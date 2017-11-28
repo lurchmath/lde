@@ -101,7 +101,7 @@
                         </ul>
                     </li>
                     <li >
-                        <a href="../ideas/">Ideas</a>
+                        <a href="../ideas/">Ideas Archive</a>
                     </li>
                 </ul>
 
@@ -135,7 +135,15 @@
                 <div class="col-md-9" role="main">
 
 <h1 id="lde-design-phase-1b-dependencies">LDE Design Phase 1B: Dependencies</h1>
-<p>Content coming soon.</p></div>
+<p>This document is not yet complete.  Its content will eventually specify:</p>
+<ul>
+<li>Support dependencies as read-only first-few-children of the document.</li>
+<li>They need to be validated only to be sure they don't redeclare one
+   another's stuff.</li>
+<li>Note that every structure already has an .exports() method, so we just
+   need to implement that structure for the root of the LDE Document, and
+   that will be what a document exports when it is used as a dependency.</li>
+</ul></div>
         </div>
 
         <footer class="col-md-12">

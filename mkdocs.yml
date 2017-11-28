@@ -14,7 +14,7 @@ pages:
     - Phase 5, Parsing Rules: phase5-parsing.md
     - Phase 6, Declarations: phase6-declarations.md
     - Phase 7, Bonus Features: phase7-features.md
-- Ideas: ideas.md
+- Ideas Archive: ideas.md
 dev_addr: 127.0.0.1:8888
 extra_javascript:
     - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML

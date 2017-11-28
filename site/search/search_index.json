@@ -2,12 +2,12 @@
     "docs": [
         {
             "location": "/", 
-            "text": "The Lurch Deductive Engine (LDE)\n\n\nDocumentation forthcoming.", 
+            "text": "The Lurch Deductive Engine (LDE)\n\n\nThis documentation site contains the design of the LDE.\n\n\nWe will implement that design, and document it better as we go.\n\n\nUse the menu at the top of this site to find content.", 
             "title": "Home"
         }, 
         {
             "location": "/#the-lurch-deductive-engine-lde", 
-            "text": "Documentation forthcoming.", 
+            "text": "This documentation site contains the design of the LDE.  We will implement that design, and document it better as we go.  Use the menu at the top of this site to find content.", 
             "title": "The Lurch Deductive Engine (LDE)"
         }, 
         {
@@ -182,93 +182,93 @@
         }, 
         {
             "location": "/phase1b-dependencies/", 
-            "text": "LDE Design Phase 1B: Dependencies\n\n\nContent coming soon.", 
+            "text": "LDE Design Phase 1B: Dependencies\n\n\nThis document is not yet complete.  Its content will eventually specify:\n\n\n\n\nSupport dependencies as read-only first-few-children of the document.\n\n\nThey need to be validated only to be sure they don't redeclare one\n   another's stuff.\n\n\nNote that every structure already has an .exports() method, so we just\n   need to implement that structure for the root of the LDE Document, and\n   that will be what a document exports when it is used as a dependency.", 
             "title": "Phase 1B, Dependencies"
         }, 
         {
             "location": "/phase1b-dependencies/#lde-design-phase-1b-dependencies", 
-            "text": "Content coming soon.", 
+            "text": "This document is not yet complete.  Its content will eventually specify:   Support dependencies as read-only first-few-children of the document.  They need to be validated only to be sure they don't redeclare one\n   another's stuff.  Note that every structure already has an .exports() method, so we just\n   need to implement that structure for the root of the LDE Document, and\n   that will be what a document exports when it is used as a dependency.", 
             "title": "LDE Design Phase 1B: Dependencies"
         }, 
         {
             "location": "/phase1c-background/", 
-            "text": "LDE Design Phase 1C: Background Queue\n\n\nContent coming soon.", 
+            "text": "LDE Design Phase 1C: Background Queue\n\n\nThis document is not yet complete.  Its content will eventually specify:\n\n\n\n\nAdd a mechanism for queueing tasks to be done later.\n\n\nIt should be smart enough that, whenever task X is enqueued, then any\n   already-enqueued task Y that will need to be redone after X anyway\n   should be removed form the queue, for efficiency.\n\n\nThen rewrite Phase 1 and Interlude A to use this feature as needed.\n   All later phases should enqueue all nontrivial processing tasks this way.", 
             "title": "Phase 1C, Background Queue"
         }, 
         {
             "location": "/phase1c-background/#lde-design-phase-1c-background-queue", 
-            "text": "Content coming soon.", 
+            "text": "This document is not yet complete.  Its content will eventually specify:   Add a mechanism for queueing tasks to be done later.  It should be smart enough that, whenever task X is enqueued, then any\n   already-enqueued task Y that will need to be redone after X anyway\n   should be removed form the queue, for efficiency.  Then rewrite Phase 1 and Interlude A to use this feature as needed.\n   All later phases should enqueue all nontrivial processing tasks this way.", 
             "title": "LDE Design Phase 1C: Background Queue"
         }, 
         {
             "location": "/phase2-strings/", 
-            "text": "LDE Design Phase 2: String Matching\n\n\nContent coming soon.", 
+            "text": "LDE Design Phase 2: String Matching\n\n\nThis document is not yet complete.  Its content will eventually specify:\n\n\n\n\nExtend rules to include string-based matching (like the kind of matching\n   Circle-Dot and MIU use)\n\n\nThis enables: toy systems like Circle-Dot and MIU", 
             "title": "Phase 2, String Matching"
         }, 
         {
             "location": "/phase2-strings/#lde-design-phase-2-string-matching", 
-            "text": "Content coming soon.", 
+            "text": "This document is not yet complete.  Its content will eventually specify:   Extend rules to include string-based matching (like the kind of matching\n   Circle-Dot and MIU use)  This enables: toy systems like Circle-Dot and MIU", 
             "title": "LDE Design Phase 2: String Matching"
         }, 
         {
             "location": "/phase3-theorems/", 
-            "text": "LDE Design Phase 3: Theorems and Proofs\n\n\nContent coming soon.", 
+            "text": "LDE Design Phase 3: Theorems and Proofs\n\n\nThis document is not yet complete.  Its content will eventually specify:\n\n\n\n\nProofs (which are also subproofs)\n\n\nTheorem statements\n\n\nPairing of theorems with proofs\n\n\nHomework problems (which may be the same as a theorem-proof pair!)\n\n\nThis enables: well, proofs and homework assignments, I guess", 
             "title": "Phase 3, Theorems and Proofs"
         }, 
         {
             "location": "/phase3-theorems/#lde-design-phase-3-theorems-and-proofs", 
-            "text": "Content coming soon.", 
+            "text": "This document is not yet complete.  Its content will eventually specify:   Proofs (which are also subproofs)  Theorem statements  Pairing of theorems with proofs  Homework problems (which may be the same as a theorem-proof pair!)  This enables: well, proofs and homework assignments, I guess", 
             "title": "LDE Design Phase 3: Theorems and Proofs"
         }, 
         {
             "location": "/phase4-expressions/", 
-            "text": "LDE Design Phase 4: Expressions\n\n\nContent coming soon.", 
+            "text": "LDE Design Phase 4: Expressions\n\n\nThis document is not yet complete.  Its content will eventually specify:\n\n\n\n\nExpanded form for non-atomic expressions (function applications,\n   binding, variables, constants, etc.)\n\n\nExtend rules to pattern-based matching (the usual kind of rules we think\n   of in math)\n\n\nThis enables: propositional logic, but with statements in expanded form\n   only", 
             "title": "Phase 4, Expression Trees"
         }, 
         {
             "location": "/phase4-expressions/#lde-design-phase-4-expressions", 
-            "text": "Content coming soon.", 
+            "text": "This document is not yet complete.  Its content will eventually specify:   Expanded form for non-atomic expressions (function applications,\n   binding, variables, constants, etc.)  Extend rules to pattern-based matching (the usual kind of rules we think\n   of in math)  This enables: propositional logic, but with statements in expanded form\n   only", 
             "title": "LDE Design Phase 4: Expressions"
         }, 
         {
             "location": "/phase5-parsing/", 
-            "text": "LDE Design Phase 5: Parsing\n\n\nContent coming soon.", 
+            "text": "LDE Design Phase 5: Parsing\n\n\nThis document is not yet complete.  Its content will eventually specify:\n\n\n\n\nRules for defining parsing\n\n\nConstant declarations may be implemented under the hood as special cases\n   of language rules.\n\n\nThis does not mean they must parse into OpenMath symbols.  It is\n  acceptable to parse them into, for example, OpenMath strings, with a\n  special attribute Constant=True, or any equally unique/recognizable\n  expression.\n\n\nAlso, this does not mean that constant declarations must feel to the\n  user like language rule declarations feel.  We can let users think of\n  them and express them as constant declarations, but under the hood it\n  may be implemented as if it had been a language rule.\n\n\n\n\n\n\nThis enables: propositional logic in its usual notation, and other\n   related simple systems", 
             "title": "Phase 5, Parsing Rules"
         }, 
         {
             "location": "/phase5-parsing/#lde-design-phase-5-parsing", 
-            "text": "Content coming soon.", 
+            "text": "This document is not yet complete.  Its content will eventually specify:   Rules for defining parsing  Constant declarations may be implemented under the hood as special cases\n   of language rules.  This does not mean they must parse into OpenMath symbols.  It is\n  acceptable to parse them into, for example, OpenMath strings, with a\n  special attribute Constant=True, or any equally unique/recognizable\n  expression.  Also, this does not mean that constant declarations must feel to the\n  user like language rule declarations feel.  We can let users think of\n  them and express them as constant declarations, but under the hood it\n  may be implemented as if it had been a language rule.    This enables: propositional logic in its usual notation, and other\n   related simple systems", 
             "title": "LDE Design Phase 5: Parsing"
         }, 
         {
             "location": "/phase6-declarations/", 
-            "text": "LDE Design Phase 6: Declarations\n\n\nContent coming soon.", 
+            "text": "LDE Design Phase 6: Declarations\n\n\nThis document is not yet complete.  Its content will eventually specify:\n\n\n\n\nVariable declarations (which may be a special type of expression, or may\n   be a special type of subproof--i.e., do we mark a variable as a\n   declaration, or do we mark a subproof as a variable declaration one, and\n   then the variable at the start of it is declared?)\n\n\nExamples (structures in which you declare all manner of stuff that\n   doesn't bleed out)\n\n\nThis enables: predicate logic in standard math notation, and many other\n   math topics", 
             "title": "Phase 6, Declarations"
         }, 
         {
             "location": "/phase6-declarations/#lde-design-phase-6-declarations", 
-            "text": "Content coming soon.", 
+            "text": "This document is not yet complete.  Its content will eventually specify:   Variable declarations (which may be a special type of expression, or may\n   be a special type of subproof--i.e., do we mark a variable as a\n   declaration, or do we mark a subproof as a variable declaration one, and\n   then the variable at the start of it is declared?)  Examples (structures in which you declare all manner of stuff that\n   doesn't bleed out)  This enables: predicate logic in standard math notation, and many other\n   math topics", 
             "title": "LDE Design Phase 6: Declarations"
         }, 
         {
             "location": "/phase7-features/", 
-            "text": "LDE Design Phase 7: Features\n\n\nContent coming soon.", 
+            "text": "LDE Design Phase 7: Features\n\n\nThis document is not yet complete.  Its content will eventually specify:\n\n\n\n\nAdd features to anything built so far (like multiple conclusions from a\n   rule, or automatic premise finding, or automatic premise ordering, or\n   the ability to specify metavariable instantiations, or any of 1000 other\n   features we'd like to add)\n\n\nThis enables: everything else", 
             "title": "Phase 7, Bonus Features"
         }, 
         {
             "location": "/phase7-features/#lde-design-phase-7-features", 
-            "text": "Content coming soon.", 
+            "text": "This document is not yet complete.  Its content will eventually specify:   Add features to anything built so far (like multiple conclusions from a\n   rule, or automatic premise finding, or automatic premise ordering, or\n   the ability to specify metavariable instantiations, or any of 1000 other\n   features we'd like to add)  This enables: everything else", 
             "title": "LDE Design Phase 7: Features"
         }, 
         {
             "location": "/ideas/", 
-            "text": "LDE Design Ideas\n\n\nContent coming soon.", 
-            "title": "Ideas"
+            "text": "LDE Design Idea Archive\n\n\nThis document records incomplete ideas the Lurch team is keeping in mind\nfor integration into later design plans.\n\n\n\n\nWe have considered a UI with buttons with mathematical names on them,\n   such as Justify (which would let you choose a reason and it would insert\n   it), Cite (which would let you click any premise and it would make the\n   arrow), a toolbar of all math words.\n\n\nWe have tested a Suggestions feature, and could really use it widely:\n\n\nWhen the cursor is near something the software could recognize as a\n  statement or a reason, it gives a faint shadow over it of what it\n  thinks you're saying.\n\n\nA single keystroke confirms, and if you don't use that keystroke, the\n  shadowy suggestion is never actually realized in the document.\n\n\nExample usage:\n\n\nType, then hit \nCtrl+Enter\n to approve an interpretation of what\n  you said as a statement.\n\n\nA visual indicator of some kind shows that the bubble was formed,\n  but since your cursor is after it, the bubble-forming animation\n  fades.\n\n\nKeep typing, then hit \nCtrl+Enter\n to approve an interpretation of\n  what you said as a reason.\n\n\nSame visual indicator process.\n\n\nImmediately a suggested connection of the reason to the statement\n  appears, and you hit \nCtrl+Enter\n again to connect them.\n\n\nSame visual indicator process.\n\n\nStart typing your next statement, and repeat from step 1.\n\n\n\n\n\n\nWhenever your cursor is in a statement accessible to the most recent\n  justification you formed, a suggested premise citation arrow could\n  appear; \nCtrl+Enter\n to confirm.\n\n\n\n\n\n\nMathQuill (and, one day, MathJax, if we choose to add it) are UX sugar\n   that sits above the document, and can be converted to text as part of\n   the UI's processing of HTML into Structures.\n\n\nA UI idea from long ago recorded here for safe keeping:\n\n\nConsider all situations in which it\u2019s possible to write a small JS\n  function that can easily take in a string of text and split it into\n  an array of substrings, like \n\"Fred is a fish\"\n to\n  \n[\"Fred is\", \"a\", \"fish\"]\n, such that the array alternates between\n  meaningful stuff and non-meaningful stuff. Then we have two things we\n  can do with such a function.\n\n\nFirst, the translator can obviously use that to trivially lift the\n  meaningful stuff out.\n\n\nSecond, the UX can also use it to \nhighlight\n \nwhile the user is\n  typing in a group\n which parts of the group\u2019s content the app is\n  paying attention to, and which parts it\u2019s ignoring. Imagine typing\n  \n[Fred is a fish]\n and the app is gently highlighting everything\n  except the 'a' or typing\n  \n[Fred, who we all love, is a very nice fish]\n\n  and the app highlights like so:\n  [\nFRED\n, who we all love, \nIS\n a very nice \nFISH\n].\n  Such highlighting would be in the overlay where the bubble is drawn,\n  and shown only when the cursor is in there.\n\n\nOne specific subclass of this idea is when we require rigid formal\n  syntax, like line-numbered proofs with\n  \nstatement[whitespace]reason[whitespace]premise,...", 
+            "title": "Ideas Archive"
         }, 
         {
-            "location": "/ideas/#lde-design-ideas", 
-            "text": "Content coming soon.", 
-            "title": "LDE Design Ideas"
+            "location": "/ideas/#lde-design-idea-archive", 
+            "text": "This document records incomplete ideas the Lurch team is keeping in mind\nfor integration into later design plans.   We have considered a UI with buttons with mathematical names on them,\n   such as Justify (which would let you choose a reason and it would insert\n   it), Cite (which would let you click any premise and it would make the\n   arrow), a toolbar of all math words.  We have tested a Suggestions feature, and could really use it widely:  When the cursor is near something the software could recognize as a\n  statement or a reason, it gives a faint shadow over it of what it\n  thinks you're saying.  A single keystroke confirms, and if you don't use that keystroke, the\n  shadowy suggestion is never actually realized in the document.  Example usage:  Type, then hit  Ctrl+Enter  to approve an interpretation of what\n  you said as a statement.  A visual indicator of some kind shows that the bubble was formed,\n  but since your cursor is after it, the bubble-forming animation\n  fades.  Keep typing, then hit  Ctrl+Enter  to approve an interpretation of\n  what you said as a reason.  Same visual indicator process.  Immediately a suggested connection of the reason to the statement\n  appears, and you hit  Ctrl+Enter  again to connect them.  Same visual indicator process.  Start typing your next statement, and repeat from step 1.    Whenever your cursor is in a statement accessible to the most recent\n  justification you formed, a suggested premise citation arrow could\n  appear;  Ctrl+Enter  to confirm.    MathQuill (and, one day, MathJax, if we choose to add it) are UX sugar\n   that sits above the document, and can be converted to text as part of\n   the UI's processing of HTML into Structures.  A UI idea from long ago recorded here for safe keeping:  Consider all situations in which it\u2019s possible to write a small JS\n  function that can easily take in a string of text and split it into\n  an array of substrings, like  \"Fred is a fish\"  to\n   [\"Fred is\", \"a\", \"fish\"] , such that the array alternates between\n  meaningful stuff and non-meaningful stuff. Then we have two things we\n  can do with such a function.  First, the translator can obviously use that to trivially lift the\n  meaningful stuff out.  Second, the UX can also use it to  highlight   while the user is\n  typing in a group  which parts of the group\u2019s content the app is\n  paying attention to, and which parts it\u2019s ignoring. Imagine typing\n   [Fred is a fish]  and the app is gently highlighting everything\n  except the 'a' or typing\n   [Fred, who we all love, is a very nice fish] \n  and the app highlights like so:\n  [ FRED , who we all love,  IS  a very nice  FISH ].\n  Such highlighting would be in the overlay where the bubble is drawn,\n  and shown only when the cursor is in there.  One specific subclass of this idea is when we require rigid formal\n  syntax, like line-numbered proofs with\n   statement[whitespace]reason[whitespace]premise,...", 
+            "title": "LDE Design Idea Archive"
         }
     ]
 }

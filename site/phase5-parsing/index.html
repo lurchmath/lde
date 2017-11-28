@@ -101,7 +101,7 @@
                         </ul>
                     </li>
                     <li >
-                        <a href="../ideas/">Ideas</a>
+                        <a href="../ideas/">Ideas Archive</a>
                     </li>
                 </ul>
 
@@ -135,7 +135,24 @@
                 <div class="col-md-9" role="main">
 
 <h1 id="lde-design-phase-5-parsing">LDE Design Phase 5: Parsing</h1>
-<p>Content coming soon.</p></div>
+<p>This document is not yet complete.  Its content will eventually specify:</p>
+<ul>
+<li>Rules for defining parsing</li>
+<li>Constant declarations may be implemented under the hood as special cases
+   of language rules.<ul>
+<li>This does not mean they must parse into OpenMath symbols.  It is
+  acceptable to parse them into, for example, OpenMath strings, with a
+  special attribute Constant=True, or any equally unique/recognizable
+  expression.</li>
+<li>Also, this does not mean that constant declarations must feel to the
+  user like language rule declarations feel.  We can let users think of
+  them and express them as constant declarations, but under the hood it
+  may be implemented as if it had been a language rule.</li>
+</ul>
+</li>
+<li>This enables: propositional logic in its usual notation, and other
+   related simple systems</li>
+</ul></div>
         </div>
 
         <footer class="col-md-12">
