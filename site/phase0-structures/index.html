@@ -130,12 +130,181 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
         <li class="main active"><a href="#lde-design-phase-0-structures">LDE Design Phase 0: Structures</a></li>
+            <li><a href="#methods-in-the-structure-class">Methods in the Structure class</a></li>
+            <li><a href="#lde-in-general">LDE in general</a></li>
+            <li><a href="#notation-in-code">Notation in code</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
 <h1 id="lde-design-phase-0-structures">LDE Design Phase 0: Structures</h1>
-<p>Content coming soon.</p></div>
+<p>All the later phases will actually implement stuff that we could use to
+make real documents and libraries.  This one doesn't, so it's called Phase
+0.</p>
+<p>In this phase, we just design the generic Structure class on which everything else will depend, and the infrastructure of the LDE itself.</p>
+<p>At the end of this phase, we could write unit tests of the whole Structure class and its LDE context, thus guaranteeing that all later phases rest on a good foundation.</p>
+<h2 id="methods-in-the-structure-class">Methods in the Structure class</h2>
+<ul>
+<li><code>S.setComputedAttribute(key,value)</code> caches a computed value under a
+   certain key<ul>
+<li>One important example of a computed attribute:</li>
+<li><code>S.setComputedAttribute("feedback",obj)</code> tells the UI the type of
+  feedback it should show for structure S, with obj having these keys:<ul>
+<li>result: a string, either "valid" or "invalid" or "indeterminate"</li>
+<li>message: a string, the message should be shown on hover of the
+  feedback indicator</li>
+<li>section: (optional) which character (or range of characters) are
+  the specific ones on which the feedback focuses.<ul>
+<li>For instance, if something doesn't parse, you might want to
+  point out where it failed.</li>
+<li>Or if an expression parses into many steps of work, each of
+  which gets validated separately, then the feedback needs to
+  be localized.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>S.compute(key1,key2,...)</code> runs whatever function is necessary to
+   compute and store the attributes for the keys.<ul>
+<li>It should usually be obvious what this is from context, like if S has
+  a function <code>S.meaning()</code> and we say <code>S.compute("meaning")</code> that means
+  run <code>S.setComputedAttribute("meaning",S.meaning())</code>.</li>
+<li>But more complex examples are possible, and each structure type is in
+  charge of implementing <code>compute()</code> in the appropriate way.</li>
+</ul>
+</li>
+<li><code>S.clearComputedAttributes(key1,key2,...)</code> removes the computed values;
+   calling it with no arguments removes all computed values</li>
+<li><code>S.getComputedAttribute(key)</code> fetches the computed attribute value, or
+   returns undefined if it's not stored</li>
+<li><code>S.properties()</code> looks at the set of other structures that connect to S
+   via arrows, and forms a dictionary of name=value pairs, the "properties"
+   of S.</li>
+<li><code>S.isAccessibleTo(S')</code> returns true or false, implementing the
+   accessibility relation defined earlier.</li>
+<li><code>S.findCited(n)</code> finds the first structure S' accessible to S with
+   name=n in <code>S'.attributes()</code>, or undefined if there is no such structure
+   S'.</li>
+<li><code>S.whatCitesMe()</code> finds all structures S' in the scope of S with
+   a=<code>S.attributes().name</code> in <code>S'.attributes()</code>, with a being one of the
+   keys we use for citation, such as "reason" or "premise" and so on.</li>
+<li>There may be a need later to create other accessibility-related
+   routines, such as <code>S.allAccessibleToMe()</code> or <code>S.myScope()</code> or
+   <code>S.allAccessibleSatisfying(P)</code> etc.</li>
+<li><code>S.wasInserted()</code> is a function that the UI will call in a brand new
+   structure as soon as it is inserted into the document.  Each structure
+   type may implement this function to do whatever it feels is necessary to
+   initialize its internal data and notify any nearby nodes in the LDE
+   Document about its arrival.  Some structure types may choose to leave
+   this as an empty function.</li>
+<li><code>S.wasRemoved(parent,index)</code> is a function that the UI will call in a
+   structure the moment it is deleted from the document (but not yet
+   deleted from JavaScript memory).  The first parameter will be the former
+   parent structure (which will always exist, since the root of the LDE
+   Document can't be deleted) and the index that S formerly had within that
+   parent.  Similarly, each structure type can implement this as it sees
+   fit, including doing nothing.  Note that replacing one structure with
+   another will yield a call to <code>S.wasRemoved()</code> in the one structure and
+   <code>S.wasInserted()</code> in the other.</li>
+<li><code>S.wasChanged()</code> is a function that the UI will call in a structure if
+   something about the structure changed (such as one of its attributes or
+   the contents of an atomic structure)<ul>
+<li><code>S.text()</code> returns the contents of S as plain text</li>
+<li><code>S.children()</code> yields an ordered array of structures immediately
+  inside S</li>
+<li><code>S.parent()</code> yields the parent structure of S, or undefined if S is
+  the LDE Document root</li>
+</ul>
+</li>
+</ul>
+<h2 id="lde-in-general">LDE in general</h2>
+<p>When the LDE is loaded into memory it will:</p>
+<ul>
+<li>Create a global Structure that is the LDE Document.  It will be a
+   generic Structure, not a subclass.  It will have no children; they
+   can be added later.  That is, it starts as a one-node tree, root only.</li>
+<li>Establish a global mapping from unique Structure IDs to the instances
+   that have those IDs</li>
+<li>Defines a global function for deserializing Structure instances (or
+   subclass instances) from JSON data</li>
+<li>If it detects that it is being run in a background thread, it will
+   set up listeners for messages from the parent thread.  These
+   listeners will handle messages of three types:<ul>
+<li>Insert a new subtree.<ul>
+<li>The message must include the unique ID of the parent, the
+  index at which the subtree will be inserted, and all the data
+  defining the subtree (serialized in JSON form, as required
+  for transmission to JavaScript background threads).</li>
+<li>If the Structure (once it's deserialized) doesn't have an ID,
+  give it a new, unique one as determined by the global
+  mapping, and insert the new (id,instance) pair into that
+  mapping</li>
+</ul>
+</li>
+<li>Delete an existing subtree.  The message must include the unique
+  ID of the tree to delete.  Remove it from the global ID mapping
+  as well and erase its ID attribute.</li>
+<li>Replace a subtree with a new one.  The message must include the
+  unique ID of the tree to replace and the data defining the
+  replacement (serialized as just described).  Remove the replaced
+  one from the global ID mapping as well and erase its ID attribute.</li>
+</ul>
+</li>
+<li>Even if it is not being run in a background thread (but perhaps was
+   loaded as a module in some command-line app, for instance) it will
+   still expose insert, delete, and replace functions as part of the
+   module's API.</li>
+<li>We will call any kind of insertion, removal, or replacement of
+   subtrees of the LDE Document a change event, whether it happened via
+   a message from a parent thread or as a function call to the LDE as a
+   module in a larger app.</li>
+</ul>
+<h2 id="notation-in-code">Notation in code</h2>
+<p>Ensure that the Structure (and, later, other subclass) constructors are
+sophisticated enough to help us build LDE Documents easily in the unit
+testing suite, like so:</p>
+<pre><code class="javascript">Structure(
+    FormalSystem(
+        Rule(
+            &quot;function ( step ) { return { valid: step.text().length &lt; 5, message: 'Boy is this silly.' }; }&quot;,
+        ).attr( { name : &quot;silly rule&quot; } )
+    ),
+    AtomicExpression( &quot;yay&quot; ).attr( { id : 1 } ),
+    AtomicExpression( &quot;silly rule&quot; ).attr( { &quot;outgoing edges&quot; : [ { targetId : 1, type : &quot;reason&quot; } ] ),
+    AtomicExpression( &quot;oh rats&quot; ).attr( { id : 2 } ),
+    AtomicExpression( &quot;silly rule&quot; ).attr( { &quot;outgoing edges&quot; : [ { targetId : 2, type : &quot;reason&quot; } ] )
+)
+</code></pre>
+
+<p>or even</p>
+<pre><code class="javascript">Structure(
+    FormalSystem(
+        Rule(
+            &quot;function ( step ) { return { valid: step.text().length &lt; 5, message: 'Boy is this silly.' }; }&quot;,
+        ).attr( { name : &quot;silly rule&quot; } )
+    ),
+    AtomicExpression( &quot;yay&quot; ).attr( { id : 1 } ),
+    AtomicExpression( &quot;silly rule&quot; ).attr( { &quot;reason for&quot; : 1 } ),
+    AtomicExpression( &quot;oh rats&quot; ).attr( { id : 2 } ),
+    AtomicExpression( &quot;silly rule&quot; ).attr( { &quot;reason for&quot; : 2 } )
+)
+</code></pre>
+
+<p>or even</p>
+<pre><code class="javascript">Structure(
+    FormalSystem(
+        Rule(
+            &quot;function ( step ) { return { valid: step.text().length &lt; 5, message: 'Boy is this silly.' }; }&quot;,
+        ).attr( { name : &quot;silly rule&quot; } )
+    ),
+    AtomicExpression( &quot;yay&quot; ),
+    AtomicExpression( &quot;silly rule&quot; ).attr( { &quot;reason for&quot; : &quot;previous&quot; } ),
+    AtomicExpression( &quot;oh rats&quot; ),
+    AtomicExpression( &quot;silly rule&quot; ).attr( { &quot;reason for&quot; : &quot;previous&quot; } )
+)
+</code></pre></div>
         </div>
 
         <footer class="col-md-12">
