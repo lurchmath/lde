@@ -1,2 +1,18 @@
 site_name: Lurch Deductive Engine Documentation
+pages:
+- Home: index.md
+- Overview: overview.md
+- Phases:
+    - Phase 0, Structures: phase0-structures.md
+    - Phase 1, Basic Validation: phase1-validation.md
+    - Phase 1A, The Client: phase1a-client.md
+    - Phase 1B, Dependencies: phase1b-dependencies.md
+    - Phase 1C, Background Queue: phase1c-background.md
+    - Phase 2, String Matching: phase2-strings.md
+    - Phase 3, Theorems and Proofs: phase3-theorems.md
+    - Phase 4, Expression Trees: phase4-expressions.md
+    - Phase 5, Parsing Rules: phase5-parsing.md
+    - Phase 6, Declarations: phase6-declarations.md
+    - Phase 7, Bonus Features: phase7-features.md
+- Ideas: ideas.md
 dev_addr: 127.0.0.1:8888

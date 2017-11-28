@@ -3,12 +3,142 @@
         {
             "location": "/", 
             "text": "The Lurch Deductive Engine (LDE)\n\n\nDocumentation forthcoming.", 
-            "title": "The Lurch Deductive Engine (LDE)"
+            "title": "Home"
         }, 
         {
             "location": "/#the-lurch-deductive-engine-lde", 
             "text": "Documentation forthcoming.", 
             "title": "The Lurch Deductive Engine (LDE)"
+        }, 
+        {
+            "location": "/overview/", 
+            "text": "LDE Design Overview\n\n\nContent coming soon.", 
+            "title": "Overview"
+        }, 
+        {
+            "location": "/overview/#lde-design-overview", 
+            "text": "Content coming soon.", 
+            "title": "LDE Design Overview"
+        }, 
+        {
+            "location": "/phase0-structures/", 
+            "text": "LDE Design Phase 0: Structures\n\n\nContent coming soon.", 
+            "title": "Phase 0, Structures"
+        }, 
+        {
+            "location": "/phase0-structures/#lde-design-phase-0-structures", 
+            "text": "Content coming soon.", 
+            "title": "LDE Design Phase 0: Structures"
+        }, 
+        {
+            "location": "/phase1-validation/", 
+            "text": "LDE Design Phase 1: Basic Validation\n\n\nContent coming soon.", 
+            "title": "Phase 1, Basic Validation"
+        }, 
+        {
+            "location": "/phase1-validation/#lde-design-phase-1-basic-validation", 
+            "text": "Content coming soon.", 
+            "title": "LDE Design Phase 1: Basic Validation"
+        }, 
+        {
+            "location": "/phase1a-client/", 
+            "text": "LDE Design Phase 1A: The Client\n\n\nContent coming soon.", 
+            "title": "Phase 1A, The Client"
+        }, 
+        {
+            "location": "/phase1a-client/#lde-design-phase-1a-the-client", 
+            "text": "Content coming soon.", 
+            "title": "LDE Design Phase 1A: The Client"
+        }, 
+        {
+            "location": "/phase1b-dependencies/", 
+            "text": "LDE Design Phase 1B: Dependencies\n\n\nContent coming soon.", 
+            "title": "Phase 1B, Dependencies"
+        }, 
+        {
+            "location": "/phase1b-dependencies/#lde-design-phase-1b-dependencies", 
+            "text": "Content coming soon.", 
+            "title": "LDE Design Phase 1B: Dependencies"
+        }, 
+        {
+            "location": "/phase1c-background/", 
+            "text": "LDE Design Phase 1C: Background Queue\n\n\nContent coming soon.", 
+            "title": "Phase 1C, Background Queue"
+        }, 
+        {
+            "location": "/phase1c-background/#lde-design-phase-1c-background-queue", 
+            "text": "Content coming soon.", 
+            "title": "LDE Design Phase 1C: Background Queue"
+        }, 
+        {
+            "location": "/phase2-strings/", 
+            "text": "LDE Design Phase 2: String Matching\n\n\nContent coming soon.", 
+            "title": "Phase 2, String Matching"
+        }, 
+        {
+            "location": "/phase2-strings/#lde-design-phase-2-string-matching", 
+            "text": "Content coming soon.", 
+            "title": "LDE Design Phase 2: String Matching"
+        }, 
+        {
+            "location": "/phase3-theorems/", 
+            "text": "LDE Design Phase 3: Theorems and Proofs\n\n\nContent coming soon.", 
+            "title": "Phase 3, Theorems and Proofs"
+        }, 
+        {
+            "location": "/phase3-theorems/#lde-design-phase-3-theorems-and-proofs", 
+            "text": "Content coming soon.", 
+            "title": "LDE Design Phase 3: Theorems and Proofs"
+        }, 
+        {
+            "location": "/phase4-expressions/", 
+            "text": "LDE Design Phase 4: Expressions\n\n\nContent coming soon.", 
+            "title": "Phase 4, Expression Trees"
+        }, 
+        {
+            "location": "/phase4-expressions/#lde-design-phase-4-expressions", 
+            "text": "Content coming soon.", 
+            "title": "LDE Design Phase 4: Expressions"
+        }, 
+        {
+            "location": "/phase5-parsing/", 
+            "text": "LDE Design Phase 5: Parsing\n\n\nContent coming soon.", 
+            "title": "Phase 5, Parsing Rules"
+        }, 
+        {
+            "location": "/phase5-parsing/#lde-design-phase-5-parsing", 
+            "text": "Content coming soon.", 
+            "title": "LDE Design Phase 5: Parsing"
+        }, 
+        {
+            "location": "/phase6-declarations/", 
+            "text": "LDE Design Phase 6: Declarations\n\n\nContent coming soon.", 
+            "title": "Phase 6, Declarations"
+        }, 
+        {
+            "location": "/phase6-declarations/#lde-design-phase-6-declarations", 
+            "text": "Content coming soon.", 
+            "title": "LDE Design Phase 6: Declarations"
+        }, 
+        {
+            "location": "/phase7-features/", 
+            "text": "LDE Design Phase 7: Features\n\n\nContent coming soon.", 
+            "title": "Phase 7, Bonus Features"
+        }, 
+        {
+            "location": "/phase7-features/#lde-design-phase-7-features", 
+            "text": "Content coming soon.", 
+            "title": "LDE Design Phase 7: Features"
+        }, 
+        {
+            "location": "/ideas/", 
+            "text": "LDE Design Overview\n\n\nContent coming soon.", 
+            "title": "Ideas"
+        }, 
+        {
+            "location": "/ideas/#lde-design-overview", 
+            "text": "Content coming soon.", 
+            "title": "LDE Design Overview"
         }
     ]
 }

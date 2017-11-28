@@ -31,11 +31,79 @@
 
         <!-- Collapsed navigation -->
         <div class="navbar-header">
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
             <a class="navbar-brand" href=".">Lurch Deductive Engine Documentation</a>
         </div>
 
         <!-- Expanded navigation -->
         <div class="navbar-collapse collapse">
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                    <li class="active">
+                        <a href=".">Home</a>
+                    </li>
+                    <li >
+                        <a href="overview/">Overview</a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Phases <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            
+<li >
+    <a href="phase0-structures/">Phase 0, Structures</a>
+</li>
+                            
+<li >
+    <a href="phase1-validation/">Phase 1, Basic Validation</a>
+</li>
+                            
+<li >
+    <a href="phase1a-client/">Phase 1A, The Client</a>
+</li>
+                            
+<li >
+    <a href="phase1b-dependencies/">Phase 1B, Dependencies</a>
+</li>
+                            
+<li >
+    <a href="phase1c-background/">Phase 1C, Background Queue</a>
+</li>
+                            
+<li >
+    <a href="phase2-strings/">Phase 2, String Matching</a>
+</li>
+                            
+<li >
+    <a href="phase3-theorems/">Phase 3, Theorems and Proofs</a>
+</li>
+                            
+<li >
+    <a href="phase4-expressions/">Phase 4, Expression Trees</a>
+</li>
+                            
+<li >
+    <a href="phase5-parsing/">Phase 5, Parsing Rules</a>
+</li>
+                            
+<li >
+    <a href="phase6-declarations/">Phase 6, Declarations</a>
+</li>
+                            
+<li >
+    <a href="phase7-features/">Phase 7, Bonus Features</a>
+</li>
+                        </ul>
+                    </li>
+                    <li >
+                        <a href="ideas/">Ideas</a>
+                    </li>
+                </ul>
 
             <ul class="nav navbar-nav navbar-right">
                 <li>
@@ -43,6 +111,16 @@
                         <i class="fa fa-search"></i> Search
                     </a>
                 </li>
+                    <li class="disabled">
+                        <a rel="next" >
+                            <i class="fa fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="prev" href="overview/">
+                            Next <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </li>
             </ul>
         </div>
     </div>
@@ -139,5 +217,5 @@
 
 <!--
 MkDocs version : 0.17.1
-Build Date UTC : 2017-11-28 21:19:43
+Build Date UTC : 2017-11-28 21:30:25
 -->
