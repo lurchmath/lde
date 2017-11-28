@@ -1,4 +1,4 @@
 
 # The Lurch Deductive Engine (LDE)
 
-Content coming soon.
+[See documentation on the project website.](lurchmath.github.io/lde)
