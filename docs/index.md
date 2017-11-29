@@ -8,3 +8,5 @@ development (accessible from the navigation menu above) will be converted
 from pages describing the plan into pages describing the completed API.
 
 Use the menu at the top of this site to find content.
+
+[See the source code repository here.](http://github.com/lurchmath/lde)
