@@ -9,10 +9,70 @@ of the LDE Document.  For more details on this, see
 
 ## Constructor
 
-The constructor just initializes internal fields.
+The constructor body just initializes internal fields, but it accepts an
+array of initial children as its argument.  Any non-Structure passed as an
+argument is ignored.  See the next section for more details of child
+structures.
 
-        constructor : ->
+        constructor : ( children... ) ->
             @computedAttributes = { }
+            @parentNode = null
+            @childList = ( c for c in children when c instanceof Structure )
+            child.parentNode = this for child in @childList
+
+## Tree structure
+
+Structures form a hierarchy, an n-ary tree.  We thus need functions for
+inserting, removing, and querying parents and children.
+
+First, the getters.  When querying the children, we make a copy of the list
+so that clients can feel free to manipulate it without messing up the
+integrity of the hierarchy.
+
+        parent : => @parentNode
+        children : => @childList[..]
+        indexInParent : => @parentNode?.childList?.indexOf this
+
+Next, the setters.  There is no setter for the parent, because the parent
+pointer of a structure S must be kept consistent with the children list of
+the parent of S, and so we update both in the setters for children.
+
+We permit removing children from parents, either with a method in the child
+or in the parent.
+
+        removeFromParent : =>
+            if @parentNode?
+                @parentNode.childList =
+                    ( c for c in @parentNode.childList when c isnt this )
+                @parentNode = null
+        removeChild : ( atIndex ) => @childList[atIndex]?.removeFromParent()
+
+We permit inserting a new child into the parent's child array at any valid
+index (including the old length of the child array, which appends).  The
+child to be inserted is first removed from any parent it has when this
+method is called.
+
+        insertChild : ( child, beforeIndex ) ->
+            return unless child instanceof Structure and \
+                0 <= beforeIndex <= @childList.length
+            child.removeFromParent()
+            @childList = [
+                @childList[...beforeIndex]...
+                child
+                @childList[beforeIndex...]...
+            ]
+            child.parentNode = this
+
+A convenient combination of the above methods is to replace a child with a
+new structure, deparenting the old child and putting the replacement at the
+same index in the same parent.
+
+        replaceWith : ( other ) =>
+            if @parentNode?
+                originalIndex = @indexInParent()
+                originalParent = @parentNode
+                @removeFromParent()
+                originalParent.insertChild other, originalIndex
 
 ## Computed attributes
 

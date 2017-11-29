@@ -11,6 +11,8 @@ At the end of this phase, we could write unit tests of the whole Structure class
 
 ## Methods in the Structure class
 
+### Computed attributes
+
  * `S.setComputedAttribute(key,value)` caches a computed value under a
    certain key
     * One important example of a computed attribute:
@@ -41,6 +43,24 @@ At the end of this phase, we could write unit tests of the whole Structure class
       string key, pass an array `[key,arg1,arg2,...]`.
     * But more complex examples are possible, and each structure type is in
       charge of implementing `compute()` in the appropriate way.
+
+### Manipulating the structure hierarchy
+
+ * `new Structure(arg1,arg2,...)` creates a structure with the given list of
+   child structures.
+ * `S.children()` and `S.parent()` return child arrays and parent nodes,
+   respectively.
+ * `S.indexInParent()` gives the index of S in its parent's children array.
+ * `S.insertChild(child,index)` inserts a new child at the given index,
+   removing it from its old parent, if there was one.
+ * `S.removeChild(index)` does the reverse.
+ * `S.removeFromParent()` calls `P.removeChild(index)` in the parent of S,
+   passing `S.indexInParent()`.
+ * `S.replaceWith(other)` replaces S, where it sits in the hierarchy, with
+   a different structure, thus leaving S with no parent.
+
+### Other methods not yet sorted into categories
+
  * `S.properties()` looks at the set of other structures that connect to S
    via arrows, and forms a dictionary of name=value pairs, the "properties"
    of S.

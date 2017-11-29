@@ -13,6 +13,352 @@ Verify that the globals exposed by the Structure module are visible.
         it 'should be defined', ->
             expect( Structure ).toBeTruthy()
 
+
+## Structure trees
+
+    describe 'Structure trees', ->
+
+Structure objects can be formed into hierarchies.
+
+The first set of tests is whether we can form structure hierarchies with
+nested calls to constructors, and have them create the parent/child pointers
+we expect.
+
+        it 'should be assemblable with constructors', ->
+
+Make a small structure hierarchy, naming each node, and verify that no error
+occurs.
+
+            root = new Structure(
+                A = new Structure(
+                    AA = new Structure()
+                    AB = new Structure()
+                )
+                B = new Structure()
+            )
+
+Ensure that all parent pointers were correctly established in the forming of
+the hierarchy.
+
+            expect( root.parent() ).toBeNull()
+            expect( A.parent() ).toBe root
+            expect( AA.parent() ).toBe A
+            expect( AB.parent() ).toBe A
+            expect( B.parent() ).toBe root
+
+Ensure that all child arrays are equivalent in structure to what's expected
+based on the construction code above.
+
+            expect( root.children() ).toEqual [ A, B ]
+            expect( A.children() ).toEqual [ AA, AB ]
+            expect( AA.children() ).toEqual [ ]
+            expect( AB.children() ).toEqual [ ]
+            expect( B.children() ).toEqual [ ]
+
+The next test is whether children correctly compute their index in their
+parent structure.
+
+        it 'should correctly compute indices in parent nodes', ->
+
+Make the same small structure hierarchy as in the previous test.
+
+            root = new Structure(
+                A = new Structure(
+                    AA = new Structure()
+                    AB = new Structure()
+                )
+                B = new Structure()
+            )
+
+Check the index in parent of each node.
+
+            expect( root.indexInParent() ).toBeUndefined()
+            expect( A.indexInParent() ).toBe 0
+            expect( AA.indexInParent() ).toBe 0
+            expect( AB.indexInParent() ).toBe 1
+            expect( B.indexInParent() ).toBe 1
+
+The next test is whether we can remove structures from an existing hierarchy
+and retain the integrity and correct structure of the hierarchy.
+
+        it 'should support removing structures', ->
+
+Make the same small structure hierarchy as in the previous test.
+
+            root = new Structure(
+                A = new Structure(
+                    AA = new Structure()
+                    AB = new Structure()
+                )
+                B = new Structure()
+            )
+
+Remove a child of the root and verify that the structure is as expected.
+
+            B.removeFromParent()
+            expect( root.children() ).toEqual [ A ]
+            expect( A.children() ).toEqual [ AA, AB ]
+            expect( AA.children() ).toEqual [ ]
+            expect( AB.children() ).toEqual [ ]
+            expect( B.children() ).toEqual [ ]
+            expect( root.parent() ).toBeNull()
+            expect( A.parent() ).toBe root
+            expect( AA.parent() ).toBe A
+            expect( AB.parent() ).toBe A
+            expect( B.parent() ).toBeNull()
+
+Remove a grandchild of the root and verify that the structure is as
+expected.
+
+            AA.removeFromParent()
+            expect( root.children() ).toEqual [ A ]
+            expect( A.children() ).toEqual [ AB ]
+            expect( AA.children() ).toEqual [ ]
+            expect( AB.children() ).toEqual [ ]
+            expect( B.children() ).toEqual [ ]
+            expect( root.parent() ).toBeNull()
+            expect( A.parent() ).toBe root
+            expect( AA.parent() ).toBeNull()
+            expect( AB.parent() ).toBe A
+            expect( B.parent() ).toBeNull()
+
+Remove something that has already been removed, and verify that nothing
+changes or causes an error.
+
+            AA.removeFromParent()
+            expect( root.children() ).toEqual [ A ]
+            expect( A.children() ).toEqual [ AB ]
+            expect( AA.children() ).toEqual [ ]
+            expect( AB.children() ).toEqual [ ]
+            expect( B.children() ).toEqual [ ]
+            expect( root.parent() ).toBeNull()
+            expect( A.parent() ).toBe root
+            expect( AA.parent() ).toBeNull()
+            expect( AB.parent() ).toBe A
+            expect( B.parent() ).toBeNull()
+
+The next test is whether we can remove children from an existing hierarchy
+and retain the integrity and correct structure of the hierarchy.
+
+        it 'should support removing children', ->
+
+Make the same small structure hierarchy as in the previous test.
+
+            root = new Structure(
+                A = new Structure(
+                    AA = new Structure()
+                    AB = new Structure()
+                )
+                B = new Structure()
+            )
+
+Remove a child of the root and verify that the structure is as expected.
+
+            root.removeChild 1
+            expect( root.children() ).toEqual [ A ]
+            expect( A.children() ).toEqual [ AA, AB ]
+            expect( AA.children() ).toEqual [ ]
+            expect( AB.children() ).toEqual [ ]
+            expect( B.children() ).toEqual [ ]
+            expect( root.parent() ).toBeNull()
+            expect( A.parent() ).toBe root
+            expect( AA.parent() ).toBe A
+            expect( AB.parent() ).toBe A
+            expect( B.parent() ).toBeNull()
+
+Remove a grandchild of the root and verify that the structure is as
+expected.
+
+            A.removeChild 0
+            expect( root.children() ).toEqual [ A ]
+            expect( A.children() ).toEqual [ AB ]
+            expect( AA.children() ).toEqual [ ]
+            expect( AB.children() ).toEqual [ ]
+            expect( B.children() ).toEqual [ ]
+            expect( root.parent() ).toBeNull()
+            expect( A.parent() ).toBe root
+            expect( AA.parent() ).toBeNull()
+            expect( AB.parent() ).toBe A
+            expect( B.parent() ).toBeNull()
+
+Remove an invalid index, and verify that nothing changes or causes an error.
+
+            A.removeChild 1
+            expect( root.children() ).toEqual [ A ]
+            expect( A.children() ).toEqual [ AB ]
+            expect( AA.children() ).toEqual [ ]
+            expect( AB.children() ).toEqual [ ]
+            expect( B.children() ).toEqual [ ]
+            expect( root.parent() ).toBeNull()
+            expect( A.parent() ).toBe root
+            expect( AA.parent() ).toBeNull()
+            expect( AB.parent() ).toBe A
+            expect( B.parent() ).toBeNull()
+
+The next test is whether we can insert structures into an existing hierarchy
+and retain the integrity and correct structure of the hierarchy.
+
+        it 'should support inserting structures', ->
+
+Make the same small structure hierarchy as in the previous test.
+
+            root = new Structure(
+                A = new Structure(
+                    AA = new Structure()
+                    AB = new Structure()
+                )
+                B = new Structure()
+            )
+
+Add a new child of the root and verify that the structure is as expected.
+
+            C = new Structure()
+            expect( C.parent() ).toBeNull()
+            expect( C.children() ).toEqual [ ]
+            root.insertChild C, 1
+            expect( root.children() ).toEqual [ A, C, B ]
+            expect( A.children() ).toEqual [ AA, AB ]
+            expect( AA.children() ).toEqual [ ]
+            expect( AB.children() ).toEqual [ ]
+            expect( C.children() ).toEqual [ ]
+            expect( B.children() ).toEqual [ ]
+            expect( root.parent() ).toBeNull()
+            expect( A.parent() ).toBe root
+            expect( AA.parent() ).toBe A
+            expect( AB.parent() ).toBe A
+            expect( C.parent() ).toBe root
+            expect( B.parent() ).toBe root
+
+Append a child to the end of the list of children of a child of the root and
+verify that the structure is as expected.
+
+            D = new Structure()
+            expect( D.parent() ).toBeNull()
+            expect( D.children() ).toEqual [ ]
+            A.insertChild D, 2
+            expect( root.children() ).toEqual [ A, C, B ]
+            expect( A.children() ).toEqual [ AA, AB, D ]
+            expect( AA.children() ).toEqual [ ]
+            expect( AB.children() ).toEqual [ ]
+            expect( D.children() ).toEqual [ ]
+            expect( C.children() ).toEqual [ ]
+            expect( B.children() ).toEqual [ ]
+            expect( root.parent() ).toBeNull()
+            expect( A.parent() ).toBe root
+            expect( AA.parent() ).toBe A
+            expect( AB.parent() ).toBe A
+            expect( D.parent() ).toBe A
+            expect( C.parent() ).toBe root
+            expect( B.parent() ).toBe root
+
+Insert as the first child of the root a child from elsewhere in the
+hierarchy, and verify that it is removed from one place and inserted in the
+other.
+
+            root.insertChild AA, 0
+            expect( root.children() ).toEqual [ AA, A, C, B ]
+            expect( A.children() ).toEqual [ AB, D ]
+            expect( AA.children() ).toEqual [ ]
+            expect( AB.children() ).toEqual [ ]
+            expect( D.children() ).toEqual [ ]
+            expect( C.children() ).toEqual [ ]
+            expect( B.children() ).toEqual [ ]
+            expect( root.parent() ).toBeNull()
+            expect( A.parent() ).toBe root
+            expect( AA.parent() ).toBe root
+            expect( AB.parent() ).toBe A
+            expect( D.parent() ).toBe A
+            expect( C.parent() ).toBe root
+            expect( B.parent() ).toBe root
+
+Do the same test again, but this time just moving something to be a later
+sibling within the same parent.
+
+            root.insertChild A, 2
+            expect( root.children() ).toEqual [ AA, C, A, B ]
+            expect( A.children() ).toEqual [ AB, D ]
+            expect( AA.children() ).toEqual [ ]
+            expect( AB.children() ).toEqual [ ]
+            expect( D.children() ).toEqual [ ]
+            expect( C.children() ).toEqual [ ]
+            expect( B.children() ).toEqual [ ]
+            expect( root.parent() ).toBeNull()
+            expect( A.parent() ).toBe root
+            expect( AA.parent() ).toBe root
+            expect( AB.parent() ).toBe A
+            expect( D.parent() ).toBe A
+            expect( C.parent() ).toBe root
+            expect( B.parent() ).toBe root
+
+The final test in this section is whether we can replace structures in an
+existing hierarchy with new structures, and retain the integrity and correct
+structure of the hierarchy.
+
+        it 'should support replacing structures', ->
+
+Make the same small structure hierarchy as in the previous test.
+
+            root = new Structure(
+                A = new Structure(
+                    AA = new Structure()
+                    AB = new Structure()
+                )
+                B = new Structure()
+            )
+
+Replace one child of the root with a new structure and verify that all comes
+out as expected.
+
+            C = new Structure()
+            expect( C.parent() ).toBeNull()
+            expect( C.children() ).toEqual [ ]
+            B.replaceWith C
+            expect( root.children() ).toEqual [ A, C ]
+            expect( A.children() ).toEqual [ AA, AB ]
+            expect( AA.children() ).toEqual [ ]
+            expect( AB.children() ).toEqual [ ]
+            expect( C.children() ).toEqual [ ]
+            expect( B.children() ).toEqual [ ]
+            expect( root.parent() ).toBeNull()
+            expect( A.parent() ).toBe root
+            expect( AA.parent() ).toBe A
+            expect( AB.parent() ).toBe A
+            expect( C.parent() ).toBe root
+            expect( B.parent() ).toBeNull()
+
+Replace one grandchild of the root with the former child of the root, and
+verify that all comes out as expected.
+
+            AA.replaceWith B
+            expect( root.children() ).toEqual [ A, C ]
+            expect( A.children() ).toEqual [ B, AB ]
+            expect( AA.children() ).toEqual [ ]
+            expect( AB.children() ).toEqual [ ]
+            expect( C.children() ).toEqual [ ]
+            expect( B.children() ).toEqual [ ]
+            expect( root.parent() ).toBeNull()
+            expect( A.parent() ).toBe root
+            expect( AA.parent() ).toBeNull()
+            expect( AB.parent() ).toBe A
+            expect( C.parent() ).toBe root
+            expect( B.parent() ).toBe A
+
+Replace A with one of its own children, as a corner case test.
+
+            A.replaceWith AB
+            expect( root.children() ).toEqual [ AB, C ]
+            expect( A.children() ).toEqual [ B ]
+            expect( AA.children() ).toEqual [ ]
+            expect( AB.children() ).toEqual [ ]
+            expect( C.children() ).toEqual [ ]
+            expect( B.children() ).toEqual [ ]
+            expect( root.parent() ).toBeNull()
+            expect( A.parent() ).toBeNull()
+            expect( AA.parent() ).toBeNull()
+            expect( AB.parent() ).toBe root
+            expect( C.parent() ).toBe root
+            expect( B.parent() ).toBe A
+
 ## Computed attributes
 
     describe 'Computed attributes', ->

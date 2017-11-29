@@ -144,6 +144,7 @@ make real documents and libraries.  This one doesn't, so it's called Phase
 <p>In this phase, we just design the generic Structure class on which everything else will depend, and the infrastructure of the LDE itself.</p>
 <p>At the end of this phase, we could write unit tests of the whole Structure class and its LDE context, thus guaranteeing that all later phases rest on a good foundation.</p>
 <h2 id="methods-in-the-structure-class">Methods in the Structure class</h2>
+<h3 id="computed-attributes">Computed attributes</h3>
 <ul>
 <li><code>S.setComputedAttribute(key,value)</code> caches a computed value under a
    certain key<ul>
@@ -183,6 +184,24 @@ make real documents and libraries.  This one doesn't, so it's called Phase
   charge of implementing <code>compute()</code> in the appropriate way.</li>
 </ul>
 </li>
+</ul>
+<h3 id="manipulating-the-structure-hierarchy">Manipulating the structure hierarchy</h3>
+<ul>
+<li><code>new Structure(arg1,arg2,...)</code> creates a structure with the given list of
+   child structures.</li>
+<li><code>S.children()</code> and <code>S.parent()</code> return child arrays and parent nodes,
+   respectively.</li>
+<li><code>S.indexInParent()</code> gives the index of S in its parent's children array.</li>
+<li><code>S.insertChild(child,index)</code> inserts a new child at the given index,
+   removing it from its old parent, if there was one.</li>
+<li><code>S.removeChild(index)</code> does the reverse.</li>
+<li><code>S.removeFromParent()</code> calls <code>P.removeChild(index)</code> in the parent of S,
+   passing <code>S.indexInParent()</code>.</li>
+<li><code>S.replaceWith(other)</code> replaces S, where it sits in the hierarchy, with
+   a different structure, thus leaving S with no parent.</li>
+</ul>
+<h3 id="other-methods-not-yet-sorted-into-categories">Other methods not yet sorted into categories</h3>
+<ul>
 <li><code>S.properties()</code> looks at the set of other structures that connect to S
    via arrows, and forms a dictionary of name=value pairs, the "properties"
    of S.</li>
