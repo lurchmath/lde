@@ -15,12 +15,13 @@ Verify that the globals exposed by the Structure module are visible.
 
 ## Computed attributes
 
+    describe 'Computed attributes', ->
+
 Structure objects provide a computed attributes dictionary, which should
 function as any other Javascript object, storing key-value pairs.  Because
 the implementation of this is very straightforward, we do only a few short
 tests.
 
-    describe 'Computed attributes', ->
         it 'should function as a key-value dictionary', ->
 
 Make a few new structures.
@@ -66,3 +67,45 @@ Now there's nothing in the dictionaries again.
             expect( S2.getComputedAttribute 'alpha' ).toBeUndefined()
             expect( S1.getComputedAttribute 'b e t a' ).toBeUndefined()
             expect( S2.getComputedAttribute 'b e t a' ).toBeUndefined()
+
+The `compute` function runs member functions within the Structure instance
+and stores the values.  See
+[the documentation](../src/structure.litcoffee#computed-attributes)
+for details.
+
+        it 'should compute and store attributes as requested', ->
+
+Create a structure instance.
+
+            S = new Structure()
+
+Give it two member functions that do simple example computations.
+
+            counter = 0
+            S.count = -> counter++
+            S.add = ( a, b ) -> a + b
+
+Call `compute()` an then inspect the stored computed attributes to verify
+that compute calls `count` or `add` and stores the results appropriately.
+
+First, the zero-argument case.
+
+            S.compute 'count'
+            expect( S.getComputedAttribute 'count' ).toBe 0
+            S.compute 'count'
+            expect( S.getComputedAttribute 'count' ).toBe 1
+            S.compute 'count'
+            expect( S.getComputedAttribute 'count' ).toBe 2
+
+Next, the two-argument case.
+
+            S.compute [ 'add', 5, 6 ]
+            expect( S.getComputedAttribute 'add' ).toBe 11
+            S.compute [ 'add', 100, -200 ]
+            expect( S.getComputedAttribute 'add' ).toBe -100
+
+Finally, the many-calls case.
+
+            S.compute 'count', [ 'add', 1, 2 ], 'count'
+            expect( S.getComputedAttribute 'count' ).toBe 4
+            expect( S.getComputedAttribute 'add' ).toBe 3
