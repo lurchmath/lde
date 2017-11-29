@@ -26,17 +26,21 @@ At the end of this phase, we could write unit tests of the whole Structure class
             * Or if an expression parses into many steps of work, each of
               which gets validated separately, then the feedback needs to
               be localized.
+ * `S.getComputedAttribute(key)` fetches the computed attribute value, or
+   returns undefined if it's not stored
+ * `S.clearComputedAttributes(key1,key2,...)` removes the computed values;
+   calling it with no arguments removes all computed values
  * `S.compute(key1,key2,...)` runs whatever function is necessary to
    compute and store the attributes for the keys.
     * It should usually be obvious what this is from context, like if S has
       a function `S.meaning()` and we say `S.compute("meaning")` that means
       run `S.setComputedAttribute("meaning",S.meaning())`.
+    * In fact, the base implementation in the structure class does exactly
+      what is described in the previous bullet point; `S.compute(k)` runs
+      `S[k]()` and stores the result.  To pass parameters, instead of a
+      string key, pass an array `[key,arg1,arg2,...]`.
     * But more complex examples are possible, and each structure type is in
       charge of implementing `compute()` in the appropriate way.
- * `S.clearComputedAttributes(key1,key2,...)` removes the computed values;
-   calling it with no arguments removes all computed values
- * `S.getComputedAttribute(key)` fetches the computed attribute value, or
-   returns undefined if it's not stored
  * `S.properties()` looks at the set of other structures that connect to S
    via arrows, and forms a dictionary of name=value pairs, the "properties"
    of S.
