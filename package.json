@@ -7,6 +7,8 @@
     "test": "tests"
   },
   "dependencies": {
+  },
+  "devDependencies": {
     "gulp-coffee": "^2.3.4",
     "gulp": "^3.9.1",
     "gulp-sourcemaps": "^2.6.1",
@@ -15,7 +17,6 @@
     "jasmine-node": "^1.14.5",
     "pump": "^1.0.3"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "gulp tests"
   },
