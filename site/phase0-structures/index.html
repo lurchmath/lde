@@ -166,19 +166,23 @@ make real documents and libraries.  This one doesn't, so it's called Phase
 </li>
 </ul>
 </li>
+<li><code>S.getComputedAttribute(key)</code> fetches the computed attribute value, or
+   returns undefined if it's not stored</li>
+<li><code>S.clearComputedAttributes(key1,key2,...)</code> removes the computed values;
+   calling it with no arguments removes all computed values</li>
 <li><code>S.compute(key1,key2,...)</code> runs whatever function is necessary to
    compute and store the attributes for the keys.<ul>
 <li>It should usually be obvious what this is from context, like if S has
   a function <code>S.meaning()</code> and we say <code>S.compute("meaning")</code> that means
   run <code>S.setComputedAttribute("meaning",S.meaning())</code>.</li>
+<li>In fact, the base implementation in the structure class does exactly
+  what is described in the previous bullet point; <code>S.compute(k)</code> runs
+  <code>S[k]()</code> and stores the result.  To pass parameters, instead of a
+  string key, pass an array <code>[key,arg1,arg2,...]</code>.</li>
 <li>But more complex examples are possible, and each structure type is in
   charge of implementing <code>compute()</code> in the appropriate way.</li>
 </ul>
 </li>
-<li><code>S.clearComputedAttributes(key1,key2,...)</code> removes the computed values;
-   calling it with no arguments removes all computed values</li>
-<li><code>S.getComputedAttribute(key)</code> fetches the computed attribute value, or
-   returns undefined if it's not stored</li>
 <li><code>S.properties()</code> looks at the set of other structures that connect to S
    via arrows, and forms a dictionary of name=value pairs, the "properties"
    of S.</li>
