@@ -44,12 +44,31 @@ At the end of this phase, we could write unit tests of the whole Structure class
     * But more complex examples are possible, and each structure type is in
       charge of implementing `compute()` in the appropriate way.
 
+### External attributes
+
+Just as computed attributes are a key-value dictionary, so are external
+attributes.  However, we keep them separate because computed attributes are
+those created by the LDE itself, internally, as the result fo some
+computation on the structure, but external attributes are provided by the
+client of this module, and are not altered by the LDE.
+
+Thus we have the same three functions for manipulating the key-value
+dictionary (get/set/clear) but no corresponding `compute` function.
+
+ * `S.setExternalAttribute(key,value)` stores a value under a given key.
+ * `S.getExternalAttribute(key)` fetches the attribute value, or returns
+   undefined if it's not stored.
+ * `S.clearExternalAttributes(key1,key2,...)` removes the stored values;
+   calling it with no arguments removes all stored values.
+
 ### Manipulating the structure hierarchy
 
  * `new Structure(arg1,arg2,...)` creates a structure with the given list of
    child structures.
- * `S.children()` and `S.parent()` return child arrays and parent nodes,
-   respectively.
+ * `S.children()` yields an ordered array of structures immediately
+   inside S
+ * `S.parent()` yields the parent structure of S, or undefined if S is
+   the LDE Document root
  * `S.indexInParent()` gives the index of S in its parent's children array.
  * `S.insertChild(child,index)` inserts a new child at the given index,
    removing it from its old parent, if there was one.
@@ -59,45 +78,49 @@ At the end of this phase, we could write unit tests of the whole Structure class
  * `S.replaceWith(other)` replaces S, where it sits in the hierarchy, with
    a different structure, thus leaving S with no parent.
 
+### Event handling in the structure hierarchy
+
+Each of the following functions will be called by the functions above, when
+the event is complete.  There is no default implementation of each of these
+functions, which means that no call will take place.  However, any instance
+or subclass may choose to implement one or more of these functions as event
+handlers, and thus hear about the events they signal.
+
+ * `S.wasInserted()` will be called in any structure inserted into any
+   parent structure, including just-constructed structures being inserted
+   into a parent for the first time.  It is called after the insertion, so
+   `S.parent()` will yield a valid `Structure` instance.
+ * `S.wasRemoved(parent,index)` will be called immediately after S is
+   removed from its previous parent (but obviously S has not yet been
+   deleted from JavaScript memory).  The first parameter will be the former
+   parent structure (which will still exist, because the removal juts
+   happened) and the index that S formerly had within that parent.  Note
+   that replacing one structure with another will yield a call to
+   `S.wasRemoved()` in the one structure and `S.wasInserted()` in the other.
+ * `S.wasChanged()` is a function that the UI will call in a structure if
+   something about the structure changed (such as one of its attributes or
+   the contents of an atomic structure).
+
 ### Other methods not yet sorted into categories
 
+ * `S.isAccessibleTo(T)` returns true or false, implementing the
+   accessibility relation defined earlier.
  * `S.properties()` looks at the set of other structures that connect to S
    via arrows, and forms a dictionary of name=value pairs, the "properties"
    of S.
- * `S.isAccessibleTo(S')` returns true or false, implementing the
-   accessibility relation defined earlier.
- * `S.findCited(n)` finds the first structure S' accessible to S with
-   name=n in `S'.attributes()`, or undefined if there is no such structure
-   S'.
- * `S.whatCitesMe()` finds all structures S' in the scope of S with
-   a=`S.attributes().name` in `S'.attributes()`, with a being one of the
-   keys we use for citation, such as "reason" or "premise" and so on.
+ * `S.findCited(n)` finds the first structure `T` accessible to `S` with
+   name `n` in `T.attributes()`, or undefined if there is no such structure
+   `T`.
+ * `S.whatCitesMe()` finds all structures `T` in the scope of `S` with any
+   citation-based key (such as "reason" or "premise") in `T.properties()`
+   begin associated to the value `S.properties().name`.
+ * `S.text()` returns the contents of `S` as plain text.  The default
+   implementation of this, for the base `Structure` class, is the empty
+   string.  Subclasses may override this, but there is a guaranteed
+   implementation in all `Structure`s that yields a string.
  * There may be a need later to create other accessibility-related
    routines, such as `S.allAccessibleToMe()` or `S.myScope()` or
    `S.allAccessibleSatisfying(P)` etc.
- * `S.wasInserted()` is a function that the UI will call in a brand new
-   structure as soon as it is inserted into the document.  Each structure
-   type may implement this function to do whatever it feels is necessary to
-   initialize its internal data and notify any nearby nodes in the LDE
-   Document about its arrival.  Some structure types may choose to leave
-   this as an empty function.
- * `S.wasRemoved(parent,index)` is a function that the UI will call in a
-   structure the moment it is deleted from the document (but not yet
-   deleted from JavaScript memory).  The first parameter will be the former
-   parent structure (which will always exist, since the root of the LDE
-   Document can't be deleted) and the index that S formerly had within that
-   parent.  Similarly, each structure type can implement this as it sees
-   fit, including doing nothing.  Note that replacing one structure with
-   another will yield a call to `S.wasRemoved()` in the one structure and
-   `S.wasInserted()` in the other.
- * `S.wasChanged()` is a function that the UI will call in a structure if
-   something about the structure changed (such as one of its attributes or
-   the contents of an atomic structure)
-    * `S.text()` returns the contents of S as plain text
-    * `S.children()` yields an ordered array of structures immediately
-      inside S
-    * `S.parent()` yields the parent structure of S, or undefined if S is
-      the LDE Document root
 
 ## LDE in general
 
@@ -133,10 +156,10 @@ When the LDE is loaded into memory it will:
    loaded as a module in some command-line app, for instance) it will
    still expose insert, delete, and replace functions as part of the
    module's API.
- * We will call any kind of insertion, removal, or replacement of
-   subtrees of the LDE Document a change event, whether it happened via
-   a message from a parent thread or as a function call to the LDE as a
-   module in a larger app.
+
+We will call any kind of insertion, removal, or replacement of subtrees of
+the LDE Document a change event, whether it happened via a message from a
+parent thread or as a function call to the LDE as a module in a larger app.
 
 ## Notation in code
 
