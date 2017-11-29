@@ -130,21 +130,29 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
         <li class="main active"><a href="#lde-design-phase-0-structures">LDE Design Phase 0: Structures</a></li>
-            <li><a href="#methods-in-the-structure-class">Methods in the Structure class</a></li>
-            <li><a href="#lde-in-general">LDE in general</a></li>
-            <li><a href="#notation-in-code">Notation in code</a></li>
+            <li><a href="#the-structure-module">The Structure module</a></li>
+            <li><a href="#lde-module">LDE Module</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
 <h1 id="lde-design-phase-0-structures">LDE Design Phase 0: Structures</h1>
 <p>All the later phases will actually implement stuff that we could use to
-make real documents and libraries.  This one doesn't, so it's called Phase
-0.</p>
+make real documents and libraries.  This one doesn't, so it's called
+Phase 0.</p>
 <p>In this phase, we just design the generic Structure class on which everything else will depend, and the infrastructure of the LDE itself.</p>
 <p>At the end of this phase, we could write unit tests of the whole Structure class and its LDE context, thus guaranteeing that all later phases rest on a good foundation.</p>
-<h2 id="methods-in-the-structure-class">Methods in the Structure class</h2>
+<h2 id="the-structure-module">The Structure module</h2>
+<p>That module defines a single <code>Structure</code> class, whose instances have these
+methods.</p>
 <h3 id="computed-attributes">Computed attributes</h3>
+<p>Work done in this section:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
+</ul>
+<p>Specification:</p>
 <ul>
 <li><code>S.setComputedAttribute(key,value)</code> caches a computed value under a
    certain key<ul>
@@ -186,6 +194,13 @@ make real documents and libraries.  This one doesn't, so it's called Phase
 </li>
 </ul>
 <h3 id="external-attributes">External attributes</h3>
+<p>Work done in this section:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
+</ul>
+<p>Specification:</p>
 <p>Just as computed attributes are a key-value dictionary, so are external
 attributes.  However, we keep them separate because computed attributes are
 those created by the LDE itself, internally, as the result fo some
@@ -201,6 +216,13 @@ dictionary (get/set/clear) but no corresponding <code>compute</code> function.</
    calling it with no arguments removes all stored values.</li>
 </ul>
 <h3 id="manipulating-the-structure-hierarchy">Manipulating the structure hierarchy</h3>
+<p>Work done in this section:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
+</ul>
+<p>Specification:</p>
 <ul>
 <li><code>new Structure(arg1,arg2,...)</code> creates a structure with the given list of
    child structures.</li>
@@ -218,6 +240,13 @@ dictionary (get/set/clear) but no corresponding <code>compute</code> function.</
    a different structure, thus leaving S with no parent.</li>
 </ul>
 <h3 id="event-handling-in-the-structure-hierarchy">Event handling in the structure hierarchy</h3>
+<p>Work done in this section:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
+</ul>
+<p>Specification:</p>
 <p>Each of the following functions will be called by the functions above, when
 the event is complete.  There is no default implementation of each of these
 functions, which means that no call will take place.  However, any instance
@@ -239,112 +268,157 @@ handlers, and thus hear about the events they signal.</p>
    something about the structure changed (such as one of its attributes or
    the contents of an atomic structure).</li>
 </ul>
-<h3 id="other-methods-not-yet-sorted-into-categories">Other methods not yet sorted into categories</h3>
+<h3 id="unique-ids">Unique IDs</h3>
+<p>Work done in this section:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
+</ul>
+<p>Specification:</p>
 <ul>
-<li><code>S.isAccessibleTo(T)</code> returns true or false, implementing the
-   accessibility relation defined earlier.</li>
+<li>Establish a global mapping from unique Structure IDs to the instances
+   that have those IDs; update this (and the list of free IDs) in the
+   Structure constructor.</li>
+<li>Create a class function for finding the instance with a given ID, if any.</li>
+</ul>
+<h3 id="connections">Connections</h3>
+<p>Work done in this section:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
+</ul>
+<p>Specification:</p>
+<ul>
+<li>Assume that two special external attribute keys will be "connectionsOut"
+   and "connectionsIn," each a set of targetID-connectionType pairs.  These
+   are assumed to be kept consistent across a hierarchy, in that any
+   connections out from one node also exist as connections in for all the
+   target nodes.</li>
+<li>Create convenience getter and setter functions for this data.<ul>
+<li>Create/delete a connection of type T between A and B.</li>
+<li>Get all connections of type T to/from A.</li>
+<li>Get all connections to/from A.</li>
+<li>Get all connections from A to B.</li>
+</ul>
+</li>
 <li><code>S.properties()</code> looks at the set of other structures that connect to S
    via arrows, and forms a dictionary of name=value pairs, the "properties"
    of S.</li>
+</ul>
+<h3 id="convenience-constructions-for-unit-testing">Convenience constructions for unit testing</h3>
+<p>Work done in this section:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
+</ul>
+<p>Specification:</p>
+<ul>
+<li>Create <code>S.attr(obj)</code> that will add as external attributes all key-value
+   pairs in <code>obj</code>, returning <code>S</code> for use in hierarchy-building.</li>
+<li>Append to the constructor code that traverses the tree and attempts to
+   make connectionsOut attributes consistent with connectionsIn attributes,
+   in a full tree traversal.</li>
+<li>Enhance that tree traversal so that it finds attributes with common
+   connection-type keys ("reason for", "premise for", etc.) and converts
+   them into connectionsOut members before doing the consistency checking.
+   E.g., <code>S.attr({"reason for":3})</code>.</li>
+<li>Enhance that further so that the value associated with such a key can be
+   a string from among a small set of relative references, such as
+   "previous" and "next."  E.g., <code>S.attr({"reason for":"previous"})</code>.</li>
+</ul>
+<h3 id="accessibility">Accessibility</h3>
+<p>Work done in this section:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
+</ul>
+<p>Specification:</p>
+<ul>
+<li><code>S.isAccessibleTo(T)</code> returns true or false, implementing the
+   accessibility relation defined earlier.</li>
 <li><code>S.findCited(n)</code> finds the first structure <code>T</code> accessible to <code>S</code> with
    name <code>n</code> in <code>T.attributes()</code>, or undefined if there is no such structure
    <code>T</code>.</li>
 <li><code>S.whatCitesMe()</code> finds all structures <code>T</code> in the scope of <code>S</code> with any
    citation-based key (such as "reason" or "premise") in <code>T.properties()</code>
    begin associated to the value <code>S.properties().name</code>.</li>
-<li><code>S.text()</code> returns the contents of <code>S</code> as plain text.  The default
-   implementation of this, for the base <code>Structure</code> class, is the empty
-   string.  Subclasses may override this, but there is a guaranteed
-   implementation in all <code>Structure</code>s that yields a string.</li>
 <li>There may be a need later to create other accessibility-related
    routines, such as <code>S.allAccessibleToMe()</code> or <code>S.myScope()</code> or
    <code>S.allAccessibleSatisfying(P)</code> etc.</li>
 </ul>
-<h2 id="lde-in-general">LDE in general</h2>
-<p>When the LDE is loaded into memory it will:</p>
+<h3 id="miscellany">Miscellany</h3>
+<p>Work done in this section:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
+</ul>
+<p>Specification:</p>
 <ul>
+<li><code>S.text()</code> returns the contents of <code>S</code> as plain text.  The default
+   implementation of this, for the base <code>Structure</code> class, is the empty
+   string.  Subclasses may override this, but there is a guaranteed
+   implementation in all <code>Structure</code>s that yields a string.</li>
+</ul>
+<h2 id="lde-module">LDE Module</h2>
+<h3 id="global-functions-and-data">Global functions and data</h3>
+<p>Work done in this section:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
+</ul>
+<p>Specification:</p>
+<ul>
+<li>Defines global functions for serializing and dezerializing Structure
+   instances (or subclass instances) to/from JSON data.  The important half
+   of this pair is deserialization, but to help with testing, it makes sense
+   to also create a corresponding serializer.</li>
 <li>Create a global Structure that is the LDE Document.  It will be a
    generic Structure, not a subclass.  It will have no children; they
    can be added later.  That is, it starts as a one-node tree, root only.</li>
-<li>Establish a global mapping from unique Structure IDs to the instances
-   that have those IDs</li>
-<li>Defines a global function for deserializing Structure instances (or
-   subclass instances) from JSON data</li>
-<li>If it detects that it is being run in a background thread, it will
-   set up listeners for messages from the parent thread.  These
-   listeners will handle messages of three types:<ul>
+</ul>
+<h3 id="foregroundbackground">Foreground/background</h3>
+<p>Work done in this section:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
+</ul>
+<p>Specification:</p>
+<p>If the LDE detects that it is being run in a background thread, it will set
+up listeners for messages from the parent thread.  These listeners will
+handle messages of three types:</p>
+<ul>
 <li>Insert a new subtree.<ul>
-<li>The message must include the unique ID of the parent, the
-  index at which the subtree will be inserted, and all the data
-  defining the subtree (serialized in JSON form, as required
-  for transmission to JavaScript background threads).</li>
-<li>If the Structure (once it's deserialized) doesn't have an ID,
-  give it a new, unique one as determined by the global
-  mapping, and insert the new (id,instance) pair into that
-  mapping</li>
+<li>The message must include the unique ID of the parent, the index at
+  which the subtree will be inserted, and all the data defining the
+  subtree (serialized in JSON form, as required for transmission to
+  JavaScript background threads).</li>
+<li>If the Structure (once it's deserialized) doesn't have an ID, give it
+  a new, unique one as determined by the global mapping, and insert the
+  new (id,instance) pair into that mapping</li>
 </ul>
 </li>
-<li>Delete an existing subtree.  The message must include the unique
-  ID of the tree to delete.  Remove it from the global ID mapping
-  as well and erase its ID attribute.</li>
-<li>Replace a subtree with a new one.  The message must include the
-  unique ID of the tree to replace and the data defining the
-  replacement (serialized as just described).  Remove the replaced
-  one from the global ID mapping as well and erase its ID attribute.</li>
+<li>Delete an existing subtree.  The message must include the unique ID of
+   the tree to delete.  Remove it from the global ID mapping as well and
+   erase its ID attribute.</li>
+<li>Replace a subtree with a new one.  The message must include the unique
+   ID of the tree to replace and the data defining the replacement
+   (serialized as just described).  Remove the replaced one from the global
+   ID mapping as well and erase its ID attribute.</li>
 </ul>
-</li>
-<li>Even if it is not being run in a background thread (but perhaps was
-   loaded as a module in some command-line app, for instance) it will
-   still expose insert, delete, and replace functions as part of the
-   module's API.</li>
-</ul>
+<p>Even if it is not being run in a background thread (but perhaps was loaded
+as a module in some command-line app, for instance) it will still expose
+insert, delete, and replace functions as part of the module's API, each of
+which operate on the global LDE document.</p>
 <p>We will call any kind of insertion, removal, or replacement of subtrees of
 the LDE Document a change event, whether it happened via a message from a
-parent thread or as a function call to the LDE as a module in a larger app.</p>
-<h2 id="notation-in-code">Notation in code</h2>
-<p>Ensure that the Structure (and, later, other subclass) constructors are
-sophisticated enough to help us build LDE Documents easily in the unit
-testing suite, like so:</p>
-<pre><code class="javascript">Structure(
-    FormalSystem(
-        Rule(
-            &quot;function ( step ) { return { valid: step.text().length &lt; 5, message: 'Boy is this silly.' }; }&quot;,
-        ).attr( { name : &quot;silly rule&quot; } )
-    ),
-    AtomicExpression( &quot;yay&quot; ).attr( { id : 1 } ),
-    AtomicExpression( &quot;silly rule&quot; ).attr( { &quot;outgoing edges&quot; : [ { targetId : 1, type : &quot;reason&quot; } ] ),
-    AtomicExpression( &quot;oh rats&quot; ).attr( { id : 2 } ),
-    AtomicExpression( &quot;silly rule&quot; ).attr( { &quot;outgoing edges&quot; : [ { targetId : 2, type : &quot;reason&quot; } ] )
-)
-</code></pre>
-
-<p>or even</p>
-<pre><code class="javascript">Structure(
-    FormalSystem(
-        Rule(
-            &quot;function ( step ) { return { valid: step.text().length &lt; 5, message: 'Boy is this silly.' }; }&quot;,
-        ).attr( { name : &quot;silly rule&quot; } )
-    ),
-    AtomicExpression( &quot;yay&quot; ).attr( { id : 1 } ),
-    AtomicExpression( &quot;silly rule&quot; ).attr( { &quot;reason for&quot; : 1 } ),
-    AtomicExpression( &quot;oh rats&quot; ).attr( { id : 2 } ),
-    AtomicExpression( &quot;silly rule&quot; ).attr( { &quot;reason for&quot; : 2 } )
-)
-</code></pre>
-
-<p>or even</p>
-<pre><code class="javascript">Structure(
-    FormalSystem(
-        Rule(
-            &quot;function ( step ) { return { valid: step.text().length &lt; 5, message: 'Boy is this silly.' }; }&quot;,
-        ).attr( { name : &quot;silly rule&quot; } )
-    ),
-    AtomicExpression( &quot;yay&quot; ),
-    AtomicExpression( &quot;silly rule&quot; ).attr( { &quot;reason for&quot; : &quot;previous&quot; } ),
-    AtomicExpression( &quot;oh rats&quot; ),
-    AtomicExpression( &quot;silly rule&quot; ).attr( { &quot;reason for&quot; : &quot;previous&quot; } )
-)
-</code></pre></div>
+parent thread or as a function call to the LDE as a module in a larger app.</p></div>
         </div>
 
         <footer class="col-md-12">

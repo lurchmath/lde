@@ -2,16 +2,27 @@
 # LDE Design Phase 0: Structures
 
 All the later phases will actually implement stuff that we could use to
-make real documents and libraries.  This one doesn't, so it's called Phase
-0.
+make real documents and libraries.  This one doesn't, so it's called
+Phase 0.
 
 In this phase, we just design the generic Structure class on which everything else will depend, and the infrastructure of the LDE itself.
 
 At the end of this phase, we could write unit tests of the whole Structure class and its LDE context, thus guaranteeing that all later phases rest on a good foundation.
 
-## Methods in the Structure class
+## The Structure module
+
+That module defines a single `Structure` class, whose instances have these
+methods.
 
 ### Computed attributes
+
+Work done in this section:
+
+ * [x] Code implemented
+ * [x] Unit tests written and passing
+ * [ ] API documentation written
+
+Specification:
 
  * `S.setComputedAttribute(key,value)` caches a computed value under a
    certain key
@@ -46,6 +57,14 @@ At the end of this phase, we could write unit tests of the whole Structure class
 
 ### External attributes
 
+Work done in this section:
+
+ * [x] Code implemented
+ * [x] Unit tests written and passing
+ * [ ] API documentation written
+
+Specification:
+
 Just as computed attributes are a key-value dictionary, so are external
 attributes.  However, we keep them separate because computed attributes are
 those created by the LDE itself, internally, as the result fo some
@@ -63,6 +82,14 @@ dictionary (get/set/clear) but no corresponding `compute` function.
 
 ### Manipulating the structure hierarchy
 
+Work done in this section:
+
+ * [x] Code implemented
+ * [x] Unit tests written and passing
+ * [ ] API documentation written
+
+Specification:
+
  * `new Structure(arg1,arg2,...)` creates a structure with the given list of
    child structures.
  * `S.children()` yields an ordered array of structures immediately
@@ -79,6 +106,14 @@ dictionary (get/set/clear) but no corresponding `compute` function.
    a different structure, thus leaving S with no parent.
 
 ### Event handling in the structure hierarchy
+
+Work done in this section:
+
+ * [x] Code implemented
+ * [ ] Unit tests written and passing
+ * [ ] API documentation written
+
+Specification:
 
 Each of the following functions will be called by the functions above, when
 the event is complete.  There is no default implementation of each of these
@@ -101,114 +136,160 @@ handlers, and thus hear about the events they signal.
    something about the structure changed (such as one of its attributes or
    the contents of an atomic structure).
 
-### Other methods not yet sorted into categories
+### Unique IDs
 
- * `S.isAccessibleTo(T)` returns true or false, implementing the
-   accessibility relation defined earlier.
+Work done in this section:
+
+ * [ ] Code implemented
+ * [ ] Unit tests written and passing
+ * [ ] API documentation written
+
+Specification:
+
+ * Establish a global mapping from unique Structure IDs to the instances
+   that have those IDs; update this (and the list of free IDs) in the
+   Structure constructor.
+ * Create a class function for finding the instance with a given ID, if any.
+
+### Connections
+
+Work done in this section:
+
+ * [ ] Code implemented
+ * [ ] Unit tests written and passing
+ * [ ] API documentation written
+
+Specification:
+
+ * Assume that two special external attribute keys will be "connectionsOut"
+   and "connectionsIn," each a set of targetID-connectionType pairs.  These
+   are assumed to be kept consistent across a hierarchy, in that any
+   connections out from one node also exist as connections in for all the
+   target nodes.
+ * Create convenience getter and setter functions for this data.
+    * Create/delete a connection of type T between A and B.
+    * Get all connections of type T to/from A.
+    * Get all connections to/from A.
+    * Get all connections from A to B.
  * `S.properties()` looks at the set of other structures that connect to S
    via arrows, and forms a dictionary of name=value pairs, the "properties"
    of S.
+
+### Convenience constructions for unit testing
+
+Work done in this section:
+
+ * [ ] Code implemented
+ * [ ] Unit tests written and passing
+ * [ ] API documentation written
+
+Specification:
+
+ * Create `S.attr(obj)` that will add as external attributes all key-value
+   pairs in `obj`, returning `S` for use in hierarchy-building.
+ * Append to the constructor code that traverses the tree and attempts to
+   make connectionsOut attributes consistent with connectionsIn attributes,
+   in a full tree traversal.
+ * Enhance that tree traversal so that it finds attributes with common
+   connection-type keys ("reason for", "premise for", etc.) and converts
+   them into connectionsOut members before doing the consistency checking.
+   E.g., `S.attr({"reason for":3})`.
+ * Enhance that further so that the value associated with such a key can be
+   a string from among a small set of relative references, such as
+   "previous" and "next."  E.g., `S.attr({"reason for":"previous"})`.
+
+### Accessibility
+
+Work done in this section:
+
+ * [ ] Code implemented
+ * [ ] Unit tests written and passing
+ * [ ] API documentation written
+
+Specification:
+
+ * `S.isAccessibleTo(T)` returns true or false, implementing the
+   accessibility relation defined earlier.
  * `S.findCited(n)` finds the first structure `T` accessible to `S` with
    name `n` in `T.attributes()`, or undefined if there is no such structure
    `T`.
  * `S.whatCitesMe()` finds all structures `T` in the scope of `S` with any
    citation-based key (such as "reason" or "premise") in `T.properties()`
    begin associated to the value `S.properties().name`.
- * `S.text()` returns the contents of `S` as plain text.  The default
-   implementation of this, for the base `Structure` class, is the empty
-   string.  Subclasses may override this, but there is a guaranteed
-   implementation in all `Structure`s that yields a string.
  * There may be a need later to create other accessibility-related
    routines, such as `S.allAccessibleToMe()` or `S.myScope()` or
    `S.allAccessibleSatisfying(P)` etc.
 
-## LDE in general
+### Miscellany
 
-When the LDE is loaded into memory it will:
+Work done in this section:
 
+ * [ ] Code implemented
+ * [ ] Unit tests written and passing
+ * [ ] API documentation written
+
+Specification:
+
+ * `S.text()` returns the contents of `S` as plain text.  The default
+   implementation of this, for the base `Structure` class, is the empty
+   string.  Subclasses may override this, but there is a guaranteed
+   implementation in all `Structure`s that yields a string.
+
+## LDE Module
+
+### Global functions and data
+
+Work done in this section:
+
+ * [ ] Code implemented
+ * [ ] Unit tests written and passing
+ * [ ] API documentation written
+
+Specification:
+
+ * Defines global functions for serializing and dezerializing Structure
+   instances (or subclass instances) to/from JSON data.  The important half
+   of this pair is deserialization, but to help with testing, it makes sense
+   to also create a corresponding serializer.
  * Create a global Structure that is the LDE Document.  It will be a
    generic Structure, not a subclass.  It will have no children; they
    can be added later.  That is, it starts as a one-node tree, root only.
- * Establish a global mapping from unique Structure IDs to the instances
-   that have those IDs
- * Defines a global function for deserializing Structure instances (or
-   subclass instances) from JSON data
- * If it detects that it is being run in a background thread, it will
-   set up listeners for messages from the parent thread.  These
-   listeners will handle messages of three types:
-    * Insert a new subtree.
-        * The message must include the unique ID of the parent, the
-          index at which the subtree will be inserted, and all the data
-          defining the subtree (serialized in JSON form, as required
-          for transmission to JavaScript background threads).
-        * If the Structure (once it's deserialized) doesn't have an ID,
-          give it a new, unique one as determined by the global
-          mapping, and insert the new (id,instance) pair into that
-          mapping
-    * Delete an existing subtree.  The message must include the unique
-      ID of the tree to delete.  Remove it from the global ID mapping
-      as well and erase its ID attribute.
-    * Replace a subtree with a new one.  The message must include the
-      unique ID of the tree to replace and the data defining the
-      replacement (serialized as just described).  Remove the replaced
-      one from the global ID mapping as well and erase its ID attribute.
- * Even if it is not being run in a background thread (but perhaps was
-   loaded as a module in some command-line app, for instance) it will
-   still expose insert, delete, and replace functions as part of the
-   module's API.
+
+### Foreground/background
+
+Work done in this section:
+
+ * [ ] Code implemented
+ * [ ] Unit tests written and passing
+ * [ ] API documentation written
+
+Specification:
+
+If the LDE detects that it is being run in a background thread, it will set
+up listeners for messages from the parent thread.  These listeners will
+handle messages of three types:
+
+ * Insert a new subtree.
+    * The message must include the unique ID of the parent, the index at
+      which the subtree will be inserted, and all the data defining the
+      subtree (serialized in JSON form, as required for transmission to
+      JavaScript background threads).
+    * If the Structure (once it's deserialized) doesn't have an ID, give it
+      a new, unique one as determined by the global mapping, and insert the
+      new (id,instance) pair into that mapping
+ * Delete an existing subtree.  The message must include the unique ID of
+   the tree to delete.  Remove it from the global ID mapping as well and
+   erase its ID attribute.
+ * Replace a subtree with a new one.  The message must include the unique
+   ID of the tree to replace and the data defining the replacement
+   (serialized as just described).  Remove the replaced one from the global
+   ID mapping as well and erase its ID attribute.
+
+Even if it is not being run in a background thread (but perhaps was loaded
+as a module in some command-line app, for instance) it will still expose
+insert, delete, and replace functions as part of the module's API, each of
+which operate on the global LDE document.
 
 We will call any kind of insertion, removal, or replacement of subtrees of
 the LDE Document a change event, whether it happened via a message from a
 parent thread or as a function call to the LDE as a module in a larger app.
-
-## Notation in code
-
-Ensure that the Structure (and, later, other subclass) constructors are
-sophisticated enough to help us build LDE Documents easily in the unit
-testing suite, like so:
-
-```javascript
-Structure(
-    FormalSystem(
-        Rule(
-            "function ( step ) { return { valid: step.text().length < 5, message: 'Boy is this silly.' }; }",
-        ).attr( { name : "silly rule" } )
-    ),
-    AtomicExpression( "yay" ).attr( { id : 1 } ),
-    AtomicExpression( "silly rule" ).attr( { "outgoing edges" : [ { targetId : 1, type : "reason" } ] ),
-    AtomicExpression( "oh rats" ).attr( { id : 2 } ),
-    AtomicExpression( "silly rule" ).attr( { "outgoing edges" : [ { targetId : 2, type : "reason" } ] )
-)
-```
-
-or even
-
-```javascript
-Structure(
-    FormalSystem(
-        Rule(
-            "function ( step ) { return { valid: step.text().length < 5, message: 'Boy is this silly.' }; }",
-        ).attr( { name : "silly rule" } )
-    ),
-    AtomicExpression( "yay" ).attr( { id : 1 } ),
-    AtomicExpression( "silly rule" ).attr( { "reason for" : 1 } ),
-    AtomicExpression( "oh rats" ).attr( { id : 2 } ),
-    AtomicExpression( "silly rule" ).attr( { "reason for" : 2 } )
-)
-```
-
-or even
-
-```javascript
-Structure(
-    FormalSystem(
-        Rule(
-            "function ( step ) { return { valid: step.text().length < 5, message: 'Boy is this silly.' }; }",
-        ).attr( { name : "silly rule" } )
-    ),
-    AtomicExpression( "yay" ),
-    AtomicExpression( "silly rule" ).attr( { "reason for" : "previous" } ),
-    AtomicExpression( "oh rats" ),
-    AtomicExpression( "silly rule" ).attr( { "reason for" : "previous" } )
-)
-```
