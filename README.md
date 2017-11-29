@@ -18,15 +18,19 @@
  * `release/` folder stores the sources that have been compiled to
    JavaScript.
     * To compile everything in your own copy of the repo, run `gulp`.
+    * If you make changes to the source code, be sure to compile to the
+      release folder before committing and pushing, so that the two folders
+      are always consistent in the repo online.
  * `docs/` is where the documentation source files are written in Markdown.
  * `site/` contains the documentation, compiled to a static site.
     * To rebuild the docs in your own copy of the repo, run `gulp docs`.
     * This requires you to have [mkdocs](http://www.mkdocs.org/) installed.
-    * Pushing changes to this folder to GitHub will update the main site
+    * Pushing changes in this folder to GitHub will update the main site
       documentation, linked to above.
-    * Consequently, any time you change the content of the `docs/` folder,
-      you should rebuild them into `site/` before committing and pushing,
-      or your documentation updates will not be visible on the docs site.
+    * Any time you change the content of the `docs/` folder, you should
+      rebuild them into `site/` before committing and pushing, so that the
+      two folders (and, more importantly, the docs site online) stay
+      consistent.
  * `tests/` contains the source code for the unit tests.
     * To run all tests in your own copy of the repo, run `gulp test`.
 
