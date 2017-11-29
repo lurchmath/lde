@@ -1,6 +1,8 @@
 
 # The Lurch Deductive Engine (LDE)
 
+[![Build Status](https://travis-ci.org/lurchmath/lde.svg?branch=master)](https://travis-ci.org/lurchmath/lde)
+
 [See documentation on the project website.](http://lurchmath.github.io/lde)
 
 ## Getting started with development
