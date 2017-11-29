@@ -16,9 +16,13 @@ structures.
 
         constructor : ( children... ) ->
             @computedAttributes = { }
+            @externalAttributes = { }
             @parentNode = null
             @childList = ( c for c in children when c instanceof Structure )
-            child.parentNode = this for child in @childList
+            for child in @childList
+                child.removeFromParent()
+                child.parentNode = this
+                child.wasInserted?()
 
 ## Tree structure
 
@@ -41,10 +45,11 @@ We permit removing children from parents, either with a method in the child
 or in the parent.
 
         removeFromParent : =>
-            if @parentNode?
-                @parentNode.childList =
-                    ( c for c in @parentNode.childList when c isnt this )
+            if ( originalParent = @parentNode )?
+                originalIndex = @indexInParent()
+                @parentNode.childList.splice originalIndex, 1
                 @parentNode = null
+                @wasRemoved? originalParent, originalIndex
         removeChild : ( atIndex ) => @childList[atIndex]?.removeFromParent()
 
 We permit inserting a new child into the parent's child array at any valid
@@ -62,15 +67,15 @@ method is called.
                 @childList[beforeIndex...]...
             ]
             child.parentNode = this
+            @wasInserted?()
 
 A convenient combination of the above methods is to replace a child with a
 new structure, deparenting the old child and putting the replacement at the
 same index in the same parent.
 
         replaceWith : ( other ) =>
-            if @parentNode?
+            if ( originalParent = @parentNode )?
                 originalIndex = @indexInParent()
-                originalParent = @parentNode
                 @removeFromParent()
                 originalParent.insertChild other, originalIndex
 
@@ -89,8 +94,15 @@ for details.
 
         getComputedAttribute : ( key ) => @computedAttributes[key]
         setComputedAttribute : ( key, value ) =>
-            @computedAttributes[key] = value
-        clearComputedAttribute : ( key ) => delete @computedAttributes[key]
+            if @computedAttributes[key] isnt value
+                @computedAttributes[key] = value
+                @wasChanged?()
+        clearComputedAttributes : ( keys... ) =>
+            if keys.length is 0 then keys = Object.keys @computedAttributes
+            for key in keys
+                if key of @computedAttributes
+                    delete @computedAttributes[key]
+                    @wasChanged?()
 
 The default implementation of the `compute` member takes any number of keys
 as string arguments, and runs them as member functions, storing the results
@@ -111,3 +123,21 @@ here](https://lurchmath.github.io/lde/site/phase0-structures/#methods-in-the-str
                 if arg not instanceof Array then arg = [ arg ]
                 [ func, params... ] = arg
                 @setComputedAttribute func, @[func] params...
+
+## External attributes
+
+The dictionary of external attributes has get/set/clear functions just as we
+have for computed attributes.  The intent is for them to store data provided
+by the client, and the LDE will not alter it.
+
+        getExternalAttribute : ( key ) => @externalAttributes[key]
+        setExternalAttribute : ( key, value ) =>
+            if @externalAttributes[key] isnt value
+                @externalAttributes[key] = value
+                @wasChanged?()
+        clearExternalAttributes : ( keys... ) =>
+            if keys.length is 0 then keys = Object.keys @externalAttributes
+            for key in keys
+                if key of @externalAttributes
+                    delete @externalAttributes[key]
+                    @wasChanged?()

@@ -402,10 +402,8 @@ Things added to S1 did not impact S2, and vice versa.
 We can remove things from the dictionaries without error, even asking to
 remove things that weren't there in the first place.
 
-            S1.clearComputedAttribute 'alpha'
-            S1.clearComputedAttribute 'b e t a'
-            S2.clearComputedAttribute 'alpha'
-            S2.clearComputedAttribute 'b e t a'
+            S1.clearComputedAttributes 'alpha', 'b e t a'
+            S2.clearComputedAttributes 'alpha', 'b e t a'
 
 Now there's nothing in the dictionaries again.
 
@@ -455,3 +453,54 @@ Finally, the many-calls case.
             S.compute 'count', [ 'add', 1, 2 ], 'count'
             expect( S.getComputedAttribute 'count' ).toBe 4
             expect( S.getComputedAttribute 'add' ).toBe 3
+
+## External attributes
+
+    describe 'External attributes', ->
+
+Same first set of tests as for computed attributes, because that's the set
+of tests in which they behave the same.
+
+        it 'should function as a key-value dictionary', ->
+
+Make a few new structures.
+
+            S1 = new Structure()
+            S2 = new Structure()
+
+There shouldn't be any values stored at first in either of them.
+
+            expect( S1.getExternalAttribute 'alpha' ).toBeUndefined()
+            expect( S2.getExternalAttribute 'alpha' ).toBeUndefined()
+            expect( S1.getExternalAttribute 'b e t a' ).toBeUndefined()
+            expect( S2.getExternalAttribute 'b e t a' ).toBeUndefined()
+
+We can set any type of data in them without error.
+
+            value1 = 55555
+            value2 = { example : 'JSON' }
+            S1.setExternalAttribute 'alpha', value1
+            S2.setExternalAttribute 'b e t a', value2
+
+We can then retrieve that exact data again.
+
+            expect( S1.getExternalAttribute 'alpha' ).toBe value1
+            expect( S2.getExternalAttribute 'b e t a' ).toBe value2
+
+Things added to S1 did not impact S2, and vice versa.
+
+            expect( S2.getExternalAttribute 'alpha' ).toBeUndefined()
+            expect( S1.getExternalAttribute 'b e t a' ).toBeUndefined()
+
+We can remove things from the dictionaries without error, even asking to
+remove things that weren't there in the first place.
+
+            S1.clearExternalAttributes 'alpha', 'b e t a'
+            S2.clearExternalAttributes 'alpha', 'b e t a'
+
+Now there's nothing in the dictionaries again.
+
+            expect( S1.getExternalAttribute 'alpha' ).toBeUndefined()
+            expect( S2.getExternalAttribute 'alpha' ).toBeUndefined()
+            expect( S1.getExternalAttribute 'b e t a' ).toBeUndefined()
+            expect( S2.getExternalAttribute 'b e t a' ).toBeUndefined()
