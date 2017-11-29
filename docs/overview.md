@@ -1,10 +1,13 @@
 
 # LDE Design Overview
 
-This page lists the design decisions made by the Lurch team to date
+This page lists the design principles adopted by the Lurch team to date
 regarding the LDE, with reasons and explanations for each.  This document
 can be used as reference, and to guide development, but it may also be
 changed as better ideas come along.
+
+To see the specific phases of development planned for the LDE, and what's
+completed, use the "Phases" menu above.
 
 ## Elegance and Simplicity
 
