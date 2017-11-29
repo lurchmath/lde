@@ -185,12 +185,29 @@ make real documents and libraries.  This one doesn't, so it's called Phase
 </ul>
 </li>
 </ul>
+<h3 id="external-attributes">External attributes</h3>
+<p>Just as computed attributes are a key-value dictionary, so are external
+attributes.  However, we keep them separate because computed attributes are
+those created by the LDE itself, internally, as the result fo some
+computation on the structure, but external attributes are provided by the
+client of this module, and are not altered by the LDE.</p>
+<p>Thus we have the same three functions for manipulating the key-value
+dictionary (get/set/clear) but no corresponding <code>compute</code> function.</p>
+<ul>
+<li><code>S.setExternalAttribute(key,value)</code> stores a value under a given key.</li>
+<li><code>S.getExternalAttribute(key)</code> fetches the attribute value, or returns
+   undefined if it's not stored.</li>
+<li><code>S.clearExternalAttributes(key1,key2,...)</code> removes the stored values;
+   calling it with no arguments removes all stored values.</li>
+</ul>
 <h3 id="manipulating-the-structure-hierarchy">Manipulating the structure hierarchy</h3>
 <ul>
 <li><code>new Structure(arg1,arg2,...)</code> creates a structure with the given list of
    child structures.</li>
-<li><code>S.children()</code> and <code>S.parent()</code> return child arrays and parent nodes,
-   respectively.</li>
+<li><code>S.children()</code> yields an ordered array of structures immediately
+   inside S</li>
+<li><code>S.parent()</code> yields the parent structure of S, or undefined if S is
+   the LDE Document root</li>
 <li><code>S.indexInParent()</code> gives the index of S in its parent's children array.</li>
 <li><code>S.insertChild(child,index)</code> inserts a new child at the given index,
    removing it from its old parent, if there was one.</li>
@@ -200,47 +217,48 @@ make real documents and libraries.  This one doesn't, so it's called Phase
 <li><code>S.replaceWith(other)</code> replaces S, where it sits in the hierarchy, with
    a different structure, thus leaving S with no parent.</li>
 </ul>
+<h3 id="event-handling-in-the-structure-hierarchy">Event handling in the structure hierarchy</h3>
+<p>Each of the following functions will be called by the functions above, when
+the event is complete.  There is no default implementation of each of these
+functions, which means that no call will take place.  However, any instance
+or subclass may choose to implement one or more of these functions as event
+handlers, and thus hear about the events they signal.</p>
+<ul>
+<li><code>S.wasInserted()</code> will be called in any structure inserted into any
+   parent structure, including just-constructed structures being inserted
+   into a parent for the first time.  It is called after the insertion, so
+   <code>S.parent()</code> will yield a valid <code>Structure</code> instance.</li>
+<li><code>S.wasRemoved(parent,index)</code> will be called immediately after S is
+   removed from its previous parent (but obviously S has not yet been
+   deleted from JavaScript memory).  The first parameter will be the former
+   parent structure (which will still exist, because the removal juts
+   happened) and the index that S formerly had within that parent.  Note
+   that replacing one structure with another will yield a call to
+   <code>S.wasRemoved()</code> in the one structure and <code>S.wasInserted()</code> in the other.</li>
+<li><code>S.wasChanged()</code> is a function that the UI will call in a structure if
+   something about the structure changed (such as one of its attributes or
+   the contents of an atomic structure).</li>
+</ul>
 <h3 id="other-methods-not-yet-sorted-into-categories">Other methods not yet sorted into categories</h3>
 <ul>
+<li><code>S.isAccessibleTo(T)</code> returns true or false, implementing the
+   accessibility relation defined earlier.</li>
 <li><code>S.properties()</code> looks at the set of other structures that connect to S
    via arrows, and forms a dictionary of name=value pairs, the "properties"
    of S.</li>
-<li><code>S.isAccessibleTo(S')</code> returns true or false, implementing the
-   accessibility relation defined earlier.</li>
-<li><code>S.findCited(n)</code> finds the first structure S' accessible to S with
-   name=n in <code>S'.attributes()</code>, or undefined if there is no such structure
-   S'.</li>
-<li><code>S.whatCitesMe()</code> finds all structures S' in the scope of S with
-   a=<code>S.attributes().name</code> in <code>S'.attributes()</code>, with a being one of the
-   keys we use for citation, such as "reason" or "premise" and so on.</li>
+<li><code>S.findCited(n)</code> finds the first structure <code>T</code> accessible to <code>S</code> with
+   name <code>n</code> in <code>T.attributes()</code>, or undefined if there is no such structure
+   <code>T</code>.</li>
+<li><code>S.whatCitesMe()</code> finds all structures <code>T</code> in the scope of <code>S</code> with any
+   citation-based key (such as "reason" or "premise") in <code>T.properties()</code>
+   begin associated to the value <code>S.properties().name</code>.</li>
+<li><code>S.text()</code> returns the contents of <code>S</code> as plain text.  The default
+   implementation of this, for the base <code>Structure</code> class, is the empty
+   string.  Subclasses may override this, but there is a guaranteed
+   implementation in all <code>Structure</code>s that yields a string.</li>
 <li>There may be a need later to create other accessibility-related
    routines, such as <code>S.allAccessibleToMe()</code> or <code>S.myScope()</code> or
    <code>S.allAccessibleSatisfying(P)</code> etc.</li>
-<li><code>S.wasInserted()</code> is a function that the UI will call in a brand new
-   structure as soon as it is inserted into the document.  Each structure
-   type may implement this function to do whatever it feels is necessary to
-   initialize its internal data and notify any nearby nodes in the LDE
-   Document about its arrival.  Some structure types may choose to leave
-   this as an empty function.</li>
-<li><code>S.wasRemoved(parent,index)</code> is a function that the UI will call in a
-   structure the moment it is deleted from the document (but not yet
-   deleted from JavaScript memory).  The first parameter will be the former
-   parent structure (which will always exist, since the root of the LDE
-   Document can't be deleted) and the index that S formerly had within that
-   parent.  Similarly, each structure type can implement this as it sees
-   fit, including doing nothing.  Note that replacing one structure with
-   another will yield a call to <code>S.wasRemoved()</code> in the one structure and
-   <code>S.wasInserted()</code> in the other.</li>
-<li><code>S.wasChanged()</code> is a function that the UI will call in a structure if
-   something about the structure changed (such as one of its attributes or
-   the contents of an atomic structure)<ul>
-<li><code>S.text()</code> returns the contents of S as plain text</li>
-<li><code>S.children()</code> yields an ordered array of structures immediately
-  inside S</li>
-<li><code>S.parent()</code> yields the parent structure of S, or undefined if S is
-  the LDE Document root</li>
-</ul>
-</li>
 </ul>
 <h2 id="lde-in-general">LDE in general</h2>
 <p>When the LDE is loaded into memory it will:</p>
@@ -279,11 +297,10 @@ make real documents and libraries.  This one doesn't, so it's called Phase
    loaded as a module in some command-line app, for instance) it will
    still expose insert, delete, and replace functions as part of the
    module's API.</li>
-<li>We will call any kind of insertion, removal, or replacement of
-   subtrees of the LDE Document a change event, whether it happened via
-   a message from a parent thread or as a function call to the LDE as a
-   module in a larger app.</li>
 </ul>
+<p>We will call any kind of insertion, removal, or replacement of subtrees of
+the LDE Document a change event, whether it happened via a message from a
+parent thread or as a function call to the LDE as a module in a larger app.</p>
 <h2 id="notation-in-code">Notation in code</h2>
 <p>Ensure that the Structure (and, later, other subclass) constructors are
 sophisticated enough to help us build LDE Documents easily in the unit
