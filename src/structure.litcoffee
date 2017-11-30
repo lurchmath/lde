@@ -175,3 +175,85 @@ by the client, and the LDE will not alter it.
                 if key of @externalAttributes
                     delete @externalAttributes[key]
                     @wasChanged?()
+
+## Connections
+
+Structures may have connections among them, specified using external
+attributes.  The documentation
+[here](https://lurchmath.github.io/lde/site/phase0-structures/#connections)
+covers the concept in detail.  We provide the following functions to make it
+easier for clients to create, remove, or query connections.
+
+The first function ensures that all connections in a hierarchy are properly
+recorded twice, once as outgoing from the source, and once as incoming to
+the target.  This consistency is assumed by the query functions.  Run this
+on the root of your hierarchy if you have any reason to believe that the
+connections may not be stored consistently.
+
+Because connections depend on IDs, this routine does nothing if this
+Structure does not already have an ID.
+
+        fillOutConnections : =>
+
+Recur on children, but if this object has no ID, we can't go beyond that.
+
+            child.fillOutConnections() for child in @childList
+            if not @ID? then return
+
+We define an internal function for converting multisets of target-type pairs
+from array representation to an easier-to-work-with object representation,
+and then an inverse of that function.  These make the rest of this function
+eaiser to write.
+
+The "array" form is as in the docs linked to above,
+`[ [targID, connType], ... ]`.  The "object" form maps target keys to
+objects whose key-value pairs are type-count pairs, where the count is the
+number of times the `[targID,connType]` pair appeared in the array.
+That is, `{ targID: { type: count, ... }, ... }`.
+
+            arrayToObject = ( array ) ->
+                result = { }
+                for connection in array
+                    [ target, type ] = connection
+                    result[target] ?= { }
+                    result[target][type] ?= 0
+                    result[target][type]++
+                result
+            objectToArray = ( object ) ->
+                result = [ ]
+                for own target, moreData of object
+                    for own type, count of moreData
+                        for i in [1..count]
+                            result.push [ Number( target ), type ]
+                result
+
+Now find all my outgoing connections, and ensure they exist in at least the
+same quantity on both sides.
+
+            outs = arrayToObject \
+                ( @getExternalAttribute 'connectionsOut' ) ? [ ]
+            for own target, moreData of outs
+                continue unless ( T = Structure.instanceWithID target )?
+                targetIns = arrayToObject \
+                    ( T.getExternalAttribute 'connectionsIn' ) ? [ ]
+                targetIns[@ID] ?= { }
+                for own type, count of moreData
+                    moreData[type] = targetIns[@ID][type] =
+                        Math.max count, targetIns[@ID][type] ? 0
+                T.setExternalAttribute 'connectionsIn',
+                    objectToArray targetIns
+
+Repeat the same exrecise for my incoming connections.
+
+            ins = arrayToObject \
+                ( @getExternalAttribute 'connectionsIn' ) ? [ ]
+            for own source, moreData of ins
+                continue unless ( S = Structure.instanceWithID source )?
+                sourceOuts = arrayToObject \
+                    ( S.getExternalAttribute 'connectionsOut' ) ? [ ]
+                sourceOuts[@ID] ?= { }
+                for own type, count of moreData
+                    moreData[type] = sourceOuts[@ID][type] =
+                        Math.max count, sourceOuts[@ID][type] ? 0
+                S.setExternalAttribute 'connectionsOut',
+                    objectToArray sourceOuts

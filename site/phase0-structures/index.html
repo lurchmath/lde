@@ -293,8 +293,9 @@ handlers, and thus hear about the events they signal.</p>
 <p>Specification:</p>
 <ul>
 <li>Structures support two special external attribute keys, "connectionsOut"
-   and "connectionsIn," each a set of targetID-connectionType pairs.
-   Example such set: <code>[ [3,'reason'], [12,'premise'] ]</code></li>
+   and "connectionsIn," each a multiset of targetID-connectionType pairs.
+   Example such multiset (this particular one with no repeated entries):
+   <code>[ [3,'reason'], [12,'premise'] ]</code></li>
 <li>We will want to keep these consistent across a given structure hierarchy.
    Consequently, we do two things.<ul>
 <li>We provide the function <code>S.fillOutConnections()</code> that can be called

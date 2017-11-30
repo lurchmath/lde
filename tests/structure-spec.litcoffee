@@ -703,3 +703,172 @@ the lookup function works correctly.
             expect( Structure.instanceWithID A.ID ).toBe A
             expect( Structure.instanceWithID B.ID ).toBe B
             expect( Structure.instanceWithID C.ID ).toBe C
+
+## Connections
+
+    describe 'Connections among structures', ->
+
+Connections are documented
+[here](https://lurchmath.github.io/lde/site/phase0-structures/#connections).
+The following unit tests are for all functions related to them.
+
+        it 'should be made consistent by fillOutConnections()', ->
+
+We begin with the `fillOutConnections()` function, which is supposed to make
+connections consistent, in the sense that outgoing connections lists to
+various targets match the incoming connections lists at those targets.  We
+thus create two structure hierarchies with inconsistent connection lists,
+call `fillOutConnections()`, and ensure that the inconsistencies are fixed.
+
+Structure 1:
+
+            A = new Structure(
+                B = new Structure(),
+                C = new Structure()
+            )
+
+In order to make connections, each structure will need an ID.
+
+            A.getID()
+            B.getID()
+            C.getID()
+
+We now connect A to B, but only note it within A.
+And we connect B to C, but only note it within C.
+These are the two inconsistencies we will test here.
+
+            A.setExternalAttribute 'connectionsOut', [ [ B.ID, 'foo' ] ]
+            C.setExternalAttribute 'connectionsIn', [ [ B.ID, 'bar' ] ]
+
+Make the connections consistent.
+
+            A.fillOutConnections()
+
+Verify that no old connections were removed.
+
+            expect( A.getExternalAttribute 'connectionsOut' )
+                .toEqual [ [ B.ID, 'foo' ] ]
+            expect( C.getExternalAttribute 'connectionsIn' )
+                .toEqual [ [ B.ID, 'bar' ] ]
+
+Verify that all the appropriate new connections were added.
+
+            expect( B.getExternalAttribute 'connectionsIn' )
+                .toEqual [ [ A.ID, 'foo' ] ]
+            expect( B.getExternalAttribute 'connectionsOut' )
+                .toEqual [ [ C.ID, 'bar' ] ]
+
+Verify that no other connections were created.
+
+            expect( C.getExternalAttribute 'connectionsOut' )
+                .toBeUndefined()
+            expect( A.getExternalAttribute 'connectionsIn' )
+                .toBeUndefined()
+
+Structure 2:
+
+This is much more complex than structure 1, including multiple connections
+between the same two structures, connections both ways between the same two
+structures, some already-filled-out connections, connections from a node to
+itself, and so on.
+
+            root = new Structure(
+                A = new Structure(
+                    B = new Structure()
+                    C = new Structure()
+                )
+                D = new Structure(
+                    E = new Structure()
+                )
+            )
+            A.getID()
+            B.getID()
+            C.getID()
+            D.getID()
+            E.getID()
+            A.setExternalAttribute 'connectionsOut',
+                [ [ B.ID, '1' ], [ E.ID, '2' ] ]
+            B.setExternalAttribute 'connectionsIn',
+                [ [ A.ID, '1' ], [ A.ID, '1' ], [ A.ID, '1' ],
+                  [ A.ID, '2' ] ]
+            B.setExternalAttribute 'connectionsOut', [ [ C.ID, '1' ] ]
+            C.setExternalAttribute 'connectionsIn', [ [ D.ID, '3' ] ]
+            C.setExternalAttribute 'connectionsOut', [ [ D.ID, '3' ] ]
+            D.setExternalAttribute 'connectionsIn', [ [ C.ID, '3' ] ]
+            E.setExternalAttribute 'connectionsIn',
+                [ [ A.ID, '2' ], [ A.ID, '2' ],
+                  [ E.ID, '4' ], [ E.ID, '4' ] ]
+            E.setExternalAttribute 'connectionsOut',
+                [ [ C.ID, '3' ], [ E.ID, '4' ], [ E.ID, '5' ] ]
+
+Make the connections consistent.
+
+            root.fillOutConnections()
+
+To compare things as multisets, we need some utility functions.
+
+            samePair = ( a, b ) -> a[0] is b[0] and a[1] is b[1]
+            pairCount = ( array, pair ) ->
+                ( a for a in array when samePair a, pair ).length
+
+Check the connections of each of the six nodes.
+
+Root:
+
+            expect( root.getExternalAttribute 'connectionsIn' )
+                .toBeUndefined()
+            expect( root.getExternalAttribute 'connectionsOut' )
+                .toBeUndefined()
+
+A:
+
+            expect( A.getExternalAttribute 'connectionsIn' )
+                .toBeUndefined()
+            toTest = A.getExternalAttribute 'connectionsOut'
+            expect( pairCount toTest, [ B.ID, '1' ] ).toBe 3
+            expect( pairCount toTest, [ B.ID, '2' ] ).toBe 1
+            expect( pairCount toTest, [ E.ID, '2' ] ).toBe 2
+            expect( toTest.length ).toBe 6
+
+B:
+
+            toTest = B.getExternalAttribute 'connectionsIn'
+            expect( pairCount toTest, [ A.ID, '1' ] ).toBe 3
+            expect( pairCount toTest, [ A.ID, '2' ] ).toBe 1
+            expect( toTest.length ).toBe 4
+            toTest = B.getExternalAttribute 'connectionsOut'
+            expect( pairCount toTest, [ C.ID, '1' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+
+C:
+
+            toTest = C.getExternalAttribute 'connectionsIn'
+            expect( pairCount toTest, [ B.ID, '1' ] ).toBe 1
+            expect( pairCount toTest, [ D.ID, '3' ] ).toBe 1
+            expect( pairCount toTest, [ E.ID, '3' ] ).toBe 1
+            expect( toTest.length ).toBe 3
+            toTest = C.getExternalAttribute 'connectionsOut'
+            expect( pairCount toTest, [ D.ID, '3' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+
+D:
+
+            toTest = D.getExternalAttribute 'connectionsIn'
+            expect( pairCount toTest, [ C.ID, '3' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+            toTest = D.getExternalAttribute 'connectionsOut'
+            expect( pairCount toTest, [ C.ID, '3' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+
+E:
+
+            toTest = E.getExternalAttribute 'connectionsIn'
+            expect( pairCount toTest, [ A.ID, '2' ] ).toBe 2
+            expect( pairCount toTest, [ E.ID, '4' ] ).toBe 2
+            expect( pairCount toTest, [ E.ID, '5' ] ).toBe 1
+            expect( toTest.length ).toBe 5
+            toTest = E.getExternalAttribute 'connectionsOut'
+            expect( pairCount toTest, [ C.ID, '3' ] ).toBe 1
+            expect( pairCount toTest, [ E.ID, '4' ] ).toBe 2
+            expect( pairCount toTest, [ E.ID, '5' ] ).toBe 1
+            expect( toTest.length ).toBe 4

@@ -163,8 +163,9 @@ Work done in this section:
 Specification:
 
  * Structures support two special external attribute keys, "connectionsOut"
-   and "connectionsIn," each a set of targetID-connectionType pairs.
-   Example such set: `[ [3,'reason'], [12,'premise'] ]`
+   and "connectionsIn," each a multiset of targetID-connectionType pairs.
+   Example such multiset (this particular one with no repeated entries):
+   `[ [3,'reason'], [12,'premise'] ]`
  * We will want to keep these consistent across a given structure hierarchy.
    Consequently, we do two things.
     * We provide the function `S.fillOutConnections()` that can be called
