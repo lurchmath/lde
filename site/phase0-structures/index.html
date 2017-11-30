@@ -270,16 +270,18 @@ handlers, and thus hear about the events they signal.</p>
 <h3 id="unique-ids">Unique IDs</h3>
 <p>Work done in this section:</p>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled> Code implemented</li>
-<li class="task-list-item"><input type="checkbox" disabled> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Unit tests written and passing</li>
 <li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
 </ul>
 <p>Specification:</p>
 <ul>
-<li>Establish a global mapping from unique Structure IDs to the instances
-   that have those IDs; update this (and the list of free IDs) in the
-   Structure constructor.</li>
-<li>Create a class function for finding the instance with a given ID, if any.</li>
+<li>The Structure class establishes a global mapping from unique Structure
+   IDs to the instances that have those IDs.</li>
+<li>Clients can assign or release IDs for structures using the instance
+   methods <code>getID()</code> and <code>releaseID()</code>.</li>
+<li>Clients can look up structures from IDs using
+   <code>Structure.instanceWithId(id)</code>.</li>
 </ul>
 <h3 id="connections">Connections</h3>
 <p>Work done in this section:</p>

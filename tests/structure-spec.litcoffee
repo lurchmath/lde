@@ -616,3 +616,90 @@ event handlers.
             expect( B.wasChanged ).not.toHaveBeenCalled()
             B.clearComputedAttributes 5
             expect( B.wasChanged ).toHaveBeenCalled()
+
+## Unique IDs
+
+    describe 'Unique IDs for Structure instances', ->
+
+Build some structures for use in all the tests below.
+
+        A = new Structure()
+        B = new Structure(
+            C = new Structure()
+        )
+
+By default, structure instances don't have any IDs.
+
+        it 'should not be assigned by default', ->
+            expect( A.ID ).toBeUndefined()
+            expect( B.ID ).toBeUndefined()
+            expect( C.ID ).toBeUndefined()
+
+When you request an ID for a structure, it gets a nonnegative integer ID.
+
+        it 'should assign nonnegative integers when asked', ->
+            A.getID()
+            expect( typeof A.ID ).toBe 'number'
+            expect( A.ID ).not.toBeLessThan 0
+            B.getID()
+            expect( typeof B.ID ).toBe 'number'
+            expect( B.ID ).not.toBeLessThan 0
+            C.getID()
+            expect( typeof C.ID ).toBe 'number'
+            expect( C.ID ).not.toBeLessThan 0
+
+Requesting an ID again for a structure that already has one does nothing to
+the structure's ID.
+
+        it 'should not reassign IDs when they are already present', ->
+            old = A.ID
+            A.getID()
+            expect( A.ID ).toBe old
+            old = B.ID
+            B.getID()
+            expect( B.ID ).toBe old
+            old = C.ID
+            C.getID()
+            expect( C.ID ).toBe old
+
+Releasing an ID should mean that the structure doesn't have one any longer.
+But requesting an ID immediately thereafter should get the old one back,
+because in this simple test case, only one ID is released at a time, making
+it the next one waiting to be assigned.
+
+        it 'should release and reassign IDs correctly', ->
+            expect( A.ID ).not.toBeUndefined()
+            old = A.ID
+            A.releaseID()
+            expect( A.ID ).toBeUndefined()
+            A.getID()
+            expect( A.ID ).not.toBeUndefined()
+            expect( A.ID ).toBe old
+            expect( A.ID ).not.toBeUndefined()
+            old = B.ID
+            B.releaseID()
+            expect( B.ID ).toBeUndefined()
+            B.getID()
+            expect( B.ID ).not.toBeUndefined()
+            expect( B.ID ).toBe old
+            expect( B.ID ).not.toBeUndefined()
+            old = C.ID
+            C.releaseID()
+            expect( C.ID ).toBeUndefined()
+            C.getID()
+            expect( C.ID ).not.toBeUndefined()
+            expect( C.ID ).toBe old
+
+Through all of the above changes, the list of IDs should never get above 3,
+because releasing and reassigning IDs should reuse old ones.
+
+        it 'should assign IDs economically', ->
+            expect( Structure::IDs.length ).toBe 3
+
+Looking up a structure from its ID yields the structure itself.  That is,
+the lookup function works correctly.
+
+        it 'should look structures up by ID correctly', ->
+            expect( Structure.instanceWithID A.ID ).toBe A
+            expect( Structure.instanceWithID B.ID ).toBe B
+            expect( Structure.instanceWithID C.ID ).toBe C

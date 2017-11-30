@@ -139,16 +139,18 @@ handlers, and thus hear about the events they signal.
 
 Work done in this section:
 
- * [ ] Code implemented
- * [ ] Unit tests written and passing
+ * [x] Code implemented
+ * [x] Unit tests written and passing
  * [ ] API documentation written
 
 Specification:
 
- * Establish a global mapping from unique Structure IDs to the instances
-   that have those IDs; update this (and the list of free IDs) in the
-   Structure constructor.
- * Create a class function for finding the instance with a given ID, if any.
+ * The Structure class establishes a global mapping from unique Structure
+   IDs to the instances that have those IDs.
+ * Clients can assign or release IDs for structures using the instance
+   methods `getID()` and `releaseID()`.
+ * Clients can look up structures from IDs using
+   `Structure.instanceWithId(id)`.
 
 ### Connections
 

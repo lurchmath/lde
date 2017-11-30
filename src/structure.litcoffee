@@ -7,6 +7,39 @@ of the LDE Document.  For more details on this, see
 
     exports.Structure = class Structure
 
+## Unique IDs for instances
+
+We want to be able to give instance of this class unique IDs.  To do so, we
+will track those IDs in a class variable defined here, and provide class
+methods for assigning and revoking IDs to instances.  IDs will be
+nonnegative integers, and we will track them using an array.
+
+        IDs : [ ]
+        @instanceWithID : ( id ) -> Structure::IDs[id]
+        @nextUnusedID : ->
+            result = Structure::IDs.indexOf null
+            if result >= 0 then result else Structure::IDs.length
+
+The following two functions, which can be called in an instance to request a
+new, unique ID, or to relinquish one back into the pool, are optional for
+any given instance.  That is, it is not required that each instance have an
+ID.  But this system ensures that if IDs are assigned in this way, then they
+will be globally unique for all instances.
+
+Ensure that any instance that calls `getID` at some point later calls
+`releaseID`, or the `IDs` array will become enormous, a memory leak.
+
+        getID : =>
+            return if @ID?
+            @ID = Structure.nextUnusedID()
+            Structure::IDs[@ID] = this
+        releaseID : =>
+            if @ID?
+                Structure::IDs[@ID] = null
+                delete @ID
+                while Structure::IDs[Structure::IDs.length-1] is null
+                    Structure::IDs.pop()
+
 ## Constructor
 
 The constructor body just initializes internal fields, but it accepts an
