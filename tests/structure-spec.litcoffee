@@ -504,3 +504,115 @@ Now there's nothing in the dictionaries again.
             expect( S2.getExternalAttribute 'alpha' ).toBeUndefined()
             expect( S1.getExternalAttribute 'b e t a' ).toBeUndefined()
             expect( S2.getExternalAttribute 'b e t a' ).toBeUndefined()
+
+## Event handling
+
+    describe 'Event handling', ->
+
+Changes to a structure hierarchy should result in event handlers being
+called in the various structures in the hierarchy.  See [this
+documentation](https://lurchmath.github.io/lde/site/phase0-structures/#event-handling-in-the-structure-hierarchy)
+for details about the events.
+
+        A = B = null
+        beforeEach ->
+
+Create two structres and install utilities to spy on when their event
+handlers have been called.
+
+            A = new Structure()
+            A.wasInserted = jasmine.createSpy 'wasInserted'
+            A.wasRemoved = jasmine.createSpy 'wasRemoved'
+            A.wasChanged = jasmine.createSpy 'wasChanged'
+            B = new Structure()
+            B.wasInserted = jasmine.createSpy 'wasInserted'
+            B.wasRemoved = jasmine.createSpy 'wasRemoved'
+            B.wasChanged = jasmine.createSpy 'wasChanged'
+
+Run a simple test to verify that the Jasmine event handler spies are working
+as expected; they have not yet been called.
+
+        it 'should begin with no event handlers called', ->
+            expect( A.wasInserted ).not.toHaveBeenCalled()
+            expect( A.wasRemoved ).not.toHaveBeenCalled()
+            expect( A.wasChanged ).not.toHaveBeenCalled()
+            expect( B.wasInserted ).not.toHaveBeenCalled()
+            expect( B.wasRemoved ).not.toHaveBeenCalled()
+            expect( B.wasChanged ).not.toHaveBeenCalled()
+
+Now test whether insertion and removal handlers work.
+
+        it 'should send insertion and removal events', ->
+
+Insert A into B and verify that only the insertion event from A was called.
+
+            B.insertChild A
+            expect( A.wasInserted ).toHaveBeenCalled()
+            expect( A.wasRemoved ).not.toHaveBeenCalled()
+            expect( A.wasChanged ).not.toHaveBeenCalled()
+            expect( B.wasInserted ).not.toHaveBeenCalled()
+            expect( B.wasRemoved ).not.toHaveBeenCalled()
+            expect( B.wasChanged ).not.toHaveBeenCalled()
+
+Reset the insertion event for A as if it had not been called, cleaning up
+for future tests.
+
+            A.wasInserted = jasmine.createSpy 'wasInserted'
+            expect( A.wasInserted ).not.toHaveBeenCalled()
+
+Remove A from B and verify that only the removal event from A was called.
+
+            A.removeFromParent()
+            expect( A.wasInserted ).not.toHaveBeenCalled()
+            expect( A.wasRemoved ).toHaveBeenCalled()
+            expect( A.wasChanged ).not.toHaveBeenCalled()
+            expect( B.wasInserted ).not.toHaveBeenCalled()
+            expect( B.wasRemoved ).not.toHaveBeenCalled()
+            expect( B.wasChanged ).not.toHaveBeenCalled()
+
+Now test whether change handlers work.
+
+        it 'should send change events', ->
+
+Add external and/or computed attributes to each of A and B and ensure that
+the correct event handlers were called in each case.
+
+            A.setExternalAttribute 'a', 'b'
+            expect( A.wasChanged ).toHaveBeenCalled()
+            expect( B.wasChanged ).not.toHaveBeenCalled()
+            B.setComputedAttribute 5, { }
+            expect( B.wasChanged ).toHaveBeenCalled()
+
+Reset the change events for A and B as if they had not been called, cleaning
+up for future tests.
+
+            A.wasChanged = jasmine.createSpy 'wasChanged'
+            B.wasChanged = jasmine.createSpy 'wasChanged'
+            expect( A.wasChanged ).not.toHaveBeenCalled()
+            expect( B.wasChanged ).not.toHaveBeenCalled()
+
+Modify the attributes already added to A and B and verify that the change
+event handlers are called again.
+
+            B.setExternalAttribute 5, { } # different object!
+            expect( B.wasChanged ).toHaveBeenCalled()
+            expect( A.wasChanged ).not.toHaveBeenCalled()
+            A.setComputedAttribute 'a', 'c'
+            expect( A.wasChanged ).toHaveBeenCalled()
+
+Reset the change events for A and B as if they had not been called, cleaning
+up for future tests.
+
+            A.wasChanged = jasmine.createSpy 'wasChanged'
+            B.wasChanged = jasmine.createSpy 'wasChanged'
+            expect( A.wasChanged ).not.toHaveBeenCalled()
+            expect( B.wasChanged ).not.toHaveBeenCalled()
+
+Remove attributes from A and B and verify that this, too, calls change
+event handlers.
+
+            A.clearExternalAttributes 'a'
+            expect( A.wasChanged ).toHaveBeenCalled()
+            expect( B.wasChanged ).not.toHaveBeenCalled()
+            B.clearComputedAttributes 5
+            expect( B.wasChanged ).toHaveBeenCalled()

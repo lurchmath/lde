@@ -110,7 +110,7 @@ Specification:
 Work done in this section:
 
  * [x] Code implemented
- * [ ] Unit tests written and passing
+ * [x] Unit tests written and passing
  * [ ] API documentation written
 
 Specification:
@@ -133,8 +133,7 @@ handlers, and thus hear about the events they signal.
    that replacing one structure with another will yield a call to
    `S.wasRemoved()` in the one structure and `S.wasInserted()` in the other.
  * `S.wasChanged()` is a function that the UI will call in a structure if
-   something about the structure changed (such as one of its attributes or
-   the contents of an atomic structure).
+   one of the structure's computd or external attributes changed.
 
 ### Unique IDs
 

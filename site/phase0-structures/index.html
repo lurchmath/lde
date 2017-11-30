@@ -243,7 +243,7 @@ dictionary (get/set/clear) but no corresponding <code>compute</code> function.</
 <p>Work done in this section:</p>
 <ul class="task-list">
 <li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
-<li class="task-list-item"><input type="checkbox" disabled> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Unit tests written and passing</li>
 <li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
 </ul>
 <p>Specification:</p>
@@ -265,8 +265,7 @@ handlers, and thus hear about the events they signal.</p>
    that replacing one structure with another will yield a call to
    <code>S.wasRemoved()</code> in the one structure and <code>S.wasInserted()</code> in the other.</li>
 <li><code>S.wasChanged()</code> is a function that the UI will call in a structure if
-   something about the structure changed (such as one of its attributes or
-   the contents of an atomic structure).</li>
+   one of the structure's computd or external attributes changed.</li>
 </ul>
 <h3 id="unique-ids">Unique IDs</h3>
 <p>Work done in this section:</p>

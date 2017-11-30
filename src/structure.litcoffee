@@ -55,9 +55,10 @@ or in the parent.
 We permit inserting a new child into the parent's child array at any valid
 index (including the old length of the child array, which appends).  The
 child to be inserted is first removed from any parent it has when this
-method is called.
+method is called.  The default index is 0, so that a call of
+`insertChild(x)` inserts it as the first child.
 
-        insertChild : ( child, beforeIndex ) ->
+        insertChild : ( child, beforeIndex = 0 ) ->
             return unless child instanceof Structure and \
                 0 <= beforeIndex <= @childList.length
             child.removeFromParent()
@@ -67,7 +68,7 @@ method is called.
                 @childList[beforeIndex...]...
             ]
             child.parentNode = this
-            @wasInserted?()
+            child.wasInserted?()
 
 A convenient combination of the above methods is to replace a child with a
 new structure, deparenting the old child and putting the replacement at the
