@@ -1211,17 +1211,73 @@ connections within it.
 
 Verify that all connection queries yield correct results.
 
+First, connections in and out of A:
+
             expect( A.allConnectionsIn 'reason' ).toEqual [ B.ID, B.ID ]
             expect( A.allConnectionsIn 'premise' ).toEqual [ ]
+            expect( A.allConnectionsIn() )
+                .toEqual [ [ B.ID, 'reason' ], [ B.ID, 'reason' ] ]
             expect( A.allConnectionsOut 'reason' ).toEqual [ B.ID ]
             expect( A.allConnectionsOut 'premise' ).toEqual [ ]
+            expect( A.allConnectionsOut() ).toEqual [ [ B.ID, 'reason' ] ]
+
+Next, connections in and out of B:
+
             expect( B.allConnectionsIn 'reason' ).toEqual [ A.ID ]
             expect( B.allConnectionsIn 'premise' ).toEqual [ ]
+            expect( B.allConnectionsIn() ).toEqual [ [ A.ID, 'reason' ] ]
             expect( B.allConnectionsOut 'reason' ).toEqual [ A.ID, A.ID ]
             expect( B.allConnectionsOut 'premise' ).toEqual [ ]
+            expect( B.allConnectionsOut() )
+                .toEqual [ [ A.ID, 'reason' ], [ A.ID, 'reason' ] ]
+
+Next, connections in and out of C:
+
             expect( C.allConnectionsIn 'reason' ).toEqual [ ]
             expect( C.allConnectionsIn 'premise' )
                 .toEqual [ C.ID, C.ID, C.ID ]
+            expect( C.allConnectionsIn() ).toEqual [
+                [ C.ID, 'premise' ], [ C.ID, 'premise' ],
+                [ C.ID, 'premise' ]
+            ]
             expect( C.allConnectionsOut 'reason' ).toEqual [ ]
             expect( C.allConnectionsOut 'premise' )
                 .toEqual [ C.ID, C.ID, C.ID ]
+            expect( C.allConnectionsOut() ).toEqual [
+                [ C.ID, 'premise' ], [ C.ID, 'premise' ],
+                [ C.ID, 'premise' ]
+            ]
+
+Next, connections between specific pairs:
+
+            expect( A.allConnectionsTo A ).toEqual [ ]
+            expect( A.allConnectionsTo B ).toEqual [ 'reason' ]
+            expect( A.allConnectionsTo C ).toEqual [ ]
+            expect( B.allConnectionsTo A ).toEqual [ 'reason', 'reason' ]
+            expect( B.allConnectionsTo B ).toEqual [ ]
+            expect( B.allConnectionsTo C ).toEqual [ ]
+            expect( C.allConnectionsTo A ).toEqual [ ]
+            expect( C.allConnectionsTo B ).toEqual [ ]
+            expect( C.allConnectionsTo C )
+                .toEqual [ 'premise', 'premise', 'premise' ]
+
+Finally, incoming connections reported as property lists:
+
+            props = A.properties()
+            expect( Object.keys props ).toEqual [ 'reason' ]
+            expect( props['reason'] instanceof Array ).toBeTruthy()
+            expect( props['reason'].length ).toBe 2
+            expect( props['reason'][0] ).toBe B
+            expect( props['reason'][1] ).toBe B
+            props = B.properties()
+            expect( Object.keys props ).toEqual [ 'reason' ]
+            expect( props['reason'] instanceof Array ).toBeTruthy()
+            expect( props['reason'].length ).toBe 1
+            expect( props['reason'][0] ).toBe A
+            props = C.properties()
+            expect( Object.keys props ).toEqual [ 'premise' ]
+            expect( props['premise'] instanceof Array ).toBeTruthy()
+            expect( props['premise'].length ).toBe 3
+            expect( props['premise'][0] ).toBe C
+            expect( props['premise'][1] ).toBe C
+            expect( props['premise'][2] ).toBe C
