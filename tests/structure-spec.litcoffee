@@ -1187,3 +1187,41 @@ connections are as they should be.
             toTest = C.getExternalAttribute 'connectionsOut'
             expect( pairCount toTest, [ C.ID, 'premise' ] ).toBe 1
             expect( toTest.length ).toBe 1
+
+The following section tests the three querying utilities for connections.
+
+        it 'should give correct results from connection queries', ->
+
+Build the same structure as in the previous section, and make the same
+connections within it.
+
+            A = new Structure(
+                B = new Structure(),
+                C = new Structure()
+            )
+            A.getID()
+            B.getID()
+            C.getID()
+            expect( A.connectTo B, 'reason' ).toBeTruthy()
+            expect( B.connectTo A, 'reason' ).toBeTruthy()
+            expect( B.connectTo A, 'reason' ).toBeTruthy()
+            expect( C.connectTo C, 'premise' ).toBeTruthy()
+            expect( C.connectTo C, 'premise' ).toBeTruthy()
+            expect( C.connectTo C, 'premise' ).toBeTruthy()
+
+Verify that all connection queries yield correct results.
+
+            expect( A.allConnectionsIn 'reason' ).toEqual [ B.ID, B.ID ]
+            expect( A.allConnectionsIn 'premise' ).toEqual [ ]
+            expect( A.allConnectionsOut 'reason' ).toEqual [ B.ID ]
+            expect( A.allConnectionsOut 'premise' ).toEqual [ ]
+            expect( B.allConnectionsIn 'reason' ).toEqual [ A.ID ]
+            expect( B.allConnectionsIn 'premise' ).toEqual [ ]
+            expect( B.allConnectionsOut 'reason' ).toEqual [ A.ID, A.ID ]
+            expect( B.allConnectionsOut 'premise' ).toEqual [ ]
+            expect( C.allConnectionsIn 'reason' ).toEqual [ ]
+            expect( C.allConnectionsIn 'premise' )
+                .toEqual [ C.ID, C.ID, C.ID ]
+            expect( C.allConnectionsOut 'reason' ).toEqual [ ]
+            expect( C.allConnectionsOut 'premise' )
+                .toEqual [ C.ID, C.ID, C.ID ]

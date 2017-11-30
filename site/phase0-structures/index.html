@@ -326,7 +326,9 @@ handlers, and thus hear about the events they signal.</p>
 </li>
 <li><code>S.properties()</code> looks at the set of other structures that connect to S
    via arrows, and forms a dictionary of name=value pairs, the "properties"
-   of <code>S</code>.</li>
+   of <code>S</code>.  The key will be the type of the connection and the value will be
+   the array of structures that connected to this one with that connection
+   type.</li>
 </ul>
 <h3 id="convenience-constructions-for-unit-testing">Convenience constructions for unit testing</h3>
 <p>Work done in this section:</p>

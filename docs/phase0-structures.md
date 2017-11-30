@@ -192,7 +192,9 @@ Specification:
     * Get all connections from `S` to `T` with `S.getConnectionsTo(T)`.
  * `S.properties()` looks at the set of other structures that connect to S
    via arrows, and forms a dictionary of name=value pairs, the "properties"
-   of `S`.
+   of `S`.  The key will be the type of the connection and the value will be
+   the array of structures that connected to this one with that connection
+   type.
 
 ### Convenience constructions for unit testing
 
