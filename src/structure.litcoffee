@@ -113,6 +113,47 @@ same index in the same parent.
                 @removeFromParent()
                 originalParent.insertChild other, originalIndex
 
+We can ask which of two structures comes earlier in their common ancestor,
+under pre-order tree traversal, lowest-indexed children first.  The ordering
+defined here is strict (`A.isEarlierThan A` is false).
+
+        isEarlierThan : ( other ) ->
+            if other not instanceof Structure then return undefined
+            if other is this then return no
+
+Get a list of all ancestors of the other structure.  If it is the root,
+then I am strictly later than it, and we can return that now.
+
+            ancestorsOfOther = [ other ]
+            while ( nextAncestor = ancestorsOfOther[0].parent() )?
+                ancestorsOfOther.unshift nextAncestor
+
+Find my nearest ancestor that appears in that list.
+
+
+            walk = this
+            relevantAncestor = null
+            while walk? and walk not in ancestorsOfOther
+                relevantAncestor = walk
+                walk = walk.parent()
+
+If there was none, we are incomparable; return undefined.  If the nearest
+ancestor was me, then other is one of my descendants, so I am earlier than
+it.  If the nearest ancestor was the other structure, then the reverse is
+true.
+
+            if not walk? then return undefined
+            if walk is this then return yes
+            if walk is other then return no
+
+Compare the child indices in the common ancestor to determine ordering.
+
+            commonAncestorIndex = ancestorsOfOther.indexOf walk
+            otherRelevantAncestor = ancestorsOfOther[commonAncestorIndex+1]
+            myAncestorIndex = relevantAncestor.indexInParent()
+            otherAncestorIndex = otherRelevantAncestor.indexInParent()
+            myAncestorIndex < otherAncestorIndex
+
 ## Computed attributes
 
 The dictionary of computed attributes has getters and setters that work on

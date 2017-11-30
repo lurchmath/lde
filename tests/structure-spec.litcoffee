@@ -290,9 +290,9 @@ sibling within the same parent.
             expect( C.parent() ).toBe root
             expect( B.parent() ).toBe root
 
-The final test in this section is whether we can replace structures in an
-existing hierarchy with new structures, and retain the integrity and correct
-structure of the hierarchy.
+Now we test whether we can replace structures in an existing hierarchy with
+new structures, and retain the integrity and correct structure of the
+hierarchy.
 
         it 'should support replacing structures', ->
 
@@ -358,6 +358,102 @@ Replace A with one of its own children, as a corner case test.
             expect( AB.parent() ).toBe root
             expect( C.parent() ).toBe root
             expect( B.parent() ).toBe A
+
+The next section tests the tree ordering relation defined in the Structure
+class, `isEarlierThan()`.
+
+        it 'correctly judges which subtrees are earlier', ->
+
+Define a structre on which we will test the ordering relation.  Then define
+a separate structure that's not connected to it, for comparing across the
+two structures.
+
+            root = new Structure(
+                A = new Structure(
+                    AA = new Structure()
+                    AB = new Structure(
+                        ABA = new Structure()
+                    )
+                )
+                B = new Structure()
+            )
+            disconnected = new Structure(
+                dA = new Structure()
+            )
+
+Check all possible pairs of subtrees of the root and verify that the order
+relation is correct for them.
+
+            expect( root.isEarlierThan root ).toBeFalsy()
+            expect( root.isEarlierThan A ).toBeTruthy()
+            expect( root.isEarlierThan AA ).toBeTruthy()
+            expect( root.isEarlierThan AB ).toBeTruthy()
+            expect( root.isEarlierThan ABA ).toBeTruthy()
+            expect( root.isEarlierThan B ).toBeTruthy()
+            expect( A.isEarlierThan root ).toBeFalsy()
+            expect( A.isEarlierThan A ).toBeFalsy()
+            expect( A.isEarlierThan AA ).toBeTruthy()
+            expect( A.isEarlierThan AB ).toBeTruthy()
+            expect( A.isEarlierThan ABA ).toBeTruthy()
+            expect( A.isEarlierThan B ).toBeTruthy()
+            expect( AA.isEarlierThan root ).toBeFalsy()
+            expect( AA.isEarlierThan A ).toBeFalsy()
+            expect( AA.isEarlierThan AA ).toBeFalsy()
+            expect( AA.isEarlierThan AB ).toBeTruthy()
+            expect( AA.isEarlierThan ABA ).toBeTruthy()
+            expect( AA.isEarlierThan B ).toBeTruthy()
+            expect( AB.isEarlierThan root ).toBeFalsy()
+            expect( AB.isEarlierThan A ).toBeFalsy()
+            expect( AB.isEarlierThan AA ).toBeFalsy()
+            expect( AB.isEarlierThan AB ).toBeFalsy()
+            expect( AB.isEarlierThan ABA ).toBeTruthy()
+            expect( AB.isEarlierThan B ).toBeTruthy()
+            expect( ABA.isEarlierThan root ).toBeFalsy()
+            expect( ABA.isEarlierThan A ).toBeFalsy()
+            expect( ABA.isEarlierThan AA ).toBeFalsy()
+            expect( ABA.isEarlierThan AB ).toBeFalsy()
+            expect( ABA.isEarlierThan ABA ).toBeFalsy()
+            expect( ABA.isEarlierThan B ).toBeTruthy()
+            expect( B.isEarlierThan root ).toBeFalsy()
+            expect( B.isEarlierThan A ).toBeFalsy()
+            expect( B.isEarlierThan AA ).toBeFalsy()
+            expect( B.isEarlierThan AB ).toBeFalsy()
+            expect( B.isEarlierThan ABA ).toBeFalsy()
+            expect( B.isEarlierThan B ).toBeFalsy()
+
+Repeat the exercise for the disconnected tree.
+
+            expect( disconnected.isEarlierThan disconnected ).toBeFalsy()
+            expect( disconnected.isEarlierThan dA ).toBeTruthy()
+            expect( dA.isEarlierThan disconnected ).toBeFalsy()
+            expect( dA.isEarlierThan dA ).toBeFalsy()
+
+Verify that across trees, the answer is always undefined.
+
+            expect( root.isEarlierThan disconnected ).toBeUndefined()
+            expect( A.isEarlierThan disconnected ).toBeUndefined()
+            expect( AA.isEarlierThan disconnected ).toBeUndefined()
+            expect( AB.isEarlierThan disconnected ).toBeUndefined()
+            expect( ABA.isEarlierThan disconnected ).toBeUndefined()
+            expect( B.isEarlierThan disconnected ).toBeUndefined()
+            expect( root.isEarlierThan dA ).toBeUndefined()
+            expect( A.isEarlierThan dA ).toBeUndefined()
+            expect( AA.isEarlierThan dA ).toBeUndefined()
+            expect( AB.isEarlierThan dA ).toBeUndefined()
+            expect( ABA.isEarlierThan dA ).toBeUndefined()
+            expect( B.isEarlierThan dA ).toBeUndefined()
+            expect( disconnected.isEarlierThan root ).toBeFalsy()
+            expect( disconnected.isEarlierThan A ).toBeFalsy()
+            expect( disconnected.isEarlierThan AA ).toBeFalsy()
+            expect( disconnected.isEarlierThan AB ).toBeFalsy()
+            expect( disconnected.isEarlierThan ABA ).toBeFalsy()
+            expect( disconnected.isEarlierThan B ).toBeFalsy()
+            expect( dA.isEarlierThan root ).toBeFalsy()
+            expect( dA.isEarlierThan A ).toBeFalsy()
+            expect( dA.isEarlierThan AA ).toBeFalsy()
+            expect( dA.isEarlierThan AB ).toBeFalsy()
+            expect( dA.isEarlierThan ABA ).toBeFalsy()
+            expect( dA.isEarlierThan B ).toBeFalsy()
 
 ## Computed attributes
 
