@@ -292,21 +292,40 @@ handlers, and thus hear about the events they signal.</p>
 </ul>
 <p>Specification:</p>
 <ul>
-<li>Assume that two special external attribute keys will be "connectionsOut"
-   and "connectionsIn," each a set of targetID-connectionType pairs.  These
-   are assumed to be kept consistent across a hierarchy, in that any
-   connections out from one node also exist as connections in for all the
-   target nodes.</li>
-<li>Create convenience getter and setter functions for this data.<ul>
-<li>Create/delete a connection of type T between A and B.</li>
-<li>Get all connections of type T to/from A.</li>
-<li>Get all connections to/from A.</li>
-<li>Get all connections from A to B.</li>
+<li>Structures support two special external attribute keys, "connectionsOut"
+   and "connectionsIn," each a set of targetID-connectionType pairs.
+   Example such set: <code>[ [3,'reason'], [12,'premise'] ]</code></li>
+<li>We will want to keep these consistent across a given structure hierarchy.
+   Consequently, we do two things.<ul>
+<li>We provide the function <code>S.fillOutConnections()</code> that can be called
+  with <code>S</code> equal to the hierarchy's root, and it will ensure that a
+  connection stored in the "connectionsOut" array of any node in the
+  hierarchy is also stored in the "connectionsIn" array of its target,
+  and vice versa.</li>
+<li>We provide a convenience function for creating connections,
+  <code>S.connectTo(T,type)</code>, that creates the connection by adding it to
+  both the "out" list for <code>S</code> and the "in" list for <code>T</code>.</li>
+<li>We provide a convenience function for deleting connections,
+  <code>S.disconnectFrom(T,type)</code> that deletes the connection from both
+  lists.</li>
+</ul>
+</li>
+<li>We also provide the following convenience functions that assume that the
+   hierarchy's in and out connection lists are the same.  That assumption
+   will be satisfied if no method of editing connection lists was ever used
+   other than the convenience functions given above, or if such a method
+   were used, then <code>fillOutConnections()</code> has been called on the hierarchy
+   root since that time.<ul>
+<li>Get all connections of some type to/from <code>S</code> with
+  <code>S.getConnectionsOut(type)</code> (or <code>In</code>).</li>
+<li>Get all connections to/from <code>S</code> by omitting the type from the call in
+  the previous bullet point.</li>
+<li>Get all connections from <code>S</code> to <code>T</code> with <code>S.getConnectionsTo(T)</code>.</li>
 </ul>
 </li>
 <li><code>S.properties()</code> looks at the set of other structures that connect to S
    via arrows, and forms a dictionary of name=value pairs, the "properties"
-   of S.</li>
+   of <code>S</code>.</li>
 </ul>
 <h3 id="convenience-constructions-for-unit-testing">Convenience constructions for unit testing</h3>
 <p>Work done in this section:</p>

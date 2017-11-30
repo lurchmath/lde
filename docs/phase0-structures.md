@@ -162,19 +162,36 @@ Work done in this section:
 
 Specification:
 
- * Assume that two special external attribute keys will be "connectionsOut"
-   and "connectionsIn," each a set of targetID-connectionType pairs.  These
-   are assumed to be kept consistent across a hierarchy, in that any
-   connections out from one node also exist as connections in for all the
-   target nodes.
- * Create convenience getter and setter functions for this data.
-    * Create/delete a connection of type T between A and B.
-    * Get all connections of type T to/from A.
-    * Get all connections to/from A.
-    * Get all connections from A to B.
+ * Structures support two special external attribute keys, "connectionsOut"
+   and "connectionsIn," each a set of targetID-connectionType pairs.
+   Example such set: `[ [3,'reason'], [12,'premise'] ]`
+ * We will want to keep these consistent across a given structure hierarchy.
+   Consequently, we do two things.
+    * We provide the function `S.fillOutConnections()` that can be called
+      with `S` equal to the hierarchy's root, and it will ensure that a
+      connection stored in the "connectionsOut" array of any node in the
+      hierarchy is also stored in the "connectionsIn" array of its target,
+      and vice versa.
+    * We provide a convenience function for creating connections,
+      `S.connectTo(T,type)`, that creates the connection by adding it to
+      both the "out" list for `S` and the "in" list for `T`.
+    * We provide a convenience function for deleting connections,
+      `S.disconnectFrom(T,type)` that deletes the connection from both
+      lists.
+ * We also provide the following convenience functions that assume that the
+   hierarchy's in and out connection lists are the same.  That assumption
+   will be satisfied if no method of editing connection lists was ever used
+   other than the convenience functions given above, or if such a method
+   were used, then `fillOutConnections()` has been called on the hierarchy
+   root since that time.
+    * Get all connections of some type to/from `S` with
+      `S.getConnectionsOut(type)` (or `In`).
+    * Get all connections to/from `S` by omitting the type from the call in
+      the previous bullet point.
+    * Get all connections from `S` to `T` with `S.getConnectionsTo(T)`.
  * `S.properties()` looks at the set of other structures that connect to S
    via arrows, and forms a dictionary of name=value pairs, the "properties"
-   of S.
+   of `S`.
 
 ### Convenience constructions for unit testing
 
