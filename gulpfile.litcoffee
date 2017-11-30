@@ -14,9 +14,9 @@ Load Gulp modules.
 
 ## Build tasks
 
-Create default task to compile CoffeeScript source into JavaScript.
+Create a build task to compile CoffeeScript source into JavaScript.
 
-    gulp.task 'default', -> pump [
+    gulp.task 'build', -> pump [
         gulp.src 'src/*.litcoffee'
         sourcemaps.init()
         coffee bare : yes
@@ -39,3 +39,9 @@ Create "docs" task to build the documentation using
 installed on your system.
 
     gulp.task 'docs', shell.task 'mkdocs build'
+
+## All tasks
+
+The default task is to do all of the above tasks.
+
+    gulp.task 'default', [ 'test', 'build', 'docs' ]

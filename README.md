@@ -19,7 +19,7 @@
    [Literate CoffeeScript](http://coffeescript.org/#literate).
  * `release/` folder stores the sources that have been compiled to
    JavaScript.
-    * To compile everything in your own copy of the repo, run `gulp`.
+    * To compile everything in your own copy of the repo, run `gulp build`.
     * If you make changes to the source code, be sure to compile to the
       release folder before committing and pushing, so that the two folders
       are always consistent in the repo online.
