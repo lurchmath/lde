@@ -712,6 +712,12 @@ Connections are documented
 [here](https://lurchmath.github.io/lde/site/phase0-structures/#connections).
 The following unit tests are for all functions related to them.
 
+We will be comparing things as multisets, and some utility functions help.
+
+        samePair = ( a, b ) -> a[0] is b[0] and a[1] is b[1]
+        pairCount = ( array, pair ) ->
+            ( a for a in array when samePair a, pair ).length
+
         it 'should be made consistent by fillOutConnections()', ->
 
 We begin with the `fillOutConnections()` function, which is supposed to make
@@ -805,12 +811,6 @@ Make the connections consistent.
 
             root.fillOutConnections()
 
-To compare things as multisets, we need some utility functions.
-
-            samePair = ( a, b ) -> a[0] is b[0] and a[1] is b[1]
-            pairCount = ( array, pair ) ->
-                ( a for a in array when samePair a, pair ).length
-
 Check the connections of each of the six nodes.
 
 Root:
@@ -872,3 +872,222 @@ E:
             expect( pairCount toTest, [ E.ID, '4' ] ).toBe 2
             expect( pairCount toTest, [ E.ID, '5' ] ).toBe 1
             expect( toTest.length ).toBe 4
+
+That completes the tests of `fillOutConnections()`.
+
+The following section tests the function `connectTo()`.
+
+        it 'should make consistent connections when asked', ->
+
+Make a simple structure to use for testing.  Give all structures in it IDs,
+and verify that they have no connections to start with.
+
+            A = new Structure(
+                B = new Structure(),
+                C = new Structure()
+            )
+            A.getID()
+            B.getID()
+            C.getID()
+            expect( A.getExternalAttribute 'connectionsIn' )
+                .toBeUndefined()
+            expect( A.getExternalAttribute 'connectionsOut' )
+                .toBeUndefined()
+            expect( B.getExternalAttribute 'connectionsIn' )
+                .toBeUndefined()
+            expect( B.getExternalAttribute 'connectionsOut' )
+                .toBeUndefined()
+            expect( C.getExternalAttribute 'connectionsIn' )
+                .toBeUndefined()
+            expect( C.getExternalAttribute 'connectionsOut' )
+                .toBeUndefined()
+
+Make four connections of various types, and ensure that the connection sets
+are created correctly in each case.  Furthermore, in each case, ensure that
+the attempt to make a connection succeeds.
+
+First, a simple connection.
+
+            expect( A.connectTo B, 'reason' ).toBeTruthy()
+            expect( A.getExternalAttribute 'connectionsIn' )
+                .toBeUndefined()
+            toTest = A.getExternalAttribute 'connectionsOut'
+            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+            toTest = B.getExternalAttribute 'connectionsIn'
+            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+            expect( B.getExternalAttribute 'connectionsOut' )
+                .toBeUndefined()
+            expect( C.getExternalAttribute 'connectionsIn' )
+                .toBeUndefined()
+            expect( C.getExternalAttribute 'connectionsOut' )
+                .toBeUndefined()
+
+Second, a conncetion going the other way, and of the same type.
+
+            expect( B.connectTo A, 'reason' ).toBeTruthy()
+            toTest = A.getExternalAttribute 'connectionsIn'
+            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+            toTest = A.getExternalAttribute 'connectionsOut'
+            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+            toTest = B.getExternalAttribute 'connectionsIn'
+            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+            toTest = B.getExternalAttribute 'connectionsOut'
+            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+            expect( C.getExternalAttribute 'connectionsIn' )
+                .toBeUndefined()
+            expect( C.getExternalAttribute 'connectionsOut' )
+                .toBeUndefined()
+
+Third, repeat the previous connection and ensure that there are now two.
+
+            expect( B.connectTo A, 'reason' ).toBeTruthy()
+            toTest = A.getExternalAttribute 'connectionsIn'
+            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 2
+            expect( toTest.length ).toBe 2
+            toTest = A.getExternalAttribute 'connectionsOut'
+            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+            toTest = B.getExternalAttribute 'connectionsIn'
+            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+            toTest = B.getExternalAttribute 'connectionsOut'
+            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 2
+            expect( toTest.length ).toBe 2
+            expect( C.getExternalAttribute 'connectionsIn' )
+                .toBeUndefined()
+            expect( C.getExternalAttribute 'connectionsOut' )
+                .toBeUndefined()
+
+Fourth, connect C to itself three times and ensure they all appear.
+
+            expect( C.connectTo C, 'premise' ).toBeTruthy()
+            expect( C.connectTo C, 'premise' ).toBeTruthy()
+            expect( C.connectTo C, 'premise' ).toBeTruthy()
+            toTest = A.getExternalAttribute 'connectionsIn'
+            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 2
+            expect( toTest.length ).toBe 2
+            toTest = A.getExternalAttribute 'connectionsOut'
+            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+            toTest = B.getExternalAttribute 'connectionsIn'
+            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+            toTest = B.getExternalAttribute 'connectionsOut'
+            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 2
+            expect( toTest.length ).toBe 2
+            toTest = C.getExternalAttribute 'connectionsIn'
+            expect( pairCount toTest, [ C.ID, 'premise' ] ).toBe 3
+            expect( toTest.length ).toBe 3
+            toTest = C.getExternalAttribute 'connectionsOut'
+            expect( pairCount toTest, [ C.ID, 'premise' ] ).toBe 3
+            expect( toTest.length ).toBe 3
+
+The following section tests the function `disconnectFrom()`; it is the
+companion to the previous section.
+
+        it 'should break connections consistently when asked', ->
+
+Build the same structure as in the previous section, and make the same
+connections within it.
+
+            A = new Structure(
+                B = new Structure(),
+                C = new Structure()
+            )
+            A.getID()
+            B.getID()
+            C.getID()
+            expect( A.connectTo B, 'reason' ).toBeTruthy()
+            expect( B.connectTo A, 'reason' ).toBeTruthy()
+            expect( B.connectTo A, 'reason' ).toBeTruthy()
+            expect( C.connectTo C, 'premise' ).toBeTruthy()
+            expect( C.connectTo C, 'premise' ).toBeTruthy()
+            expect( C.connectTo C, 'premise' ).toBeTruthy()
+
+Verify that the currenct connection setup is, as expected, what it was at
+the end of the last section.
+
+            toTest = A.getExternalAttribute 'connectionsIn'
+            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 2
+            expect( toTest.length ).toBe 2
+            toTest = A.getExternalAttribute 'connectionsOut'
+            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+            toTest = B.getExternalAttribute 'connectionsIn'
+            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+            toTest = B.getExternalAttribute 'connectionsOut'
+            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 2
+            expect( toTest.length ).toBe 2
+            toTest = C.getExternalAttribute 'connectionsIn'
+            expect( pairCount toTest, [ C.ID, 'premise' ] ).toBe 3
+            expect( toTest.length ).toBe 3
+            toTest = C.getExternalAttribute 'connectionsOut'
+            expect( pairCount toTest, [ C.ID, 'premise' ] ).toBe 3
+            expect( toTest.length ).toBe 3
+
+Remove a few connections one at a time and ensure that at each point all
+connections are as they should be.
+
+            expect( B.disconnectFrom A, 'reason' ).toBeTruthy()
+            toTest = A.getExternalAttribute 'connectionsIn'
+            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+            toTest = A.getExternalAttribute 'connectionsOut'
+            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+            toTest = B.getExternalAttribute 'connectionsIn'
+            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+            toTest = B.getExternalAttribute 'connectionsOut'
+            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+            toTest = C.getExternalAttribute 'connectionsIn'
+            expect( pairCount toTest, [ C.ID, 'premise' ] ).toBe 3
+            expect( toTest.length ).toBe 3
+            toTest = C.getExternalAttribute 'connectionsOut'
+            expect( pairCount toTest, [ C.ID, 'premise' ] ).toBe 3
+            expect( toTest.length ).toBe 3
+
+            expect( B.disconnectFrom A, 'reason' ).toBeTruthy()
+            expect( A.getExternalAttribute 'connectionsIn' )
+                .toEqual [ ]
+            toTest = A.getExternalAttribute 'connectionsOut'
+            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+            toTest = B.getExternalAttribute 'connectionsIn'
+            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+            expect( B.getExternalAttribute 'connectionsOut' )
+                .toEqual [ ]
+            toTest = C.getExternalAttribute 'connectionsIn'
+            expect( pairCount toTest, [ C.ID, 'premise' ] ).toBe 3
+            expect( toTest.length ).toBe 3
+            toTest = C.getExternalAttribute 'connectionsOut'
+            expect( pairCount toTest, [ C.ID, 'premise' ] ).toBe 3
+            expect( toTest.length ).toBe 3
+
+            expect( C.disconnectFrom C, 'premise' ).toBeTruthy()
+            expect( C.disconnectFrom C, 'premise' ).toBeTruthy()
+            expect( A.getExternalAttribute 'connectionsIn' )
+                .toEqual [ ]
+            toTest = A.getExternalAttribute 'connectionsOut'
+            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+            toTest = B.getExternalAttribute 'connectionsIn'
+            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+            expect( B.getExternalAttribute 'connectionsOut' )
+                .toEqual [ ]
+            toTest = C.getExternalAttribute 'connectionsIn'
+            expect( pairCount toTest, [ C.ID, 'premise' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+            toTest = C.getExternalAttribute 'connectionsOut'
+            expect( pairCount toTest, [ C.ID, 'premise' ] ).toBe 1
+            expect( toTest.length ).toBe 1

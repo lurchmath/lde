@@ -184,6 +184,8 @@ attributes.  The documentation
 covers the concept in detail.  We provide the following functions to make it
 easier for clients to create, remove, or query connections.
 
+### Making connections consistent
+
 The first function ensures that all connections in a hierarchy are properly
 recorded twice, once as outgoing from the source, and once as incoming to
 the target.  This consistency is assumed by the query functions.  Run this
@@ -257,3 +259,55 @@ Repeat the same exrecise for my incoming connections.
                         Math.max count, sourceOuts[@ID][type] ? 0
                 S.setExternalAttribute 'connectionsOut',
                     objectToArray sourceOuts
+
+### Making consistent connections
+
+Another way to ensure that connections among structures in a hierarchy are
+consistent is to avoid directly editing the external attribute containing
+the connections data, and instead use the following two convenience
+functions for creating or deleting connections.
+
+The first one creates a new connection of the given type from this structure
+to another.  Because there may be multiple connections of a given type
+between the same two structures, calling this repeatedly adds new
+connections.
+
+These functions do nothing if either of the two structures is lacking an ID.
+They return true on success and false on failure.
+
+        connectTo : ( otherStructure, connectionType ) ->
+            return no unless @ID? and \
+                otherStructure instanceof Structure and otherStructure.ID?
+            outs = ( @getExternalAttribute 'connectionsOut' ) ? [ ]
+            ins = ( otherStructure.getExternalAttribute 'connectionsIn' ) \
+                ? [ ]
+            outs.push [ otherStructure.ID, connectionType ]
+            ins.push [ @ID, connectionType ]
+            @setExternalAttribute 'connectionsOut', outs
+            otherStructure.setExternalAttribute 'connectionsIn', ins
+            yes
+
+The delete function does nothing if there is no connection to delete.
+
+        disconnectFrom : ( otherStructure, connectionType ) ->
+            return no unless @ID? and \
+                otherStructure instanceof Structure and otherStructure.ID?
+            outs = ( @getExternalAttribute 'connectionsOut' ) ? [ ]
+            ins = ( otherStructure.getExternalAttribute 'connectionsIn' ) \
+                ? [ ]
+            outIndex = inIndex = 0
+            while outIndex < outs.length and \
+                  ( outs[outIndex][0] isnt otherStructure.ID or \
+                    outs[outIndex][1] isnt connectionType )
+                outIndex++
+            if outIndex is outs.length then return no
+            while inIndex < ins.length and \
+                  ( ins[inIndex][0] isnt @ID or \
+                    ins[inIndex][1] isnt connectionType )
+                inIndex++
+            if inIndex is ins.length then return no
+            outs.splice outIndex, 1
+            ins.splice inIndex, 1
+            @setExternalAttribute 'connectionsOut', outs
+            otherStructure.setExternalAttribute 'connectionsIn', ins
+            yes
