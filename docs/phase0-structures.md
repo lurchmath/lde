@@ -84,8 +84,8 @@ dictionary (get/set/clear) but no corresponding `compute` function.
 
 Work done in this section:
 
- * [x] Code implemented
- * [x] Unit tests written and passing
+ * [ ] Code implemented
+ * [ ] Unit tests written and passing
  * [ ] API documentation written
 
 Specification:
@@ -104,6 +104,7 @@ Specification:
    passing `S.indexInParent()`.
  * `S.replaceWith(other)` replaces S, where it sits in the hierarchy, with
    a different structure, thus leaving S with no parent.
+ * `S.copy()` makes a deep copy of S, or equivalently, the subtree with root S.
 
 ### Event handling in the structure hierarchy
 
