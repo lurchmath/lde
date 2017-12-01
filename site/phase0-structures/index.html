@@ -218,8 +218,8 @@ dictionary (get/set/clear) but no corresponding <code>compute</code> function.</
 <h3 id="manipulating-the-structure-hierarchy">Manipulating the structure hierarchy</h3>
 <p>Work done in this section:</p>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
-<li class="task-list-item"><input type="checkbox" disabled checked> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled> Unit tests written and passing</li>
 <li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
 </ul>
 <p>Specification:</p>
@@ -238,6 +238,7 @@ dictionary (get/set/clear) but no corresponding <code>compute</code> function.</
    passing <code>S.indexInParent()</code>.</li>
 <li><code>S.replaceWith(other)</code> replaces S, where it sits in the hierarchy, with
    a different structure, thus leaving S with no parent.</li>
+<li><code>S.copy()</code> makes a deep copy of S, or equivalently, the subtree with root S.</li>
 </ul>
 <h3 id="event-handling-in-the-structure-hierarchy">Event handling in the structure hierarchy</h3>
 <p>Work done in this section:</p>
@@ -333,8 +334,8 @@ handlers, and thus hear about the events they signal.</p>
 <h3 id="convenience-constructions-for-unit-testing">Convenience constructions for unit testing</h3>
 <p>Work done in this section:</p>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled> Code implemented</li>
-<li class="task-list-item"><input type="checkbox" disabled> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Unit tests written and passing</li>
 <li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
 </ul>
 <p>Specification:</p>

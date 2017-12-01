@@ -222,6 +222,72 @@ by the client, and the LDE will not alter it.
                     delete @externalAttributes[key]
                     @wasChanged?()
 
+External attributes can also be added with an `attr()` function that returns
+the instance, thus supporting method chaining.  This is useful when
+constructing objects of this class, especially for unit testing, using
+code like `Structure( Structure().attr(...), ... )`.  It takes an object and
+installs all of its key-value pairs as external attributes.
+
+        attr : ( object ) ->
+            @setExternalAttribute key, value for own key, value of object
+            this
+
+On the topic of conveniences for constructing instances, the following
+method can be used at the top level of a nested set of constructor calls,
+to traverse the final tree after constructing it, and performs the
+convenience cleanup routines described within the function itself.
+
+This is intended to be used when constructing large structures, as in
+`result = Structure( ...lots of children... ).setup()`.
+
+        setup : ->
+
+Every structure and substructure will be given a unique ID.
+
+            recurGetID = ( node ) ->
+                node.getID()
+                recurGetID child for child in node.children()
+            recurGetID this
+
+Every structure with an external attribute key "label for", "reason for", or
+"premise for" and value X will be converted into a connection to node X of
+type "label", "reason", or "premise", respectively.  Node X will be found by
+seeking a node with attribute key "id" and value X.
+
+All attributes with key id are then deleted.
+
+Alternately the same keys could be associated with value "previous" or
+"next" to indicate connection to a sibling, with no id required.
+
+            targets = { }
+            recurFindTargets = ( node ) ->
+                if ( id = node.getExternalAttribute 'id' )?
+                    targets[id] = node
+                    node.clearExternalAttributes 'id'
+                recurFindTargets child for child in node.children()
+            recurFindTargets this
+            recurConnect = ( node ) ->
+                for attr in [ 'label', 'premise', 'reason' ]
+                    if ( value = node.getExternalAttribute "#{attr} for" )?
+                        if value is 'previous'
+                            target = node.previousSibling()
+                        else if value is 'next'
+                            target = node.nextSibling()
+                        else if targets.hasOwnProperty value
+                            target = targets[value]
+                        else
+                            target = null
+                        if target? then node.connectTo target, attr
+                        node.clearExternalAttributes "#{attr} for"
+                recurConnect child for child in node.children()
+            recurConnect this
+
+We then check all connections within this structure for consistency, and
+return the structure for use in chaining.
+
+            @fillOutConnections()
+            this
+
 ## Connections
 
 Structures may have connections among them, specified using external

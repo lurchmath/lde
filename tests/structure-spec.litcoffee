@@ -1294,3 +1294,57 @@ Finally, incoming connections reported as property lists:
             expect( props['premise'][0] ).toBe C
             expect( props['premise'][1] ).toBe C
             expect( props['premise'][2] ).toBe C
+
+## Convenience constructions
+
+There are two member functions, `attr` and `setup`, that are mostly just
+used within this unit testing framework, for easily constructing Structure
+hierarchies.  We use them here, then verify that they have created the
+hierarchies we expect, so that we can use them hereafter in testing.
+
+    describe 'Convenience constructions', ->
+
+First, check to be sure `attr` works.  This is a short test because that
+function is straightforward.
+
+        it 'build things correctly with attr', ->
+            A = new Structure(
+                B = new Structure().attr { example : 'text' }
+            ).attr { one : 1, two : 2 }
+            expect( A.getExternalAttribute 'one' ).toBe 1
+            expect( A.getExternalAttribute 'two' ).toBe 2
+            expect( B.getExternalAttribute 'example' ).toBe 'text'
+
+Next, verify that `setup` gives unique IDs to all children in the hierarchy.
+
+        it 'give unique IDs to everybody with setup', ->
+            A = new Structure(
+                B = new Structure()
+                C = new Structure()
+            ).setup()
+            expect( typeof A.ID ).toBe 'number'
+            expect( typeof B.ID ).toBe 'number'
+            expect( typeof C.ID ).toBe 'number'
+            expect( A.ID ).not.toBe B.ID
+            expect( A.ID ).not.toBe C.ID
+            expect( B.ID ).not.toBe C.ID
+
+Finally, verify that `setup` makes connections as requested by entries in
+the `attr` objects, and deletes those attributes afterwards.
+
+        it 'makes connections with setup and attr together', ->
+            A = new Structure(
+                B = new Structure().attr { id : 1 }
+                C = new Structure().attr { 'reason for': 'previous' }
+            ).attr { 'label for' : 1 }
+            .setup()
+            expect( A.allConnectionsIn() ).toEqual [ ]
+            expect( A.allConnectionsOut() ).toEqual [ [ B.ID, 'label' ] ]
+            expect( B.allConnectionsIn() )
+                .toEqual [ [ A.ID, 'label' ], [ C.ID, 'reason' ] ]
+            expect( B.allConnectionsOut() ).toEqual [ ]
+            expect( C.allConnectionsIn() ).toEqual [ ]
+            expect( C.allConnectionsOut() ).toEqual [ [ B.ID, 'reason' ] ]
+            expect( A.getExternalAttribute 'label for' ).toBeUndefined()
+            expect( B.getExternalAttribute 'id' ).toBeUndefined()
+            expect( C.getExternalAttribute 'reason for' ).toBeUndefined()
