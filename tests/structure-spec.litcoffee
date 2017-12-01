@@ -55,6 +55,19 @@ based on the construction code above.
             expect( AB.children() ).toEqual [ ]
             expect( B.children() ).toEqual [ ]
 
+Ensure that previous and next sibling functions work as expected.
+
+            expect( root.previousSibling() ).toBeUndefined()
+            expect( root.nextSibling() ).toBeUndefined()
+            expect( A.previousSibling() ).toBeUndefined()
+            expect( A.nextSibling() ).toBe B
+            expect( AA.previousSibling() ).toBeUndefined()
+            expect( AA.nextSibling() ).toBe AB
+            expect( AB.previousSibling() ).toBe AA
+            expect( AB.nextSibling() ).toBeUndefined()
+            expect( B.previousSibling() ).toBe A
+            expect( B.nextSibling() ).toBeUndefined()
+
 The next test is whether children correctly compute their index in their
 parent structure.
 

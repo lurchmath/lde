@@ -69,6 +69,12 @@ integrity of the hierarchy.
         parent : -> @parentNode
         children : -> @childList[..]
         indexInParent : -> @parentNode?.childList?.indexOf this
+        previousSibling : ->
+            if ( index = @indexInParent() )?
+                @parentNode.childList[index-1]
+        nextSibling : ->
+            if ( index = @indexInParent() )?
+                @parentNode.childList[index+1]
 
 Next, the setters.  There is no setter for the parent, because the parent
 pointer of a structure S must be kept consistent with the children list of
@@ -129,7 +135,6 @@ then I am strictly later than it, and we can return that now.
                 ancestorsOfOther.unshift nextAncestor
 
 Find my nearest ancestor that appears in that list.
-
 
             walk = this
             relevantAncestor = null
