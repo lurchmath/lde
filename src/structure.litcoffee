@@ -29,11 +29,11 @@ will be globally unique for all instances.
 Ensure that any instance that calls `getID` at some point later calls
 `releaseID`, or the `IDs` array will become enormous, a memory leak.
 
-        getID : =>
+        getID : ->
             return if @ID?
             @ID = Structure.nextUnusedID()
             Structure::IDs[@ID] = this
-        releaseID : =>
+        releaseID : ->
             if @ID?
                 Structure::IDs[@ID] = null
                 delete @ID
@@ -66,9 +66,9 @@ First, the getters.  When querying the children, we make a copy of the list
 so that clients can feel free to manipulate it without messing up the
 integrity of the hierarchy.
 
-        parent : => @parentNode
-        children : => @childList[..]
-        indexInParent : => @parentNode?.childList?.indexOf this
+        parent : -> @parentNode
+        children : -> @childList[..]
+        indexInParent : -> @parentNode?.childList?.indexOf this
 
 Next, the setters.  There is no setter for the parent, because the parent
 pointer of a structure S must be kept consistent with the children list of
@@ -77,13 +77,13 @@ the parent of S, and so we update both in the setters for children.
 We permit removing children from parents, either with a method in the child
 or in the parent.
 
-        removeFromParent : =>
+        removeFromParent : ->
             if ( originalParent = @parentNode )?
                 originalIndex = @indexInParent()
                 @parentNode.childList.splice originalIndex, 1
                 @parentNode = null
                 @wasRemoved? originalParent, originalIndex
-        removeChild : ( atIndex ) => @childList[atIndex]?.removeFromParent()
+        removeChild : ( atIndex ) -> @childList[atIndex]?.removeFromParent()
 
 We permit inserting a new child into the parent's child array at any valid
 index (including the old length of the child array, which appends).  The
@@ -107,7 +107,7 @@ A convenient combination of the above methods is to replace a child with a
 new structure, deparenting the old child and putting the replacement at the
 same index in the same parent.
 
-        replaceWith : ( other ) =>
+        replaceWith : ( other ) ->
             if ( originalParent = @parentNode )?
                 originalIndex = @indexInParent()
                 @removeFromParent()
@@ -167,12 +167,12 @@ key is special; see [the documentation
 here](https://lurchmath.github.io/lde/site/phase0-structures/#methods-in-the-structure-class)
 for details.
 
-        getComputedAttribute : ( key ) => @computedAttributes[key]
-        setComputedAttribute : ( key, value ) =>
+        getComputedAttribute : ( key ) -> @computedAttributes[key]
+        setComputedAttribute : ( key, value ) ->
             if @computedAttributes[key] isnt value
                 @computedAttributes[key] = value
                 @wasChanged?()
-        clearComputedAttributes : ( keys... ) =>
+        clearComputedAttributes : ( keys... ) ->
             if keys.length is 0 then keys = Object.keys @computedAttributes
             for key in keys
                 if key of @computedAttributes
@@ -193,7 +193,7 @@ Specifically:
 More details re in [the documentation
 here](https://lurchmath.github.io/lde/site/phase0-structures/#methods-in-the-structure-class).
 
-        compute : ( args... ) =>
+        compute : ( args... ) ->
             for arg in args
                 if arg not instanceof Array then arg = [ arg ]
                 [ func, params... ] = arg
@@ -205,12 +205,12 @@ The dictionary of external attributes has get/set/clear functions just as we
 have for computed attributes.  The intent is for them to store data provided
 by the client, and the LDE will not alter it.
 
-        getExternalAttribute : ( key ) => @externalAttributes[key]
-        setExternalAttribute : ( key, value ) =>
+        getExternalAttribute : ( key ) -> @externalAttributes[key]
+        setExternalAttribute : ( key, value ) ->
             if @externalAttributes[key] isnt value
                 @externalAttributes[key] = value
                 @wasChanged?()
-        clearExternalAttributes : ( keys... ) =>
+        clearExternalAttributes : ( keys... ) ->
             if keys.length is 0 then keys = Object.keys @externalAttributes
             for key in keys
                 if key of @externalAttributes
@@ -236,7 +236,7 @@ connections may not be stored consistently.
 Because connections depend on IDs, this routine does nothing if this
 Structure does not already have an ID.
 
-        fillOutConnections : =>
+        fillOutConnections : ->
 
 Recur on children, but if this object has no ID, we can't go beyond that.
 
