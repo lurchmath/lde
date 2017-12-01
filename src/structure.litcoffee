@@ -113,6 +113,15 @@ same index in the same parent.
                 @removeFromParent()
                 originalParent.insertChild other, originalIndex
 
+Another possibly convenient utility is to make a copy of the Structure S
+(or equivalently the subtree with root S).
+
+        copy : ->
+            S = new Structure
+            S.computedAttributes = JSON.parse JSON.stringify @computedAttributes
+            S.externalAttributes = JSON.parse JSON.stringify @externalAttributes
+            S.childList = [C.copy() for C in @childList]
+
 We can ask which of two structures comes earlier in their common ancestor,
 under pre-order tree traversal, lowest-indexed children first.  The ordering
 defined here is strict (`A.isEarlierThan A` is false).

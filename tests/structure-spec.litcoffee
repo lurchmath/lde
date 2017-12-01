@@ -290,6 +290,7 @@ sibling within the same parent.
             expect( C.parent() ).toBe root
             expect( B.parent() ).toBe root
 
+
 Now we test whether we can replace structures in an existing hierarchy with
 new structures, and retain the integrity and correct structure of the
 hierarchy.
@@ -358,6 +359,35 @@ Replace A with one of its own children, as a corner case test.
             expect( AB.parent() ).toBe root
             expect( C.parent() ).toBe root
             expect( B.parent() ).toBe A
+
+============================
+
+The next test is whether we can make a deep copy of a Structure.
+
+        it 'should support deep copying structures', ->
+
+Make two small Structures for testing.
+
+            root = new Structure(
+                A = new Structure(
+                    AA = new Structure()
+                    AB = new Structure(
+                        ABA = new Structure()
+                    )
+                )
+                B = new Structure()
+            )
+            disconnected = new Structure(
+                dA = new Structure()
+            )
+
+Make a copy of root and test that it copied correctly.
+
+            C = root.copy()
+            expect( C ).not.toBe root
+            # expect( C ).toEqual root
+
+============================
 
 The next section tests the tree ordering relation defined in the Structure
 class, `isEarlierThan()`.
