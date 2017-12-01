@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Ideas Archive - Lurch Deductive Engine Documentation</title>
+        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/highlight.css">
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+	
+	<script src="../js/jquery-1.10.2.min.js"></script>
+        <script src="../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../js/highlight.pack.js"></script> 
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="..">Lurch Deductive Engine Documentation</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                    <li >
+                        <a href="..">Home</a>
+                    </li>
+                    <li >
+                        <a href="../overview/">Overview</a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Phases <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            
+<li >
+    <a href="../phase0-structures/">Phase 0, Structures</a>
+</li>
+                            
+<li >
+    <a href="../phase1-validation/">Phase 1, Basic Validation</a>
+</li>
+                            
+<li >
+    <a href="../phase1a-client/">Phase 1A, The Client</a>
+</li>
+                            
+<li >
+    <a href="../phase1b-dependencies/">Phase 1B, Dependencies</a>
+</li>
+                            
+<li >
+    <a href="../phase1c-background/">Phase 1C, Background Queue</a>
+</li>
+                            
+<li >
+    <a href="../phase2-strings/">Phase 2, String Matching</a>
+</li>
+                            
+<li >
+    <a href="../phase3-theorems/">Phase 3, Theorems and Proofs</a>
+</li>
+                            
+<li >
+    <a href="../phase4-expressions/">Phase 4, Expression Trees</a>
+</li>
+                            
+<li >
+    <a href="../phase5-parsing/">Phase 5, Parsing Rules</a>
+</li>
+                            
+<li >
+    <a href="../phase6-declarations/">Phase 6, Declarations</a>
+</li>
+                            
+<li >
+    <a href="../phase7-features/">Phase 7, Bonus Features</a>
+</li>
+                        </ul>
+                    </li>
+                    <li class="active">
+                        <a href="./">Ideas Archive</a>
+                    </li>
+                </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                        <i class="fa fa-search"></i> Search
+                    </a>
+                </li>
+                    <li >
+                        <a rel="next" href="../phase7-features/">
+                            <i class="fa fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li class="disabled">
+                        <a rel="prev" >
+                            Next <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+        <div class="container">
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="main active"><a href="#lde-design-idea-archive">LDE Design Idea Archive</a></li>
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<h1 id="lde-design-idea-archive">LDE Design Idea Archive</h1>
+<p>This document records incomplete ideas the Lurch team is keeping in mind
+for integration into later design plans.</p>
+<ul>
+<li>We have considered a UI with buttons with mathematical names on them,
+   such as Justify (which would let you choose a reason and it would insert
+   it), Cite (which would let you click any premise and it would make the
+   arrow), a toolbar of all math words.</li>
+<li>We have tested a Suggestions feature, and could really use it widely:<ul>
+<li>When the cursor is near something the software could recognize as a
+  statement or a reason, it gives a faint shadow over it of what it
+  thinks you're saying.</li>
+<li>A single keystroke confirms, and if you don't use that keystroke, the
+  shadowy suggestion is never actually realized in the document.</li>
+<li>Example usage:<ul>
+<li>Type, then hit <code>Ctrl+Enter</code> to approve an interpretation of what
+  you said as a statement.</li>
+<li>A visual indicator of some kind shows that the bubble was formed,
+  but since your cursor is after it, the bubble-forming animation
+  fades.</li>
+<li>Keep typing, then hit <code>Ctrl+Enter</code> to approve an interpretation of
+  what you said as a reason.</li>
+<li>Same visual indicator process.</li>
+<li>Immediately a suggested connection of the reason to the statement
+  appears, and you hit <code>Ctrl+Enter</code> again to connect them.</li>
+<li>Same visual indicator process.</li>
+<li>Start typing your next statement, and repeat from step 1.</li>
+</ul>
+</li>
+<li>Whenever your cursor is in a statement accessible to the most recent
+  justification you formed, a suggested premise citation arrow could
+  appear; <code>Ctrl+Enter</code> to confirm.</li>
+</ul>
+</li>
+<li>MathQuill (and, one day, MathJax, if we choose to add it) are UX sugar
+   that sits above the document, and can be converted to text as part of
+   the UI's processing of HTML into Structures.</li>
+<li>A UI idea from long ago recorded here for safe keeping:<ul>
+<li>Consider all situations in which it’s possible to write a small JS
+  function that can easily take in a string of text and split it into
+  an array of substrings, like <code>"Fred is a fish"</code> to
+  <code>["Fred is", "a", "fish"]</code>, such that the array alternates between
+  meaningful stuff and non-meaningful stuff. Then we have two things we
+  can do with such a function.</li>
+<li>First, the translator can obviously use that to trivially lift the
+  meaningful stuff out.</li>
+<li>Second, the UX can also use it to <em>highlight</em> <strong>while the user is
+  typing in a group</strong> which parts of the group’s content the app is
+  paying attention to, and which parts it’s ignoring. Imagine typing
+  <code>[Fred is a fish]</code> and the app is gently highlighting everything
+  except the 'a' or typing
+  <code>[Fred, who we all love, is a very nice fish]</code>
+  and the app highlights like so:
+  [<em>FRED</em>, who we all love, <em>IS</em> a very nice <em>FISH</em>].
+  Such highlighting would be in the overlay where the bubble is drawn,
+  and shown only when the cursor is in there.</li>
+<li>One specific subclass of this idea is when we require rigid formal
+  syntax, like line-numbered proofs with
+  <code>statement[whitespace]reason[whitespace]premise,...</code></li>
+</ul>
+</li>
+</ul></div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>var base_url = '..';</script>
+        <script data-main="../mkdocs/js/search.js" src="../mkdocs/js/require.js"></script>
+        <script src="../js/base.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

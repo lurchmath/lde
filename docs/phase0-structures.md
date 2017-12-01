@@ -201,8 +201,8 @@ Specification:
 
 Work done in this section:
 
- * [ ] Code implemented
- * [ ] Unit tests written and passing
+ * [x] Code implemented
+ * [x] Unit tests written and passing
  * [ ] API documentation written
 
 Specification:
