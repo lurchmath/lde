@@ -1,98 +1,98 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
-
+    
     <url>
      <loc>/</loc>
-     <lastmod>2017-12-01</lastmod>
+     <lastmod>2017-12-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
+    
 
-
-
+    
     <url>
      <loc>/overview/</loc>
-     <lastmod>2017-12-01</lastmod>
+     <lastmod>2017-12-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
+    
 
-
-
-
+    
+        
     <url>
      <loc>/phase0-structures/</loc>
-     <lastmod>2017-12-01</lastmod>
+     <lastmod>2017-12-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
-
+        
     <url>
      <loc>/phase1-validation/</loc>
-     <lastmod>2017-12-01</lastmod>
+     <lastmod>2017-12-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
-
+        
     <url>
      <loc>/phase1a-client/</loc>
-     <lastmod>2017-12-01</lastmod>
+     <lastmod>2017-12-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
-
+        
     <url>
      <loc>/phase1b-dependencies/</loc>
-     <lastmod>2017-12-01</lastmod>
+     <lastmod>2017-12-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
-
+        
     <url>
      <loc>/phase1c-background/</loc>
-     <lastmod>2017-12-01</lastmod>
+     <lastmod>2017-12-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
-
+        
     <url>
      <loc>/phase2-strings/</loc>
-     <lastmod>2017-12-01</lastmod>
+     <lastmod>2017-12-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
-
+        
     <url>
      <loc>/phase3-theorems/</loc>
-     <lastmod>2017-12-01</lastmod>
+     <lastmod>2017-12-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
-
+        
     <url>
      <loc>/phase4-expressions/</loc>
-     <lastmod>2017-12-01</lastmod>
+     <lastmod>2017-12-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
-
+        
     <url>
      <loc>/phase5-parsing/</loc>
-     <lastmod>2017-12-01</lastmod>
+     <lastmod>2017-12-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
-
+        
     <url>
      <loc>/phase6-declarations/</loc>
-     <lastmod>2017-12-01</lastmod>
+     <lastmod>2017-12-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
-
+        
     <url>
      <loc>/phase7-features/</loc>
-     <lastmod>2017-12-01</lastmod>
+     <lastmod>2017-12-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
+        
+    
 
-
-
-
+    
     <url>
      <loc>/ideas/</loc>
-     <lastmod>2017-12-01</lastmod>
+     <lastmod>2017-12-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
-
+    
 
 </urlset>
