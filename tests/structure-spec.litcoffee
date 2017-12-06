@@ -68,6 +68,87 @@ Ensure that previous and next sibling functions work as expected.
             expect( B.previousSibling() ).toBe A
             expect( B.nextSibling() ).toBeUndefined()
 
+The next test verifies that the constructor ignores non-Structures when
+building hierarchies.
+
+        it 'should drop invalid content from hierarchies', ->
+
+Make a similar small structure hierarchy to the one in the previous test,
+but add a few erroneous items.
+
+            root = new Structure(
+                7
+                A = new Structure(
+                    AA = new Structure
+                    AB = new Structure
+                    'This is not a Structure'
+                )
+                /regular expression/
+                B = new Structure
+            )
+
+Ensure that parent pointers and child arrays are exactly as they were in
+the previous test, because the erroneous new stuff has been ignored.
+
+            expect( root.parent() ).toBeNull()
+            expect( A.parent() ).toBe root
+            expect( AA.parent() ).toBe A
+            expect( AB.parent() ).toBe A
+            expect( B.parent() ).toBe root
+            expect( root.children() ).toEqual [ A, B ]
+            expect( A.children() ).toEqual [ AA, AB ]
+            expect( AA.children() ).toEqual [ ]
+            expect( AB.children() ).toEqual [ ]
+            expect( B.children() ).toEqual [ ]
+
+The next test ensures that you cannot create a cyclic structure by inserting
+an ancestor as a child.
+
+        it 'should prevent cyclic hierarchies', ->
+
+Create a single node and try to make it a child of itself.  This should
+fail, leaving the node in its original state.
+
+            A = new Structure
+            A.insertChild A
+            expect( A.parent() ).toBeNull()
+            expect( A.children() ).toEqual [ ]
+
+Create another node B and insert it as a child of A.  Then try to insert A
+as a child of B.  This should succeed, but should have removed B from being
+a child of A, so that the structure remains acyclic.
+
+            B = new Structure
+            A.insertChild B
+            expect( A.parent() ).toBeNull()
+            expect( A.children() ).toEqual [ B ]
+            expect( B.parent() ).toBe A
+            expect( B.children() ).toEqual [ ]
+            B.insertChild A
+            expect( A.parent() ).toBe B
+            expect( A.children() ).toEqual [ ]
+            expect( B.parent() ).toBeNull()
+            expect( B.children() ).toEqual [ A ]
+
+The same test should succeed if we do it with a structure with several nodes
+rather than just two.
+
+            A = new Structure(
+                B = new Structure
+                C = new Structure(
+                    D = new Structure
+                )
+            )
+            D.insertChild A
+            expect( A.parent() ).toBe D
+            expect( B.parent() ).toBe A
+            expect( C.parent() ).toBe A
+            expect( D.parent() ).toBeNull()
+            expect( A.children() ).toEqual [ B, C ]
+            expect( B.children() ).toEqual [ ]
+            expect( C.children() ).toEqual [ ]
+            expect( D.children() ).toEqual [ A ]
+
 The next test is whether children correctly compute their index in their
 parent structure.
 

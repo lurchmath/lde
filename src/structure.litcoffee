@@ -51,11 +51,9 @@ structures.
             @computedAttributes = { }
             @externalAttributes = { }
             @parentNode = null
-            @childList = ( c for c in children when c instanceof Structure )
-            for child in @childList
-                child.removeFromParent()
-                child.parentNode = this
-                child.wasInserted?()
+            @childList = [ ]
+            for child in children
+                @insertChild child, @childList.length
 
 ## Tree structure
 
@@ -97,9 +95,20 @@ child to be inserted is first removed from any parent it has when this
 method is called.  The default index is 0, so that a call of
 `insertChild(x)` inserts it as the first child.
 
+If the child to be inserted is an ancestor of this structure, then we
+remove this structure from its parent, to obey the insertion command given
+while still maintaining acyclicity in the tree structure.  If the child to
+be inserted is this node itself, this function does nothing.
+
         insertChild : ( child, beforeIndex = 0 ) ->
             return unless child instanceof Structure and \
+                child isnt this and \
                 0 <= beforeIndex <= @childList.length
+            walk = this
+            while ( walk = walk.parent() )?
+                if walk is child
+                    @removeFromParent()
+                    break
             child.removeFromParent()
             @childList = [
                 @childList[...beforeIndex]...
