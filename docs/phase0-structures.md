@@ -5,9 +5,12 @@ All the later phases will actually implement stuff that we could use to
 make real documents and libraries.  This one doesn't, so it's called
 Phase 0.
 
-In this phase, we just design the generic Structure class on which everything else will depend, and the infrastructure of the LDE itself.
+In this phase, we just design the generic Structure class on which
+everything else will depend, and the infrastructure of the LDE itself.
 
-At the end of this phase, we could write unit tests of the whole Structure class and its LDE context, thus guaranteeing that all later phases rest on a good foundation.
+At the end of this phase, we could write unit tests of the whole Structure
+class and its LDE context, thus guaranteeing that all later phases rest on a
+good foundation.
 
 ## The Structure module
 
@@ -237,7 +240,7 @@ Specification:
    `T`.
  * `S.whatCitesMe()` finds all structures `T` in the scope of `S` with any
    citation-based key (such as "reason" or "premise") in `T.properties()`
-   begin associated to the value `S.properties().name`.
+   being associated to the value `S.properties().name`.
  * There may be a need later to create other accessibility-related
    routines, such as `S.allAccessibleToMe()` or `S.myScope()` or
    `S.allAccessibleSatisfying(P)` etc.
