@@ -31,10 +31,10 @@ occurs.
 
             root = new Structure(
                 A = new Structure(
-                    AA = new Structure()
-                    AB = new Structure()
+                    AA = new Structure
+                    AB = new Structure
                 )
-                B = new Structure()
+                B = new Structure
             )
 
 Ensure that all parent pointers were correctly established in the forming of
@@ -77,10 +77,10 @@ Make the same small structure hierarchy as in the previous test.
 
             root = new Structure(
                 A = new Structure(
-                    AA = new Structure()
-                    AB = new Structure()
+                    AA = new Structure
+                    AB = new Structure
                 )
-                B = new Structure()
+                B = new Structure
             )
 
 Check the index in parent of each node.
@@ -100,10 +100,10 @@ Make the same small structure hierarchy as in the previous test.
 
             root = new Structure(
                 A = new Structure(
-                    AA = new Structure()
-                    AB = new Structure()
+                    AA = new Structure
+                    AB = new Structure
                 )
-                B = new Structure()
+                B = new Structure
             )
 
 Remove a child of the root and verify that the structure is as expected.
@@ -159,10 +159,10 @@ Make the same small structure hierarchy as in the previous test.
 
             root = new Structure(
                 A = new Structure(
-                    AA = new Structure()
-                    AB = new Structure()
+                    AA = new Structure
+                    AB = new Structure
                 )
-                B = new Structure()
+                B = new Structure
             )
 
 Remove a child of the root and verify that the structure is as expected.
@@ -217,15 +217,15 @@ Make the same small structure hierarchy as in the previous test.
 
             root = new Structure(
                 A = new Structure(
-                    AA = new Structure()
-                    AB = new Structure()
+                    AA = new Structure
+                    AB = new Structure
                 )
-                B = new Structure()
+                B = new Structure
             )
 
 Add a new child of the root and verify that the structure is as expected.
 
-            C = new Structure()
+            C = new Structure
             expect( C.parent() ).toBeNull()
             expect( C.children() ).toEqual [ ]
             root.insertChild C, 1
@@ -245,7 +245,7 @@ Add a new child of the root and verify that the structure is as expected.
 Append a child to the end of the list of children of a child of the root and
 verify that the structure is as expected.
 
-            D = new Structure()
+            D = new Structure
             expect( D.parent() ).toBeNull()
             expect( D.children() ).toEqual [ ]
             A.insertChild D, 2
@@ -314,16 +314,16 @@ Make the same small structure hierarchy as in the previous test.
 
             root = new Structure(
                 A = new Structure(
-                    AA = new Structure()
-                    AB = new Structure()
+                    AA = new Structure
+                    AB = new Structure
                 )
-                B = new Structure()
+                B = new Structure
             )
 
 Replace one child of the root with a new structure and verify that all comes
 out as expected.
 
-            C = new Structure()
+            C = new Structure
             expect( C.parent() ).toBeNull()
             expect( C.children() ).toEqual [ ]
             B.replaceWith C
@@ -383,15 +383,15 @@ Make two small Structures for testing.
 
             root = new Structure(
                 A = new Structure(
-                    AA = new Structure()
+                    AA = new Structure
                     AB = new Structure(
-                        ABA = new Structure()
+                        ABA = new Structure
                     )
                 )
-                B = new Structure()
+                B = new Structure
             )
             disconnected = new Structure(
-                dA = new Structure()
+                dA = new Structure
             )
 
 Make a copy of root and test that it copied correctly.
@@ -413,15 +413,15 @@ two structures.
 
             root = new Structure(
                 A = new Structure(
-                    AA = new Structure()
+                    AA = new Structure
                     AB = new Structure(
-                        ABA = new Structure()
+                        ABA = new Structure
                     )
                 )
-                B = new Structure()
+                B = new Structure
             )
             disconnected = new Structure(
-                dA = new Structure()
+                dA = new Structure
             )
 
 Check all possible pairs of subtrees of the root and verify that the order
@@ -511,8 +511,8 @@ tests.
 
 Make a few new structures.
 
-            S1 = new Structure()
-            S2 = new Structure()
+            S1 = new Structure
+            S2 = new Structure
 
 There shouldn't be any values stored at first in either of them.
 
@@ -560,7 +560,7 @@ for details.
 
 Create a structure instance.
 
-            S = new Structure()
+            S = new Structure
 
 Give it two member functions that do simple example computations.
 
@@ -604,8 +604,8 @@ of tests in which they behave the same.
 
 Make a few new structures.
 
-            S1 = new Structure()
-            S2 = new Structure()
+            S1 = new Structure
+            S2 = new Structure
 
 There shouldn't be any values stored at first in either of them.
 
@@ -659,11 +659,11 @@ for details about the events.
 Create two structres and install utilities to spy on when their event
 handlers have been called.
 
-            A = new Structure()
+            A = new Structure
             A.wasInserted = jasmine.createSpy 'wasInserted'
             A.wasRemoved = jasmine.createSpy 'wasRemoved'
             A.wasChanged = jasmine.createSpy 'wasChanged'
-            B = new Structure()
+            B = new Structure
             B.wasInserted = jasmine.createSpy 'wasInserted'
             B.wasRemoved = jasmine.createSpy 'wasRemoved'
             B.wasChanged = jasmine.createSpy 'wasChanged'
@@ -762,9 +762,9 @@ event handlers.
 
 Build some structures for use in all the tests below.
 
-        A = new Structure()
+        A = new Structure
         B = new Structure(
-            C = new Structure()
+            C = new Structure
         )
 
 By default, structure instances don't have any IDs.
@@ -868,8 +868,8 @@ call `fillOutConnections()`, and ensure that the inconsistencies are fixed.
 Structure 1:
 
             A = new Structure(
-                B = new Structure(),
-                C = new Structure()
+                B = new Structure,
+                C = new Structure
             )
 
 In order to make connections, each structure will need an ID.
@@ -919,11 +919,11 @@ itself, and so on.
 
             root = new Structure(
                 A = new Structure(
-                    B = new Structure()
-                    C = new Structure()
+                    B = new Structure
+                    C = new Structure
                 )
                 D = new Structure(
-                    E = new Structure()
+                    E = new Structure
                 )
             )
             A.getID()
@@ -1022,8 +1022,8 @@ Make a simple structure to use for testing.  Give all structures in it IDs,
 and verify that they have no connections to start with.
 
             A = new Structure(
-                B = new Structure(),
-                C = new Structure()
+                B = new Structure,
+                C = new Structure
             )
             A.getID()
             B.getID()
@@ -1136,8 +1136,8 @@ Build the same structure as in the previous section, and make the same
 connections within it.
 
             A = new Structure(
-                B = new Structure(),
-                C = new Structure()
+                B = new Structure
+                C = new Structure
             )
             A.getID()
             B.getID()
@@ -1239,8 +1239,8 @@ Build the same structure as in the previous section, and make the same
 connections within it.
 
             A = new Structure(
-                B = new Structure(),
-                C = new Structure()
+                B = new Structure
+                C = new Structure
             )
             A.getID()
             B.getID()
@@ -1349,8 +1349,8 @@ Next, verify that `setup` gives unique IDs to all children in the hierarchy.
 
         it 'give unique IDs to everybody with setup', ->
             A = new Structure(
-                B = new Structure()
-                C = new Structure()
+                B = new Structure
+                C = new Structure
             ).setup()
             expect( typeof A.ID ).toBe 'number'
             expect( typeof B.ID ).toBe 'number'
