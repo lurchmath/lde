@@ -156,8 +156,8 @@ current design plans.  A later phase will add support for this.</p>
 <ul>
 <li><code>E.goals == [ "validated" ]</code></li>
 <li><code>E.validate()</code> does this:<ul>
-<li>If <code>E.children().length &gt; 0</code> then <code>E.feedback("X","only atomic
-  expressions supported so far")</code></li>
+<li>If <code>E.children().length &gt; 0</code> then
+  <code>E.feedback("X","only atomic expressions supported so far")</code></li>
 <li>Otherwise <code>E.feedback(none,none)</code></li>
 <li><code>E.meaning()</code> returns <code>E.text()</code>, but we may decide not to use a
   loaded word like "meaning" and instead just leave .text() to be
@@ -173,8 +173,8 @@ current design plans.  A later phase will add support for this.</p>
 <h2 id="definitions-of-the-simplest-rules-code-based-rules">Definitions of the simplest rules: code-based rules</h2>
 <ul>
 <li><code>R.validate()</code> does this:<ul>
-<li>If <code>R.attributes().code!=true</code> then <code>R.feedback("X","only code rules
-  are supported so far")</code></li>
+<li>If <code>R.attributes().code!=true</code> then
+  <code>R.feedback("X","only code rules are supported so far")</code></li>
 <li>If <code>R.text()</code> isn't valid JavaScript code that defines a function,
   then <code>R.feedback("X","...")</code></li>
 <li>Otherwise <code>R.feedback("check","nice code rule, dude")</code></li>

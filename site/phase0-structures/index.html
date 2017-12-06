@@ -140,8 +140,11 @@
 <p>All the later phases will actually implement stuff that we could use to
 make real documents and libraries.  This one doesn't, so it's called
 Phase 0.</p>
-<p>In this phase, we just design the generic Structure class on which everything else will depend, and the infrastructure of the LDE itself.</p>
-<p>At the end of this phase, we could write unit tests of the whole Structure class and its LDE context, thus guaranteeing that all later phases rest on a good foundation.</p>
+<p>In this phase, we just design the generic Structure class on which
+everything else will depend, and the infrastructure of the LDE itself.</p>
+<p>At the end of this phase, we could write unit tests of the whole Structure
+class and its LDE context, thus guaranteeing that all later phases rest on a
+good foundation.</p>
 <h2 id="the-structure-module">The Structure module</h2>
 <p>That module defines a single <code>Structure</code> class, whose instances have these
 methods.</p>
@@ -369,7 +372,7 @@ handlers, and thus hear about the events they signal.</p>
    <code>T</code>.</li>
 <li><code>S.whatCitesMe()</code> finds all structures <code>T</code> in the scope of <code>S</code> with any
    citation-based key (such as "reason" or "premise") in <code>T.properties()</code>
-   begin associated to the value <code>S.properties().name</code>.</li>
+   being associated to the value <code>S.properties().name</code>.</li>
 <li>There may be a need later to create other accessibility-related
    routines, such as <code>S.allAccessibleToMe()</code> or <code>S.myScope()</code> or
    <code>S.allAccessibleSatisfying(P)</code> etc.</li>
