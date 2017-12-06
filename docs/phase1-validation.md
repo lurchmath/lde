@@ -20,8 +20,8 @@ current design plans.  A later phase will add support for this.
 
  * `E.goals == [ "validated" ]`
  * `E.validate()` does this:
-    * If `E.children().length > 0` then `E.feedback("X","only atomic
-      expressions supported so far")`
+    * If `E.children().length > 0` then
+      `E.feedback("X","only atomic expressions supported so far")`
     * Otherwise `E.feedback(none,none)`
     * `E.meaning()` returns `E.text()`, but we may decide not to use a
       loaded word like "meaning" and instead just leave .text() to be
@@ -35,8 +35,8 @@ current design plans.  A later phase will add support for this.
 ## Definitions of the simplest rules: code-based rules
 
  * `R.validate()` does this:
-    * If `R.attributes().code!=true` then `R.feedback("X","only code rules
-      are supported so far")`
+    * If `R.attributes().code!=true` then
+      `R.feedback("X","only code rules are supported so far")`
     * If `R.text()` isn't valid JavaScript code that defines a function,
       then `R.feedback("X","...")`
     * Otherwise `R.feedback("check","nice code rule, dude")`
