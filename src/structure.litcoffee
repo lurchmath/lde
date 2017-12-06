@@ -479,3 +479,100 @@ more information, see the documentation
                 if ( source = Structure.instanceWithID conn[0] )?
                     ( result[conn[1]] ?= [ ] ).push source
             result
+
+## Accessibility
+
+A structure A is accessible to a structure B if they have a common ancestor
+and are positioned within that ancestor in such a way that B could cite A as
+a premise.
+
+The officially definition is that a structure is accessible to all of its
+previous siblings, all the previous siblings of its parent, all the previous
+siblings of its grandparent, and so on up the ancestor chain.  Note that a
+structure is not accessible to itself, nor to any of its ancestors.
+Conversely, if A is accessible to B, then we say that B is in the scope of
+A.
+
+### Foundational accessibility functions
+
+We begin with two functions, implementing the accessibility/scope relations.
+
+        isAccessibleTo : ( other ) ->
+            if other not instanceof Structure then return no
+            if not other.parent()? then return no
+            if @parent() is other.parent()
+                @indexInParent() < other.indexInParent()
+            else
+                @isAccessibleTo other.parent()
+        isInTheScopeOf : ( other ) -> other.isAccessibleTo this
+
+For all the other computations we will want to do with scopes and
+accessibility, we will need iterators over all structures accessible to (or
+in the scope of, respectively) this one.  An iterator for a set S is an
+object `I` such that repeated calls to `I.next()` yield new elements of S
+until S is exhausted, at which point all future calls to `I.next()` return
+null.
+
+The first iterator function lists all structures accessible to this one, in
+reverse order in the hierarchy.  That is, all previous siblings are yielded
+from right to left, then all previous siblings of the parent, and so on.
+
+        iteratorOverAccessibles : ->
+            ancestor : this
+            sibling : this
+            next : ->
+                if not @ancestor? then return null
+                if ( @sibling = @sibling.previousSibling() )?
+                    return @sibling
+                @sibling = @ancestor = @ancestor.parent()
+                @next()
+
+The second iterator function lists all structures in the scope of this one,
+in forward order in the hierarchy.  That is, all descendants of the next
+sibling are yielded, then all descendants of the subsequent sibling, and so
+on, in the order of a postorder tree traversal.
+
+        iteratorOverScope : ->
+            chain : [ this ]
+            next : ->
+                if @chain.length is 0 then return null
+                last = @chain.pop()
+                if ( walk = last.nextSibling() )?
+                    @chain.push walk
+                    @chain.push walk while ( walk = walk.children()[0] )?
+                    @chain[@chain.length-1]
+                else if @chain.length > 0
+                    @chain[@chain.length-1]
+                else
+                    null
+
+### Accessibility convenience functions
+
+We then create two functions that can use these iterators for searching or
+enumeration.  Call `first(iterator,predicate)` to get the first element the
+iterator yields satisfying the predicate.  Call `all(iterator,prediacte)`
+with the obvious related meaning.  In each case, the predicate can be
+omitted to get the first element or all elements (no restrictions).  If the
+predicate is never satisfied, `first` returns undefiend, and `all` returns
+an empty array.
+
+        first = ( iterator, predicate = -> yes ) ->
+            while ( next = iterator.next() )?
+                if predicate next then return next
+        all = ( iterator, predicate = -> yes ) ->
+            result = [ ]
+            while ( next = iterator.next() )?
+                if predicate next then result.push next
+            result
+
+We can then write useful functions whose names give their obvious meanings,
+by combining the tools above.
+
+        firstAccessible : ( predicate = -> yes ) ->
+            first @iteratorOverAccessibles(), predicate
+        allAccessibles : ( predicate = -> yes ) ->
+            all @iteratorOverAccessibles(), predicate
+        firstInScope : ( predicate = -> yes ) ->
+            first @iteratorOverScope(), predicate
+        allInScope : ( predicate = -> yes ) ->
+            all @iteratorOverScope(), predicate

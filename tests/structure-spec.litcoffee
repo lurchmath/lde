@@ -1378,3 +1378,360 @@ the `attr` objects, and deletes those attributes afterwards.
             expect( A.getExternalAttribute 'label for' ).toBeUndefined()
             expect( B.getExternalAttribute 'id' ).toBeUndefined()
             expect( C.getExternalAttribute 'reason for' ).toBeUndefined()
+
+## Accessibility
+
+The accessibility relation is documented in [the source code for the
+Structure class](../src/structure.litcoffee#accessibility).  The first test
+in this section just tests the two functions implementing that relation:
+the forward direction in `isAccessibleTo` and the reverse direction in
+`isInTheScopeOf`.
+
+    describe 'Accessibility relations', ->
+
+Define a large-ish structure we will use throughout all tests in this
+section.
+
+        A = new Structure(
+            B = new Structure(
+                C = new Structure
+                D = new Structure
+            )
+            E = new Structure(
+                F = new Structure(
+                    G = new Structure
+                )
+                H = new Structure(
+                    I = new Structure
+                    J = new Structure
+                )
+                K = new Structure
+            )
+        )
+
+Verify that the forward direction of the relation works, that is, the
+version implemented in `isAccessibleTo`.
+
+        it 'should work forwards', ->
+
+Here are all the pairs of nodes in the above structure for which the
+relation should return true.
+
+            expect( B.isAccessibleTo E ).toBeTruthy()
+            expect( B.isAccessibleTo F ).toBeTruthy()
+            expect( B.isAccessibleTo G ).toBeTruthy()
+            expect( B.isAccessibleTo H ).toBeTruthy()
+            expect( B.isAccessibleTo I ).toBeTruthy()
+            expect( B.isAccessibleTo J ).toBeTruthy()
+            expect( B.isAccessibleTo K ).toBeTruthy()
+            expect( C.isAccessibleTo D ).toBeTruthy()
+            expect( F.isAccessibleTo H ).toBeTruthy()
+            expect( F.isAccessibleTo I ).toBeTruthy()
+            expect( F.isAccessibleTo J ).toBeTruthy()
+            expect( F.isAccessibleTo K ).toBeTruthy()
+            expect( H.isAccessibleTo K ).toBeTruthy()
+            expect( I.isAccessibleTo J ).toBeTruthy()
+
+Here is a sample of the many pairs of nodes for which it should return
+false, despite the fact that the left-hand argument appears earlier in the
+hierarchy than the right-hand one.
+
+            expect( A.isAccessibleTo B ).toBeFalsy()
+            expect( A.isAccessibleTo E ).toBeFalsy()
+            expect( A.isAccessibleTo C ).toBeFalsy()
+            expect( A.isAccessibleTo K ).toBeFalsy()
+            expect( F.isAccessibleTo G ).toBeFalsy()
+            expect( C.isAccessibleTo E ).toBeFalsy()
+            expect( G.isAccessibleTo J ).toBeFalsy()
+            expect( G.isAccessibleTo K ).toBeFalsy()
+
+Here is a sample of the many pairs of nodes for which it should return
+false, mostly because the left-hand argument appears later in the hierarchy
+than the right-hand one, so regardless of the structure between them, the
+accessibility relation could never hold.
+
+            expect( D.isAccessibleTo B ).toBeFalsy()
+            expect( G.isAccessibleTo E ).toBeFalsy()
+            expect( G.isAccessibleTo F ).toBeFalsy()
+            expect( H.isAccessibleTo G ).toBeFalsy()
+            expect( H.isAccessibleTo H ).toBeFalsy()
+            expect( B.isAccessibleTo B ).toBeFalsy()
+            expect( A.isAccessibleTo A ).toBeFalsy()
+            expect( K.isAccessibleTo B ).toBeFalsy()
+            expect( J.isAccessibleTo E ).toBeFalsy()
+            expect( H.isAccessibleTo F ).toBeFalsy()
+
+        it 'should work backwards', ->
+
+Now we repeat all the exact same tests as in the previous test function, but
+we swap the order of the arguments and we change `isAccessibleTo` into
+`isInTheScopeOf`.  Thus the results should all be the same.
+
+            expect( E.isInTheScopeOf B ).toBeTruthy()
+            expect( F.isInTheScopeOf B ).toBeTruthy()
+            expect( G.isInTheScopeOf B ).toBeTruthy()
+            expect( H.isInTheScopeOf B ).toBeTruthy()
+            expect( I.isInTheScopeOf B ).toBeTruthy()
+            expect( J.isInTheScopeOf B ).toBeTruthy()
+            expect( K.isInTheScopeOf B ).toBeTruthy()
+            expect( D.isInTheScopeOf C ).toBeTruthy()
+            expect( H.isInTheScopeOf F ).toBeTruthy()
+            expect( I.isInTheScopeOf F ).toBeTruthy()
+            expect( J.isInTheScopeOf F ).toBeTruthy()
+            expect( K.isInTheScopeOf F ).toBeTruthy()
+            expect( K.isInTheScopeOf H ).toBeTruthy()
+            expect( J.isInTheScopeOf I ).toBeTruthy()
+            expect( B.isInTheScopeOf A ).toBeFalsy()
+            expect( E.isInTheScopeOf A ).toBeFalsy()
+            expect( C.isInTheScopeOf A ).toBeFalsy()
+            expect( K.isInTheScopeOf A ).toBeFalsy()
+            expect( G.isInTheScopeOf F ).toBeFalsy()
+            expect( E.isInTheScopeOf C ).toBeFalsy()
+            expect( J.isInTheScopeOf G ).toBeFalsy()
+            expect( K.isInTheScopeOf G ).toBeFalsy()
+            expect( B.isInTheScopeOf D ).toBeFalsy()
+            expect( E.isInTheScopeOf G ).toBeFalsy()
+            expect( F.isInTheScopeOf G ).toBeFalsy()
+            expect( G.isInTheScopeOf H ).toBeFalsy()
+            expect( H.isInTheScopeOf H ).toBeFalsy()
+            expect( B.isInTheScopeOf B ).toBeFalsy()
+            expect( A.isInTheScopeOf A ).toBeFalsy()
+            expect( B.isInTheScopeOf K ).toBeFalsy()
+            expect( E.isInTheScopeOf J ).toBeFalsy()
+            expect( F.isInTheScopeOf H ).toBeFalsy()
+
+We now test the two iterator functions, one that iterates over structures
+accessible to the given one, and one that iterates over the scope of the
+given structure.
+
+    describe 'Accessibility iterator', ->
+
+We re-use the same structure hierarchy for this test as in the last one.
+
+        A = new Structure(
+            B = new Structure(
+                C = new Structure
+                D = new Structure
+            )
+            E = new Structure(
+                F = new Structure(
+                    G = new Structure
+                )
+                H = new Structure(
+                    I = new Structure
+                    J = new Structure
+                )
+                K = new Structure
+            )
+        )
+
+Compute the `iteratorOverAccessibles` object for five sample nodes in the
+hierarchy, and verify that successive calls to `next()` in that object yield
+the correct structures in the correct order.
+
+        it 'should yield accessible structures in the correct order', ->
+
+For the first few, there are no accessible structures, so the iterator
+yields null immediately.  We evaluate it twice more regardless, to verify
+that it does not cause any errors to do so.
+
+            it = A.iteratorOverAccessibles()
+            expect( it.next() ).toBeNull()
+            expect( it.next() ).toBeNull()
+            expect( it.next() ).toBeNull()
+            it = B.iteratorOverAccessibles()
+            expect( it.next() ).toBeNull()
+            expect( it.next() ).toBeNull()
+            expect( it.next() ).toBeNull()
+            it = C.iteratorOverAccessibles()
+            expect( it.next() ).toBeNull()
+            expect( it.next() ).toBeNull()
+            expect( it.next() ).toBeNull()
+
+In the last two examples, there are some accessible structures over which to
+iterate.
+
+            it = F.iteratorOverAccessibles()
+            expect( it.next() ).toBe B
+            expect( it.next() ).toBeNull()
+            expect( it.next() ).toBeNull()
+            expect( it.next() ).toBeNull()
+            it = J.iteratorOverAccessibles()
+            expect( it.next() ).toBe I
+            expect( it.next() ).toBe F
+            expect( it.next() ).toBe B
+            expect( it.next() ).toBeNull()
+            expect( it.next() ).toBeNull()
+            expect( it.next() ).toBeNull()
+
+In the following function, we test the same five nodes in the hierarchy, but
+now iterating over their scopes instead of the structures accessible to
+them.  Note that for B in particular, the order of the values returned is
+not the order in which they're written in the code above that constructs the
+hierarchy, but rather in the order of a postorder tree traversal, as the
+specification (in the source code documentation linked to above) requires.
+
+        it 'should yield structures in scope in the correct order', ->
+            it = A.iteratorOverScope()
+            expect( it.next() ).toBeNull()
+            expect( it.next() ).toBeNull()
+            expect( it.next() ).toBeNull()
+            it = B.iteratorOverScope()
+            expect( it.next() ).toBe G
+            expect( it.next() ).toBe F
+            expect( it.next() ).toBe I
+            expect( it.next() ).toBe J
+            expect( it.next() ).toBe H
+            expect( it.next() ).toBe K
+            expect( it.next() ).toBe E
+            expect( it.next() ).toBeNull()
+            expect( it.next() ).toBeNull()
+            expect( it.next() ).toBeNull()
+            it = C.iteratorOverScope()
+            expect( it.next() ).toBe D
+            expect( it.next() ).toBeNull()
+            expect( it.next() ).toBeNull()
+            expect( it.next() ).toBeNull()
+            it = F.iteratorOverScope()
+            expect( it.next() ).toBe I
+            expect( it.next() ).toBe J
+            expect( it.next() ).toBe H
+            expect( it.next() ).toBe K
+            expect( it.next() ).toBeNull()
+            expect( it.next() ).toBeNull()
+            expect( it.next() ).toBeNull()
+            it = J.iteratorOverScope()
+            expect( it.next() ).toBeNull()
+            expect( it.next() ).toBeNull()
+            expect( it.next() ).toBeNull()
+
+Finally, we test the functions that can search through the iterators for
+single or multiple values.
+
+    describe 'Accessibility searches', ->
+
+We re-use the same structure hierarchy for this test as in the last one.
+
+        A = new Structure(
+            B = new Structure(
+                C = new Structure
+                D = new Structure
+            )
+            E = new Structure(
+                F = new Structure(
+                    G = new Structure
+                )
+                H = new Structure(
+                    I = new Structure
+                    J = new Structure
+                )
+                K = new Structure
+            )
+        )
+
+We define two simple predicates for use as testing predicates below.  Each
+is a one-place predicate that operates on structures; the first says whether
+the structure has a child (one or more) and the second says whether it has
+a grandchild (one or more).
+
+        hasChild = ( x ) -> x.children().length > 0
+        hasGrandchild = ( x ) ->
+            for child in x.children()
+                if hasChild child then return yes
+            no
+
+First we test the search functions for nodes accessible to the given one.
+
+        it 'should find accessible structure(s) satisfying predicates', ->
+
+The first node accessible from J is I, but the first one with children is F.
+
+            expect( J.firstAccessible() ).toBe I
+            expect( J.firstAccessible hasChild ).toBe F
+
+There is no node accessible from J with grandchildren.
+
+            expect( J.firstAccessible hasGrandchild ).toBeUndefined()
+
+The nodes accessible from J are, in order, I, F, B.
+
+            result = J.allAccessibles()
+            expect( result.length ).toBe 3
+            expect( result[0] ).toBe I
+            expect( result[1] ).toBe F
+            expect( result[2] ).toBe B
+
+If we limit it to those with children, we get only F and B, in that order.
+
+            result = J.allAccessibles hasChild
+            expect( result.length ).toBe 2
+            expect( result[0] ).toBe F
+            expect( result[1] ).toBe B
+
+All nodes accessible to F are just B only.
+
+            result = F.allAccessibles()
+            expect( result.length ).toBe 1
+            expect( result[0] ).toBe B
+
+If we limit that search to those with grandchildren, there is nothing on the
+resulting list.
+
+            result = F.allAccessibles hasGrandchild
+            expect( result.length ).toBe 0
+
+The set of nodes accessible from C is empty.
+
+            result = C.allAccessibles()
+            expect( result.length ).toBe 0
+
+Second we test the search functions for nodes in the scope of the given one.
+
+        it 'should find structure(s) in scope satisfying predicates', ->
+
+The first node in the scope of B is G.
+The first node in the scope of C is D.
+
+            expect( B.firstInScope() ).toBe G
+            expect( C.firstInScope() ).toBe D
+
+If we limit those searches to nodes with children, then for B we get F,
+and for C we find there is no such node.
+
+            expect( B.firstInScope hasChild ).toBe F
+            expect( C.firstInScope hasChild ).toBeUndefined()
+
+The complete set of nodes in the scope of B are, in order, G, F, I, J, H, K,
+E.
+
+            result = B.allInScope()
+            expect( result.length ).toBe 7
+            expect( result[0] ).toBe G
+            expect( result[1] ).toBe F
+            expect( result[2] ).toBe I
+            expect( result[3] ).toBe J
+            expect( result[4] ).toBe H
+            expect( result[5] ).toBe K
+            expect( result[6] ).toBe E
+
+Limiting that search to nodes with grandparents yields everything but E.
+
+            result = B.allInScope ( x ) -> x.parent()?.parent()?
+            expect( result.length ).toBe 6
+            expect( result[0] ).toBe G
+            expect( result[1] ).toBe F
+            expect( result[2] ).toBe I
+            expect( result[3] ).toBe J
+            expect( result[4] ).toBe H
+            expect( result[5] ).toBe K
+
+The same search from C yields just one node, D.
+
+            result = C.allInScope()
+            expect( result.length ).toBe 1
+            expect( result[0] ).toBe D
+
+The same search from K yields an empty list.
+
+            result = K.allInScope()
+            expect( result.length ).toBe 0
