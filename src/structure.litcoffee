@@ -135,7 +135,8 @@ Another possibly convenient utility is to make a copy of the Structure S
             S = new Structure
             S.computedAttributes = JSON.parse JSON.stringify @computedAttributes
             S.externalAttributes = JSON.parse JSON.stringify @externalAttributes
-            S.childList = [C.copy() for C in @childList]
+            S.childList = ( C.copy() for C in @childList )
+            S
 
 We can ask which of two structures comes earlier in their common ancestor,
 under pre-order tree traversal, lowest-indexed children first.  The ordering

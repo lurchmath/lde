@@ -460,26 +460,32 @@ The next test is whether we can make a deep copy of a Structure.
 
         it 'should support deep copying structures', ->
 
-Make two small Structures for testing.
+Make a tiny Structure for testing.
 
-            root = new Structure(
-                A = new Structure(
-                    AA = new Structure
-                    AB = new Structure(
-                        ABA = new Structure
-                    )
-                )
-                B = new Structure
-            )
-            disconnected = new Structure(
-                dA = new Structure
-            )
+            tiny = new Structure
+            tiny.setExternalAttribute 5, 6
 
-Make a copy of root and test that it copied correctly.
+Make a copy of root and test that it copied correctly and did not mess up
+the original.
 
-            C = root.copy()
-            expect( C ).not.toBe root
-            # expect( C ).toEqual root
+            C = tiny.copy()
+            expect( C ).not.toBe tiny
+            expect( C.parent() ).toBeFalsy()
+            expect( C.children() ).toEqual [ ]
+            expect( C.getExternalAttribute 5 ).toBe 6
+            expect( C.getExternalAttribute 6 ).toBeUndefined()
+            expect( C.getComputedAttribute 5 ).toBeUndefined()
+            expect( tiny.parent() ).toBeFalsy()
+            expect( tiny.children() ).toEqual [ ]
+            expect( tiny.getExternalAttribute 5 ).toBe 6
+            expect( tiny.getExternalAttribute 6 ).toBeUndefined()
+            expect( tiny.getComputedAttribute 5 ).toBeUndefined()
+
+Ensure that changing data within the original doesn't change the copy.
+
+            tiny.setExternalAttribute 5, 10
+            expect( tiny.getExternalAttribute 5 ).toBe 10
+            expect( C.getExternalAttribute 5 ).toBe 6
 
 ============================
 
