@@ -398,6 +398,12 @@ consistent is to avoid directly editing the external attribute containing
 the connections data, and instead use the following two convenience
 functions for creating or deleting connections.
 
+Note that the LDE should not be directly editing external attributes anyway,
+because they are defined to be read-only from this side.  But these two
+functions are useful when constructing structures to use in testing, and in
+particular for implementing the `attr` and `setup` functions above, which
+are very useful in the unit testing suite.
+
 The first one creates a new connection of the given type from this structure
 to another.  Because there may be multiple connections of a given type
 between the same two structures, calling this repeatedly adds new
@@ -586,3 +592,211 @@ by combining the tools above.
             first @iteratorOverScope(), predicate
         allInScope : ( predicate = -> yes ) ->
             all @iteratorOverScope(), predicate
+
+## Attribute Conventions
+
+We have already established one significant convention in [the Connections
+section, above](#connections), that is, that the "connections" external
+attribute stores a very specific type of data with a very specific meaning.
+We established that convention partially through documentation and partially
+through implementing convenience functions that assume and use the
+convention.
+
+In this section, we establish several other conventions, many of which build
+upon the connections convention, and that deal with both external and
+computed attributes.  These conventions may be leveraged by any client of
+this module that constructs structures and expects the LDE to do
+computations (primarily validation) on them.
+
+In some sense, you can see this as the most fluid of the work in this file.
+All the previous sections in this class are foundational to how structures
+behave, whereas this one is more arbitrary.  But at the same time, it adds
+mathematical concepts to the `Structure` class for the first time.
+
+### Special external attributes
+
+There are three types of special external attributes (so far).
+
+Atomic structures are often defined by a single piece of text that is the
+structure's content.  The first convention is that such text will be stored
+as an external attribute with key "text," and consequently we create a
+convenience function for accessing this very common piece of data.
+
+        text : -> @getExternalAttribute 'text'
+
+The "text" in some structures is to be interpreted as a citation of another
+structure by name.  For instance, a structure containing the text "Theorem
+3.5" probably refers to an earlier structure with that name.  Thus the
+second convention is that structures whose content is to be interpreted as a
+reference to an earlier name have their "reference" attribute set to true
+(or any value that becomes true when treated as a boolean).
+
+        isAReference : -> not not @getExternalAttribute 'reference'
+
+Note that the above two functions do not have corresponding setter functions
+because they are external attributes, which are read-only from the point of
+view of the LDE.
+
+The second type of external attribute that requires special functions for
+dealing with it is the attribute storing connections to other structures.
+We handle that attribute with all the functions in [the Connections section,
+above](#connections).
+
+### Special connection types
+
+There are a few types of connections that are given special status by the
+Lurch Deductive Engine: reasons, premises, and labels.  One structure may be
+a label, reason, or premise for another, and the primary way to express that
+is by connecting the structures.  A label or reason connects to the
+structure for which it is a label or reason, and a premise is connected to
+by the structure that cites it as a premise.  We write three convenience
+functions here for speaking about these special connection types.
+
+We define `A.isALabelFor B` to be true iff A connects to B with a conncetion
+of type "label," meaning that the text content of A should be treated as a
+label for B.
+
+        isALabelFor : ( other ) ->
+            other.ID in @allConnectionsOut 'label'
+
+We define `A.isAPremiseFor B` to be true iff A is cited as a premise for B,
+that is, A connects to B with a connection of type "premise."  If A passes
+the `isAReference()` test, then the text content of A refers to the actual
+premise by name; otherwise, A itself is the premise.
+
+        isAPremiseFor : ( other ) ->
+            other.ID in @allConnectionsOut 'premise'
+
+We define `A.isAReasonFor B` to be true iff A connects to B with a
+connection of type "reason," meaning that A should be treated as a reason
+for B.  As with premises, if A passes the `isAReference()` test, then the
+text content of A refers to the actual reason by name; otherwise, A itself
+is the reason.
+
+        isAReasonFor : ( other ) ->
+            other.ID in @allConnectionsOut 'reason'
+
+While the `labels()`, `reasons()`, and `premises()` functions defined
+[below](#collecting-labels-reasons-and-premises) permit attaching labels,
+reasons, and premises using attributes other than connections, the three
+functions defined above are for querying connections only, not any other
+type of label/reason/premise attachment.
+
+### Convenience functions used below
+
+We define the following convenience functions that will be used to build the
+more significant tools defined in the following section.  Note that these
+are defined with the equal sign (`=`) rather than the colon (`:`) so they
+are not instance members, but just temporary functions usable only within
+this class.
+
+The first looks up external and internal attributes under a given key,
+verifies that both are arrays of strings, and combines them into a single
+resulting array, filtering out all non-strings.
+
+        stringArrayAttributes = ( structure, key ) ->
+            external = structure.getExternalAttribute key
+            computed = structure.getComputedAttribute key
+            if external not instanceof Array then external = [ ]
+            if computed not instanceof Array then computed = [ ]
+            ( item for item in [ external..., computed... ] \
+                when typeof item is 'string' )
+
+Te second takes a structure and connection type as arguments and returns all
+other structures that have connections of the given type to the given
+structure.
+
+        allConnectedTo = ( structure, type ) ->
+            result = [ ]
+            for id in structure.allConnectionsIn type
+                if ( other = Structure.instanceWithID id )?
+                    result.push other
+            result
+
+The final function takes an array and returns the an array with all the same
+entries as the first, but each entry listed exactly once (no duplicates).
+
+        uniqueArray = ( array ) ->
+            result = [ ]
+            for item in array
+                if item not in result then result.push item
+            result
+
+### Collecting labels, reasons, and premises
+
+We permit a structure to be labeled in any of three ways.
+
+ * The external attribute with key "labels" may be an array of strings, each
+   of which will then be treated as a label for the structure.
+ * The computed attribute with key "labels" is treated the same way.
+ * Any structure may label another structure as documented by the
+   `isALabelFor` function implemented earlier in this same section.
+
+The `labels()` function gathers all labels assigned by any of these three
+means into a single set, returned as an array with no repeated entries, and
+no predefined order.  Any label that is not a string or is the empty string
+is omitted from the results.
+
+        labels : ->
+            result = [
+                ( stringArrayAttributes this, 'labels' )...
+                ( label.text() for label in allConnectedTo this, 'label' \
+                    when label.text() )...
+            ]
+            ( label for label in uniqueArray result when label isnt '' )
+
+We then build two important functions based on `labels()`.  The first is a
+trivial extension of it, to the `hasLabel()` function, which checks to see
+if this structure has a particular label.
+
+        hasLabel : ( label ) -> label in @labels()
+
+The second is a lookup function, which starts from this structure and walks
+back through all structures accessible to it, to find the first one having a
+given label.  This can be used when the current structure cites something by
+name, and we wish to find which structure was cited by name.  We call the
+lookup function to find the nearest accessible structure with that name, if
+there is such a structure.  Undefined is returned if there is no such
+structure.
+
+        lookup : ( label ) ->
+            @firstAccessible ( other ) -> other.hasLabel label
+
+We permit structures to have reasons attached to them in any of four ways.
+
+ * A structure A may be a reason for another structure B if there is a
+   connection from A to B of type reason.  By default, A is then the reason
+   for B, in the sense that A should be a rule justifying B.
+ * A variant of the previous case is when A passes the `isAReference()`
+   test, in which case A is not a rule justifying B, but rather the text of
+   A is the name of a rule justifying B.
+ * The external attribute with key "reasons" may be an array of strings,
+   each of which will then be treated as the name of another structure that
+   is treated as a reason for this one.
+ * The computed attribute with key "reasons" is treated the same way.
+
+The following function gathers all reasons assigned by any of these four
+means into a single set, returned as an array with no predefined order.  It
+may contain some strings (which are the names of reasons, and were attached
+using one of the final two means) and/or some structures (which may be
+reasons or the names of them, and were attached using one of the first two
+means).  The caller is responsible for converting the names into structures
+(when possible) using `lookup()`, defined above.  The array may contain
+repeated entries, if they were attached more than once using one or more of
+the four means given above.
+
+        reasons : ->
+            [
+                ( stringArrayAttributes this, 'reasons' )...
+                ( allConnectedTo this, 'reason' )...
+            ]
+
+We permit structures to have premises attached to them in exactly the same
+four ways as they have reasons attached.  For that reason, we implement the
+`premises` function identically to the `reasons` function.
+
+        premises : ->
+            [
+                ( stringArrayAttributes this, 'premises' )...
+                ( allConnectedTo this, 'premise' )...
+            ]

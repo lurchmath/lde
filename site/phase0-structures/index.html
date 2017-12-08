@@ -132,6 +132,7 @@
         <li class="main active"><a href="#lde-design-phase-0-structures">LDE Design Phase 0: Structures</a></li>
             <li><a href="#the-structure-module">The Structure module</a></li>
             <li><a href="#lde-module">LDE Module</a></li>
+            <li><a href="#later-enhancements">Later enhancements</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
@@ -367,15 +368,12 @@ handlers, and thus hear about the events they signal.</p>
 <ul>
 <li><code>S.isAccessibleTo(T)</code> returns true or false, implementing the
    accessibility relation defined earlier.</li>
-<li><code>S.findCited(n)</code> finds the first structure <code>T</code> accessible to <code>S</code> with
-   name <code>n</code> in <code>T.attributes()</code>, or undefined if there is no such structure
-   <code>T</code>.</li>
-<li><code>S.whatCitesMe()</code> finds all structures <code>T</code> in the scope of <code>S</code> with any
-   citation-based key (such as "reason" or "premise") in <code>T.properties()</code>
-   being associated to the value <code>S.properties().name</code>.</li>
-<li>There may be a need later to create other accessibility-related
-   routines, such as <code>S.allAccessibleToMe()</code> or <code>S.myScope()</code> or
-   <code>S.allAccessibleSatisfying(P)</code> etc.</li>
+<li><code>S.text()</code> and <code>S.isAReference()</code></li>
+<li><code>S.isALabelFor(T)</code> (plus <code>isAPremiseFor</code> and <code>isAReasonFor</code>)</li>
+<li><code>S.lookup(n)</code> finds the first structure <code>T</code> accessible to <code>S</code> with
+   label <code>n</code>.</li>
+<li><code>S.labels()</code>, <code>S.reasons()</code>, and <code>S.premises()</code></li>
+<li><code>S.cites(T)</code> and <code>S.whatCitesMe()</code></li>
 </ul>
 <h3 id="miscellany">Miscellany</h3>
 <p>Work done in this section:</p>
@@ -445,7 +443,21 @@ insert, delete, and replace functions as part of the module's API, each of
 which operate on the global LDE document.</p>
 <p>We will call any kind of insertion, removal, or replacement of subtrees of
 the LDE Document a change event, whether it happened via a message from a
-parent thread or as a function call to the LDE as a module in a larger app.</p></div>
+parent thread or as a function call to the LDE as a module in a larger app.</p>
+<h2 id="later-enhancements">Later enhancements</h2>
+<p>The following enhancements to work from Phase 0 are proposed, but are not
+essential enough to have been included in the Phase 0 work.  We list them
+here so as not to lose track of important ideas, and we leave empty check
+boxes next to them so that we can later mark them complete as they are
+implemented.</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled> Make the <code>labels()</code> function more efficient as follows.<ul>
+<li>Whenever it is computed, cache the value in an internal field.</li>
+<li>The next time <code>labels()</code> is called, use the cached value if it exists.</li>
+<li>Whenever you call <code>wasChanged()</code>, be sure to clear the cached value.</li>
+</ul>
+</li>
+</ul></div>
         </div>
 
         <footer class="col-md-12">

@@ -235,15 +235,12 @@ Specification:
 
  * `S.isAccessibleTo(T)` returns true or false, implementing the
    accessibility relation defined earlier.
- * `S.findCited(n)` finds the first structure `T` accessible to `S` with
-   name `n` in `T.attributes()`, or undefined if there is no such structure
-   `T`.
- * `S.whatCitesMe()` finds all structures `T` in the scope of `S` with any
-   citation-based key (such as "reason" or "premise") in `T.properties()`
-   being associated to the value `S.properties().name`.
- * There may be a need later to create other accessibility-related
-   routines, such as `S.allAccessibleToMe()` or `S.myScope()` or
-   `S.allAccessibleSatisfying(P)` etc.
+ * `S.text()` and `S.isAReference()`
+ * `S.isALabelFor(T)` (plus `isAPremiseFor` and `isAReasonFor`)
+ * `S.lookup(n)` finds the first structure `T` accessible to `S` with
+   label `n`.
+ * `S.labels()`, `S.reasons()`, and `S.premises()`
+ * `S.cites(T)` and `S.whatCitesMe()`
 
 ### Miscellany
 
@@ -318,3 +315,16 @@ which operate on the global LDE document.
 We will call any kind of insertion, removal, or replacement of subtrees of
 the LDE Document a change event, whether it happened via a message from a
 parent thread or as a function call to the LDE as a module in a larger app.
+
+## Later enhancements
+
+The following enhancements to work from Phase 0 are proposed, but are not
+essential enough to have been included in the Phase 0 work.  We list them
+here so as not to lose track of important ideas, and we leave empty check
+boxes next to them so that we can later mark them complete as they are
+implemented.
+
+ * [ ] Make the `labels()` function more efficient as follows.
+    * Whenever it is computed, cache the value in an internal field.
+    * The next time `labels()` is called, use the cached value if it exists.
+    * Whenever you call `wasChanged()`, be sure to clear the cached value.

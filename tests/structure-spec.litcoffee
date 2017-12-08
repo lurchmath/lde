@@ -1822,3 +1822,359 @@ The same search from K yields an empty list.
 
             result = K.allInScope()
             expect( result.length ).toBe 0
+
+## Attribute conventions
+
+Attribute conventions are documented in the code
+[here](../src/structure.litcoffee#attribute-conventions).  This section
+tests each function (and thus each related concept) defined there.
+
+    describe 'Attribute conventions', ->
+
+The `text()` function is very straightforward, so we have minimal testing of
+it.
+
+        it 'should correctly fetch the text attribute', ->
+
+Construct a Structure with no attributes, and verify that its text is
+undefined.
+
+            A = new Structure
+            expect( A.text() ).toBeUndefined()
+
+Give it a text attribute and verify that we can query it with `text()`.
+
+            A.attr text : 'example'
+            expect( A.text() ).toBe 'example'
+
+Change it and verify that the change took.
+
+            A.attr text : 'other'
+            expect( A.text() ).toBe 'other'
+
+Make a copy of A and verify that the copy also has the same text.
+
+            B = A.copy()
+            expect( B.text() ).toBe 'other'
+
+The `isAReference()` function is very straightforward, so we have minimal
+testing of it.
+
+        it 'should correctly identify references', ->
+
+Construct a Structure with no attributes, and verify that it is not a
+reference.
+
+            A = new Structure
+            expect( A.isAReference() ).toBe no
+
+Give it a true reference attribute and verify that it now counts as a
+reference.
+
+            A.attr reference : yes
+            expect( A.isAReference() ).toBe yes
+
+Give it a false reference attribute and verify that it no longer counts as a
+reference.
+
+            A.attr reference : no
+            expect( A.isAReference() ).toBe no
+
+Give it any truthy reference attribute and verify that it is a reference.
+
+            A.attr reference : 100
+            expect( A.isAReference() ).toBe yes
+
+Make a copy of A and verify that the copy is also a reference.
+
+            B = A.copy()
+            expect( B.isAReference() ).toBe yes
+
+We now check that the `isALabelFor()`, `isAReasonFor()`, and
+`isAPremiseFor()` functions detect such connections iff they exist.
+
+        it 'should correctly detect label/reason/premise connections', ->
+
+Make a structure with a single label connection.  Verify that there is
+exactly one (x,y) pair for which `x.isALabelFor y` is true, and that it is
+the correct pair.
+
+            A = new Structure(
+                B = new Structure
+                C = new Structure().attr 'label for' : 'previous'
+            ).setup()
+            expect( A.isALabelFor A ).toBeFalsy()
+            expect( A.isALabelFor B ).toBeFalsy()
+            expect( A.isALabelFor C ).toBeFalsy()
+            expect( B.isALabelFor A ).toBeFalsy()
+            expect( B.isALabelFor B ).toBeFalsy()
+            expect( B.isALabelFor C ).toBeFalsy()
+            expect( C.isALabelFor A ).toBeFalsy()
+            expect( C.isALabelFor B ).toBeTruthy()
+            expect( C.isALabelFor C ).toBeFalsy()
+
+Make a structure with two reason connections.  Verify that there are
+exactly two (x,y) pairs for which `x.isAReasonFor y` is true, and that they
+are the correct pairs.
+
+            A = new Structure(
+                B = new Structure().attr id : 1, 'label for' : 'next'
+                C = new Structure().attr 'reason for' : 'previous'
+                D = new Structure().attr 'reason for' : '1'
+            ).setup()
+            expect( A.isAReasonFor A ).toBeFalsy()
+            expect( A.isAReasonFor B ).toBeFalsy()
+            expect( A.isAReasonFor C ).toBeFalsy()
+            expect( A.isAReasonFor D ).toBeFalsy()
+            expect( B.isAReasonFor A ).toBeFalsy()
+            expect( B.isAReasonFor B ).toBeFalsy()
+            expect( B.isAReasonFor C ).toBeFalsy()
+            expect( B.isAReasonFor D ).toBeFalsy()
+            expect( C.isAReasonFor A ).toBeFalsy()
+            expect( C.isAReasonFor B ).toBeTruthy()
+            expect( C.isAReasonFor C ).toBeFalsy()
+            expect( C.isAReasonFor D ).toBeFalsy()
+            expect( D.isAReasonFor A ).toBeFalsy()
+            expect( D.isAReasonFor B ).toBeTruthy()
+            expect( D.isAReasonFor C ).toBeFalsy()
+            expect( D.isAReasonFor D ).toBeFalsy()
+
+Make a structure with three premise connections.  Verify that there are
+exactly two (x,y) pairs for which `x.isAPremiseFor y` is true, and that they
+are the correct pairs.
+
+            A = new Structure(
+                B = new Structure().attr \
+                    id : 2, 'label for' : 1, 'premise for' : 3
+                C = new Structure().attr id : 3, 'premise for' : 2
+                D = new Structure().attr id : 4, 'premise for' : 3
+            ).attr( id : 1 ).setup()
+            expect( A.isAPremiseFor A ).toBeFalsy()
+            expect( A.isAPremiseFor B ).toBeFalsy()
+            expect( A.isAPremiseFor C ).toBeFalsy()
+            expect( A.isAPremiseFor D ).toBeFalsy()
+            expect( B.isAPremiseFor A ).toBeFalsy()
+            expect( B.isAPremiseFor B ).toBeFalsy()
+            expect( B.isAPremiseFor C ).toBeTruthy()
+            expect( B.isAPremiseFor D ).toBeFalsy()
+            expect( C.isAPremiseFor A ).toBeFalsy()
+            expect( C.isAPremiseFor B ).toBeTruthy()
+            expect( C.isAPremiseFor C ).toBeFalsy()
+            expect( C.isAPremiseFor D ).toBeFalsy()
+            expect( D.isAPremiseFor A ).toBeFalsy()
+            expect( D.isAPremiseFor B ).toBeFalsy()
+            expect( D.isAPremiseFor C ).toBeTruthy()
+            expect( D.isAPremiseFor D ).toBeFalsy()
+
+The next set of tests verifies that the `labels()` function correctly
+computes lists of labels for a structure based on the three possible
+sources for such labels (external attributes, computed attributes, and
+connections).  The trivial sidekick function `hasLabel()` is also tested.
+
+        it 'should correctly compute label lists and membership', ->
+
+Define a structure with several connections, labels, and one text attribute.
+
+            A = new Structure(
+                B = new Structure().attr name : 'B'
+                C = new Structure().attr name : 'C'
+            ).attr name : 'A'
+            A.setup()
+            A.setExternalAttribute 'labels', [ 'one' ]
+            B.setComputedAttribute 'labels', [ 'two', 'three' ]
+            B.setExternalAttribute 'labels', [ 'two' ]
+            expect( C.connectTo B, 'label' ).toBeTruthy()
+            expect( A.connectTo C, 'label' ).toBeTruthy()
+            C.setExternalAttribute 'text', 'four'
+
+The labels for A include only the one specified in its external attribute
+"labels," because it has no computed attributes nor any incoming
+connections.
+
+            expect( A.labels() ).toEqual [ 'one' ]
+
+The labels for B include "two" and "three" from its computed attributes,
+nothing *new* from its external attributes, and "four" from the connection
+from C to B (in which C has the text "four" and is connceted as a label).
+
+            toTest = B.labels()
+            expect( toTest.length ).toBe 3
+            expect( 'two' in toTest ).toBeTruthy()
+            expect( 'three' in toTest ).toBeTruthy()
+            expect( 'four' in toTest ).toBeTruthy()
+
+The labels for C include nothing at all, because it has no labels defined in
+its external or internal attributes, and while A claims to label C, it has
+no text content to serve as the label.
+
+            expect( C.labels() ).toEqual [ ]
+
+Now repeat all the above tests, phrased in terms of `hasLabel()` rather than
+just `labels()`.
+
+            expect( A.hasLabel 'one' ).toBeTruthy()
+            expect( A.hasLabel 'two' ).toBeFalsy()
+            expect( A.hasLabel 'three' ).toBeFalsy()
+            expect( A.hasLabel 'four' ).toBeFalsy()
+            expect( B.hasLabel 'one' ).toBeFalsy()
+            expect( B.hasLabel 'two' ).toBeTruthy()
+            expect( B.hasLabel 'three' ).toBeTruthy()
+            expect( B.hasLabel 'four' ).toBeTruthy()
+            expect( C.hasLabel 'one' ).toBeFalsy()
+            expect( C.hasLabel 'two' ).toBeFalsy()
+            expect( C.hasLabel 'three' ).toBeFalsy()
+            expect( C.hasLabel 'four' ).toBeFalsy()
+
+The following test gives labels to several structures throughout a complex
+hierarchy, and then does many lookups to verify that all the results are
+correct.  These include various types of challenges to the lookup function,
+described in the individual tests below.
+
+        it 'should correctly look up labeled structures', ->
+
+The complex hierarchy:
+
+            A = new Structure(
+                B = new Structure(
+                    C = new Structure().attr labels : [ 'L1', 'L2' ]
+                    D = new Structure().attr labels : [ 'L3' ]
+                ).attr labels : [ 'L4', 'L6' ]
+                E = new Structure(
+                    F = new Structure().attr labels : [ 'L1', 'L6' ]
+                    G = new Structure().attr labels : [ 'L4', 'L5' ]
+                )
+            ).setup()
+
+From A, B, or C, one can find nothing via lookup using any label.
+
+            expect( A.lookup 'L1' ).toBeUndefined()
+            expect( A.lookup 'L2' ).toBeUndefined()
+            expect( A.lookup 'L3' ).toBeUndefined()
+            expect( A.lookup 'L4' ).toBeUndefined()
+            expect( A.lookup 'L5' ).toBeUndefined()
+            expect( A.lookup 'L6' ).toBeUndefined()
+            expect( B.lookup 'L1' ).toBeUndefined()
+            expect( B.lookup 'L2' ).toBeUndefined()
+            expect( B.lookup 'L3' ).toBeUndefined()
+            expect( B.lookup 'L4' ).toBeUndefined()
+            expect( B.lookup 'L5' ).toBeUndefined()
+            expect( B.lookup 'L6' ).toBeUndefined()
+            expect( C.lookup 'L1' ).toBeUndefined()
+            expect( C.lookup 'L2' ).toBeUndefined()
+            expect( C.lookup 'L3' ).toBeUndefined()
+            expect( C.lookup 'L4' ).toBeUndefined()
+            expect( C.lookup 'L5' ).toBeUndefined()
+            expect( C.lookup 'L6' ).toBeUndefined()
+
+From D, one can find C by looking up L1 or L2, but nothing else.
+
+            expect( D.lookup 'L1' ).toBe C
+            expect( D.lookup 'L2' ).toBe C
+            expect( D.lookup 'L3' ).toBeUndefined()
+            expect( D.lookup 'L4' ).toBeUndefined()
+            expect( D.lookup 'L5' ).toBeUndefined()
+            expect( D.lookup 'L6' ).toBeUndefined()
+
+From E, one can find B by looking up L4 or L6, but nothing else.  This tests
+that lookup follows accessibility rules, ignoring the structures inside B.
+
+            expect( E.lookup 'L1' ).toBeUndefined()
+            expect( E.lookup 'L2' ).toBeUndefined()
+            expect( E.lookup 'L3' ).toBeUndefined()
+            expect( E.lookup 'L4' ).toBe B
+            expect( E.lookup 'L5' ).toBeUndefined()
+            expect( E.lookup 'L6' ).toBe B
+
+From F, one can find B by looking up L4 or L6, but nothing else.  This test
+is similar to the previous, but verifying that accessibility can step up to
+include the parent's previous siblings.
+
+            expect( F.lookup 'L1' ).toBeUndefined()
+            expect( F.lookup 'L2' ).toBeUndefined()
+            expect( F.lookup 'L3' ).toBeUndefined()
+            expect( F.lookup 'L4' ).toBe B
+            expect( F.lookup 'L5' ).toBeUndefined()
+            expect( F.lookup 'L6' ).toBe B
+
+From G, one can find B by looking up L4, but F by looking up L1 or L6.  This
+test verifies that the label L6 on F successfully eclipses the same label on
+B.
+
+            expect( G.lookup 'L1' ).toBe F
+            expect( G.lookup 'L2' ).toBeUndefined()
+            expect( G.lookup 'L3' ).toBeUndefined()
+            expect( G.lookup 'L4' ).toBe B
+            expect( G.lookup 'L5' ).toBeUndefined()
+            expect( G.lookup 'L6' ).toBe F
+
+The next set of tests verifies that the `reasons()` and `premises()`
+functions correctly compute lists of reasons/premises for a structure based
+on the four possible sources for such labels (external attributes, computed
+attributes, and connections of two types).
+
+        it 'should correctly compute reason and premise lists', ->
+
+Define a structure with several connections, reasons, and one text
+attribute.  We re-use a similar structure from the earlier test for labels.
+
+            A = new Structure(
+                B = new Structure().attr name : 'B'
+                C = new Structure().attr name : 'C'
+            ).attr name : 'A'
+            A.setup()
+            A.setExternalAttribute 'reasons', [ 'one' ]
+            B.setComputedAttribute 'reasons', [ 'two', 'three' ]
+            B.setExternalAttribute 'reasons', [ 'two' ]
+            expect( C.connectTo B, 'reason' ).toBeTruthy()
+            expect( A.connectTo C, 'reason' ).toBeTruthy()
+            C.setExternalAttribute 'text', 'four'
+            C.setExternalAttribute 'reference', yes
+
+The reasons for A include only the one specified in its external attribute
+"reasons," because it has no computed attributes nor any incoming
+connections.
+
+            expect( A.reasons() ).toEqual [ 'one' ]
+
+The reasons for B include "two" and "three" from its computed attributes,
+"two" again from its external attributes, and C from the connection from C
+to B.
+
+            toTest = B.reasons()
+            expect( toTest.length ).toBe 4
+            numTwos = ( x for x in toTest when x is 'two' ).length
+            expect( numTwos ).toBe 2
+            expect( 'three' in toTest ).toBeTruthy()
+            expect( C in toTest ).toBeTruthy()
+
+The reasons for C include just A, because it has no reasons defined in
+its external or internal attributes, but A connects to C as a reason and is
+not marked as a reference, so it must itself be the reason structure.
+
+            expect( C.reasons() ).toEqual [ A ]
+
+Redo everything we just did, but for premises instead of reasons.
+
+            A = new Structure(
+                B = new Structure().attr name : 'B'
+                C = new Structure().attr name : 'C'
+            ).attr name : 'A'
+            A.setup()
+            A.setExternalAttribute 'premises', [ 'one' ]
+            B.setComputedAttribute 'premises', [ 'two', 'three' ]
+            B.setExternalAttribute 'premises', [ 'two' ]
+            expect( C.connectTo B, 'premise' ).toBeTruthy()
+            expect( A.connectTo C, 'premise' ).toBeTruthy()
+            C.setExternalAttribute 'text', 'four'
+            C.setExternalAttribute 'reference', yes
+
+            expect( A.premises() ).toEqual [ 'one' ]
+
+            toTest = B.premises()
+            expect( toTest.length ).toBe 4
+            numTwos = ( x for x in toTest when x is 'two' ).length
+            expect( numTwos ).toBe 2
+            expect( 'three' in toTest ).toBeTruthy()
+            expect( C in toTest ).toBeTruthy()
+
+            expect( C.premises() ).toEqual [ A ]
