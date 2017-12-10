@@ -642,46 +642,6 @@ dealing with it is the attribute storing connections to other structures.
 We handle that attribute with all the functions in [the Connections section,
 above](#connections).
 
-### Special connection types
-
-There are a few types of connections that are given special status by the
-Lurch Deductive Engine: reasons, premises, and labels.  One structure may be
-a label, reason, or premise for another, and the primary way to express that
-is by connecting the structures.  A label or reason connects to the
-structure for which it is a label or reason, and a premise is connected to
-by the structure that cites it as a premise.  We write three convenience
-functions here for speaking about these special connection types.
-
-We define `A.isALabelFor B` to be true iff A connects to B with a conncetion
-of type "label," meaning that the text content of A should be treated as a
-label for B.
-
-        isALabelFor : ( other ) ->
-            other.ID in @allConnectionsOut 'label'
-
-We define `A.isAPremiseFor B` to be true iff A is cited as a premise for B,
-that is, A connects to B with a connection of type "premise."  If A passes
-the `isAReference()` test, then the text content of A refers to the actual
-premise by name; otherwise, A itself is the premise.
-
-        isAPremiseFor : ( other ) ->
-            other.ID in @allConnectionsOut 'premise'
-
-We define `A.isAReasonFor B` to be true iff A connects to B with a
-connection of type "reason," meaning that A should be treated as a reason
-for B.  As with premises, if A passes the `isAReference()` test, then the
-text content of A refers to the actual reason by name; otherwise, A itself
-is the reason.
-
-        isAReasonFor : ( other ) ->
-            other.ID in @allConnectionsOut 'reason'
-
-While the `labels()`, `reasons()`, and `premises()` functions defined
-[below](#collecting-labels-reasons-and-premises) permit attaching labels,
-reasons, and premises using attributes other than connections, the three
-functions defined above are for querying connections only, not any other
-type of label/reason/premise attachment.
-
 ### Convenience functions used below
 
 We define the following convenience functions that will be used to build the
@@ -729,8 +689,8 @@ We permit a structure to be labeled in any of three ways.
  * The external attribute with key "labels" may be an array of strings, each
    of which will then be treated as a label for the structure.
  * The computed attribute with key "labels" is treated the same way.
- * Any structure may label another structure as documented by the
-   `isALabelFor` function implemented earlier in this same section.
+ * Any structure may label another structure by having a connection of type
+   "label" from the labeling structure to the labeled structure.
 
 The `labels()` function gathers all labels assigned by any of these three
 means into a single set, returned as an array with no repeated entries, and
