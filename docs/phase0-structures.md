@@ -227,8 +227,8 @@ Specification:
 
 Work done in this section:
 
- * [ ] Code implemented
- * [ ] Unit tests written and passing
+ * [x] Code implemented
+ * [x] Unit tests written and passing
  * [ ] API documentation written
 
 Specification:
@@ -246,16 +246,15 @@ Specification:
 
 Work done in this section:
 
- * [ ] Code implemented
- * [ ] Unit tests written and passing
+ * [x] Code implemented
+ * [x] Unit tests written and passing
  * [ ] API documentation written
 
 Specification:
 
- * `S.text()` returns the contents of `S` as plain text.  The default
-   implementation of this, for the base `Structure` class, is the empty
-   string.  Subclasses may override this, but there is a guaranteed
-   implementation in all `Structure`s that yields a string.
+ * `S.text()` returns the contents of `S` as plain text.  This just looks up
+   the external attribute "test," which can be filled in by the client for
+   structures that have text content.
 
 ## LDE Module
 
@@ -328,3 +327,9 @@ implemented.
     * Whenever it is computed, cache the value in an internal field.
     * The next time `labels()` is called, use the cached value if it exists.
     * Whenever you call `wasChanged()`, be sure to clear the cached value.
+ * [ ] Make the `whatCitesMe()` function more efficient by making it loop
+   manually through all the things in scope, tracking when anything it is
+   scope eclipses it by being labeled with one or more of its labels.  If at
+   any point it has no more labels left in force, stop iterating.  This is a
+   minor performance gain, because it will be rare that a structure is fully
+   eclipsed by other structures with the same name.

@@ -360,8 +360,8 @@ handlers, and thus hear about the events they signal.</p>
 <h3 id="accessibility">Accessibility</h3>
 <p>Work done in this section:</p>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled> Code implemented</li>
-<li class="task-list-item"><input type="checkbox" disabled> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Unit tests written and passing</li>
 <li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
 </ul>
 <p>Specification:</p>
@@ -378,16 +378,15 @@ handlers, and thus hear about the events they signal.</p>
 <h3 id="miscellany">Miscellany</h3>
 <p>Work done in this section:</p>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled> Code implemented</li>
-<li class="task-list-item"><input type="checkbox" disabled> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Unit tests written and passing</li>
 <li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
 </ul>
 <p>Specification:</p>
 <ul>
-<li><code>S.text()</code> returns the contents of <code>S</code> as plain text.  The default
-   implementation of this, for the base <code>Structure</code> class, is the empty
-   string.  Subclasses may override this, but there is a guaranteed
-   implementation in all <code>Structure</code>s that yields a string.</li>
+<li><code>S.text()</code> returns the contents of <code>S</code> as plain text.  This just looks up
+   the external attribute "test," which can be filled in by the client for
+   structures that have text content.</li>
 </ul>
 <h2 id="lde-module">LDE Module</h2>
 <h3 id="global-functions-and-data">Global functions and data</h3>
@@ -457,6 +456,12 @@ implemented.</p>
 <li>Whenever you call <code>wasChanged()</code>, be sure to clear the cached value.</li>
 </ul>
 </li>
+<li class="task-list-item"><input type="checkbox" disabled> Make the <code>whatCitesMe()</code> function more efficient by making it loop
+   manually through all the things in scope, tracking when anything it is
+   scope eclipses it by being labeled with one or more of its labels.  If at
+   any point it has no more labels left in force, stop iterating.  This is a
+   minor performance gain, because it will be rare that a structure is fully
+   eclipsed by other structures with the same name.</li>
 </ul></div>
         </div>
 

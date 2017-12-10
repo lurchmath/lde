@@ -705,22 +705,11 @@ is omitted from the results.
             ]
             ( label for label in uniqueArray result when label isnt '' )
 
-We then build two important functions based on `labels()`.  The first is a
-trivial extension of it, to the `hasLabel()` function, which checks to see
-if this structure has a particular label.
+We then build a trivial extension of the `labels()` function, the
+`hasLabel()` function, which checks to see if this structure has a
+particular label.
 
         hasLabel : ( label ) -> label in @labels()
-
-The second is a lookup function, which starts from this structure and walks
-back through all structures accessible to it, to find the first one having a
-given label.  This can be used when the current structure cites something by
-name, and we wish to find which structure was cited by name.  We call the
-lookup function to find the nearest accessible structure with that name, if
-there is such a structure.  Undefined is returned if there is no such
-structure.
-
-        lookup : ( label ) ->
-            @firstAccessible ( other ) -> other.hasLabel label
 
 We permit structures to have reasons attached to them in any of four ways.
 
@@ -760,3 +749,37 @@ four ways as they have reasons attached.  For that reason, we implement the
                 ( stringArrayAttributes this, 'premises' )...
                 ( allConnectedTo this, 'premise' )...
             ]
+
+### Citations and lookups
+
+The lookup function starts from this structure and walks back through all
+structures accessible to it, to find the first one having a given label.
+This can be used when the current structure cites something by name, and we
+wish to find which structure was cited by name.  We call the lookup function
+to find the nearest accessible structure with that name, if there is such a
+structure.  Undefined is returned if there is no such structure.
+
+        lookup : ( label ) ->
+            @firstAccessible ( other ) -> other.hasLabel label
+
+We can then use that function to check whether one structure cites another.
+We say that A cites B iff B is a reason or premise for A.  Thus we get the
+results of `reasons()` and `premises()` and perform any needed lookups to
+answer the question, does A cite B?  For efficiency, we do equality
+comparison of structures first, then lookups second.
+
+        cites : ( other ) ->
+            citations = [ @reasons()..., @premises()... ]
+            toLookUp = [ ]
+            for item in citations
+                if item is other then return yes
+                if typeof item is 'string' then toLookUp.push item
+                if item.isAReference?() then toLookUp.push item.text()
+            for label in toLookUp
+                if other is @lookup label then return yes
+            no
+
+Finally, we can write a function that computes all structures that cite this
+one.  It uses the above function to make the work easy.
+
+        whatCitesMe : -> @allInScope ( other ) => other.cites this

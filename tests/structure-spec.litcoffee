@@ -1949,6 +1949,79 @@ just `labels()`.
             expect( C.hasLabel 'three' ).toBeFalsy()
             expect( C.hasLabel 'four' ).toBeFalsy()
 
+The next set of tests verifies that the `reasons()` and `premises()`
+functions correctly compute lists of reasons/premises for a structure based
+on the four possible sources for such labels (external attributes, computed
+attributes, and connections of two types).
+
+        it 'should correctly compute reason and premise lists', ->
+
+Define a structure with several connections, reasons, and one text
+attribute.  We re-use a similar structure from the earlier test for labels.
+
+            A = new Structure(
+                B = new Structure().attr name : 'B'
+                C = new Structure().attr name : 'C'
+            ).attr name : 'A'
+            A.setup()
+            A.setExternalAttribute 'reasons', [ 'one' ]
+            B.setComputedAttribute 'reasons', [ 'two', 'three' ]
+            B.setExternalAttribute 'reasons', [ 'two' ]
+            expect( C.connectTo B, 'reason' ).toBeTruthy()
+            expect( A.connectTo C, 'reason' ).toBeTruthy()
+            C.setExternalAttribute 'text', 'four'
+            C.setExternalAttribute 'reference', yes
+
+The reasons for A include only the one specified in its external attribute
+"reasons," because it has no computed attributes nor any incoming
+connections.
+
+            expect( A.reasons() ).toEqual [ 'one' ]
+
+The reasons for B include "two" and "three" from its computed attributes,
+"two" again from its external attributes, and C from the connection from C
+to B.
+
+            toTest = B.reasons()
+            expect( toTest.length ).toBe 4
+            numTwos = ( x for x in toTest when x is 'two' ).length
+            expect( numTwos ).toBe 2
+            expect( 'three' in toTest ).toBeTruthy()
+            expect( C in toTest ).toBeTruthy()
+
+The reasons for C include just A, because it has no reasons defined in
+its external or internal attributes, but A connects to C as a reason and is
+not marked as a reference, so it must itself be the reason structure.
+
+            expect( C.reasons() ).toEqual [ A ]
+
+Redo everything we just did, but for premises instead of reasons.
+
+            A = new Structure(
+                B = new Structure().attr name : 'B'
+                C = new Structure().attr name : 'C'
+            ).attr name : 'A'
+            A.setup()
+            A.setExternalAttribute 'premises', [ 'one' ]
+            B.setComputedAttribute 'premises', [ 'two', 'three' ]
+            B.setExternalAttribute 'premises', [ 'two' ]
+            expect( C.connectTo B, 'premise' ).toBeTruthy()
+            expect( A.connectTo C, 'premise' ).toBeTruthy()
+            C.setExternalAttribute 'text', 'four'
+            C.setExternalAttribute 'reference', yes
+
+            expect( A.premises() ).toEqual [ 'one' ]
+
+            toTest = B.premises()
+            expect( toTest.length ).toBe 4
+            numTwos = ( x for x in toTest when x is 'two' ).length
+            expect( numTwos ).toBe 2
+            expect( 'three' in toTest ).toBeTruthy()
+            expect( C in toTest ).toBeTruthy()
+
+            expect( C.premises() ).toEqual [ A ]
+
+
 The following test gives labels to several structures throughout a complex
 hierarchy, and then does many lookups to verify that all the results are
 correct.  These include various types of challenges to the lookup function,
@@ -2031,74 +2104,91 @@ B.
             expect( G.lookup 'L5' ).toBeUndefined()
             expect( G.lookup 'L6' ).toBe F
 
-The next set of tests verifies that the `reasons()` and `premises()`
-functions correctly compute lists of reasons/premises for a structure based
-on the four possible sources for such labels (external attributes, computed
-attributes, and connections of two types).
+We now test the `cites()` function and the `whatCitesMe()` function, which
+together form the final functions in the `Structure` class.
 
-        it 'should correctly compute reason and premise lists', ->
+        it 'should know which structures cite which other structures', ->
 
-Define a structure with several connections, reasons, and one text
-attribute.  We re-use a similar structure from the earlier test for labels.
+We begin by creating a hierarchy with several labels, reasons, and premises.
+We keep it flat here, because there are many tests we want to do, and
+splitting it into subtrees would make it impossible to do thorough tests
+without a huge structure.  We assume that the above tests have sufficiently
+verified that the accessibility/scope relations behave correctly for
+non-flat structures.
 
-            A = new Structure(
-                B = new Structure().attr name : 'B'
-                C = new Structure().attr name : 'C'
-            ).attr name : 'A'
-            A.setup()
-            A.setExternalAttribute 'reasons', [ 'one' ]
-            B.setComputedAttribute 'reasons', [ 'two', 'three' ]
-            B.setExternalAttribute 'reasons', [ 'two' ]
-            expect( C.connectTo B, 'reason' ).toBeTruthy()
-            expect( A.connectTo C, 'reason' ).toBeTruthy()
-            C.setExternalAttribute 'text', 'four'
-            C.setExternalAttribute 'reference', yes
+            root = new Structure(
+                A = new Structure().attr id : 1
+                B = new Structure().attr id : 2
+                C = new Structure().attr id : 3
+                D = new Structure().attr id : 4
+                E = new Structure().attr id : 5
+                F = new Structure().attr id : 6
+            ).setup()
+            A.setExternalAttribute 'text', 'Theorem 1'
+            A.connectTo B, 'label'
+            B.connectTo D, 'reason'
+            C.setExternalAttribute 'labels', [ 'C' ]
+            D.setExternalAttribute 'premises', [ 'C' ]
+            D.connectTo F, 'premise'
+            E.connectTo F, 'premise'
+            F.setExternalAttribute 'reasons', [ 'Theorem 1' ]
 
-The reasons for A include only the one specified in its external attribute
-"reasons," because it has no computed attributes nor any incoming
-connections.
+To summarize:
 
-            expect( A.reasons() ).toEqual [ 'one' ]
+ * B is labeled "Theorem 1" by A.
+ * C is a premise for D, which cites Theorem 1 as reason.
+ * D and E are both premises for F, which also cites Theorem 1 as reason.
 
-The reasons for B include "two" and "three" from its computed attributes,
-"two" again from its external attributes, and C from the connection from C
-to B.
+We now check all (x,y) pairs under the `cites` relation and verify that all
+answers are correct.
 
-            toTest = B.reasons()
-            expect( toTest.length ).toBe 4
-            numTwos = ( x for x in toTest when x is 'two' ).length
-            expect( numTwos ).toBe 2
-            expect( 'three' in toTest ).toBeTruthy()
-            expect( C in toTest ).toBeTruthy()
+The only citations (as per the above bulleted list) are that D cites both
+B and C, and F cites B, D, and E.
 
-The reasons for C include just A, because it has no reasons defined in
-its external or internal attributes, but A connects to C as a reason and is
-not marked as a reference, so it must itself be the reason structure.
+            expect( A.cites A ).toBeFalsy()
+            expect( A.cites B ).toBeFalsy()
+            expect( A.cites C ).toBeFalsy()
+            expect( A.cites D ).toBeFalsy()
+            expect( A.cites E ).toBeFalsy()
+            expect( A.cites F ).toBeFalsy()
+            expect( B.cites A ).toBeFalsy()
+            expect( B.cites B ).toBeFalsy()
+            expect( B.cites C ).toBeFalsy()
+            expect( B.cites D ).toBeFalsy()
+            expect( B.cites E ).toBeFalsy()
+            expect( B.cites F ).toBeFalsy()
+            expect( C.cites A ).toBeFalsy()
+            expect( C.cites B ).toBeFalsy()
+            expect( C.cites C ).toBeFalsy()
+            expect( C.cites D ).toBeFalsy()
+            expect( C.cites E ).toBeFalsy()
+            expect( C.cites F ).toBeFalsy()
+            expect( D.cites A ).toBeFalsy()
+            expect( D.cites B ).toBeTruthy()
+            expect( D.cites C ).toBeTruthy()
+            expect( D.cites D ).toBeFalsy()
+            expect( D.cites E ).toBeFalsy()
+            expect( D.cites F ).toBeFalsy()
+            expect( E.cites A ).toBeFalsy()
+            expect( E.cites B ).toBeFalsy()
+            expect( E.cites C ).toBeFalsy()
+            expect( E.cites D ).toBeFalsy()
+            expect( E.cites E ).toBeFalsy()
+            expect( E.cites F ).toBeFalsy()
+            expect( F.cites A ).toBeFalsy()
+            expect( F.cites B ).toBeTruthy()
+            expect( F.cites C ).toBeFalsy()
+            expect( F.cites D ).toBeTruthy()
+            expect( F.cites E ).toBeTruthy()
+            expect( F.cites F ).toBeFalsy()
 
-            expect( C.reasons() ).toEqual [ A ]
+We then ask "what cites me?" for each of the six children of the root.  To
+turn around the tests just given, we report our expectations as follows:
+B is cited by D and F, C is cited by D, and D and E are cited by F.
 
-Redo everything we just did, but for premises instead of reasons.
-
-            A = new Structure(
-                B = new Structure().attr name : 'B'
-                C = new Structure().attr name : 'C'
-            ).attr name : 'A'
-            A.setup()
-            A.setExternalAttribute 'premises', [ 'one' ]
-            B.setComputedAttribute 'premises', [ 'two', 'three' ]
-            B.setExternalAttribute 'premises', [ 'two' ]
-            expect( C.connectTo B, 'premise' ).toBeTruthy()
-            expect( A.connectTo C, 'premise' ).toBeTruthy()
-            C.setExternalAttribute 'text', 'four'
-            C.setExternalAttribute 'reference', yes
-
-            expect( A.premises() ).toEqual [ 'one' ]
-
-            toTest = B.premises()
-            expect( toTest.length ).toBe 4
-            numTwos = ( x for x in toTest when x is 'two' ).length
-            expect( numTwos ).toBe 2
-            expect( 'three' in toTest ).toBeTruthy()
-            expect( C in toTest ).toBeTruthy()
-
-            expect( C.premises() ).toEqual [ A ]
+            expect( A.whatCitesMe() ).toEqual [ ]
+            expect( B.whatCitesMe() ).toEqual [ D, F ]
+            expect( C.whatCitesMe() ).toEqual [ D ]
+            expect( D.whatCitesMe() ).toEqual [ F ]
+            expect( E.whatCitesMe() ).toEqual [ F ]
+            expect( F.whatCitesMe() ).toEqual [ ]
