@@ -207,8 +207,10 @@ Another possibly convenient utility is to make a copy of the Structure S
 
         copy : ->
             S = new Structure
-            S.computedAttributes = JSON.parse JSON.stringify @computedAttributes
-            S.externalAttributes = JSON.parse JSON.stringify @externalAttributes
+            S.computedAttributes =
+                JSON.parse JSON.stringify @computedAttributes
+            S.externalAttributes =
+                JSON.parse JSON.stringify @externalAttributes
             S.childList = ( C.copy() for C in @childList )
             S
 
