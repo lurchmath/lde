@@ -7,6 +7,11 @@ of the LDE Document.  For more details on this, see
 
     exports.Structure = class Structure
 
+If you plan to develop a subclass of `Structure`, be sure to follow the
+requirement listed in the
+[Serialization and Deserialization](#serialization-and-deserialization)
+section, below.
+
 ## Unique IDs for instances
 
 We want to be able to give instance of this class unique IDs.  To do so, we
@@ -54,6 +59,75 @@ structures.
             @childList = [ ]
             for child in children
                 @insertChild child, @childList.length
+
+## Serialization and deserialization
+
+We need to be able to convert structure hierarchies to/from JSON data.  We
+do so with the routines in this section.  The serialization and
+deserialization routines are not exactly inverses of one another, because
+they explicitly ignore the `ID` attribute, if there is one.  Serializing and
+then deserializing will produce a hierarchy with no IDs, but you can add
+them with `setup`, defined [below](#external-attributs).  Even so, they will
+almost certainly be different IDs than the original hierarchy had.  Other
+than that, the two hierarchies should be equivalent.
+
+### Registering class names
+
+In order for a hierarchy of structures to be able to be serialized and
+deserialized, we need to track the class of each structure in the hierarchy.
+After all, there will be sublcasses of this class defined, and during
+deserialization, instances of those subclasses will need to be created, as
+opposed to generic `Structure`s.
+
+To facilitate this, we track all subclasses in a single global variable,
+here.  Add one using the registration function provided.
+
+        subclasses : { }
+        @addSubclass : ( name, classObj ) ->
+            Structure::subclasses[name] = classObj
+            name
+
+When should you call it?  In your subclass, create a class variable called
+`className` and assign `Structure.addSubclass 'your class name', YourClass`
+to that member.  Follow this example, which we do here for the `Structure`
+base class:
+
+        className : Structure.addSubclass 'Structure', Structure
+
+## Serialization to JSON
+
+The serialized version of a class contains some objects from within the
+class, not copies but the same objects, so that serialization can be fast.
+Thus you should not modify the serialized version's members.  If you want an
+independent copy, run `JSON.parse` on `JSON.stringify` of the serialized
+version.
+
+        toJSON : ->
+            className : @className
+            computedAttributes : @computedAttributes
+            externalAttributes : @externalAttributes
+            children : ( child.toJSON() for child in @childList )
+
+## Deserialization from JSON
+
+Deserialization is a method in the class, because of course it is called
+when you have no instance at hand, and wish to create one.
+
+It does not re-use the members from the parameter, but explicitly copies
+them using a combination of `JSON.parse` and `JSON.stringify`, so that a
+deserialized version of an existing object will share no members with that
+object.
+
+        @fromJSON : ( json ) ->
+            classObj = Structure::subclasses[json.className]
+            children =
+                ( Structure.fromJSON child for child in json.children )
+            result = new classObj children...
+            result.computedAttributes =
+                JSON.parse JSON.stringify json.computedAttributes
+            result.externalAttributes =
+                JSON.parse JSON.stringify json.externalAttributes
+            result
 
 ## Tree structure
 
@@ -191,6 +265,10 @@ key is special; see [the documentation
 here](https://lurchmath.github.io/lde/site/phase0-structures/#methods-in-the-structure-class)
 for details.
 
+No checks are put on what kind of data can be used for the values of this
+dictionary, but they should be JSON data only, to support serialization.
+(Checks are omitted for efficiency.)
+
         getComputedAttribute : ( key ) -> @computedAttributes[key]
         setComputedAttribute : ( key, value ) ->
             if @computedAttributes[key] isnt value
@@ -228,6 +306,9 @@ here](https://lurchmath.github.io/lde/site/phase0-structures/#methods-in-the-str
 The dictionary of external attributes has get/set/clear functions just as we
 have for computed attributes.  The intent is for them to store data provided
 by the client, and the LDE will not alter it.
+
+As with computed attributes, values should be JSON data only, to support
+serialization, but we do not check for this property, for efficiency.
 
         getExternalAttribute : ( key ) -> @externalAttributes[key]
         setExternalAttribute : ( key, value ) ->

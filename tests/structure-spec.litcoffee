@@ -13,7 +13,6 @@ Verify that the globals exposed by the Structure module are visible.
         it 'should be defined', ->
             expect( Structure ).toBeTruthy()
 
-
 ## Structure trees
 
     describe 'Structure trees', ->
@@ -584,6 +583,198 @@ Verify that across trees, the answer is always undefined.
             expect( dA.isEarlierThan AB ).toBeFalsy()
             expect( dA.isEarlierThan ABA ).toBeFalsy()
             expect( dA.isEarlierThan B ).toBeFalsy()
+
+The following tests serialize and deserialize structures (including some
+subclasses) and verify that the results are faithful copies of the
+originals.
+
+        it 'should serialize and deserialize hierarchies correctly', ->
+
+Begin with a trivial example, a single node hierarchy with no attributes.
+
+            loner = new Structure
+            json = loner.toJSON()
+            expect( json instanceof Structure ).toBeFalsy()
+            expect( json ).not.toBe loner
+            expect( json.className ).toBe 'Structure'
+            expect( json.computedAttributes ).toEqual { }
+            expect( json.externalAttributes ).toEqual { }
+            expect( json.children ).toEqual [ ]
+
+Deserialize a copy from it and verify that it is correctly structured.
+
+            copy = Structure.fromJSON json
+            expect( copy instanceof Structure ).toBeTruthy()
+            expect( copy.computedAttributes ).toEqual { }
+            expect( copy.externalAttributes ).toEqual { }
+            expect( copy.computedAttributes ).not.toBe \
+                json.computedAttributes
+            expect( copy.externalAttributes ).not.toBe \
+                json.externalAttributes
+            expect( copy.computedAttributes ).not.toBe \
+                loner.computedAttributes
+            expect( copy.externalAttributes ).not.toBe \
+                loner.externalAttributes
+            expect( copy.children() ).toEqual [ ]
+            expect( copy.parent() ).toBeNull()
+            expect( copy ).not.toBe json
+            expect( copy ).not.toBe loner
+
+Now do another one-node example, but this one with some attributes of each
+type.
+
+            atty = new Structure()
+            atty.setExternalAttribute 1, 2
+            atty.setExternalAttribute 'three', [ 'four', { } ]
+            atty.setComputedAttribute 'five', 666666
+            atty.setComputedAttribute '7', { 8 : [ [ ] ] }
+            json = atty.toJSON()
+            expect( json instanceof Structure ).toBeFalsy()
+            expect( json ).not.toBe atty
+            expect( json.className ).toBe 'Structure'
+            expect( json.computedAttributes ).toEqual
+                'five' : 666666
+                '7' : { 8 : [ [ ] ] }
+            expect( json.externalAttributes ).toEqual
+                1 : 2
+                'three' : [ 'four', { } ]
+            expect( json.children ).toEqual [ ]
+
+Deserialize a copy from it and verify that it is correctly structured.
+
+            copy = Structure.fromJSON json
+            expect( copy instanceof Structure ).toBeTruthy()
+            expect( copy.computedAttributes ).toEqual
+                'five' : 666666
+                '7' : { 8 : [ [ ] ] }
+            expect( copy.externalAttributes ).toEqual
+                1 : 2
+                'three' : [ 'four', { } ]
+            expect( copy.computedAttributes ).not.toBe \
+                json.computedAttributes
+            expect( copy.externalAttributes ).not.toBe \
+                json.externalAttributes
+            expect( copy.computedAttributes ).not.toBe \
+                atty.computedAttributes
+            expect( copy.externalAttributes ).not.toBe \
+                atty.externalAttributes
+            expect( copy.children() ).toEqual [ ]
+            expect( copy.parent() ).toBeNull()
+            expect( copy ).not.toBe json
+            expect( copy ).not.toBe atty
+
+Now define two silly little subclasses of `Structure` for use in just the
+next test.
+
+            class Sub1 extends Structure
+                className : Structure.addSubclass 'Sub1', Sub1
+                exampleMethod1 : -> 5
+            class Sub2 extends Structure
+                className : Structure.addSubclass 'Sub2', Sub2
+                exampleMethod2 : -> @getExternalAttribute 'test'
+
+Now create a hierarchy with three `Structure`s in it, one of each of the
+three classes `Structure`, `Sub1`, and `Sub2`.  Also give every node in the
+hierarchy a unique ID.
+
+            bigger = new Structure(
+                child1 = new Sub1().attr 10 : 100
+                child2 = new Sub2().attr 'test' : 'ing'
+            ).setup()
+
+Verify that the children are of the expected classes.
+
+            expect( child1 instanceof Sub1 ).toBeTruthy()
+            expect( child1.exampleMethod1 ).not.toBeUndefined()
+            expect( child2 instanceof Sub2 ).toBeTruthy()
+            expect( child2.exampleMethod2 ).not.toBeUndefined()
+
+Serialize and verify that it came out correctly.
+
+            json = bigger.toJSON()
+            expect( json instanceof Structure ).toBeFalsy()
+            expect( json ).not.toBe bigger
+            expect( json.className ).toBe 'Structure'
+            expect( json.computedAttributes ).toEqual { }
+            expect( json.externalAttributes ).toEqual { }
+            expect( json.children.length ).toBe 2
+            child = json.children[0]
+            expect( child instanceof Structure ).toBeFalsy()
+            expect( child instanceof Sub1 ).toBeFalsy()
+            expect( child.className ).toBe 'Sub1'
+            expect( child.computedAttributes ).toEqual { }
+            expect( child.externalAttributes ).toEqual { 10 : 100 }
+            expect( child.children ).toEqual [ ]
+            expect( child.exampleMethod1 ).toBeUndefined()
+            child = json.children[1]
+            expect( child instanceof Structure ).toBeFalsy()
+            expect( child instanceof Sub2 ).toBeFalsy()
+            expect( child.className ).toBe 'Sub2'
+            expect( child.computedAttributes ).toEqual { }
+            expect( child.externalAttributes ).toEqual { 'test' : 'ing' }
+            expect( child.children ).toEqual [ ]
+            expect( child.exampleMethod2 ).toBeUndefined()
+
+Deserialize and verify that each node is the same class as in the original
+hierarchy, as well as all the same tests we did for the earlier cases.
+
+            copy = Structure.fromJSON json
+            expect( copy instanceof Structure ).toBeTruthy()
+            expect( copy.computedAttributes ).toEqual { }
+            expect( copy.externalAttributes ).toEqual { }
+            expect( copy.computedAttributes ).not.toBe \
+                json.computedAttributes
+            expect( copy.externalAttributes ).not.toBe \
+                json.externalAttributes
+            expect( copy.computedAttributes ).not.toBe \
+                bigger.computedAttributes
+            expect( copy.externalAttributes ).not.toBe \
+                bigger.externalAttributes
+            expect( copy.ID ).toBeUndefined()
+            expect( copy.parent() ).toBeNull()
+            expect( copy ).not.toBe json
+            expect( copy ).not.toBe bigger
+            expect( copy.children().length ).toBe 2
+            child = copy.children()[0]
+            expect( child instanceof Sub1 ).toBeTruthy()
+            expect( child.computedAttributes ).toEqual { }
+            expect( child.externalAttributes ).toEqual { 10 : 100 }
+            expect( child.computedAttributes ).not.toBe \
+                json.computedAttributes
+            expect( child.externalAttributes ).not.toBe \
+                json.externalAttributes
+            expect( child.computedAttributes ).not.toBe \
+                child1.computedAttributes
+            expect( child.externalAttributes ).not.toBe \
+                child1.externalAttributes
+            expect( child.ID ).toBeUndefined()
+            expect( child.parent() ).toBe copy
+            expect( child ).not.toBe json.children[0]
+            expect( child ).not.toBe child1
+            expect( child.children() ).toEqual [ ]
+            child = copy.children()[1]
+            expect( child instanceof Sub2 ).toBeTruthy()
+            expect( child.computedAttributes ).toEqual { }
+            expect( child.externalAttributes ).toEqual { 'test' : 'ing' }
+            expect( child.computedAttributes ).not.toBe \
+                json.computedAttributes
+            expect( child.externalAttributes ).not.toBe \
+                json.externalAttributes
+            expect( child.computedAttributes ).not.toBe \
+                child2.computedAttributes
+            expect( child.externalAttributes ).not.toBe \
+                child2.externalAttributes
+            expect( child.ID ).toBeUndefined()
+            expect( child.parent() ).toBe copy
+            expect( child ).not.toBe json.children[1]
+            expect( child ).not.toBe child2
+            expect( child.children() ).toEqual [ ]
+
+Release all IDs assigned in this test, so that we do not mess up tests of
+IDs later in the file, which expect that none have yet been assigned.
+
+            instance.releaseID() for instance in Structure::IDs
+            expect( Structure::IDs.length ).toBe 0
 
 ## Computed attributes
 

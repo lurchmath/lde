@@ -13,3 +13,8 @@ Imports:
 Exports:
 
     exports.Structure = Structure
+
+The LDE Document is a global instance of the `Structure` class, representing
+the meaningful content of the user's document.
+
+    LDEDocument = new Structure
