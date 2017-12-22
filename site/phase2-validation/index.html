@@ -53,7 +53,7 @@
                         <ul class="dropdown-menu">
                             
 <li >
-    <a href="../overview/">Overview</a>
+    <a href="../design-overview/">Overview</a>
 </li>
                             
 <li >
@@ -105,6 +105,23 @@
 </li>
                         </ul>
                     </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Documentation <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            
+<li >
+    <a href="../api-overview/">Overview</a>
+</li>
+                            
+<li >
+    <a href="../api-structures/">Structures</a>
+</li>
+                            
+<li >
+    <a href="../api-lde/">The LDE</a>
+</li>
+                        </ul>
+                    </li>
                 </ul>
 
             <ul class="nav navbar-nav navbar-right">
@@ -132,10 +149,13 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
         <li class="main active"><a href="#lde-design-phase-2-basic-validation">LDE Design Phase 2: Basic Validation</a></li>
-            <li><a href="#atomic-expressions">Atomic expressions</a></li>
-            <li><a href="#definitions-of-the-simplest-rules-code-based-rules">Definitions of the simplest rules: code-based rules</a></li>
-            <li><a href="#formal-systems-or-mathematical-topics">Formal systems (or "mathematical topics")</a></li>
-            <li><a href="#unit-testing">Unit testing</a></li>
+            <li><a href="#content">Content</a></li>
+            <li><a href="#goal">Goal</a></li>
+            <li><a href="#status">Status</a></li>
+        <li class="main "><a href="#atomic-expressions">Atomic expressions</a></li>
+        <li class="main "><a href="#definitions-of-the-simplest-rules-code-based-rules">Definitions of the simplest rules: code-based rules</a></li>
+        <li class="main "><a href="#formal-systems-or-mathematical-topics">Formal systems (or "mathematical topics")</a></li>
+        <li class="main "><a href="#unit-testing">Unit testing</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
@@ -146,6 +166,7 @@ tested in that state, and that provides more features than the previous
 state did.  By the time the final phase is complete, the LDE will be a
 robust and useful product.</p>
 <h1 id="lde-design-phase-2-basic-validation">LDE Design Phase 2: Basic Validation</h1>
+<h2 id="content">Content</h2>
 <p>This phase defines:</p>
 <ul>
 <li>Atomic expressions (just expressions whose meaning is a string, and
@@ -155,11 +176,16 @@ robust and useful product.</p>
 <li>Formal systems (or "mathematical topics", which are structures we can
    put rules inside of)</li>
 </ul>
+<h2 id="goal">Goal</h2>
 <p>This enables really simple formal systems, like TriX game.</p>
 <p>While the intent is for any of the nontrivial processing tasks to be placed
 in a queue and handled when the CPU has time, I leave that hassle out of the
 current design plans.  A later phase will add support for this.</p>
-<h2 id="atomic-expressions">Atomic expressions</h2>
+<h2 id="status">Status</h2>
+<p>This phase has not yet been implemented.  Once it has been implemented, its
+contents will be documented in the API Documentation available from the
+navigation menu at the top of this site.</p>
+<h1 id="atomic-expressions">Atomic expressions</h1>
 <ul>
 <li><code>E.goals == [ "validated" ]</code></li>
 <li><code>E.validate()</code> does this:<ul>
@@ -177,7 +203,7 @@ current design plans.  A later phase will add support for this.</p>
 </ul>
 </li>
 </ul>
-<h2 id="definitions-of-the-simplest-rules-code-based-rules">Definitions of the simplest rules: code-based rules</h2>
+<h1 id="definitions-of-the-simplest-rules-code-based-rules">Definitions of the simplest rules: code-based rules</h1>
 <ul>
 <li><code>R.validate()</code> does this:<ul>
 <li>If <code>R.attributes().code!=true</code> then
@@ -215,7 +241,7 @@ current design plans.  A later phase will add support for this.</p>
 </ul>
 </li>
 </ul>
-<h2 id="formal-systems-or-mathematical-topics">Formal systems (or "mathematical topics")</h2>
+<h1 id="formal-systems-or-mathematical-topics">Formal systems (or "mathematical topics")</h1>
 <ul>
 <li><code>F.exports()</code> returns an array composed of these things, in the order
    they appear in the document:<ul>
@@ -233,7 +259,7 @@ current design plans.  A later phase will add support for this.</p>
    <code>S.wasInserted/wasRemoved/wasChanged()</code>.  Does it need to call
    <code>validate()</code> in anything?</li>
 </ul>
-<h2 id="unit-testing">Unit testing</h2>
+<h1 id="unit-testing">Unit testing</h1>
 <p>How we could do unit testing on this simple LDE:</p>
 <ul>
 <li>Fire up the LDE so that its document is new and thus blank.</li>

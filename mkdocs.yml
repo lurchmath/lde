@@ -2,7 +2,7 @@ site_name: Lurch Deductive Engine Documentation
 pages:
 - Home: index.md
 - Design Plans:
-    - Overview: overview.md
+    - Overview: design-overview.md
     - Phase 1, Structures: phase1-structures.md
     - Phase 2, Basic Validation: phase2-validation.md
     - Phase 3, The Client: phase3-client.md
@@ -15,6 +15,10 @@ pages:
     - Phase 10, Declarations: phase10-declarations.md
     - Phase 11, Bonus Features: phase11-features.md
     - Ideas Archive: ideas.md
+- API Documentation:
+    - Overview: api-overview.md
+    - Structures: api-structures.md
+    - The LDE: api-lde.md
 dev_addr: 127.0.0.1:8888
 extra_javascript:
     - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML

@@ -7,6 +7,8 @@ robust and useful product.
 
 # LDE Design Phase 3: The Client
 
+## Content
+
 This phase defines the LDE Client, a thin interface to the LDE defined in a
 separate module.
 
@@ -17,7 +19,17 @@ LDE.
 This page is just a description; it's not actually written in a "design" or
 "how to build" manner, at least not to the same degree that Phase 2 was.
 
-## App launch
+## Goal
+
+This phase's work just makes Phase 1's work easier to use for most clients.
+
+## Status
+
+This phase has not yet been implemented.  Once it has been implemented, its
+contents will be documented in the API Documentation available from the
+navigation menu at the top of this site.
+
+# App launch
 
 When the Client is loaded into memory (say, at app launch) it will create a
 global structure that is intended to be a sort of shallow/shadow/fake copy
@@ -33,7 +45,7 @@ of the LDE Document.
    hierarchy, stored in the Client (part of the UI) can't do anything at
    all.  It's picture of what's really going on elsewhere, in the LDE.
 
-## Background threads
+# Background threads
 
 The Client can be told about the existence of a background thread that's
 running the LDE.
@@ -47,7 +59,7 @@ running the LDE.
    propagate in only one direction to guarantee that the two hierarchies
    are isomorphic.
 
-## No subclasses
+# No subclasses
 
 Because the nodes in the Facade don't actually do anything, they have no
 subclasses.
@@ -71,7 +83,7 @@ subclasses.
     * Every node just stores its attributes, not doing anything with
       them, unlike on the LDE Document side, which does computation.
 
-## Serialization
+# Serialization
 
  * Facade nodes do one thing, actually:  They know how to serialize
    themselves into JSON, including all their children.
@@ -79,7 +91,7 @@ subclasses.
    and so that the entire Facade can be serialized by the UI (later of
    course) for saving in document metadata.
 
-## IDs
+# IDs
 
 Each Facade node will be given, at the time it's created, an ID unique
 among all nodes in the Facade hierarchy.
@@ -97,7 +109,7 @@ among all nodes in the Facade hierarchy.
    corresponding Facade node, so that it is accessible to the entire UI as
    well.
 
-## Unit testing
+# Unit testing
 
  * Verify that the Facade hierarchy can be built and works independent of
    the LDE
@@ -108,7 +120,7 @@ among all nodes in the Facade hierarchy.
  * All further testing in later phases has the option of using the Client
    or not, depending on what's best for testing in that particular instance.
 
-## Extendability
+# Extendability
 
  * The LDE is free to expose to clients any other functionality it sees
    fit.  That is, interaction with the LDE is not limited to syncing the

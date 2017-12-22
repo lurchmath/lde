@@ -7,6 +7,8 @@ robust and useful product.
 
 # LDE Design Phase 9: Parsing
 
+## Content
+
 This document is not yet complete.  Its content will eventually specify:
 
  * Rules for defining parsing
@@ -20,5 +22,14 @@ This document is not yet complete.  Its content will eventually specify:
       user like language rule declarations feel.  We can let users think of
       them and express them as constant declarations, but under the hood it
       may be implemented as if it had been a language rule.
- * This enables: propositional logic in its usual notation, and other
-   related simple systems
+
+## Goal
+
+This enables: propositional logic in its usual notation, and other related
+simple systems
+
+## Status
+
+This phase has not yet been implemented.  Once it has been implemented, its
+contents will be documented in the API Documentation available from the
+navigation menu at the top of this site.

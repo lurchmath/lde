@@ -7,6 +7,8 @@ robust and useful product.
 
 # LDE Design Phase 5: Background Queue
 
+## Content
+
 This document is not yet complete.  Its content will eventually specify:
 
  * Add a mechanism for queueing tasks to be done later.
@@ -15,3 +17,15 @@ This document is not yet complete.  Its content will eventually specify:
    should be removed form the queue, for efficiency.
  * Then rewrite Phases 2 and 3 to use this feature as needed.
    All later phases should enqueue all nontrivial processing tasks this way.
+
+## Goal
+
+All the work done before this operates more efficiently, and the large and
+complex deductive engine we plan to build on the foundation we have so far
+will still be performant.
+
+## Status
+
+This phase has not yet been implemented.  Once it has been implemented, its
+contents will be documented in the API Documentation available from the
+navigation menu at the top of this site.

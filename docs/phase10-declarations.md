@@ -7,6 +7,8 @@ robust and useful product.
 
 # LDE Design Phase 10: Declarations
 
+## Content
+
 This document is not yet complete.  Its content will eventually specify:
 
  * Variable declarations (which may be a special type of expression, or may
@@ -15,5 +17,14 @@ This document is not yet complete.  Its content will eventually specify:
    then the variable at the start of it is declared?)
  * Examples (structures in which you declare all manner of stuff that
    doesn't bleed out)
- * This enables: predicate logic in standard math notation, and many other
-   math topics
+
+## Goal
+
+This enables: predicate logic in standard math notation, and many other math
+topics
+
+## Status
+
+This phase has not yet been implemented.  Once it has been implemented, its
+contents will be documented in the API Documentation available from the
+navigation menu at the top of this site.

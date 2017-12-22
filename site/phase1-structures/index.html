@@ -53,7 +53,7 @@
                         <ul class="dropdown-menu">
                             
 <li >
-    <a href="../overview/">Overview</a>
+    <a href="../design-overview/">Overview</a>
 </li>
                             
 <li class="active">
@@ -105,6 +105,23 @@
 </li>
                         </ul>
                     </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Documentation <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            
+<li >
+    <a href="../api-overview/">Overview</a>
+</li>
+                            
+<li >
+    <a href="../api-structures/">Structures</a>
+</li>
+                            
+<li >
+    <a href="../api-lde/">The LDE</a>
+</li>
+                        </ul>
+                    </li>
                 </ul>
 
             <ul class="nav navbar-nav navbar-right">
@@ -114,7 +131,7 @@
                     </a>
                 </li>
                     <li >
-                        <a rel="next" href="../overview/">
+                        <a rel="next" href="../design-overview/">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
@@ -132,9 +149,23 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
         <li class="main active"><a href="#lde-design-phase-1-structures">LDE Design Phase 1: Structures</a></li>
-            <li><a href="#the-structure-module">The Structure module</a></li>
-            <li><a href="#lde-module">LDE Module</a></li>
-            <li><a href="#later-enhancements">Later enhancements</a></li>
+            <li><a href="#content">Content</a></li>
+            <li><a href="#goal">Goal</a></li>
+            <li><a href="#status">Status</a></li>
+        <li class="main "><a href="#the-structure-module">The Structure module</a></li>
+            <li><a href="#computed-attributes">Computed attributes</a></li>
+            <li><a href="#external-attributes">External attributes</a></li>
+            <li><a href="#manipulating-the-structure-hierarchy">Manipulating the structure hierarchy</a></li>
+            <li><a href="#event-handling-in-the-structure-hierarchy">Event handling in the structure hierarchy</a></li>
+            <li><a href="#unique-ids">Unique IDs</a></li>
+            <li><a href="#connections">Connections</a></li>
+            <li><a href="#convenience-constructions-for-unit-testing">Convenience constructions for unit testing</a></li>
+            <li><a href="#accessibility">Accessibility</a></li>
+            <li><a href="#miscellany">Miscellany</a></li>
+        <li class="main "><a href="#lde-module">LDE Module</a></li>
+            <li><a href="#global-functions-and-data">Global functions and data</a></li>
+            <li><a href="#foregroundbackground">Foreground/background</a></li>
+        <li class="main "><a href="#later-enhancements">Later enhancements</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
@@ -145,15 +176,20 @@ tested in that state, and that provides more features than the previous
 state did.  By the time the final phase is complete, the LDE will be a
 robust and useful product.</p>
 <h1 id="lde-design-phase-1-structures">LDE Design Phase 1: Structures</h1>
+<h2 id="content">Content</h2>
 <p>In this phase, we just design the generic Structure class on which
 everything else will depend, and the infrastructure of the LDE itself.</p>
+<h2 id="goal">Goal</h2>
 <p>At the end of this phase, we could write unit tests of the whole Structure
 class and its LDE context, thus guaranteeing that all later phases rest on a
 good foundation.</p>
-<h2 id="the-structure-module">The Structure module</h2>
+<h2 id="status">Status</h2>
+<p>This phase has been implemented, and is documented in the API Documentation,
+accessible from the navigation menu at the top of this site.</p>
+<h1 id="the-structure-module">The Structure module</h1>
 <p>That module defines a single <code>Structure</code> class, whose instances have these
 methods.</p>
-<h3 id="computed-attributes">Computed attributes</h3>
+<h2 id="computed-attributes">Computed attributes</h2>
 <p>Work done in this section:</p>
 <ul class="task-list">
 <li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
@@ -201,7 +237,7 @@ methods.</p>
 </ul>
 </li>
 </ul>
-<h3 id="external-attributes">External attributes</h3>
+<h2 id="external-attributes">External attributes</h2>
 <p>Work done in this section:</p>
 <ul class="task-list">
 <li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
@@ -223,7 +259,7 @@ dictionary (get/set/clear) but no corresponding <code>compute</code> function.</
 <li><code>S.clearExternalAttributes(key1,key2,...)</code> removes the stored values;
    calling it with no arguments removes all stored values.</li>
 </ul>
-<h3 id="manipulating-the-structure-hierarchy">Manipulating the structure hierarchy</h3>
+<h2 id="manipulating-the-structure-hierarchy">Manipulating the structure hierarchy</h2>
 <p>Work done in this section:</p>
 <ul class="task-list">
 <li class="task-list-item"><input type="checkbox" disabled> Code implemented</li>
@@ -248,7 +284,7 @@ dictionary (get/set/clear) but no corresponding <code>compute</code> function.</
    a different structure, thus leaving S with no parent.</li>
 <li><code>S.copy()</code> makes a deep copy of S, or equivalently, the subtree with root S.</li>
 </ul>
-<h3 id="event-handling-in-the-structure-hierarchy">Event handling in the structure hierarchy</h3>
+<h2 id="event-handling-in-the-structure-hierarchy">Event handling in the structure hierarchy</h2>
 <p>Work done in this section:</p>
 <ul class="task-list">
 <li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
@@ -276,7 +312,7 @@ handlers, and thus hear about the events they signal.</p>
 <li><code>S.wasChanged()</code> is a function that the UI will call in a structure if
    one of the structure's computd or external attributes changed.</li>
 </ul>
-<h3 id="unique-ids">Unique IDs</h3>
+<h2 id="unique-ids">Unique IDs</h2>
 <p>Work done in this section:</p>
 <ul class="task-list">
 <li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
@@ -292,7 +328,7 @@ handlers, and thus hear about the events they signal.</p>
 <li>Clients can look up structures from IDs using
    <code>Structure.instanceWithId(id)</code>.</li>
 </ul>
-<h3 id="connections">Connections</h3>
+<h2 id="connections">Connections</h2>
 <p>Work done in this section:</p>
 <ul class="task-list">
 <li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
@@ -339,7 +375,7 @@ handlers, and thus hear about the events they signal.</p>
    the array of structures that connected to this one with that connection
    type.</li>
 </ul>
-<h3 id="convenience-constructions-for-unit-testing">Convenience constructions for unit testing</h3>
+<h2 id="convenience-constructions-for-unit-testing">Convenience constructions for unit testing</h2>
 <p>Work done in this section:</p>
 <ul class="task-list">
 <li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
@@ -361,7 +397,7 @@ handlers, and thus hear about the events they signal.</p>
    a string from among a small set of relative references, such as
    "previous" and "next."  E.g., <code>S.attr({"reason for":"previous"})</code>.</li>
 </ul>
-<h3 id="accessibility">Accessibility</h3>
+<h2 id="accessibility">Accessibility</h2>
 <p>Work done in this section:</p>
 <ul class="task-list">
 <li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
@@ -379,7 +415,7 @@ handlers, and thus hear about the events they signal.</p>
 <li><code>S.labels()</code>, <code>S.reasons()</code>, and <code>S.premises()</code></li>
 <li><code>S.cites(T)</code> and <code>S.whatCitesMe()</code></li>
 </ul>
-<h3 id="miscellany">Miscellany</h3>
+<h2 id="miscellany">Miscellany</h2>
 <p>Work done in this section:</p>
 <ul class="task-list">
 <li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
@@ -392,8 +428,8 @@ handlers, and thus hear about the events they signal.</p>
    the external attribute "test," which can be filled in by the client for
    structures that have text content.</li>
 </ul>
-<h2 id="lde-module">LDE Module</h2>
-<h3 id="global-functions-and-data">Global functions and data</h3>
+<h1 id="lde-module">LDE Module</h1>
+<h2 id="global-functions-and-data">Global functions and data</h2>
 <p>Work done in this section:</p>
 <ul class="task-list">
 <li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
@@ -410,7 +446,7 @@ handlers, and thus hear about the events they signal.</p>
    generic Structure, not a subclass.  It will have no children; they
    can be added later.  That is, it starts as a one-node tree, root only.</li>
 </ul>
-<h3 id="foregroundbackground">Foreground/background</h3>
+<h2 id="foregroundbackground">Foreground/background</h2>
 <p>Work done in this section:</p>
 <ul class="task-list">
 <li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
@@ -449,7 +485,7 @@ the four functions given above, and calling them internally.</p>
 <p>We will call any kind of insertion, removal, or replacement of subtrees of
 the LDE Document a change event, whether it happened via a message from a
 parent thread or as a function call to the LDE as a module in a larger app.</p>
-<h2 id="later-enhancements">Later enhancements</h2>
+<h1 id="later-enhancements">Later enhancements</h1>
 <p>The following enhancements to work from Phase 1 are proposed, but are not
 essential enough to have been included in the Phase 1 work.  We list them
 here so as not to lose track of important ideas, and we leave empty check

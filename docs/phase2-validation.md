@@ -7,6 +7,8 @@ robust and useful product.
 
 # LDE Design Phase 2: Basic Validation
 
+## Content
+
 This phase defines:
 
  * Atomic expressions (just expressions whose meaning is a string, and
@@ -16,13 +18,21 @@ This phase defines:
  * Formal systems (or "mathematical topics", which are structures we can
    put rules inside of)
 
+## Goal
+
 This enables really simple formal systems, like TriX game.
 
 While the intent is for any of the nontrivial processing tasks to be placed
 in a queue and handled when the CPU has time, I leave that hassle out of the
 current design plans.  A later phase will add support for this.
 
-## Atomic expressions
+## Status
+
+This phase has not yet been implemented.  Once it has been implemented, its
+contents will be documented in the API Documentation available from the
+navigation menu at the top of this site.
+
+# Atomic expressions
 
  * `E.goals == [ "validated" ]`
  * `E.validate()` does this:
@@ -38,7 +48,7 @@ current design plans.  A later phase will add support for this.
       `E.wasInserted/wasRemoved/wasChanged()`.  Does it need to call
       `validate()` in anything?
 
-## Definitions of the simplest rules: code-based rules
+# Definitions of the simplest rules: code-based rules
 
  * `R.validate()` does this:
     * If `R.attributes().code!=true` then
@@ -72,7 +82,7 @@ current design plans.  A later phase will add support for this.
       `R.wasInserted/wasRemoved/wasChanged()`.  Does it need to call
       `validate()` in anything?
 
-## Formal systems (or "mathematical topics")
+# Formal systems (or "mathematical topics")
 
  * `F.exports()` returns an array composed of these things, in the order
    they appear in the document:
@@ -88,7 +98,7 @@ current design plans.  A later phase will add support for this.
    `S.wasInserted/wasRemoved/wasChanged()`.  Does it need to call
    `validate()` in anything?
 
-## Unit testing
+# Unit testing
 
 How we could do unit testing on this simple LDE:
 

@@ -7,10 +7,24 @@ robust and useful product.
 
 # LDE Design Phase 7: Theorems and Proofs
 
+## Content
+
 This document is not yet complete.  Its content will eventually specify:
 
  * Proofs (which are also subproofs)
  * Theorem statements
  * Pairing of theorems with proofs
  * Homework problems (which may be the same as a theorem-proof pair!)
- * This enables: well, proofs and homework assignments, I guess
+
+## Goal
+
+This enables:
+
+ * Proofs
+ * Homework assignments
+
+## Status
+
+This phase has not yet been implemented.  Once it has been implemented, its
+contents will be documented in the API Documentation available from the
+navigation menu at the top of this site.

@@ -8,7 +8,7 @@
         
         
         <link rel="shortcut icon" href="../img/favicon.ico">
-        <title>Phase 4, Dependencies - Lurch Deductive Engine Documentation</title>
+        <title>The LDE - Lurch Deductive Engine Documentation</title>
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
@@ -48,7 +48,7 @@
                     <li >
                         <a href="..">Home</a>
                     </li>
-                    <li class="dropdown active">
+                    <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Design Plans <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             
@@ -68,8 +68,8 @@
     <a href="../phase3-client/">Phase 3, The Client</a>
 </li>
                             
-<li class="active">
-    <a href="./">Phase 4, Dependencies</a>
+<li >
+    <a href="../phase4-dependencies/">Phase 4, Dependencies</a>
 </li>
                             
 <li >
@@ -105,7 +105,7 @@
 </li>
                         </ul>
                     </li>
-                    <li class="dropdown">
+                    <li class="dropdown active">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Documentation <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             
@@ -117,8 +117,8 @@
     <a href="../api-structures/">Structures</a>
 </li>
                             
-<li >
-    <a href="../api-lde/">The LDE</a>
+<li class="active">
+    <a href="./">The LDE</a>
 </li>
                         </ul>
                     </li>
@@ -131,12 +131,12 @@
                     </a>
                 </li>
                     <li >
-                        <a rel="next" href="../phase3-client/">
+                        <a rel="next" href="../api-structures/">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
-                    <li >
-                        <a rel="prev" href="../phase5-background/">
+                    <li class="disabled">
+                        <a rel="prev" >
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -148,37 +148,13 @@
         <div class="container">
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
-        <li class="main active"><a href="#lde-design-phase-4-dependencies">LDE Design Phase 4: Dependencies</a></li>
-            <li><a href="#content">Content</a></li>
-            <li><a href="#goal">Goal</a></li>
-            <li><a href="#status">Status</a></li>
+        <li class="main active"><a href="#api-documentation-for-the-lde-module">API Documentation for the LDE Module</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<p>We have designed the work on the Lurch Deductive Engine (LDE) to progress in
-phases.  The idea is that each phase ends with a completed whole that can be
-tested in that state, and that provides more features than the previous
-state did.  By the time the final phase is complete, the LDE will be a
-robust and useful product.</p>
-<h1 id="lde-design-phase-4-dependencies">LDE Design Phase 4: Dependencies</h1>
-<h2 id="content">Content</h2>
-<p>This document is not yet complete.  Its content will eventually specify:</p>
-<ul>
-<li>Support dependencies as read-only first-few-children of the document.</li>
-<li>They need to be validated only to be sure they don't redeclare one
-   another's stuff.</li>
-<li>Note that every structure already has an .exports() method, so we just
-   need to implement that structure for the root of the LDE Document, and
-   that will be what a document exports when it is used as a dependency.</li>
-</ul>
-<h2 id="goal">Goal</h2>
-<p>Rule definitions can be stored in a master document on which others depend,
-and many later documents can all use the same central rule set.</p>
-<h2 id="status">Status</h2>
-<p>This phase has not yet been implemented.  Once it has been implemented, its
-contents will be documented in the API Documentation available from the
-navigation menu at the top of this site.</p></div>
+<h1 id="api-documentation-for-the-lde-module">API Documentation for the LDE Module</h1>
+<p>This document is a placeholder, and will be filled in later.</p></div>
         </div>
 
         <footer class="col-md-12">

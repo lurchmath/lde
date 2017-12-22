@@ -7,19 +7,28 @@ robust and useful product.
 
 # LDE Design Phase 1: Structures
 
+## Content
+
 In this phase, we just design the generic Structure class on which
 everything else will depend, and the infrastructure of the LDE itself.
+
+## Goal
 
 At the end of this phase, we could write unit tests of the whole Structure
 class and its LDE context, thus guaranteeing that all later phases rest on a
 good foundation.
 
-## The Structure module
+## Status
+
+This phase has been implemented, and is documented in the API Documentation,
+accessible from the navigation menu at the top of this site.
+
+# The Structure module
 
 That module defines a single `Structure` class, whose instances have these
 methods.
 
-### Computed attributes
+## Computed attributes
 
 Work done in this section:
 
@@ -60,7 +69,7 @@ Specification:
     * But more complex examples are possible, and each structure type is in
       charge of implementing `compute()` in the appropriate way.
 
-### External attributes
+## External attributes
 
 Work done in this section:
 
@@ -85,7 +94,7 @@ dictionary (get/set/clear) but no corresponding `compute` function.
  * `S.clearExternalAttributes(key1,key2,...)` removes the stored values;
    calling it with no arguments removes all stored values.
 
-### Manipulating the structure hierarchy
+## Manipulating the structure hierarchy
 
 Work done in this section:
 
@@ -111,7 +120,7 @@ Specification:
    a different structure, thus leaving S with no parent.
  * `S.copy()` makes a deep copy of S, or equivalently, the subtree with root S.
 
-### Event handling in the structure hierarchy
+## Event handling in the structure hierarchy
 
 Work done in this section:
 
@@ -141,7 +150,7 @@ handlers, and thus hear about the events they signal.
  * `S.wasChanged()` is a function that the UI will call in a structure if
    one of the structure's computd or external attributes changed.
 
-### Unique IDs
+## Unique IDs
 
 Work done in this section:
 
@@ -158,7 +167,7 @@ Specification:
  * Clients can look up structures from IDs using
    `Structure.instanceWithId(id)`.
 
-### Connections
+## Connections
 
 Work done in this section:
 
@@ -202,7 +211,7 @@ Specification:
    the array of structures that connected to this one with that connection
    type.
 
-### Convenience constructions for unit testing
+## Convenience constructions for unit testing
 
 Work done in this section:
 
@@ -225,7 +234,7 @@ Specification:
    a string from among a small set of relative references, such as
    "previous" and "next."  E.g., `S.attr({"reason for":"previous"})`.
 
-### Accessibility
+## Accessibility
 
 Work done in this section:
 
@@ -244,7 +253,7 @@ Specification:
  * `S.labels()`, `S.reasons()`, and `S.premises()`
  * `S.cites(T)` and `S.whatCitesMe()`
 
-### Miscellany
+## Miscellany
 
 Work done in this section:
 
@@ -258,9 +267,9 @@ Specification:
    the external attribute "test," which can be filled in by the client for
    structures that have text content.
 
-## LDE Module
+# LDE Module
 
-### Global functions and data
+## Global functions and data
 
 Work done in this section:
 
@@ -278,7 +287,7 @@ Specification:
    generic Structure, not a subclass.  It will have no children; they
    can be added later.  That is, it starts as a one-node tree, root only.
 
-### Foreground/background
+## Foreground/background
 
 Work done in this section:
 
@@ -321,7 +330,7 @@ We will call any kind of insertion, removal, or replacement of subtrees of
 the LDE Document a change event, whether it happened via a message from a
 parent thread or as a function call to the LDE as a module in a larger app.
 
-## Later enhancements
+# Later enhancements
 
 The following enhancements to work from Phase 1 are proposed, but are not
 essential enough to have been included in the Phase 1 work.  We list them

@@ -7,10 +7,21 @@ robust and useful product.
 
 # LDE Design Phase 11: Features
 
+## Content
+
 This document is not yet complete.  Its content will eventually specify:
 
- * Add features to anything built so far (like multiple conclusions from a
-   rule, or automatic premise finding, or automatic premise ordering, or
-   the ability to specify metavariable instantiations, or any of 1000 other
-   features we'd like to add)
- * This enables: everything else
+Add features to anything built so far (like multiple conclusions from a
+rule, or automatic premise finding, or automatic premise ordering, or the
+ability to specify metavariable instantiations, or any of 1000 other
+features we'd like to add)
+
+## Goal
+
+This enables everything else
+
+## Status
+
+This phase has not yet been implemented.  Once it has been implemented, its
+contents will be documented in the API Documentation available from the
+navigation menu at the top of this site.
