@@ -492,7 +492,7 @@
         }, 
         {
             "location": "/api-overview/", 
-            "text": "API Documentation Overview\n\n\nDesign Plans vs. API Documentation\n\n\nAt the top of this site, notice the two navigation menus entitled \"Design\nPlans\" and \"API Documentation.\"  The difference between them is this:\n\n\n\n\nDesign Plans\n lists concepts that have not yet been implemented and\n   documented.  Consequently, the concepts are usually not described in full\n   detail, but just the best detail available in the planning phase.\n\n\nAPI Documentation\n lists concepts that have been implemented, and for\n   which the developers have therefore been able to document their work.\n   Having the benefit of hindsight, this is therefore more detailed.\n\n\n\n\nDeveloper Workflow\n\n\nDevelopers designing and/or implementing concepts should therefore progress\nthose concepts through a lifecycle like so:\n\n\n\n\nDescribe the concept in one of the Design Plans page.  Provide as much\n    detail as you can, knowing of course that full details is impossible to\n    provide before the work has been done.\n\n\nAs you implement and test the concept, update those design documents\n    with whatever new information you create or learn as part of the work,\n    thus making them more precise.\n\n\nOnce the concept is fully implemented and tested, document the work in\n    an existing or new page in the API Documentation section.  This may\n    involve copying and pasting some of the content from the design plan,\n    provided that it still applies.  It will probably also involve adding\n    significant detail about the particulars of the implementation.\n\n\nReplace the original (less detailed) documentation in the design plans\n    with a brief description of the concept, followed by a link to the\n    corresponding part of the API Documentation for full details.\n\n\n\n\nFor the Reader\n\n\nReaders of this documentation will therefore be able to see how much has\nbeen implemented by perusing the Design Plans pages.  Those that are brief\noverviews of concepts with links to API Documentation have been implemented.\nThose that are plans for future work, with no links to any API\nDocumentation, have not yet been implemented.", 
+            "text": "API Documentation Overview\n\n\nDesign Plans vs. API Documentation\n\n\nAt the top of this site, notice the two navigation menus entitled \"Design\nPlans\" and \"API Documentation.\"  The difference between them is this:\n\n\n\n\nDesign Plans\n lists concepts that have not yet been implemented and\n   documented.  Consequently, the concepts are usually not described in full\n   detail, but just the best detail available in the planning phase.\n\n\nAPI Documentation\n lists concepts that have been implemented, and for\n   which the developers have therefore been able to document their work.\n   Having the benefit of hindsight, this is therefore more detailed, and\n   often even contains links directly into the source code.\n\n\n\n\nDeveloper Workflow\n\n\nDevelopers designing and/or implementing concepts should therefore progress\nthose concepts through a lifecycle like so:\n\n\n\n\nDescribe the concept in one of the Design Plans page.  Provide as much\n    detail as you can, knowing of course that full details is impossible to\n    provide before the work has been done.\n\n\nAs you implement and test the concept, update those design documents\n    with whatever new information you create or learn as part of the work,\n    thus making them more precise.\n\n\nOnce the concept is fully implemented and tested, document the work in\n    an existing or new page in the API Documentation section.  This may\n    involve copying and pasting some of the content from the design plan,\n    provided that it still applies.  It will probably also involve adding\n    significant detail about the particulars of the implementation.\n\n\nReplace the original (less detailed) documentation in the design plans\n    with a brief description of the concept, followed by a link to the\n    corresponding part of the API Documentation for full details.\n\n\n\n\nFor the Reader\n\n\nReaders of this documentation will therefore be able to see how much has\nbeen implemented by perusing the Design Plans pages.  Those that are brief\noverviews of concepts with links to API Documentation have been implemented.\nThose that are plans for future work, with no links to any API\nDocumentation, have not yet been implemented.", 
             "title": "Overview"
         }, 
         {
@@ -502,7 +502,7 @@
         }, 
         {
             "location": "/api-overview/#design-plans-vs-api-documentation", 
-            "text": "At the top of this site, notice the two navigation menus entitled \"Design\nPlans\" and \"API Documentation.\"  The difference between them is this:   Design Plans  lists concepts that have not yet been implemented and\n   documented.  Consequently, the concepts are usually not described in full\n   detail, but just the best detail available in the planning phase.  API Documentation  lists concepts that have been implemented, and for\n   which the developers have therefore been able to document their work.\n   Having the benefit of hindsight, this is therefore more detailed.", 
+            "text": "At the top of this site, notice the two navigation menus entitled \"Design\nPlans\" and \"API Documentation.\"  The difference between them is this:   Design Plans  lists concepts that have not yet been implemented and\n   documented.  Consequently, the concepts are usually not described in full\n   detail, but just the best detail available in the planning phase.  API Documentation  lists concepts that have been implemented, and for\n   which the developers have therefore been able to document their work.\n   Having the benefit of hindsight, this is therefore more detailed, and\n   often even contains links directly into the source code.", 
             "title": "Design Plans vs. API Documentation"
         }, 
         {
@@ -517,13 +517,18 @@
         }, 
         {
             "location": "/api-structures/", 
-            "text": "API Documentation for the Structure Class\n\n\nThis document is a placeholder, and will be filled in later.", 
+            "text": "API Documentation for the \nStructure\n Class\n\n\nSource Code\n\n\n\n\nThe \nStructure\n class\n\n\nUnit tests of the \nStructure\n class\n\n\n\n\nThis document is a placeholder, and will be filled in later.", 
             "title": "Structures"
         }, 
         {
             "location": "/api-structures/#api-documentation-for-the-structure-class", 
-            "text": "This document is a placeholder, and will be filled in later.", 
+            "text": "", 
             "title": "API Documentation for the Structure Class"
+        }, 
+        {
+            "location": "/api-structures/#source-code", 
+            "text": "The  Structure  class  Unit tests of the  Structure  class   This document is a placeholder, and will be filled in later.", 
+            "title": "Source Code"
         }, 
         {
             "location": "/api-lde/", 

@@ -11,7 +11,8 @@ Plans" and "API Documentation."  The difference between them is this:
    detail, but just the best detail available in the planning phase.
  * *API Documentation* lists concepts that have been implemented, and for
    which the developers have therefore been able to document their work.
-   Having the benefit of hindsight, this is therefore more detailed.
+   Having the benefit of hindsight, this is therefore more detailed, and
+   often even contains links directly into the source code.
 
 ## Developer Workflow
 
