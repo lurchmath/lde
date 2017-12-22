@@ -280,36 +280,40 @@ Specification:
 
 Work done in this section:
 
- * [ ] Code implemented
- * [ ] Unit tests written and passing
+ * [x] Code implemented
+ * [x] Unit tests written and passing
  * [ ] API documentation written
 
 Specification:
 
+Implement the following four functions that modify the global LDE Document
+object and expose them as part of the LDE module's API.
+
+ * `insert(serializedStructure,parentID,insertionIndex)` should deserialize
+   the given structure from JSON, find the descendant of the LDE Document
+   that has the given ID, and insert the deserialized version as one of its
+   children, at the given index.  If anything goes wrong in that process
+   (e.g., can't deserialize, can't find descendant with that ID, invalid
+   insertion index) then do nothing.  When you deserialize the structure,
+   be sure to call `setup()` in it, to give IDs recursively.
+ * `delete(subtreeID)` finds the descendant of the global LDE Document that
+   has the given ID and, assuming such a structure exists, removes it from
+   its parent and releases all IDs within it.
+ * `replace(subtreeID,serializedStructure)` finds the descendant of the
+   global LDE Document that has the given ID and, assuming such a structure
+   exists, deserializes the second argument and uses it to replace that
+   structure.  The deserialized version will have `setup()` run in it before
+   insertion into the Document, so that it has IDs.  The structure that was
+   removed to do the replacement will have all the IDs within it released.
+ * `setAttribute(subtreeID,key,value)` finds the descendant of the global
+   LDE Document that has the given ID and, assuming such a structure exists,
+   calls its member function for setting an external attribute with the
+   given key and value.
+
 If the LDE detects that it is being run in a background thread, it will set
 up listeners for messages from the parent thread.  These listeners will
-handle messages of three types:
-
- * Insert a new subtree.
-    * The message must include the unique ID of the parent, the index at
-      which the subtree will be inserted, and all the data defining the
-      subtree (serialized in JSON form, as required for transmission to
-      JavaScript background threads).
-    * If the Structure (once it's deserialized) doesn't have an ID, give it
-      a new, unique one as determined by the global mapping, and insert the
-      new (id,instance) pair into that mapping
- * Delete an existing subtree.  The message must include the unique ID of
-   the tree to delete.  Remove it from the global ID mapping as well and
-   erase its ID attribute.
- * Replace a subtree with a new one.  The message must include the unique
-   ID of the tree to replace and the data defining the replacement
-   (serialized as just described).  Remove the replaced one from the global
-   ID mapping as well and erase its ID attribute.
-
-Even if it is not being run in a background thread (but perhaps was loaded
-as a module in some command-line app, for instance) it will still expose
-insert, delete, and replace functions as part of the module's API, each of
-which operate on the global LDE document.
+handle messages of four types, insert/delete/replace/attribute, mirroring
+the four functions given above, and calling them internally.
 
 We will call any kind of insertion, removal, or replacement of subtrees of
 the LDE Document a change event, whether it happened via a message from a
