@@ -10,89 +10,85 @@
     
 
     
+        
     <url>
      <loc>/overview/</loc>
      <lastmod>2017-12-22</lastmod>
      <changefreq>daily</changefreq>
     </url>
-    
-
-    
         
     <url>
-     <loc>/phase0-structures/</loc>
+     <loc>/phase1-structures/</loc>
      <lastmod>2017-12-22</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>/phase1-validation/</loc>
+     <loc>/phase2-validation/</loc>
      <lastmod>2017-12-22</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>/phase1a-client/</loc>
+     <loc>/phase3-client/</loc>
      <lastmod>2017-12-22</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>/phase1b-dependencies/</loc>
+     <loc>/phase4-dependencies/</loc>
      <lastmod>2017-12-22</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>/phase1c-background/</loc>
+     <loc>/phase5-background/</loc>
      <lastmod>2017-12-22</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>/phase2-strings/</loc>
+     <loc>/phase6-strings/</loc>
      <lastmod>2017-12-22</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>/phase3-theorems/</loc>
+     <loc>/phase7-theorems/</loc>
      <lastmod>2017-12-22</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>/phase4-expressions/</loc>
+     <loc>/phase8-expressions/</loc>
      <lastmod>2017-12-22</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>/phase5-parsing/</loc>
+     <loc>/phase9-parsing/</loc>
      <lastmod>2017-12-22</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>/phase6-declarations/</loc>
+     <loc>/phase10-declarations/</loc>
      <lastmod>2017-12-22</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>/phase7-features/</loc>
+     <loc>/phase11-features/</loc>
      <lastmod>2017-12-22</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
-    
-
-    
     <url>
      <loc>/ideas/</loc>
      <lastmod>2017-12-22</lastmod>
      <changefreq>daily</changefreq>
     </url>
+        
     
 
 </urlset>

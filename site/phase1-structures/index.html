@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Phase 1, Structures - Lurch Deductive Engine Documentation</title>
+        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/highlight.css">
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+        <script src="../js/jquery-1.10.2.min.js"></script>
+        <script src="../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../js/highlight.pack.js"></script> 
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="..">Lurch Deductive Engine Documentation</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                    <li >
+                        <a href="..">Home</a>
+                    </li>
+                    <li class="dropdown active">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Design Plans <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            
+<li >
+    <a href="../overview/">Overview</a>
+</li>
+                            
+<li class="active">
+    <a href="./">Phase 1, Structures</a>
+</li>
+                            
+<li >
+    <a href="../phase2-validation/">Phase 2, Basic Validation</a>
+</li>
+                            
+<li >
+    <a href="../phase3-client/">Phase 3, The Client</a>
+</li>
+                            
+<li >
+    <a href="../phase4-dependencies/">Phase 4, Dependencies</a>
+</li>
+                            
+<li >
+    <a href="../phase5-background/">Phase 5, Background Queue</a>
+</li>
+                            
+<li >
+    <a href="../phase6-strings/">Phase 6, String Matching</a>
+</li>
+                            
+<li >
+    <a href="../phase7-theorems/">Phase 7, Theorems and Proofs</a>
+</li>
+                            
+<li >
+    <a href="../phase8-expressions/">Phase 8, Expression Trees</a>
+</li>
+                            
+<li >
+    <a href="../phase9-parsing/">Phase 9, Parsing Rules</a>
+</li>
+                            
+<li >
+    <a href="../phase10-declarations/">Phase 10, Declarations</a>
+</li>
+                            
+<li >
+    <a href="../phase11-features/">Phase 11, Bonus Features</a>
+</li>
+                            
+<li >
+    <a href="../ideas/">Ideas Archive</a>
+</li>
+                        </ul>
+                    </li>
+                </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                        <i class="fa fa-search"></i> Search
+                    </a>
+                </li>
+                    <li >
+                        <a rel="next" href="../overview/">
+                            <i class="fa fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="prev" href="../phase2-validation/">
+                            Next <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+        <div class="container">
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="main active"><a href="#lde-design-phase-1-structures">LDE Design Phase 1: Structures</a></li>
+            <li><a href="#the-structure-module">The Structure module</a></li>
+            <li><a href="#lde-module">LDE Module</a></li>
+            <li><a href="#later-enhancements">Later enhancements</a></li>
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<p>We have designed the work on the Lurch Deductive Engine (LDE) to progress in
+phases.  The idea is that each phase ends with a completed whole that can be
+tested in that state, and that provides more features than the previous
+state did.  By the time the final phase is complete, the LDE will be a
+robust and useful product.</p>
+<h1 id="lde-design-phase-1-structures">LDE Design Phase 1: Structures</h1>
+<p>In this phase, we just design the generic Structure class on which
+everything else will depend, and the infrastructure of the LDE itself.</p>
+<p>At the end of this phase, we could write unit tests of the whole Structure
+class and its LDE context, thus guaranteeing that all later phases rest on a
+good foundation.</p>
+<h2 id="the-structure-module">The Structure module</h2>
+<p>That module defines a single <code>Structure</code> class, whose instances have these
+methods.</p>
+<h3 id="computed-attributes">Computed attributes</h3>
+<p>Work done in this section:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
+</ul>
+<p>Specification:</p>
+<ul>
+<li><code>S.setComputedAttribute(key,value)</code> caches a computed value under a
+   certain key<ul>
+<li>One important example of a computed attribute:</li>
+<li><code>S.setComputedAttribute("feedback",obj)</code> tells the UI the type of
+  feedback it should show for structure S, with obj having these keys:<ul>
+<li>result: a string, either "valid" or "invalid" or "indeterminate"</li>
+<li>message: a string, the message should be shown on hover of the
+  feedback indicator</li>
+<li>section: (optional) which character (or range of characters) are
+  the specific ones on which the feedback focuses.<ul>
+<li>For instance, if something doesn't parse, you might want to
+  point out where it failed.</li>
+<li>Or if an expression parses into many steps of work, each of
+  which gets validated separately, then the feedback needs to
+  be localized.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>S.getComputedAttribute(key)</code> fetches the computed attribute value, or
+   returns undefined if it's not stored</li>
+<li><code>S.clearComputedAttributes(key1,key2,...)</code> removes the computed values;
+   calling it with no arguments removes all computed values</li>
+<li><code>S.compute(key1,key2,...)</code> runs whatever function is necessary to
+   compute and store the attributes for the keys.<ul>
+<li>It should usually be obvious what this is from context, like if S has
+  a function <code>S.meaning()</code> and we say <code>S.compute("meaning")</code> that means
+  run <code>S.setComputedAttribute("meaning",S.meaning())</code>.</li>
+<li>In fact, the base implementation in the structure class does exactly
+  what is described in the previous bullet point; <code>S.compute(k)</code> runs
+  <code>S[k]()</code> and stores the result.  To pass parameters, instead of a
+  string key, pass an array <code>[key,arg1,arg2,...]</code>.</li>
+<li>But more complex examples are possible, and each structure type is in
+  charge of implementing <code>compute()</code> in the appropriate way.</li>
+</ul>
+</li>
+</ul>
+<h3 id="external-attributes">External attributes</h3>
+<p>Work done in this section:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
+</ul>
+<p>Specification:</p>
+<p>Just as computed attributes are a key-value dictionary, so are external
+attributes.  However, we keep them separate because computed attributes are
+those created by the LDE itself, internally, as the result fo some
+computation on the structure, but external attributes are provided by the
+client of this module, and are not altered by the LDE.</p>
+<p>Thus we have the same three functions for manipulating the key-value
+dictionary (get/set/clear) but no corresponding <code>compute</code> function.</p>
+<ul>
+<li><code>S.setExternalAttribute(key,value)</code> stores a value under a given key.</li>
+<li><code>S.getExternalAttribute(key)</code> fetches the attribute value, or returns
+   undefined if it's not stored.</li>
+<li><code>S.clearExternalAttributes(key1,key2,...)</code> removes the stored values;
+   calling it with no arguments removes all stored values.</li>
+</ul>
+<h3 id="manipulating-the-structure-hierarchy">Manipulating the structure hierarchy</h3>
+<p>Work done in this section:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
+</ul>
+<p>Specification:</p>
+<ul>
+<li><code>new Structure(arg1,arg2,...)</code> creates a structure with the given list of
+   child structures.</li>
+<li><code>S.children()</code> yields an ordered array of structures immediately
+   inside S</li>
+<li><code>S.parent()</code> yields the parent structure of S, or undefined if S is
+   the LDE Document root</li>
+<li><code>S.indexInParent()</code> gives the index of S in its parent's children array.</li>
+<li><code>S.insertChild(child,index)</code> inserts a new child at the given index,
+   removing it from its old parent, if there was one.</li>
+<li><code>S.removeChild(index)</code> does the reverse.</li>
+<li><code>S.removeFromParent()</code> calls <code>P.removeChild(index)</code> in the parent of S,
+   passing <code>S.indexInParent()</code>.</li>
+<li><code>S.replaceWith(other)</code> replaces S, where it sits in the hierarchy, with
+   a different structure, thus leaving S with no parent.</li>
+<li><code>S.copy()</code> makes a deep copy of S, or equivalently, the subtree with root S.</li>
+</ul>
+<h3 id="event-handling-in-the-structure-hierarchy">Event handling in the structure hierarchy</h3>
+<p>Work done in this section:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
+</ul>
+<p>Specification:</p>
+<p>Each of the following functions will be called by the functions above, when
+the event is complete.  There is no default implementation of each of these
+functions, which means that no call will take place.  However, any instance
+or subclass may choose to implement one or more of these functions as event
+handlers, and thus hear about the events they signal.</p>
+<ul>
+<li><code>S.wasInserted()</code> will be called in any structure inserted into any
+   parent structure, including just-constructed structures being inserted
+   into a parent for the first time.  It is called after the insertion, so
+   <code>S.parent()</code> will yield a valid <code>Structure</code> instance.</li>
+<li><code>S.wasRemoved(parent,index)</code> will be called immediately after S is
+   removed from its previous parent (but obviously S has not yet been
+   deleted from JavaScript memory).  The first parameter will be the former
+   parent structure (which will still exist, because the removal juts
+   happened) and the index that S formerly had within that parent.  Note
+   that replacing one structure with another will yield a call to
+   <code>S.wasRemoved()</code> in the one structure and <code>S.wasInserted()</code> in the other.</li>
+<li><code>S.wasChanged()</code> is a function that the UI will call in a structure if
+   one of the structure's computd or external attributes changed.</li>
+</ul>
+<h3 id="unique-ids">Unique IDs</h3>
+<p>Work done in this section:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
+</ul>
+<p>Specification:</p>
+<ul>
+<li>The Structure class establishes a global mapping from unique Structure
+   IDs to the instances that have those IDs.</li>
+<li>Clients can assign or release IDs for structures using the instance
+   methods <code>getID()</code> and <code>releaseID()</code>.</li>
+<li>Clients can look up structures from IDs using
+   <code>Structure.instanceWithId(id)</code>.</li>
+</ul>
+<h3 id="connections">Connections</h3>
+<p>Work done in this section:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
+</ul>
+<p>Specification:</p>
+<ul>
+<li>Structures support two special external attribute keys, "connectionsOut"
+   and "connectionsIn," each a multiset of targetID-connectionType pairs.
+   Example such multiset (this particular one with no repeated entries):
+   <code>[ [3,'reason'], [12,'premise'] ]</code></li>
+<li>We will want to keep these consistent across a given structure hierarchy.
+   Consequently, we do two things.<ul>
+<li>We provide the function <code>S.fillOutConnections()</code> that can be called
+  with <code>S</code> equal to the hierarchy's root, and it will ensure that a
+  connection stored in the "connectionsOut" array of any node in the
+  hierarchy is also stored in the "connectionsIn" array of its target,
+  and vice versa.</li>
+<li>We provide a convenience function for creating connections,
+  <code>S.connectTo(T,type)</code>, that creates the connection by adding it to
+  both the "out" list for <code>S</code> and the "in" list for <code>T</code>.</li>
+<li>We provide a convenience function for deleting connections,
+  <code>S.disconnectFrom(T,type)</code> that deletes the connection from both
+  lists.</li>
+</ul>
+</li>
+<li>We also provide the following convenience functions that assume that the
+   hierarchy's in and out connection lists are the same.  That assumption
+   will be satisfied if no method of editing connection lists was ever used
+   other than the convenience functions given above, or if such a method
+   were used, then <code>fillOutConnections()</code> has been called on the hierarchy
+   root since that time.<ul>
+<li>Get all connections of some type to/from <code>S</code> with
+  <code>S.getConnectionsOut(type)</code> (or <code>In</code>).</li>
+<li>Get all connections to/from <code>S</code> by omitting the type from the call in
+  the previous bullet point.</li>
+<li>Get all connections from <code>S</code> to <code>T</code> with <code>S.getConnectionsTo(T)</code>.</li>
+</ul>
+</li>
+<li><code>S.properties()</code> looks at the set of other structures that connect to S
+   via arrows, and forms a dictionary of name=value pairs, the "properties"
+   of <code>S</code>.  The key will be the type of the connection and the value will be
+   the array of structures that connected to this one with that connection
+   type.</li>
+</ul>
+<h3 id="convenience-constructions-for-unit-testing">Convenience constructions for unit testing</h3>
+<p>Work done in this section:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
+</ul>
+<p>Specification:</p>
+<ul>
+<li>Create <code>S.attr(obj)</code> that will add as external attributes all key-value
+   pairs in <code>obj</code>, returning <code>S</code> for use in hierarchy-building.</li>
+<li>Append to the constructor code that traverses the tree and attempts to
+   make connectionsOut attributes consistent with connectionsIn attributes,
+   in a full tree traversal.</li>
+<li>Enhance that tree traversal so that it finds attributes with common
+   connection-type keys ("reason for", "premise for", etc.) and converts
+   them into connectionsOut members before doing the consistency checking.
+   E.g., <code>S.attr({"reason for":3})</code>.</li>
+<li>Enhance that further so that the value associated with such a key can be
+   a string from among a small set of relative references, such as
+   "previous" and "next."  E.g., <code>S.attr({"reason for":"previous"})</code>.</li>
+</ul>
+<h3 id="accessibility">Accessibility</h3>
+<p>Work done in this section:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
+</ul>
+<p>Specification:</p>
+<ul>
+<li><code>S.isAccessibleTo(T)</code> returns true or false, implementing the
+   accessibility relation defined earlier.</li>
+<li><code>S.text()</code> and <code>S.isAReference()</code></li>
+<li><code>S.isALabelFor(T)</code> (plus <code>isAPremiseFor</code> and <code>isAReasonFor</code>)</li>
+<li><code>S.lookup(n)</code> finds the first structure <code>T</code> accessible to <code>S</code> with
+   label <code>n</code>.</li>
+<li><code>S.labels()</code>, <code>S.reasons()</code>, and <code>S.premises()</code></li>
+<li><code>S.cites(T)</code> and <code>S.whatCitesMe()</code></li>
+</ul>
+<h3 id="miscellany">Miscellany</h3>
+<p>Work done in this section:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
+</ul>
+<p>Specification:</p>
+<ul>
+<li><code>S.text()</code> returns the contents of <code>S</code> as plain text.  This just looks up
+   the external attribute "test," which can be filled in by the client for
+   structures that have text content.</li>
+</ul>
+<h2 id="lde-module">LDE Module</h2>
+<h3 id="global-functions-and-data">Global functions and data</h3>
+<p>Work done in this section:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
+</ul>
+<p>Specification:</p>
+<ul>
+<li>Defines global functions for serializing and dezerializing Structure
+   instances (or subclass instances) to/from JSON data.  The important half
+   of this pair is deserialization, but to help with testing, it makes sense
+   to also create a corresponding serializer.</li>
+<li>Create a global Structure that is the LDE Document.  It will be a
+   generic Structure, not a subclass.  It will have no children; they
+   can be added later.  That is, it starts as a one-node tree, root only.</li>
+</ul>
+<h3 id="foregroundbackground">Foreground/background</h3>
+<p>Work done in this section:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled checked> Code implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Unit tests written and passing</li>
+<li class="task-list-item"><input type="checkbox" disabled> API documentation written</li>
+</ul>
+<p>Specification:</p>
+<p>Implement the following four functions that modify the global LDE Document
+object and expose them as part of the LDE module's API.</p>
+<ul>
+<li><code>insert(serializedStructure,parentID,insertionIndex)</code> should deserialize
+   the given structure from JSON, find the descendant of the LDE Document
+   that has the given ID, and insert the deserialized version as one of its
+   children, at the given index.  If anything goes wrong in that process
+   (e.g., can't deserialize, can't find descendant with that ID, invalid
+   insertion index) then do nothing.  When you deserialize the structure,
+   be sure to call <code>setup()</code> in it, to give IDs recursively.</li>
+<li><code>delete(subtreeID)</code> finds the descendant of the global LDE Document that
+   has the given ID and, assuming such a structure exists, removes it from
+   its parent and releases all IDs within it.</li>
+<li><code>replace(subtreeID,serializedStructure)</code> finds the descendant of the
+   global LDE Document that has the given ID and, assuming such a structure
+   exists, deserializes the second argument and uses it to replace that
+   structure.  The deserialized version will have <code>setup()</code> run in it before
+   insertion into the Document, so that it has IDs.  The structure that was
+   removed to do the replacement will have all the IDs within it released.</li>
+<li><code>setAttribute(subtreeID,key,value)</code> finds the descendant of the global
+   LDE Document that has the given ID and, assuming such a structure exists,
+   calls its member function for setting an external attribute with the
+   given key and value.</li>
+</ul>
+<p>If the LDE detects that it is being run in a background thread, it will set
+up listeners for messages from the parent thread.  These listeners will
+handle messages of four types, insert/delete/replace/attribute, mirroring
+the four functions given above, and calling them internally.</p>
+<p>We will call any kind of insertion, removal, or replacement of subtrees of
+the LDE Document a change event, whether it happened via a message from a
+parent thread or as a function call to the LDE as a module in a larger app.</p>
+<h2 id="later-enhancements">Later enhancements</h2>
+<p>The following enhancements to work from Phase 1 are proposed, but are not
+essential enough to have been included in the Phase 1 work.  We list them
+here so as not to lose track of important ideas, and we leave empty check
+boxes next to them so that we can later mark them complete as they are
+implemented.</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled> Make the <code>labels()</code> function more efficient as follows.<ul>
+<li>Whenever it is computed, cache the value in an internal field.</li>
+<li>The next time <code>labels()</code> is called, use the cached value if it exists.</li>
+<li>Whenever you call <code>wasChanged()</code>, be sure to clear the cached value.</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" disabled> Make the <code>whatCitesMe()</code> function more efficient by making it loop
+   manually through all the things in scope, tracking when anything it is
+   scope eclipses it by being labeled with one or more of its labels.  If at
+   any point it has no more labels left in force, stop iterating.  This is a
+   minor performance gain, because it will be rare that a structure is fully
+   eclipsed by other structures with the same name.</li>
+</ul></div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>var base_url = '..';</script>
+        <script src="../js/base.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="../search/require.js"></script>
+        <script src="../search/search.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>&larr;</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>&rarr;</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    </body>
+</html>

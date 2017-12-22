@@ -4,27 +4,27 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description" content="None">
         
         
-        <link rel="shortcut icon" href="./img/favicon.ico">
-        <title>Lurch Deductive Engine Documentation</title>
-        <link href="./css/bootstrap-custom.min.css" rel="stylesheet">
-        <link href="./css/font-awesome-4.5.0.css" rel="stylesheet">
-        <link href="./css/base.css" rel="stylesheet">
-        <link rel="stylesheet" href="./css/highlight.css">
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Phase 9, Parsing Rules - Lurch Deductive Engine Documentation</title>
+        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/highlight.css">
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
             <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
             <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
         <![endif]-->
 
-        <script src="./js/jquery-1.10.2.min.js"></script>
-        <script src="./js/bootstrap-3.0.3.min.js"></script>
-        <script src="./js/highlight.pack.js"></script> 
+        <script src="../js/jquery-1.10.2.min.js"></script>
+        <script src="../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../js/highlight.pack.js"></script> 
     </head>
 
-    <body class="homepage">
+    <body>
 
         <div class="navbar navbar-default navbar-fixed-top" role="navigation">
     <div class="container">
@@ -38,70 +38,70 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href=".">Lurch Deductive Engine Documentation</a>
+            <a class="navbar-brand" href="..">Lurch Deductive Engine Documentation</a>
         </div>
 
         <!-- Expanded navigation -->
         <div class="navbar-collapse collapse">
                 <!-- Main navigation -->
                 <ul class="nav navbar-nav">
-                    <li class="active">
-                        <a href=".">Home</a>
+                    <li >
+                        <a href="..">Home</a>
                     </li>
-                    <li class="dropdown">
+                    <li class="dropdown active">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Design Plans <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             
 <li >
-    <a href="overview/">Overview</a>
+    <a href="../overview/">Overview</a>
 </li>
                             
 <li >
-    <a href="phase1-structures/">Phase 1, Structures</a>
+    <a href="../phase1-structures/">Phase 1, Structures</a>
 </li>
                             
 <li >
-    <a href="phase2-validation/">Phase 2, Basic Validation</a>
+    <a href="../phase2-validation/">Phase 2, Basic Validation</a>
 </li>
                             
 <li >
-    <a href="phase3-client/">Phase 3, The Client</a>
+    <a href="../phase3-client/">Phase 3, The Client</a>
 </li>
                             
 <li >
-    <a href="phase4-dependencies/">Phase 4, Dependencies</a>
+    <a href="../phase4-dependencies/">Phase 4, Dependencies</a>
 </li>
                             
 <li >
-    <a href="phase5-background/">Phase 5, Background Queue</a>
+    <a href="../phase5-background/">Phase 5, Background Queue</a>
 </li>
                             
 <li >
-    <a href="phase6-strings/">Phase 6, String Matching</a>
+    <a href="../phase6-strings/">Phase 6, String Matching</a>
 </li>
                             
 <li >
-    <a href="phase7-theorems/">Phase 7, Theorems and Proofs</a>
+    <a href="../phase7-theorems/">Phase 7, Theorems and Proofs</a>
 </li>
                             
 <li >
-    <a href="phase8-expressions/">Phase 8, Expression Trees</a>
+    <a href="../phase8-expressions/">Phase 8, Expression Trees</a>
+</li>
+                            
+<li class="active">
+    <a href="./">Phase 9, Parsing Rules</a>
 </li>
                             
 <li >
-    <a href="phase9-parsing/">Phase 9, Parsing Rules</a>
+    <a href="../phase10-declarations/">Phase 10, Declarations</a>
 </li>
                             
 <li >
-    <a href="phase10-declarations/">Phase 10, Declarations</a>
+    <a href="../phase11-features/">Phase 11, Bonus Features</a>
 </li>
                             
 <li >
-    <a href="phase11-features/">Phase 11, Bonus Features</a>
-</li>
-                            
-<li >
-    <a href="ideas/">Ideas Archive</a>
+    <a href="../ideas/">Ideas Archive</a>
 </li>
                         </ul>
                     </li>
@@ -113,13 +113,13 @@
                         <i class="fa fa-search"></i> Search
                     </a>
                 </li>
-                    <li class="disabled">
-                        <a rel="next" >
+                    <li >
+                        <a rel="next" href="../phase8-expressions/">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
                     <li >
-                        <a rel="prev" href="overview/">
+                        <a rel="prev" href="../phase10-declarations/">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -131,29 +131,46 @@
         <div class="container">
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
-        <li class="main active"><a href="#the-lurch-deductive-engine-lde">The Lurch Deductive Engine (LDE)</a></li>
+        <li class="main active"><a href="#lde-design-phase-9-parsing">LDE Design Phase 9: Parsing</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<h1 id="the-lurch-deductive-engine-lde">The Lurch Deductive Engine (LDE)</h1>
-<p>This documentation site contains the design of the LDE.</p>
-<p>We will implement that design, and as we do so, the various phases of
-development (accessible from the navigation menu above) will be converted
-from pages describing the plan into pages describing the completed API.</p>
-<p>Use the menu at the top of this site to find content.</p>
-<p><a href="http://github.com/lurchmath/lde">See the source code repository here.</a></p></div>
+<p>We have designed the work on the Lurch Deductive Engine (LDE) to progress in
+phases.  The idea is that each phase ends with a completed whole that can be
+tested in that state, and that provides more features than the previous
+state did.  By the time the final phase is complete, the LDE will be a
+robust and useful product.</p>
+<h1 id="lde-design-phase-9-parsing">LDE Design Phase 9: Parsing</h1>
+<p>This document is not yet complete.  Its content will eventually specify:</p>
+<ul>
+<li>Rules for defining parsing</li>
+<li>Constant declarations may be implemented under the hood as special cases
+   of language rules.<ul>
+<li>This does not mean they must parse into OpenMath symbols.  It is
+  acceptable to parse them into, for example, OpenMath strings, with a
+  special attribute Constant=True, or any equally unique/recognizable
+  expression.</li>
+<li>Also, this does not mean that constant declarations must feel to the
+  user like language rule declarations feel.  We can let users think of
+  them and express them as constant declarations, but under the hood it
+  may be implemented as if it had been a language rule.</li>
+</ul>
+</li>
+<li>This enables: propositional logic in its usual notation, and other
+   related simple systems</li>
+</ul></div>
         </div>
 
         <footer class="col-md-12">
             <hr>
             <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
-        <script>var base_url = '.';</script>
-        <script src="./js/base.js"></script>
+        <script>var base_url = '..';</script>
+        <script src="../js/base.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script src="./search/require.js"></script>
-        <script src="./search/search.js"></script>
+        <script src="../search/require.js"></script>
+        <script src="../search/search.js"></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
     <div class="modal-dialog">
@@ -222,8 +239,3 @@ from pages describing the plan into pages describing the completed API.</p>
 
     </body>
 </html>
-
-<!--
-MkDocs version : 0.17.2
-Build Date UTC : 2017-12-22 20:59:39
--->
