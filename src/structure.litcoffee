@@ -745,8 +745,8 @@ resulting array, filtering out all non-strings.
             ( item for item in [ external..., computed... ] \
                 when typeof item is 'string' )
 
-Te second takes a structure and connection type as arguments and returns all
-other structures that have connections of the given type to the given
+The second takes a structure and connection type as arguments and returns
+all other structures that have connections of the given type to the given
 structure.
 
         allConnectedTo = ( structure, type ) ->
