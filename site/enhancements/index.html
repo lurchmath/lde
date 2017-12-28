@@ -8,7 +8,7 @@
         
         
         <link rel="shortcut icon" href="../img/favicon.ico">
-        <title>The LDE - Lurch Deductive Engine Documentation</title>
+        <title>Enhancements for Later - Lurch Deductive Engine Documentation</title>
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
@@ -48,7 +48,7 @@
                     <li >
                         <a href="..">Home</a>
                     </li>
-                    <li class="dropdown">
+                    <li class="dropdown active">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Design Plans <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             
@@ -100,8 +100,8 @@
     <a href="../phase11-features/">Phase 11, Bonus Features</a>
 </li>
                             
-<li >
-    <a href="../enhancements/">Enhancements for Later</a>
+<li class="active">
+    <a href="./">Enhancements for Later</a>
 </li>
                             
 <li >
@@ -109,7 +109,7 @@
 </li>
                         </ul>
                     </li>
-                    <li class="dropdown active">
+                    <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Documentation <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             
@@ -121,8 +121,8 @@
     <a href="../api-structures/">Structures</a>
 </li>
                             
-<li class="active">
-    <a href="./">The LDE</a>
+<li >
+    <a href="../api-lde/">The LDE</a>
 </li>
                         </ul>
                     </li>
@@ -135,12 +135,12 @@
                     </a>
                 </li>
                     <li >
-                        <a rel="next" href="../api-structures/">
+                        <a rel="next" href="../phase11-features/">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
-                    <li class="disabled">
-                        <a rel="prev" >
+                    <li >
+                        <a rel="prev" href="../ideas/">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -152,13 +152,31 @@
         <div class="container">
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
-        <li class="main active"><a href="#api-documentation-for-the-lde-module">API Documentation for the LDE Module</a></li>
+        <li class="main active"><a href="#enhancements-for-later">Enhancements for Later</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<h1 id="api-documentation-for-the-lde-module">API Documentation for the LDE Module</h1>
-<p>This document is a placeholder, and will be filled in later.</p></div>
+<h1 id="enhancements-for-later">Enhancements for Later</h1>
+<p>This page lists helpful enhancements to work already completed, but which
+were not essential enough to have been included in the work done so far.  We
+list them here so as not to lose track of important improvements we might
+make later, and we leave empty check boxes next to them so that we can later
+mark them complete as they are implemented.</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled> Make the <code>labels()</code> function more efficient as follows.<ul>
+<li>Whenever it is computed, cache the value in an internal field.</li>
+<li>The next time <code>labels()</code> is called, use the cached value if it exists.</li>
+<li>Whenever you call <code>wasChanged()</code>, be sure to clear the cached value.</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" disabled> Make the <code>whatCitesMe()</code> function more efficient by making it loop
+   manually through all the things in scope, tracking when anything in its
+   scope eclipses it by being labeled with one or more of its labels.  If at
+   any point it has no more labels left in force, stop iterating.  This is a
+   minor performance gain, because it will be rare that a structure is fully
+   eclipsed by other structures with the same name.</li>
+</ul></div>
         </div>
 
         <footer class="col-md-12">

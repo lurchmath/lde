@@ -94,7 +94,7 @@ base class:
 
         className : Structure.addSubclass 'Structure', Structure
 
-## Serialization to JSON
+### Serialization to JSON
 
 The serialized version of a class contains some objects from within the
 class, not copies but the same objects, so that serialization can be fast.
@@ -108,7 +108,7 @@ version.
             externalAttributes : @externalAttributes
             children : ( child.toJSON() for child in @childList )
 
-## Deserialization from JSON
+### Deserialization from JSON
 
 Deserialization is a method in the class, because of course it is called
 when you have no instance at hand, and wish to create one.

@@ -101,6 +101,10 @@
 </li>
                             
 <li >
+    <a href="../enhancements/">Enhancements for Later</a>
+</li>
+                            
+<li >
     <a href="../ideas/">Ideas Archive</a>
 </li>
                         </ul>
@@ -150,6 +154,11 @@
     <ul class="nav bs-sidenav">
         <li class="main active"><a href="#api-documentation-for-the-structure-class">API Documentation for the Structure Class</a></li>
             <li><a href="#source-code">Source Code</a></li>
+            <li><a href="#purpose">Purpose</a></li>
+            <li><a href="#constructing-and-serialization">Constructing and Serialization</a></li>
+            <li><a href="#structure-hierarchies">Structure hierarchies</a></li>
+            <li><a href="#structure-attributes-and-connections">Structure attributes and connections</a></li>
+            <li><a href="#unique-ids">Unique IDs</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
@@ -160,7 +169,284 @@
 <li><a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee">The <code>Structure</code> class</a></li>
 <li><a href="https://github.com/lurchmath/lde/blob/master/tests/structure-spec.litcoffee">Unit tests of the <code>Structure</code> class</a></li>
 </ul>
-<p>This document is a placeholder, and will be filled in later.</p></div>
+<h2 id="purpose">Purpose</h2>
+<p>The Lurch Deductive Engine (LDE, <a href="../api-lde/">documented here</a>) maintains a
+document called hte LDE Document, which is a hierarchy (or tree).  The nodes
+in that tree are instances of this class (<code>Structure</code>) or one of its
+subclasses.</p>
+<p>We build into this base class all the functionality that must be present at
+every point in that hierarchy, and leave to subclasses that functionality
+that makes sense only for specific types of structures.  For instance, this
+class contains no functionality to support rules of inference, because they
+are one specific type of structure, so their functionality will be
+implemented in a subclass for that purpose.</p>
+<h2 id="constructing-and-serialization">Constructing and Serialization</h2>
+<p>There is one constructor for the class
+(<a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#constructor">see source code</a>):</p>
+<p><code>Structure(child1,child2,...)</code> creates a new instance, with the given list
+of children, each of which must be a <code>Structure</code> instance (or it will be
+ignored).  All such children are removed from any old parent they had before
+being inserted into this newly created one.</p>
+<p>Instances can be converted to and from JSON, for saving to a file, storing
+permanently anywhere, or transmitting across threads or network connections.
+To ensure that deserialization correctly reconstructs instances of the right
+subclass of <code>Structure</code>, each subclass must be registered.  To do so, we
+provide the <code>addSubclass</code> function.  Use it like so.</p>
+<p>JavaScript:</p>
+<pre><code class="js">    MySubclass = function ( /* ... */ ) { /* ... */ };
+    // ...
+    MySubclass.prototype.className = Structure.addSubclass( 'MySubclass', MySubclass );
+</code></pre>
+
+<p>CoffeeScript, somewhere inside the class definition:</p>
+<pre><code class="coffeescript">    class MySubclass extends Structure
+        # ...
+        className : Structure.addSubclass 'MySubclass', MySubclass
+        # ...
+</code></pre>
+
+<p>Then one can serialize and deserialize any hierarchy containing <code>Structure</code>
+instances, as well as instances of its subclasses, using the member function
+<code>someInstance.toJSON()</code> (which obviously yields a JSON structure) or the
+class function <code>Structure.fromJSON(data)</code>, which accepts JSON data created
+from the first function.</p>
+<p>Serializing a structure preserves its class, its external and computed
+attributes (<a href="#structure-attributes-and-connections">documented below</a>), and
+the hierarchy for which it is the root.  Unique IDs
+(<a href="#unique-ids">documented below</a>) are not preserved.  Deserializing does not
+assign new unique IDs, but the <code>setup()</code> function documented under
+<a href="#unique-ids">the Unique IDs section, below</a> can be used to assign new
+unique IDs to the nodes in a just-deserialized hierarchy.</p>
+<h2 id="structure-hierarchies">Structure hierarchies</h2>
+<p>To navigate or alter a hierarchy of <code>Structure</code> instances, use the
+following member functions present in each instance.</p>
+<ul>
+<li><code>instance.parent()</code> yields the parent structure, or <code>null</code> if there is
+   no parent (i.e., the instance is the root of a hierarchy)</li>
+<li><code>instance.children()</code> yields an array containing the children structures,
+   in order, or an empty array if there are none</li>
+<li><code>instance.indexInParent()</code> yields the index of the child in its parent's
+   ordered list of children, or unddefined if the instance has no parent</li>
+<li><code>instance.previousSibling()</code> and <code>instance.nextSibling()</code> yield the
+   adjacent structure in the parent's child list, forward or backward, as
+   expected, or undefined if there is no such sibling</li>
+<li><code>instance.removeFromParent()</code> drops the instance from it's parent's list
+   of children (thereby decreasing the length of that child list by 1) and
+   thus making <code>instance.parent()</code> null</li>
+<li><code>instance.removeChild(index)</code> is a convenience equivalent to
+   <code>instance.children()[index].removeFromParent()</code></li>
+<li><code>instance.insertChild(child,index)</code> expects a structure instance as the
+   first argument and an index into the children list as the second.  It
+   inserts the new child at that index, thus increasing the number of
+   children by 1.  You may use an index equal to the length of the child
+   list to append.  The child is removed from its previous parent, if any,
+   before being inserted here.</li>
+<li><code>instance.replaceWith(other)</code> expects another structure instance as its
+   argument.  It removes <code>instance</code> from its parent, if there is one, and
+   then inserts <code>other</code> at the same index in the parent, thus replacing
+   <code>instance</code>.  This has no effect if <code>instance</code> has no parent.  It is
+   equivalent to successive calls to <code>removeFromParent()</code> and
+   <code>insertChild()</code> at the instance and its parent, respectively.</li>
+<li><code>instance.copy()</code> makes a deep copy of the instance, including all nodes
+   below it in the hierarchy, but not copying their unique IDs (lest they
+   become not unique)</li>
+</ul>
+<p>The order of nodes in the hierarchy is often important.  We have one simple
+order relation on the nodes in the hierarchy, and one more complex.  The
+simplest is just whether node A is "earlier than" node B, in the order
+induced by an in-order tree traversal (that is, the order in which the open
+parentheses would appear if the tree were written as a LISP expression).
+This relation can be tested with <code>instance.isEarlierThan(other)</code>.</p>
+<p>The more complex order relation is accessibility, which we do not define
+here, because it is already defined <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#accessibility">in the source code
+documentation</a>.
+That relation is implemented with the following member functions available
+in all instances of the class.</p>
+<ul>
+<li><code>A.isAccessibleTo(B)</code> implements the relation as defined at the link
+   given above.</li>
+<li><code>A.isInTheScopeOf(B)</code> is equivalent to <code>B.isAccessibleTo(A)</code>.</li>
+<li><code>A.iteratorOverAccessibles()</code> yields an "iterator" object, which is an
+   object that can produce the list of nodes accessible to <code>A</code> by repeated
+   calls to the <code>next()</code> member of the object.  Consider the following
+   JavaScript code that would use such an iterator.</li>
+</ul>
+<pre><code class="js">    var iterator = A.iteratorOverAccessibles();
+    var accessible;
+    while ( accessible = iterator.next() ) {
+        console.log( 'The next accessible structure is:',
+            accessible.toJSON() );
+    }
+</code></pre>
+
+<p>Nodes are produced by the iterator in reverse order (under the
+<code>isEarlierThan</code> relation) starting from the first accessible node before
+<code>A</code>.  When the <code>next()</code> function yields null for the first time, the end of
+the list has been reached.  (The <code>next()</code> function will yield null forever
+thereafter.)</p>
+<p>Iterators are more efficient than producing the entire list and returning
+it, because the client may be seeking just one particular node in the list,
+and thus producing the entire list so that the client can search just a
+small part of it could be wasteful.</p>
+<p>There is an analogous function for scopes.</p>
+<ul>
+<li><code>A.iteratorOverScope()</code> functions like <code>A.iteratorOverAccessibles()</code>, but
+   walks forwards through the structure, including precisely those nodes for
+   which <code>B.isInTheScopeOf(A)</code> holds true.</li>
+</ul>
+<p>There are then four functions that use these iterators under the hood.
+Clients will most likely wish to use these rather than have direct access
+to the iterators.</p>
+<ul>
+<li><code>A.firstAccessible(P)</code> expects <code>P</code> to be a one-place predicate (that is,
+   a JavaScript function that can be evaluated on a single argument, and
+   yields true or false in each case) and yields the first item on the
+   "accessibles" list (as given by <code>A.iteratorOverAccessibles()</code>) for which
+   <code>P</code> yields true.  It returns undefined if there is no such thing.</li>
+<li><code>A.firstInScope(P)</code> expects <code>P</code> to be a one-place predicate, as just
+   defined, and behaves just like <code>firstAccessible()</code>, except it walks
+   through <code>A.iteratorOverScope()</code> instead.</li>
+<li><code>A.allAccessibles(P)</code> expects <code>P</code> as in the previous two functions, and
+   yields all nodes accessible to <code>A</code> that satisfy <code>P</code>, in the same order
+   they would be reported by <code>iteratorOverAccessibles()</code>.</li>
+<li><code>A.allInScope(P)</code> expects <code>P</code> as in the previous two functions, and
+   yields all nodes in the scope of <code>A</code> that satisfy <code>P</code>, in the same order
+   they would be reported by <code>iteratorOverScope()</code>.</li>
+</ul>
+<h2 id="structure-attributes-and-connections">Structure attributes and connections</h2>
+<h3 id="attributes-in-general">Attributes in general</h3>
+<p>Structures have two types of attributes, computed and external.  The
+distinction is documented in the source code,
+<a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#computed-attributes">here</a> and
+<a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#external-attributes">here</a>.</p>
+<p>The following functions available in each instance of the structure class
+support external and computed attributes.</p>
+<ul>
+<li><code>instance.getComputedAttribute(key)</code> and
+   <code>instance.getExternalAttribute(key)</code> look up computed or external
+   attributes by a given string <code>key</code>.</li>
+<li><code>instance.setComputedAttribute(key,value)</code> and
+   <code>instance.setExternalAttribute(key,value)</code> store computed or external
+   attributes under a given string <code>key</code> with value <code>value</code>, which should be
+   a JSON structure (or atomic data).  No check is made to verify that the
+   value is of this type, but errors will transpire later if this condition
+   is not satisfied (specifically, serialization errors).</li>
+<li><code>instance.clearComputedAttributes(key1,key2,...)</code> and
+   <code>instance.clearExternalAttributes(key1,key2,...)</code> remove the key-value
+   pairs of computed or external attributes associated with any of the keys
+   passed as parameters.  It is acceptable to pass any number of keys,
+   including just one.  If zero are passed, <em>all</em> key-value pairs are
+   removed.</li>
+<li><code>instance.attr(object)</code> adds all attributes of the given object as
+   external attributes to the instance, and returns the instance itself.
+   This is useful when constructing hierarchies, as follows.</li>
+</ul>
+<pre><code class="js">    var A = new Structure(
+        ( new Structure() ).attr( { name : 'example structure' } ),
+        ( new Structure() ).attr( { color : '#99ff00' } )
+    );
+</code></pre>
+
+<ul>
+<li><code>instance.compute(arguments)</code> is a useful shortcut for storing computed
+   attributes.  We do not redocument its details here; see the documentation
+   in the source code at the end of
+   <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#computed-attributes">this section</a>.</li>
+</ul>
+<h3 id="connections-as-a-type-of-attribute">Connections as a type of attribute</h3>
+<p>Within a structure's external attributes are two key-value pairs that should
+not be used for any other purpose, those with keys <code>connectionsOut</code> and
+<code>connectionsIn</code>.  These store data about connections between pairs of
+structures in the same heirarchy.  The data is stored by structure IDs, so
+making connections assumes that structures each have a unique ID, as
+documented <a href="#unique-ids">below</a>.</p>
+<p>You can query the connections among structures with these functions:</p>
+<ul>
+<li><code>source.allConnectionsOut(type)</code> returns a list of all destinations to
+   which the source is connected by one or more connections of the given
+   type.  Each destination appears on the list a number of times equal to
+   the number of connections of the given type from the source to that
+   destination.</li>
+<li><code>destination.allConnectionsIn(type)</code> functions analogously to the
+   previous, but for connections into a destination, rather than out from a
+   source.</li>
+<li><code>source.allConnectionsOut()</code> returns a list of destination-type pairs,
+   all connections that go out from the given source structure.</li>
+<li><code>destination.allConnectionsIn()</code> functions analogously to the previous,
+   but for connections into a destination, rather than out from a source.</li>
+<li><code>destination.properties()</code> looks at the set of source structures that
+   connect to the destination via arrows, and forms a dictionary of
+   key-value pairs, the "properties" of the destination.  The key will be
+   the type of the connection and the value will be the array of sources
+   that connected to the destination with that connection type.</li>
+</ul>
+<p>To create or destroy connections, use these functions:</p>
+<ul>
+<li><code>source.connectTo(destination,type)</code>, where <code>source</code> and <code>destination</code>
+   are <code>Structure</code> instances and <code>type</code> is a string containing the type of
+   connection, creates a new connection.  There can be multiple connections
+   between the same two structures, even of the same type.  Returns true if
+   the connection was formed, false if some error prevented it (such as the
+   destination not being a structure, or not having an ID, or the source
+   not having an ID).</li>
+<li><code>source.disconnectFrom(destination,type)</code> undoes the previous operation.
+   Because there may be multiple connections between the source and
+   destination of the same type, this simply decreases that number by one.
+   Returns true on success or false on failure (for example, if there were
+   no connection to delete).</li>
+</ul>
+<p>If the <code>connectionsOut</code> and <code>connectionsIn</code> data is directly manipulated by
+the client (not recommended), then you can call <code>root.fillOutConnections()</code>
+to ensure that the connection data stored in every source matches that
+stored in the corresponding destinations, and vice versa.</p>
+<h3 id="other-attribute-conventions">Other attribute conventions</h3>
+<p><em>Text:</em>  Some structures contain plain text.  The convention is to store
+<em>these in the external attribute with key "text."  For convenience, there is
+</em>a <code>text()</code> member function in the structure class that looks up this
+*attribute's value.</p>
+<p><em>References:</em>  Some structures serve as references to other structures.
+<em>They are marked as references with the external attribute "reference."  For
+</em>convenience, there is a <code>isAReference()</code> member function in the structure
+<em>class that looks up whether this attribute is present, and thus the
+</em>structure is functioning as a reference.</p>
+<p><em>Labels:</em>  Get a list of all text values used as labels for a structure by
+calling its member function <code>labels()</code>.  There are several ways that a
+structure can be labeled, all documented
+<a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#collecting-labels-reasons-and-premises">in the source code</a>.  All labels are strings.</p>
+<p>Check whether a string is on that list with the member function
+<code>hasLabel(label)</code>.</p>
+<p><em>Reasons and premises:</em>  You can get a list of all reasons or premises
+attached to a structure with the member functions <code>reasons()</code> and
+<code>premises()</code>.  These may be structures or the names by which structures
+accessible to this one are labeled.  There are several ways that a structure
+can have a reason or premise attached, all documented
+<a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#collecting-labels-reasons-and-premises">in the source code</a>.</p>
+<p><em>Citations:</em>  Given a string and a structure <code>S</code>, you can look up the
+nearest accessible (to <code>S</code>) structure that has that string as a label with
+<code>S.lookup(label)</code>.  We say that one structure cites another if it has that
+other as a reason or premise; you can query this binary relation with
+<code>structure.cites(other)</code>, and get a list of everything that cites a given
+structure with <code>structure.whatCitesMe()</code>.</p>
+<h2 id="unique-ids">Unique IDs</h2>
+<p>The <code>Structure</code> class maintains a mapping from nonnegative integer IDs to
+instances of the class.  A class, upon construction, doesn't get assigned a
+unique ID by default, but you can request one at any time.</p>
+<p>Here are the relevant functions:</p>
+<ul>
+<li><code>instance.ID</code> contains the instance's ID, if it has one, or undefined if
+   not</li>
+<li><code>instance.getID()</code> asks the class to allocate a new, unique ID to the
+   instance.  It does nothing if the instance already had an ID.</li>
+<li><code>instance.releaseID()</code> deletes the ID from the instance and lets the
+   class know that the ID is no longer in use, so that it may be assigned to
+   another instance later</li>
+<li><code>Structure.instanceWithID(id)</code> takes a nonnegative integer ID and yields
+   the instance with that ID, if there is one, or null or undefined if there
+   is none.</li>
+</ul>
+<p>If you have a structure hierarchy in which you wish all nodes to have a
+unique ID installed, call <code>setup()</code> on the root, and it will recursively
+call <code>getID()</code> in each instance.  It will also call <code>fillOutConnections()</code>.</p></div>
         </div>
 
         <footer class="col-md-12">

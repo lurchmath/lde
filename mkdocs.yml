@@ -14,6 +14,7 @@ pages:
     - Phase 9, Parsing Rules: phase9-parsing.md
     - Phase 10, Declarations: phase10-declarations.md
     - Phase 11, Bonus Features: phase11-features.md
+    - Enhancements for Later: enhancements.md
     - Ideas Archive: ideas.md
 - API Documentation:
     - Overview: api-overview.md

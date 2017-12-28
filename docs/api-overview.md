@@ -9,10 +9,18 @@ Plans" and "API Documentation."  The difference between them is this:
  * *Design Plans* lists concepts that have not yet been implemented and
    documented.  Consequently, the concepts are usually not described in full
    detail, but just the best detail available in the planning phase.
+   It answers the question, "What do we plan to build?"
  * *API Documentation* lists concepts that have been implemented, and for
    which the developers have therefore been able to document their work.
    Having the benefit of hindsight, this is therefore more detailed, and
    often even contains links directly into the source code.
+   It answers the question, "What did we build?" and is the official
+   documentation for the modules.
+
+Any page in the Design Plans that has been complete has had most of its
+content removed, because it has been superceded by the corresponding API
+documentation.  What remains is just a record of what was planne for that
+phase, with links to the corresponding API Documentation.
 
 ## Developer Workflow
 
