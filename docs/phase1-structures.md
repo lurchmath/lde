@@ -38,4 +38,13 @@ There is one task left to implement before this phase is complete:
 If the LDE detects that it is being run in a background thread, it will set
 up listeners for messages from the parent thread.  These listeners will
 handle messages of four types, insert/delete/replace/attribute, mirroring
-the four functions given above, and calling them internally.
+the four functions given above, and calling them internally.  Here is some
+code showing how that was done in the First Order Matching module.
+
+```coffeescript
+    if WorkerGlobalScope? # browser case
+        importScripts 'openmath.js'
+    else if self?.importScripts? # node case
+        importScripts 'node_modules/openmath-js/openmath.js'
+    # else not in a worder
+```
