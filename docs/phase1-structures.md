@@ -12,6 +12,12 @@ robust and useful product.
 In this phase, we just design the generic Structure class on which
 everything else will depend, and the infrastructure of the LDE itself.
 
+The `Structure` module defines a single `Structure` class, and has been
+implemented. [Its API Documentation appears here](api-structures.md).
+
+The `LDE` module defines several global functions, and has been implemented.
+[Its API Documentation appears here](api-lde.md).
+
 ## Goal
 
 At the end of this phase, we could write unit tests of the whole Structure
@@ -22,13 +28,3 @@ good foundation.
 
 This phase has been implemented, and is documented in the API Documentation,
 accessible from the navigation menu at the top of this site.
-
-# The Structure module
-
-That module defines a single `Structure` class, and has been implemented.
-[Its API Documentation appears here](api-structures.md).
-
-# LDE Module
-
-That module defines several global functions, and has been implemented.
-[Its API Documentation appears here](api-lde.md).

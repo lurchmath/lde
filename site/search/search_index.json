@@ -82,7 +82,7 @@
         }, 
         {
             "location": "/phase1-structures/", 
-            "text": "We have designed the work on the Lurch Deductive Engine (LDE) to progress in\nphases.  The idea is that each phase ends with a completed whole that can be\ntested in that state, and that provides more features than the previous\nstate did.  By the time the final phase is complete, the LDE will be a\nrobust and useful product.\n\n\nLDE Design Phase 1: Structures\n\n\nContent\n\n\nIn this phase, we just design the generic Structure class on which\neverything else will depend, and the infrastructure of the LDE itself.\n\n\nGoal\n\n\nAt the end of this phase, we could write unit tests of the whole Structure\nclass and its LDE context, thus guaranteeing that all later phases rest on a\ngood foundation.\n\n\nStatus\n\n\nThis phase has been implemented, and is documented in the API Documentation,\naccessible from the navigation menu at the top of this site.\n\n\nThe Structure module\n\n\nThat module defines a single \nStructure\n class, and has been implemented.\n\nIts API Documentation appears here\n.\n\n\nLDE Module\n\n\nThat module defines several global functions, and has been implemented.\n\nIts API Documentation appears here\n.", 
+            "text": "We have designed the work on the Lurch Deductive Engine (LDE) to progress in\nphases.  The idea is that each phase ends with a completed whole that can be\ntested in that state, and that provides more features than the previous\nstate did.  By the time the final phase is complete, the LDE will be a\nrobust and useful product.\n\n\nLDE Design Phase 1: Structures\n\n\nContent\n\n\nIn this phase, we just design the generic Structure class on which\neverything else will depend, and the infrastructure of the LDE itself.\n\n\nThe \nStructure\n module defines a single \nStructure\n class, and has been\nimplemented. \nIts API Documentation appears here\n.\n\n\nThe \nLDE\n module defines several global functions, and has been implemented.\n\nIts API Documentation appears here\n.\n\n\nGoal\n\n\nAt the end of this phase, we could write unit tests of the whole Structure\nclass and its LDE context, thus guaranteeing that all later phases rest on a\ngood foundation.\n\n\nStatus\n\n\nThis phase has been implemented, and is documented in the API Documentation,\naccessible from the navigation menu at the top of this site.", 
             "title": "Phase 1, Structures"
         }, 
         {
@@ -92,7 +92,7 @@
         }, 
         {
             "location": "/phase1-structures/#content", 
-            "text": "In this phase, we just design the generic Structure class on which\neverything else will depend, and the infrastructure of the LDE itself.", 
+            "text": "In this phase, we just design the generic Structure class on which\neverything else will depend, and the infrastructure of the LDE itself.  The  Structure  module defines a single  Structure  class, and has been\nimplemented.  Its API Documentation appears here .  The  LDE  module defines several global functions, and has been implemented. Its API Documentation appears here .", 
             "title": "Content"
         }, 
         {
@@ -104,16 +104,6 @@
             "location": "/phase1-structures/#status", 
             "text": "This phase has been implemented, and is documented in the API Documentation,\naccessible from the navigation menu at the top of this site.", 
             "title": "Status"
-        }, 
-        {
-            "location": "/phase1-structures/#the-structure-module", 
-            "text": "That module defines a single  Structure  class, and has been implemented. Its API Documentation appears here .", 
-            "title": "The Structure module"
-        }, 
-        {
-            "location": "/phase1-structures/#lde-module", 
-            "text": "That module defines several global functions, and has been implemented. Its API Documentation appears here .", 
-            "title": "LDE Module"
         }, 
         {
             "location": "/phase2-validation/", 
