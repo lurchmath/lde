@@ -153,12 +153,85 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
         <li class="main active"><a href="#api-documentation-for-the-lde-module">API Documentation for the LDE Module</a></li>
+            <li><a href="#one-global-document">One Global Document</a></li>
+            <li><a href="#manipulating-the-document">Manipulating the Document</a></li>
+            <li><a href="#asynchronous-api">Asynchronous API</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
 <h1 id="api-documentation-for-the-lde-module">API Documentation for the LDE Module</h1>
-<p>This document is a placeholder, and will be filled in later.</p></div>
+<p>The main LDE module is not yet complete.  So far it supports only the
+functionality documented below, which will grow with time.</p>
+<h2 id="one-global-document">One Global Document</h2>
+<p>The module initializes a single <code>Structure</code> instance in a global variable,
+which can be queried with the public API function <code>getDocument()</code>.  It
+begins life as a freshly created <code>Structure</code> with no attributes, but an ID.</p>
+<p>This document is called the <em>LDE Document,</em> and is the structure on which
+all computations done by the LDE will operate.  In the main Lurch
+application, it will represent the meaningful content that has been
+extracted from the user's document.</p>
+<h2 id="manipulating-the-document">Manipulating the Document</h2>
+<p>The document can be manipulated with four functions in the public API of
+this module:</p>
+<ul>
+<li><code>insert(structureToInsert,parentID,insertionIndex)</code> inserts a new
+   structure within the global document hierarchy, as follows:<ul>
+<li><code>structureToInsert</code> should be the serialized form of the structure to
+  insert (optionally created with <code>.toJSON()</code> in a <code>Structure</code> instance)</li>
+<li><code>parentID</code> is the ID of the parent under which this new child should
+  be inserted.  This can be any of three types of things:</li>
+<li>a number, which is interpreted as the ID of a <code>Structure</code> instance
+     already in the global document structure</li>
+<li>a string, which is interpreted as the external attribute with key
+     "ID" for a <code>Structure</code> instance already in the global document
+     structure</li>
+<li>the string <code>"root"</code>, which means the root of the global document
+     structure (which supercedes the previous case)</li>
+<li><code>insertionIndex</code> is the index of the child to insert, which must be
+  greater than or equal to zero and less than or equal to the number of
+  children of the parent</li>
+</ul>
+</li>
+<li><code>delete(ID)</code> deletes from the global document hierarchy the structure
+   with the given ID, which is interpreted with the same conventions as the
+   <code>parentID</code> is for the <code>insert</code> function</li>
+<li><code>replace(ID,newStructure)</code> replaces the structure with the given ID with
+   the given new structure.<ul>
+<li><code>ID</code> is interpreted with the same conventions as the <code>parentID</code> is for
+  the <code>insert</code> function</li>
+<li><code>newStructure</code> is a serialized structure, as <code>structureToInsert</code> is
+  for the <code>insert</code> function</li>
+</ul>
+</li>
+<li><code>setAttribute(ID,key,value)</code> modifies a single external attribute of a
+   structure within the global document hierarchy, as follows:<ul>
+<li><code>ID</code> is interpreted with the same conventions as the <code>parentID</code> is for
+  the <code>insert</code> function</li>
+<li><code>key</code> is the key of the external attribute to create or overwrite</li>
+<li><code>value</code> is the new value, which must be JSON data.  (No checks are
+  done to verify that it is JSON data, but errors will transpire
+  eventually if non-JSON data is passed.)</li>
+</ul>
+</li>
+</ul>
+<h2 id="asynchronous-api">Asynchronous API</h2>
+<p>If the LDE detects that it is being run in a background thread, it will set
+up listeners for messages from the parent thread.  These listeners will
+handle messages of four types, <code>insert</code>/<code>delete</code>/<code>replace</code>/<code>setAttribute</code>,
+mirroring the four functions given above, and calling them internally.</p>
+<p>They can be called by passing a message of the form <code>[ command, args... ]</code>,
+where the command is a string (one of <code>"insert"</code>, <code>"delete"</code>, etc.) and the
+arguments list is the same list that would be passed to the function itself,
+as documented in the previous section on this page.</p>
+<p>For example, you could start an LDE in a WebWorker and insert a new
+structure as the first child of its global document as follows.</p>
+<pre><code class="js">    // import the lde.js file (kept in the release/ folder)
+    // (This requires having the structure.js file in the same folder.)
+    var worker = new Worker( 'lde.js' );
+    var A = new Structure();
+    worker.postMessage( [ 'insert', A.toJSON(), 'root', 0 ] );
+</code></pre></div>
         </div>
 
         <footer class="col-md-12">
