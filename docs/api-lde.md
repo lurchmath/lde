@@ -26,13 +26,13 @@ this module:
       insert (optionally created with `.toJSON()` in a `Structure` instance)
     * `parentID` is the ID of the parent under which this new child should
       be inserted.  This can be any of three types of things:
-       * a number, which is interpreted as the ID of a `Structure` instance
-         already in the global document structure
-       * a string, which is interpreted as the external attribute with key
-         "ID" for a `Structure` instance already in the global document
-         structure
-       * the string `"root"`, which means the root of the global document
-         structure (which supercedes the previous case)
+        * a number, which is interpreted as the ID of a `Structure` instance
+          already in the global document structure
+        * a string, which is interpreted as the external attribute with key
+          "ID" for a `Structure` instance already in the global document
+          structure
+        * the string `"root"`, which means the root of the global document
+          structure (which supercedes the previous case)
     * `insertionIndex` is the index of the child to insert, which must be
       greater than or equal to zero and less than or equal to the number of
       children of the parent

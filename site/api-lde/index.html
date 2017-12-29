@@ -180,14 +180,16 @@ this module:</p>
 <li><code>structureToInsert</code> should be the serialized form of the structure to
   insert (optionally created with <code>.toJSON()</code> in a <code>Structure</code> instance)</li>
 <li><code>parentID</code> is the ID of the parent under which this new child should
-  be inserted.  This can be any of three types of things:</li>
+  be inserted.  This can be any of three types of things:<ul>
 <li>a number, which is interpreted as the ID of a <code>Structure</code> instance
-     already in the global document structure</li>
+  already in the global document structure</li>
 <li>a string, which is interpreted as the external attribute with key
-     "ID" for a <code>Structure</code> instance already in the global document
-     structure</li>
+  "ID" for a <code>Structure</code> instance already in the global document
+  structure</li>
 <li>the string <code>"root"</code>, which means the root of the global document
-     structure (which supercedes the previous case)</li>
+  structure (which supercedes the previous case)</li>
+</ul>
+</li>
 <li><code>insertionIndex</code> is the index of the child to insert, which must be
   greater than or equal to zero and less than or equal to the number of
   children of the parent</li>
