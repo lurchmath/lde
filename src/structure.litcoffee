@@ -5,7 +5,7 @@ The very generic word "structure" is used in the LDE to describe a subtree
 of the LDE Document.  For more details on this, see
 [the design overview docs](https://lurchmath.github.io/lde/site/overview/).
 
-    exports.Structure = class Structure
+    class Structure
 
 If you plan to develop a subclass of `Structure`, be sure to follow the
 requirement listed in the
@@ -866,3 +866,7 @@ Finally, we can write a function that computes all structures that cite this
 one.  It uses the above function to make the work easy.
 
         whatCitesMe : -> @allInScope ( other ) => other.cites this
+
+Now if this is being used in a Node.js context, export the class we defined.
+
+    if exports? then exports.Structure = Structure

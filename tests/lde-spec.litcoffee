@@ -360,3 +360,113 @@ attributes.
             expect( -> LDE.setAttribute rootID, 'test key 1' ).not.toThrow()
             expect( LDE.getDocument().getExternalAttribute 'test key 1' )
                 .toBeUndefined()
+
+## WebWorker Support
+
+This section tests the same four functions as the previous section, but
+through the interface of a WebWorker.  Actually, it simulates a WebWorker
+using the Node module `webworker-threads`.  It does not do nearly as
+thorough a test as the previous section did, because the main point of this
+section is to test the message-passing API necessary for pushing work into a
+background thread, not to re-test the same functionality as before.
+
+    describe 'LDE WebWorker Support', ->
+
+        { Worker } = require 'webworker-threads'
+        worker = null
+        beforeEach ->
+            worker = new Worker 'release/lde.js'
+            worker.onmessage = ( event ) -> worker.listener? event
+        asyncTest = ( commandAndArgArray, testfunc ) ->
+            worker.listener = ( result ) -> testfunc result.data
+            worker.postMessage commandAndArgArray
+
+### should allow querying the document
+
+        it 'should allow querying the document', ( done ) ->
+            asyncTest [ 'getDocument' ], ( result ) ->
+                expect( result ).toEqual {
+                    className : 'Structure'
+                    externalAttributes : { }
+                    computedAttributes : { }
+                    children : [ ]
+                }
+                done()
+
+### should allow inserting things
+
+        it 'should allow inserting things', ( done ) ->
+            A = new Structure().attr name : 'A', ID : 'foo'
+            worker.postMessage [ 'insert', A.toJSON(), 'root', 0 ]
+            asyncTest [ 'getDocument' ], ( result ) ->
+                expect( result ).toEqual {
+                    className : 'Structure'
+                    externalAttributes : { }
+                    computedAttributes : { }
+                    children : [
+                        className : 'Structure'
+                        externalAttributes : name : 'A', ID : 'foo'
+                        computedAttributes : { }
+                        children : [ ]
+                    ]
+                }
+                done()
+
+### should allow deleting things
+
+        it 'should allow deleting things', ( done ) ->
+            A = new Structure().attr name : 'A', ID : 'foo'
+            worker.postMessage [ 'insert', A.toJSON(), 'root', 0 ]
+            worker.postMessage [ 'delete', 'foo' ]
+            asyncTest [ 'getDocument' ], ( result ) ->
+                expect( result ).toEqual {
+                    className : 'Structure'
+                    externalAttributes : { }
+                    computedAttributes : { }
+                    children : [ ]
+                }
+                done()
+
+### should allow replacing things
+
+        it 'should allow replacing things', ( done ) ->
+            A = new Structure().attr name : 'A', ID : 'foo'
+            B = new Structure().attr name : 'B', ID : 'bar'
+            worker.postMessage [ 'insert', A.toJSON(), 'root', 0 ]
+            worker.postMessage [ 'replace', 'foo', B.toJSON() ]
+            asyncTest [ 'getDocument' ], ( result ) ->
+                expect( result ).toEqual {
+                    className : 'Structure'
+                    externalAttributes : { }
+                    computedAttributes : { }
+                    children : [
+                        className : 'Structure'
+                        externalAttributes : name : 'B', ID : 'bar'
+                        computedAttributes : { }
+                        children : [ ]
+                    ]
+                }
+                done()
+
+### should allow setting attributes
+
+        it 'should allow setting attributes', ( done ) ->
+            A = new Structure().attr name : 'A', ID : 'foo'
+            worker.postMessage [ 'insert', A.toJSON(), 'root', 0 ]
+            worker.postMessage [ 'setAttribute', 'foo', 'color', 'red' ]
+            asyncTest [ 'getDocument' ], ( result ) ->
+                expect( result ).toEqual {
+                    className : 'Structure'
+                    externalAttributes : { }
+                    computedAttributes : { }
+                    children : [
+                        className : 'Structure'
+                        externalAttributes :
+                            name : 'A'
+                            ID : 'foo'
+                            color : 'red'
+                        computedAttributes : { }
+                        children : [ ]
+                    ]
+                }
+                done()
