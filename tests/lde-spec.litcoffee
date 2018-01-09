@@ -43,24 +43,26 @@ a root only, no children).
 
         afterEach ->
             while LDE.getDocument().children().length > 0
-                LDE.delete LDE.getDocument().children()[0].ID
+                toDelete = LDE.getDocument().children()[0]
+                toDelete.removeFromParent()
+                toDelete.untrackIDs()
 
 The LDE should begin life with an empty LDE Document, that is, a root with
 no attributes and no children, and an instance of the base Structure class.
 
-        it 'should begin with an empty document', ->
+        it 'should begin with an empty document with ID "root"', ->
             serialized = LDE.getDocument().toJSON()
             expect( serialized.className ).toBe 'Structure'
             expect( serialized.children ).toEqual [ ]
-            expect( serialized.externalAttributes ).toEqual { }
+            expect( serialized.externalAttributes ).toEqual { id : 'root' }
             expect( serialized.computedAttributes ).toEqual { }
 
 In order for us to work with the LDE Document, we will need the root to have
 an ID that we can pass to various editing functions.  Let's verify that it
-has one.
+has one, and that it is "root" as it should be.
 
-        it 'should give the document root an ID', ->
-            expect( LDE.getDocument().ID ).not.toBeUndefined()
+        it 'should give the document root the ID "root"', ->
+            expect( LDE.getDocument().id() ).toBe 'root'
 
 The first piece of the LDE API we test is that for inserting new children of
 the root, or various descendants of that root.
@@ -69,50 +71,48 @@ the root, or various descendants of that root.
 
 Define some structures that we will want to insert.
 
-            A = new Structure().attr text : 'some text'
-            B = new Structure().attr reference : yes
-            C = new Structure().attr name : 'C'
+            A = new Structure().attr text : 'some text', id : 'A'
+            B = new Structure().attr reference : yes, id : 'B'
+            C = new Structure().attr name : 'C', id : 'C'
 
-Insert one and verify that it has been added and has been given an ID.
+Insert one and verify that it has been added and its ID tracked.
 
-            expect( A.ID ).toBeUndefined()
-            rootID = LDE.getDocument().ID
-            expect( -> LDE.insert A.toJSON(), rootID, 0 ).not.toThrow()
+            expect( -> LDE.insert A.toJSON(), 'root', 0 ).not.toThrow()
             expect( LDE.getDocument().children().length ).toBe 1
             insertedA = LDE.getDocument().children()[0]
             expect( insertedA ).not.toBeUndefined()
             expect( insertedA.className ).toBe 'Structure'
             expect( insertedA.text() ).toBe 'some text'
-            expect( insertedA.ID ).not.toBeUndefined()
+            expect( insertedA.id() ).toBe 'A'
             expect( insertedA.parent() ).toBe LDE.getDocument()
+            expect( Structure.instanceWithID 'A' ).toBe insertedA
 
 Insert another as its sibling and do the same verifications.
 
-            expect( B.ID ).toBeUndefined()
-            expect( -> LDE.insert B.toJSON(), rootID, 1 ).not.toThrow()
+            expect( -> LDE.insert B.toJSON(), 'root', 1 ).not.toThrow()
             expect( LDE.getDocument().children().length ).toBe 2
             insertedB = LDE.getDocument().children()[1]
             expect( insertedB ).not.toBeUndefined()
             expect( insertedB.className ).toBe 'Structure'
             expect( insertedB.isAReference() ).toBeTruthy()
-            expect( insertedB.ID ).not.toBeUndefined()
+            expect( insertedB.id() ).toBe 'B'
             expect( insertedB.parent() ).toBe LDE.getDocument()
             expect( insertedA.nextSibling() ).toBe insertedB
             expect( insertedB.previousSibling() ).toBe insertedA
+            expect( Structure.instanceWithID 'B' ).toBe insertedB
 
 Insert a grandchild and do similar verifications, but one level lower.
 
-            expect( C.ID ).toBeUndefined()
-            expect( -> LDE.insert C.toJSON(), insertedA.ID, 0 )
-                .not.toThrow()
+            expect( -> LDE.insert C.toJSON(), 'A', 0 ).not.toThrow()
             expect( LDE.getDocument().children().length ).toBe 2
             expect( insertedA.children().length ).toBe 1
             insertedC = insertedA.children()[0]
             expect( insertedC ).not.toBeUndefined()
             expect( insertedC.className ).toBe 'Structure'
             expect( insertedC.getExternalAttribute 'name' ).toBe 'C'
-            expect( insertedC.ID ).not.toBeUndefined()
+            expect( insertedC.id() ).toBe 'C'
             expect( insertedC.parent() ).toBe insertedA
+            expect( Structure.instanceWithID 'C' ).toBe insertedC
 
 Now we just verify that our process of clearing out the children of the LDE
 Document after each test is working correctly.  This is just a repeat of the
@@ -123,7 +123,7 @@ state.
             serialized = LDE.getDocument().toJSON()
             expect( serialized.className ).toBe 'Structure'
             expect( serialized.children ).toEqual [ ]
-            expect( serialized.externalAttributes ).toEqual { }
+            expect( serialized.externalAttributes ).toEqual { id : 'root' }
             expect( serialized.computedAttributes ).toEqual { }
 
 Next we test the `delete` member of the API.  We re-populate the document
@@ -134,16 +134,14 @@ and then slowly delete pieces.
 We can re-use the same structures (and insertion pattern) from an earlier
 test.
 
-            A = new Structure().attr text : 'some text'
-            B = new Structure().attr reference : yes
-            C = new Structure().attr name : 'C'
-            rootID = LDE.getDocument().ID
-            expect( -> LDE.insert A.toJSON(), rootID, 0 ).not.toThrow()
+            A = new Structure().attr text : 'some text', id : 'A'
+            B = new Structure().attr reference : yes, id : 'B'
+            C = new Structure().attr name : 'C', id : 'C'
+            expect( -> LDE.insert A.toJSON(), 'root', 0 ).not.toThrow()
             insertedA = LDE.getDocument().children()[0]
-            expect( -> LDE.insert B.toJSON(), rootID, 1 ).not.toThrow()
+            expect( -> LDE.insert B.toJSON(), 'root', 1 ).not.toThrow()
             insertedB = LDE.getDocument().children()[1]
-            expect( -> LDE.insert C.toJSON(), insertedA.ID, 0 )
-                .not.toThrow()
+            expect( -> LDE.insert C.toJSON(), 'A', 0 ).not.toThrow()
             insertedC = insertedA.children()[0]
 
 First, let's delete them from the leaves up, to be sure we can do multiple
@@ -153,7 +151,7 @@ various attributes as well.
 
 First delete C.
 
-            expect( -> LDE.delete insertedC.ID ).not.toThrow()
+            expect( -> LDE.delete 'C' ).not.toThrow()
             doc = LDE.getDocument()
             expect( doc.children().length ).toBe 2
             expect( doc.children()[0].parent() ).toBe doc
@@ -165,41 +163,36 @@ First delete C.
 
 Was its ID also released?
 
-            expect( insertedC.ID ).toBeUndefined()
+            expect( Structure.instanceWithID 'C' ).toBeUndefined()
 
 Next delete A.
 
-            expect( -> LDE.delete insertedA.ID ).not.toThrow()
+            expect( -> LDE.delete 'A' ).not.toThrow()
             expect( doc.children().length ).toBe 1
             expect( doc.children()[0].parent() ).toBe doc
             expect( doc.children()[0].children().length ).toBe 0
             expect( doc.children()[0].isAReference() ).toBeTruthy()
-            expect( insertedA.ID ).toBeUndefined()
+            expect( Structure.instanceWithID 'A' ).toBeUndefined()
 
 Finally, delete B.
 
-            expect( -> LDE.delete insertedB.ID ).not.toThrow()
+            expect( -> LDE.delete 'B' ).not.toThrow()
             expect( doc.children().length ).toBe 0
-            expect( insertedB.ID ).toBeUndefined()
+            expect( Structure.instanceWithID 'B' ).toBeUndefined()
 
 Next, let's re-add the same structures, but then delete them in a different
 order, this time including a deletion of a nonatomic subtree.
 
-            A = new Structure().attr text : 'some text'
-            B = new Structure().attr reference : yes
-            C = new Structure().attr name : 'C'
-            rootID = LDE.getDocument().ID
-            expect( -> LDE.insert A.toJSON(), rootID, 0 ).not.toThrow()
+            expect( -> LDE.insert A.toJSON(), 'root', 0 ).not.toThrow()
             insertedA = LDE.getDocument().children()[0]
-            expect( -> LDE.insert B.toJSON(), rootID, 1 ).not.toThrow()
+            expect( -> LDE.insert B.toJSON(), 'root', 1 ).not.toThrow()
             insertedB = LDE.getDocument().children()[1]
-            expect( -> LDE.insert C.toJSON(), insertedA.ID, 0 )
-                .not.toThrow()
+            expect( -> LDE.insert C.toJSON(), 'A', 0 ).not.toThrow()
             insertedC = insertedA.children()[0]
 
 First delete B.
 
-            expect( -> LDE.delete insertedB.ID ).not.toThrow()
+            expect( -> LDE.delete 'B' ).not.toThrow()
             doc = LDE.getDocument()
             expect( doc.children().length ).toBe 1
             insertedA = doc.children()[0]
@@ -210,14 +203,14 @@ First delete B.
             expect( insertedC.parent() ).toBe insertedA
             expect( insertedC.children().length ).toBe 0
             expect( insertedC.getExternalAttribute 'name' ).toBe 'C'
-            expect( insertedB.ID ).toBeUndefined()
+            expect( Structure.instanceWithID 'B' ).toBeUndefined()
 
 Then delete A, which also deletes C.
 
-            expect( -> LDE.delete insertedA.ID ).not.toThrow()
+            expect( -> LDE.delete 'A' ).not.toThrow()
             expect( doc.children().length ).toBe 0
-            expect( insertedA.ID ).toBeUndefined()
-            expect( insertedC.ID ).toBeUndefined()
+            expect( Structure.instanceWithID 'A' ).toBeUndefined()
+            expect( Structure.instanceWithID 'C' ).toBeUndefined()
 
 Next we test the `replace` member of the API.  We re-populate the document
 and then replace some substructures with new ones.
@@ -227,88 +220,89 @@ and then replace some substructures with new ones.
 We begin with the same structures (and insertion pattern) from an earlier
 test.
 
-            A = new Structure().attr text : 'some text'
-            B = new Structure().attr reference : yes
-            C = new Structure().attr name : 'C'
-            rootID = LDE.getDocument().ID
-            expect( -> LDE.insert A.toJSON(), rootID, 0 ).not.toThrow()
+            A = new Structure().attr text : 'some text', id : 'A'
+            B = new Structure().attr reference : yes, id : 'B'
+            C = new Structure().attr name : 'C', id : 'C'
+            expect( -> LDE.insert A.toJSON(), 'root', 0 ).not.toThrow()
             insertedA = LDE.getDocument().children()[0]
-            expect( -> LDE.insert B.toJSON(), rootID, 1 ).not.toThrow()
+            expect( -> LDE.insert B.toJSON(), 'root', 1 ).not.toThrow()
             insertedB = LDE.getDocument().children()[1]
-            expect( -> LDE.insert C.toJSON(), insertedA.ID, 0 )
-                .not.toThrow()
+            expect( -> LDE.insert C.toJSON(), 'A', 0 ).not.toThrow()
             insertedC = insertedA.children()[0]
 
 Verify that it has the expected structure before we begin manipulating it.
 
             expect( insertedA.className ).toBe 'Structure'
             expect( insertedA.text() ).toBe 'some text'
-            expect( insertedA.ID ).not.toBeUndefined()
+            expect( insertedA.id() ).toBe 'A'
+            expect( Structure.instanceWithID 'A' ).toBe insertedA
             expect( insertedA.parent() ).toBe LDE.getDocument()
             expect( insertedB.className ).toBe 'Structure'
             expect( insertedB.isAReference() ).toBeTruthy()
-            expect( insertedB.ID ).not.toBeUndefined()
+            expect( insertedB.id() ).toBe 'B'
+            expect( Structure.instanceWithID 'B' ).toBe insertedB
             expect( insertedB.parent() ).toBe LDE.getDocument()
             expect( insertedA.nextSibling() ).toBe insertedB
             expect( insertedB.previousSibling() ).toBe insertedA
             expect( insertedC.className ).toBe 'Structure'
             expect( insertedC.getExternalAttribute 'name' ).toBe 'C'
-            expect( insertedC.ID ).not.toBeUndefined()
+            expect( insertedC.id() ).toBe 'C'
+            expect( Structure.instanceWithID 'C' ).toBe insertedC
             expect( insertedC.parent() ).toBe insertedA
 
 Then we create some structures to use to replace those.
 
-            D = new Structure().attr name : 'D'
-            E = new Structure().attr name : 'E'
+            D = new Structure().attr name : 'Dan', id : 'D'
+            E = new Structure().attr name : 'Eli', id : 'E'
 
 Replace a grandchild of the root, then verify that all structures are
 positioned as expected with respect to one another.  This is the same test
 as above, except that C has been replaced by D.
 
-            expect( -> LDE.replace insertedC.ID, D.toJSON() ).not.toThrow()
+            expect( -> LDE.replace 'C', D.toJSON() ).not.toThrow()
             expect( insertedA.className ).toBe 'Structure'
             expect( insertedA.text() ).toBe 'some text'
-            expect( insertedA.ID ).not.toBeUndefined()
+            expect( insertedA.id() ).toBe 'A'
             expect( insertedA.parent() ).toBe LDE.getDocument()
             expect( insertedB.className ).toBe 'Structure'
             expect( insertedB.isAReference() ).toBeTruthy()
-            expect( insertedB.ID ).not.toBeUndefined()
+            expect( insertedB.id() ).toBe 'B'
             expect( insertedB.parent() ).toBe LDE.getDocument()
             expect( insertedA.nextSibling() ).toBe insertedB
             expect( insertedB.previousSibling() ).toBe insertedA
             shouldBeD = insertedA.children()[0]
             expect( shouldBeD ).not.toBe insertedC
             expect( shouldBeD.className ).toBe 'Structure'
-            expect( shouldBeD.getExternalAttribute 'name' ).toBe 'D'
-            expect( shouldBeD.ID ).not.toBeUndefined()
+            expect( shouldBeD.getExternalAttribute 'name' ).toBe 'Dan'
+            expect( shouldBeD.id() ).toBe 'D'
             expect( shouldBeD.parent() ).toBe insertedA
 
 Verify that C is no longer in the hierarchy, and that its ID has been
 released.
 
             expect( insertedC.parent() ).toBeNull()
-            expect( insertedC.ID ).toBeUndefined()
+            expect( Structure.instanceWithID 'C' ).toBeUndefined()
 
 Now replace a nonatomic subtree with an atomic subtree, then do the same
 type of tests to verify the structure.
 
-            expect( -> LDE.replace insertedA.ID, E.toJSON() ).not.toThrow()
+            expect( -> LDE.replace 'A', E.toJSON() ).not.toThrow()
             shouldBeE = LDE.getDocument().children()[0]
             expect( shouldBeE ).not.toBe insertedA
             expect( shouldBeE.className ).toBe 'Structure'
-            expect( shouldBeE.getExternalAttribute 'name' ).toBe 'E'
-            expect( shouldBeE.ID ).not.toBeUndefined()
+            expect( shouldBeE.getExternalAttribute 'name' ).toBe 'Eli'
+            expect( shouldBeE.id() ).toBe 'E'
             expect( shouldBeE.parent() ).toBe LDE.getDocument()
             expect( insertedB.className ).toBe 'Structure'
             expect( insertedB.isAReference() ).toBeTruthy()
-            expect( insertedB.ID ).not.toBeUndefined()
+            expect( insertedB.id() ).toBe 'B'
             expect( insertedB.parent() ).toBe LDE.getDocument()
             expect( shouldBeE.nextSibling() ).toBe insertedB
             expect( insertedB.previousSibling() ).toBe shouldBeE
             expect( insertedA.parent() ).toBeNull()
             expect( shouldBeD.parent() ).toBe insertedA
-            expect( insertedA.ID ).toBeUndefined()
-            expect( shouldBeD.ID ).toBeUndefined()
+            expect( Structure.instanceWithID 'A' ).toBeUndefined()
+            expect( Structure.instanceWithID 'D' ).toBeUndefined()
 
 Finally we test the `setAttribute` member of the API.  We re-populate the
 document and then replace some substructures with new ones.
@@ -318,16 +312,14 @@ document and then replace some substructures with new ones.
 We begin with the same structures (and insertion pattern) from an earlier
 test.
 
-            A = new Structure().attr text : 'some text'
-            B = new Structure().attr reference : yes
-            C = new Structure().attr name : 'C'
-            rootID = LDE.getDocument().ID
-            expect( -> LDE.insert A.toJSON(), rootID, 0 ).not.toThrow()
+            A = new Structure().attr text : 'some text', id : 'A'
+            B = new Structure().attr reference : yes, id : 'B'
+            C = new Structure().attr name : 'C', id : 'C'
+            expect( -> LDE.insert A.toJSON(), 'root', 0 ).not.toThrow()
             insertedA = LDE.getDocument().children()[0]
-            expect( -> LDE.insert B.toJSON(), rootID, 1 ).not.toThrow()
+            expect( -> LDE.insert B.toJSON(), 'root', 1 ).not.toThrow()
             insertedB = LDE.getDocument().children()[1]
-            expect( -> LDE.insert C.toJSON(), insertedA.ID, 0 )
-                .not.toThrow()
+            expect( -> LDE.insert C.toJSON(), 'A', 0 ).not.toThrow()
             insertedC = insertedA.children()[0]
 
 We do not at this point test whether the structure looks the way we expect,
@@ -337,13 +329,13 @@ to be sure that it creates the structure as expected.
 Let us add an attribute to each of the nodes, including the root, and verify
 that they were successfully added.
 
-            expect( -> LDE.setAttribute rootID,
+            expect( -> LDE.setAttribute 'root',
                 'test key 1', 'test value 1' ).not.toThrow()
-            expect( -> LDE.setAttribute insertedA.ID,
+            expect( -> LDE.setAttribute 'A',
                 'test key 2', 'test value 2' ).not.toThrow()
-            expect( -> LDE.setAttribute insertedB.ID,
+            expect( -> LDE.setAttribute 'B',
                 'test key 3', 'test value 3' ).not.toThrow()
-            expect( -> LDE.setAttribute insertedC.ID,
+            expect( -> LDE.setAttribute 'C',
                 'test key 4', 'test value 4' ).not.toThrow()
             expect( LDE.getDocument().getExternalAttribute 'test key 1' )
                 .toBe 'test value 1'
@@ -357,7 +349,7 @@ that they were successfully added.
 Then we call `setAttribute` with no value, and ensure that this removes
 attributes.
 
-            expect( -> LDE.setAttribute rootID, 'test key 1' ).not.toThrow()
+            expect( -> LDE.setAttribute 'root', 'test key 1' ).not.toThrow()
             expect( LDE.getDocument().getExternalAttribute 'test key 1' )
                 .toBeUndefined()
 

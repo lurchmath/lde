@@ -21,10 +21,11 @@ any case.
 ## The LDE Document
 
 The LDE Document is a global instance of the `Structure` class, representing
-the meaningful content of the user's document.
+the meaningful content of the user's document.  It has the special ID
+"root."
 
-    LDEDocument = new Structure
-    LDEDocument.getID()
+    LDEDocument = ( new Structure ).attr 'id' : 'root'
+    LDEDocument.trackIDs()
 
 Clients should treat the global LDE Document as read-only, *except* through
 the API provided in [the following section](#the-main-api).  But we provide
@@ -53,44 +54,6 @@ particular structure is a descendant of the LDE Document.
             structure = structure.parent()
         no
 
-We also create a function for recursively releasing IDs throughout an entire
-structure hierarchy.
-
-    releaseAllIDs = ( hierarchy ) ->
-        hierarchy.releaseID()
-        releaseAllIDs child for child in hierarchy.children()
-
-And another two functions for adding or removing a hierarchy of structures
-from having the IDs contained in their external attributes tracked by this
-module.
-
-    externalIDToStructure = { }
-    trackExternalIDs = ( hierarchy, recursive = yes ) ->
-        if ( id = hierarchy.getExternalAttribute 'ID' )?
-            externalIDToStructure[id] = hierarchy
-        if recursive
-            trackExternalIDs child for child in hierarchy.children
-    stopTrackingExternalIDs = ( hierarchy, recursive = yes ) ->
-        if ( id = hierarchy.getExternalAttribute 'ID' )?
-            delete externalIDToStructure[id]
-        if recursive
-            stopTrackingExternalIDs child for child in hierarchy.children
-
-Finally a lookup function for IDs that will test whether the ID is a
-nonnegative natural number (as used by the Structure module) or a string
-(as may be used externally by any client).  The former is done through a
-lookup provided by the `Structure` class itself, and the latter using the
-object defined above.  Also, the special string `"root"` always yields the
-document root.
-
-    lookupID = ( id ) ->
-        if id is 'root'
-            functions.getDocument()
-        else if typeof id is 'number'
-            Structure.instanceWithID id
-        else
-            externalIDToStructure[id]
-
 ## The Main API
 
 This module presents to clients a four-function API defined in this section.
@@ -99,50 +62,45 @@ Each of these functions manipulates the global LDE Document.
 The following insertion function deserializes the given structure from JSON,
 finds the descendant of the LDE Document that has the given ID, and inserts
 the deserialized version as one of its children, at the given index. If
-anything goes wrong in that process then it does nothing.  All newly
-inserted structures are given new, unique IDs (with their descendants) if
-they did not yet have them.
+anything goes wrong in that process then it does nothing.  The ID must be
+the ID of a Structure, as defined in that class (a string ID stored in the
+external attribute "id").
 
-The ID may be the ID of a Structure, as defined in that class (a nonnegative
-natural number) or it may be an externally used ID, which must be a string,
-and will be considered to indicate the unique structure with external
-attribute having key "ID" and the given string as its value.
+All newly inserted structures and their descendants have all their IDs
+tracked.
 
     functions.insert = ( json, parentID, insertionIndex ) ->
-        if ( parent = lookupID parentID )? and \
+        if ( parent = Structure.instanceWithID parentID )? and \
            ( 0 <= insertionIndex <= parent.children().length ) and \
            ( isInTheDocument parent ) and \
            ( newInstance = Structure.fromJSON( json ).setup() )?
             parent.insertChild newInstance, insertionIndex
-            trackExternalIDs newInstance
+            newInstance.trackIDs()
 
 The following function finds the descendant of the global LDE Document that
 has the given ID and, assuming such a structure exists, removes it from its
-parent and releases all IDs within it.
+parent and stops tracking all IDs within it.
 
     functions.delete = ( subtreeID ) ->
-        if ( subtree = lookupID subtreeID )? and \
+        if ( subtree = Structure.instanceWithID subtreeID )? and \
            ( isInTheDocument subtree ) and subtree isnt LDEDocument
             subtree.removeFromParent()
-            releaseAllIDs subtree
-            stopTrackingExternalIDs subtree
+            subtree.untrackIDs()
 
 The following function finds the descendant of the global LDE Document that
 has the given ID and, assuming such a structure exists, deserializes the
 second argument as a Structure object and uses it to replace the original
-structure in the LDE Document. The deserialized version will be assigned
-new, unique IDs at every node in its tree before insertion into the
-Document.  The structure that was removed to do the replacement will have
-all the IDs within it released.
+structure in the LDE Document.  The deserialized version will have all of
+the IDs in its hierarchy tracked.  This module will also stop tracking all
+IDs in the structure that was removed.
 
     functions.replace = ( subtreeID, json ) ->
-        if ( subtree = lookupID subtreeID )? and \
+        if ( subtree = Structure.instanceWithID subtreeID )? and \
            ( isInTheDocument subtree ) and subtree isnt LDEDocument and \
            ( newInstance = Structure.fromJSON( json ).setup() )?
             subtree.replaceWith newInstance
-            releaseAllIDs subtree
-            trackExternalIDs newInstance
-            stopTrackingExternalIDs subtree
+            subtree.untrackIDs()
+            newInstance.trackIDs()
 
 The following function finds the descendant of the global LDE Document that
 has the given ID and, assuming such a structure exists, calls its member
@@ -151,11 +109,11 @@ per the requirements of the `Structure.setExternalAttribute` function, be
 sure to provide only values that are amenable to `JSON.stringify`.
 
     functions.setAttribute = ( subtreeID, key, value ) ->
-        if ( subtree = lookupID subtreeID )? and \
+        if ( subtree = Structure.instanceWithID subtreeID )? and \
            isInTheDocument subtree
-            if key is 'ID' then stopTrackingExternalIDs subtree, no
+            if key is 'id' then subtree.untrackIDs no
             subtree.setExternalAttribute key, value
-            if key is 'ID' then trackExternalIDs subtree, no
+            if key is 'id' then subtree.trackIDs no
 
 ## Event Listeners
 
