@@ -69,11 +69,16 @@ Thus you should not modify the serialized version's members.  If you want an
 independent copy, run `JSON.parse` on `JSON.stringify` of the serialized
 version.
 
-        toJSON : ->
+        toJSON : ( includeID = yes ) ->
+            if includeID or not @id()?
+                externals = @externalAttributes
+            else
+                externals = JSON.parse JSON.stringify @externalAttributes
+                delete externals.id
             className : @className
             computedAttributes : @computedAttributes
-            externalAttributes : @externalAttributes
-            children : ( child.toJSON() for child in @childList )
+            externalAttributes : externals
+            children : ( child.toJSON includeID for child in @childList )
 
 ### Deserialization from JSON
 

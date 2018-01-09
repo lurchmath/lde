@@ -770,6 +770,36 @@ hierarchy, as well as all the same tests we did for the earlier cases.
             expect( child ).not.toBe child2
             expect( child.children() ).toEqual [ ]
 
+Verify that `toJSON` respects its optional argument by creating a small
+hierarchy with some IDs, and applying `toJSON` to it twice, once with a true
+argument and once with a false argument.
+
+            small = new Structure(
+                new Structure().attr id : 'X', other : 'things'
+            ).attr id : 'Y', other : 'stuff'
+            expect( small.toJSON() ).toEqual {
+                className : 'Structure'
+                externalAttributes : id : 'Y', other : 'stuff'
+                computedAttributes : { }
+                children : [
+                    className : 'Structure'
+                    externalAttributes : id : 'X', other : 'things'
+                    computedAttributes : { }
+                    children : [ ]
+                ]
+            }
+            expect( small.toJSON no ).toEqual {
+                className : 'Structure'
+                externalAttributes : other : 'stuff'
+                computedAttributes : { }
+                children : [
+                    className : 'Structure'
+                    externalAttributes : other : 'things'
+                    computedAttributes : { }
+                    children : [ ]
+                ]
+            }
+
 ## Computed attributes
 
     describe 'Computed attributes', ->
