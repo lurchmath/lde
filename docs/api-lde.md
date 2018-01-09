@@ -23,33 +23,39 @@ this module:
  * `insert(structureToInsert,parentID,insertionIndex)` inserts a new
    structure within the global document hierarchy, as follows:
     * `structureToInsert` should be the serialized form of the structure to
-      insert (optionally created with `.toJSON()` in a `Structure` instance)
+      insert (optionally created with `.toJSON()` in a `Structure`
+      instance).  After the structure is deserialized and inserted into the
+      document, `trackIDs()` will be called in it; for more information on
+      that function, see [its entry in the API docs](api-lde.md#unique-ids).
     * `parentID` is the ID of the parent under which this new child should
-      be inserted.  This can be any of three types of things:
-        * a number, which is interpreted as the ID of a `Structure` instance
-          already in the global document structure
-        * a string, which is interpreted as the external attribute with key
-          "ID" for a `Structure` instance already in the global document
-          structure
-        * the string `"root"`, which means the root of the global document
-          structure (which supercedes the previous case)
+      be inserted.  This must be a string ID that belongs to a structure
+      already in the global document hierarchy.  Note that the root of the
+      hierarchy is given the ID "root" at the time the module is loaded.
     * `insertionIndex` is the index of the child to insert, which must be
       greater than or equal to zero and less than or equal to the number of
       children of the parent
  * `delete(ID)` deletes from the global document hierarchy the structure
    with the given ID, which is interpreted with the same conventions as the
-   `parentID` is for the `insert` function
+   `parentID` is for the `insert` function.  After the structure is deleted,
+   `untrackIDs()` will be called in it; for more information on that
+   function, see [its entry in the API docs](api-lde.md#unique-ids).
  * `replace(ID,newStructure)` replaces the structure with the given ID with
    the given new structure.
     * `ID` is interpreted with the same conventions as the `parentID` is for
       the `insert` function
     * `newStructure` is a serialized structure, as `structureToInsert` is
       for the `insert` function
+    * After this operation, `untrackIDs()` will be called in the replaced
+      structure and `trackIDs()` in the replacement; for more information
+      on those functions, see
+      [their entries in the API docs](api-lde.md#unique-ids).
  * `setAttribute(ID,key,value)` modifies a single external attribute of a
    structure within the global document hierarchy, as follows:
     * `ID` is interpreted with the same conventions as the `parentID` is for
       the `insert` function
-    * `key` is the key of the external attribute to create or overwrite
+    * `key` is the key of the external attribute to create or overwrite.  If
+      this key happens to be "id", then the class-level tracking of IDs
+      will be updated to repsect the change.
     * `value` is the new value, which must be JSON data.  (No checks are
       done to verify that it is JSON data, but errors will transpire
       eventually if non-JSON data is passed.)

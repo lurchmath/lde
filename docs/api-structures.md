@@ -59,11 +59,7 @@ from the first function.
 
 Serializing a structure preserves its class, its external and computed
 attributes ([documented below](#structure-attributes-and-connections)), and
-the hierarchy for which it is the root.  Unique IDs
-([documented below](#unique-ids)) are not preserved.  Deserializing does not
-assign new unique IDs, but the `setup()` function documented under
-[the Unique IDs section, below](#unique-ids) can be used to assign new
-unique IDs to the nodes in a just-deserialized hierarchy.
+the hierarchy for which it is the root.
 
 ## Structure hierarchies
 
@@ -97,8 +93,9 @@ following member functions present in each instance.
    equivalent to successive calls to `removeFromParent()` and
    `insertChild()` at the instance and its parent, respectively.
  * `instance.copy()` makes a deep copy of the instance, including all nodes
-   below it in the hierarchy, but not copying their unique IDs (lest they
-   become not unique)
+   below it in the hierarchy.  This new copy will have all the same IDs as
+   the previous copy, so to preserve uniqueness of IDs, you will usually
+   want to call `copiedInstance.clearIDs()` afterwards.
 
 The order of nodes in the hierarchy is often important.  We have one simple
 order relation on the nodes in the hierarchy, and one more complex.  The
@@ -260,16 +257,24 @@ stored in the corresponding destinations, and vice versa.
 
 ### Other attribute conventions
 
+*ID:*  Some structures have a unique ID.  This is necessary for making
+connections among structures, because the connections are recorded using
+these unique IDs as references.  The convention is to store a structure's ID
+in its external attribute with key "id."  For convenience, there is an
+`id()` member function in the structure class that looks up this
+attribute's value.  See more information in the
+[Unique IDs section](#unique-ids), below.
+
 *Text:*  Some structures contain plain text.  The convention is to store
-*these in the external attribute with key "text."  For convenience, there is
-*a `text()` member function in the structure class that looks up this
-*attribute's value.
+these in the external attribute with key "text."  For convenience, there is
+a `text()` member function in the structure class that looks up this
+attribute's value.
 
 *References:*  Some structures serve as references to other structures.
-*They are marked as references with the external attribute "reference."  For
-*convenience, there is a `isAReference()` member function in the structure
-*class that looks up whether this attribute is present, and thus the
-*structure is functioning as a reference.
+They are marked as references with the external attribute "reference."  For
+convenience, there is a `isAReference()` member function in the structure
+class that looks up whether this attribute is present, and thus the
+structure is functioning as a reference.
 
 *Labels:*  Get a list of all text values used as labels for a structure by
 calling its member function `labels()`.  There are several ways that a
@@ -295,23 +300,25 @@ structure with `structure.whatCitesMe()`.
 
 ## Unique IDs
 
-The `Structure` class maintains a mapping from nonnegative integer IDs to
-instances of the class.  A class, upon construction, doesn't get assigned a
-unique ID by default, but you can request one at any time.
+The `Structure` class maintains a mapping from IDs (as strings) to
+instances of the class.  An instance gets its ID from the external attribute
+with key "id."  All IDs in a hierarchy can be tracked (that is, recorded
+into this class-level mapping) with the `trackIDs()` function documented
+below.
 
 Here are the relevant functions:
 
- * `instance.ID` contains the instance's ID, if it has one, or undefined if
+ * `instance.id()` returns the instance's ID, if it has one, or undefined if
    not
- * `instance.getID()` asks the class to allocate a new, unique ID to the
-   instance.  It does nothing if the instance already had an ID.
- * `instance.releaseID()` deletes the ID from the instance and lets the
-   class know that the ID is no longer in use, so that it may be assigned to
-   another instance later
- * `Structure.instanceWithID(id)` takes a nonnegative integer ID and yields
-   the instance with that ID, if there is one, or null or undefined if there
-   is none.
-
-If you have a structure hierarchy in which you wish all nodes to have a
-unique ID installed, call `setup()` on the root, and it will recursively
-call `getID()` in each instance.  It will also call `fillOutConnections()`.
+ * `instance.trackIDs()` asks the class to update the class variable that
+   maps IDs to instances, recording the connection of all IDs for all nodes
+   in the hierarchy whose root is `instance`.  This will overwrite earlier
+   data in that mapping if and only if you have not kept IDs unique.
+ * `instance.untrackIDs()` removes from the class-level mapping all IDs that
+   appear in the hierarchy whose root is `instance`.  If you are done with
+   a `Structure` instance, you must call this function in it, so that its
+   memory is guaranteed to eventually be garbage collected.
+ * `Structure.instanceWithID(id)` takes a string ID and yields the instance
+   with that ID, if there is one, and that instance has recorded its ID in
+   the class-level variable for this purpose by means of a call to
+   `trackIDs()`, or null or undefined if there is none.

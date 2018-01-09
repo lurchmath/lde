@@ -212,11 +212,7 @@ class function <code>Structure.fromJSON(data)</code>, which accepts JSON data cr
 from the first function.</p>
 <p>Serializing a structure preserves its class, its external and computed
 attributes (<a href="#structure-attributes-and-connections">documented below</a>), and
-the hierarchy for which it is the root.  Unique IDs
-(<a href="#unique-ids">documented below</a>) are not preserved.  Deserializing does not
-assign new unique IDs, but the <code>setup()</code> function documented under
-<a href="#unique-ids">the Unique IDs section, below</a> can be used to assign new
-unique IDs to the nodes in a just-deserialized hierarchy.</p>
+the hierarchy for which it is the root.</p>
 <h2 id="structure-hierarchies">Structure hierarchies</h2>
 <p>To navigate or alter a hierarchy of <code>Structure</code> instances, use the
 following member functions present in each instance.</p>
@@ -248,8 +244,9 @@ following member functions present in each instance.</p>
    equivalent to successive calls to <code>removeFromParent()</code> and
    <code>insertChild()</code> at the instance and its parent, respectively.</li>
 <li><code>instance.copy()</code> makes a deep copy of the instance, including all nodes
-   below it in the hierarchy, but not copying their unique IDs (lest they
-   become not unique)</li>
+   below it in the hierarchy.  This new copy will have all the same IDs as
+   the previous copy, so to preserve uniqueness of IDs, you will usually
+   want to call <code>copiedInstance.clearIDs()</code> afterwards.</li>
 </ul>
 <p>The order of nodes in the hierarchy is often important.  We have one simple
 order relation on the nodes in the hierarchy, and one more complex.  The
@@ -400,15 +397,22 @@ the client (not recommended), then you can call <code>root.fillOutConnections()<
 to ensure that the connection data stored in every source matches that
 stored in the corresponding destinations, and vice versa.</p>
 <h3 id="other-attribute-conventions">Other attribute conventions</h3>
+<p><em>ID:</em>  Some structures have a unique ID.  This is necessary for making
+connections among structures, because the connections are recorded using
+these unique IDs as references.  The convention is to store a structure's ID
+in its external attribute with key "id."  For convenience, there is an
+<code>id()</code> member function in the structure class that looks up this
+attribute's value.  See more information in the
+<a href="#unique-ids">Unique IDs section</a>, below.</p>
 <p><em>Text:</em>  Some structures contain plain text.  The convention is to store
-<em>these in the external attribute with key "text."  For convenience, there is
-</em>a <code>text()</code> member function in the structure class that looks up this
-*attribute's value.</p>
+these in the external attribute with key "text."  For convenience, there is
+a <code>text()</code> member function in the structure class that looks up this
+attribute's value.</p>
 <p><em>References:</em>  Some structures serve as references to other structures.
-<em>They are marked as references with the external attribute "reference."  For
-</em>convenience, there is a <code>isAReference()</code> member function in the structure
-<em>class that looks up whether this attribute is present, and thus the
-</em>structure is functioning as a reference.</p>
+They are marked as references with the external attribute "reference."  For
+convenience, there is a <code>isAReference()</code> member function in the structure
+class that looks up whether this attribute is present, and thus the
+structure is functioning as a reference.</p>
 <p><em>Labels:</em>  Get a list of all text values used as labels for a structure by
 calling its member function <code>labels()</code>.  There are several ways that a
 structure can be labeled, all documented
@@ -428,25 +432,28 @@ other as a reason or premise; you can query this binary relation with
 <code>structure.cites(other)</code>, and get a list of everything that cites a given
 structure with <code>structure.whatCitesMe()</code>.</p>
 <h2 id="unique-ids">Unique IDs</h2>
-<p>The <code>Structure</code> class maintains a mapping from nonnegative integer IDs to
-instances of the class.  A class, upon construction, doesn't get assigned a
-unique ID by default, but you can request one at any time.</p>
+<p>The <code>Structure</code> class maintains a mapping from IDs (as strings) to
+instances of the class.  An instance gets its ID from the external attribute
+with key "id."  All IDs in a hierarchy can be tracked (that is, recorded
+into this class-level mapping) with the <code>trackIDs()</code> function documented
+below.</p>
 <p>Here are the relevant functions:</p>
 <ul>
-<li><code>instance.ID</code> contains the instance's ID, if it has one, or undefined if
+<li><code>instance.id()</code> returns the instance's ID, if it has one, or undefined if
    not</li>
-<li><code>instance.getID()</code> asks the class to allocate a new, unique ID to the
-   instance.  It does nothing if the instance already had an ID.</li>
-<li><code>instance.releaseID()</code> deletes the ID from the instance and lets the
-   class know that the ID is no longer in use, so that it may be assigned to
-   another instance later</li>
-<li><code>Structure.instanceWithID(id)</code> takes a nonnegative integer ID and yields
-   the instance with that ID, if there is one, or null or undefined if there
-   is none.</li>
-</ul>
-<p>If you have a structure hierarchy in which you wish all nodes to have a
-unique ID installed, call <code>setup()</code> on the root, and it will recursively
-call <code>getID()</code> in each instance.  It will also call <code>fillOutConnections()</code>.</p></div>
+<li><code>instance.trackIDs()</code> asks the class to update the class variable that
+   maps IDs to instances, recording the connection of all IDs for all nodes
+   in the hierarchy whose root is <code>instance</code>.  This will overwrite earlier
+   data in that mapping if and only if you have not kept IDs unique.</li>
+<li><code>instance.untrackIDs()</code> removes from the class-level mapping all IDs that
+   appear in the hierarchy whose root is <code>instance</code>.  If you are done with
+   a <code>Structure</code> instance, you must call this function in it, so that its
+   memory is guaranteed to eventually be garbage collected.</li>
+<li><code>Structure.instanceWithID(id)</code> takes a string ID and yields the instance
+   with that ID, if there is one, and that instance has recorded its ID in
+   the class-level variable for this purpose by means of a call to
+   <code>trackIDs()</code>, or null or undefined if there is none.</li>
+</ul></div>
         </div>
 
         <footer class="col-md-12">

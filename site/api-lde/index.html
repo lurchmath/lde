@@ -178,18 +178,14 @@ this module:</p>
 <li><code>insert(structureToInsert,parentID,insertionIndex)</code> inserts a new
    structure within the global document hierarchy, as follows:<ul>
 <li><code>structureToInsert</code> should be the serialized form of the structure to
-  insert (optionally created with <code>.toJSON()</code> in a <code>Structure</code> instance)</li>
+  insert (optionally created with <code>.toJSON()</code> in a <code>Structure</code>
+  instance).  After the structure is deserialized and inserted into the
+  document, <code>trackIDs()</code> will be called in it; for more information on
+  that function, see <a href="./#unique-ids">its entry in the API docs</a>.</li>
 <li><code>parentID</code> is the ID of the parent under which this new child should
-  be inserted.  This can be any of three types of things:<ul>
-<li>a number, which is interpreted as the ID of a <code>Structure</code> instance
-  already in the global document structure</li>
-<li>a string, which is interpreted as the external attribute with key
-  "ID" for a <code>Structure</code> instance already in the global document
-  structure</li>
-<li>the string <code>"root"</code>, which means the root of the global document
-  structure (which supercedes the previous case)</li>
-</ul>
-</li>
+  be inserted.  This must be a string ID that belongs to a structure
+  already in the global document hierarchy.  Note that the root of the
+  hierarchy is given the ID "root" at the time the module is loaded.</li>
 <li><code>insertionIndex</code> is the index of the child to insert, which must be
   greater than or equal to zero and less than or equal to the number of
   children of the parent</li>
@@ -197,20 +193,28 @@ this module:</p>
 </li>
 <li><code>delete(ID)</code> deletes from the global document hierarchy the structure
    with the given ID, which is interpreted with the same conventions as the
-   <code>parentID</code> is for the <code>insert</code> function</li>
+   <code>parentID</code> is for the <code>insert</code> function.  After the structure is deleted,
+   <code>untrackIDs()</code> will be called in it; for more information on that
+   function, see <a href="./#unique-ids">its entry in the API docs</a>.</li>
 <li><code>replace(ID,newStructure)</code> replaces the structure with the given ID with
    the given new structure.<ul>
 <li><code>ID</code> is interpreted with the same conventions as the <code>parentID</code> is for
   the <code>insert</code> function</li>
 <li><code>newStructure</code> is a serialized structure, as <code>structureToInsert</code> is
   for the <code>insert</code> function</li>
+<li>After this operation, <code>untrackIDs()</code> will be called in the replaced
+  structure and <code>trackIDs()</code> in the replacement; for more information
+  on those functions, see
+  <a href="./#unique-ids">their entries in the API docs</a>.</li>
 </ul>
 </li>
 <li><code>setAttribute(ID,key,value)</code> modifies a single external attribute of a
    structure within the global document hierarchy, as follows:<ul>
 <li><code>ID</code> is interpreted with the same conventions as the <code>parentID</code> is for
   the <code>insert</code> function</li>
-<li><code>key</code> is the key of the external attribute to create or overwrite</li>
+<li><code>key</code> is the key of the external attribute to create or overwrite.  If
+  this key happens to be "id", then the class-level tracking of IDs
+  will be updated to repsect the change.</li>
 <li><code>value</code> is the new value, which must be JSON data.  (No checks are
   done to verify that it is JSON data, but errors will transpire
   eventually if non-JSON data is passed.)</li>
