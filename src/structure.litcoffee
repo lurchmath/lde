@@ -698,7 +698,13 @@ mathematical concepts to the `Structure` class for the first time.
 
 ### Special external attributes
 
-There are three types of special external attributes (so far).
+There are just a few types of special external attributes (so far).
+
+The external attribute with key "id" can be used to give a structure a
+unique ID.  Because this is used in several ways throughout the LDE, we
+provide the following convenience function for accessing it.
+
+        id : -> @getExternalAttribute 'id'
 
 Atomic structures are often defined by a single piece of text that is the
 structure's content.  The first convention is that such text will be stored
@@ -716,11 +722,11 @@ reference to an earlier name have their "reference" attribute set to true
 
         isAReference : -> not not @getExternalAttribute 'reference'
 
-Note that the above two functions do not have corresponding setter functions
+Note that the above functions do not have corresponding setter functions
 because they are external attributes, which are read-only from the point of
 view of the LDE.
 
-The second type of external attribute that requires special functions for
+The final type of external attribute that requires special functions for
 dealing with it is the attribute storing connections to other structures.
 We handle that attribute with all the functions in [the Connections section,
 above](#connections).
