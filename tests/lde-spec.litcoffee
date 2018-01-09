@@ -379,7 +379,7 @@ background thread, not to re-test the same functionality as before.
             asyncTest [ 'getDocument' ], ( result ) ->
                 expect( result ).toEqual {
                     className : 'Structure'
-                    externalAttributes : { }
+                    externalAttributes : { id : 'root' }
                     computedAttributes : { }
                     children : [ ]
                 }
@@ -393,7 +393,7 @@ background thread, not to re-test the same functionality as before.
             asyncTest [ 'getDocument' ], ( result ) ->
                 expect( result ).toEqual {
                     className : 'Structure'
-                    externalAttributes : { }
+                    externalAttributes : { id : 'root' }
                     computedAttributes : { }
                     children : [
                         className : 'Structure'
@@ -407,13 +407,13 @@ background thread, not to re-test the same functionality as before.
 ### should allow deleting things
 
         it 'should allow deleting things', ( done ) ->
-            A = new Structure().attr name : 'A', ID : 'foo'
+            A = new Structure().attr name : 'A', id : 'foo'
             worker.postMessage [ 'insert', A.toJSON(), 'root', 0 ]
             worker.postMessage [ 'delete', 'foo' ]
             asyncTest [ 'getDocument' ], ( result ) ->
                 expect( result ).toEqual {
                     className : 'Structure'
-                    externalAttributes : { }
+                    externalAttributes : { id : 'root' }
                     computedAttributes : { }
                     children : [ ]
                 }
@@ -422,18 +422,18 @@ background thread, not to re-test the same functionality as before.
 ### should allow replacing things
 
         it 'should allow replacing things', ( done ) ->
-            A = new Structure().attr name : 'A', ID : 'foo'
-            B = new Structure().attr name : 'B', ID : 'bar'
+            A = new Structure().attr name : 'A', id : 'foo'
+            B = new Structure().attr name : 'B', id : 'bar'
             worker.postMessage [ 'insert', A.toJSON(), 'root', 0 ]
             worker.postMessage [ 'replace', 'foo', B.toJSON() ]
             asyncTest [ 'getDocument' ], ( result ) ->
                 expect( result ).toEqual {
                     className : 'Structure'
-                    externalAttributes : { }
+                    externalAttributes : { id : 'root' }
                     computedAttributes : { }
                     children : [
                         className : 'Structure'
-                        externalAttributes : name : 'B', ID : 'bar'
+                        externalAttributes : name : 'B', id : 'bar'
                         computedAttributes : { }
                         children : [ ]
                     ]
@@ -443,19 +443,19 @@ background thread, not to re-test the same functionality as before.
 ### should allow setting attributes
 
         it 'should allow setting attributes', ( done ) ->
-            A = new Structure().attr name : 'A', ID : 'foo'
+            A = new Structure().attr name : 'A', id : 'foo'
             worker.postMessage [ 'insert', A.toJSON(), 'root', 0 ]
             worker.postMessage [ 'setAttribute', 'foo', 'color', 'red' ]
             asyncTest [ 'getDocument' ], ( result ) ->
                 expect( result ).toEqual {
                     className : 'Structure'
-                    externalAttributes : { }
+                    externalAttributes : { id : 'root' }
                     computedAttributes : { }
                     children : [
                         className : 'Structure'
                         externalAttributes :
                             name : 'A'
-                            ID : 'foo'
+                            id : 'foo'
                             color : 'red'
                         computedAttributes : { }
                         children : [ ]
