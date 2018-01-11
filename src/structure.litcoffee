@@ -488,7 +488,7 @@ connections.
 These functions do nothing if either of the two structures is lacking an ID.
 They return true on success and false on failure.
 
-        connectTo : ( otherStructure, connectionType ) ->
+        connectTo : ( otherStructure, connectionType = '' ) ->
             return no unless @id()? and \
                 otherStructure instanceof Structure and otherStructure.id()?
             outs = ( @getExternalAttribute 'connectionsOut' ) ? [ ]
@@ -502,7 +502,7 @@ They return true on success and false on failure.
 
 The delete function does nothing if there is no connection to delete.
 
-        disconnectFrom : ( otherStructure, connectionType ) ->
+        disconnectFrom : ( otherStructure, connectionType = '' ) ->
             return no unless @id()? and \
                 otherStructure instanceof Structure and otherStructure.id()?
             outs = ( @getExternalAttribute 'connectionsOut' ) ? [ ]
@@ -749,15 +749,22 @@ resulting array, filtering out all non-strings.
             ( item for item in [ external..., computed... ] \
                 when typeof item is 'string' )
 
-The second takes a structure and connection type as arguments and returns
-all other structures that have connections of the given type to the given
-structure.
+The second takes a structure and category as arguments and returns all other
+structures that are of that category (when tested via `isA`) and that have
+connections to the given structure.
 
-        allConnectedTo = ( structure, type ) ->
+        allConnectedTo = ( structure, category = null ) ->
             result = [ ]
-            for id in structure.allConnectionsIn type
-                if ( other = Structure.instanceWithID id )?
+            for [ id, type ] in structure.allConnectionsIn()
+                console.log 'connection from id', id
+                console.log 'corresponding structure is',
+                    Structure.instanceWithID id
+                console.log 'is that a', category, '?',
+                    ( Structure.instanceWithID id )?.isA category
+                if ( other = Structure.instanceWithID id )? and \
+                   ( not category or other.isA category )
                     result.push other
+                console.log 'list is now', other
             result
 
 The final function takes an array and returns the an array with all the same
@@ -776,8 +783,8 @@ We permit a structure to be labeled in any of three ways.
  * The external attribute with key "labels" may be an array of strings, each
    of which will then be treated as a label for the structure.
  * The computed attribute with key "labels" is treated the same way.
- * Any structure may label another structure by having a connection of type
-   "label" from the labeling structure to the labeled structure.
+ * Any structure may label another structure by passing the `isA 'label'`
+   test and having a connection from the label to the labeled structure.
 
 The `labels()` function gathers all labels assigned by any of these three
 means into a single set, returned as an array with no repeated entries, and
@@ -801,11 +808,10 @@ particular label.
 We permit structures to have reasons attached to them in any of four ways.
 
  * A structure A may be a reason for another structure B if there is a
-   connection from A to B of type reason.  By default, A is then the reason
-   for B, in the sense that A should be a rule justifying B.
- * A variant of the previous case is when A passes the `isA 'reference'`
-   test, in which case A is not a rule justifying B, but rather the text of
-   A is the name of a rule justifying B.
+   connection from A to B and A passes the `isA 'reason'` test.
+ * A variant of the previous case is when A also passes the `isA
+   'reference'` test, in which case A is not a rule justifying B, but
+   rather the text of A is the name of a rule justifying B.
  * The external attribute with key "reasons" may be an array of strings,
    each of which will then be treated as the name of another structure that
    is treated as a reason for this one.
@@ -834,7 +840,9 @@ four ways as they have reasons attached.  For that reason, we implement the
         premises : ->
             [
                 ( stringArrayAttributes this, 'premises' )...
-                ( allConnectedTo this, 'premise' )...
+                ( source for source in allConnectedTo this when \
+                    not ( source.isA 'reason' ) and \
+                    not ( source.isA 'label' ) )...
             ]
 
 ### Citations and lookups
