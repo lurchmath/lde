@@ -136,6 +136,7 @@ Another possibly convenient utility is to make a copy of the Structure S
             S.computedAttributes = JSON.parse JSON.stringify @computedAttributes
             S.externalAttributes = JSON.parse JSON.stringify @externalAttributes
             S.childList = ( C.copy() for C in @childList )
+            child.parentNode = S for child in S.childList
             S
 
 We can ask which of two structures comes earlier in their common ancestor,

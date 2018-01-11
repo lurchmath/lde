@@ -487,6 +487,51 @@ Ensure that changing data within the original doesn't change the copy.
             expect( tiny.getExternalAttribute 5 ).toBe 10
             expect( C.getExternalAttribute 5 ).toBe 6
 
+Make a more complex Structure for testing.
+
+            tween = new Structure(
+                A = new Structure(
+                    AA = new Structure
+                    AB = new Structure
+                    AC = new Structure
+                )
+                B = new Structure
+            )
+            AB.setExternalAttribute 2, 7
+            B.setComputedAttribute 4, 9
+
+Make a copy of tween and test that it copied correctly and did not mess up
+the original.
+
+            D = tween.copy()
+            expect( D ).not.toBe tween
+            expect( D.children().length ).toEqual 2
+            DA = D.children()[0]
+            expect( D.parent() ).toBeFalsy()
+            expect( A.parent() ).not.toBe( D )
+            expect( B.parent() ).not.toBe( D )
+            expect( A.parent() ).toBe( tween )
+            expect( B.parent() ).toBe( tween )
+            expect( DA.parent() ).toBe( D )
+            expect( DA.computedAttributes ).toEqual { }
+            expect( DA.children().length ).toEqual 3
+            DAB = DA.children()[1]
+            expect( DAB ).not.toBe( AB )
+            expect( DAB.computedAttributes ).toEqual { }
+            expect( DAB.getExternalAttribute(2) ).toEqual 7
+            DB = D.children()[1]
+            expect( DB.externalAttributes ).toEqual { }
+            expect( DB.getComputedAttribute(4) ).toEqual 9
+
+# Ensure that changing data within the original doesn't change the copy.
+
+            tween.setExternalAttribute 3, 8
+            expect( tween.getExternalAttribute 3 ).toEqual 8
+            expect( D.externalAttributes ).toEqual { }
+            AB.setExternalAttribute 2, 9
+            expect( AB.getExternalAttribute 2 ).toEqual 9
+            expect( DAB.getExternalAttribute 2 ).toEqual 7
+
 ============================
 
 The next section tests the tree ordering relation defined in the Structure
