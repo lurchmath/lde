@@ -1,20 +1,25 @@
 site_name: Lurch Deductive Engine Documentation
 pages:
 - Home: index.md
-- Overview: overview.md
-- Phases:
-    - Phase 0, Structures: phase0-structures.md
-    - Phase 1, Basic Validation: phase1-validation.md
-    - Phase 1A, The Client: phase1a-client.md
-    - Phase 1B, Dependencies: phase1b-dependencies.md
-    - Phase 1C, Background Queue: phase1c-background.md
-    - Phase 2, String Matching: phase2-strings.md
-    - Phase 3, Theorems and Proofs: phase3-theorems.md
-    - Phase 4, Expression Trees: phase4-expressions.md
-    - Phase 5, Parsing Rules: phase5-parsing.md
-    - Phase 6, Declarations: phase6-declarations.md
-    - Phase 7, Bonus Features: phase7-features.md
-- Ideas Archive: ideas.md
+- Design Plans:
+    - Overview: design-overview.md
+    - Phase 1, Structures: phase1-structures.md
+    - Phase 2, Basic Validation: phase2-validation.md
+    - Phase 3, The Client: phase3-client.md
+    - Phase 4, Dependencies: phase4-dependencies.md
+    - Phase 5, Background Queue: phase5-background.md
+    - Phase 6, String Matching: phase6-strings.md
+    - Phase 7, Theorems and Proofs: phase7-theorems.md
+    - Phase 8, Expression Trees: phase8-expressions.md
+    - Phase 9, Parsing Rules: phase9-parsing.md
+    - Phase 10, Declarations: phase10-declarations.md
+    - Phase 11, Bonus Features: phase11-features.md
+    - Enhancements for Later: enhancements.md
+    - Ideas Archive: ideas.md
+- API Documentation:
+    - Overview: api-overview.md
+    - Structures: api-structures.md
+    - The LDE: api-lde.md
 dev_addr: 127.0.0.1:8888
 extra_javascript:
     - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML

@@ -8,13 +8,14 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "gulp-coffee": "^2.3.4",
     "gulp": "^3.9.1",
+    "gulp-coffee": "^2.3.4",
+    "gulp-shell": "^0.6.3",
     "gulp-sourcemaps": "^2.6.1",
     "gulp-uglify": "^3.0.0",
-    "gulp-shell": "^0.6.3",
     "jasmine-node": "^1.14.5",
-    "pump": "^1.0.3"
+    "pump": "^1.0.3",
+    "webworker-threads": "^0.7.13"
   },
   "scripts": {
     "test": "gulp tests"

@@ -8,7 +8,7 @@
         
         
         <link rel="shortcut icon" href="../img/favicon.ico">
-        <title>Ideas Archive - Lurch Deductive Engine Documentation</title>
+        <title>The LDE - Lurch Deductive Engine Documentation</title>
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
@@ -48,7 +48,7 @@
                     <li >
                         <a href="..">Home</a>
                     </li>
-                    <li class="dropdown active">
+                    <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Design Plans <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             
@@ -104,12 +104,12 @@
     <a href="../enhancements/">Enhancements for Later</a>
 </li>
                             
-<li class="active">
-    <a href="./">Ideas Archive</a>
+<li >
+    <a href="../ideas/">Ideas Archive</a>
 </li>
                         </ul>
                     </li>
-                    <li class="dropdown">
+                    <li class="dropdown active">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Documentation <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             
@@ -121,8 +121,8 @@
     <a href="../api-structures/">Structures</a>
 </li>
                             
-<li >
-    <a href="../api-lde/">The LDE</a>
+<li class="active">
+    <a href="./">The LDE</a>
 </li>
                         </ul>
                     </li>
@@ -135,12 +135,12 @@
                     </a>
                 </li>
                     <li >
-                        <a rel="next" href="../enhancements/">
+                        <a rel="next" href="../api-structures/">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
-                    <li >
-                        <a rel="prev" href="../api-overview/">
+                    <li class="disabled">
+                        <a rel="prev" >
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -152,73 +152,92 @@
         <div class="container">
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
-        <li class="main active"><a href="#lde-design-idea-archive">LDE Design Idea Archive</a></li>
+        <li class="main active"><a href="#api-documentation-for-the-lde-module">API Documentation for the LDE Module</a></li>
+            <li><a href="#one-global-document">One Global Document</a></li>
+            <li><a href="#manipulating-the-document">Manipulating the Document</a></li>
+            <li><a href="#asynchronous-api">Asynchronous API</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<h1 id="lde-design-idea-archive">LDE Design Idea Archive</h1>
-<p>This document records incomplete ideas the Lurch team is keeping in mind
-for integration into later design plans.</p>
+<h1 id="api-documentation-for-the-lde-module">API Documentation for the LDE Module</h1>
+<p>The main LDE module is not yet complete.  So far it supports only the
+functionality documented below, which will grow with time.</p>
+<h2 id="one-global-document">One Global Document</h2>
+<p>The module initializes a single <code>Structure</code> instance in a global variable,
+which can be queried with the public API function <code>getDocument()</code>.  It
+begins life as a freshly created <code>Structure</code> with no attributes, but an ID.</p>
+<p>This document is called the <em>LDE Document,</em> and is the structure on which
+all computations done by the LDE will operate.  In the main Lurch
+application, it will represent the meaningful content that has been
+extracted from the user's document.</p>
+<h2 id="manipulating-the-document">Manipulating the Document</h2>
+<p>The document can be manipulated with four functions in the public API of
+this module:</p>
 <ul>
-<li>We have considered a UI with buttons with mathematical names on them,
-   such as Justify (which would let you choose a reason and it would insert
-   it), Cite (which would let you click any premise and it would make the
-   arrow), a toolbar of all math words.</li>
-<li>We have tested a Suggestions feature, and could really use it widely:<ul>
-<li>When the cursor is near something the software could recognize as a
-  statement or a reason, it gives a faint shadow over it of what it
-  thinks you're saying.</li>
-<li>A single keystroke confirms, and if you don't use that keystroke, the
-  shadowy suggestion is never actually realized in the document.</li>
-<li>Example usage:<ul>
-<li>Type, then hit <code>Ctrl+Enter</code> to approve an interpretation of what
-  you said as a statement.</li>
-<li>A visual indicator of some kind shows that the bubble was formed,
-  but since your cursor is after it, the bubble-forming animation
-  fades.</li>
-<li>Keep typing, then hit <code>Ctrl+Enter</code> to approve an interpretation of
-  what you said as a reason.</li>
-<li>Same visual indicator process.</li>
-<li>Immediately a suggested connection of the reason to the statement
-  appears, and you hit <code>Ctrl+Enter</code> again to connect them.</li>
-<li>Same visual indicator process.</li>
-<li>Start typing your next statement, and repeat from step 1.</li>
+<li><code>insert(structureToInsert,parentID,insertionIndex)</code> inserts a new
+   structure within the global document hierarchy, as follows:<ul>
+<li><code>structureToInsert</code> should be the serialized form of the structure to
+  insert (optionally created with <code>.toJSON()</code> in a <code>Structure</code>
+  instance).  After the structure is deserialized and inserted into the
+  document, <code>trackIDs()</code> will be called in it; for more information on
+  that function, see <a href="./#unique-ids">its entry in the API docs</a>.</li>
+<li><code>parentID</code> is the ID of the parent under which this new child should
+  be inserted.  This must be a string ID that belongs to a structure
+  already in the global document hierarchy.  Note that the root of the
+  hierarchy is given the ID "root" at the time the module is loaded.</li>
+<li><code>insertionIndex</code> is the index of the child to insert, which must be
+  greater than or equal to zero and less than or equal to the number of
+  children of the parent</li>
 </ul>
 </li>
-<li>Whenever your cursor is in a statement accessible to the most recent
-  justification you formed, a suggested premise citation arrow could
-  appear; <code>Ctrl+Enter</code> to confirm.</li>
+<li><code>delete(ID)</code> deletes from the global document hierarchy the structure
+   with the given ID, which is interpreted with the same conventions as the
+   <code>parentID</code> is for the <code>insert</code> function.  After the structure is deleted,
+   <code>untrackIDs()</code> will be called in it; for more information on that
+   function, see <a href="./#unique-ids">its entry in the API docs</a>.</li>
+<li><code>replace(ID,newStructure)</code> replaces the structure with the given ID with
+   the given new structure.<ul>
+<li><code>ID</code> is interpreted with the same conventions as the <code>parentID</code> is for
+  the <code>insert</code> function</li>
+<li><code>newStructure</code> is a serialized structure, as <code>structureToInsert</code> is
+  for the <code>insert</code> function</li>
+<li>After this operation, <code>untrackIDs()</code> will be called in the replaced
+  structure and <code>trackIDs()</code> in the replacement; for more information
+  on those functions, see
+  <a href="./#unique-ids">their entries in the API docs</a>.</li>
 </ul>
 </li>
-<li>MathQuill (and, one day, MathJax, if we choose to add it) are UX sugar
-   that sits above the document, and can be converted to text as part of
-   the UI's processing of HTML into Structures.</li>
-<li>A UI idea from long ago recorded here for safe keeping:<ul>
-<li>Consider all situations in which it’s possible to write a small JS
-  function that can easily take in a string of text and split it into
-  an array of substrings, like <code>"Fred is a fish"</code> to
-  <code>["Fred is", "a", "fish"]</code>, such that the array alternates between
-  meaningful stuff and non-meaningful stuff. Then we have two things we
-  can do with such a function.</li>
-<li>First, the translator can obviously use that to trivially lift the
-  meaningful stuff out.</li>
-<li>Second, the UX can also use it to <em>highlight</em> <strong>while the user is
-  typing in a group</strong> which parts of the group’s content the app is
-  paying attention to, and which parts it’s ignoring. Imagine typing
-  <code>[Fred is a fish]</code> and the app is gently highlighting everything
-  except the 'a' or typing
-  <code>[Fred, who we all love, is a very nice fish]</code>
-  and the app highlights like so:
-  [<em>FRED</em>, who we all love, <em>IS</em> a very nice <em>FISH</em>].
-  Such highlighting would be in the overlay where the bubble is drawn,
-  and shown only when the cursor is in there.</li>
-<li>One specific subclass of this idea is when we require rigid formal
-  syntax, like line-numbered proofs with
-  <code>statement[whitespace]reason[whitespace]premise,...</code></li>
+<li><code>setAttribute(ID,key,value)</code> modifies a single external attribute of a
+   structure within the global document hierarchy, as follows:<ul>
+<li><code>ID</code> is interpreted with the same conventions as the <code>parentID</code> is for
+  the <code>insert</code> function</li>
+<li><code>key</code> is the key of the external attribute to create or overwrite.  If
+  this key happens to be "id", then the class-level tracking of IDs
+  will be updated to repsect the change.</li>
+<li><code>value</code> is the new value, which must be JSON data.  (No checks are
+  done to verify that it is JSON data, but errors will transpire
+  eventually if non-JSON data is passed.)</li>
 </ul>
 </li>
-</ul></div>
+</ul>
+<h2 id="asynchronous-api">Asynchronous API</h2>
+<p>If the LDE detects that it is being run in a background thread, it will set
+up listeners for messages from the parent thread.  These listeners will
+handle messages of four types, <code>insert</code>/<code>delete</code>/<code>replace</code>/<code>setAttribute</code>,
+mirroring the four functions given above, and calling them internally.</p>
+<p>They can be called by passing a message of the form <code>[ command, args... ]</code>,
+where the command is a string (one of <code>"insert"</code>, <code>"delete"</code>, etc.) and the
+arguments list is the same list that would be passed to the function itself,
+as documented in the previous section on this page.</p>
+<p>For example, you could start an LDE in a WebWorker and insert a new
+structure as the first child of its global document as follows.</p>
+<pre><code class="js">    // import the lde.js file (kept in the release/ folder)
+    // (This requires having the structure.js file in the same folder.)
+    var worker = new Worker( 'lde.js' );
+    var A = new Structure();
+    worker.postMessage( [ 'insert', A.toJSON(), 'root', 0 ] );
+</code></pre></div>
         </div>
 
         <footer class="col-md-12">

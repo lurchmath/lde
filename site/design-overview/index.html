@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Overview - Lurch Deductive Engine Documentation</title>
+        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/highlight.css">
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+        <script src="../js/jquery-1.10.2.min.js"></script>
+        <script src="../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../js/highlight.pack.js"></script> 
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="..">Lurch Deductive Engine Documentation</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                    <li >
+                        <a href="..">Home</a>
+                    </li>
+                    <li class="dropdown active">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Design Plans <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            
+<li class="active">
+    <a href="./">Overview</a>
+</li>
+                            
+<li >
+    <a href="../phase1-structures/">Phase 1, Structures</a>
+</li>
+                            
+<li >
+    <a href="../phase2-validation/">Phase 2, Basic Validation</a>
+</li>
+                            
+<li >
+    <a href="../phase3-client/">Phase 3, The Client</a>
+</li>
+                            
+<li >
+    <a href="../phase4-dependencies/">Phase 4, Dependencies</a>
+</li>
+                            
+<li >
+    <a href="../phase5-background/">Phase 5, Background Queue</a>
+</li>
+                            
+<li >
+    <a href="../phase6-strings/">Phase 6, String Matching</a>
+</li>
+                            
+<li >
+    <a href="../phase7-theorems/">Phase 7, Theorems and Proofs</a>
+</li>
+                            
+<li >
+    <a href="../phase8-expressions/">Phase 8, Expression Trees</a>
+</li>
+                            
+<li >
+    <a href="../phase9-parsing/">Phase 9, Parsing Rules</a>
+</li>
+                            
+<li >
+    <a href="../phase10-declarations/">Phase 10, Declarations</a>
+</li>
+                            
+<li >
+    <a href="../phase11-features/">Phase 11, Bonus Features</a>
+</li>
+                            
+<li >
+    <a href="../enhancements/">Enhancements for Later</a>
+</li>
+                            
+<li >
+    <a href="../ideas/">Ideas Archive</a>
+</li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Documentation <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            
+<li >
+    <a href="../api-overview/">Overview</a>
+</li>
+                            
+<li >
+    <a href="../api-structures/">Structures</a>
+</li>
+                            
+<li >
+    <a href="../api-lde/">The LDE</a>
+</li>
+                        </ul>
+                    </li>
+                </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                        <i class="fa fa-search"></i> Search
+                    </a>
+                </li>
+                    <li >
+                        <a rel="next" href="..">
+                            <i class="fa fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="prev" href="../phase1-structures/">
+                            Next <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+        <div class="container">
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="main active"><a href="#lde-design-overview">LDE Design Overview</a></li>
+            <li><a href="#elegance-and-simplicity">Elegance and Simplicity</a></li>
+            <li><a href="#feedback-and-validation">Feedback and Validation</a></li>
+            <li><a href="#lde-and-ui">LDE and UI</a></li>
+            <li><a href="#structures">Structures</a></li>
+            <li><a href="#accessibility">Accessibility</a></li>
+            <li><a href="#attributes">Attributes</a></li>
+            <li><a href="#document">Document</a></li>
+            <li><a href="#some-brief-ui-comments">Some brief UI comments</a></li>
+            <li><a href="#structures-are-oop-objects">Structures are OOP Objects</a></li>
+            <li><a href="#exporting-data-from-structures">Exporting data from structures</a></li>
+            <li><a href="#dependencies-as-a-special-case">Dependencies as a special case</a></li>
+            <li><a href="#design-phases">Design Phases</a></li>
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<h1 id="lde-design-overview">LDE Design Overview</h1>
+<p>This page lists the design principles adopted by the Lurch team to date
+regarding the LDE, with reasons and explanations for each.  This document
+can be used as reference, and to guide development, but it may also be
+changed as better ideas come along.</p>
+<p>To see the specific phases of development planned for the LDE, and what's
+completed, use the "Phases" menu above.</p>
+<h2 id="elegance-and-simplicity">Elegance and Simplicity</h2>
+<p>These are of utmost importance, because</p>
+<ul>
+<li>they make Lurch easier to explain to students or in an Advanced User's
+   Guide (AUG),</li>
+<li>they make Lurch easier to test because it has fewer unusual corner cases
+   or special handling of odd circumstances,</li>
+<li>they make Lurch easier to implement for the same reason, and</li>
+<li>they make it easier for us to be confident that our designs are good,
+   because they're easier to hold in your head and grok all at once.</li>
+</ul>
+<h2 id="feedback-and-validation">Feedback and Validation</h2>
+<ul>
+<li>The primary purpose of the Lurch application is to give feedback to the
+   user about the work they type into their document.</li>
+<li>Because this will often involve validating steps of work in a proof, we
+   may use the terms "feedback" and "validation" interchangeably, even
+   though technically validation is just a particular type of feedback
+   (though the most common type in our case).</li>
+<li><em>One-Pass Validation (OPV)</em> is a paradigm in which, whenever the app
+   needs to update feedback in response to changes made by the user, it
+   does so by reprocessing every bit of meaningful content from scratch, in
+   one (large, possibly time-consuming) pass over the whole document.</li>
+<li><em>Real-Time Validation (RTV)</em> is a paradigm in which, whenever the app
+   needs to update feedback in response to changes made by the user, it
+   attempts to re-use as much information from previous validation as
+   possible, only updating those portions of it that need updating in
+   response to the specific change the user just made.  Thus RTV is
+   trickier to design and implement than OPV, but more efficient at
+   run-time.</li>
+<li>An important concept for our test suite is that any RTV design can be
+   converted to an OPV design trivially, and then used for comparison
+   testing.  Simply replace all sophisticated RTV-style change event
+   handlers with OPV-style ones, that mark the entire document as needing
+   reprocessing.  Then any potential change that can be made to the user's
+   document can be run through each of these engines in parallel, and the
+   results compared for equivalence.</li>
+<li>Note that the choice of OPV vs. RTV is independent of the choice of
+   manual validation vs. automatic validation.  RTV certainly makes
+   automatic validation nicer, and thus makes manual validation less
+   appealing, but you could choose anything from among
+   <script type="math/tex">\{\text{OPV},\text{RTV}\}\times\{\text{auto},\text{manual}\}</script>.</li>
+</ul>
+<h2 id="lde-and-ui">LDE and UI</h2>
+<ul>
+<li>We have a paradigm in which the UI is exactly that (user interface) and
+   the LDE (Lurch Deductive Engine) is the brain that operates in one or
+   more background threads, processing what the user has given the app
+   through the UI.</li>
+<li>We aim to implement every feature in the LDE if possible, but implement
+   in the UI only those features that can't be implemented in the LDE.
+   Here, "if possible" means that it would not break the model-view
+   paradigm to implement it in the LDE (i.e., the LDE wouldn't need to
+   speak HTML).  Reasons for this:<ul>
+<li>The LDE will be implemented in pure JS, no DOM, so that it can be
+  used in a WebWorker and in the unit testing suite.</li>
+<li>Therefore the bigger the LDE is, the more of our code has been
+  subject to rigorous unit tests.</li>
+<li>And the bigger the LDE is, the more of our code is run out of the UX
+  thread, and thus the more responsive our app is.</li>
+</ul>
+</li>
+<li>The decisions recorded here are almost entirely about the design of the
+   LDE, not the UI.</li>
+</ul>
+<h2 id="structures">Structures</h2>
+<ul>
+<li>Define a <em>structure</em> to be the basic unit of meaning in the LDE.<ul>
+<li>This includes document-level structures such as a section,
+  subsection, proof, subproof, etc., which are analogous to block-level
+  items like DIV or P in HTML, and <code>\begin{X}...\end{X}</code> in LaTeX.</li>
+<li>But it also includes inline structures (SPANs in HTML, <code>\foo{...}</code> or
+  <code>$...$</code> in LaTeX).</li>
+<li>Structures can be nested acyclically.</li>
+</ul>
+</li>
+<li>Examples of types of structures that we may choose to define later:<ul>
+<li>Proofs/Subproofs, with one specific flavor of it being the kind that
+  declares a variable first</li>
+<li>Definitions of rules, axioms, language rules</li>
+<li>Formal systems (or "mathematical topics")</li>
+<li>Theorems and pairing of them with proofs</li>
+<li>Expressions</li>
+<li>Maybe variables will be declared by based on placing a variable
+  inside an expression by itself, at the head of a variable declaration
+  subproof, or maybe by creating a new structure type for variable
+  declarations, or maybe something else</li>
+<li>Homework problems</li>
+<li>Examples (an environment in which anything you declare ends its scope
+  at the end of the example, no matter what it was)</li>
+</ul>
+</li>
+<li>The set of structure types should equal the set of common mathematical
+   structures that mathematics students should be learning anyway, and they
+   should behave the same in Lurch as in mathematics.  This ensures that
+   Lurch doesn't add to the mathematics learning curve in this sense.</li>
+<li>Not every structure is permitted to contain every other type of
+   structure.  But such rules are enforced through validation, which we
+   will not be defining for some time yet, so this comment is just a
+   preview of what's to come.  For instance, expressions can contain only
+   other expressions.</li>
+<li>At some later point, we may care about the meanings of structures, so
+   that they can be used as premises in proofs.  At such a time, we will
+   ensure that a structure's meaning includes the unjustified steps in the
+   structure (which function as premises), the final step in the structure
+   (which functions as its conclusion), any variables declared within it
+   (which are bound in it), and so on, but it is not necessary to define
+   those details yet.  I mention them here merely so that the idea is not
+   lost.</li>
+</ul>
+<h2 id="accessibility">Accessibility</h2>
+<ul>
+<li>A structure A is accessible to a structure B if some ancestor structure
+   of B (possibly B itself) is a sibling of A, but A is the (strictly)
+   earlier of the two siblings within their parent structure.</li>
+<li>Equivalently, we can speak of "scope" rather than accessibility.  The
+   scope of a structure A is all later siblings of A in the same parent,
+   along with all their descendants.  Thus B is in the scope of A iff A is
+   accessible to B.</li>
+</ul>
+<h2 id="attributes">Attributes</h2>
+<ul>
+<li>Every structure contains a key-value dictionary called <em>external
+   attributes,</em> which are read-only from the point of view of the LDE, and
+   are read-write from the point of view of the UI.  They are called
+   "external" because, from the LDE's point of view, they come from
+   elsewhere (the UI).</li>
+<li>Every structure contains a key-value dictionary called <em>computed
+   attributes,</em> which are read-only from the point of view of the UI, and
+   are read-write from the point of view of the LDE.  They are called
+   "computed" because the LDE's job is to compute stuff, which it stores in
+   these attributes.</li>
+<li>These two dictionaries are disjoint.  It is possible for a single key k
+   to have one value in the one dictionary, and another value in the other
+   dictionary.</li>
+</ul>
+<h2 id="document">Document</h2>
+<ul>
+<li>The entire document will be represented to the LDE as a single
+   structure, usually with a nonzero number of inner structures.</li>
+<li>We call the representation of the entire document as a structure the LDE
+   Document, a phrase chosen to connote "the LDE's view of the document,
+   not the one the user sees in the UI."</li>
+<li>One main job of the UI is to convert from what the user sees into the
+   LDE Document.</li>
+<li>So to the list of structure types above, add "Document."</li>
+<li>The entire LDE Document data structure will live inside the LDE module.
+   In the main Lurch app, this implies that the LDE Document will be stored
+   in the background thread where the LDE runs, not in the UI.  Thus the UI
+   will communicate across threads to create the LDE Document.  Details on
+   this later.</li>
+</ul>
+<h2 id="some-brief-ui-comments">Some brief UI comments</h2>
+<ul>
+<li>Most of the purpose of the UI will be to convert the HTML document the
+   user sees into the LDE Document the LDE processes, then to show the user
+   in the HTML document and feedback the LDE sends back.<ul>
+<li>In service to that purpose, the UI contains many (largely independent
+  and usually small) features for encoding the HTML document into the
+  LDE Document.</li>
+<li>Examples include conventions for processing groups, connections,
+  numbered lists, section headings, finding meaning in text through
+  regular expressions, and the meanings of various LaTeX-like
+  <code>\shortcuts</code>.</li>
+<li>A document author chooses which subset of these features to enable by
+  making choices in the document settings dialog.  Those settings are
+  stored in document metadata, and propagate to dependencies (defined
+  below).</li>
+<li>The UI will have very little hard-coded (i.e., non-customizable)
+  procedures for interpreting the HTML document into the LDE document;
+  the settings above are highly choosable by the user.</li>
+<li>The only constrained interpretation conventions (i.e., few or no
+  options for changing the interpretation) would be those that have
+  mathematical names, such as "proof," which have a specific meaning
+  that it would be educationally counterproductive to interpret another
+  way.</li>
+<li>In addition, we may choose a specific set of document settings to use
+  throughout the standard libraries that ship with Lurch, to show best
+  practices and help users with consistency and predictability.</li>
+</ul>
+</li>
+<li>Other UI details:<ul>
+<li>Because we have a UI that allows users to make connections among
+  groups, the structures in the hierarchy may include, among their
+  external attributes, a binary, edge-labeled multigraph.  (Note that
+  this does not require that every connection in the HTML document
+  become two Structures in the LDE Document with attributes connecting
+  them.  Nor does it stipulate that some concept--such as
+  labeling--that we might decide to represent as part of this
+  multigraph can't also be represented sometimes in another way as
+  well.)</li>
+<li>If we require the LDE to send a signal when validation completes,
+  then we can make a UI setting of whether to show feedback as the
+  feedback arrives, or only after the "all validation complete" signal
+  arrives (and thus feedback has stabilized).</li>
+</ul>
+</li>
+</ul>
+<h2 id="structures-are-oop-objects">Structures are OOP Objects</h2>
+<ul>
+<li>A structure exposes a set of data and methods about its internal state
+   to the rest of the app, in much the same way as Objects in OOP do, with
+   the type of structure (from the list above, e.g., Theorem or Example)
+   functioning as the "class" of the Object.</li>
+<li>Some methods in a structure will be time-intensive to run, and thus
+   should use an asynchronous paradigm, queueing the tasks for running when
+   the LDE thread has time.  The most time-intensive tasks, such as
+   matching and parsing, may be delegated to yet other background threads
+   by the LDE thread.</li>
+</ul>
+<h2 id="exporting-data-from-structures">Exporting data from structures</h2>
+<ul>
+<li>Here is an important example method that all structures should have
+   (though each class may implement it differently):<ul>
+<li>A method that reports which structures (usually child structures of
+  A), if any, are to be made accessible to any structure B in the scope
+  of A (thus changing the normal scoping rules).</li>
+<li>The flexibility inherent in the vagueness of this exporting notion is
+  useful.  For instance, a single theorem in the document might be
+  encoded in the LDE document as having many children, some of which
+  are its various interpretations as a rule of inference, and export
+  them all, so that any can be used/cited later.</li>
+<li>Note that the exports method need not copy child structures directly
+  for exporting.  It may combine/manipulate/compute structures to
+  export based on its children in any way.  Thus "scope" is a simple
+  and clean definition, which this function sort of indirectly extends.</li>
+</ul>
+</li>
+<li>We will define much of the functionality of the LDE as the various
+   structures in the document calling methods in one another, which is
+   simple and elegant.  But it requires that we carefully track and cache
+   the clean/dirty status of each structure, to retain efficiency.</li>
+</ul>
+<h2 id="dependencies-as-a-special-case">Dependencies as a special case</h2>
+<ul>
+<li>The current paradigm (already implemented) in webLurch is that a
+   dependency must specify what data it exports to any document that
+   depends on it.</li>
+<li>Such data will be stored in the dependency document's metadata, so that
+   documents depending on it can easily import it.  It will include
+   anything that the dependency imported from its dependencies, and so on
+   to arbitrary depth.</li>
+<li>Because we now require every structure to know what it exports to later
+   structures, the question of what a document exports is simply a special
+   case of that.  The document is itself a structure, and thus it can
+   already answer the "what does this document export?" question.</li>
+<li>Recall from above that one of the pieces of data that a document will
+   export is its document settings, as described earlier.</li>
+</ul>
+<h2 id="design-phases">Design Phases</h2>
+<ul>
+<li>The question, "Which structure should be designed first?" is tricky
+   because each structure is rather complex, and they're rather
+   interdependent.</li>
+<li>One approach would be to design each structure incrementally, adding
+   features in phases.</li>
+<li>Thus we might begin with an LDE implementation that has just a few
+   features for a few structure types, and yet is sufficient for building
+   very simply Lurch libraries.</li>
+<li>This lets us build familiarity and knowledge as we do the design, so
+   we're better at it by the time we get to the hard stuff.</li>
+<li>Phases 2, 3, and so on can add features and structure types, thus
+   enabling more and more sophisticated Lurch libraries, until we have
+   reached the level of power that supports a first proof course.</li>
+</ul>
+<p>See other documentation on this site for the contents of each design phase.</p></div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>var base_url = '..';</script>
+        <script src="../js/base.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="../search/require.js"></script>
+        <script src="../search/search.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>&larr;</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>&rarr;</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    </body>
+</html>

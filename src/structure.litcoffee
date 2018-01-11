@@ -5,40 +5,12 @@ The very generic word "structure" is used in the LDE to describe a subtree
 of the LDE Document.  For more details on this, see
 [the design overview docs](https://lurchmath.github.io/lde/site/overview/).
 
-    exports.Structure = class Structure
+    class Structure
 
-## Unique IDs for instances
-
-We want to be able to give instance of this class unique IDs.  To do so, we
-will track those IDs in a class variable defined here, and provide class
-methods for assigning and revoking IDs to instances.  IDs will be
-nonnegative integers, and we will track them using an array.
-
-        IDs : [ ]
-        @instanceWithID : ( id ) -> Structure::IDs[id]
-        @nextUnusedID : ->
-            result = Structure::IDs.indexOf null
-            if result >= 0 then result else Structure::IDs.length
-
-The following two functions, which can be called in an instance to request a
-new, unique ID, or to relinquish one back into the pool, are optional for
-any given instance.  That is, it is not required that each instance have an
-ID.  But this system ensures that if IDs are assigned in this way, then they
-will be globally unique for all instances.
-
-Ensure that any instance that calls `getID` at some point later calls
-`releaseID`, or the `IDs` array will become enormous, a memory leak.
-
-        getID : ->
-            return if @ID?
-            @ID = Structure.nextUnusedID()
-            Structure::IDs[@ID] = this
-        releaseID : ->
-            if @ID?
-                Structure::IDs[@ID] = null
-                delete @ID
-                while Structure::IDs[Structure::IDs.length-1] is null
-                    Structure::IDs.pop()
+If you plan to develop a subclass of `Structure`, be sure to follow the
+requirement listed in the
+[Serialization and Deserialization](#serialization-and-deserialization)
+section, below.
 
 ## Constructor
 
@@ -54,6 +26,80 @@ structures.
             @childList = [ ]
             for child in children
                 @insertChild child, @childList.length
+
+## Serialization and deserialization
+
+We need to be able to convert structure hierarchies to/from JSON data.  We
+do so with the routines in this section.  The serialization and
+deserialization routines are not exactly inverses of one another, because
+they explicitly ignore the `ID` attribute, if there is one.  Serializing and
+then deserializing will produce a hierarchy with no IDs, but you can add
+them with `setup`, defined [below](#external-attributs).  Even so, they will
+almost certainly be different IDs than the original hierarchy had.  Other
+than that, the two hierarchies should be equivalent.
+
+### Registering class names
+
+In order for a hierarchy of structures to be able to be serialized and
+deserialized, we need to track the class of each structure in the hierarchy.
+After all, there will be sublcasses of this class defined, and during
+deserialization, instances of those subclasses will need to be created, as
+opposed to generic `Structure`s.
+
+To facilitate this, we track all subclasses in a single global variable,
+here.  Add one using the registration function provided.
+
+        subclasses : { }
+        @addSubclass : ( name, classObj ) ->
+            Structure::subclasses[name] = classObj
+            name
+
+When should you call it?  In your subclass, create a class variable called
+`className` and assign `Structure.addSubclass 'your class name', YourClass`
+to that member.  Follow this example, which we do here for the `Structure`
+base class:
+
+        className : Structure.addSubclass 'Structure', Structure
+
+### Serialization to JSON
+
+The serialized version of a class contains some objects from within the
+class, not copies but the same objects, so that serialization can be fast.
+Thus you should not modify the serialized version's members.  If you want an
+independent copy, run `JSON.parse` on `JSON.stringify` of the serialized
+version.
+
+        toJSON : ( includeID = yes ) ->
+            if includeID or not @id()?
+                externals = @externalAttributes
+            else
+                externals = JSON.parse JSON.stringify @externalAttributes
+                delete externals.id
+            className : @className
+            computedAttributes : @computedAttributes
+            externalAttributes : externals
+            children : ( child.toJSON includeID for child in @childList )
+
+### Deserialization from JSON
+
+Deserialization is a method in the class, because of course it is called
+when you have no instance at hand, and wish to create one.
+
+It does not re-use the members from the parameter, but explicitly copies
+them using a combination of `JSON.parse` and `JSON.stringify`, so that a
+deserialized version of an existing object will share no members with that
+object.
+
+        @fromJSON : ( json ) ->
+            classObj = Structure::subclasses[json.className]
+            children =
+                ( Structure.fromJSON child for child in json.children )
+            result = new classObj children...
+            result.computedAttributes =
+                JSON.parse JSON.stringify json.computedAttributes
+            result.externalAttributes =
+                JSON.parse JSON.stringify json.externalAttributes
+            result
 
 ## Tree structure
 
@@ -110,11 +156,7 @@ be inserted is this node itself, this function does nothing.
                     @removeFromParent()
                     break
             child.removeFromParent()
-            @childList = [
-                @childList[...beforeIndex]...
-                child
-                @childList[beforeIndex...]...
-            ]
+            @childList.splice beforeIndex, 0, child
             child.parentNode = this
             child.wasInserted?()
 
@@ -133,8 +175,10 @@ Another possibly convenient utility is to make a copy of the Structure S
 
         copy : ->
             S = new Structure
-            S.computedAttributes = JSON.parse JSON.stringify @computedAttributes
-            S.externalAttributes = JSON.parse JSON.stringify @externalAttributes
+            S.computedAttributes =
+                JSON.parse JSON.stringify @computedAttributes
+            S.externalAttributes =
+                JSON.parse JSON.stringify @externalAttributes
             S.childList = ( C.copy() for C in @childList )
             child.parentNode = S for child in S.childList
             S
@@ -192,6 +236,10 @@ key is special; see [the documentation
 here](https://lurchmath.github.io/lde/site/phase0-structures/#methods-in-the-structure-class)
 for details.
 
+No checks are put on what kind of data can be used for the values of this
+dictionary, but they should be JSON data only, to support serialization.
+(Checks are omitted for efficiency.)
+
         getComputedAttribute : ( key ) -> @computedAttributes[key]
         setComputedAttribute : ( key, value ) ->
             if @computedAttributes[key] isnt value
@@ -230,6 +278,9 @@ The dictionary of external attributes has get/set/clear functions just as we
 have for computed attributes.  The intent is for them to store data provided
 by the client, and the LDE will not alter it.
 
+As with computed attributes, values should be JSON data only, to support
+serialization, but we do not check for this property, for efficiency.
+
         getExternalAttribute : ( key ) -> @externalAttributes[key]
         setExternalAttribute : ( key, value ) ->
             if @externalAttributes[key] isnt value
@@ -262,13 +313,6 @@ This is intended to be used when constructing large structures, as in
 
         setup : ->
 
-Every structure and substructure will be given a unique ID.
-
-            recurGetID = ( node ) ->
-                node.getID()
-                recurGetID child for child in node.children()
-            recurGetID this
-
 Every structure with an external attribute key "label for", "reason for", or
 "premise for" and value X will be converted into a connection to node X of
 type "label", "reason", or "premise", respectively.  Node X will be found by
@@ -283,7 +327,6 @@ Alternately the same keys could be associated with value "previous" or
             recurFindTargets = ( node ) ->
                 if ( id = node.getExternalAttribute 'id' )?
                     targets[id] = node
-                    node.clearExternalAttributes 'id'
                 recurFindTargets child for child in node.children()
             recurFindTargets this
             recurConnect = ( node ) ->
@@ -307,6 +350,39 @@ return the structure for use in chaining.
 
             @fillOutConnections()
             this
+
+## Unique IDs for instances
+
+Clients of this class may give instances of it unique IDs stored in external
+attributes.  (See the corresponding convenience function for querying such
+IDs in the [Attribute Conventions section](#attribute-conventions).)  To
+track those IDs, we use a class variable defined here, and provide class
+methods for tracking and untracking IDs in a structure hierarchy.  IDs can
+be any string, and thus we track them in an object, using the strings as
+keys.
+
+        IDs : { }
+        @instanceWithID : ( id ) -> Structure::IDs[id]
+
+The following two functions recur through a given structure hierarchy and
+save all of its IDs into (or delete all of its IDs from) the above class
+variable.  Whenever a structure hierarchy is no longer used by the client,
+`untrackIDs` should be called on that hierarchy to prevent memory leaks.
+
+        trackIDs : ( recursive = yes ) ->
+            if @id()? then Structure::IDs[@id()] = @
+            if recursive then child.trackIDs() for child in @children()
+        untrackIDs : ( recursive = yes ) ->
+            if @id()? then delete Structure::IDs[@id()]
+            if recursive then child.untrackIDs() for child in @children()
+
+The following function removes all ID attributes from a structure hierarchy.
+This is useful, for example, after making a deep copy of a structure, so
+that the copied version does not violate the global uniqueness of IDs.
+
+        clearIDs : ( recursive = yes ) ->
+            @clearExternalAttributes 'id'
+            if recursive then child.clearIDs() for child in @children()
 
 ## Connections
 
@@ -332,7 +408,7 @@ Structure does not already have an ID.
 Recur on children, but if this object has no ID, we can't go beyond that.
 
             child.fillOutConnections() for child in @childList
-            if not @ID? then return
+            if not @id()? then return
 
 We define an internal function for converting multisets of target-type pairs
 from array representation to an easier-to-work-with object representation,
@@ -358,7 +434,7 @@ That is, `{ targID: { type: count, ... }, ... }`.
                 for own target, moreData of object
                     for own type, count of moreData
                         for i in [1..count]
-                            result.push [ Number( target ), type ]
+                            result.push [ target, type ]
                 result
 
 Now find all my outgoing connections, and ensure they exist in at least the
@@ -370,10 +446,10 @@ same quantity on both sides.
                 continue unless ( T = Structure.instanceWithID target )?
                 targetIns = arrayToObject \
                     ( T.getExternalAttribute 'connectionsIn' ) ? [ ]
-                targetIns[@ID] ?= { }
+                targetIns[@id()] ?= { }
                 for own type, count of moreData
-                    moreData[type] = targetIns[@ID][type] =
-                        Math.max count, targetIns[@ID][type] ? 0
+                    moreData[type] = targetIns[@id()][type] =
+                        Math.max count, targetIns[@id()][type] ? 0
                 T.setExternalAttribute 'connectionsIn',
                     objectToArray targetIns
 
@@ -385,10 +461,10 @@ Repeat the same exrecise for my incoming connections.
                 continue unless ( S = Structure.instanceWithID source )?
                 sourceOuts = arrayToObject \
                     ( S.getExternalAttribute 'connectionsOut' ) ? [ ]
-                sourceOuts[@ID] ?= { }
+                sourceOuts[@id()] ?= { }
                 for own type, count of moreData
-                    moreData[type] = sourceOuts[@ID][type] =
-                        Math.max count, sourceOuts[@ID][type] ? 0
+                    moreData[type] = sourceOuts[@id()][type] =
+                        Math.max count, sourceOuts[@id()][type] ? 0
                 S.setExternalAttribute 'connectionsOut',
                     objectToArray sourceOuts
 
@@ -414,13 +490,13 @@ These functions do nothing if either of the two structures is lacking an ID.
 They return true on success and false on failure.
 
         connectTo : ( otherStructure, connectionType ) ->
-            return no unless @ID? and \
-                otherStructure instanceof Structure and otherStructure.ID?
+            return no unless @id()? and \
+                otherStructure instanceof Structure and otherStructure.id()?
             outs = ( @getExternalAttribute 'connectionsOut' ) ? [ ]
             ins = ( otherStructure.getExternalAttribute 'connectionsIn' ) \
                 ? [ ]
-            outs.push [ otherStructure.ID, connectionType ]
-            ins.push [ @ID, connectionType ]
+            outs.push [ otherStructure.id(), connectionType ]
+            ins.push [ @id(), connectionType ]
             @setExternalAttribute 'connectionsOut', outs
             otherStructure.setExternalAttribute 'connectionsIn', ins
             yes
@@ -428,19 +504,19 @@ They return true on success and false on failure.
 The delete function does nothing if there is no connection to delete.
 
         disconnectFrom : ( otherStructure, connectionType ) ->
-            return no unless @ID? and \
-                otherStructure instanceof Structure and otherStructure.ID?
+            return no unless @id()? and \
+                otherStructure instanceof Structure and otherStructure.id()?
             outs = ( @getExternalAttribute 'connectionsOut' ) ? [ ]
             ins = ( otherStructure.getExternalAttribute 'connectionsIn' ) \
                 ? [ ]
             outIndex = inIndex = 0
             while outIndex < outs.length and \
-                  ( outs[outIndex][0] isnt otherStructure.ID or \
+                  ( outs[outIndex][0] isnt otherStructure.id() or \
                     outs[outIndex][1] isnt connectionType )
                 outIndex++
             if outIndex is outs.length then return no
             while inIndex < ins.length and \
-                  ( ins[inIndex][0] isnt @ID or \
+                  ( ins[inIndex][0] isnt @id() or \
                     ins[inIndex][1] isnt connectionType )
                 inIndex++
             if inIndex is ins.length then return no
@@ -480,9 +556,9 @@ one without an ID.
 
         allConnectionsTo : ( otherStructure ) ->
             return null unless otherStructure instanceof Structure and \
-                otherStructure.ID?
+                otherStructure.id()?
             outs = ( @getExternalAttribute 'connectionsOut' ) ? [ ]
-            ( conn[1] for conn in outs when conn[0] is otherStructure.ID )
+            ( conn[1] for conn in outs when conn[0] is otherStructure.id() )
 
 The final query treats all incoming connections to a structure as if they
 give it "properties."  If A connects to B with type T, then when we look up
@@ -616,7 +692,13 @@ mathematical concepts to the `Structure` class for the first time.
 
 ### Special external attributes
 
-There are three types of special external attributes (so far).
+There are just a few types of special external attributes (so far).
+
+The external attribute with key "id" can be used to give a structure a
+unique ID.  Because this is used in several ways throughout the LDE, we
+provide the following convenience function for accessing it.
+
+        id : -> @getExternalAttribute 'id'
 
 Atomic structures are often defined by a single piece of text that is the
 structure's content.  The first convention is that such text will be stored
@@ -634,11 +716,11 @@ reference to an earlier name have their "reference" attribute set to true
 
         isAReference : -> not not @getExternalAttribute 'reference'
 
-Note that the above two functions do not have corresponding setter functions
+Note that the above functions do not have corresponding setter functions
 because they are external attributes, which are read-only from the point of
 view of the LDE.
 
-The second type of external attribute that requires special functions for
+The final type of external attribute that requires special functions for
 dealing with it is the attribute storing connections to other structures.
 We handle that attribute with all the functions in [the Connections section,
 above](#connections).
@@ -663,8 +745,8 @@ resulting array, filtering out all non-strings.
             ( item for item in [ external..., computed... ] \
                 when typeof item is 'string' )
 
-Te second takes a structure and connection type as arguments and returns all
-other structures that have connections of the given type to the given
+The second takes a structure and connection type as arguments and returns
+all other structures that have connections of the given type to the given
 structure.
 
         allConnectedTo = ( structure, type ) ->
@@ -784,3 +866,7 @@ Finally, we can write a function that computes all structures that cite this
 one.  It uses the above function to make the work easy.
 
         whatCitesMe : -> @allInScope ( other ) => other.cites this
+
+Now if this is being used in a Node.js context, export the class we defined.
+
+    if exports? then exports.Structure = Structure

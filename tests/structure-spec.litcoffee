@@ -13,7 +13,6 @@ Verify that the globals exposed by the Structure module are visible.
         it 'should be defined', ->
             expect( Structure ).toBeTruthy()
 
-
 ## Structure trees
 
     describe 'Structure trees', ->
@@ -630,6 +629,222 @@ Verify that across trees, the answer is always undefined.
             expect( dA.isEarlierThan ABA ).toBeFalsy()
             expect( dA.isEarlierThan B ).toBeFalsy()
 
+The following tests serialize and deserialize structures (including some
+subclasses) and verify that the results are faithful copies of the
+originals.
+
+        it 'should serialize and deserialize hierarchies correctly', ->
+
+Begin with a trivial example, a single node hierarchy with no attributes.
+
+            loner = new Structure
+            json = loner.toJSON()
+            expect( json instanceof Structure ).toBeFalsy()
+            expect( json ).not.toBe loner
+            expect( json.className ).toBe 'Structure'
+            expect( json.computedAttributes ).toEqual { }
+            expect( json.externalAttributes ).toEqual { }
+            expect( json.children ).toEqual [ ]
+
+Deserialize a copy from it and verify that it is correctly structured.
+
+            copy = Structure.fromJSON json
+            expect( copy instanceof Structure ).toBeTruthy()
+            expect( copy.computedAttributes ).toEqual { }
+            expect( copy.externalAttributes ).toEqual { }
+            expect( copy.computedAttributes ).not.toBe \
+                json.computedAttributes
+            expect( copy.externalAttributes ).not.toBe \
+                json.externalAttributes
+            expect( copy.computedAttributes ).not.toBe \
+                loner.computedAttributes
+            expect( copy.externalAttributes ).not.toBe \
+                loner.externalAttributes
+            expect( copy.children() ).toEqual [ ]
+            expect( copy.parent() ).toBeNull()
+            expect( copy ).not.toBe json
+            expect( copy ).not.toBe loner
+
+Now do another one-node example, but this one with some attributes of each
+type.
+
+            atty = new Structure()
+            atty.setExternalAttribute 1, 2
+            atty.setExternalAttribute 'three', [ 'four', { } ]
+            atty.setComputedAttribute 'five', 666666
+            atty.setComputedAttribute '7', { 8 : [ [ ] ] }
+            json = atty.toJSON()
+            expect( json instanceof Structure ).toBeFalsy()
+            expect( json ).not.toBe atty
+            expect( json.className ).toBe 'Structure'
+            expect( json.computedAttributes ).toEqual
+                'five' : 666666
+                '7' : { 8 : [ [ ] ] }
+            expect( json.externalAttributes ).toEqual
+                1 : 2
+                'three' : [ 'four', { } ]
+            expect( json.children ).toEqual [ ]
+
+Deserialize a copy from it and verify that it is correctly structured.
+
+            copy = Structure.fromJSON json
+            expect( copy instanceof Structure ).toBeTruthy()
+            expect( copy.computedAttributes ).toEqual
+                'five' : 666666
+                '7' : { 8 : [ [ ] ] }
+            expect( copy.externalAttributes ).toEqual
+                1 : 2
+                'three' : [ 'four', { } ]
+            expect( copy.computedAttributes ).not.toBe \
+                json.computedAttributes
+            expect( copy.externalAttributes ).not.toBe \
+                json.externalAttributes
+            expect( copy.computedAttributes ).not.toBe \
+                atty.computedAttributes
+            expect( copy.externalAttributes ).not.toBe \
+                atty.externalAttributes
+            expect( copy.children() ).toEqual [ ]
+            expect( copy.parent() ).toBeNull()
+            expect( copy ).not.toBe json
+            expect( copy ).not.toBe atty
+
+Now define two silly little subclasses of `Structure` for use in just the
+next test.
+
+            class Sub1 extends Structure
+                className : Structure.addSubclass 'Sub1', Sub1
+                exampleMethod1 : -> 5
+            class Sub2 extends Structure
+                className : Structure.addSubclass 'Sub2', Sub2
+                exampleMethod2 : -> @getExternalAttribute 'test'
+
+Now create a hierarchy with three `Structure`s in it, one of each of the
+three classes `Structure`, `Sub1`, and `Sub2`.  Also give every node in the
+hierarchy a unique ID.
+
+            bigger = new Structure(
+                child1 = new Sub1().attr 10 : 100
+                child2 = new Sub2().attr 'test' : 'ing'
+            ).setup()
+
+Verify that the children are of the expected classes.
+
+            expect( child1 instanceof Sub1 ).toBeTruthy()
+            expect( child1.exampleMethod1 ).not.toBeUndefined()
+            expect( child2 instanceof Sub2 ).toBeTruthy()
+            expect( child2.exampleMethod2 ).not.toBeUndefined()
+
+Serialize and verify that it came out correctly.
+
+            json = bigger.toJSON()
+            expect( json instanceof Structure ).toBeFalsy()
+            expect( json ).not.toBe bigger
+            expect( json.className ).toBe 'Structure'
+            expect( json.computedAttributes ).toEqual { }
+            expect( json.externalAttributes ).toEqual { }
+            expect( json.children.length ).toBe 2
+            child = json.children[0]
+            expect( child instanceof Structure ).toBeFalsy()
+            expect( child instanceof Sub1 ).toBeFalsy()
+            expect( child.className ).toBe 'Sub1'
+            expect( child.computedAttributes ).toEqual { }
+            expect( child.externalAttributes ).toEqual { 10 : 100 }
+            expect( child.children ).toEqual [ ]
+            expect( child.exampleMethod1 ).toBeUndefined()
+            child = json.children[1]
+            expect( child instanceof Structure ).toBeFalsy()
+            expect( child instanceof Sub2 ).toBeFalsy()
+            expect( child.className ).toBe 'Sub2'
+            expect( child.computedAttributes ).toEqual { }
+            expect( child.externalAttributes ).toEqual { 'test' : 'ing' }
+            expect( child.children ).toEqual [ ]
+            expect( child.exampleMethod2 ).toBeUndefined()
+
+Deserialize and verify that each node is the same class as in the original
+hierarchy, as well as all the same tests we did for the earlier cases.
+
+            copy = Structure.fromJSON json
+            expect( copy instanceof Structure ).toBeTruthy()
+            expect( copy.computedAttributes ).toEqual { }
+            expect( copy.externalAttributes ).toEqual { }
+            expect( copy.computedAttributes ).not.toBe \
+                json.computedAttributes
+            expect( copy.externalAttributes ).not.toBe \
+                json.externalAttributes
+            expect( copy.computedAttributes ).not.toBe \
+                bigger.computedAttributes
+            expect( copy.externalAttributes ).not.toBe \
+                bigger.externalAttributes
+            expect( copy.id() ).toBeUndefined()
+            expect( copy.parent() ).toBeNull()
+            expect( copy ).not.toBe json
+            expect( copy ).not.toBe bigger
+            expect( copy.children().length ).toBe 2
+            child = copy.children()[0]
+            expect( child instanceof Sub1 ).toBeTruthy()
+            expect( child.computedAttributes ).toEqual { }
+            expect( child.externalAttributes ).toEqual { 10 : 100 }
+            expect( child.computedAttributes ).not.toBe \
+                json.computedAttributes
+            expect( child.externalAttributes ).not.toBe \
+                json.externalAttributes
+            expect( child.computedAttributes ).not.toBe \
+                child1.computedAttributes
+            expect( child.externalAttributes ).not.toBe \
+                child1.externalAttributes
+            expect( child.id() ).toBeUndefined()
+            expect( child.parent() ).toBe copy
+            expect( child ).not.toBe json.children[0]
+            expect( child ).not.toBe child1
+            expect( child.children() ).toEqual [ ]
+            child = copy.children()[1]
+            expect( child instanceof Sub2 ).toBeTruthy()
+            expect( child.computedAttributes ).toEqual { }
+            expect( child.externalAttributes ).toEqual { 'test' : 'ing' }
+            expect( child.computedAttributes ).not.toBe \
+                json.computedAttributes
+            expect( child.externalAttributes ).not.toBe \
+                json.externalAttributes
+            expect( child.computedAttributes ).not.toBe \
+                child2.computedAttributes
+            expect( child.externalAttributes ).not.toBe \
+                child2.externalAttributes
+            expect( child.id() ).toBeUndefined()
+            expect( child.parent() ).toBe copy
+            expect( child ).not.toBe json.children[1]
+            expect( child ).not.toBe child2
+            expect( child.children() ).toEqual [ ]
+
+Verify that `toJSON` respects its optional argument by creating a small
+hierarchy with some IDs, and applying `toJSON` to it twice, once with a true
+argument and once with a false argument.
+
+            small = new Structure(
+                new Structure().attr id : 'X', other : 'things'
+            ).attr id : 'Y', other : 'stuff'
+            expect( small.toJSON() ).toEqual {
+                className : 'Structure'
+                externalAttributes : id : 'Y', other : 'stuff'
+                computedAttributes : { }
+                children : [
+                    className : 'Structure'
+                    externalAttributes : id : 'X', other : 'things'
+                    computedAttributes : { }
+                    children : [ ]
+                ]
+            }
+            expect( small.toJSON no ).toEqual {
+                className : 'Structure'
+                externalAttributes : other : 'stuff'
+                computedAttributes : { }
+                children : [
+                    className : 'Structure'
+                    externalAttributes : other : 'things'
+                    computedAttributes : { }
+                    children : [ ]
+                ]
+            }
+
 ## Computed attributes
 
     describe 'Computed attributes', ->
@@ -894,86 +1109,49 @@ event handlers.
 
 Build some structures for use in all the tests below.
 
-        A = new Structure
+        A = new Structure().attr 'id' : 'one'
         B = new Structure(
-            C = new Structure
-        )
+            C = new Structure().attr 'id' : 2
+        ).attr 'id' : 'THREE'
 
-By default, structure instances don't have any IDs.
+The convenience function for querying IDs should work.
 
-        it 'should not be assigned by default', ->
-            expect( A.ID ).toBeUndefined()
-            expect( B.ID ).toBeUndefined()
-            expect( C.ID ).toBeUndefined()
+        it 'query IDs that have been assigned', ->
+            expect( A.id() ).toBe 'one'
+            expect( B.id() ).toBe 'THREE'
+            expect( C.id() ).toBe 2
 
-When you request an ID for a structure, it gets a nonnegative integer ID.
+The previous test's claim should hold true even with structures that have
+not been assigned an ID, which therefore have `undefined` as their ID.
 
-        it 'should assign nonnegative integers when asked', ->
-            A.getID()
-            expect( typeof A.ID ).toBe 'number'
-            expect( A.ID ).not.toBeLessThan 0
-            B.getID()
-            expect( typeof B.ID ).toBe 'number'
-            expect( B.ID ).not.toBeLessThan 0
-            C.getID()
-            expect( typeof C.ID ).toBe 'number'
-            expect( C.ID ).not.toBeLessThan 0
+        it 'yield undefined IDs for structures with no assigned ID', ->
+            expect( ( new Structure ).id() ).toBeUndefined()
 
-Requesting an ID again for a structure that already has one does nothing to
-the structure's ID.
+The class doesn't track IDs for structures unless you ask it to.  So by
+default, there shouldn't be any instances we can look up by their ID.
 
-        it 'should not reassign IDs when they are already present', ->
-            old = A.ID
-            A.getID()
-            expect( A.ID ).toBe old
-            old = B.ID
-            B.getID()
-            expect( B.ID ).toBe old
-            old = C.ID
-            C.getID()
-            expect( C.ID ).toBe old
+        it 'does not track IDs unless asked', ->
+            expect( Structure.instanceWithID 'one' ).toBeUndefined()
+            expect( Structure.instanceWithID 2 ).toBeUndefined()
+            expect( Structure.instanceWithID 'THREE' ).toBeUndefined()
 
-Releasing an ID should mean that the structure doesn't have one any longer.
-But requesting an ID immediately thereafter should get the old one back,
-because in this simple test case, only one ID is released at a time, making
-it the next one waiting to be assigned.
+But if you do ask it to track IDs, it does so correctly.
 
-        it 'should release and reassign IDs correctly', ->
-            expect( A.ID ).not.toBeUndefined()
-            old = A.ID
-            A.releaseID()
-            expect( A.ID ).toBeUndefined()
-            A.getID()
-            expect( A.ID ).not.toBeUndefined()
-            expect( A.ID ).toBe old
-            expect( A.ID ).not.toBeUndefined()
-            old = B.ID
-            B.releaseID()
-            expect( B.ID ).toBeUndefined()
-            B.getID()
-            expect( B.ID ).not.toBeUndefined()
-            expect( B.ID ).toBe old
-            expect( B.ID ).not.toBeUndefined()
-            old = C.ID
-            C.releaseID()
-            expect( C.ID ).toBeUndefined()
-            C.getID()
-            expect( C.ID ).not.toBeUndefined()
-            expect( C.ID ).toBe old
+        it 'does track IDs once asked', ->
+            A.trackIDs()
+            B.trackIDs()
+            expect( Structure.instanceWithID 'one' ).toBe A
+            expect( Structure.instanceWithID 2 ).toBe C
+            expect( Structure.instanceWithID 'THREE' ).toBe B
 
-Through all of the above changes, the list of IDs should never get above 3,
-because releasing and reassigning IDs should reuse old ones.
+And if you ask it to stop, it does that, too.
 
-        it 'should assign IDs economically', ->
-            expect( Structure::IDs.length ).toBe 3
-
-Looking up a structure from its ID yields the structure itself.  That is,
-the lookup function works correctly.
-
-        it 'should look structures up by ID correctly', ->
-            expect( Structure.instanceWithID A.ID ).toBe A
-            expect( Structure.instanceWithID B.ID ).toBe B
-            expect( Structure.instanceWithID C.ID ).toBe C
+        it 'stops tracking IDs once asked', ->
+            A.untrackIDs()
+            B.untrackIDs()
+            expect( Structure.instanceWithID 'one' ).toBeUndefined()
+            expect( Structure.instanceWithID 2 ).toBeUndefined()
+            expect( Structure.instanceWithID 'THREE' ).toBeUndefined()
 
 ## Connections
 
@@ -1000,22 +1178,17 @@ call `fillOutConnections()`, and ensure that the inconsistencies are fixed.
 Structure 1:
 
             A = new Structure(
-                B = new Structure,
-                C = new Structure
-            )
-
-In order to make connections, each structure will need an ID.
-
-            A.getID()
-            B.getID()
-            C.getID()
+                B = new Structure().attr id : 'B'
+                C = new Structure().attr id : 'C'
+            ).attr id : 'A'
+            A.trackIDs()
 
 We now connect A to B, but only note it within A.
 And we connect B to C, but only note it within C.
 These are the two inconsistencies we will test here.
 
-            A.setExternalAttribute 'connectionsOut', [ [ B.ID, 'foo' ] ]
-            C.setExternalAttribute 'connectionsIn', [ [ B.ID, 'bar' ] ]
+            A.setExternalAttribute 'connectionsOut', [ [ 'B', 'foo' ] ]
+            C.setExternalAttribute 'connectionsIn', [ [ 'B', 'bar' ] ]
 
 Make the connections consistent.
 
@@ -1024,16 +1197,16 @@ Make the connections consistent.
 Verify that no old connections were removed.
 
             expect( A.getExternalAttribute 'connectionsOut' )
-                .toEqual [ [ B.ID, 'foo' ] ]
+                .toEqual [ [ 'B', 'foo' ] ]
             expect( C.getExternalAttribute 'connectionsIn' )
-                .toEqual [ [ B.ID, 'bar' ] ]
+                .toEqual [ [ 'B', 'bar' ] ]
 
 Verify that all the appropriate new connections were added.
 
             expect( B.getExternalAttribute 'connectionsIn' )
-                .toEqual [ [ A.ID, 'foo' ] ]
+                .toEqual [ [ 'A', 'foo' ] ]
             expect( B.getExternalAttribute 'connectionsOut' )
-                .toEqual [ [ C.ID, 'bar' ] ]
+                .toEqual [ [ 'C', 'bar' ] ]
 
 Verify that no other connections were created.
 
@@ -1041,6 +1214,7 @@ Verify that no other connections were created.
                 .toBeUndefined()
             expect( A.getExternalAttribute 'connectionsIn' )
                 .toBeUndefined()
+            A.untrackIDs()
 
 Structure 2:
 
@@ -1051,32 +1225,27 @@ itself, and so on.
 
             root = new Structure(
                 A = new Structure(
-                    B = new Structure
-                    C = new Structure
-                )
+                    B = new Structure().attr id : 'B'
+                    C = new Structure().attr id : 'C'
+                ).attr id : 'A'
                 D = new Structure(
-                    E = new Structure
-                )
-            )
-            A.getID()
-            B.getID()
-            C.getID()
-            D.getID()
-            E.getID()
+                    E = new Structure().attr id : 'E'
+                ).attr id : 'D'
+            ).attr id : 'root'
+            root.trackIDs()
             A.setExternalAttribute 'connectionsOut',
-                [ [ B.ID, '1' ], [ E.ID, '2' ] ]
+                [ [ 'B', '1' ], [ 'E', '2' ] ]
             B.setExternalAttribute 'connectionsIn',
-                [ [ A.ID, '1' ], [ A.ID, '1' ], [ A.ID, '1' ],
-                  [ A.ID, '2' ] ]
-            B.setExternalAttribute 'connectionsOut', [ [ C.ID, '1' ] ]
-            C.setExternalAttribute 'connectionsIn', [ [ D.ID, '3' ] ]
-            C.setExternalAttribute 'connectionsOut', [ [ D.ID, '3' ] ]
-            D.setExternalAttribute 'connectionsIn', [ [ C.ID, '3' ] ]
+                [ [ 'A', '1' ], [ 'A', '1' ], [ 'A', '1' ],
+                  [ 'A', '2' ] ]
+            B.setExternalAttribute 'connectionsOut', [ [ 'C', '1' ] ]
+            C.setExternalAttribute 'connectionsIn', [ [ 'D', '3' ] ]
+            C.setExternalAttribute 'connectionsOut', [ [ 'D', '3' ] ]
+            D.setExternalAttribute 'connectionsIn', [ [ 'C', '3' ] ]
             E.setExternalAttribute 'connectionsIn',
-                [ [ A.ID, '2' ], [ A.ID, '2' ],
-                  [ E.ID, '4' ], [ E.ID, '4' ] ]
+                [ [ 'A', '2' ], [ 'A', '2' ], [ 'E', '4' ], [ 'E', '4' ] ]
             E.setExternalAttribute 'connectionsOut',
-                [ [ C.ID, '3' ], [ E.ID, '4' ], [ E.ID, '5' ] ]
+                [ [ 'C', '3' ], [ 'E', '4' ], [ 'E', '5' ] ]
 
 Make the connections consistent.
 
@@ -1096,53 +1265,54 @@ A:
             expect( A.getExternalAttribute 'connectionsIn' )
                 .toBeUndefined()
             toTest = A.getExternalAttribute 'connectionsOut'
-            expect( pairCount toTest, [ B.ID, '1' ] ).toBe 3
-            expect( pairCount toTest, [ B.ID, '2' ] ).toBe 1
-            expect( pairCount toTest, [ E.ID, '2' ] ).toBe 2
+            expect( pairCount toTest, [ 'B', '1' ] ).toBe 3
+            expect( pairCount toTest, [ 'B', '2' ] ).toBe 1
+            expect( pairCount toTest, [ 'E', '2' ] ).toBe 2
             expect( toTest.length ).toBe 6
 
 B:
 
             toTest = B.getExternalAttribute 'connectionsIn'
-            expect( pairCount toTest, [ A.ID, '1' ] ).toBe 3
-            expect( pairCount toTest, [ A.ID, '2' ] ).toBe 1
+            expect( pairCount toTest, [ 'A', '1' ] ).toBe 3
+            expect( pairCount toTest, [ 'A', '2' ] ).toBe 1
             expect( toTest.length ).toBe 4
             toTest = B.getExternalAttribute 'connectionsOut'
-            expect( pairCount toTest, [ C.ID, '1' ] ).toBe 1
+            expect( pairCount toTest, [ 'C', '1' ] ).toBe 1
             expect( toTest.length ).toBe 1
 
 C:
 
             toTest = C.getExternalAttribute 'connectionsIn'
-            expect( pairCount toTest, [ B.ID, '1' ] ).toBe 1
-            expect( pairCount toTest, [ D.ID, '3' ] ).toBe 1
-            expect( pairCount toTest, [ E.ID, '3' ] ).toBe 1
+            expect( pairCount toTest, [ 'B', '1' ] ).toBe 1
+            expect( pairCount toTest, [ 'D', '3' ] ).toBe 1
+            expect( pairCount toTest, [ 'E', '3' ] ).toBe 1
             expect( toTest.length ).toBe 3
             toTest = C.getExternalAttribute 'connectionsOut'
-            expect( pairCount toTest, [ D.ID, '3' ] ).toBe 1
+            expect( pairCount toTest, [ 'D', '3' ] ).toBe 1
             expect( toTest.length ).toBe 1
 
 D:
 
             toTest = D.getExternalAttribute 'connectionsIn'
-            expect( pairCount toTest, [ C.ID, '3' ] ).toBe 1
+            expect( pairCount toTest, [ 'C', '3' ] ).toBe 1
             expect( toTest.length ).toBe 1
             toTest = D.getExternalAttribute 'connectionsOut'
-            expect( pairCount toTest, [ C.ID, '3' ] ).toBe 1
+            expect( pairCount toTest, [ 'C', '3' ] ).toBe 1
             expect( toTest.length ).toBe 1
 
 E:
 
             toTest = E.getExternalAttribute 'connectionsIn'
-            expect( pairCount toTest, [ A.ID, '2' ] ).toBe 2
-            expect( pairCount toTest, [ E.ID, '4' ] ).toBe 2
-            expect( pairCount toTest, [ E.ID, '5' ] ).toBe 1
+            expect( pairCount toTest, [ 'A', '2' ] ).toBe 2
+            expect( pairCount toTest, [ 'E', '4' ] ).toBe 2
+            expect( pairCount toTest, [ 'E', '5' ] ).toBe 1
             expect( toTest.length ).toBe 5
             toTest = E.getExternalAttribute 'connectionsOut'
-            expect( pairCount toTest, [ C.ID, '3' ] ).toBe 1
-            expect( pairCount toTest, [ E.ID, '4' ] ).toBe 2
-            expect( pairCount toTest, [ E.ID, '5' ] ).toBe 1
+            expect( pairCount toTest, [ 'C', '3' ] ).toBe 1
+            expect( pairCount toTest, [ 'E', '4' ] ).toBe 2
+            expect( pairCount toTest, [ 'E', '5' ] ).toBe 1
             expect( toTest.length ).toBe 4
+            root.untrackIDs()
 
 That completes the tests of `fillOutConnections()`.
 
@@ -1154,12 +1324,10 @@ Make a simple structure to use for testing.  Give all structures in it IDs,
 and verify that they have no connections to start with.
 
             A = new Structure(
-                B = new Structure,
-                C = new Structure
-            )
-            A.getID()
-            B.getID()
-            C.getID()
+                B = new Structure().attr id : 'B'
+                C = new Structure().attr id : 'C'
+            ).attr id : 'A'
+            A.trackIDs()
             expect( A.getExternalAttribute 'connectionsIn' )
                 .toBeUndefined()
             expect( A.getExternalAttribute 'connectionsOut' )
@@ -1183,10 +1351,10 @@ First, a simple connection.
             expect( A.getExternalAttribute 'connectionsIn' )
                 .toBeUndefined()
             toTest = A.getExternalAttribute 'connectionsOut'
-            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 1
+            expect( pairCount toTest, [ 'B', 'reason' ] ).toBe 1
             expect( toTest.length ).toBe 1
             toTest = B.getExternalAttribute 'connectionsIn'
-            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 1
+            expect( pairCount toTest, [ 'A', 'reason' ] ).toBe 1
             expect( toTest.length ).toBe 1
             expect( B.getExternalAttribute 'connectionsOut' )
                 .toBeUndefined()
@@ -1199,16 +1367,16 @@ Second, a conncetion going the other way, and of the same type.
 
             expect( B.connectTo A, 'reason' ).toBeTruthy()
             toTest = A.getExternalAttribute 'connectionsIn'
-            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 1
+            expect( pairCount toTest, [ 'B', 'reason' ] ).toBe 1
             expect( toTest.length ).toBe 1
             toTest = A.getExternalAttribute 'connectionsOut'
-            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 1
+            expect( pairCount toTest, [ 'B', 'reason' ] ).toBe 1
             expect( toTest.length ).toBe 1
             toTest = B.getExternalAttribute 'connectionsIn'
-            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 1
+            expect( pairCount toTest, [ 'A', 'reason' ] ).toBe 1
             expect( toTest.length ).toBe 1
             toTest = B.getExternalAttribute 'connectionsOut'
-            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 1
+            expect( pairCount toTest, [ 'A', 'reason' ] ).toBe 1
             expect( toTest.length ).toBe 1
             expect( C.getExternalAttribute 'connectionsIn' )
                 .toBeUndefined()
@@ -1219,16 +1387,16 @@ Third, repeat the previous connection and ensure that there are now two.
 
             expect( B.connectTo A, 'reason' ).toBeTruthy()
             toTest = A.getExternalAttribute 'connectionsIn'
-            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 2
+            expect( pairCount toTest, [ 'B', 'reason' ] ).toBe 2
             expect( toTest.length ).toBe 2
             toTest = A.getExternalAttribute 'connectionsOut'
-            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 1
+            expect( pairCount toTest, [ 'B', 'reason' ] ).toBe 1
             expect( toTest.length ).toBe 1
             toTest = B.getExternalAttribute 'connectionsIn'
-            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 1
+            expect( pairCount toTest, [ 'A', 'reason' ] ).toBe 1
             expect( toTest.length ).toBe 1
             toTest = B.getExternalAttribute 'connectionsOut'
-            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 2
+            expect( pairCount toTest, [ 'A', 'reason' ] ).toBe 2
             expect( toTest.length ).toBe 2
             expect( C.getExternalAttribute 'connectionsIn' )
                 .toBeUndefined()
@@ -1241,23 +1409,24 @@ Fourth, connect C to itself three times and ensure they all appear.
             expect( C.connectTo C, 'premise' ).toBeTruthy()
             expect( C.connectTo C, 'premise' ).toBeTruthy()
             toTest = A.getExternalAttribute 'connectionsIn'
-            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 2
+            expect( pairCount toTest, [ 'B', 'reason' ] ).toBe 2
             expect( toTest.length ).toBe 2
             toTest = A.getExternalAttribute 'connectionsOut'
-            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 1
+            expect( pairCount toTest, [ 'B', 'reason' ] ).toBe 1
             expect( toTest.length ).toBe 1
             toTest = B.getExternalAttribute 'connectionsIn'
-            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 1
+            expect( pairCount toTest, [ 'A', 'reason' ] ).toBe 1
             expect( toTest.length ).toBe 1
             toTest = B.getExternalAttribute 'connectionsOut'
-            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 2
+            expect( pairCount toTest, [ 'A', 'reason' ] ).toBe 2
             expect( toTest.length ).toBe 2
             toTest = C.getExternalAttribute 'connectionsIn'
-            expect( pairCount toTest, [ C.ID, 'premise' ] ).toBe 3
+            expect( pairCount toTest, [ 'C', 'premise' ] ).toBe 3
             expect( toTest.length ).toBe 3
             toTest = C.getExternalAttribute 'connectionsOut'
-            expect( pairCount toTest, [ C.ID, 'premise' ] ).toBe 3
+            expect( pairCount toTest, [ 'C', 'premise' ] ).toBe 3
             expect( toTest.length ).toBe 3
+            A.untrackIDs()
 
 The following section tests the function `disconnectFrom()`; it is the
 companion to the previous section.
@@ -1268,12 +1437,10 @@ Build the same structure as in the previous section, and make the same
 connections within it.
 
             A = new Structure(
-                B = new Structure
-                C = new Structure
-            )
-            A.getID()
-            B.getID()
-            C.getID()
+                B = new Structure().attr id : 'B'
+                C = new Structure().attr id : 'C'
+            ).attr id : 'A'
+            A.trackIDs()
             expect( A.connectTo B, 'reason' ).toBeTruthy()
             expect( B.connectTo A, 'reason' ).toBeTruthy()
             expect( B.connectTo A, 'reason' ).toBeTruthy()
@@ -1285,22 +1452,22 @@ Verify that the currenct connection setup is, as expected, what it was at
 the end of the last section.
 
             toTest = A.getExternalAttribute 'connectionsIn'
-            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 2
+            expect( pairCount toTest, [ 'B', 'reason' ] ).toBe 2
             expect( toTest.length ).toBe 2
             toTest = A.getExternalAttribute 'connectionsOut'
-            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 1
+            expect( pairCount toTest, [ 'B', 'reason' ] ).toBe 1
             expect( toTest.length ).toBe 1
             toTest = B.getExternalAttribute 'connectionsIn'
-            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 1
+            expect( pairCount toTest, [ 'A', 'reason' ] ).toBe 1
             expect( toTest.length ).toBe 1
             toTest = B.getExternalAttribute 'connectionsOut'
-            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 2
+            expect( pairCount toTest, [ 'A', 'reason' ] ).toBe 2
             expect( toTest.length ).toBe 2
             toTest = C.getExternalAttribute 'connectionsIn'
-            expect( pairCount toTest, [ C.ID, 'premise' ] ).toBe 3
+            expect( pairCount toTest, [ 'C', 'premise' ] ).toBe 3
             expect( toTest.length ).toBe 3
             toTest = C.getExternalAttribute 'connectionsOut'
-            expect( pairCount toTest, [ C.ID, 'premise' ] ).toBe 3
+            expect( pairCount toTest, [ 'C', 'premise' ] ).toBe 3
             expect( toTest.length ).toBe 3
 
 Remove a few connections one at a time and ensure that at each point all
@@ -1308,40 +1475,40 @@ connections are as they should be.
 
             expect( B.disconnectFrom A, 'reason' ).toBeTruthy()
             toTest = A.getExternalAttribute 'connectionsIn'
-            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 1
+            expect( pairCount toTest, [ 'B', 'reason' ] ).toBe 1
             expect( toTest.length ).toBe 1
             toTest = A.getExternalAttribute 'connectionsOut'
-            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 1
+            expect( pairCount toTest, [ 'B', 'reason' ] ).toBe 1
             expect( toTest.length ).toBe 1
             toTest = B.getExternalAttribute 'connectionsIn'
-            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 1
+            expect( pairCount toTest, [ 'A', 'reason' ] ).toBe 1
             expect( toTest.length ).toBe 1
             toTest = B.getExternalAttribute 'connectionsOut'
-            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 1
+            expect( pairCount toTest, [ 'A', 'reason' ] ).toBe 1
             expect( toTest.length ).toBe 1
             toTest = C.getExternalAttribute 'connectionsIn'
-            expect( pairCount toTest, [ C.ID, 'premise' ] ).toBe 3
+            expect( pairCount toTest, [ 'C', 'premise' ] ).toBe 3
             expect( toTest.length ).toBe 3
             toTest = C.getExternalAttribute 'connectionsOut'
-            expect( pairCount toTest, [ C.ID, 'premise' ] ).toBe 3
+            expect( pairCount toTest, [ 'C', 'premise' ] ).toBe 3
             expect( toTest.length ).toBe 3
 
             expect( B.disconnectFrom A, 'reason' ).toBeTruthy()
             expect( A.getExternalAttribute 'connectionsIn' )
                 .toEqual [ ]
             toTest = A.getExternalAttribute 'connectionsOut'
-            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 1
+            expect( pairCount toTest, [ 'B', 'reason' ] ).toBe 1
             expect( toTest.length ).toBe 1
             toTest = B.getExternalAttribute 'connectionsIn'
-            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 1
+            expect( pairCount toTest, [ 'A', 'reason' ] ).toBe 1
             expect( toTest.length ).toBe 1
             expect( B.getExternalAttribute 'connectionsOut' )
                 .toEqual [ ]
             toTest = C.getExternalAttribute 'connectionsIn'
-            expect( pairCount toTest, [ C.ID, 'premise' ] ).toBe 3
+            expect( pairCount toTest, [ 'C', 'premise' ] ).toBe 3
             expect( toTest.length ).toBe 3
             toTest = C.getExternalAttribute 'connectionsOut'
-            expect( pairCount toTest, [ C.ID, 'premise' ] ).toBe 3
+            expect( pairCount toTest, [ 'C', 'premise' ] ).toBe 3
             expect( toTest.length ).toBe 3
 
             expect( C.disconnectFrom C, 'premise' ).toBeTruthy()
@@ -1349,19 +1516,20 @@ connections are as they should be.
             expect( A.getExternalAttribute 'connectionsIn' )
                 .toEqual [ ]
             toTest = A.getExternalAttribute 'connectionsOut'
-            expect( pairCount toTest, [ B.ID, 'reason' ] ).toBe 1
+            expect( pairCount toTest, [ 'B', 'reason' ] ).toBe 1
             expect( toTest.length ).toBe 1
             toTest = B.getExternalAttribute 'connectionsIn'
-            expect( pairCount toTest, [ A.ID, 'reason' ] ).toBe 1
+            expect( pairCount toTest, [ 'A', 'reason' ] ).toBe 1
             expect( toTest.length ).toBe 1
             expect( B.getExternalAttribute 'connectionsOut' )
                 .toEqual [ ]
             toTest = C.getExternalAttribute 'connectionsIn'
-            expect( pairCount toTest, [ C.ID, 'premise' ] ).toBe 1
+            expect( pairCount toTest, [ 'C', 'premise' ] ).toBe 1
             expect( toTest.length ).toBe 1
             toTest = C.getExternalAttribute 'connectionsOut'
-            expect( pairCount toTest, [ C.ID, 'premise' ] ).toBe 1
+            expect( pairCount toTest, [ 'C', 'premise' ] ).toBe 1
             expect( toTest.length ).toBe 1
+            A.untrackIDs()
 
 The following section tests the three querying utilities for connections.
 
@@ -1371,12 +1539,10 @@ Build the same structure as in the previous section, and make the same
 connections within it.
 
             A = new Structure(
-                B = new Structure
-                C = new Structure
-            )
-            A.getID()
-            B.getID()
-            C.getID()
+                B = new Structure().attr id : 'B'
+                C = new Structure().attr id : 'C'
+            ).attr id : 'A'
+            A.trackIDs()
             expect( A.connectTo B, 'reason' ).toBeTruthy()
             expect( B.connectTo A, 'reason' ).toBeTruthy()
             expect( B.connectTo A, 'reason' ).toBeTruthy()
@@ -1388,39 +1554,37 @@ Verify that all connection queries yield correct results.
 
 First, connections in and out of A:
 
-            expect( A.allConnectionsIn 'reason' ).toEqual [ B.ID, B.ID ]
+            expect( A.allConnectionsIn 'reason' ).toEqual [ 'B', 'B' ]
             expect( A.allConnectionsIn 'premise' ).toEqual [ ]
             expect( A.allConnectionsIn() )
-                .toEqual [ [ B.ID, 'reason' ], [ B.ID, 'reason' ] ]
-            expect( A.allConnectionsOut 'reason' ).toEqual [ B.ID ]
+                .toEqual [ [ 'B', 'reason' ], [ 'B', 'reason' ] ]
+            expect( A.allConnectionsOut 'reason' ).toEqual [ 'B' ]
             expect( A.allConnectionsOut 'premise' ).toEqual [ ]
-            expect( A.allConnectionsOut() ).toEqual [ [ B.ID, 'reason' ] ]
+            expect( A.allConnectionsOut() ).toEqual [ [ 'B', 'reason' ] ]
 
 Next, connections in and out of B:
 
-            expect( B.allConnectionsIn 'reason' ).toEqual [ A.ID ]
+            expect( B.allConnectionsIn 'reason' ).toEqual [ 'A' ]
             expect( B.allConnectionsIn 'premise' ).toEqual [ ]
-            expect( B.allConnectionsIn() ).toEqual [ [ A.ID, 'reason' ] ]
-            expect( B.allConnectionsOut 'reason' ).toEqual [ A.ID, A.ID ]
+            expect( B.allConnectionsIn() ).toEqual [ [ 'A', 'reason' ] ]
+            expect( B.allConnectionsOut 'reason' ).toEqual [ 'A', 'A' ]
             expect( B.allConnectionsOut 'premise' ).toEqual [ ]
             expect( B.allConnectionsOut() )
-                .toEqual [ [ A.ID, 'reason' ], [ A.ID, 'reason' ] ]
+                .toEqual [ [ 'A', 'reason' ], [ 'A', 'reason' ] ]
 
 Next, connections in and out of C:
 
             expect( C.allConnectionsIn 'reason' ).toEqual [ ]
             expect( C.allConnectionsIn 'premise' )
-                .toEqual [ C.ID, C.ID, C.ID ]
+                .toEqual [ 'C', 'C', 'C' ]
             expect( C.allConnectionsIn() ).toEqual [
-                [ C.ID, 'premise' ], [ C.ID, 'premise' ],
-                [ C.ID, 'premise' ]
+                [ 'C', 'premise' ], [ 'C', 'premise' ], [ 'C', 'premise' ]
             ]
             expect( C.allConnectionsOut 'reason' ).toEqual [ ]
             expect( C.allConnectionsOut 'premise' )
-                .toEqual [ C.ID, C.ID, C.ID ]
+                .toEqual [ 'C', 'C', 'C' ]
             expect( C.allConnectionsOut() ).toEqual [
-                [ C.ID, 'premise' ], [ C.ID, 'premise' ],
-                [ C.ID, 'premise' ]
+                [ 'C', 'premise' ], [ 'C', 'premise' ], [ 'C', 'premise' ]
             ]
 
 Next, connections between specific pairs:
@@ -1456,6 +1620,7 @@ Finally, incoming connections reported as property lists:
             expect( props['premise'][0] ).toBe C
             expect( props['premise'][1] ).toBe C
             expect( props['premise'][2] ).toBe C
+            A.untrackIDs()
 
 ## Convenience constructions
 
@@ -1477,38 +1642,23 @@ function is straightforward.
             expect( A.getExternalAttribute 'two' ).toBe 2
             expect( B.getExternalAttribute 'example' ).toBe 'text'
 
-Next, verify that `setup` gives unique IDs to all children in the hierarchy.
-
-        it 'give unique IDs to everybody with setup', ->
-            A = new Structure(
-                B = new Structure
-                C = new Structure
-            ).setup()
-            expect( typeof A.ID ).toBe 'number'
-            expect( typeof B.ID ).toBe 'number'
-            expect( typeof C.ID ).toBe 'number'
-            expect( A.ID ).not.toBe B.ID
-            expect( A.ID ).not.toBe C.ID
-            expect( B.ID ).not.toBe C.ID
-
-Finally, verify that `setup` makes connections as requested by entries in
+Next, verify that `setup` makes connections as requested by entries in
 the `attr` objects, and deletes those attributes afterwards.
 
         it 'makes connections with setup and attr together', ->
             A = new Structure(
-                B = new Structure().attr { id : 1 }
-                C = new Structure().attr { 'reason for': 'previous' }
-            ).attr { 'label for' : 1 }
+                B = new Structure().attr id : 2
+                C = new Structure().attr id : 3, 'reason for': 'previous'
+            ).attr id : 1, 'label for' : 2
             .setup()
             expect( A.allConnectionsIn() ).toEqual [ ]
-            expect( A.allConnectionsOut() ).toEqual [ [ B.ID, 'label' ] ]
+            expect( A.allConnectionsOut() ).toEqual [ [ 2, 'label' ] ]
             expect( B.allConnectionsIn() )
-                .toEqual [ [ A.ID, 'label' ], [ C.ID, 'reason' ] ]
+                .toEqual [ [ 1, 'label' ], [ 3, 'reason' ] ]
             expect( B.allConnectionsOut() ).toEqual [ ]
             expect( C.allConnectionsIn() ).toEqual [ ]
-            expect( C.allConnectionsOut() ).toEqual [ [ B.ID, 'reason' ] ]
+            expect( C.allConnectionsOut() ).toEqual [ [ 2, 'reason' ] ]
             expect( A.getExternalAttribute 'label for' ).toBeUndefined()
-            expect( B.getExternalAttribute 'id' ).toBeUndefined()
             expect( C.getExternalAttribute 'reason for' ).toBeUndefined()
 
 ## Accessibility
@@ -1945,10 +2095,10 @@ connections).  The trivial sidekick function `hasLabel()` is also tested.
 Define a structure with several connections, labels, and one text attribute.
 
             A = new Structure(
-                B = new Structure().attr name : 'B'
-                C = new Structure().attr name : 'C'
-            ).attr name : 'A'
-            A.setup()
+                B = new Structure().attr id : 'B'
+                C = new Structure().attr id : 'C'
+            ).attr id : 'A'
+            A.trackIDs()
             A.setExternalAttribute 'labels', [ 'one' ]
             B.setComputedAttribute 'labels', [ 'two', 'three' ]
             B.setExternalAttribute 'labels', [ 'two' ]
@@ -2005,10 +2155,10 @@ Define a structure with several connections, reasons, and one text
 attribute.  We re-use a similar structure from the earlier test for labels.
 
             A = new Structure(
-                B = new Structure().attr name : 'B'
-                C = new Structure().attr name : 'C'
-            ).attr name : 'A'
-            A.setup()
+                B = new Structure().attr id : 'B'
+                C = new Structure().attr id : 'C'
+            ).attr id : 'A'
+            A.trackIDs()
             A.setExternalAttribute 'reasons', [ 'one' ]
             B.setComputedAttribute 'reasons', [ 'two', 'three' ]
             B.setExternalAttribute 'reasons', [ 'two' ]
@@ -2043,10 +2193,10 @@ not marked as a reference, so it must itself be the reason structure.
 Redo everything we just did, but for premises instead of reasons.
 
             A = new Structure(
-                B = new Structure().attr name : 'B'
-                C = new Structure().attr name : 'C'
-            ).attr name : 'A'
-            A.setup()
+                B = new Structure().attr id : 'B'
+                C = new Structure().attr id : 'C'
+            ).attr id : 'A'
+            A.trackIDs()
             A.setExternalAttribute 'premises', [ 'one' ]
             B.setComputedAttribute 'premises', [ 'two', 'three' ]
             B.setExternalAttribute 'premises', [ 'two' ]
@@ -2085,7 +2235,7 @@ The complex hierarchy:
                     F = new Structure().attr labels : [ 'L1', 'L6' ]
                     G = new Structure().attr labels : [ 'L4', 'L5' ]
                 )
-            ).setup()
+            )
 
 From A, B, or C, one can find nothing via lookup using any label.
 
@@ -2168,7 +2318,7 @@ non-flat structures.
                 D = new Structure().attr id : 4
                 E = new Structure().attr id : 5
                 F = new Structure().attr id : 6
-            ).setup()
+            ).trackIDs()
             A.setExternalAttribute 'text', 'Theorem 1'
             A.connectTo B, 'label'
             B.connectTo D, 'reason'

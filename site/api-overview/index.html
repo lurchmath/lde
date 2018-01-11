@@ -7,21 +7,21 @@
         
         
         
-        <link rel="shortcut icon" href="/img/favicon.ico">
-        <title>Lurch Deductive Engine Documentation</title>
-        <link href="/css/bootstrap-custom.min.css" rel="stylesheet">
-        <link href="/css/font-awesome-4.5.0.css" rel="stylesheet">
-        <link href="/css/base.css" rel="stylesheet">
-        <link rel="stylesheet" href="/css/highlight.css">
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Overview - Lurch Deductive Engine Documentation</title>
+        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/highlight.css">
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
             <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
             <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
         <![endif]-->
 
-        <script src="/js/jquery-1.10.2.min.js"></script>
-        <script src="/js/bootstrap-3.0.3.min.js"></script>
-        <script src="/js/highlight.pack.js"></script> 
+        <script src="../js/jquery-1.10.2.min.js"></script>
+        <script src="../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../js/highlight.pack.js"></script> 
     </head>
 
     <body>
@@ -38,7 +38,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="/">Lurch Deductive Engine Documentation</a>
+            <a class="navbar-brand" href="..">Lurch Deductive Engine Documentation</a>
         </div>
 
         <!-- Expanded navigation -->
@@ -46,83 +46,83 @@
                 <!-- Main navigation -->
                 <ul class="nav navbar-nav">
                     <li >
-                        <a href="/">Home</a>
+                        <a href="..">Home</a>
                     </li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Design Plans <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             
 <li >
-    <a href="/design-overview/">Overview</a>
+    <a href="../design-overview/">Overview</a>
 </li>
                             
 <li >
-    <a href="/phase1-structures/">Phase 1, Structures</a>
+    <a href="../phase1-structures/">Phase 1, Structures</a>
 </li>
                             
 <li >
-    <a href="/phase2-validation/">Phase 2, Basic Validation</a>
+    <a href="../phase2-validation/">Phase 2, Basic Validation</a>
 </li>
                             
 <li >
-    <a href="/phase3-client/">Phase 3, The Client</a>
+    <a href="../phase3-client/">Phase 3, The Client</a>
 </li>
                             
 <li >
-    <a href="/phase4-dependencies/">Phase 4, Dependencies</a>
+    <a href="../phase4-dependencies/">Phase 4, Dependencies</a>
 </li>
                             
 <li >
-    <a href="/phase5-background/">Phase 5, Background Queue</a>
+    <a href="../phase5-background/">Phase 5, Background Queue</a>
 </li>
                             
 <li >
-    <a href="/phase6-strings/">Phase 6, String Matching</a>
+    <a href="../phase6-strings/">Phase 6, String Matching</a>
 </li>
                             
 <li >
-    <a href="/phase7-theorems/">Phase 7, Theorems and Proofs</a>
+    <a href="../phase7-theorems/">Phase 7, Theorems and Proofs</a>
 </li>
                             
 <li >
-    <a href="/phase8-expressions/">Phase 8, Expression Trees</a>
+    <a href="../phase8-expressions/">Phase 8, Expression Trees</a>
 </li>
                             
 <li >
-    <a href="/phase9-parsing/">Phase 9, Parsing Rules</a>
+    <a href="../phase9-parsing/">Phase 9, Parsing Rules</a>
 </li>
                             
 <li >
-    <a href="/phase10-declarations/">Phase 10, Declarations</a>
+    <a href="../phase10-declarations/">Phase 10, Declarations</a>
 </li>
                             
 <li >
-    <a href="/phase11-features/">Phase 11, Bonus Features</a>
+    <a href="../phase11-features/">Phase 11, Bonus Features</a>
 </li>
                             
 <li >
-    <a href="/enhancements/">Enhancements for Later</a>
+    <a href="../enhancements/">Enhancements for Later</a>
 </li>
                             
 <li >
-    <a href="/ideas/">Ideas Archive</a>
+    <a href="../ideas/">Ideas Archive</a>
 </li>
                         </ul>
                     </li>
-                    <li class="dropdown">
+                    <li class="dropdown active">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Documentation <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             
-<li >
-    <a href="/api-overview/">Overview</a>
+<li class="active">
+    <a href="./">Overview</a>
 </li>
                             
 <li >
-    <a href="/api-structures/">Structures</a>
+    <a href="../api-structures/">Structures</a>
 </li>
                             
 <li >
-    <a href="/api-lde/">The LDE</a>
+    <a href="../api-lde/">The LDE</a>
 </li>
                         </ul>
                     </li>
@@ -134,32 +134,88 @@
                         <i class="fa fa-search"></i> Search
                     </a>
                 </li>
+                    <li >
+                        <a rel="next" href="../ideas/">
+                            <i class="fa fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="prev" href="../api-structures/">
+                            Next <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </li>
             </ul>
         </div>
     </div>
 </div>
 
         <div class="container">
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="main active"><a href="#api-documentation-overview">API Documentation Overview</a></li>
+            <li><a href="#design-plans-vs-api-documentation">Design Plans vs. API Documentation</a></li>
+            <li><a href="#developer-workflow">Developer Workflow</a></li>
+            <li><a href="#for-the-reader">For the Reader</a></li>
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
 
-    <div class="row-fluid">
-      <div id="main-content" class="span12">
-        <h1 id="404-page-not-found" style="text-align: center">404</h1>
-        <p style="text-align: center"><strong>Page not found</strong></p>
-      </div>
-    </div>
-
-
+<h1 id="api-documentation-overview">API Documentation Overview</h1>
+<h2 id="design-plans-vs-api-documentation">Design Plans vs. API Documentation</h2>
+<p>At the top of this site, notice the two navigation menus entitled "Design
+Plans" and "API Documentation."  The difference between them is this:</p>
+<ul>
+<li><em>Design Plans</em> lists concepts that have not yet been implemented and
+   documented.  Consequently, the concepts are usually not described in full
+   detail, but just the best detail available in the planning phase.
+   It answers the question, "What do we plan to build?"</li>
+<li><em>API Documentation</em> lists concepts that have been implemented, and for
+   which the developers have therefore been able to document their work.
+   Having the benefit of hindsight, this is therefore more detailed, and
+   often even contains links directly into the source code.
+   It answers the question, "What did we build?" and is the official
+   documentation for the modules.</li>
+</ul>
+<p>Any page in the Design Plans that has been complete has had most of its
+content removed, because it has been superceded by the corresponding API
+documentation.  What remains is just a record of what was planne for that
+phase, with links to the corresponding API Documentation.</p>
+<h2 id="developer-workflow">Developer Workflow</h2>
+<p>Developers designing and/or implementing concepts should therefore progress
+those concepts through a lifecycle like so:</p>
+<ol>
+<li>Describe the concept in one of the Design Plans page.  Provide as much
+    detail as you can, knowing of course that full details is impossible to
+    provide before the work has been done.</li>
+<li>As you implement and test the concept, update those design documents
+    with whatever new information you create or learn as part of the work,
+    thus making them more precise.</li>
+<li>Once the concept is fully implemented and tested, document the work in
+    an existing or new page in the API Documentation section.  This may
+    involve copying and pasting some of the content from the design plan,
+    provided that it still applies.  It will probably also involve adding
+    significant detail about the particulars of the implementation.</li>
+<li>Replace the original (less detailed) documentation in the design plans
+    with a brief description of the concept, followed by a link to the
+    corresponding part of the API Documentation for full details.</li>
+</ol>
+<h2 id="for-the-reader">For the Reader</h2>
+<p>Readers of this documentation will therefore be able to see how much has
+been implemented by perusing the Design Plans pages.  Those that are brief
+overviews of concepts with links to API Documentation have been implemented.
+Those that are plans for future work, with no links to any API
+Documentation, have not yet been implemented.</p></div>
         </div>
 
         <footer class="col-md-12">
             <hr>
             <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
-        <script>var base_url = '';</script>
-        <script src="/js/base.js"></script>
+        <script>var base_url = '..';</script>
+        <script src="../js/base.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script src="/search/require.js"></script>
-        <script src="/search/search.js"></script>
+        <script src="../search/require.js"></script>
+        <script src="../search/search.js"></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
     <div class="modal-dialog">

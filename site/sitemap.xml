@@ -4,15 +4,7 @@
     
     <url>
      <loc>/</loc>
-     <lastmod>2017-12-09</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    
-
-    
-    <url>
-     <loc>/overview/</loc>
-     <lastmod>2017-12-09</lastmod>
+     <lastmod>2018-01-09</lastmod>
      <changefreq>daily</changefreq>
     </url>
     
@@ -20,79 +12,111 @@
     
         
     <url>
-     <loc>/phase0-structures/</loc>
-     <lastmod>2017-12-09</lastmod>
+     <loc>/design-overview/</loc>
+     <lastmod>2018-01-09</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>/phase1-validation/</loc>
-     <lastmod>2017-12-09</lastmod>
+     <loc>/phase1-structures/</loc>
+     <lastmod>2018-01-09</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>/phase1a-client/</loc>
-     <lastmod>2017-12-09</lastmod>
+     <loc>/phase2-validation/</loc>
+     <lastmod>2018-01-09</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>/phase1b-dependencies/</loc>
-     <lastmod>2017-12-09</lastmod>
+     <loc>/phase3-client/</loc>
+     <lastmod>2018-01-09</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>/phase1c-background/</loc>
-     <lastmod>2017-12-09</lastmod>
+     <loc>/phase4-dependencies/</loc>
+     <lastmod>2018-01-09</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>/phase2-strings/</loc>
-     <lastmod>2017-12-09</lastmod>
+     <loc>/phase5-background/</loc>
+     <lastmod>2018-01-09</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>/phase3-theorems/</loc>
-     <lastmod>2017-12-09</lastmod>
+     <loc>/phase6-strings/</loc>
+     <lastmod>2018-01-09</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>/phase4-expressions/</loc>
-     <lastmod>2017-12-09</lastmod>
+     <loc>/phase7-theorems/</loc>
+     <lastmod>2018-01-09</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>/phase5-parsing/</loc>
-     <lastmod>2017-12-09</lastmod>
+     <loc>/phase8-expressions/</loc>
+     <lastmod>2018-01-09</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>/phase6-declarations/</loc>
-     <lastmod>2017-12-09</lastmod>
+     <loc>/phase9-parsing/</loc>
+     <lastmod>2018-01-09</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>/phase7-features/</loc>
-     <lastmod>2017-12-09</lastmod>
+     <loc>/phase10-declarations/</loc>
+     <lastmod>2018-01-09</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
-    
-
-    
+    <url>
+     <loc>/phase11-features/</loc>
+     <lastmod>2018-01-09</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>/enhancements/</loc>
+     <lastmod>2018-01-09</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
     <url>
      <loc>/ideas/</loc>
-     <lastmod>2017-12-09</lastmod>
+     <lastmod>2018-01-09</lastmod>
      <changefreq>daily</changefreq>
     </url>
+        
+    
+
+    
+        
+    <url>
+     <loc>/api-overview/</loc>
+     <lastmod>2018-01-09</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>/api-structures/</loc>
+     <lastmod>2018-01-09</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>/api-lde/</loc>
+     <lastmod>2018-01-09</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
     
 
 </urlset>
