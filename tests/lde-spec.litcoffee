@@ -94,7 +94,7 @@ Insert another as its sibling and do the same verifications.
             insertedB = LDE.getDocument().children()[1]
             expect( insertedB ).not.toBeUndefined()
             expect( insertedB.className ).toBe 'Structure'
-            expect( insertedB.isAReference() ).toBeTruthy()
+            expect( insertedB.isA 'reference' ).toBeTruthy()
             expect( insertedB.id() ).toBe 'B'
             expect( insertedB.parent() ).toBe LDE.getDocument()
             expect( insertedA.nextSibling() ).toBe insertedB
@@ -159,7 +159,7 @@ First delete C.
             expect( doc.children()[0].text() ).toBe 'some text'
             expect( doc.children()[1].parent() ).toBe doc
             expect( doc.children()[1].children().length ).toBe 0
-            expect( doc.children()[1].isAReference() ).toBeTruthy()
+            expect( doc.children()[1].isA 'reference' ).toBeTruthy()
 
 Was its ID also released?
 
@@ -171,7 +171,7 @@ Next delete A.
             expect( doc.children().length ).toBe 1
             expect( doc.children()[0].parent() ).toBe doc
             expect( doc.children()[0].children().length ).toBe 0
-            expect( doc.children()[0].isAReference() ).toBeTruthy()
+            expect( doc.children()[0].isA 'reference' ).toBeTruthy()
             expect( Structure.instanceWithID 'A' ).toBeUndefined()
 
 Finally, delete B.
@@ -238,7 +238,7 @@ Verify that it has the expected structure before we begin manipulating it.
             expect( Structure.instanceWithID 'A' ).toBe insertedA
             expect( insertedA.parent() ).toBe LDE.getDocument()
             expect( insertedB.className ).toBe 'Structure'
-            expect( insertedB.isAReference() ).toBeTruthy()
+            expect( insertedB.isA 'reference' ).toBeTruthy()
             expect( insertedB.id() ).toBe 'B'
             expect( Structure.instanceWithID 'B' ).toBe insertedB
             expect( insertedB.parent() ).toBe LDE.getDocument()
@@ -265,7 +265,7 @@ as above, except that C has been replaced by D.
             expect( insertedA.id() ).toBe 'A'
             expect( insertedA.parent() ).toBe LDE.getDocument()
             expect( insertedB.className ).toBe 'Structure'
-            expect( insertedB.isAReference() ).toBeTruthy()
+            expect( insertedB.isA 'reference' ).toBeTruthy()
             expect( insertedB.id() ).toBe 'B'
             expect( insertedB.parent() ).toBe LDE.getDocument()
             expect( insertedA.nextSibling() ).toBe insertedB
@@ -294,7 +294,7 @@ type of tests to verify the structure.
             expect( shouldBeE.id() ).toBe 'E'
             expect( shouldBeE.parent() ).toBe LDE.getDocument()
             expect( insertedB.className ).toBe 'Structure'
-            expect( insertedB.isAReference() ).toBeTruthy()
+            expect( insertedB.isA 'reference' ).toBeTruthy()
             expect( insertedB.id() ).toBe 'B'
             expect( insertedB.parent() ).toBe LDE.getDocument()
             expect( shouldBeE.nextSibling() ).toBe insertedB

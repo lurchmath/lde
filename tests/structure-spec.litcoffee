@@ -2007,38 +2007,49 @@ Make a copy of A and verify that the copy also has the same text.
             B = A.copy()
             expect( B.text() ).toBe 'other'
 
-The `isAReference()` function is very straightforward, so we have minimal
-testing of it.
+The `isA()` function is very straightforward, so we have minimal testing of
+it.
 
-        it 'should correctly identify references', ->
+        it 'should correctly identify categories', ->
 
 Construct a Structure with no attributes, and verify that it is not a
-reference.
+reference, label, or reason.
 
             A = new Structure
-            expect( A.isAReference() ).toBe no
+            expect( A.isA 'reference' ).toBe no
+            expect( A.isA 'label' ).toBe no
+            expect( A.isA 'reason' ).toBe no
 
 Give it a true reference attribute and verify that it now counts as a
 reference.
 
             A.attr reference : yes
-            expect( A.isAReference() ).toBe yes
+            expect( A.isA 'reference' ).toBe yes
+            expect( A.isA 'label' ).toBe no
+            expect( A.isA 'reason' ).toBe no
 
 Give it a false reference attribute and verify that it no longer counts as a
 reference.
 
             A.attr reference : no
-            expect( A.isAReference() ).toBe no
+            expect( A.isA 'reference' ).toBe no
+            expect( A.isA 'label' ).toBe no
+            expect( A.isA 'reason' ).toBe no
 
-Give it any truthy reference attribute and verify that it is a reference.
+Give it any truthy label attribute and verify that it is a label.
 
-            A.attr reference : 100
-            expect( A.isAReference() ).toBe yes
+            A.attr label : 100
+            expect( A.isA 'reference' ).toBe no
+            expect( A.isA 'label' ).toBe yes
+            expect( A.isA 'reason' ).toBe no
 
-Make a copy of A and verify that the copy is also a reference.
+Make a copy of A and verify that the copy is also a label, but neither a
+reference nor reason.
 
             B = A.copy()
-            expect( B.isAReference() ).toBe yes
+            expect( B.isA 'reference' ).toBe no
+            expect( B.isA 'label' ).toBe yes
+            expect( B.isA 'reason' ).toBe no
 
 The next set of tests verifies that the `labels()` function correctly
 computes lists of labels for a structure based on the three possible

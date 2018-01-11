@@ -708,12 +708,17 @@ convenience function for accessing this very common piece of data.
 
 The "text" in some structures is to be interpreted as a citation of another
 structure by name.  For instance, a structure containing the text "Theorem
-3.5" probably refers to an earlier structure with that name.  Thus the
-second convention is that structures whose content is to be interpreted as a
-reference to an earlier name have their "reference" attribute set to true
-(or any value that becomes true when treated as a boolean).
+3.5" probably refers to an earlier structure with that name.  Thus we need a
+way for structures whose content is to be interpreted as a reference to an
+earlier name to indicate as much by having their "reference" attribute set
+to true (or any value that becomes true when treated as a boolean).
 
-        isAReference : -> not not @getExternalAttribute 'reference'
+This is a particular example of a more general phenomenon.  We may also wish
+to ask whether a structure is a label or reason or any other category of
+structure.  Thus we create a generic routine for testing whether a structure
+has an attribute that classifies it as belonging to any category.
+
+        isA : ( category ) -> not not @getExternalAttribute category
 
 Note that the above functions do not have corresponding setter functions
 because they are external attributes, which are read-only from the point of
@@ -798,7 +803,7 @@ We permit structures to have reasons attached to them in any of four ways.
  * A structure A may be a reason for another structure B if there is a
    connection from A to B of type reason.  By default, A is then the reason
    for B, in the sense that A should be a rule justifying B.
- * A variant of the previous case is when A passes the `isAReference()`
+ * A variant of the previous case is when A passes the `isA 'reference'`
    test, in which case A is not a rule justifying B, but rather the text of
    A is the name of a rule justifying B.
  * The external attribute with key "reasons" may be an array of strings,
@@ -856,7 +861,7 @@ comparison of structures first, then lookups second.
             for item in citations
                 if item is other then return yes
                 if typeof item is 'string' then toLookUp.push item
-                if item.isAReference?() then toLookUp.push item.text()
+                if item.isA? 'reference' then toLookUp.push item.text()
             for label in toLookUp
                 if other is @lookup label then return yes
             no
