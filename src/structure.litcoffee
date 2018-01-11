@@ -829,16 +829,31 @@ the four means given above.
             ]
 
 We permit structures to have premises attached to them in exactly the same
-four ways as they have reasons attached.  For that reason, we implement the
-`premises` function identically to the `reasons` function.
+four ways as they have reasons attached, except that premises do not need to
+be marked with a "premise" attribute.  Also, any premise connected to the
+reason for a structure is treated as if it had connected directly to the
+structure itself.
 
         premises : ->
-            [
+
+Direct connections first:
+
+            result = [
                 ( stringArrayAttributes this, 'premises' )...
                 ( source for source in allConnectedTo this when \
                     not ( source.isA 'reason' ) and \
                     not ( source.isA 'label' ) )...
             ]
+
+Now add indirect connections:
+
+            for reason in @reasons()
+                if reason instanceof Structure
+                    for source in allConnectedTo reason
+                        if not ( source.isA 'reason' ) and \
+                           not ( source.isA 'label' )
+                            result.push source
+            result
 
 ### Citations and lookups
 

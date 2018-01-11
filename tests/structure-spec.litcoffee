@@ -2194,6 +2194,7 @@ its external or internal attributes, but A connects to C as a reason and is
 not marked as a reference, so it must itself be the reason structure.
 
             expect( C.reasons() ).toEqual [ A ]
+            A.untrackIDs()
 
 Redo everything we just did, but for premises instead of reasons.
 
@@ -2217,6 +2218,25 @@ Redo everything we just did, but for premises instead of reasons.
             expect( C in toTest ).toBeTruthy()
 
             expect( C.premises() ).toEqual [ A ]
+            A.untrackIDs()
+
+Furthermore, expect premises to also support indirect connections through a
+reason structure.  That is, if A connects to B which connects to C, and B
+is a reason for C, then A can count a as a premise for C.  We test this
+exact situation below, but with one change; we connect A twice to B, so that
+it serves as two different premises to C.
+
+            C = new Structure(
+                A = new Structure().attr id : 1
+                B = new Structure().attr reason : yes, id : 2
+            ).attr id : 3
+            C.trackIDs()
+            expect( A.connectTo B ).toBeTruthy()
+            expect( A.connectTo B ).toBeTruthy()
+            expect( B.connectTo C ).toBeTruthy()
+            expect( C.reasons() ).toEqual [ B ]
+            expect( B.premises() ).toEqual [ A, A ]
+            expect( C.premises() ).toEqual [ A, A ]
 
 The following test gives labels to several structures throughout a complex
 hierarchy, and then does many lookups to verify that all the results are
