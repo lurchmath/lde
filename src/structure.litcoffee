@@ -757,15 +757,9 @@ connections to the given structure.
         allConnectedTo = ( structure, category = null ) ->
             result = [ ]
             for [ id, type ] in structure.allConnectionsIn()
-                console.log 'connection from id', id
-                console.log 'corresponding structure is',
-                    Structure.instanceWithID id
-                console.log 'is that a', category, '?',
-                    ( Structure.instanceWithID id )?.isA category
                 if ( other = Structure.instanceWithID id )? and \
                    ( not category or other.isA category )
                     result.push other
-                console.log 'list is now', other
             result
 
 The final function takes an array and returns the an array with all the same
