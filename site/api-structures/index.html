@@ -408,11 +408,12 @@ attribute's value.  See more information in the
 these in the external attribute with key "text."  For convenience, there is
 a <code>text()</code> member function in the structure class that looks up this
 attribute's value.</p>
-<p><em>References:</em>  Some structures serve as references to other structures.
-They are marked as references with the external attribute "reference."  For
-convenience, there is a <code>isAReference()</code> member function in the structure
-class that looks up whether this attribute is present, and thus the
-structure is functioning as a reference.</p>
+<p><em>References:</em>  Some structures serve as references to other structures. They
+are marked as references with the external attribute "reference."  For
+convenience, there is a <code>isA()</code> member function in the structure class that
+can look up whether this attribute is present, by calling
+<code>isA('reference')</code>, and thus indicating whether the structure is
+functioning as a reference.</p>
 <p><em>Labels:</em>  Get a list of all text values used as labels for a structure by
 calling its member function <code>labels()</code>.  There are several ways that a
 structure can be labeled, all documented

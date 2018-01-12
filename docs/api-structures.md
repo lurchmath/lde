@@ -270,11 +270,12 @@ these in the external attribute with key "text."  For convenience, there is
 a `text()` member function in the structure class that looks up this
 attribute's value.
 
-*References:*  Some structures serve as references to other structures.
-They are marked as references with the external attribute "reference."  For
-convenience, there is a `isAReference()` member function in the structure
-class that looks up whether this attribute is present, and thus the
-structure is functioning as a reference.
+*References:*  Some structures serve as references to other structures. They
+are marked as references with the external attribute "reference."  For
+convenience, there is a `isA()` member function in the structure class that
+can look up whether this attribute is present, by calling
+`isA('reference')`, and thus indicating whether the structure is
+functioning as a reference.
 
 *Labels:*  Get a list of all text values used as labels for a structure by
 calling its member function `labels()`.  There are several ways that a
