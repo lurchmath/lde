@@ -251,9 +251,8 @@ navigation menu at the top of this site.</p>
    complete.</li>
 </ul>
 <h1 id="code-based-rules">Code-based rules</h1>
-<p>The <code>Rule</code> class will be a subclass of <code>Structure</code>, and will add support for
-the following new member functions.  If <code>R</code> is an instance of <code>Rule</code> then
-its <code>validate()</code> function should be as follows.</p>
+<p>The <code>Rule</code> class will be a subclass of <code>Structure</code>.  If <code>R</code> is an instance
+of <code>Rule</code> then its <code>validate()</code> function should be as follows.</p>
 <ul>
 <li>If <code>R.isA 'code'</code> fails, then call <code>R.feedback('invalid','...')</code> with
    a message that only code rules are supported so far.  Then jump to the
@@ -265,9 +264,8 @@ its <code>validate()</code> function should be as follows.</p>
 <li>For every expression in <code>R.whatCitesMe()</code>, revalidate it.</li>
 </ul>
 <h1 id="statements">Statements</h1>
-<p>The <code>Statement</code> class will be a subclass of <code>Structure</code>, and will add
-support for the following new member functions.  If <code>S</code> is an instance of
-<code>Statement</code> then its <code>validate()</code> function should be as follows.</p>
+<p>The <code>Statement</code> class will be a subclass of <code>Structure</code>.  If <code>S</code> is an
+instance of <code>Statement</code> then its <code>validate()</code> function should be as follows.</p>
 <ul>
 <li>If <code>S.children().length &gt; 0</code> then call <code>S.feedback('invalid','...')</code>
    with a message that only atomic statements supported so far.

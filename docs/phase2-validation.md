@@ -94,9 +94,8 @@ Building and running functions in the background
 
 # Code-based rules
 
-The `Rule` class will be a subclass of `Structure`, and will add support for
-the following new member functions.  If `R` is an instance of `Rule` then
-its `validate()` function should be as follows.
+The `Rule` class will be a subclass of `Structure`.  If `R` is an instance
+of `Rule` then its `validate()` function should be as follows.
 
  * If `R.isA 'code'` fails, then call `R.feedback('invalid','...')` with
    a message that only code rules are supported so far.  Then jump to the
@@ -109,9 +108,8 @@ its `validate()` function should be as follows.
 
 # Statements
 
-The `Statement` class will be a subclass of `Structure`, and will add
-support for the following new member functions.  If `S` is an instance of
-`Statement` then its `validate()` function should be as follows.
+The `Statement` class will be a subclass of `Structure`.  If `S` is an
+instance of `Statement` then its `validate()` function should be as follows.
 
  * If `S.children().length > 0` then call `S.feedback('invalid','...')`
    with a message that only atomic statements supported so far.
