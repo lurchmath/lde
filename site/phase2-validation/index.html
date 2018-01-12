@@ -156,8 +156,10 @@
             <li><a href="#content">Content</a></li>
             <li><a href="#goal">Goal</a></li>
             <li><a href="#status">Status</a></li>
-        <li class="main "><a href="#atomic-expressions">Atomic expressions</a></li>
-        <li class="main "><a href="#definitions-of-the-simplest-rules-code-based-rules">Definitions of the simplest rules: code-based rules</a></li>
+        <li class="main "><a href="#extending-the-structure-module">Extending the Structure module</a></li>
+        <li class="main "><a href="#extending-the-lde-module">Extending the LDE module</a></li>
+        <li class="main "><a href="#code-based-rules">Code-based rules</a></li>
+        <li class="main "><a href="#statements">Statements</a></li>
         <li class="main "><a href="#formal-systems-or-mathematical-topics">Formal systems (or "mathematical topics")</a></li>
         <li class="main "><a href="#unit-testing">Unit testing</a></li>
     </ul>
@@ -173,95 +175,154 @@ robust and useful product.</p>
 <h2 id="content">Content</h2>
 <p>This phase defines:</p>
 <ul>
-<li>Atomic expressions (just expressions whose meaning is a string, and
-   contain no other structures)</li>
+<li>Statements (just atomic expressions whose contents are a string, and
+   contain no child structures)</li>
 <li>Definitions of the simplest rule type only: code rules written in
    JavaScript</li>
 <li>Formal systems (or "mathematical topics", which are structures we can
    put rules inside of)</li>
 </ul>
 <h2 id="goal">Goal</h2>
-<p>This enables really simple formal systems, like TriX game.</p>
-<p>While the intent is for any of the nontrivial processing tasks to be placed
-in a queue and handled when the CPU has time, I leave that hassle out of the
-current design plans.  A later phase will add support for this.</p>
+<p>This enables really simple formal systems, ones whose statements are strings
+and that require no citing of premises.  Examples:</p>
+<ul>
+<li>TriX game (in which the previous statement is always the only premise,
+   and is never cited) would become possible after Phase 2.</li>
+<li>A system that verifies each statement independently (e.g., arithmetic
+   equations and inequalities) would also be possible.</li>
+</ul>
+<p>While the intent is eventually for nontrivial validation tasks to be placed
+in a queue and handled in background threads, that work is not part of
+Phase 2.  A later phase will add support for it.</p>
 <h2 id="status">Status</h2>
 <p>This phase has not yet been implemented.  Once it has been implemented, its
 contents will be documented in the API Documentation available from the
 navigation menu at the top of this site.</p>
-<h1 id="atomic-expressions">Atomic expressions</h1>
+<h1 id="extending-the-structure-module">Extending the <code>Structure</code> module</h1>
+<p>Giving feedback</p>
 <ul>
-<li><code>E.goals == [ "validated" ]</code></li>
-<li><code>E.validate()</code> does this:<ul>
-<li>If <code>E.children().length &gt; 0</code> then
-  <code>E.feedback("X","only atomic expressions supported so far")</code></li>
-<li>Otherwise <code>E.feedback(none,none)</code></li>
-<li><code>E.meaning()</code> returns <code>E.text()</code>, but we may decide not to use a
-  loaded word like "meaning" and instead just leave .text() to be
-  called directly, if <code>.meaning()</code> seems too confusing or
-  philosophically overcommitted</li>
-<li><code>E.wasChanged()</code> calls <code>E.clearComputedAttributes()</code></li>
-<li>We have not yet specified the implementation for
-  <code>E.wasInserted/wasRemoved/wasChanged()</code>.  Does it need to call
-  <code>validate()</code> in anything?</li>
+<li>Extend the generic <code>Structure</code> class with a convenience function called
+   <code>feedback(a,b)</code> that sets the computed attribute with key "feedback" to a
+   JSON object whose validation result is <code>a</code> and whose corresponding brief
+   message is <code>b</code>.  If both arguments are omitted, then the "feedback"
+   computed attribute is removed.  For instance, we might make calls like
+   <code>S.feedback('valid','This rule is used correctly.')</code> or
+   <code>S.feedback('invalid','You did not provide a valid reason.')</code>.</li>
 </ul>
-</li>
-</ul>
-<h1 id="definitions-of-the-simplest-rules-code-based-rules">Definitions of the simplest rules: code-based rules</h1>
+<p>Event handlers</p>
 <ul>
-<li><code>R.validate()</code> does this:<ul>
-<li>If <code>R.attributes().code!=true</code> then
-  <code>R.feedback("X","only code rules are supported so far")</code></li>
+<li>Extend the generic <code>Structure</code> class with new event handlers for
+   <code>aboutToChange</code>, <code>aboutToBeInserted</code>, and <code>aboutToBeRemoved</code>.</li>
+<li>Check to see whether the existing event handlers (<code>wasInserted</code>,
+   <code>wasRemoved</code>, and <code>wasChanged</code>) are tested in the unit tests.  If not,
+   add tests for them, together with tests for these new events.</li>
+<li>Provide a default implementation for <code>aboutToBeRemoved()</code> that calls
+   <code>whatCitesMe()</code> in the same object and stores the result in a temporary
+   field in the object.  Then provide a default implementation of
+   <code>wasRemoved()</code> that calls <code>validate()</code> on every structure on that list.</li>
+<li>Provide default implementations of <code>wasInserted()</code> and <code>wasChanged()</code>
+   that each call <code>validate()</code> in the same object, if that function exists.</li>
+</ul>
+<p>Building and running functions</p>
+<ul>
+<li>Add to the <code>Structure</code> class a class method <code>runFunction(f,args,cb)</code> that
+   converts the string of JavaScript code <code>f</code> into a function (through the
+   <code>Function</code> constructor), then runs it on the given set of arguments,
+   sending the result to the given callback (or an error instead, using the
+   standard two-argument callback signature).  This will be overridden by
+   the LDE with an asynchronous method, but it needs to exist so that the
+   <code>Structure</code> class is, in theory, independent of the LDE.</li>
+</ul>
+<h1 id="extending-the-lde-module">Extending the <code>LDE</code> module</h1>
+<p>Building and running functions in the background</p>
+<ul>
+<li>After loading the <code>Structure</code> module, replace its class method
+   <code>runFunction</code> with one that operates asynchronously, sending the job to a
+   background thread.  If the thread does not terminate in a short time,
+   send back an error about termination time.  Keep track of all background
+   threads that are currently running, so that the total can be queried at
+   any given time.</li>
+<li>Extend each of the LDE's functions (<code>insert</code>, <code>replace</code>, etc.) so that if
+   it terminates without there being any currently running background
+   threads then it posts a message that LDE computations are complete.</li>
+<li>Extend the LDE's new implementation of <code>runFunction</code> so that whenever it
+   finishes calling the callback, if there are no background threads
+   running at that time, it posts the same message about computations being
+   complete.</li>
+</ul>
+<h1 id="code-based-rules">Code-based rules</h1>
+<p>The <code>Rule</code> class will be a subclass of <code>Structure</code>, and will add support for
+the following new member functions.  If <code>R</code> is an instance of <code>Rule</code> then
+its <code>validate()</code> function should be as follows.</p>
+<ul>
+<li>If <code>R.isA 'code'</code> fails, then call <code>R.feedback('invalid','...')</code> with
+   a message that only code rules are supported so far.  Then jump to the
+   final bullet point in this list.</li>
 <li>If <code>R.text()</code> isn't valid JavaScript code that defines a function,
-  then <code>R.feedback("X","...")</code></li>
-<li>Otherwise <code>R.feedback("check","nice code rule, dude")</code></li>
-<li>In any case, whenever <code>R.validate()</code> terminates, it calls
-  <code>E.clearComputedAttributes()</code> for every E in <code>R.whatCitesMe()</code>.</li>
+   then <code>R.feedback('invalid','...')</code> with a message to that effect.
+   Then jump to the final bullet point in this list.</li>
+<li>Otherwise <code>R.feedback('valid','This is a valid code rule.')</code>.  Then:</li>
+<li>For every expression in <code>R.whatCitesMe()</code>, revalidate it.</li>
 </ul>
-</li>
-<li>Extend <code>E.validate()</code>, the routine for atomic expressions, by replacing
-   its "otherwise" step with these steps:<ul>
-<li>If <code>E.attributes().reason</code> doesn't exist, do <code>E.feedback(none,none)</code>
-  and stop.</li>
-<li>Let r=<code>E.attributes().reason</code>.</li>
-<li>If <code>E.findCited(r)</code> is undefined, then
-  <code>E.feedback("X","no such rule")</code></li>
-<li>Let r=<code>E.findCited(r)</code>.</li>
-<li>If <code>r.getComputedAttribute("validated")</code> is undefined, then stop
-  here.  When r gets validated, it will trigger a re-validation of E,
-  as in the final bullet point under <code>R.validate()</code>, above.</li>
-<li>Let f be the JavaScript function defined in <code>r.text()</code> and call
-  <code>f(E)</code>.</li>
-<li>If <code>f(E)</code> ends with an error, then
-  <code>E.feedback("X","internal rule error")</code>.</li>
-<li>If <code>f(E)</code> doesn't terminate soon, then
-  <code>E.feedback("X","internal rule error")</code>.</li>
-<li>If <code>f(E)</code> is not a correctly formed validation result object, then
-  <code>E.feedback("X","internal rule error")</code>.</li>
-<li>Otherwise <code>E.feedback(f(E).type,f(E).message)</code>.</li>
-<li>We have not yet specified the implementation for
-  <code>R.wasInserted/wasRemoved/wasChanged()</code>.  Does it need to call
-  <code>validate()</code> in anything?</li>
-</ul>
-</li>
+<h1 id="statements">Statements</h1>
+<p>The <code>Statement</code> class will be a subclass of <code>Structure</code>, and will add
+support for the following new member functions.  If <code>S</code> is an instance of
+<code>Statement</code> then its <code>validate()</code> function should be as follows.</p>
+<ul>
+<li>If <code>S.children().length &gt; 0</code> then call <code>S.feedback('invalid','...')</code>
+   with a message that only atomic statements supported so far.
+   Then stop.</li>
+<li>If <code>S</code> does not have a reason attached to it, then call
+   <code>S.feedback()</code> to clear feedback, and stop.</li>
+<li>If <code>S</code> has more than one reason attached to it, then call
+   <code>S.feedback('invalid','...')</code> with a message that multiple reasons is
+   not permitted.  Then stop.</li>
+<li>Treat the one reason attached to <code>S</code> as a reference and look it up.
+   If it produces no structure, call <code>S.feedback('invalid','...')</code> with a
+   message that there is no such reason.  Then stop.</li>
+<li>Take the object found in the previous bullet point.  If it is not an
+   instance of the <code>Rule</code> subclass defined below, call
+   <code>S.feedback('invalid','...')</code> with a message that the cited reason is
+   not a rule.  Then stop.</li>
+<li>If the cited rule has not been validated, then stop here.  (When it
+   gets validated, it will trigger a re-validation of <code>S</code>.)</li>
+<li>Let f be the JavaScript function defined in the text of the rule and
+   call <code>f(S)</code> in a background thread.</li>
+<li>If <code>f(S)</code> ends with an error, then call <code>S.feedback("invalid","...")</code>
+   with a message about an internal rule error.</li>
+<li>If <code>f(S)</code> does not terminate quickly, then call
+   <code>S.feedback("invalid","...")</code> with a message about an internal rule
+   error.</li>
+<li>If <code>f(S)</code> is not a correctly formed validation result object, then
+   call <code>S.feedback("invalid","...")</code> with a message about an internal
+   rule error.  Note that a correctly formed validation result object
+   will have a <code>type</code> ("valid", "invalid") and a <code>message</code>.</li>
+<li>Otherwise call <code>S.feedback(f(S).type,f(S).message)</code>.</li>
 </ul>
 <h1 id="formal-systems-or-mathematical-topics">Formal systems (or "mathematical topics")</h1>
+<p>The <code>FormalSystem</code> class will be a subclass of <code>Structure</code>, and will add
+support for the following new member functions.  Assume <code>F</code> is an instance
+of <code>FormalSystem</code> in each case.  Further assume that <code>S</code> is an instance of
+<code>Structure</code> in each case.</p>
 <ul>
 <li><code>F.exports()</code> returns an array composed of these things, in the order
    they appear in the document:<ul>
-<li>any rule in <code>F.children()</code></li>
-<li>any element of <code>F'.exports()</code> for any formal system F' in
+<li>any <code>Rule</code> instance in <code>F.children()</code></li>
+<li>any element of <code>F2.exports()</code> for any formal system <code>F2</code> in
   <code>F.children()</code></li>
 </ul>
 </li>
-<li>Extend <code>S.findCited(n)</code> to also check <code>F.exports()</code> whenever it
-   encounters an accessible formal system</li>
+<li>Extend <code>S.lookup(label)</code> to also check <code>F.exports()</code> whenever it
+   encounters an accessible <code>FormalSystem</code> instance.</li>
 <li>Extend <code>S.whatCitesMe()</code> to also looks at the scope of <code>S.parent()</code> iff
-   it is a formal system (and its <code>parent()</code> iff that is a formal system,
-   and so on)</li>
-<li>We have not yet specified the implementation for
-   <code>S.wasInserted/wasRemoved/wasChanged()</code>.  Does it need to call
-   <code>validate()</code> in anything?</li>
+   it is a <code>FormalSystem</code> instance (and its <code>parent()</code> iff that is a
+   <code>FormalSystem</code> instance, and so on).</li>
+<li>Override the default implementation of <code>F.wasInserted()</code> so that it now
+   calls <code>R.whatCitesMe()</code> for every <code>R</code> in <code>F.exports()</code> and revalidates
+   every structure on any of those lists.</li>
+<li>Extend the implementation of <code>F.aboutToBeRemoved()</code> and <code>F.wasRemoved()</code>
+   so that each propagates the call to the function of the same name in all
+   structures in <code>F.exports()</code>.</li>
 </ul>
 <h1 id="unit-testing">Unit testing</h1>
 <p>How we could do unit testing on this simple LDE:</p>
@@ -276,12 +337,20 @@ navigation menu at the top of this site.</p>
 <li>Examine the computation results stored in step 2 and verify correct
    processing of the rule and two steps.</li>
 </ul>
-<p>We might even extend this test with more steps.</p>
+<p>Consider each of the unusual corner cases handled above and create tests for
+it, including such situations as these:</p>
 <ul>
-<li>Send a signal to the LDE to alter the third child of the document,
-   making it a correct use of the rule.</li>
-<li>Wait for computation to finish and check to be sure it re-validated that
-   step as correct now.</li>
+<li>Send a signal to the LDE to alter the incorrect use of the rule, making
+   it correct.  Wait for computation to finish and check to be sure it
+   re-validated that step as correct now.</li>
+<li>Insert a rule with label X, followed by a statement with label X,
+   followed by a statement citing reason X.  Ensure the statement does not
+   validate because it cites a non-rule.  Remove the statement labeled X.
+   Ensure the remaining statement validates because it now cites rule X.</li>
+<li>In a blank document, insert a statement that cites rule Y.  Then insert a
+   formal system containing rule Y before the statement.  Ensure that the
+   system notices, and that the statement automatically had its validation
+   updated.</li>
 </ul></div>
         </div>
 
