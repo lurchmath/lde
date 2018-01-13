@@ -30,13 +30,7 @@ structures.
 ## Serialization and deserialization
 
 We need to be able to convert structure hierarchies to/from JSON data.  We
-do so with the routines in this section.  The serialization and
-deserialization routines are not exactly inverses of one another, because
-they explicitly ignore the `ID` attribute, if there is one.  Serializing and
-then deserializing will produce a hierarchy with no IDs, but you can add
-them with `setup`, defined [below](#external-attributs).  Even so, they will
-almost certainly be different IDs than the original hierarchy had.  Other
-than that, the two hierarchies should be equivalent.
+do so with the routines in this section.
 
 ### Registering class names
 
