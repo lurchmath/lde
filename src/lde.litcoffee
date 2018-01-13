@@ -15,8 +15,10 @@ any case.
         { Structure } = require './structure'
     else if WorkerGlobalScope?
         importScripts 'structure.js'
+        importScripts 'label.js'
     else if self?.importScripts?
         importScripts 'release/structure.js'
+        importScripts 'release/label.js'
 
 ## The LDE Document
 
