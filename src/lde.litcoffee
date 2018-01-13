@@ -16,9 +16,11 @@ any case.
     else if WorkerGlobalScope?
         importScripts 'structure.js'
         importScripts 'label.js'
+        importScripts 'reason.js'
     else if self?.importScripts?
         importScripts 'release/structure.js'
         importScripts 'release/label.js'
+        importScripts 'release/reason.js'
 
 ## The LDE Document
 
