@@ -22,3 +22,7 @@ Deserialization](structure.litcoffee#serialization-and-deserialization) in the
         className : Structure.addSubclass 'Label', Label
 
 We will add a validation routine and perhaps other methods here later.
+
+Now if this is being used in a Node.js context, export the class we defined.
+
+    if exports? then exports.Label = Label

@@ -17,10 +17,14 @@ any case.
         importScripts 'structure.js'
         importScripts 'label.js'
         importScripts 'reason.js'
+        importScripts 'formal-system.js'
+        importScripts 'statement.js'
     else if self?.importScripts?
         importScripts 'release/structure.js'
         importScripts 'release/label.js'
         importScripts 'release/reason.js'
+        importScripts 'release/formal-system.js'
+        importScripts 'release/statement.js'
 
 ## The LDE Document
 

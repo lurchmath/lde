@@ -30,3 +30,7 @@ Register this subclass for use in serialization and deserialization.
         className : Structure.addSubclass 'Reason', Reason
 
 Later we will define validation routines for this class.
+
+Now if this is being used in a Node.js context, export the class we defined.
+
+    if exports? then exports.Reason = Reason
