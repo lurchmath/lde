@@ -1,0 +1,2 @@
+var Rule,Structure,extend=function(r,e){function t(){this.constructor=r}for(var u in e)hasProp.call(e,u)&&(r[u]=e[u]);return t.prototype=e.prototype,r.prototype=new t,r.__super__=e.prototype,r},hasProp={}.hasOwnProperty;"undefined"!=typeof require&&null!==require&&(Structure=require("./structure").Structure),Rule=function(r){function e(){return e.__super__.constructor.apply(this,arguments)}return extend(e,Structure),e.prototype.className=Structure.addSubclass("Rule",e),e}(),"undefined"!=typeof exports&&null!==exports&&(exports.Rule=Rule);
+//# sourceMappingURL=rule.js.map
