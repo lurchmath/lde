@@ -9,7 +9,7 @@
 ## Purpose
 
 The Lurch Deductive Engine (LDE, [documented here](api-lde.md)) maintains a
-document called hte LDE Document, which is a hierarchy (or tree).  The nodes
+document called the LDE Document, which is a hierarchy (or tree).  The nodes
 in that tree are instances of this class (`Structure`) or one of its
 subclasses.
 
