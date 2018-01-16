@@ -63,10 +63,10 @@ commit, in order to share your work with others.
 
 ### Small code reorganization
 
- * [ ] Move `Structure::copy` and `Structure::earlierThan` into the previous
+ * [x] Move `Structure::copy` and `Structure::earlierThan` into the previous
    section in that file, which is about "read" functions rather than "write"
    ones.
- * [ ] Ensure the unit tests still pass and then commit, explaining it's
+ * [x] Ensure the unit tests still pass and then commit, explaining it's
    just code reorganization.
 
 ### Creating the `update` function

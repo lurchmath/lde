@@ -114,56 +114,6 @@ integrity of the hierarchy.
             if ( index = @indexInParent() )?
                 @parentNode.childList[index+1]
 
-Next, the setters.  There is no setter for the parent, because the parent
-pointer of a structure S must be kept consistent with the children list of
-the parent of S, and so we update both in the setters for children.
-
-We permit removing children from parents, either with a method in the child
-or in the parent.
-
-        removeFromParent : ->
-            if ( originalParent = @parentNode )?
-                originalIndex = @indexInParent()
-                @parentNode.childList.splice originalIndex, 1
-                @parentNode = null
-                @wasRemoved? originalParent, originalIndex
-        removeChild : ( atIndex ) -> @childList[atIndex]?.removeFromParent()
-
-We permit inserting a new child into the parent's child array at any valid
-index (including the old length of the child array, which appends).  The
-child to be inserted is first removed from any parent it has when this
-method is called.  The default index is 0, so that a call of
-`insertChild(x)` inserts it as the first child.
-
-If the child to be inserted is an ancestor of this structure, then we
-remove this structure from its parent, to obey the insertion command given
-while still maintaining acyclicity in the tree structure.  If the child to
-be inserted is this node itself, this function does nothing.
-
-        insertChild : ( child, beforeIndex = 0 ) ->
-            return unless child instanceof Structure and \
-                child isnt this and \
-                0 <= beforeIndex <= @childList.length
-            walk = this
-            while ( walk = walk.parent() )?
-                if walk is child
-                    @removeFromParent()
-                    break
-            child.removeFromParent()
-            @childList.splice beforeIndex, 0, child
-            child.parentNode = this
-            child.wasInserted?()
-
-A convenient combination of the above methods is to replace a child with a
-new structure, deparenting the old child and putting the replacement at the
-same index in the same parent.
-
-        replaceWith : ( other ) ->
-            if ( originalParent = @parentNode )?
-                originalIndex = @indexInParent()
-                @removeFromParent()
-                originalParent.insertChild other, originalIndex
-
 Another possibly convenient utility is to make a copy of the Structure S
 (or equivalently the subtree with root S).
 
@@ -216,6 +166,56 @@ Compare the child indices in the common ancestor to determine ordering.
             myAncestorIndex = relevantAncestor.indexInParent()
             otherAncestorIndex = otherRelevantAncestor.indexInParent()
             myAncestorIndex < otherAncestorIndex
+
+Next, the setters.  There is no setter for the parent, because the parent
+pointer of a structure S must be kept consistent with the children list of
+the parent of S, and so we update both in the setters for children.
+
+We permit removing children from parents, either with a method in the child
+or in the parent.
+
+        removeFromParent : ->
+            if ( originalParent = @parentNode )?
+                originalIndex = @indexInParent()
+                @parentNode.childList.splice originalIndex, 1
+                @parentNode = null
+                @wasRemoved? originalParent, originalIndex
+        removeChild : ( atIndex ) -> @childList[atIndex]?.removeFromParent()
+
+We permit inserting a new child into the parent's child array at any valid
+index (including the old length of the child array, which appends).  The
+child to be inserted is first removed from any parent it has when this
+method is called.  The default index is 0, so that a call of
+`insertChild(x)` inserts it as the first child.
+
+If the child to be inserted is an ancestor of this structure, then we
+remove this structure from its parent, to obey the insertion command given
+while still maintaining acyclicity in the tree structure.  If the child to
+be inserted is this node itself, this function does nothing.
+
+        insertChild : ( child, beforeIndex = 0 ) ->
+            return unless child instanceof Structure and \
+                child isnt this and \
+                0 <= beforeIndex <= @childList.length
+            walk = this
+            while ( walk = walk.parent() )?
+                if walk is child
+                    @removeFromParent()
+                    break
+            child.removeFromParent()
+            @childList.splice beforeIndex, 0, child
+            child.parentNode = this
+            child.wasInserted?()
+
+A convenient combination of the above methods is to replace a child with a
+new structure, deparenting the old child and putting the replacement at the
+same index in the same parent.
+
+        replaceWith : ( other ) ->
+            if ( originalParent = @parentNode )?
+                originalIndex = @indexInParent()
+                @removeFromParent()
+                originalParent.insertChild other, originalIndex
 
 ## Computed attributes
 
