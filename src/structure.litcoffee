@@ -554,19 +554,6 @@ one without an ID.
             outs = ( @getExternalAttribute 'connectionsOut' ) ? [ ]
             ( conn[1] for conn in outs when conn[0] is otherStructure.id() )
 
-The final query treats all incoming connections to a structure as if they
-give it "properties."  If A connects to B with type T, then when we look up
-the key T in B's properties, we get an array that will contain A.  For
-more information, see the documentation
-[here](https://lurchmath.github.io/lde/site/phase0-structures/#connections).
-
-        properties : ->
-            result = { }
-            for conn in ( @getExternalAttribute 'connectionsIn' ) ? [ ]
-                if ( source = Structure.instanceWithID conn[0] )?
-                    ( result[conn[1]] ?= [ ] ).push source
-            result
-
 ## Accessibility
 
 A structure A is accessible to a structure B if they have a common ancestor

@@ -55,10 +55,10 @@ commit, in order to share your work with others.
 
 ### Removing the `properties` function
 
- * [ ] Delete `Structure::properties` and all corresponding tests because we
+ * [x] Delete `Structure::properties` and all corresponding tests because we
    no longer use it for anything.
- * [ ] Remove API documentation for that function.
- * [ ] Once the unit tests pass, commit, explaining that our specifications
+ * [x] Remove API documentation for that function.
+ * [x] Once the unit tests pass, commit, explaining that our specifications
    no longer need that function.
 
 ### Small code reorganization

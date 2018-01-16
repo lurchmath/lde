@@ -229,11 +229,6 @@ You can query the connections among structures with these functions:
    all connections that go out from the given source structure.
  * `destination.allConnectionsIn()` functions analogously to the previous,
    but for connections into a destination, rather than out from a source.
- * `destination.properties()` looks at the set of source structures that
-   connect to the destination via arrows, and forms a dictionary of
-   key-value pairs, the "properties" of the destination.  The key will be
-   the type of the connection and the value will be the array of sources
-   that connected to the destination with that connection type.
 
 To create or destroy connections, use these functions:
 

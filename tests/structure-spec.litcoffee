@@ -1596,28 +1596,6 @@ Next, connections between specific pairs:
             expect( C.allConnectionsTo C )
                 .toEqual [ 'other', 'other', 'other' ]
 
-Finally, incoming connections reported as property lists:
-
-            props = A.properties()
-            expect( Object.keys props ).toEqual [ 'example' ]
-            expect( props['example'] instanceof Array ).toBeTruthy()
-            expect( props['example'].length ).toBe 2
-            expect( props['example'][0] ).toBe B
-            expect( props['example'][1] ).toBe B
-            props = B.properties()
-            expect( Object.keys props ).toEqual [ 'example' ]
-            expect( props['example'] instanceof Array ).toBeTruthy()
-            expect( props['example'].length ).toBe 1
-            expect( props['example'][0] ).toBe A
-            props = C.properties()
-            expect( Object.keys props ).toEqual [ 'other' ]
-            expect( props['other'] instanceof Array ).toBeTruthy()
-            expect( props['other'].length ).toBe 3
-            expect( props['other'][0] ).toBe C
-            expect( props['other'][1] ).toBe C
-            expect( props['other'][2] ).toBe C
-            A.untrackIDs()
-
 ## Convenience constructions
 
 There are two member functions, `attr` and `setup`, that are mostly just
