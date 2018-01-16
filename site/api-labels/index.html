@@ -8,7 +8,7 @@
         
         
         <link rel="shortcut icon" href="../img/favicon.ico">
-        <title>Phase 8, Expression Trees - Lurch Deductive Engine Documentation</title>
+        <title>Labels - Lurch Deductive Engine Documentation</title>
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
@@ -48,7 +48,7 @@
                     <li >
                         <a href="..">Home</a>
                     </li>
-                    <li class="dropdown active">
+                    <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Design Plans <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             
@@ -84,8 +84,8 @@
     <a href="../phase7-theorems/">Phase 7, Theorems and Proofs</a>
 </li>
                             
-<li class="active">
-    <a href="./">Phase 8, Expression Trees</a>
+<li >
+    <a href="../phase8-expressions/">Phase 8, Expression Trees</a>
 </li>
                             
 <li >
@@ -109,7 +109,7 @@
 </li>
                         </ul>
                     </li>
-                    <li class="dropdown">
+                    <li class="dropdown active">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Documentation <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             
@@ -125,8 +125,8 @@
     <a href="../api-structures/">Structures</a>
 </li>
                             
-<li >
-    <a href="../api-labels/">Labels</a>
+<li class="active">
+    <a href="./">Labels</a>
 </li>
                             
 <li >
@@ -143,12 +143,12 @@
                     </a>
                 </li>
                     <li >
-                        <a rel="next" href="../phase7-theorems/">
+                        <a rel="next" href="../api-structures/">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
                     <li >
-                        <a rel="prev" href="../phase9-parsing/">
+                        <a rel="prev" href="../api-reasons/">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -160,34 +160,25 @@
         <div class="container">
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
-        <li class="main active"><a href="#lde-design-phase-8-expressions">LDE Design Phase 8: Expressions</a></li>
-            <li><a href="#content">Content</a></li>
-            <li><a href="#goal">Goal</a></li>
-            <li><a href="#status">Status</a></li>
+        <li class="main active"><a href="#api-documentation-for-the-labels-class">API Documentation for the Labels Class</a></li>
+            <li><a href="#source-code">Source Code</a></li>
+            <li><a href="#purpose">Purpose</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<p>We have designed the work on the Lurch Deductive Engine (LDE) to progress in
-phases.  The idea is that each phase ends with a completed whole that can be
-tested in that state, and that provides more features than the previous
-state did.  By the time the final phase is complete, the LDE will be a
-robust and useful product.</p>
-<h1 id="lde-design-phase-8-expressions">LDE Design Phase 8: Expressions</h1>
-<h2 id="content">Content</h2>
-<p>This document is not yet complete.  Its content will eventually specify:</p>
+<h1 id="api-documentation-for-the-labels-class">API Documentation for the <code>Labels</code> Class</h1>
+<h2 id="source-code">Source Code</h2>
 <ul>
-<li>Expanded form for non-atomic expressions (function applications,
-   binding, variables, constants, etc.)</li>
-<li>Extend rules to pattern-based matching (the usual kind of rules we think
-   of in math)</li>
+<li><a href="https://github.com/lurchmath/lde/blob/master/src/label.litcoffee">The <code>Labels</code> class</a></li>
+<li><a href="https://github.com/lurchmath/lde/blob/master/tests/label-spec.litcoffee">Unit tests of the <code>Label</code> class</a></li>
 </ul>
-<h2 id="goal">Goal</h2>
-<p>This enables: propositional logic, but with statements in expanded form only</p>
-<h2 id="status">Status</h2>
-<p>This phase has not yet been implemented.  Once it has been implemented, its
-contents will be documented in the API Documentation available from the
-navigation menu at the top of this site.</p></div>
+<h2 id="purpose">Purpose</h2>
+<p>The Lurch Deductive Engine (LDE, <a href="../api-lde/">documented here</a>) maintains a
+document called the LDE Document, which is a hierarchy (or tree).  The nodes
+in that tree are instances of the class <code>Structure</code> or one of its
+subclasses.  The <code>Label</code> class is one such subclass.  It is intended to represent the general concept of a label in mathematics.  In particular, it provides any functionality required to (a) store information about the names and name spaces of particular instances of <code>Structure</code>s, (b) assign that information to those instances, and (c) to allow other <code>Structure</code>s to query that information.  </p>
+<p>This document is currently a stub for the API of the <code>Label</code> class.  We will add the actual API here once the class has been coded.</p></div>
         </div>
 
         <footer class="col-md-12">

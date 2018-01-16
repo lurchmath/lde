@@ -106,13 +106,25 @@
     </url>
         
     <url>
+     <loc>/api-lde/</loc>
+     <lastmod>2018-01-16</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
      <loc>/api-structures/</loc>
      <lastmod>2018-01-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>/api-lde/</loc>
+     <loc>/api-labels/</loc>
+     <lastmod>2018-01-16</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>/api-reasons/</loc>
      <lastmod>2018-01-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
