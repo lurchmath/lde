@@ -49,9 +49,9 @@ commit, in order to share your work with others.
 
 ### Documenting `Label`s and `Reason`s
 
- * [ ] Add API documentation pages for the Label and Reason modules.
- * [ ] Add links to those pages from the `mkdocs.yml` page.
- * [ ] Commit.
+ * [x] Add API documentation pages for the Label and Reason modules.
+ * [x] Add links to those pages from the `mkdocs.yml` page.
+ * [x] Commit.
 
 ### Removing the `properties` function
 
