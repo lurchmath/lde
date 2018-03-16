@@ -1,86 +1,92 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
-    
+
     <url>
      <loc>/</loc>
      <lastmod>2018-03-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
-    
 
-    
-        
+
+
+
     <url>
      <loc>/design-overview/</loc>
      <lastmod>2018-03-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
-        
+
     <url>
      <loc>/phase1-structures/</loc>
      <lastmod>2018-03-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
-        
+
     <url>
      <loc>/phase2-input-tree/</loc>
      <lastmod>2018-03-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
-        
+
     <url>
      <loc>/phase3-interpretation/</loc>
      <lastmod>2018-03-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
-        
+
     <url>
      <loc>/phase4-validation/</loc>
      <lastmod>2018-03-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
-        
+
     <url>
      <loc>/phaseN-archive/</loc>
      <lastmod>2018-03-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
-        
+
     <url>
      <loc>/enhancements/</loc>
      <lastmod>2018-03-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
-        
+
     <url>
      <loc>/ideas/</loc>
      <lastmod>2018-03-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
-        
-    
 
-    
-        
+
+
+
+
     <url>
      <loc>/api-overview/</loc>
      <lastmod>2018-03-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
-        
+
+    <url>
+     <loc>/api-lde/</loc>
+     <lastmod>2018-01-16</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+
     <url>
      <loc>/api-structures/</loc>
      <lastmod>2018-03-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
-        
+
     <url>
      <loc>/api-lde/</loc>
      <lastmod>2018-03-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
-        
-    
+
+
 
 </urlset>
