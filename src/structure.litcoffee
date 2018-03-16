@@ -174,8 +174,14 @@ the parent of S, and so we update both in the setters for children.
 We permit removing children from parents, either with a method in the child
 or in the parent.
 
+We notify the child of its removal through calling two event handlers (if
+they exist) in the child object: `willBeRemoved()` immediately before the
+removal and `wasRemoved(parent,index)` after the removal, passing the former
+parent and child index within that parent.
+
         removeFromParent : ->
             if ( originalParent = @parentNode )?
+                @willBeRemoved?()
                 originalIndex = @indexInParent()
                 @parentNode.childList.splice originalIndex, 1
                 @parentNode = null
@@ -193,16 +199,25 @@ remove this structure from its parent, to obey the insertion command given
 while still maintaining acyclicity in the tree structure.  If the child to
 be inserted is this node itself, this function does nothing.
 
+We notify the child of its insertion through calling two event handlers (if
+they exist) in the child object: `willBeInserted(parent,index)` immediately
+before the removal and `wasInserted()` after the removal.  The parameters to
+the first of these routines are the soon-to-be parent and the index within
+that parent at which the insertion will take place.
+
+If the child or this object needs to first be removed from a parent as
+described above, there will also be removal events, as documented in the
+`removeFromParent()` function, above.
+
         insertChild : ( child, beforeIndex = 0 ) ->
             return unless child instanceof Structure and \
                 child isnt this and \
                 0 <= beforeIndex <= @childList.length
             walk = this
             while ( walk = walk.parent() )?
-                if walk is child
-                    @removeFromParent()
-                    break
+                if walk is child then @removeFromParent() ; break
             child.removeFromParent()
+            child.willBeInserted? this, beforeIndex
             @childList.splice beforeIndex, 0, child
             child.parentNode = this
             child.wasInserted?()
@@ -210,6 +225,10 @@ be inserted is this node itself, this function does nothing.
 A convenient combination of the above methods is to replace a child with a
 new structure, deparenting the old child and putting the replacement at the
 same index in the same parent.
+
+Because this calls `removeFromParent()` and `insertChild()`, it also
+generates calls to the four event handlers mentioned in those functions,
+above.
 
         replaceWith : ( other ) ->
             if ( originalParent = @parentNode )?
@@ -238,13 +257,18 @@ dictionary, but they should be JSON data only, to support serialization.
         setComputedAttribute : ( key, value ) ->
             if @computedAttributes[key] isnt value
                 @computedAttributes[key] = value
-                @wasChanged?()
         clearComputedAttributes : ( keys... ) ->
             if keys.length is 0 then keys = Object.keys @computedAttributes
             for key in keys
                 if key of @computedAttributes
                     delete @computedAttributes[key]
-                    @wasChanged?()
+
+We do not notify the structure of changes to its computed attributes,
+because we assume that such changes were initiated internally by objects in
+this module.  We will, however, notify the structure of changes to its
+external attributes, which we expect are initiated by the client, and thus
+the structure may need to react to them. See the subsquent section for
+details.
 
 The default implementation of the `compute` member takes any number of keys
 as string arguments, and runs them as member functions, storing the results
@@ -275,17 +299,26 @@ by the client, and the LDE will not alter it.
 As with computed attributes, values should be JSON data only, to support
 serialization, but we do not check for this property, for efficiency.
 
+We notify the structure of changes to its external attributes through
+calling two event handlers (if they exist) in the object:
+`willBeChanged(key)` immediately before the change and `wasChanged(key)`
+after the removal, in both cases passing the key from the changing key-value
+pair.  These events are the same whether the key-value pair is inserted,
+modified, or removed.
+
         getExternalAttribute : ( key ) -> @externalAttributes[key]
         setExternalAttribute : ( key, value ) ->
             if @externalAttributes[key] isnt value
+                @willBeChanged? key
                 @externalAttributes[key] = value
-                @wasChanged?()
+                @wasChanged? key
         clearExternalAttributes : ( keys... ) ->
             if keys.length is 0 then keys = Object.keys @externalAttributes
             for key in keys
                 if key of @externalAttributes
+                    @willBeChanged? key
                     delete @externalAttributes[key]
-                    @wasChanged?()
+                    @wasChanged? key
 
 External attributes can also be added with an `attr()` function that returns
 the instance, thus supporting method chaining.  This is useful when

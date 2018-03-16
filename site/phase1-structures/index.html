@@ -61,43 +61,19 @@
 </li>
                             
 <li >
-    <a href="../phase2-validation/">Phase 2, Basic Validation</a>
+    <a href="../phase2-input-tree/">Phase 2, The Input Tree</a>
 </li>
                             
 <li >
-    <a href="../phase3-client/">Phase 3, The Client</a>
+    <a href="../phase3-interpretation/">Phase 3, Interpretation</a>
 </li>
                             
 <li >
-    <a href="../phase4-dependencies/">Phase 4, Dependencies</a>
+    <a href="../phase4-validation/">Phase 4, Validation</a>
 </li>
                             
 <li >
-    <a href="../phase5-background/">Phase 5, Background Queue</a>
-</li>
-                            
-<li >
-    <a href="../phase6-strings/">Phase 6, String Matching</a>
-</li>
-                            
-<li >
-    <a href="../phase7-theorems/">Phase 7, Theorems and Proofs</a>
-</li>
-                            
-<li >
-    <a href="../phase8-expressions/">Phase 8, Expression Trees</a>
-</li>
-                            
-<li >
-    <a href="../phase9-parsing/">Phase 9, Parsing Rules</a>
-</li>
-                            
-<li >
-    <a href="../phase10-declarations/">Phase 10, Declarations</a>
-</li>
-                            
-<li >
-    <a href="../phase11-features/">Phase 11, Bonus Features</a>
+    <a href="../phaseN-archive/">Phase N, List of outdated phases</a>
 </li>
                             
 <li >
@@ -140,7 +116,7 @@
                         </a>
                     </li>
                     <li >
-                        <a rel="prev" href="../phase2-validation/">
+                        <a rel="prev" href="../phase2-input-tree/">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -156,6 +132,9 @@
             <li><a href="#content">Content</a></li>
             <li><a href="#goal">Goal</a></li>
             <li><a href="#status">Status</a></li>
+            <li><a href="#tie-up-loose-ends-on-the-old-version">Tie up loose ends on the old version</a></li>
+            <li><a href="#remove-files-we-no-longer-need-and-what-depends-on-them">Remove files we no longer need (and what depends on them)</a></li>
+            <li><a href="#remove-code-portions-we-no-longer-need">Remove code portions we no longer need</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
@@ -178,198 +157,53 @@ implemented. <a href="../api-structures/">Its API Documentation appears here</a>
 class and its LDE context, thus guaranteeing that all later phases rest on a
 good foundation.</p>
 <h2 id="status">Status</h2>
-<p>This phase has been implemented, and is documented in the API Documentation,
-accessible from the navigation menu at the top of this site.</p>
-<p>However, it needs a major overhaul in light of our most recent design
-discussions.  Here are the shared to-dos for that overhaul.  Each has a
-checkbox that any developer can use to indicate completion.</p>
-<p>Each section goes together, and should be committed together, as described.
-Although none of the steps say "push," there is an implied push after each
-commit, in order to share your work with others.</p>
-<h3 id="structure-event-handlers"><code>Structure</code> event handlers</h3>
+<p>This phase was implemented and documented in the API Documentation, but has
+since seen a major (and beneficial!) re-design, and that re-design has not
+yet been implemented.  It should be done as follows:</p>
+<h2 id="tie-up-loose-ends-on-the-old-version">Tie up loose ends on the old version</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled> Add the <code>willBe*</code> function calls into the <code>Structure</code> class's
-   methods.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Add tests for those functions (and the <code>was*</code> functions, if needed)
-   in the <code>Structure</code> class test suite.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Just as the <code>Structure</code> class has tests for all <code>was*</code> events (such
+   as <code>wasRemoved</code>, etc.), add tests for the corresponding <code>willBe*</code> events.</li>
 <li class="task-list-item"><input type="checkbox" disabled> Add API documentation for these events, or update what documentation</li>
 <li class="task-list-item"><input type="checkbox" disabled> Once the unit tests pass, commit.</li>
 </ul>
-<h3 id="documenting-labels-and-reasons">Documenting <code>Label</code>s and <code>Reason</code>s</h3>
+<h2 id="remove-files-we-no-longer-need-and-what-depends-on-them">Remove files we no longer need (and what depends on them)</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled> Add API documentation pages for the Label and Reason modules.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Add links to those pages from the <code>mkdocs.yml</code> page.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Commit.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Delete the file <code>src/statement.litcoffee</code>, as well as the
+   corresponding files for reason, label, and rule.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Delete the analogous four files in the <code>tests/</code> folder.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Search for any code that imports any of those files and delete the</li>
+<li class="task-list-item"><input type="checkbox" disabled> Search through all the documentation for any documentation that</li>
+<li class="task-list-item"><input type="checkbox" disabled> Run the unit test suite and verify that all tests pass.  If not,</li>
+<li class="task-list-item"><input type="checkbox" disabled> Once all tests pass, rebuild everything, commit, and push to the</li>
 </ul>
-<h3 id="removing-the-properties-function">Removing the <code>properties</code> function</h3>
+<h2 id="remove-code-portions-we-no-longer-need">Remove code portions we no longer need</h2>
+<h3 id="computed-attributes">Computed attributes</h3>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled checked> Delete <code>Structure::properties</code> and all corresponding tests because we
-   no longer use it for anything.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked> Remove API documentation for that function.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked> Once the unit tests pass, commit, explaining that our specifications</li>
+<li class="task-list-item"><input type="checkbox" disabled> Remove from <code>src/structure.litcoffee</code> the entire section entitled
+   "Computed attributes," because we no longer need to distinguish computed
+   from external attributes.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Remove any unit tests that dealt with any of the code deleted in the</li>
+<li class="task-list-item"><input type="checkbox" disabled> Search for any documentation that mentioned code deleted in that same</li>
 </ul>
-<h3 id="small-code-reorganization">Small code reorganization</h3>
+<h3 id="external-attributes">External attributes</h3>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled checked> Move <code>Structure::copy</code> and <code>Structure::earlierThan</code> into the previous
-   section in that file, which is about "read" functions rather than "write"
-   ones.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked> Ensure the unit tests still pass and then commit, explaining it's</li>
+<li class="task-list-item"><input type="checkbox" disabled> In the <code>src/structure.litcoffee</code> file, in the section entitled
+   "External attributes," rename everything so that it no longer contains
+   the word "external."  For example, <code>getExternalAttribute</code> would become
+   just <code>getAttribute</code>, because we no longer need to distinguish computed
+   from external attributes.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Throughout the unit tests, find any mention of external attributes</li>
+<li class="task-list-item"><input type="checkbox" disabled> Search for any documentation that mentioned external attributes and</li>
 </ul>
-<h3 id="creating-the-update-function">Creating the <code>update</code> function</h3>
+<h3 id="attribute-conventions">Attribute conventions</h3>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled> Add a default implementation for <code>wasChanged()</code> and <code>wasInserted()</code>
-   that calls the <code>update()</code> event handler, if it exists.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Add minimal documentation in the source code, plus fuller API<code>update()</code> will be called whenever the
-   object or anything on which it depends experiences an insertion or change
-   event, and the function should update any computed attributes based on
-   its new state.  Currently, it is only called when the object itself
-   changes, but we will later extend it to be called whenever something on
-   which it depends changes as well.  Also, the <code>Structure</code> class provides
-   no default implementation of <code>update()</code>, but other subclasses will.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Add unit tests for that function.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Once the unit tests pass, commit.</li>
-</ul>
-<h3 id="document-upcoming-changes-to-the-label-module">Document upcoming changes to the <code>Label</code> module</h3>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled> Define name objects, which are key-value dictionaries containing at</li>
-<li class="task-list-item"><input type="checkbox" disabled> Define the concept of matching two such objects, one a label and one<code>nameMatches()</code> that will
-   implement it, which for now just compares names and later can be
-   extended.  Examples:<ul>
-<li>For text, feel free to match substrings (if that setting is
-  enabled).</li>
-<li>For numerical labels, do not match substrings, but be forgiving
-  about punctuation (if that setting is enabled).</li>
-<li>Namespaces, etc.</li>
-</ul>
-</li>
-<li class="task-list-item"><input type="checkbox" disabled> Explain that the <code>Label</code> class will define a <code>name()</code> method for
-   computing a name object from it, and will extend the <code>Structure</code> class
-   with a <code>reference()</code> method that can turn any structure functioning as a
-   reference into the name object it represents.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Define the three ways that structures can get names:<ul>
-<li><code>S.getExternalAttribute 'labels'</code> is an array of name objects.</li>
-<li><code>S.getComputedAttribute 'labels'</code> is an array of name objects.</li>
-<li>If <code>L</code> is a <code>Label</code> instance and <code>L</code> connects to <code>A</code>, then the
-  name computed from <code>L</code> applies to <code>A</code>.</li>
-</ul>
-</li>
-<li class="task-list-item"><input type="checkbox" disabled> Add comments that these changes are not yet implemented, but are</li>
-<li class="task-list-item"><input type="checkbox" disabled> Commit.</li>
-</ul>
-<h3 id="implementing-documented-changes-to-the-label-module">Implementing documented changes to the <code>Label</code> module</h3>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled> Implement <code>nameMatches()</code> as documented in the previous section.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Implement <code>name()</code> as documented in the previous section.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Implement <code>reference()</code> as documented in the previous section.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Move <code>labels()</code>, <code>hasLabel()</code>, and <code>lookup()</code> into
-   <a href="../label.litcoffee">label.litcoffee</a>.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Reimplement them to respect the new paradigm, renaming <code>labels()</code> to
-   <code>names()</code>.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Rename <code>lookup()</code> to <code>lookupLast()</code>.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Create a new <code>lookup()</code> that looks up <em>all</em> structures with the name.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Move the tests of <code>labels()</code>, <code>hasLabel()</code>, and <code>lookup()</code> over from
-   the Structure module to the <code>Label</code> unit tests.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Remove earlier source code comment that said that the changes are not</li>
-<li class="task-list-item"><input type="checkbox" disabled> Update all tests.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Once all tests pass, commit.</li>
-</ul>
-<h3 id="finishing-documentation-of-the-new-label-module-content">Finishing documentation of the new <code>Label</code> module content</h3>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled> Extend the API Documentation for the <code>Label</code> module so that it
-   introduces all the concepts recently documented in the <code>Label</code> module
-   itself, linking to that source code for full details.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Commit.</li>
-</ul>
-<h3 id="document-upcoming-changes-to-the-reason-module">Document upcoming changes to the <code>Reason</code> module</h3>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled> Explain that every reason is a reference, and will therefore make use<code>Structure::reference()</code>.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Define the three ways that structures can get names:<ul>
-<li><code>S.getExternalAttribute 'reasons'</code> is an array of name objects.</li>
-<li><code>S.getComputedAttribute 'reasons'</code> is an array of name objects.</li>
-<li>If <code>R</code> is a <code>Reason</code> instance and <code>R</code> connects to <code>A</code>, then
-  <code>A.lookupLast R.reference()</code> is a reason for <code>A</code>, assuming that
-  such a computation yields a <code>Structure</code> instance.</li>
-</ul>
-</li>
-</ul>
-<h3 id="implementing-documented-changes-to-the-reason-module">Implementing documented changes to the <code>Reason</code> module</h3>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled> Move <code>reasons()</code> into <a href="../reason.litcoffee">reason.litcoffee</a>,
-   reimplementing and redocumenting it as you do so.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Remove earlier source code comment that said that the changes are</li>
-<li class="task-list-item"><input type="checkbox" disabled> Move the tests of <code>reasons()</code> over from the Structure module to the
-   Reason unit tests.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Once all tests pass, commit.</li>
-</ul>
-<h3 id="finishing-documentation-of-the-new-reason-module-content">Finishing documentation of the new <code>Reason</code> module content</h3>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled> Extend the API Documentation for the Reason module so that it</li>
-<li class="task-list-item"><input type="checkbox" disabled> Commit.</li>
-</ul>
-<h3 id="remove-code-and-documentation-about-premises-and-citation">Remove code and documentation about premises and citation</h3>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled> Delete the <code>premises()</code> function from the <code>Structure</code> module.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Delete all the convenience functions defined above it, which we no</li>
-<li class="task-list-item"><input type="checkbox" disabled> Delete all unit tests of that function.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Remove <code>cites()</code> and <code>whatCitesMe()</code> from the structure module.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Remove the tests of <code>cites()</code> and <code>whatCitesMe()</code> as well.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Update the API Documentation to reflect these changes.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Once all tests pass, commit, explaining that we're removing this</li>
-</ul>
-<h3 id="remove-structure-categorization-function-and-its-docs">Remove structure categorization function and its docs</h3>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled> Remove <code>isA()</code> from the structure module.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Remove the tests of <code>isA()</code> and any tests that depend upon it.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Update the API Documentation to reflect these changes.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Once all tests pass, commit, explaining that nothing uses the <code>isA</code>
-   function any longer, and thus it can be removed.</li>
-</ul>
-<h3 id="catch-setup-function-up-with-recent-changes">Catch <code>setup</code> function up with recent changes</h3>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled> Update <code>setup()</code> to no longer make reason, premise, or label
-   connections in the old way.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Update the tests of <code>setup()</code>.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Update the API Documentation to reflect these changes.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Once all tests pass, commit.</li>
-</ul>
-<h3 id="documenting-and-coding-dependents">Documenting and coding dependents</h3>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled> Add a section to the <code>Structure</code> module for inter-structure
-   dependence.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Define a function <code>dependents()</code> that computes the set of structures
-   that depend on the given one.  Its default implementation is to return
-   the empty array.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Document that function, explaining that any <code>Structure</code> subclass can
-   override it.</li>
-<li class="task-list-item"><input type="checkbox" disabled> In the <code>Label</code> module, overwrite that function (yes, actually modify
-   the <code>Structure</code> class and replace the original implementation) with one
-   that finds any structure in the scope of <code>this</code> that has <code>this</code> as a
-   reason.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Add documentation to that new implementation of <code>dependents()</code>,
-   saying that we will extend it later when we support premises, so that
-   anything citing a premise also depends on the premise.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Create unit tests for this new functionality.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Once all tests pass, commit.</li>
-</ul>
-<h3 id="connect-event-handlers-to-update">Connect event handlers to <code>update()</code></h3>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled> Update the default implementations in the <code>Structure</code> class of the
-   <code>willBe*</code> and <code>was*</code> functions necessary for calling <code>update()</code> whenever
-   something on which a structure depends was changed.<ul>
-<li><code>wasInserted()</code> should call <code>update()</code> in everything on which the
-  newly inserted object depends.</li>
-<li><code>willBeRemoved()</code> should store the list of things that depend on
-  the to-be-removed structure, and then <code>wasRemoved()</code> should call
-  <code>update()</code> in each structure on that list, then delete the list.</li>
-<li><code>willBeChanged()</code> should store the list of things that depend on
-  the to-be-changed structure, and then <code>wasChanged()</code> should union that
-  list with the new list of things that depend on it, and then call
-  <code>update()</code> in each structure on that united list.</li>
-</ul>
-</li>
-<li class="task-list-item"><input type="checkbox" disabled> Extend the unit tests for the <code>Reason</code> module to test these very
-   issues, the propagation of updates through reason citations.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Once all tests pass, commit.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Remove from <code>src/structure.litcoffee</code> the entire section entitled
+   "Attribute conventions," because many of those conventions will change
+   as we build upon our new design.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Remove any unit tests that dealt with any of the code deleted in the</li>
+<li class="task-list-item"><input type="checkbox" disabled> Search for any documentation that mentioned code deleted in that same</li>
+<li class="task-list-item"><input type="checkbox" disabled> Once all tests pass, rebuild everything, commit, and push to the</li>
 </ul></div>
         </div>
 

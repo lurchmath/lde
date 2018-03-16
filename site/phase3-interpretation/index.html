@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Phase 3, Interpretation - Lurch Deductive Engine Documentation</title>
+        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/highlight.css">
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+        <script src="../js/jquery-1.10.2.min.js"></script>
+        <script src="../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../js/highlight.pack.js"></script> 
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="..">Lurch Deductive Engine Documentation</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                    <li >
+                        <a href="..">Home</a>
+                    </li>
+                    <li class="dropdown active">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Design Plans <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            
+<li >
+    <a href="../design-overview/">Overview</a>
+</li>
+                            
+<li >
+    <a href="../phase1-structures/">Phase 1, Structures</a>
+</li>
+                            
+<li >
+    <a href="../phase2-input-tree/">Phase 2, The Input Tree</a>
+</li>
+                            
+<li class="active">
+    <a href="./">Phase 3, Interpretation</a>
+</li>
+                            
+<li >
+    <a href="../phase4-validation/">Phase 4, Validation</a>
+</li>
+                            
+<li >
+    <a href="../phaseN-archive/">Phase N, List of outdated phases</a>
+</li>
+                            
+<li >
+    <a href="../enhancements/">Enhancements for Later</a>
+</li>
+                            
+<li >
+    <a href="../ideas/">Ideas Archive</a>
+</li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Documentation <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            
+<li >
+    <a href="../api-overview/">Overview</a>
+</li>
+                            
+<li >
+    <a href="../api-structures/">Structures</a>
+</li>
+                            
+<li >
+    <a href="../api-lde/">The LDE</a>
+</li>
+                        </ul>
+                    </li>
+                </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                        <i class="fa fa-search"></i> Search
+                    </a>
+                </li>
+                    <li >
+                        <a rel="next" href="../phase2-input-tree/">
+                            <i class="fa fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="prev" href="../phase4-validation/">
+                            Next <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+        <div class="container">
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="main active"><a href="#lde-design-phase-3-interpretation">LDE Design Phase 3: Interpretation</a></li>
+            <li><a href="#content">Content</a></li>
+            <li><a href="#goal">Goal</a></li>
+            <li><a href="#status">Status</a></li>
+            <li><a href="#outputstructure-class">OutputStructure class</a></li>
+            <li><a href="#building-interpretation-routines">Building interpretation routines</a></li>
+            <li><a href="#caching-interpretation-results">Caching interpretation results</a></li>
+            <li><a href="#building-recursive-interpretation">Building recursive interpretation</a></li>
+            <li><a href="#calling-interpretation-routines">Calling interpretation routines</a></li>
+            <li><a href="#tracking-origins">Tracking origins</a></li>
+            <li><a href="#feedback-messages">Feedback messages</a></li>
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<p>We have designed the work on the Lurch Deductive Engine (LDE) to progress in
+phases.  The idea is that each phase ends with a completed whole that can be
+tested in that state, and that provides more features than the previous
+state did.  By the time the final phase is complete, the LDE will be a
+robust and useful product.</p>
+<h1 id="lde-design-phase-3-interpretation">LDE Design Phase 3: Interpretation</h1>
+<h2 id="content">Content</h2>
+<p>In this phase, we add a very rudimentary <code>OutputStructure</code> class, and
+methods in the Input Tree to generate it by interpreting the contents of the
+input.</p>
+<h2 id="goal">Goal</h2>
+<p>The <code>OutputStructure</code> class will exist and a hierarchy of such things will
+be created by the Input Tree.</p>
+<h2 id="status">Status</h2>
+<p>This has not been implemented.  See the tasks below.</p>
+<h2 id="outputstructure-class"><code>OutputStructure</code> class</h2>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled> Create a subclass of <code>Structure</code>, in its own new module,
+   <code>src/output-structure.litcoffee</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Add documentation explaining what it is and will do (though that</li>
+<li class="task-list-item"><input type="checkbox" disabled> Ensure that the <code>OutputStructure</code> subclass registers itself with the
+   serialization code, as
+   <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
+   describes.  (That is, use a line like
+   <code>className : Structure.addSubclass 'OutputStructure', OutputStructure</code> in
+   the <code>OutputStructure</code> class code.)</li>
+<li class="task-list-item"><input type="checkbox" disabled> Ensure that the LDE module also imports the<code>output-structure.litcoffee</code> module in addition to the
+   <code>input-structure.litcoffee</code> one.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Update all documentation in that file to reflect the changes just</li>
+<li class="task-list-item"><input type="checkbox" disabled> Create a new unit test file for <code>OutputStructure</code>s that is extremely
+   basic, just testing to be sure that the symbol <code>OutputStructure</code> is
+   defined at the global scope and creates things that are instances of the
+   generic <code>Structure</code> base class.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Add documentation for that unit test file, following the pattern</li>
+<li class="task-list-item"><input type="checkbox" disabled> Once the unit tests pass, build everything and commit.</li>
+</ul>
+<h2 id="building-interpretation-routines">Building interpretation routines</h2>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled> Create an <code>interpret</code> routine in the <code>InputStructure</code> class that
+   takes two arguments, <code>accessibles</code> (a list of <code>OutputStructure</code>s
+   accessible to the <code>InputStructure</code> in question) and <code>childResults</code> (a
+   list of lists of <code>OutputStructure</code> instances that were generated by
+   recursive interpretation calls).  The implementation in this base class
+   should be to create a generic <code>OutputStructure</code> instance and flatten all
+   the <code>childResults</code> arrays into it as children, in order.  Pseudocode:</li>
+</ul>
+<pre><code>let result = new OutputStructure() // plain vanilla wrapper node
+for each childArray in childResults:
+    for each node in childArray:
+        result.appendChild( node ) // put everything in it
+        return [ result ] // return an array of exactly one tree
+</code></pre>
+
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled> Add documentation in that file describing the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Extend the unit tests for the <code>InputStructure</code> module to include some
+   calls to this routine, passing it various example parameters and
+   verifying that it does its job as specified.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Add documentation in that test file describing the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Once the unit tests pass, build everything and commit.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Add documentation stating the limitations on how subclasses are<code>interpret</code> routine from the <code>InputStructure</code>
+   class.  Specifically, the following rules must be obeyed:<ul>
+<li>For any two nodes A and B in the output tree, if A was created by
+  <code>X.interpret()</code> and B was created by <code>Y.interpret()</code>, and A is an
+  ancestor of B, then X must be an ancestor of Y.</li>
+<li>For any two nodes A and B in the output tree, if A was created by
+  <code>X.interpret()</code> and B was created by <code>Y.interpret()</code>, and A has any
+  ancestor that is an earlier sibling of any ancestor of B, then X must
+  have an ancestor that is an earlier sibling of some ancestor of Y.</li>
+<li>If <code>X.interpret()</code> calls <code>Y.markDirty()</code>, then X must be accessible
+  to Y.</li>
+<li>The result of <code>X.interpret()</code> may be contingent only upon the
+  following data.  (This is made easy by passing this stuff as
+  parameters to <code>X.interpret()</code>.  So as long as it just uses its
+  parameters and children, and doesn't go seeking out other data, this
+  rule is automatically followed.)</li>
+<li>Any descendant <code>InputStructure</code> Y of X, including (naturally) its
+     most recently computed interpretation.  (Note that X is not
+     accessible to any such Y.)</li>
+<li>Any <code>InputStructure</code> Y accessible to X, optionally with its most
+     recently computed interpretation as well.  (Note that this does not
+     include ancestors of X.)</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" disabled> Rebuild the docs and commit.</li>
+</ul>
+<h2 id="caching-interpretation-results">Caching interpretation results</h2>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled> Extend the <code>InputStructure</code> class with a field called
+   <code>lastInterpretation</code>, which is initialized to undefined in the
+   constructor.  This field does not need to be part of any serialization
+   or deserialization of instances.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Create an <code>interpretation()</code> method that returns the value of
+   that member variable.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Create a <code>saveInterpretation(S)</code> method in the <code>InputStructure</code> class
+   that stores <code>OutputStructure</code> <code>S</code> in the <code>lastInterpretation</code> field.  If
+   no parameter <code>S</code> is passed, replace the cached value with undefined.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Update all documentation in that file to reflect the changes just</li>
+<li class="task-list-item"><input type="checkbox" disabled> Add to the unit tests for <code>InputStructure</code>s a few simple tests for
+   these new routines.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Add documentation in that file describing the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Once the unit tests pass, build everything and commit.</li>
+</ul>
+<h2 id="building-recursive-interpretation">Building recursive interpretation</h2>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled> Create a <code>recursiveInterpret</code> routine in the <code>InputStructure</code> class
+   that takes one argument, <code>accessibles</code> (with the same meaning as in the
+   <code>interpret</code> routine).  This argument should default to an empty array.
+   Pseudocode:</li>
+</ul>
+<pre><code>// use the cache if it's there:
+if my lastInterpretation() is not undefined, return that and quit
+otherwise...
+// remember the size of accessibles for later:
+let L = the current length of the accessibles array.
+// we will be recursively computing child result arrays,
+// and will want to keep a list of them, so initialize that list to empty:
+let allChildResults = [ ]
+// now the loop for the recursive work:
+for each child C of X do the following:
+    // do the recursion.
+    // note that for the first child, the same list of accessibles for the
+    // parent applies to that child:
+    let childResult = C.recursiveInterpret( accessibles )
+    // but for later children, more things are accessible.  specifically,
+    // anything just created by interpreting C should be accessible to
+    // C.nextSibling(), so:
+    let accessibles = the concatenation of accessibles
+        with childResult (thus extending accessibles)
+    // and of course remember the result of the recursive call we just made:
+    append childResult as a new entry to the end of allChildResults
+        // (which is an array of arrays)
+// now that we're done recurring,
+// we want to restore the accessibles array to its old state:
+let accessibles = just the first L entries of accessibles
+    // (restoring it to what it was at the start of this routine)
+// this is because we will now ask this node X to interpret itself in
+// light of (a) what's accessible to it and (b) all the recursive
+// results of interpreting its children.
+// So we need the right accessibles array to do this:
+saveInterpretation( X.interpret( accessibles, allChildResults ) )
+mark X as no longer dirty
+then return lastInterpretation() as the result of this function
+</code></pre>
+
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled> Add documentation in that file describing the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Extend the unit tests for the <code>InputStructure</code> module to include some
+   calls to this routine, passing it various example parameters and
+   verifying that it does its job as specified.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Write more unit tests that create and register some dummy subclasses<code>InputStructure</code> that have example custom <code>interpret</code> routines.
+   Verify that those routines get called and do exactly what's expected in
+   the creation of their portion of the Output Tree.  Ensure you test a
+   variety of different kinds of <code>interpret</code> routines, including ones that
+   copy or create attributes, delete children, don't include the default
+   wrapper, etc.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Add documentation in that test file describing the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Once the unit tests pass, build everything and commit.</li>
+</ul>
+<h2 id="calling-interpretation-routines">Calling interpretation routines</h2>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled> In the LDE module, in every one of the four functions it exposes as<code>.markDirty()</code> on
+   the appropriate <code>InputStructure</code> instance, then
+   <code>.recursiveInterpret()</code> on the root of the LDE document (the Input Tree).</li>
+<li class="task-list-item"><input type="checkbox" disabled> Update the documentation in that file to describe the changes just</li>
+<li class="task-list-item"><input type="checkbox" disabled> Extend the unit tests for the LDE module to verify that this</li>
+<li class="task-list-item"><input type="checkbox" disabled> Write more unit tests that create and register some dummy subclasses<code>InputStructure</code> that have example custom <code>interpret</code> routines.
+   Verify that those routines get called and do exactly what's expected in
+   the creation of the Output Tree.  Ensure you test a variety of different
+   kinds of <code>interpret</code> routines, as you did in the previous section.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Add documentation in that test file describing the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Once the unit tests pass, build everything and commit.</li>
+</ul>
+<h2 id="tracking-origins">Tracking origins</h2>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled> Create a class variable in the <code>InputStructure</code> class called
+   <code>instanceBeingInterpreted</code> that is initialized to null.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Extend the <code>recursiveInterpret</code> routine so that, before each call to
+   <code>X.interpret()</code>, it sets <code>instanceBeingInterpreted</code> to <code>X</code>, then sets it
+   back to null after <code>X.interpret()</code> is complete.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Extend the constructor for <code>OutputStructure</code> nodes so that, if the
+   global <code>InputStructure</code> class is defined, and its
+   <code>instanceBeingInterpreted</code> variable is non-null, then that instance is
+   stored within the newly constructed <code>OutputStructure</code> in a field called
+   <code>origin</code>.  Otherwise, <code>origin</code> should be undefined (or null, whatever).</li>
+<li class="task-list-item"><input type="checkbox" disabled> Extend the unit tests for the LDE module to verify that Output Trees<code>OutputStructure</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Once the unit tests pass, build everything and commit.</li>
+</ul>
+<h2 id="feedback-messages">Feedback messages</h2>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled> Add a function to the LDE module that can be called whenever the<code>InputStructure</code> in the Input Tree changes, and the
+   function will send a message (to any listening client) containing this
+   data: the ID of the node whose feedback changed, and the new feedback
+   data.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Extend each of the LDE module's API functions so that, when any new<code>InputStructure</code> instances are added in the Input Tree, we recursively go
+   through them and all their descendants, and set their <code>wasChanged</code> event
+   handlers to check to see if the feedback changed, and if so, call that
+   global message sending function.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Update the documentation in that file to describe the changes just</li>
+<li class="task-list-item"><input type="checkbox" disabled> Extend the unit tests for the LDE module to verify that this</li>
+<li class="task-list-item"><input type="checkbox" disabled> Add documentation in that test file describing the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Once the unit tests pass, build everything and commit.</li>
+</ul></div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>var base_url = '..';</script>
+        <script src="../js/base.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="../search/require.js"></script>
+        <script src="../search/search.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>&larr;</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>&rarr;</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    </body>
+</html>

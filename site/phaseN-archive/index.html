@@ -8,7 +8,7 @@
         
         
         <link rel="shortcut icon" href="../img/favicon.ico">
-        <title>Phase 2, Basic Validation - Lurch Deductive Engine Documentation</title>
+        <title>Phase N, List of outdated phases - Lurch Deductive Engine Documentation</title>
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
@@ -60,44 +60,20 @@
     <a href="../phase1-structures/">Phase 1, Structures</a>
 </li>
                             
+<li >
+    <a href="../phase2-input-tree/">Phase 2, The Input Tree</a>
+</li>
+                            
+<li >
+    <a href="../phase3-interpretation/">Phase 3, Interpretation</a>
+</li>
+                            
+<li >
+    <a href="../phase4-validation/">Phase 4, Validation</a>
+</li>
+                            
 <li class="active">
-    <a href="./">Phase 2, Basic Validation</a>
-</li>
-                            
-<li >
-    <a href="../phase3-client/">Phase 3, The Client</a>
-</li>
-                            
-<li >
-    <a href="../phase4-dependencies/">Phase 4, Dependencies</a>
-</li>
-                            
-<li >
-    <a href="../phase5-background/">Phase 5, Background Queue</a>
-</li>
-                            
-<li >
-    <a href="../phase6-strings/">Phase 6, String Matching</a>
-</li>
-                            
-<li >
-    <a href="../phase7-theorems/">Phase 7, Theorems and Proofs</a>
-</li>
-                            
-<li >
-    <a href="../phase8-expressions/">Phase 8, Expression Trees</a>
-</li>
-                            
-<li >
-    <a href="../phase9-parsing/">Phase 9, Parsing Rules</a>
-</li>
-                            
-<li >
-    <a href="../phase10-declarations/">Phase 10, Declarations</a>
-</li>
-                            
-<li >
-    <a href="../phase11-features/">Phase 11, Bonus Features</a>
+    <a href="./">Phase N, List of outdated phases</a>
 </li>
                             
 <li >
@@ -135,12 +111,12 @@
                     </a>
                 </li>
                     <li >
-                        <a rel="next" href="../phase1-structures/">
+                        <a rel="next" href="../phase4-validation/">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
                     <li >
-                        <a rel="prev" href="../phase3-client/">
+                        <a rel="prev" href="../enhancements/">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -153,15 +129,30 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
         <li class="main active"><a href="#lde-design-phase-2-basic-validation">LDE Design Phase 2: Basic Validation</a></li>
-            <li><a href="#content">Content</a></li>
-            <li><a href="#goal">Goal</a></li>
-            <li><a href="#status">Status</a></li>
-        <li class="main "><a href="#extending-the-structure-module">Extending the Structure module</a></li>
-        <li class="main "><a href="#extending-the-lde-module">Extending the LDE module</a></li>
-        <li class="main "><a href="#code-based-rules">Code-based rules</a></li>
-        <li class="main "><a href="#statements">Statements</a></li>
-        <li class="main "><a href="#formal-systems-or-mathematical-topics">Formal systems (or "mathematical topics")</a></li>
-        <li class="main "><a href="#unit-testing">Unit testing</a></li>
+            <li><a href="#extending-the-structure-module">Extending the Structure module</a></li>
+            <li><a href="#extending-the-lde-module">Extending the LDE module</a></li>
+            <li><a href="#code-based-rules">Code-based rules</a></li>
+            <li><a href="#statements">Statements</a></li>
+            <li><a href="#formal-systems-or-mathematical-topics">Formal systems (or "mathematical topics")</a></li>
+            <li><a href="#unit-testing">Unit testing</a></li>
+        <li class="main "><a href="#lde-design-phase-3-the-client">LDE Design Phase 3: The Client</a></li>
+            <li><a href="#app-launch">App launch</a></li>
+            <li><a href="#background-threads">Background threads</a></li>
+            <li><a href="#no-subclasses">No subclasses</a></li>
+            <li><a href="#serialization">Serialization</a></li>
+            <li><a href="#ids">IDs</a></li>
+            <li><a href="#unit-testing_1">Unit testing</a></li>
+            <li><a href="#extendability">Extendability</a></li>
+        <li class="main "><a href="#lde-design-phase-4-dependencies">LDE Design Phase 4: Dependencies</a></li>
+        <li class="main "><a href="#lde-design-phase-5-background-queue">LDE Design Phase 5: Background Queue</a></li>
+            <li><a href="#new-stuff">New stuff</a></li>
+            <li><a href="#old-stuff">Old stuff</a></li>
+        <li class="main "><a href="#lde-design-phase-6-string-matching">LDE Design Phase 6: String Matching</a></li>
+        <li class="main "><a href="#lde-design-phase-7-theorems-and-proofs">LDE Design Phase 7: Theorems and Proofs</a></li>
+        <li class="main "><a href="#lde-design-phase-8-expressions">LDE Design Phase 8: Expressions</a></li>
+        <li class="main "><a href="#lde-design-phase-9-parsing">LDE Design Phase 9: Parsing</a></li>
+        <li class="main "><a href="#lde-design-phase-10-declarations">LDE Design Phase 10: Declarations</a></li>
+        <li class="main "><a href="#lde-design-phase-11-features">LDE Design Phase 11: Features</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
@@ -171,8 +162,13 @@ phases.  The idea is that each phase ends with a completed whole that can be
 tested in that state, and that provides more features than the previous
 state did.  By the time the final phase is complete, the LDE will be a
 robust and useful product.</p>
+<p>This file contains ideas that were formerly listed as phases 2 through 11.
+But since they were written, phase 1 was completely redesigned (in a very
+helpful way).  Thus these ideas no longer apply as they once did.</p>
+<p>However, they have many good ideas within them, and are thus retained here
+to be referenced later when building on top of the newly-redesigned
+foundation of <code>Structure</code>s.</p>
 <h1 id="lde-design-phase-2-basic-validation">LDE Design Phase 2: Basic Validation</h1>
-<h2 id="content">Content</h2>
 <p>This phase defines:</p>
 <ul>
 <li>Statements (just atomic expressions whose contents are a string, and
@@ -182,7 +178,6 @@ robust and useful product.</p>
 <li>Formal systems (or "mathematical topics", which are structures we can
    put rules inside of)</li>
 </ul>
-<h2 id="goal">Goal</h2>
 <p>This enables really simple formal systems, ones whose statements are strings
 and that require no citing of premises.  Examples:</p>
 <ul>
@@ -194,11 +189,7 @@ and that require no citing of premises.  Examples:</p>
 <p>While the intent is eventually for nontrivial validation tasks to be placed
 in a queue and handled in background threads, that work is not part of
 Phase 2.  A later phase will add support for it.</p>
-<h2 id="status">Status</h2>
-<p>This phase has not yet been implemented.  Once it has been implemented, its
-contents will be documented in the API Documentation available from the
-navigation menu at the top of this site.</p>
-<h1 id="extending-the-structure-module">Extending the <code>Structure</code> module</h1>
+<h2 id="extending-the-structure-module">Extending the <code>Structure</code> module</h2>
 <p>Giving feedback</p>
 <ul>
 <li>Extend the generic <code>Structure</code> class with a convenience function called
@@ -233,7 +224,7 @@ navigation menu at the top of this site.</p>
    the LDE with an asynchronous method, but it needs to exist so that the
    <code>Structure</code> class is, in theory, independent of the LDE.</li>
 </ul>
-<h1 id="extending-the-lde-module">Extending the <code>LDE</code> module</h1>
+<h2 id="extending-the-lde-module">Extending the <code>LDE</code> module</h2>
 <p>Building and running functions in the background</p>
 <ul>
 <li>After loading the <code>Structure</code> module, replace its class method
@@ -250,7 +241,7 @@ navigation menu at the top of this site.</p>
    running at that time, it posts the same message about computations being
    complete.</li>
 </ul>
-<h1 id="code-based-rules">Code-based rules</h1>
+<h2 id="code-based-rules">Code-based rules</h2>
 <p>The <code>Rule</code> class will be a subclass of <code>Structure</code>.  If <code>R</code> is an instance
 of <code>Rule</code> then its <code>validate()</code> function should be as follows.</p>
 <ul>
@@ -263,7 +254,7 @@ of <code>Rule</code> then its <code>validate()</code> function should be as foll
 <li>Otherwise <code>R.feedback('valid','This is a valid code rule.')</code>.  Then:</li>
 <li>For every expression in <code>R.whatCitesMe()</code>, revalidate it.</li>
 </ul>
-<h1 id="statements">Statements</h1>
+<h2 id="statements">Statements</h2>
 <p>The <code>Statement</code> class will be a subclass of <code>Structure</code>.  If <code>S</code> is an
 instance of <code>Statement</code> then its <code>validate()</code> function should be as follows.</p>
 <ul>
@@ -297,7 +288,7 @@ instance of <code>Statement</code> then its <code>validate()</code> function sho
    will have a <code>type</code> ("valid", "invalid") and a <code>message</code>.</li>
 <li>Otherwise call <code>S.feedback(f(S).type,f(S).message)</code>.</li>
 </ul>
-<h1 id="formal-systems-or-mathematical-topics">Formal systems (or "mathematical topics")</h1>
+<h2 id="formal-systems-or-mathematical-topics">Formal systems (or "mathematical topics")</h2>
 <p>The <code>FormalSystem</code> class will be a subclass of <code>Structure</code>, and will add
 support for the following new member functions.  Assume <code>F</code> is an instance
 of <code>FormalSystem</code> in each case.  Further assume that <code>S</code> is an instance of
@@ -322,7 +313,7 @@ of <code>FormalSystem</code> in each case.  Further assume that <code>S</code> i
    so that each propagates the call to the function of the same name in all
    structures in <code>F.exports()</code>.</li>
 </ul>
-<h1 id="unit-testing">Unit testing</h1>
+<h2 id="unit-testing">Unit testing</h2>
 <p>How we could do unit testing on this simple LDE:</p>
 <ul>
 <li>Fire up the LDE so that its document is new and thus blank.</li>
@@ -349,7 +340,230 @@ it, including such situations as these:</p>
    formal system containing rule Y before the statement.  Ensure that the
    system notices, and that the statement automatically had its validation
    updated.</li>
-</ul></div>
+</ul>
+<h1 id="lde-design-phase-3-the-client">LDE Design Phase 3: The Client</h1>
+<p>This phase defines the LDE Client, a thin interface to the LDE defined in a
+separate module.</p>
+<p>The Client maintains the Facade, a shallow copy of the LDE Document that it
+keeps in sync with it, thus providing an easy API for interacting with the
+LDE.</p>
+<p>This page is just a description; it's not actually written in a "design" or
+"how to build" manner, at least not to the same degree that Phase 2 was.</p>
+<p>This phase's work just makes Phase 1's work easier to use for most clients.</p>
+<h2 id="app-launch">App launch</h2>
+<p>When the Client is loaded into memory (say, at app launch) it will create a
+global structure that is intended to be a sort of shallow/shadow/fake copy
+of the LDE Document.</p>
+<ul>
+<li>Because it will imitate the structure of the LDE Document, it will be
+   a hierarchy.</li>
+<li>But it will not be a hierarchy of Structures, because as we know,
+   Structures do computation, and that's the job of the LDE.  This is
+   just a front-end; it doesn't do anything.</li>
+<li>So rather than calling each node in the Client's hierarchy a
+   Structure, I'll call it a <em>Facade.</em>  This is to emphasize that this
+   hierarchy, stored in the Client (part of the UI) can't do anything at
+   all.  It's picture of what's really going on elsewhere, in the LDE.</li>
+</ul>
+<h2 id="background-threads">Background threads</h2>
+<p>The Client can be told about the existence of a background thread that's
+running the LDE.</p>
+<ul>
+<li>If it is told about such a thread, then any later
+   insertions/deletions/changes to the Facade hierarchy will immediately
+   be communicated by the Client to that LDE thread as a change event
+   (defined above).</li>
+<li>This guarantees that the Facade hierarchy and LDE Document are always
+   in sync:  Because the LDE never alters its hierarchy, messages need
+   propagate in only one direction to guarantee that the two hierarchies
+   are isomorphic.</li>
+</ul>
+<h2 id="no-subclasses">No subclasses</h2>
+<p>Because the nodes in the Facade don't actually do anything, they have no
+subclasses.</p>
+<ul>
+<li>Unlike the Structure class, which it makes sense to subclass so that
+   we can add various features like validation functions and so forth,
+   none of that matters in the Facade.  It ships all that work to
+   someone else.</li>
+<li>Thus every node in the Facade hierarchy is a generic Facade node,
+   storing a dictionary of attributes given to it at construction time,
+   which are precisely the external attributes for that node.</li>
+<li>These attributes will have been communicated to the LDE when the
+   Facade node was constructed, and the LDE can use them to figure out
+   how to create a corresponding Structure node on the LDE side (or any
+   subclass of Structure; one attribute should be the class name
+   itself!).</li>
+<li>But the point here is that what it means for the Facade to be a
+   shallow/inactive copy of the LDE Document is that:<ul>
+<li>Every node is just a Facade node, and thus they have no
+  specialized functionality at all.</li>
+<li>Every node just stores its attributes, not doing anything with
+  them, unlike on the LDE Document side, which does computation.</li>
+</ul>
+</li>
+</ul>
+<h2 id="serialization">Serialization</h2>
+<ul>
+<li>Facade nodes do one thing, actually:  They know how to serialize
+   themselves into JSON, including all their children.</li>
+<li>This is so that they can pass themselves across to the LDE for syncing,
+   and so that the entire Facade can be serialized by the UI (later of
+   course) for saving in document metadata.</li>
+</ul>
+<h2 id="ids">IDs</h2>
+<p>Each Facade node will be given, at the time it's created, an ID unique
+among all nodes in the Facade hierarchy.</p>
+<ul>
+<li>This unique ID will be part of what's communicated in the change event
+   to the LDE, so that the corresponding Structure created in the LDE can
+   have the same ID.</li>
+<li>Thus future change events from the Client to the LDE can reference nodes
+   in the hierarchy by this common ID system.</li>
+<li>Similarly, when the LDE sends out signals about new computed attributes
+   being stored in the LDE Document, it will mention these unique IDs to
+   unambiguously indicate in which node the new computed attribute is
+   stored.</li>
+<li>The Client will then store the same computed attribute in the
+   corresponding Facade node, so that it is accessible to the entire UI as
+   well.</li>
+</ul>
+<h2 id="unit-testing_1">Unit testing</h2>
+<ul>
+<li>Verify that the Facade hierarchy can be built and works independent of
+   the LDE</li>
+<li>Verify that if you connect it to an LDE background thread, the documents
+   stay in sync</li>
+<li>Verify that the same tests done in Phase 2 can be done also through this
+   "API" to the LDE</li>
+<li>All further testing in later phases has the option of using the Client
+   or not, depending on what's best for testing in that particular instance.</li>
+</ul>
+<h2 id="extendability">Extendability</h2>
+<ul>
+<li>The LDE is free to expose to clients any other functionality it sees
+   fit.  That is, interaction with the LDE is not limited to syncing the
+   Facade with the LDE Document and waiting for computed responses.</li>
+<li>For instance, one type of response that should only be produced when
+   specifically asked for is a "verbose feedback" response, like what we
+   get in the old desktop Lurch by double-clicking a traffic light.  This
+   is too much work to create for every step of work, but should be created
+   only when needed.</li>
+<li>Thus the LDE could expose a computeVerboseFeedback() function that took
+   the unique ID of an LDE Document structure as input and later sent back
+   a message with the corresponding verbose feedback (in HTML form) as the
+   result.</li>
+</ul>
+<h1 id="lde-design-phase-4-dependencies">LDE Design Phase 4: Dependencies</h1>
+<ul>
+<li>Support dependencies as read-only first-few-children of the document.</li>
+<li>They need to be validated only to be sure they don't redeclare one
+   another's stuff.</li>
+<li>Note that every structure already has an .exports() method, so we just
+   need to implement that structure for the root of the LDE Document, and
+   that will be what a document exports when it is used as a dependency.</li>
+</ul>
+<p>Rule definitions can be stored in a master document on which others depend,
+and many later documents can all use the same central rule set.</p>
+<h1 id="lde-design-phase-5-background-queue">LDE Design Phase 5: Background Queue</h1>
+<h2 id="new-stuff">New stuff</h2>
+<p>The stuff in the "old stuff" section, immediately after this one, may no
+longer apply; it is from an old design.  But these new plans may still be
+relevant, depending on how efficiently interpretation is eventually seen to
+be:</p>
+<p>Currently, interpretation is triggered immediately in response to calls to
+the LDE's API.  If that interpretation process takes too long, a queue of
+API calls can be formed.  When any request comes in to the LDE API, rather
+than being immediately executed, it would go on a queue.  The <em>old</em> way of
+processing such events is analogous to handling the queue like so:</p>
+<ul>
+<li>Pop an item off this API command queue</li>
+<li>Perform the item</li>
+<li>Call .markDirty() in the relevant node</li>
+<li>Call root.recursiveInterpret()</li>
+<li>Repeat from step 1 until the queue is empty</li>
+</ul>
+<p>But now that we have a queue, we can do the following more efficient procedure instead:</p>
+<ul>
+<li>Pop an item off this API command queue</li>
+<li>Perform the item</li>
+<li>Call .markDirty in the relevant node</li>
+<li>Repeat from step 1 until the queue is empty</li>
+<li>Call root.recursiveInterpret()</li>
+</ul>
+<p>Thus many quick API calls in succession will result in just one (possibly
+expensive) call to root.recursiveInterpret(), rather than many such
+(possibly expensive) calls.</p>
+<h2 id="old-stuff">Old stuff</h2>
+<ul>
+<li>Add a mechanism for queueing tasks to be done later.</li>
+<li>It should be smart enough that, whenever task X is enqueued, then any
+   already-enqueued task Y that will need to be redone after X anyway
+   should be removed form the queue, for efficiency.</li>
+<li>Then rewrite Phases 2 and 3 to use this feature as needed.
+   All later phases should enqueue all nontrivial processing tasks this way.</li>
+</ul>
+<p>All the work done before this operates more efficiently, and the large and
+complex deductive engine we plan to build on the foundation we have so far
+will still be performant.</p>
+<h1 id="lde-design-phase-6-string-matching">LDE Design Phase 6: String Matching</h1>
+<p>Extend rules to include string-based matching (like the kind of matching
+Circle-Dot and MIU use)</p>
+<p>This enables: toy systems like Circle-Dot and MIU</p>
+<h1 id="lde-design-phase-7-theorems-and-proofs">LDE Design Phase 7: Theorems and Proofs</h1>
+<ul>
+<li>Proofs (which are also subproofs)</li>
+<li>Theorem statements</li>
+<li>Pairing of theorems with proofs</li>
+<li>Homework problems (which may be the same as a theorem-proof pair!)</li>
+</ul>
+<p>This enables:</p>
+<ul>
+<li>Proofs</li>
+<li>Homework assignments</li>
+</ul>
+<h1 id="lde-design-phase-8-expressions">LDE Design Phase 8: Expressions</h1>
+<ul>
+<li>Expanded form for non-atomic expressions (function applications,
+   binding, variables, constants, etc.)</li>
+<li>Extend rules to pattern-based matching (the usual kind of rules we think
+   of in math)</li>
+</ul>
+<p>This enables: propositional logic, but with statements in expanded form only</p>
+<h1 id="lde-design-phase-9-parsing">LDE Design Phase 9: Parsing</h1>
+<ul>
+<li>Rules for defining parsing</li>
+<li>Constant declarations may be implemented under the hood as special cases
+   of language rules.<ul>
+<li>This does not mean they must parse into OpenMath symbols.  It is
+  acceptable to parse them into, for example, OpenMath strings, with a
+  special attribute Constant=True, or any equally unique/recognizable
+  expression.</li>
+<li>Also, this does not mean that constant declarations must feel to the
+  user like language rule declarations feel.  We can let users think of
+  them and express them as constant declarations, but under the hood it
+  may be implemented as if it had been a language rule.</li>
+</ul>
+</li>
+</ul>
+<p>This enables: propositional logic in its usual notation, and other related
+simple systems</p>
+<h1 id="lde-design-phase-10-declarations">LDE Design Phase 10: Declarations</h1>
+<ul>
+<li>Variable declarations (which may be a special type of expression, or may
+   be a special type of subproof--i.e., do we mark a variable as a
+   declaration, or do we mark a subproof as a variable declaration one, and
+   then the variable at the start of it is declared?)</li>
+<li>Examples (structures in which you declare all manner of stuff that
+   doesn't bleed out)</li>
+</ul>
+<p>This enables: predicate logic in standard math notation, and many other math
+topics</p>
+<h1 id="lde-design-phase-11-features">LDE Design Phase 11: Features</h1>
+<p>Add features to anything built so far (like multiple conclusions from a
+rule, or automatic premise finding, or automatic premise ordering, or the
+ability to specify metavariable instantiations, or any of 1000 other
+features we'd like to add)</p></div>
         </div>
 
         <footer class="col-md-12">

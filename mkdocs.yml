@@ -4,16 +4,10 @@ pages:
 - Design Plans:
     - Overview: design-overview.md
     - Phase 1, Structures: phase1-structures.md
-    - Phase 2, Basic Validation: phase2-validation.md
-    - Phase 3, The Client: phase3-client.md
-    - Phase 4, Dependencies: phase4-dependencies.md
-    - Phase 5, Background Queue: phase5-background.md
-    - Phase 6, String Matching: phase6-strings.md
-    - Phase 7, Theorems and Proofs: phase7-theorems.md
-    - Phase 8, Expression Trees: phase8-expressions.md
-    - Phase 9, Parsing Rules: phase9-parsing.md
-    - Phase 10, Declarations: phase10-declarations.md
-    - Phase 11, Bonus Features: phase11-features.md
+    - Phase 2, The Input Tree: phase2-input-tree.md
+    - Phase 3, Interpretation: phase3-interpretation.md
+    - Phase 4, Validation: phase4-validation.md
+    - Phase N, List of outdated phases: phaseN-archive.md
     - Enhancements for Later: enhancements.md
     - Ideas Archive: ideas.md
 - API Documentation:
