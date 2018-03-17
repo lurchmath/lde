@@ -8,7 +8,7 @@
         
         
         <link rel="shortcut icon" href="../img/favicon.ico">
-        <title>Labels - Lurch Deductive Engine Documentation</title>
+        <title>Phase 1, Structures - Lurch Deductive Engine Documentation</title>
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
@@ -48,7 +48,7 @@
                     <li >
                         <a href="..">Home</a>
                     </li>
-                    <li class="dropdown">
+                    <li class="dropdown active">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Design Plans <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             
@@ -56,8 +56,8 @@
     <a href="../design-overview/">Overview</a>
 </li>
                             
-<li >
-    <a href="../phase1-structures/">Phase 1, Structures</a>
+<li class="active">
+    <a href="./">Phase 1, Structures</a>
 </li>
                             
 <li >
@@ -85,7 +85,7 @@
 </li>
                         </ul>
                     </li>
-                    <li class="dropdown active">
+                    <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Documentation <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             
@@ -101,8 +101,8 @@
     <a href="../api-structures/">Structures</a>
 </li>
                             
-<li class="active">
-    <a href="./">Labels</a>
+<li >
+    <a href="../api-labels/">Labels</a>
 </li>
                             
 <li >
@@ -119,12 +119,12 @@
                     </a>
                 </li>
                     <li >
-                        <a rel="next" href="../api-structures/">
+                        <a rel="next" href="../design-overview/">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
                     <li >
-                        <a rel="prev" href="../api-reasons/">
+                        <a rel="prev" href="../phase2-input-tree/">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -136,25 +136,83 @@
         <div class="container">
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
-        <li class="main active"><a href="#api-documentation-for-the-labels-class">API Documentation for the Labels Class</a></li>
-            <li><a href="#source-code">Source Code</a></li>
-            <li><a href="#purpose">Purpose</a></li>
+        <li class="main active"><a href="#lde-design-phase-1-structures">LDE Design Phase 1: Structures</a></li>
+            <li><a href="#content">Content</a></li>
+            <li><a href="#goal">Goal</a></li>
+            <li><a href="#status">Status</a></li>
+            <li><a href="#tie-up-loose-ends-on-the-old-version">Tie up loose ends on the old version</a></li>
+            <li><a href="#remove-files-we-no-longer-need-and-what-depends-on-them">Remove files we no longer need (and what depends on them)</a></li>
+            <li><a href="#remove-code-portions-we-no-longer-need">Remove code portions we no longer need</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<h1 id="api-documentation-for-the-labels-class">API Documentation for the <code>Labels</code> Class</h1>
-<h2 id="source-code">Source Code</h2>
-<ul>
-<li><a href="https://github.com/lurchmath/lde/blob/master/src/label.litcoffee">The <code>Labels</code> class</a></li>
-<li><a href="https://github.com/lurchmath/lde/blob/master/tests/label-spec.litcoffee">Unit tests of the <code>Label</code> class</a></li>
+<p>We have designed the work on the Lurch Deductive Engine (LDE) to progress in
+phases.  The idea is that each phase ends with a completed whole that can be
+tested in that state, and that provides more features than the previous
+state did.  By the time the final phase is complete, the LDE will be a
+robust and useful product.</p>
+<h1 id="lde-design-phase-1-structures">LDE Design Phase 1: Structures</h1>
+<h2 id="content">Content</h2>
+<p>In this phase, we just design the generic Structure class on which
+everything else will depend, and the infrastructure of the LDE itself.</p>
+<p>The <code>Structure</code> module defines a single <code>Structure</code> class, and has been
+implemented. <a href="../api-structures/">Its API Documentation appears here</a>.</p>
+<p>The <code>LDE</code> module defines several global functions, and has been implemented.
+<a href="../api-lde/">Its API Documentation appears here</a>.</p>
+<h2 id="goal">Goal</h2>
+<p>At the end of this phase, we could write unit tests of the whole Structure
+class and its LDE context, thus guaranteeing that all later phases rest on a
+good foundation.</p>
+<h2 id="status">Status</h2>
+<p>This phase was implemented and documented in the API Documentation, but has
+since seen a major (and beneficial!) re-design, and that re-design has not
+yet been implemented.  It should be done as follows:</p>
+<h2 id="tie-up-loose-ends-on-the-old-version">Tie up loose ends on the old version</h2>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled> Just as the <code>Structure</code> class has tests for all <code>was*</code> events (such
+   as <code>wasRemoved</code>, etc.), add tests for the corresponding <code>willBe*</code> events.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Add API documentation for these events, or update what documentation</li>
+<li class="task-list-item"><input type="checkbox" disabled> Once the unit tests pass, commit.</li>
 </ul>
-<h2 id="purpose">Purpose</h2>
-<p>The Lurch Deductive Engine (LDE, <a href="../api-lde/">documented here</a>) maintains a
-document called the LDE Document, which is a hierarchy (or tree).  The nodes
-in that tree are instances of the class <code>Structure</code> or one of its
-subclasses.  The <code>Label</code> class is one such subclass.  It is intended to represent the general concept of a label in mathematics.  In particular, it provides any functionality required to (a) store information about the names and name spaces of particular instances of <code>Structure</code>s, (b) assign that information to those instances, and (c) to allow other <code>Structure</code>s to query that information.  </p>
-<p>This document is currently a stub for the API of the <code>Label</code> class.  We will add the actual API here once the class has been coded.</p></div>
+<h2 id="remove-files-we-no-longer-need-and-what-depends-on-them">Remove files we no longer need (and what depends on them)</h2>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled> Delete the file <code>src/statement.litcoffee</code>, as well as the
+   corresponding files for reason, label, and rule.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Delete the analogous four files in the <code>tests/</code> folder.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Search for any code that imports any of those files and delete the</li>
+<li class="task-list-item"><input type="checkbox" disabled> Search through all the documentation for any documentation that</li>
+<li class="task-list-item"><input type="checkbox" disabled> Run the unit test suite and verify that all tests pass.  If not,</li>
+<li class="task-list-item"><input type="checkbox" disabled> Once all tests pass, rebuild everything, commit, and push to the</li>
+</ul>
+<h2 id="remove-code-portions-we-no-longer-need">Remove code portions we no longer need</h2>
+<h3 id="computed-attributes">Computed attributes</h3>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled> Remove from <code>src/structure.litcoffee</code> the entire section entitled
+   "Computed attributes," because we no longer need to distinguish computed
+   from external attributes.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Remove any unit tests that dealt with any of the code deleted in the</li>
+<li class="task-list-item"><input type="checkbox" disabled> Search for any documentation that mentioned code deleted in that same</li>
+</ul>
+<h3 id="external-attributes">External attributes</h3>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled> In the <code>src/structure.litcoffee</code> file, in the section entitled
+   "External attributes," rename everything so that it no longer contains
+   the word "external."  For example, <code>getExternalAttribute</code> would become
+   just <code>getAttribute</code>, because we no longer need to distinguish computed
+   from external attributes.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Throughout the unit tests, find any mention of external attributes</li>
+<li class="task-list-item"><input type="checkbox" disabled> Search for any documentation that mentioned external attributes and</li>
+</ul>
+<h3 id="attribute-conventions">Attribute conventions</h3>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled> Remove from <code>src/structure.litcoffee</code> the entire section entitled
+   "Attribute conventions," because many of those conventions will change
+   as we build upon our new design.</li>
+<li class="task-list-item"><input type="checkbox" disabled> Remove any unit tests that dealt with any of the code deleted in the</li>
+<li class="task-list-item"><input type="checkbox" disabled> Search for any documentation that mentioned code deleted in that same</li>
+<li class="task-list-item"><input type="checkbox" disabled> Once all tests pass, rebuild everything, commit, and push to the</li>
+</ul></div>
         </div>
 
         <footer class="col-md-12">
