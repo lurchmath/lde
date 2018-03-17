@@ -1057,13 +1057,15 @@ Now test whether change handlers work.
         it 'should send change events', ->
 
 Add external and/or computed attributes to each of A and B and ensure that
-the correct event handlers were called in each case.
+the correct event handlers were called in each case.  Note that changing
+computed attributes should not call change events, because they were not
+triggered by the client, but by the LDE itself.
 
             A.setExternalAttribute 'a', 'b'
             expect( A.wasChanged ).toHaveBeenCalled()
             expect( B.wasChanged ).not.toHaveBeenCalled()
             B.setComputedAttribute 5, { }
-            expect( B.wasChanged ).toHaveBeenCalled()
+            expect( B.wasChanged ).not.toHaveBeenCalled()
 
 Reset the change events for A and B as if they had not been called, cleaning
 up for future tests.
@@ -1074,13 +1076,14 @@ up for future tests.
             expect( B.wasChanged ).not.toHaveBeenCalled()
 
 Modify the attributes already added to A and B and verify that the change
-event handlers are called again.
+event handlers are called again.  As above, changing computed attributes
+should not call change events.
 
             B.setExternalAttribute 5, { } # different object!
             expect( B.wasChanged ).toHaveBeenCalled()
             expect( A.wasChanged ).not.toHaveBeenCalled()
             A.setComputedAttribute 'a', 'c'
-            expect( A.wasChanged ).toHaveBeenCalled()
+            expect( A.wasChanged ).not.toHaveBeenCalled()
 
 Reset the change events for A and B as if they had not been called, cleaning
 up for future tests.
@@ -1090,14 +1093,15 @@ up for future tests.
             expect( A.wasChanged ).not.toHaveBeenCalled()
             expect( B.wasChanged ).not.toHaveBeenCalled()
 
-Remove attributes from A and B and verify that this, too, calls change
-event handlers.
+Remove attributes from A and B and verify that this, too, calls change event
+handlers.  As above, changing computed attributes should not call change
+events.
 
             A.clearExternalAttributes 'a'
             expect( A.wasChanged ).toHaveBeenCalled()
             expect( B.wasChanged ).not.toHaveBeenCalled()
             B.clearComputedAttributes 5
-            expect( B.wasChanged ).toHaveBeenCalled()
+            expect( B.wasChanged ).not.toHaveBeenCalled()
 
 ## Unique IDs
 
