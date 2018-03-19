@@ -20,7 +20,7 @@ argument is ignored.  See the next section for more details of child
 structures.
 
         constructor : ( children... ) ->
-            @externalAttributes = { }
+            @attributes = { }
             @parentNode = null
             @childList = [ ]
             for child in children
@@ -64,12 +64,12 @@ version.
 
         toJSON : ( includeID = yes ) ->
             if includeID or not @id()?
-                externals = @externalAttributes
+                attributes = @attributes
             else
-                externals = JSON.parse JSON.stringify @externalAttributes
-                delete externals.id
+                attributes = JSON.parse JSON.stringify @attributes
+                delete attributes.id
             className : @className
-            externalAttributes : externals
+            attributes : attributes
             children : ( child.toJSON includeID for child in @childList )
 
 ### Deserialization from JSON
@@ -87,8 +87,7 @@ object.
             children =
                 ( Structure.fromJSON child for child in json.children )
             result = new classObj children...
-            result.externalAttributes =
-                JSON.parse JSON.stringify json.externalAttributes
+            result.attributes = JSON.parse JSON.stringify json.attributes
             result
 
 ## Tree structure
@@ -115,8 +114,7 @@ Another possibly convenient utility is to make a copy of the Structure S
 
         copy : ->
             S = new Structure
-            S.externalAttributes =
-                JSON.parse JSON.stringify @externalAttributes
+            S.attributes = JSON.parse JSON.stringify @attributes
             S.childList = ( C.copy() for C in @childList )
             child.parentNode = S for child in S.childList
             S
@@ -230,46 +228,44 @@ above.
                 @removeFromParent()
                 originalParent.insertChild other, originalIndex
 
-## External attributes
+## Attributes
 
-The dictionary of external attributes has getters and setters that work on
-keys or key-value pairs (respectively).  There is also a corresponding
-"clear" function for deleting entries from the external attributes
-dictionary.
+The dictionary of attributes has getters and setters that work on keys or
+key-value pairs (respectively).  There is also a corresponding "clear"
+function for deleting entries from the attributes dictionary.
 
 No checks are put on what kind of data can be used for the values of this
 dictionary, but they should be JSON data only, to support serialization.
 (Checks are omitted for efficiency.)
 
-We notify the structure of changes to its external attributes through
-calling two event handlers (if they exist) in the object:
-`willBeChanged(key)` immediately before the change and `wasChanged(key)`
-after the removal, in both cases passing the key from the changing key-value
-pair.  These events are the same whether the key-value pair is inserted,
-modified, or removed.
+We notify the structure of changes to its attributes through calling two
+event handlers (if they exist) in the object: `willBeChanged(key)`
+immediately before the change and `wasChanged(key)` after the removal, in
+both cases passing the key from the changing key-value pair.  These events
+are the same whether the key-value pair is inserted, modified, or removed.
 
-        getExternalAttribute : ( key ) -> @externalAttributes[key]
-        setExternalAttribute : ( key, value ) ->
-            if @externalAttributes[key] isnt value
+        getAttribute : ( key ) -> @attributes[key]
+        setAttribute : ( key, value ) ->
+            if @attributes[key] isnt value
                 @willBeChanged? key
-                @externalAttributes[key] = value
+                @attributes[key] = value
                 @wasChanged? key
-        clearExternalAttributes : ( keys... ) ->
-            if keys.length is 0 then keys = Object.keys @externalAttributes
+        clearAttributes : ( keys... ) ->
+            if keys.length is 0 then keys = Object.keys @attributes
             for key in keys
-                if key of @externalAttributes
+                if key of @attributes
                     @willBeChanged? key
-                    delete @externalAttributes[key]
+                    delete @attributes[key]
                     @wasChanged? key
 
-External attributes can also be added with an `attr()` function that returns
-the instance, thus supporting method chaining.  This is useful when
-constructing objects of this class, especially for unit testing, using
-code like `Structure( Structure().attr(...), ... )`.  It takes an object and
-installs all of its key-value pairs as external attributes.
+Attributes can also be added with an `attr()` function that returns the
+instance, thus supporting method chaining.  This is useful when constructing
+objects of this class, especially for unit testing, using code like
+`Structure( Structure().attr(...), ... )`.  It takes an object and installs
+all of its key-value pairs as attributes.
 
         attr : ( object ) ->
-            @setExternalAttribute key, value for own key, value of object
+            @setAttribute key, value for own key, value of object
             this
 
 On the topic of conveniences for constructing instances, the following
@@ -282,9 +278,9 @@ This is intended to be used when constructing large structures, as in
 
         setup : ->
 
-Every structure with an external attribute key "label for", "reason for", or
-"premise for" and value X will be converted into a connection to node X of
-type "label", "reason", or "premise", respectively.  Node X will be found by
+Every structure with an attribute key "label for", "reason for", or "premise
+for" and value X will be converted into a connection to node X of type
+"label", "reason", or "premise", respectively.  Node X will be found by
 seeking a node with attribute key "id" and value X.
 
 All attributes with key id are then deleted.
@@ -294,13 +290,13 @@ Alternately the same keys could be associated with value "previous" or
 
             targets = { }
             recurFindTargets = ( node ) ->
-                if ( id = node.getExternalAttribute 'id' )?
+                if ( id = node.getAttribute 'id' )?
                     targets[id] = node
                 recurFindTargets child for child in node.children()
             recurFindTargets this
             recurConnect = ( node ) ->
                 for attr in [ 'label', 'premise', 'reason' ]
-                    if ( value = node.getExternalAttribute "#{attr} for" )?
+                    if ( value = node.getAttribute "#{attr} for" )?
                         if value is 'previous'
                             target = node.previousSibling()
                         else if value is 'next'
@@ -310,7 +306,7 @@ Alternately the same keys could be associated with value "previous" or
                         else
                             target = null
                         if target? then node.connectTo target, attr
-                        node.clearExternalAttributes "#{attr} for"
+                        node.clearAttributes "#{attr} for"
                 recurConnect child for child in node.children()
             recurConnect this
 
@@ -322,7 +318,7 @@ return the structure for use in chaining.
 
 ## Unique IDs for instances
 
-Clients of this class may give instances of it unique IDs stored in external
+Clients of this class may give instances of it unique IDs stored in
 attributes.  (See the corresponding convenience function for querying such
 IDs in the [Attribute Conventions section](#attribute-conventions).)  To
 track those IDs, we use a class variable defined here, and provide class
@@ -338,7 +334,7 @@ save all of its IDs into (or delete all of its IDs from) the above class
 variable.  Whenever a structure hierarchy is no longer used by the client,
 `untrackIDs` should be called on that hierarchy to prevent memory leaks.
 
-        id : -> @getExternalAttribute 'id'
+        id : -> @getAttribute 'id'
         trackIDs : ( recursive = yes ) ->
             if @id()? then Structure::IDs[@id()] = @
             if recursive then child.trackIDs() for child in @children()
@@ -351,13 +347,13 @@ This is useful, for example, after making a deep copy of a structure, so
 that the copied version does not violate the global uniqueness of IDs.
 
         clearIDs : ( recursive = yes ) ->
-            @clearExternalAttributes 'id'
+            @clearAttributes 'id'
             if recursive then child.clearIDs() for child in @children()
 
 ## Connections
 
-Structures may have connections among them, specified using external
-attributes.  The documentation
+Structures may have connections among them, specified using attributes.  The
+documentation
 [here](https://lurchmath.github.io/lde/site/phase0-structures/#connections)
 covers the concept in detail.  We provide the following functions to make it
 easier for clients to create, remove, or query connections.
@@ -410,46 +406,42 @@ That is, `{ targID: { type: count, ... }, ... }`.
 Now find all my outgoing connections, and ensure they exist in at least the
 same quantity on both sides.
 
-            outs = arrayToObject \
-                ( @getExternalAttribute 'connectionsOut' ) ? [ ]
+            outs = arrayToObject ( @getAttribute 'connectionsOut' ) ? [ ]
             for own target, moreData of outs
                 continue unless ( T = Structure.instanceWithID target )?
                 targetIns = arrayToObject \
-                    ( T.getExternalAttribute 'connectionsIn' ) ? [ ]
+                    ( T.getAttribute 'connectionsIn' ) ? [ ]
                 targetIns[@id()] ?= { }
                 for own type, count of moreData
                     moreData[type] = targetIns[@id()][type] =
                         Math.max count, targetIns[@id()][type] ? 0
-                T.setExternalAttribute 'connectionsIn',
-                    objectToArray targetIns
+                T.setAttribute 'connectionsIn', objectToArray targetIns
 
 Repeat the same exrecise for my incoming connections.
 
-            ins = arrayToObject \
-                ( @getExternalAttribute 'connectionsIn' ) ? [ ]
+            ins = arrayToObject ( @getAttribute 'connectionsIn' ) ? [ ]
             for own source, moreData of ins
                 continue unless ( S = Structure.instanceWithID source )?
                 sourceOuts = arrayToObject \
-                    ( S.getExternalAttribute 'connectionsOut' ) ? [ ]
+                    ( S.getAttribute 'connectionsOut' ) ? [ ]
                 sourceOuts[@id()] ?= { }
                 for own type, count of moreData
                     moreData[type] = sourceOuts[@id()][type] =
                         Math.max count, sourceOuts[@id()][type] ? 0
-                S.setExternalAttribute 'connectionsOut',
-                    objectToArray sourceOuts
+                S.setAttribute 'connectionsOut', objectToArray sourceOuts
 
 ### Making consistent connections
 
 Another way to ensure that connections among structures in a hierarchy are
-consistent is to avoid directly editing the external attribute containing
-the connections data, and instead use the following two convenience
-functions for creating or deleting connections.
+consistent is to avoid directly editing the attribute containing the
+connections data, and instead use the following two convenience functions
+for creating or deleting connections.
 
-Note that the LDE should not be directly editing external attributes anyway,
-because they are defined to be read-only from this side.  But these two
-functions are useful when constructing structures to use in testing, and in
-particular for implementing the `attr` and `setup` functions above, which
-are very useful in the unit testing suite.
+Note that the LDE should not be directly editing attributes anyway, because
+they are defined to be read-only from this side.  But these two functions
+are useful when constructing structures to use in testing, and in particular
+for implementing the `attr` and `setup` functions above, which are very
+useful in the unit testing suite.
 
 The first one creates a new connection of the given type from this structure
 to another.  Because there may be multiple connections of a given type
@@ -462,13 +454,12 @@ They return true on success and false on failure.
         connectTo : ( otherStructure, connectionType = '' ) ->
             return no unless @id()? and \
                 otherStructure instanceof Structure and otherStructure.id()?
-            outs = ( @getExternalAttribute 'connectionsOut' ) ? [ ]
-            ins = ( otherStructure.getExternalAttribute 'connectionsIn' ) \
-                ? [ ]
+            outs = ( @getAttribute 'connectionsOut' ) ? [ ]
+            ins = ( otherStructure.getAttribute 'connectionsIn' ) ? [ ]
             outs.push [ otherStructure.id(), connectionType ]
             ins.push [ @id(), connectionType ]
-            @setExternalAttribute 'connectionsOut', outs
-            otherStructure.setExternalAttribute 'connectionsIn', ins
+            @setAttribute 'connectionsOut', outs
+            otherStructure.setAttribute 'connectionsIn', ins
             yes
 
 The delete function does nothing if there is no connection to delete.
@@ -476,9 +467,8 @@ The delete function does nothing if there is no connection to delete.
         disconnectFrom : ( otherStructure, connectionType = '' ) ->
             return no unless @id()? and \
                 otherStructure instanceof Structure and otherStructure.id()?
-            outs = ( @getExternalAttribute 'connectionsOut' ) ? [ ]
-            ins = ( otherStructure.getExternalAttribute 'connectionsIn' ) \
-                ? [ ]
+            outs = ( @getAttribute 'connectionsOut' ) ? [ ]
+            ins = ( otherStructure.getAttribute 'connectionsIn' ) ? [ ]
             outIndex = inIndex = 0
             while outIndex < outs.length and \
                   ( outs[outIndex][0] isnt otherStructure.id() or \
@@ -492,8 +482,8 @@ The delete function does nothing if there is no connection to delete.
             if inIndex is ins.length then return no
             outs.splice outIndex, 1
             ins.splice inIndex, 1
-            @setExternalAttribute 'connectionsOut', outs
-            otherStructure.setExternalAttribute 'connectionsIn', ins
+            @setAttribute 'connectionsOut', outs
+            otherStructure.setAttribute 'connectionsIn', ins
             yes
 
 ### Querying connections
@@ -508,14 +498,14 @@ type, then all outgoing connections are returned, not as targets only, but
 as target-type pairs, `[[targetID,typeString],...]`.
 
         allConnectionsOut : ( ofThisType ) ->
-            outs = ( @getExternalAttribute 'connectionsOut' ) ? [ ]
+            outs = ( @getAttribute 'connectionsOut' ) ? [ ]
             if not ofThisType? then return outs
             ( conn[0] for conn in outs when conn[1] is ofThisType )
 
 Then we can do the same thing for incoming connections.
 
         allConnectionsIn : ( ofThisType ) ->
-            ins = ( @getExternalAttribute 'connectionsIn' ) ? [ ]
+            ins = ( @getAttribute 'connectionsIn' ) ? [ ]
             if not ofThisType? then return ins
             ( conn[0] for conn in ins when conn[1] is ofThisType )
 
@@ -527,7 +517,7 @@ one without an ID.
         allConnectionsTo : ( otherStructure ) ->
             return null unless otherStructure instanceof Structure and \
                 otherStructure.id()?
-            outs = ( @getExternalAttribute 'connectionsOut' ) ? [ ]
+            outs = ( @getAttribute 'connectionsOut' ) ? [ ]
             ( conn[1] for conn in outs when conn[0] is otherStructure.id() )
 
 ## Accessibility

@@ -78,13 +78,13 @@ yet been implemented.  It should be done as follows:
 
 ### External attributes
 
- * [ ] In the `src/structure.litcoffee` file, in the section entitled
+ * [x] In the `src/structure.litcoffee` file, in the section entitled
    "External attributes," rename everything so that it no longer contains
    the word "external."  For example, `getExternalAttribute` would become
    just `getAttribute`, because we no longer need to distinguish computed
    from external attributes.
- * [ ] Throughout the unit tests, find any mention of external attributes
+ * [x] Throughout the unit tests, find any mention of external attributes
    and rename it to match the new names of those functions.  Ensure that all
    unit tests then still pass.
- * [ ] Search for any documentation that mentioned external attributes and
+ * [x] Search for any documentation that mentioned external attributes and
    update it to match the new names of those functions.

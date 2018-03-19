@@ -126,11 +126,10 @@ These are of utmost importance, because
 
 ## Attributes
 
- * Every structure contains a key-value dictionary called *external
-   attributes,* which are read-only from the point of view of the LDE, and
-   are read-write from the point of view of the UI.  They are called
-   "external" because, from the LDE's point of view, they come from
-   elsewhere (the UI).
+ * Every structure contains a key-value dictionary called *attributes,*
+   which are read-only from the point of view of the LDE, and are
+   read-write from the point of view of the UI.  From the LDE's point of
+   view, they come from elsewhere (the UI).
 
 ## Document
 
@@ -178,13 +177,12 @@ These are of utmost importance, because
  * Other UI details:
     * Because we have a UI that allows users to make connections among
       groups, the structures in the hierarchy may include, among their
-      external attributes, a binary, edge-labeled multigraph.  (Note that
-      this does not require that every connection in the HTML document
-      become two Structures in the LDE Document with attributes connecting
-      them.  Nor does it stipulate that some concept--such as
-      labeling--that we might decide to represent as part of this
-      multigraph can't also be represented sometimes in another way as
-      well.)
+      attributes, a binary, edge-labeled multigraph.  (Note that this does
+      not require that every connection in the HTML document become two
+      Structures in the LDE Document with attributes connecting them.  Nor
+      does it stipulate that some concept--such as labeling--that we might
+      decide to represent as part of this multigraph can't also be
+      represented sometimes in another way as well.)
     * If we require the LDE to send a signal when validation completes,
       then we can make a UI setting of whether to show feedback as the
       feedback arrives, or only after the "all validation complete" signal

@@ -54,7 +54,7 @@ no attributes and no children, and an instance of the base Structure class.
             serialized = LDE.getDocument().toJSON()
             expect( serialized.className ).toBe 'Structure'
             expect( serialized.children ).toEqual [ ]
-            expect( serialized.externalAttributes ).toEqual { id : 'root' }
+            expect( serialized.attributes ).toEqual { id : 'root' }
 
 In order for us to work with the LDE Document, we will need the root to have
 an ID that we can pass to various editing functions.  Let's verify that it
@@ -81,7 +81,7 @@ Insert one and verify that it has been added and its ID tracked.
             insertedA = LDE.getDocument().children()[0]
             expect( insertedA ).not.toBeUndefined()
             expect( insertedA.className ).toBe 'Structure'
-            expect( insertedA.getExternalAttribute 'text' ).toBe 'some text'
+            expect( insertedA.getAttribute 'text' ).toBe 'some text'
             expect( insertedA.id() ).toBe 'A'
             expect( insertedA.parent() ).toBe LDE.getDocument()
             expect( Structure.instanceWithID 'A' ).toBe insertedA
@@ -93,7 +93,7 @@ Insert another as its sibling and do the same verifications.
             insertedB = LDE.getDocument().children()[1]
             expect( insertedB ).not.toBeUndefined()
             expect( insertedB.className ).toBe 'Structure'
-            expect( insertedB.getExternalAttribute 'reference' )
+            expect( insertedB.getAttribute 'reference' )
                 .toBeTruthy()
             expect( insertedB.id() ).toBe 'B'
             expect( insertedB.parent() ).toBe LDE.getDocument()
@@ -109,7 +109,7 @@ Insert a grandchild and do similar verifications, but one level lower.
             insertedC = insertedA.children()[0]
             expect( insertedC ).not.toBeUndefined()
             expect( insertedC.className ).toBe 'Structure'
-            expect( insertedC.getExternalAttribute 'name' ).toBe 'C'
+            expect( insertedC.getAttribute 'name' ).toBe 'C'
             expect( insertedC.id() ).toBe 'C'
             expect( insertedC.parent() ).toBe insertedA
             expect( Structure.instanceWithID 'C' ).toBe insertedC
@@ -123,7 +123,7 @@ state.
             serialized = LDE.getDocument().toJSON()
             expect( serialized.className ).toBe 'Structure'
             expect( serialized.children ).toEqual [ ]
-            expect( serialized.externalAttributes ).toEqual { id : 'root' }
+            expect( serialized.attributes ).toEqual { id : 'root' }
 
 Next we test the `delete` member of the API.  We re-populate the document
 and then slowly delete pieces.
@@ -155,11 +155,11 @@ First delete C.
             expect( doc.children().length ).toBe 2
             expect( doc.children()[0].parent() ).toBe doc
             expect( doc.children()[0].children().length ).toBe 0
-            expect( doc.children()[0].getExternalAttribute 'text' )
+            expect( doc.children()[0].getAttribute 'text' )
                 .toBe 'some text'
             expect( doc.children()[1].parent() ).toBe doc
             expect( doc.children()[1].children().length ).toBe 0
-            expect( doc.children()[1].getExternalAttribute 'reference' )
+            expect( doc.children()[1].getAttribute 'reference' )
                 .toBeTruthy()
 
 Was its ID also released?
@@ -172,7 +172,7 @@ Next delete A.
             expect( doc.children().length ).toBe 1
             expect( doc.children()[0].parent() ).toBe doc
             expect( doc.children()[0].children().length ).toBe 0
-            expect( doc.children()[0].getExternalAttribute 'reference' )
+            expect( doc.children()[0].getAttribute 'reference' )
                 .toBeTruthy()
             expect( Structure.instanceWithID 'A' ).toBeUndefined()
 
@@ -200,11 +200,11 @@ First delete B.
             insertedA = doc.children()[0]
             expect( insertedA.parent() ).toBe doc
             expect( insertedA.children().length ).toBe 1
-            expect( insertedA.getExternalAttribute 'text' ).toBe 'some text'
+            expect( insertedA.getAttribute 'text' ).toBe 'some text'
             insertedC = insertedA.children()[0]
             expect( insertedC.parent() ).toBe insertedA
             expect( insertedC.children().length ).toBe 0
-            expect( insertedC.getExternalAttribute 'name' ).toBe 'C'
+            expect( insertedC.getAttribute 'name' ).toBe 'C'
             expect( Structure.instanceWithID 'B' ).toBeUndefined()
 
 Then delete A, which also deletes C.
@@ -235,20 +235,19 @@ test.
 Verify that it has the expected structure before we begin manipulating it.
 
             expect( insertedA.className ).toBe 'Structure'
-            expect( insertedA.getExternalAttribute 'text' ).toBe 'some text'
+            expect( insertedA.getAttribute 'text' ).toBe 'some text'
             expect( insertedA.id() ).toBe 'A'
             expect( Structure.instanceWithID 'A' ).toBe insertedA
             expect( insertedA.parent() ).toBe LDE.getDocument()
             expect( insertedB.className ).toBe 'Structure'
-            expect( insertedB.getExternalAttribute 'reference' )
-                .toBeTruthy()
+            expect( insertedB.getAttribute 'reference' ).toBeTruthy()
             expect( insertedB.id() ).toBe 'B'
             expect( Structure.instanceWithID 'B' ).toBe insertedB
             expect( insertedB.parent() ).toBe LDE.getDocument()
             expect( insertedA.nextSibling() ).toBe insertedB
             expect( insertedB.previousSibling() ).toBe insertedA
             expect( insertedC.className ).toBe 'Structure'
-            expect( insertedC.getExternalAttribute 'name' ).toBe 'C'
+            expect( insertedC.getAttribute 'name' ).toBe 'C'
             expect( insertedC.id() ).toBe 'C'
             expect( Structure.instanceWithID 'C' ).toBe insertedC
             expect( insertedC.parent() ).toBe insertedA
@@ -264,12 +263,11 @@ as above, except that C has been replaced by D.
 
             expect( -> LDE.replace 'C', D.toJSON() ).not.toThrow()
             expect( insertedA.className ).toBe 'Structure'
-            expect( insertedA.getExternalAttribute 'text' ).toBe 'some text'
+            expect( insertedA.getAttribute 'text' ).toBe 'some text'
             expect( insertedA.id() ).toBe 'A'
             expect( insertedA.parent() ).toBe LDE.getDocument()
             expect( insertedB.className ).toBe 'Structure'
-            expect( insertedB.getExternalAttribute 'reference' )
-                .toBeTruthy()
+            expect( insertedB.getAttribute 'reference' ).toBeTruthy()
             expect( insertedB.id() ).toBe 'B'
             expect( insertedB.parent() ).toBe LDE.getDocument()
             expect( insertedA.nextSibling() ).toBe insertedB
@@ -277,7 +275,7 @@ as above, except that C has been replaced by D.
             shouldBeD = insertedA.children()[0]
             expect( shouldBeD ).not.toBe insertedC
             expect( shouldBeD.className ).toBe 'Structure'
-            expect( shouldBeD.getExternalAttribute 'name' ).toBe 'Dan'
+            expect( shouldBeD.getAttribute 'name' ).toBe 'Dan'
             expect( shouldBeD.id() ).toBe 'D'
             expect( shouldBeD.parent() ).toBe insertedA
 
@@ -294,12 +292,11 @@ type of tests to verify the structure.
             shouldBeE = LDE.getDocument().children()[0]
             expect( shouldBeE ).not.toBe insertedA
             expect( shouldBeE.className ).toBe 'Structure'
-            expect( shouldBeE.getExternalAttribute 'name' ).toBe 'Eli'
+            expect( shouldBeE.getAttribute 'name' ).toBe 'Eli'
             expect( shouldBeE.id() ).toBe 'E'
             expect( shouldBeE.parent() ).toBe LDE.getDocument()
             expect( insertedB.className ).toBe 'Structure'
-            expect( insertedB.getExternalAttribute 'reference' )
-                .toBeTruthy()
+            expect( insertedB.getAttribute 'reference' ).toBeTruthy()
             expect( insertedB.id() ).toBe 'B'
             expect( insertedB.parent() ).toBe LDE.getDocument()
             expect( shouldBeE.nextSibling() ).toBe insertedB
@@ -342,20 +339,20 @@ that they were successfully added.
                 'test key 3', 'test value 3' ).not.toThrow()
             expect( -> LDE.setAttribute 'C',
                 'test key 4', 'test value 4' ).not.toThrow()
-            expect( LDE.getDocument().getExternalAttribute 'test key 1' )
+            expect( LDE.getDocument().getAttribute 'test key 1' )
                 .toBe 'test value 1'
-            expect( insertedA.getExternalAttribute 'test key 2' )
+            expect( insertedA.getAttribute 'test key 2' )
                 .toBe 'test value 2'
-            expect( insertedB.getExternalAttribute 'test key 3' )
+            expect( insertedB.getAttribute 'test key 3' )
                 .toBe 'test value 3'
-            expect( insertedC.getExternalAttribute 'test key 4' )
+            expect( insertedC.getAttribute 'test key 4' )
                 .toBe 'test value 4'
 
 Then we call `setAttribute` with no value, and ensure that this removes
 attributes.
 
             expect( -> LDE.setAttribute 'root', 'test key 1' ).not.toThrow()
-            expect( LDE.getDocument().getExternalAttribute 'test key 1' )
+            expect( LDE.getDocument().getAttribute 'test key 1' )
                 .toBeUndefined()
 
 ## WebWorker Support
@@ -384,7 +381,7 @@ background thread, not to re-test the same functionality as before.
             asyncTest [ 'getDocument' ], ( result ) ->
                 expect( result ).toEqual {
                     className : 'Structure'
-                    externalAttributes : { id : 'root' }
+                    attributes : { id : 'root' }
                     children : [ ]
                 }
                 done()
@@ -397,10 +394,10 @@ background thread, not to re-test the same functionality as before.
             asyncTest [ 'getDocument' ], ( result ) ->
                 expect( result ).toEqual {
                     className : 'Structure'
-                    externalAttributes : { id : 'root' }
+                    attributes : { id : 'root' }
                     children : [
                         className : 'Structure'
-                        externalAttributes : name : 'A', ID : 'foo'
+                        attributes : name : 'A', ID : 'foo'
                         children : [ ]
                     ]
                 }
@@ -415,7 +412,7 @@ background thread, not to re-test the same functionality as before.
             asyncTest [ 'getDocument' ], ( result ) ->
                 expect( result ).toEqual {
                     className : 'Structure'
-                    externalAttributes : { id : 'root' }
+                    attributes : { id : 'root' }
                     children : [ ]
                 }
                 done()
@@ -430,10 +427,10 @@ background thread, not to re-test the same functionality as before.
             asyncTest [ 'getDocument' ], ( result ) ->
                 expect( result ).toEqual {
                     className : 'Structure'
-                    externalAttributes : { id : 'root' }
+                    attributes : { id : 'root' }
                     children : [
                         className : 'Structure'
-                        externalAttributes : name : 'B', id : 'bar'
+                        attributes : name : 'B', id : 'bar'
                         children : [ ]
                     ]
                 }
@@ -448,10 +445,10 @@ background thread, not to re-test the same functionality as before.
             asyncTest [ 'getDocument' ], ( result ) ->
                 expect( result ).toEqual {
                     className : 'Structure'
-                    externalAttributes : { id : 'root' }
+                    attributes : { id : 'root' }
                     children : [
                         className : 'Structure'
-                        externalAttributes :
+                        attributes :
                             name : 'A'
                             id : 'foo'
                             color : 'red'

@@ -64,7 +64,7 @@ finds the descendant of the LDE Document that has the given ID, and inserts
 the deserialized version as one of its children, at the given index. If
 anything goes wrong in that process then it does nothing.  The ID must be
 the ID of a Structure, as defined in that class (a string ID stored in the
-external attribute "id").
+attribute "id").
 
 All newly inserted structures and their descendants have all their IDs
 tracked.
@@ -104,15 +104,15 @@ IDs in the structure that was removed.
 
 The following function finds the descendant of the global LDE Document that
 has the given ID and, assuming such a structure exists, calls its member
-function for setting an external attribute with the given key and value.  As
-per the requirements of the `Structure.setExternalAttribute` function, be
-sure to provide only values that are amenable to `JSON.stringify`.
+function for setting an attribute with the given key and value.  As per the
+requirements of the `Structure.setAttribute` function, be sure to provide
+only values that are amenable to `JSON.stringify`.
 
     functions.setAttribute = ( subtreeID, key, value ) ->
         if ( subtree = Structure.instanceWithID subtreeID )? and \
            isInTheDocument subtree
             if key is 'id' then subtree.untrackIDs no
-            subtree.setExternalAttribute key, value
+            subtree.setAttribute key, value
             if key is 'id' then subtree.trackIDs no
 
 ## Event Listeners

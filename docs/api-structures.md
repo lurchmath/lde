@@ -57,9 +57,9 @@ instances, as well as instances of its subclasses, using the member function
 class function `Structure.fromJSON(data)`, which accepts JSON data created
 from the first function.
 
-Serializing a structure preserves its class, its external attributes
-([documented below](#structure-attributes-and-connections)), and the
-hierarchy for which it is the root.
+Serializing a structure preserves its class, its attributes ([documented
+below](#structure-attributes-and-connections)), and the hierarchy for which
+it is the root.
 
 ## Structure hierarchies
 
@@ -166,22 +166,21 @@ to the iterators.
 ## Structure attributes and connections
 
 The following functions available in each instance of the structure class
-support external attributes.
+support attributes.
 
- * `instance.getExternalAttribute(key)` looks up external attributes by a
-   given string `key`.
- * `instance.setExternalAttribute(key,value)` stores external attributes
-   under a given string `key` with value `value`, which should be a JSON
-   structure (or atomic data).  No check is made to verify that the value
-   is of this type, but errors will transpire later if this condition is
-   not satisfied (specifically, serialization errors).
- * `instance.clearExternalAttributes(key1,key2,...)` removes the key-value
-   pairs of external attributes associated with any of the keys passed as
-   parameters.  It is acceptable to pass any number of keys, including just
-   one.  If zero are passed, *all* key-value pairs are removed.
+ * `instance.getAttribute(key)` looks up attributes by a given string `key`.
+ * `instance.setAttribute(key,value)` stores attributes under a given
+   string `key` with value `value`, which should be a JSON structure (or
+   atomic data).  No check is made to verify that the value is of this
+   type, but errors will transpire later if this condition is not satisfied
+   (specifically, serialization errors).
+ * `instance.clearAttributes(key1,key2,...)` removes the key-value pairs
+   of attributes associated with any of the keys passed as parameters.  It
+   is acceptable to pass any number of keys, including just one.  If zero
+   are passed, *all* key-value pairs are removed.
  * `instance.attr(object)` adds all attributes of the given object as
-   external attributes to the instance, and returns the instance itself.
-   This is useful when constructing hierarchies, as follows.
+   attributes to the instance, and returns the instance itself.  This is
+   useful when constructing hierarchies, as follows.
 
 ```js
     var A = new Structure(
@@ -192,8 +191,8 @@ support external attributes.
 
 ### Connections as a type of attribute
 
-Within a structure's external attributes are two key-value pairs that should
-not be used for any other purpose, those with keys `connectionsOut` and
+Within a structure's attributes are two key-value pairs that should not be
+used for any other purpose, those with keys `connectionsOut` and
 `connectionsIn`.  These store data about connections between pairs of
 structures in the same heirarchy.  The data is stored by structure IDs, so
 making connections assumes that structures each have a unique ID, as
@@ -236,11 +235,10 @@ stored in the corresponding destinations, and vice versa.
 
 ## Unique IDs
 
-The `Structure` class maintains a mapping from IDs (as strings) to
-instances of the class.  An instance gets its ID from the external attribute
-with key "id."  All IDs in a hierarchy can be tracked (that is, recorded
-into this class-level mapping) with the `trackIDs()` function documented
-below.
+The `Structure` class maintains a mapping from IDs (as strings) to instances
+of the class.  An instance gets its ID from the attribute with key "id."
+All IDs in a hierarchy can be tracked (that is, recorded into this
+class-level mapping) with the `trackIDs()` function documented below.
 
 Here are the relevant functions:
 
@@ -270,8 +268,8 @@ object itself, as in `myStructure.willBeRemoved = myHandlerFunction`.
 Insertion events are fired immediately before/after the `Structure` is added
 as a child under a new parent.  Removal events are fired immediately
 before/after the `Structure` is removed from an existing parent.  Change
-events are fired immediately before/after an external attribute of the
-`Structure` instance changes.
+events are fired immediately before/after an attribute of the `Structure`
+instance changes.
 
 Example:
 

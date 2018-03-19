@@ -460,7 +460,7 @@ The next test is whether we can make a deep copy of a Structure.
 Make a tiny Structure for testing.
 
             tiny = new Structure
-            tiny.setExternalAttribute 5, 6
+            tiny.setAttribute 5, 6
 
 Make a copy of root and test that it copied correctly and did not mess up
 the original.
@@ -469,18 +469,18 @@ the original.
             expect( C ).not.toBe tiny
             expect( C.parent() ).toBeFalsy()
             expect( C.children() ).toEqual [ ]
-            expect( C.getExternalAttribute 5 ).toBe 6
-            expect( C.getExternalAttribute 6 ).toBeUndefined()
+            expect( C.getAttribute 5 ).toBe 6
+            expect( C.getAttribute 6 ).toBeUndefined()
             expect( tiny.parent() ).toBeFalsy()
             expect( tiny.children() ).toEqual [ ]
-            expect( tiny.getExternalAttribute 5 ).toBe 6
-            expect( tiny.getExternalAttribute 6 ).toBeUndefined()
+            expect( tiny.getAttribute 5 ).toBe 6
+            expect( tiny.getAttribute 6 ).toBeUndefined()
 
 Ensure that changing data within the original doesn't change the copy.
 
-            tiny.setExternalAttribute 5, 10
-            expect( tiny.getExternalAttribute 5 ).toBe 10
-            expect( C.getExternalAttribute 5 ).toBe 6
+            tiny.setAttribute 5, 10
+            expect( tiny.getAttribute 5 ).toBe 10
+            expect( C.getAttribute 5 ).toBe 6
 
 Make a more complex Structure for testing.
 
@@ -492,7 +492,7 @@ Make a more complex Structure for testing.
                 )
                 B = new Structure
             )
-            AB.setExternalAttribute 2, 7
+            AB.setAttribute 2, 7
 
 Make a copy of tween and test that it copied correctly and did not mess up
 the original.
@@ -510,18 +510,18 @@ the original.
             expect( DA.children().length ).toEqual 3
             DAB = DA.children()[1]
             expect( DAB ).not.toBe( AB )
-            expect( DAB.getExternalAttribute 2 ).toEqual 7
+            expect( DAB.getAttribute 2 ).toEqual 7
             DB = D.children()[1]
-            expect( DB.externalAttributes ).toEqual { }
+            expect( DB.attributes ).toEqual { }
 
 Ensure that changing data within the original doesn't change the copy.
 
-            tween.setExternalAttribute 3, 8
-            expect( tween.getExternalAttribute 3 ).toEqual 8
-            expect( D.externalAttributes ).toEqual { }
-            AB.setExternalAttribute 2, 9
-            expect( AB.getExternalAttribute 2 ).toEqual 9
-            expect( DAB.getExternalAttribute 2 ).toEqual 7
+            tween.setAttribute 3, 8
+            expect( tween.getAttribute 3 ).toEqual 8
+            expect( D.attributes ).toEqual { }
+            AB.setAttribute 2, 9
+            expect( AB.getAttribute 2 ).toEqual 9
+            expect( DAB.getAttribute 2 ).toEqual 7
 
 The next section tests the tree ordering relation defined in the Structure
 class, `isEarlierThan()`.
@@ -632,18 +632,16 @@ Begin with a trivial example, a single node hierarchy with no attributes.
             expect( json instanceof Structure ).toBeFalsy()
             expect( json ).not.toBe loner
             expect( json.className ).toBe 'Structure'
-            expect( json.externalAttributes ).toEqual { }
+            expect( json.attributes ).toEqual { }
             expect( json.children ).toEqual [ ]
 
 Deserialize a copy from it and verify that it is correctly structured.
 
             copy = Structure.fromJSON json
             expect( copy instanceof Structure ).toBeTruthy()
-            expect( copy.externalAttributes ).toEqual { }
-            expect( copy.externalAttributes ).not.toBe \
-                json.externalAttributes
-            expect( copy.externalAttributes ).not.toBe \
-                loner.externalAttributes
+            expect( copy.attributes ).toEqual { }
+            expect( copy.attributes ).not.toBe json.attributes
+            expect( copy.attributes ).not.toBe loner.attributes
             expect( copy.children() ).toEqual [ ]
             expect( copy.parent() ).toBeNull()
             expect( copy ).not.toBe json
@@ -653,13 +651,13 @@ Now do another one-node example, but this one with some attributes of each
 type.
 
             atty = new Structure()
-            atty.setExternalAttribute 1, 2
-            atty.setExternalAttribute 'three', [ 'four', { } ]
+            atty.setAttribute 1, 2
+            atty.setAttribute 'three', [ 'four', { } ]
             json = atty.toJSON()
             expect( json instanceof Structure ).toBeFalsy()
             expect( json ).not.toBe atty
             expect( json.className ).toBe 'Structure'
-            expect( json.externalAttributes ).toEqual
+            expect( json.attributes ).toEqual
                 1 : 2
                 'three' : [ 'four', { } ]
             expect( json.children ).toEqual [ ]
@@ -668,13 +666,11 @@ Deserialize a copy from it and verify that it is correctly structured.
 
             copy = Structure.fromJSON json
             expect( copy instanceof Structure ).toBeTruthy()
-            expect( copy.externalAttributes ).toEqual
+            expect( copy.attributes ).toEqual
                 1 : 2
                 'three' : [ 'four', { } ]
-            expect( copy.externalAttributes ).not.toBe \
-                json.externalAttributes
-            expect( copy.externalAttributes ).not.toBe \
-                atty.externalAttributes
+            expect( copy.attributes ).not.toBe json.attributes
+            expect( copy.attributes ).not.toBe atty.attributes
             expect( copy.children() ).toEqual [ ]
             expect( copy.parent() ).toBeNull()
             expect( copy ).not.toBe json
@@ -688,7 +684,7 @@ next test.
                 exampleMethod1 : -> 5
             class Sub2 extends Structure
                 className : Structure.addSubclass 'Sub2', Sub2
-                exampleMethod2 : -> @getExternalAttribute 'test'
+                exampleMethod2 : -> @getAttribute 'test'
 
 Now create a hierarchy with three `Structure`s in it, one of each of the
 three classes `Structure`, `Sub1`, and `Sub2`.  Also give every node in the
@@ -712,20 +708,20 @@ Serialize and verify that it came out correctly.
             expect( json instanceof Structure ).toBeFalsy()
             expect( json ).not.toBe bigger
             expect( json.className ).toBe 'Structure'
-            expect( json.externalAttributes ).toEqual { }
+            expect( json.attributes ).toEqual { }
             expect( json.children.length ).toBe 2
             child = json.children[0]
             expect( child instanceof Structure ).toBeFalsy()
             expect( child instanceof Sub1 ).toBeFalsy()
             expect( child.className ).toBe 'Sub1'
-            expect( child.externalAttributes ).toEqual { 10 : 100 }
+            expect( child.attributes ).toEqual { 10 : 100 }
             expect( child.children ).toEqual [ ]
             expect( child.exampleMethod1 ).toBeUndefined()
             child = json.children[1]
             expect( child instanceof Structure ).toBeFalsy()
             expect( child instanceof Sub2 ).toBeFalsy()
             expect( child.className ).toBe 'Sub2'
-            expect( child.externalAttributes ).toEqual { 'test' : 'ing' }
+            expect( child.attributes ).toEqual { 'test' : 'ing' }
             expect( child.children ).toEqual [ ]
             expect( child.exampleMethod2 ).toBeUndefined()
 
@@ -734,11 +730,9 @@ hierarchy, as well as all the same tests we did for the earlier cases.
 
             copy = Structure.fromJSON json
             expect( copy instanceof Structure ).toBeTruthy()
-            expect( copy.externalAttributes ).toEqual { }
-            expect( copy.externalAttributes ).not.toBe \
-                json.externalAttributes
-            expect( copy.externalAttributes ).not.toBe \
-                bigger.externalAttributes
+            expect( copy.attributes ).toEqual { }
+            expect( copy.attributes ).not.toBe json.attributes
+            expect( copy.attributes ).not.toBe bigger.attributes
             expect( copy.id() ).toBeUndefined()
             expect( copy.parent() ).toBeNull()
             expect( copy ).not.toBe json
@@ -746,11 +740,9 @@ hierarchy, as well as all the same tests we did for the earlier cases.
             expect( copy.children().length ).toBe 2
             child = copy.children()[0]
             expect( child instanceof Sub1 ).toBeTruthy()
-            expect( child.externalAttributes ).toEqual { 10 : 100 }
-            expect( child.externalAttributes ).not.toBe \
-                json.externalAttributes
-            expect( child.externalAttributes ).not.toBe \
-                child1.externalAttributes
+            expect( child.attributes ).toEqual { 10 : 100 }
+            expect( child.attributes ).not.toBe json.attributes
+            expect( child.attributes ).not.toBe child1.attributes
             expect( child.id() ).toBeUndefined()
             expect( child.parent() ).toBe copy
             expect( child ).not.toBe json.children[0]
@@ -758,11 +750,9 @@ hierarchy, as well as all the same tests we did for the earlier cases.
             expect( child.children() ).toEqual [ ]
             child = copy.children()[1]
             expect( child instanceof Sub2 ).toBeTruthy()
-            expect( child.externalAttributes ).toEqual { 'test' : 'ing' }
-            expect( child.externalAttributes ).not.toBe \
-                json.externalAttributes
-            expect( child.externalAttributes ).not.toBe \
-                child2.externalAttributes
+            expect( child.attributes ).toEqual { 'test' : 'ing' }
+            expect( child.attributes ).not.toBe json.ttributes
+            expect( child.attributes ).not.toBe child2.attributes
             expect( child.id() ).toBeUndefined()
             expect( child.parent() ).toBe copy
             expect( child ).not.toBe json.children[1]
@@ -778,30 +768,30 @@ argument and once with a false argument.
             ).attr id : 'Y', other : 'stuff'
             expect( small.toJSON() ).toEqual {
                 className : 'Structure'
-                externalAttributes : id : 'Y', other : 'stuff'
+                attributes : id : 'Y', other : 'stuff'
                 children : [
                     className : 'Structure'
-                    externalAttributes : id : 'X', other : 'things'
+                    attributes : id : 'X', other : 'things'
                     children : [ ]
                 ]
             }
             expect( small.toJSON no ).toEqual {
                 className : 'Structure'
-                externalAttributes : other : 'stuff'
+                attributes : other : 'stuff'
                 children : [
                     className : 'Structure'
-                    externalAttributes : other : 'things'
+                    attributes : other : 'things'
                     children : [ ]
                 ]
             }
 
-## External attributes
+## Attributes
 
-    describe 'External attributes', ->
+    describe 'Attributes', ->
 
-Structure objects provide an external attributes dictionary, which should
-function as any other Javascript object, storing key-value pairs.  Because
-the implementation of this is very straightforward, we do only a few short
+Structure objects provide an attributes dictionary, which should function as
+any other Javascript object, storing key-value pairs.  Because the
+implementation of this is very straightforward, we do only a few short
 tests.
 
         it 'should function as a key-value dictionary', ->
@@ -813,40 +803,40 @@ Make a few new structures.
 
 There shouldn't be any values stored at first in either of them.
 
-            expect( S1.getExternalAttribute 'alpha' ).toBeUndefined()
-            expect( S2.getExternalAttribute 'alpha' ).toBeUndefined()
-            expect( S1.getExternalAttribute 'b e t a' ).toBeUndefined()
-            expect( S2.getExternalAttribute 'b e t a' ).toBeUndefined()
+            expect( S1.getAttribute 'alpha' ).toBeUndefined()
+            expect( S2.getAttribute 'alpha' ).toBeUndefined()
+            expect( S1.getAttribute 'b e t a' ).toBeUndefined()
+            expect( S2.getAttribute 'b e t a' ).toBeUndefined()
 
 We can set any type of data in them without error.
 
             value1 = 55555
             value2 = { example : 'JSON' }
-            S1.setExternalAttribute 'alpha', value1
-            S2.setExternalAttribute 'b e t a', value2
+            S1.setAttribute 'alpha', value1
+            S2.setAttribute 'b e t a', value2
 
 We can then retrieve that exact data again.
 
-            expect( S1.getExternalAttribute 'alpha' ).toBe value1
-            expect( S2.getExternalAttribute 'b e t a' ).toBe value2
+            expect( S1.getAttribute 'alpha' ).toBe value1
+            expect( S2.getAttribute 'b e t a' ).toBe value2
 
 Things added to S1 did not impact S2, and vice versa.
 
-            expect( S2.getExternalAttribute 'alpha' ).toBeUndefined()
-            expect( S1.getExternalAttribute 'b e t a' ).toBeUndefined()
+            expect( S2.getAttribute 'alpha' ).toBeUndefined()
+            expect( S1.getAttribute 'b e t a' ).toBeUndefined()
 
 We can remove things from the dictionaries without error, even asking to
 remove things that weren't there in the first place.
 
-            S1.clearExternalAttributes 'alpha', 'b e t a'
-            S2.clearExternalAttributes 'alpha', 'b e t a'
+            S1.clearAttributes 'alpha', 'b e t a'
+            S2.clearAttributes 'alpha', 'b e t a'
 
 Now there's nothing in the dictionaries again.
 
-            expect( S1.getExternalAttribute 'alpha' ).toBeUndefined()
-            expect( S2.getExternalAttribute 'alpha' ).toBeUndefined()
-            expect( S1.getExternalAttribute 'b e t a' ).toBeUndefined()
-            expect( S2.getExternalAttribute 'b e t a' ).toBeUndefined()
+            expect( S1.getAttribute 'alpha' ).toBeUndefined()
+            expect( S2.getAttribute 'alpha' ).toBeUndefined()
+            expect( S1.getAttribute 'b e t a' ).toBeUndefined()
+            expect( S2.getAttribute 'b e t a' ).toBeUndefined()
 
 ## Event handling
 
@@ -944,10 +934,10 @@ Now test whether change handlers work.
 
         it 'should send change events', ->
 
-Add external attributes to each of A and B and ensure that the correct event
-handlers were called in each case.
+Add attributes to each of A and B and ensure that the correct event handlers
+were called in each case.
 
-            A.setExternalAttribute 'a', 'b'
+            A.setAttribute 'a', 'b'
             expect( A.wasChanged ).toHaveBeenCalled()
             expect( A.willBeChanged ).toHaveBeenCalled()
             expect( B.wasChanged ).not.toHaveBeenCalled()
@@ -968,7 +958,7 @@ up for future tests.
 Modify the attributes already added to A and B and verify that the change
 event handlers are called again.
 
-            B.setExternalAttribute 5, { } # different object!
+            B.setAttribute 5, { } # different object!
             expect( B.wasChanged ).toHaveBeenCalled()
             expect( B.willBeChanged ).toHaveBeenCalled()
             expect( A.wasChanged ).not.toHaveBeenCalled()
@@ -989,7 +979,7 @@ up for future tests.
 Remove attributes from A and B and verify that this, too, calls change event
 handlers.
 
-            A.clearExternalAttributes 'a'
+            A.clearAttributes 'a'
             expect( A.wasChanged ).toHaveBeenCalled()
             expect( A.willBeChanged ).toHaveBeenCalled()
             expect( B.wasChanged ).not.toHaveBeenCalled()
@@ -1056,17 +1046,17 @@ Ensure that `willBeChanged` comes before the change, which comes before
             valueBeforeChange = valueAfterChange = null
             A.willBeChanged = ->
                 countBeforeChange = count++
-                valueBeforeChange = A.getExternalAttribute 'test'
+                valueBeforeChange = A.getAttribute 'test'
             A.wasChanged = ->
                 countAfterChange = count++
-                valueAfterChange = A.getExternalAttribute 'test'
-            A.setExternalAttribute 'test', 100
+                valueAfterChange = A.getAttribute 'test'
+            A.setAttribute 'test', 100
             expect( countBeforeChange ).toBe 0
             expect( countAfterChange ).toBe 1
             expect( count ).toBe 2
             expect( valueBeforeChange ).toBeUndefined()
             expect( valueAfterChange ).toBe 100
-            A.setExternalAttribute 'test', null
+            A.setAttribute 'test', null
             expect( countBeforeChange ).toBe 2
             expect( countAfterChange ).toBe 3
             expect( count ).toBe 4
@@ -1157,8 +1147,8 @@ We now connect A to B, but only note it within A.
 And we connect B to C, but only note it within C.
 These are the two inconsistencies we will test here.
 
-            A.setExternalAttribute 'connectionsOut', [ [ 'B', 'foo' ] ]
-            C.setExternalAttribute 'connectionsIn', [ [ 'B', 'bar' ] ]
+            A.setAttribute 'connectionsOut', [ [ 'B', 'foo' ] ]
+            C.setAttribute 'connectionsIn', [ [ 'B', 'bar' ] ]
 
 Make the connections consistent.
 
@@ -1166,23 +1156,23 @@ Make the connections consistent.
 
 Verify that no old connections were removed.
 
-            expect( A.getExternalAttribute 'connectionsOut' )
+            expect( A.getAttribute 'connectionsOut' )
                 .toEqual [ [ 'B', 'foo' ] ]
-            expect( C.getExternalAttribute 'connectionsIn' )
+            expect( C.getAttribute 'connectionsIn' )
                 .toEqual [ [ 'B', 'bar' ] ]
 
 Verify that all the appropriate new connections were added.
 
-            expect( B.getExternalAttribute 'connectionsIn' )
+            expect( B.getAttribute 'connectionsIn' )
                 .toEqual [ [ 'A', 'foo' ] ]
-            expect( B.getExternalAttribute 'connectionsOut' )
+            expect( B.getAttribute 'connectionsOut' )
                 .toEqual [ [ 'C', 'bar' ] ]
 
 Verify that no other connections were created.
 
-            expect( C.getExternalAttribute 'connectionsOut' )
+            expect( C.getAttribute 'connectionsOut' )
                 .toBeUndefined()
-            expect( A.getExternalAttribute 'connectionsIn' )
+            expect( A.getAttribute 'connectionsIn' )
                 .toBeUndefined()
             A.untrackIDs()
 
@@ -1203,18 +1193,18 @@ itself, and so on.
                 ).attr id : 'D'
             ).attr id : 'root'
             root.trackIDs()
-            A.setExternalAttribute 'connectionsOut',
+            A.setAttribute 'connectionsOut',
                 [ [ 'B', '1' ], [ 'E', '2' ] ]
-            B.setExternalAttribute 'connectionsIn',
+            B.setAttribute 'connectionsIn',
                 [ [ 'A', '1' ], [ 'A', '1' ], [ 'A', '1' ],
                   [ 'A', '2' ] ]
-            B.setExternalAttribute 'connectionsOut', [ [ 'C', '1' ] ]
-            C.setExternalAttribute 'connectionsIn', [ [ 'D', '3' ] ]
-            C.setExternalAttribute 'connectionsOut', [ [ 'D', '3' ] ]
-            D.setExternalAttribute 'connectionsIn', [ [ 'C', '3' ] ]
-            E.setExternalAttribute 'connectionsIn',
+            B.setAttribute 'connectionsOut', [ [ 'C', '1' ] ]
+            C.setAttribute 'connectionsIn', [ [ 'D', '3' ] ]
+            C.setAttribute 'connectionsOut', [ [ 'D', '3' ] ]
+            D.setAttribute 'connectionsIn', [ [ 'C', '3' ] ]
+            E.setAttribute 'connectionsIn',
                 [ [ 'A', '2' ], [ 'A', '2' ], [ 'E', '4' ], [ 'E', '4' ] ]
-            E.setExternalAttribute 'connectionsOut',
+            E.setAttribute 'connectionsOut',
                 [ [ 'C', '3' ], [ 'E', '4' ], [ 'E', '5' ] ]
 
 Make the connections consistent.
@@ -1225,16 +1215,16 @@ Check the connections of each of the six nodes.
 
 Root:
 
-            expect( root.getExternalAttribute 'connectionsIn' )
+            expect( root.getAttribute 'connectionsIn' )
                 .toBeUndefined()
-            expect( root.getExternalAttribute 'connectionsOut' )
+            expect( root.getAttribute 'connectionsOut' )
                 .toBeUndefined()
 
 A:
 
-            expect( A.getExternalAttribute 'connectionsIn' )
+            expect( A.getAttribute 'connectionsIn' )
                 .toBeUndefined()
-            toTest = A.getExternalAttribute 'connectionsOut'
+            toTest = A.getAttribute 'connectionsOut'
             expect( pairCount toTest, [ 'B', '1' ] ).toBe 3
             expect( pairCount toTest, [ 'B', '2' ] ).toBe 1
             expect( pairCount toTest, [ 'E', '2' ] ).toBe 2
@@ -1242,42 +1232,42 @@ A:
 
 B:
 
-            toTest = B.getExternalAttribute 'connectionsIn'
+            toTest = B.getAttribute 'connectionsIn'
             expect( pairCount toTest, [ 'A', '1' ] ).toBe 3
             expect( pairCount toTest, [ 'A', '2' ] ).toBe 1
             expect( toTest.length ).toBe 4
-            toTest = B.getExternalAttribute 'connectionsOut'
+            toTest = B.getAttribute 'connectionsOut'
             expect( pairCount toTest, [ 'C', '1' ] ).toBe 1
             expect( toTest.length ).toBe 1
 
 C:
 
-            toTest = C.getExternalAttribute 'connectionsIn'
+            toTest = C.getAttribute 'connectionsIn'
             expect( pairCount toTest, [ 'B', '1' ] ).toBe 1
             expect( pairCount toTest, [ 'D', '3' ] ).toBe 1
             expect( pairCount toTest, [ 'E', '3' ] ).toBe 1
             expect( toTest.length ).toBe 3
-            toTest = C.getExternalAttribute 'connectionsOut'
+            toTest = C.getAttribute 'connectionsOut'
             expect( pairCount toTest, [ 'D', '3' ] ).toBe 1
             expect( toTest.length ).toBe 1
 
 D:
 
-            toTest = D.getExternalAttribute 'connectionsIn'
+            toTest = D.getAttribute 'connectionsIn'
             expect( pairCount toTest, [ 'C', '3' ] ).toBe 1
             expect( toTest.length ).toBe 1
-            toTest = D.getExternalAttribute 'connectionsOut'
+            toTest = D.getAttribute 'connectionsOut'
             expect( pairCount toTest, [ 'C', '3' ] ).toBe 1
             expect( toTest.length ).toBe 1
 
 E:
 
-            toTest = E.getExternalAttribute 'connectionsIn'
+            toTest = E.getAttribute 'connectionsIn'
             expect( pairCount toTest, [ 'A', '2' ] ).toBe 2
             expect( pairCount toTest, [ 'E', '4' ] ).toBe 2
             expect( pairCount toTest, [ 'E', '5' ] ).toBe 1
             expect( toTest.length ).toBe 5
-            toTest = E.getExternalAttribute 'connectionsOut'
+            toTest = E.getAttribute 'connectionsOut'
             expect( pairCount toTest, [ 'C', '3' ] ).toBe 1
             expect( pairCount toTest, [ 'E', '4' ] ).toBe 2
             expect( pairCount toTest, [ 'E', '5' ] ).toBe 1
@@ -1298,17 +1288,17 @@ and verify that they have no connections to start with.
                 C = new Structure().attr id : 'C'
             ).attr id : 'A'
             A.trackIDs()
-            expect( A.getExternalAttribute 'connectionsIn' )
+            expect( A.getAttribute 'connectionsIn' )
                 .toBeUndefined()
-            expect( A.getExternalAttribute 'connectionsOut' )
+            expect( A.getAttribute 'connectionsOut' )
                 .toBeUndefined()
-            expect( B.getExternalAttribute 'connectionsIn' )
+            expect( B.getAttribute 'connectionsIn' )
                 .toBeUndefined()
-            expect( B.getExternalAttribute 'connectionsOut' )
+            expect( B.getAttribute 'connectionsOut' )
                 .toBeUndefined()
-            expect( C.getExternalAttribute 'connectionsIn' )
+            expect( C.getAttribute 'connectionsIn' )
                 .toBeUndefined()
-            expect( C.getExternalAttribute 'connectionsOut' )
+            expect( C.getAttribute 'connectionsOut' )
                 .toBeUndefined()
 
 Make four connections of various types, and ensure that the connection sets
@@ -1318,59 +1308,59 @@ the attempt to make a connection succeeds.
 First, a simple connection.
 
             expect( A.connectTo B, 'example' ).toBeTruthy()
-            expect( A.getExternalAttribute 'connectionsIn' )
+            expect( A.getAttribute 'connectionsIn' )
                 .toBeUndefined()
-            toTest = A.getExternalAttribute 'connectionsOut'
+            toTest = A.getAttribute 'connectionsOut'
             expect( pairCount toTest, [ 'B', 'example' ] ).toBe 1
             expect( toTest.length ).toBe 1
-            toTest = B.getExternalAttribute 'connectionsIn'
+            toTest = B.getAttribute 'connectionsIn'
             expect( pairCount toTest, [ 'A', 'example' ] ).toBe 1
             expect( toTest.length ).toBe 1
-            expect( B.getExternalAttribute 'connectionsOut' )
+            expect( B.getAttribute 'connectionsOut' )
                 .toBeUndefined()
-            expect( C.getExternalAttribute 'connectionsIn' )
+            expect( C.getAttribute 'connectionsIn' )
                 .toBeUndefined()
-            expect( C.getExternalAttribute 'connectionsOut' )
+            expect( C.getAttribute 'connectionsOut' )
                 .toBeUndefined()
 
 Second, a connection going the other way, and of the same type.
 
             expect( B.connectTo A, 'example' ).toBeTruthy()
-            toTest = A.getExternalAttribute 'connectionsIn'
+            toTest = A.getAttribute 'connectionsIn'
             expect( pairCount toTest, [ 'B', 'example' ] ).toBe 1
             expect( toTest.length ).toBe 1
-            toTest = A.getExternalAttribute 'connectionsOut'
+            toTest = A.getAttribute 'connectionsOut'
             expect( pairCount toTest, [ 'B', 'example' ] ).toBe 1
             expect( toTest.length ).toBe 1
-            toTest = B.getExternalAttribute 'connectionsIn'
+            toTest = B.getAttribute 'connectionsIn'
             expect( pairCount toTest, [ 'A', 'example' ] ).toBe 1
             expect( toTest.length ).toBe 1
-            toTest = B.getExternalAttribute 'connectionsOut'
+            toTest = B.getAttribute 'connectionsOut'
             expect( pairCount toTest, [ 'A', 'example' ] ).toBe 1
             expect( toTest.length ).toBe 1
-            expect( C.getExternalAttribute 'connectionsIn' )
+            expect( C.getAttribute 'connectionsIn' )
                 .toBeUndefined()
-            expect( C.getExternalAttribute 'connectionsOut' )
+            expect( C.getAttribute 'connectionsOut' )
                 .toBeUndefined()
 
 Third, repeat the previous connection and ensure that there are now two.
 
             expect( B.connectTo A, 'example' ).toBeTruthy()
-            toTest = A.getExternalAttribute 'connectionsIn'
+            toTest = A.getAttribute 'connectionsIn'
             expect( pairCount toTest, [ 'B', 'example' ] ).toBe 2
             expect( toTest.length ).toBe 2
-            toTest = A.getExternalAttribute 'connectionsOut'
+            toTest = A.getAttribute 'connectionsOut'
             expect( pairCount toTest, [ 'B', 'example' ] ).toBe 1
             expect( toTest.length ).toBe 1
-            toTest = B.getExternalAttribute 'connectionsIn'
+            toTest = B.getAttribute 'connectionsIn'
             expect( pairCount toTest, [ 'A', 'example' ] ).toBe 1
             expect( toTest.length ).toBe 1
-            toTest = B.getExternalAttribute 'connectionsOut'
+            toTest = B.getAttribute 'connectionsOut'
             expect( pairCount toTest, [ 'A', 'example' ] ).toBe 2
             expect( toTest.length ).toBe 2
-            expect( C.getExternalAttribute 'connectionsIn' )
+            expect( C.getAttribute 'connectionsIn' )
                 .toBeUndefined()
-            expect( C.getExternalAttribute 'connectionsOut' )
+            expect( C.getAttribute 'connectionsOut' )
                 .toBeUndefined()
 
 Fourth, connect C to itself three times and ensure they all appear.
@@ -1378,22 +1368,22 @@ Fourth, connect C to itself three times and ensure they all appear.
             expect( C.connectTo C, 'other' ).toBeTruthy()
             expect( C.connectTo C, 'other' ).toBeTruthy()
             expect( C.connectTo C, 'other' ).toBeTruthy()
-            toTest = A.getExternalAttribute 'connectionsIn'
+            toTest = A.getAttribute 'connectionsIn'
             expect( pairCount toTest, [ 'B', 'example' ] ).toBe 2
             expect( toTest.length ).toBe 2
-            toTest = A.getExternalAttribute 'connectionsOut'
+            toTest = A.getAttribute 'connectionsOut'
             expect( pairCount toTest, [ 'B', 'example' ] ).toBe 1
             expect( toTest.length ).toBe 1
-            toTest = B.getExternalAttribute 'connectionsIn'
+            toTest = B.getAttribute 'connectionsIn'
             expect( pairCount toTest, [ 'A', 'example' ] ).toBe 1
             expect( toTest.length ).toBe 1
-            toTest = B.getExternalAttribute 'connectionsOut'
+            toTest = B.getAttribute 'connectionsOut'
             expect( pairCount toTest, [ 'A', 'example' ] ).toBe 2
             expect( toTest.length ).toBe 2
-            toTest = C.getExternalAttribute 'connectionsIn'
+            toTest = C.getAttribute 'connectionsIn'
             expect( pairCount toTest, [ 'C', 'other' ] ).toBe 3
             expect( toTest.length ).toBe 3
-            toTest = C.getExternalAttribute 'connectionsOut'
+            toTest = C.getAttribute 'connectionsOut'
             expect( pairCount toTest, [ 'C', 'other' ] ).toBe 3
             expect( toTest.length ).toBe 3
             A.untrackIDs()
@@ -1421,22 +1411,22 @@ connections within it.
 Verify that the currenct connection setup is, as expected, what it was at
 the end of the last section.
 
-            toTest = A.getExternalAttribute 'connectionsIn'
+            toTest = A.getAttribute 'connectionsIn'
             expect( pairCount toTest, [ 'B', 'example' ] ).toBe 2
             expect( toTest.length ).toBe 2
-            toTest = A.getExternalAttribute 'connectionsOut'
+            toTest = A.getAttribute 'connectionsOut'
             expect( pairCount toTest, [ 'B', 'example' ] ).toBe 1
             expect( toTest.length ).toBe 1
-            toTest = B.getExternalAttribute 'connectionsIn'
+            toTest = B.getAttribute 'connectionsIn'
             expect( pairCount toTest, [ 'A', 'example' ] ).toBe 1
             expect( toTest.length ).toBe 1
-            toTest = B.getExternalAttribute 'connectionsOut'
+            toTest = B.getAttribute 'connectionsOut'
             expect( pairCount toTest, [ 'A', 'example' ] ).toBe 2
             expect( toTest.length ).toBe 2
-            toTest = C.getExternalAttribute 'connectionsIn'
+            toTest = C.getAttribute 'connectionsIn'
             expect( pairCount toTest, [ 'C', 'other' ] ).toBe 3
             expect( toTest.length ).toBe 3
-            toTest = C.getExternalAttribute 'connectionsOut'
+            toTest = C.getAttribute 'connectionsOut'
             expect( pairCount toTest, [ 'C', 'other' ] ).toBe 3
             expect( toTest.length ).toBe 3
 
@@ -1444,59 +1434,59 @@ Remove a few connections one at a time and ensure that at each point all
 connections are as they should be.
 
             expect( B.disconnectFrom A, 'example' ).toBeTruthy()
-            toTest = A.getExternalAttribute 'connectionsIn'
+            toTest = A.getAttribute 'connectionsIn'
             expect( pairCount toTest, [ 'B', 'example' ] ).toBe 1
             expect( toTest.length ).toBe 1
-            toTest = A.getExternalAttribute 'connectionsOut'
+            toTest = A.getAttribute 'connectionsOut'
             expect( pairCount toTest, [ 'B', 'example' ] ).toBe 1
             expect( toTest.length ).toBe 1
-            toTest = B.getExternalAttribute 'connectionsIn'
+            toTest = B.getAttribute 'connectionsIn'
             expect( pairCount toTest, [ 'A', 'example' ] ).toBe 1
             expect( toTest.length ).toBe 1
-            toTest = B.getExternalAttribute 'connectionsOut'
+            toTest = B.getAttribute 'connectionsOut'
             expect( pairCount toTest, [ 'A', 'example' ] ).toBe 1
             expect( toTest.length ).toBe 1
-            toTest = C.getExternalAttribute 'connectionsIn'
+            toTest = C.getAttribute 'connectionsIn'
             expect( pairCount toTest, [ 'C', 'other' ] ).toBe 3
             expect( toTest.length ).toBe 3
-            toTest = C.getExternalAttribute 'connectionsOut'
+            toTest = C.getAttribute 'connectionsOut'
             expect( pairCount toTest, [ 'C', 'other' ] ).toBe 3
             expect( toTest.length ).toBe 3
 
             expect( B.disconnectFrom A, 'example' ).toBeTruthy()
-            expect( A.getExternalAttribute 'connectionsIn' )
+            expect( A.getAttribute 'connectionsIn' )
                 .toEqual [ ]
-            toTest = A.getExternalAttribute 'connectionsOut'
+            toTest = A.getAttribute 'connectionsOut'
             expect( pairCount toTest, [ 'B', 'example' ] ).toBe 1
             expect( toTest.length ).toBe 1
-            toTest = B.getExternalAttribute 'connectionsIn'
+            toTest = B.getAttribute 'connectionsIn'
             expect( pairCount toTest, [ 'A', 'example' ] ).toBe 1
             expect( toTest.length ).toBe 1
-            expect( B.getExternalAttribute 'connectionsOut' )
+            expect( B.getAttribute 'connectionsOut' )
                 .toEqual [ ]
-            toTest = C.getExternalAttribute 'connectionsIn'
+            toTest = C.getAttribute 'connectionsIn'
             expect( pairCount toTest, [ 'C', 'other' ] ).toBe 3
             expect( toTest.length ).toBe 3
-            toTest = C.getExternalAttribute 'connectionsOut'
+            toTest = C.getAttribute 'connectionsOut'
             expect( pairCount toTest, [ 'C', 'other' ] ).toBe 3
             expect( toTest.length ).toBe 3
 
             expect( C.disconnectFrom C, 'other' ).toBeTruthy()
             expect( C.disconnectFrom C, 'other' ).toBeTruthy()
-            expect( A.getExternalAttribute 'connectionsIn' )
+            expect( A.getAttribute 'connectionsIn' )
                 .toEqual [ ]
-            toTest = A.getExternalAttribute 'connectionsOut'
+            toTest = A.getAttribute 'connectionsOut'
             expect( pairCount toTest, [ 'B', 'example' ] ).toBe 1
             expect( toTest.length ).toBe 1
-            toTest = B.getExternalAttribute 'connectionsIn'
+            toTest = B.getAttribute 'connectionsIn'
             expect( pairCount toTest, [ 'A', 'example' ] ).toBe 1
             expect( toTest.length ).toBe 1
-            expect( B.getExternalAttribute 'connectionsOut' )
+            expect( B.getAttribute 'connectionsOut' )
                 .toEqual [ ]
-            toTest = C.getExternalAttribute 'connectionsIn'
+            toTest = C.getAttribute 'connectionsIn'
             expect( pairCount toTest, [ 'C', 'other' ] ).toBe 1
             expect( toTest.length ).toBe 1
-            toTest = C.getExternalAttribute 'connectionsOut'
+            toTest = C.getAttribute 'connectionsOut'
             expect( pairCount toTest, [ 'C', 'other' ] ).toBe 1
             expect( toTest.length ).toBe 1
             A.untrackIDs()
@@ -1586,9 +1576,9 @@ function is straightforward.
             A = new Structure(
                 B = new Structure().attr { example : 'text' }
             ).attr { one : 1, two : 2 }
-            expect( A.getExternalAttribute 'one' ).toBe 1
-            expect( A.getExternalAttribute 'two' ).toBe 2
-            expect( B.getExternalAttribute 'example' ).toBe 'text'
+            expect( A.getAttribute 'one' ).toBe 1
+            expect( A.getAttribute 'two' ).toBe 2
+            expect( B.getAttribute 'example' ).toBe 'text'
 
 Next, verify that `setup` makes connections as requested by entries in
 the `attr` objects, and deletes those attributes afterwards.
@@ -1606,8 +1596,8 @@ the `attr` objects, and deletes those attributes afterwards.
             expect( B.allConnectionsOut() ).toEqual [ ]
             expect( C.allConnectionsIn() ).toEqual [ ]
             expect( C.allConnectionsOut() ).toEqual [ [ 2, 'reason' ] ]
-            expect( A.getExternalAttribute 'label for' ).toBeUndefined()
-            expect( C.getExternalAttribute 'reason for' ).toBeUndefined()
+            expect( A.getAttribute 'label for' ).toBeUndefined()
+            expect( C.getAttribute 'reason for' ).toBeUndefined()
 
 ## Accessibility
 

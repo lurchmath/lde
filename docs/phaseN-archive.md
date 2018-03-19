@@ -247,7 +247,7 @@ subclasses.
    someone else.
  * Thus every node in the Facade hierarchy is a generic Facade node,
    storing a dictionary of attributes given to it at construction time,
-   which are precisely the external attributes for that node.
+   which are precisely the attributes for that node.
  * These attributes will have been communicated to the LDE when the
    Facade node was constructed, and the LDE can use them to figure out
    how to create a corresponding Structure node on the LDE side (or any

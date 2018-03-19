@@ -49,13 +49,13 @@ this module:
       structure and `trackIDs()` in the replacement; for more information
       on those functions, see
       [their entries in the API docs](api-lde.md#unique-ids).
- * `setAttribute(ID,key,value)` modifies a single external attribute of a
-   structure within the global document hierarchy, as follows:
+ * `setAttribute(ID,key,value)` modifies a single attribute of a structure
+   within the global document hierarchy, as follows:
     * `ID` is interpreted with the same conventions as the `parentID` is for
       the `insert` function
-    * `key` is the key of the external attribute to create or overwrite.  If
-      this key happens to be "id", then the class-level tracking of IDs
-      will be updated to repsect the change.
+    * `key` is the key of the attribute to create or overwrite.  If this
+      key happens to be "id", then the class-level tracking of IDs will be
+      updated to repsect the change.
     * `value` is the new value, which must be JSON data.  (No checks are
       done to verify that it is JSON data, but errors will transpire
       eventually if non-JSON data is passed.)

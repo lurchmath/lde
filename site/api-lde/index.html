@@ -184,13 +184,13 @@ this module:</p>
   <a href="./#unique-ids">their entries in the API docs</a>.</li>
 </ul>
 </li>
-<li><code>setAttribute(ID,key,value)</code> modifies a single external attribute of a
-   structure within the global document hierarchy, as follows:<ul>
+<li><code>setAttribute(ID,key,value)</code> modifies a single attribute of a structure
+   within the global document hierarchy, as follows:<ul>
 <li><code>ID</code> is interpreted with the same conventions as the <code>parentID</code> is for
   the <code>insert</code> function</li>
-<li><code>key</code> is the key of the external attribute to create or overwrite.  If
-  this key happens to be "id", then the class-level tracking of IDs
-  will be updated to repsect the change.</li>
+<li><code>key</code> is the key of the attribute to create or overwrite.  If this
+  key happens to be "id", then the class-level tracking of IDs will be
+  updated to repsect the change.</li>
 <li><code>value</code> is the new value, which must be JSON data.  (No checks are
   done to verify that it is JSON data, but errors will transpire
   eventually if non-JSON data is passed.)</li>

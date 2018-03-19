@@ -187,9 +187,9 @@ instances, as well as instances of its subclasses, using the member function
 <code>someInstance.toJSON()</code> (which obviously yields a JSON structure) or the
 class function <code>Structure.fromJSON(data)</code>, which accepts JSON data created
 from the first function.</p>
-<p>Serializing a structure preserves its class, its external attributes
-(<a href="#structure-attributes-and-connections">documented below</a>), and the
-hierarchy for which it is the root.</p>
+<p>Serializing a structure preserves its class, its attributes (<a href="#structure-attributes-and-connections">documented
+below</a>), and the hierarchy for which
+it is the root.</p>
 <h2 id="structure-hierarchies">Structure hierarchies</h2>
 <p>To navigate or alter a hierarchy of <code>Structure</code> instances, use the
 following member functions present in each instance.</p>
@@ -289,22 +289,21 @@ to the iterators.</p>
 </ul>
 <h2 id="structure-attributes-and-connections">Structure attributes and connections</h2>
 <p>The following functions available in each instance of the structure class
-support external attributes.</p>
+support attributes.</p>
 <ul>
-<li><code>instance.getExternalAttribute(key)</code> looks up external attributes by a
-   given string <code>key</code>.</li>
-<li><code>instance.setExternalAttribute(key,value)</code> stores external attributes
-   under a given string <code>key</code> with value <code>value</code>, which should be a JSON
-   structure (or atomic data).  No check is made to verify that the value
-   is of this type, but errors will transpire later if this condition is
-   not satisfied (specifically, serialization errors).</li>
-<li><code>instance.clearExternalAttributes(key1,key2,...)</code> removes the key-value
-   pairs of external attributes associated with any of the keys passed as
-   parameters.  It is acceptable to pass any number of keys, including just
-   one.  If zero are passed, <em>all</em> key-value pairs are removed.</li>
+<li><code>instance.getAttribute(key)</code> looks up attributes by a given string <code>key</code>.</li>
+<li><code>instance.setAttribute(key,value)</code> stores attributes under a given
+   string <code>key</code> with value <code>value</code>, which should be a JSON structure (or
+   atomic data).  No check is made to verify that the value is of this
+   type, but errors will transpire later if this condition is not satisfied
+   (specifically, serialization errors).</li>
+<li><code>instance.clearAttributes(key1,key2,...)</code> removes the key-value pairs
+   of attributes associated with any of the keys passed as parameters.  It
+   is acceptable to pass any number of keys, including just one.  If zero
+   are passed, <em>all</em> key-value pairs are removed.</li>
 <li><code>instance.attr(object)</code> adds all attributes of the given object as
-   external attributes to the instance, and returns the instance itself.
-   This is useful when constructing hierarchies, as follows.</li>
+   attributes to the instance, and returns the instance itself.  This is
+   useful when constructing hierarchies, as follows.</li>
 </ul>
 <pre><code class="js">    var A = new Structure(
         ( new Structure() ).attr( { name : 'example structure' } ),
@@ -313,8 +312,8 @@ support external attributes.</p>
 </code></pre>
 
 <h3 id="connections-as-a-type-of-attribute">Connections as a type of attribute</h3>
-<p>Within a structure's external attributes are two key-value pairs that should
-not be used for any other purpose, those with keys <code>connectionsOut</code> and
+<p>Within a structure's attributes are two key-value pairs that should not be
+used for any other purpose, those with keys <code>connectionsOut</code> and
 <code>connectionsIn</code>.  These store data about connections between pairs of
 structures in the same heirarchy.  The data is stored by structure IDs, so
 making connections assumes that structures each have a unique ID, as
@@ -354,11 +353,10 @@ the client (not recommended), then you can call <code>root.fillOutConnections()<
 to ensure that the connection data stored in every source matches that
 stored in the corresponding destinations, and vice versa.</p>
 <h2 id="unique-ids">Unique IDs</h2>
-<p>The <code>Structure</code> class maintains a mapping from IDs (as strings) to
-instances of the class.  An instance gets its ID from the external attribute
-with key "id."  All IDs in a hierarchy can be tracked (that is, recorded
-into this class-level mapping) with the <code>trackIDs()</code> function documented
-below.</p>
+<p>The <code>Structure</code> class maintains a mapping from IDs (as strings) to instances
+of the class.  An instance gets its ID from the attribute with key "id."
+All IDs in a hierarchy can be tracked (that is, recorded into this
+class-level mapping) with the <code>trackIDs()</code> function documented below.</p>
 <p>Here are the relevant functions:</p>
 <ul>
 <li><code>instance.id()</code> returns the instance's ID, if it has one, or undefined if
@@ -385,8 +383,8 @@ object itself, as in <code>myStructure.willBeRemoved = myHandlerFunction</code>.
 <p>Insertion events are fired immediately before/after the <code>Structure</code> is added
 as a child under a new parent.  Removal events are fired immediately
 before/after the <code>Structure</code> is removed from an existing parent.  Change
-events are fired immediately before/after an external attribute of the
-<code>Structure</code> instance changes.</p>
+events are fired immediately before/after an attribute of the <code>Structure</code>
+instance changes.</p>
 <p>Example:</p>
 <pre><code class="js">    var A = new Structure();
     var B = new Structure();
