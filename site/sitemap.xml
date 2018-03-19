@@ -81,18 +81,6 @@
      <changefreq>daily</changefreq>
     </url>
         
-    <url>
-     <loc>/api-labels/</loc>
-     <lastmod>2018-03-19</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>/api-reasons/</loc>
-     <lastmod>2018-03-19</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
     
 
 </urlset>

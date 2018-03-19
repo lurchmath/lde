@@ -534,46 +534,6 @@
             "location": "/api-structures/#events-and-event-handlers", 
             "text": "Any  Structure  instance fires up to six different types of events during\nits lifetime:  willBeInserted ,  wasInserted ,  willBeRemoved , wasRemoved ,  willBeChanged , and  wasChanged .  To install an event\nhandler for one of these, simply overwrite that key in the  Structure \nobject itself, as in  myStructure.willBeRemoved = myHandlerFunction .  Insertion events are fired immediately before/after the  Structure  is added\nas a child under a new parent.  Removal events are fired immediately\nbefore/after the  Structure  is removed from an existing parent.  Change\nevents are fired immediately before/after an external attribute of the Structure  instance changes.  No events are fired when computed attributes\nchange.  Example:      var A = new Structure();\n    var B = new Structure();\n    A.willBeInserted = function () { console.log( 'Now!' ); };\n    B.insertChild( A ); // prints 'Now!' to console just before inserting", 
             "title": "Events and event handlers"
-        }, 
-        {
-            "location": "/api-labels/", 
-            "text": "API Documentation for the \nLabels\n Class\n\n\nSource Code\n\n\n\n\nThe \nLabels\n class\n\n\nUnit tests of the \nLabel\n class\n\n\n\n\nPurpose\n\n\nThe Lurch Deductive Engine (LDE, \ndocumented here\n) maintains a\ndocument called the LDE Document, which is a hierarchy (or tree).  The nodes\nin that tree are instances of the class \nStructure\n or one of its\nsubclasses.  The \nLabel\n class is one such subclass.  It is intended to represent the general concept of a label in mathematics.  In particular, it provides any functionality required to (a) store information about the names and name spaces of particular instances of \nStructure\ns, (b) assign that information to those instances, and (c) to allow other \nStructure\ns to query that information.  \n\n\nThis document is currently a stub for the API of the \nLabel\n class.  We will add the actual API here once the class has been coded.", 
-            "title": "Labels"
-        }, 
-        {
-            "location": "/api-labels/#api-documentation-for-the-labels-class", 
-            "text": "", 
-            "title": "API Documentation for the Labels Class"
-        }, 
-        {
-            "location": "/api-labels/#source-code", 
-            "text": "The  Labels  class  Unit tests of the  Label  class", 
-            "title": "Source Code"
-        }, 
-        {
-            "location": "/api-labels/#purpose", 
-            "text": "The Lurch Deductive Engine (LDE,  documented here ) maintains a\ndocument called the LDE Document, which is a hierarchy (or tree).  The nodes\nin that tree are instances of the class  Structure  or one of its\nsubclasses.  The  Label  class is one such subclass.  It is intended to represent the general concept of a label in mathematics.  In particular, it provides any functionality required to (a) store information about the names and name spaces of particular instances of  Structure s, (b) assign that information to those instances, and (c) to allow other  Structure s to query that information.    This document is currently a stub for the API of the  Label  class.  We will add the actual API here once the class has been coded.", 
-            "title": "Purpose"
-        }, 
-        {
-            "location": "/api-reasons/", 
-            "text": "API Documentation for the \nReasons\n Class\n\n\nSource Code\n\n\n\n\nThe \nReasons\n class\n\n\nUnit tests of the \nReason\n class\n\n\n\n\nPurpose\n\n\nThe Lurch Deductive Engine (LDE, \ndocumented here\n) maintains a\ndocument called the LDE Document, which is a hierarchy (or tree).  The nodes\nin that tree are instances of the class \nStructure\n or one of its\nsubclasses.  The \nReason\n class is one such subclass.  It is intended to represent the general concept of a reason in mathematics.  In particular, it provides any functionality required to reference \nRule Structure\ns, usually by querying their associated \nLabel\ns.\n\n\nThis document is currently a stub for the API of the \nReason\n class.  We will add the actual API here once the class has been coded.", 
-            "title": "Reasons"
-        }, 
-        {
-            "location": "/api-reasons/#api-documentation-for-the-reasons-class", 
-            "text": "", 
-            "title": "API Documentation for the Reasons Class"
-        }, 
-        {
-            "location": "/api-reasons/#source-code", 
-            "text": "The  Reasons  class  Unit tests of the  Reason  class", 
-            "title": "Source Code"
-        }, 
-        {
-            "location": "/api-reasons/#purpose", 
-            "text": "The Lurch Deductive Engine (LDE,  documented here ) maintains a\ndocument called the LDE Document, which is a hierarchy (or tree).  The nodes\nin that tree are instances of the class  Structure  or one of its\nsubclasses.  The  Reason  class is one such subclass.  It is intended to represent the general concept of a reason in mathematics.  In particular, it provides any functionality required to reference  Rule Structure s, usually by querying their associated  Label s.  This document is currently a stub for the API of the  Reason  class.  We will add the actual API here once the class has been coded.", 
-            "title": "Purpose"
         }
     ]
 }

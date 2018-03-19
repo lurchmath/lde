@@ -14,8 +14,6 @@ pages:
     - Overview: api-overview.md
     - The LDE: api-lde.md
     - Structures: api-structures.md
-    - Labels: api-labels.md
-    - Reasons: api-reasons.md
 dev_addr: 127.0.0.1:8888
 extra_javascript:
     - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML

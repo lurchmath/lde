@@ -40,16 +40,16 @@ yet been implemented.  It should be done as follows:
 
 ## Remove files we no longer need (and what depends on them)
 
- * [ ] Delete the file `src/statement.litcoffee`, as well as the
+ * [x] Delete the file `src/statement.litcoffee`, as well as the
    corresponding files for reason, label, and rule.
- * [ ] Delete the analogous four files in the `tests/` folder.
- * [ ] Search for any code that imports any of those files and delete the
+ * [x] Delete the analogous four files in the `tests/` folder.
+ * [x] Search for any code that imports any of those files and delete the
    lines that import those files, since the files no longer exist.
- * [ ] Search through all the documentation for any documentation that
+ * [x] Search through all the documentation for any documentation that
    mentions those files, and delete any mention of those files.
- * [ ] Run the unit test suite and verify that all tests pass.  If not,
+ * [x] Run the unit test suite and verify that all tests pass.  If not,
    track down what's using the now-deleted code and fix it.
- * [ ] Once all tests pass, rebuild everything, commit, and push to the
+ * [x] Once all tests pass, rebuild everything, commit, and push to the
    repository.
 
 ## Remove code portions we no longer need
