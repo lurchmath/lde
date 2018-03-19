@@ -54,6 +54,18 @@ yet been implemented.  It should be done as follows:
 
 ## Remove code portions we no longer need
 
+### Attribute conventions
+
+ * [ ] Remove from `src/structure.litcoffee` the entire section entitled
+   "Attribute conventions," because many of those conventions will change
+   as we build upon our new design.
+ * [ ] Remove any unit tests that dealt with any of the code deleted in the
+   previous step.  Ensure that all unit tests then still pass.
+ * [ ] Search for any documentation that mentioned code deleted in that same
+   step and remove it, because that code no longer exists.
+ * [ ] Once all tests pass, rebuild everything, commit, and push to the
+   repository.
+
 ### Computed attributes
 
  * [ ] Remove from `src/structure.litcoffee` the entire section entitled
@@ -76,15 +88,3 @@ yet been implemented.  It should be done as follows:
    unit tests then still pass.
  * [ ] Search for any documentation that mentioned external attributes and
    update it to match the new names of those functions.
-
-### Attribute conventions
-
- * [ ] Remove from `src/structure.litcoffee` the entire section entitled
-   "Attribute conventions," because many of those conventions will change
-   as we build upon our new design.
- * [ ] Remove any unit tests that dealt with any of the code deleted in the
-   previous step.  Ensure that all unit tests then still pass.
- * [ ] Search for any documentation that mentioned code deleted in that same
-   step and remove it, because that code no longer exists.
- * [ ] Once all tests pass, rebuild everything, commit, and push to the
-   repository.
