@@ -56,14 +56,14 @@ yet been implemented.  It should be done as follows:
 
 ### Attribute conventions
 
- * [ ] Remove from `src/structure.litcoffee` the entire section entitled
+ * [x] Remove from `src/structure.litcoffee` the entire section entitled
    "Attribute conventions," because many of those conventions will change
    as we build upon our new design.
- * [ ] Remove any unit tests that dealt with any of the code deleted in the
+ * [x] Remove any unit tests that dealt with any of the code deleted in the
    previous step.  Ensure that all unit tests then still pass.
- * [ ] Search for any documentation that mentioned code deleted in that same
+ * [x] Search for any documentation that mentioned code deleted in that same
    step and remove it, because that code no longer exists.
- * [ ] Once all tests pass, rebuild everything, commit, and push to the
+ * [x] Once all tests pass, rebuild everything, commit, and push to the
    repository.
 
 ### Computed attributes

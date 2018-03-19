@@ -368,42 +368,6 @@ documented <a href="#unique-ids">below</a>.</p>
 the client (not recommended), then you can call <code>root.fillOutConnections()</code>
 to ensure that the connection data stored in every source matches that
 stored in the corresponding destinations, and vice versa.</p>
-<h3 id="other-attribute-conventions">Other attribute conventions</h3>
-<p><em>ID:</em>  Some structures have a unique ID.  This is necessary for making
-connections among structures, because the connections are recorded using
-these unique IDs as references.  The convention is to store a structure's ID
-in its external attribute with key "id."  For convenience, there is an
-<code>id()</code> member function in the structure class that looks up this
-attribute's value.  See more information in the
-<a href="#unique-ids">Unique IDs section</a>, below.</p>
-<p><em>Text:</em>  Some structures contain plain text.  The convention is to store
-these in the external attribute with key "text."  For convenience, there is
-a <code>text()</code> member function in the structure class that looks up this
-attribute's value.</p>
-<p><em>References:</em>  Some structures serve as references to other structures. They
-are marked as references with the external attribute "reference."  For
-convenience, there is a <code>isA()</code> member function in the structure class that
-can look up whether this attribute is present, by calling
-<code>isA('reference')</code>, and thus indicating whether the structure is
-functioning as a reference.</p>
-<p><em>Labels:</em>  Get a list of all text values used as labels for a structure by
-calling its member function <code>labels()</code>.  There are several ways that a
-structure can be labeled, all documented
-<a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#collecting-labels-reasons-and-premises">in the source code</a>.  All labels are strings.</p>
-<p>Check whether a string is on that list with the member function
-<code>hasLabel(label)</code>.</p>
-<p><em>Reasons and premises:</em>  You can get a list of all reasons or premises
-attached to a structure with the member functions <code>reasons()</code> and
-<code>premises()</code>.  These may be structures or the names by which structures
-accessible to this one are labeled.  There are several ways that a structure
-can have a reason or premise attached, all documented
-<a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#collecting-labels-reasons-and-premises">in the source code</a>.</p>
-<p><em>Citations:</em>  Given a string and a structure <code>S</code>, you can look up the
-nearest accessible (to <code>S</code>) structure that has that string as a label with
-<code>S.lookup(label)</code>.  We say that one structure cites another if it has that
-other as a reason or premise; you can query this binary relation with
-<code>structure.cites(other)</code>, and get a list of everything that cites a given
-structure with <code>structure.whatCitesMe()</code>.</p>
 <h2 id="unique-ids">Unique IDs</h2>
 <p>The <code>Structure</code> class maintains a mapping from IDs (as strings) to
 instances of the class.  An instance gets its ID from the external attribute
