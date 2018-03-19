@@ -55,7 +55,6 @@ no attributes and no children, and an instance of the base Structure class.
             expect( serialized.className ).toBe 'Structure'
             expect( serialized.children ).toEqual [ ]
             expect( serialized.externalAttributes ).toEqual { id : 'root' }
-            expect( serialized.computedAttributes ).toEqual { }
 
 In order for us to work with the LDE Document, we will need the root to have
 an ID that we can pass to various editing functions.  Let's verify that it
@@ -125,7 +124,6 @@ state.
             expect( serialized.className ).toBe 'Structure'
             expect( serialized.children ).toEqual [ ]
             expect( serialized.externalAttributes ).toEqual { id : 'root' }
-            expect( serialized.computedAttributes ).toEqual { }
 
 Next we test the `delete` member of the API.  We re-populate the document
 and then slowly delete pieces.
@@ -387,7 +385,6 @@ background thread, not to re-test the same functionality as before.
                 expect( result ).toEqual {
                     className : 'Structure'
                     externalAttributes : { id : 'root' }
-                    computedAttributes : { }
                     children : [ ]
                 }
                 done()
@@ -401,11 +398,9 @@ background thread, not to re-test the same functionality as before.
                 expect( result ).toEqual {
                     className : 'Structure'
                     externalAttributes : { id : 'root' }
-                    computedAttributes : { }
                     children : [
                         className : 'Structure'
                         externalAttributes : name : 'A', ID : 'foo'
-                        computedAttributes : { }
                         children : [ ]
                     ]
                 }
@@ -421,7 +416,6 @@ background thread, not to re-test the same functionality as before.
                 expect( result ).toEqual {
                     className : 'Structure'
                     externalAttributes : { id : 'root' }
-                    computedAttributes : { }
                     children : [ ]
                 }
                 done()
@@ -437,11 +431,9 @@ background thread, not to re-test the same functionality as before.
                 expect( result ).toEqual {
                     className : 'Structure'
                     externalAttributes : { id : 'root' }
-                    computedAttributes : { }
                     children : [
                         className : 'Structure'
                         externalAttributes : name : 'B', id : 'bar'
-                        computedAttributes : { }
                         children : [ ]
                     ]
                 }
@@ -457,14 +449,12 @@ background thread, not to re-test the same functionality as before.
                 expect( result ).toEqual {
                     className : 'Structure'
                     externalAttributes : { id : 'root' }
-                    computedAttributes : { }
                     children : [
                         className : 'Structure'
                         externalAttributes :
                             name : 'A'
                             id : 'foo'
                             color : 'red'
-                        computedAttributes : { }
                         children : [ ]
                     ]
                 }

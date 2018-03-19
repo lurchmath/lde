@@ -139,20 +139,8 @@ were not essential enough to have been included in the work done so far.  We
 list them here so as not to lose track of important improvements we might
 make later, and we leave empty check boxes next to them so that we can later
 mark them complete as they are implemented.</p>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled> Make the <code>labels()</code> function more efficient as follows.<ul>
-<li>Whenever it is computed, cache the value in an internal field.</li>
-<li>The next time <code>labels()</code> is called, use the cached value if it exists.</li>
-<li>Whenever you call <code>wasChanged()</code>, be sure to clear the cached value.</li>
-</ul>
-</li>
-<li class="task-list-item"><input type="checkbox" disabled> Make the <code>whatCitesMe()</code> function more efficient by making it loop
-   manually through all the things in scope, tracking when anything in its
-   scope eclipses it by being labeled with one or more of its labels.  If at
-   any point it has no more labels left in force, stop iterating.  This is a
-   minor performance gain, because it will be rare that a structure is fully
-   eclipsed by other structures with the same name.</li>
-</ul></div>
+<p>(Entries that were here have been deleted.  This page continues to exist in
+the event that it may be used again later for other ideas.)</p></div>
         </div>
 
         <footer class="col-md-12">

@@ -471,12 +471,10 @@ the original.
             expect( C.children() ).toEqual [ ]
             expect( C.getExternalAttribute 5 ).toBe 6
             expect( C.getExternalAttribute 6 ).toBeUndefined()
-            expect( C.getComputedAttribute 5 ).toBeUndefined()
             expect( tiny.parent() ).toBeFalsy()
             expect( tiny.children() ).toEqual [ ]
             expect( tiny.getExternalAttribute 5 ).toBe 6
             expect( tiny.getExternalAttribute 6 ).toBeUndefined()
-            expect( tiny.getComputedAttribute 5 ).toBeUndefined()
 
 Ensure that changing data within the original doesn't change the copy.
 
@@ -495,7 +493,6 @@ Make a more complex Structure for testing.
                 B = new Structure
             )
             AB.setExternalAttribute 2, 7
-            B.setComputedAttribute 4, 9
 
 Make a copy of tween and test that it copied correctly and did not mess up
 the original.
@@ -510,15 +507,12 @@ the original.
             expect( A.parent() ).toBe( tween )
             expect( B.parent() ).toBe( tween )
             expect( DA.parent() ).toBe( D )
-            expect( DA.computedAttributes ).toEqual { }
             expect( DA.children().length ).toEqual 3
             DAB = DA.children()[1]
             expect( DAB ).not.toBe( AB )
-            expect( DAB.computedAttributes ).toEqual { }
             expect( DAB.getExternalAttribute 2 ).toEqual 7
             DB = D.children()[1]
             expect( DB.externalAttributes ).toEqual { }
-            expect( DB.getComputedAttribute 4 ).toEqual 9
 
 Ensure that changing data within the original doesn't change the copy.
 
@@ -638,7 +632,6 @@ Begin with a trivial example, a single node hierarchy with no attributes.
             expect( json instanceof Structure ).toBeFalsy()
             expect( json ).not.toBe loner
             expect( json.className ).toBe 'Structure'
-            expect( json.computedAttributes ).toEqual { }
             expect( json.externalAttributes ).toEqual { }
             expect( json.children ).toEqual [ ]
 
@@ -646,14 +639,9 @@ Deserialize a copy from it and verify that it is correctly structured.
 
             copy = Structure.fromJSON json
             expect( copy instanceof Structure ).toBeTruthy()
-            expect( copy.computedAttributes ).toEqual { }
             expect( copy.externalAttributes ).toEqual { }
-            expect( copy.computedAttributes ).not.toBe \
-                json.computedAttributes
             expect( copy.externalAttributes ).not.toBe \
                 json.externalAttributes
-            expect( copy.computedAttributes ).not.toBe \
-                loner.computedAttributes
             expect( copy.externalAttributes ).not.toBe \
                 loner.externalAttributes
             expect( copy.children() ).toEqual [ ]
@@ -667,15 +655,10 @@ type.
             atty = new Structure()
             atty.setExternalAttribute 1, 2
             atty.setExternalAttribute 'three', [ 'four', { } ]
-            atty.setComputedAttribute 'five', 666666
-            atty.setComputedAttribute '7', { 8 : [ [ ] ] }
             json = atty.toJSON()
             expect( json instanceof Structure ).toBeFalsy()
             expect( json ).not.toBe atty
             expect( json.className ).toBe 'Structure'
-            expect( json.computedAttributes ).toEqual
-                'five' : 666666
-                '7' : { 8 : [ [ ] ] }
             expect( json.externalAttributes ).toEqual
                 1 : 2
                 'three' : [ 'four', { } ]
@@ -685,18 +668,11 @@ Deserialize a copy from it and verify that it is correctly structured.
 
             copy = Structure.fromJSON json
             expect( copy instanceof Structure ).toBeTruthy()
-            expect( copy.computedAttributes ).toEqual
-                'five' : 666666
-                '7' : { 8 : [ [ ] ] }
             expect( copy.externalAttributes ).toEqual
                 1 : 2
                 'three' : [ 'four', { } ]
-            expect( copy.computedAttributes ).not.toBe \
-                json.computedAttributes
             expect( copy.externalAttributes ).not.toBe \
                 json.externalAttributes
-            expect( copy.computedAttributes ).not.toBe \
-                atty.computedAttributes
             expect( copy.externalAttributes ).not.toBe \
                 atty.externalAttributes
             expect( copy.children() ).toEqual [ ]
@@ -736,14 +712,12 @@ Serialize and verify that it came out correctly.
             expect( json instanceof Structure ).toBeFalsy()
             expect( json ).not.toBe bigger
             expect( json.className ).toBe 'Structure'
-            expect( json.computedAttributes ).toEqual { }
             expect( json.externalAttributes ).toEqual { }
             expect( json.children.length ).toBe 2
             child = json.children[0]
             expect( child instanceof Structure ).toBeFalsy()
             expect( child instanceof Sub1 ).toBeFalsy()
             expect( child.className ).toBe 'Sub1'
-            expect( child.computedAttributes ).toEqual { }
             expect( child.externalAttributes ).toEqual { 10 : 100 }
             expect( child.children ).toEqual [ ]
             expect( child.exampleMethod1 ).toBeUndefined()
@@ -751,7 +725,6 @@ Serialize and verify that it came out correctly.
             expect( child instanceof Structure ).toBeFalsy()
             expect( child instanceof Sub2 ).toBeFalsy()
             expect( child.className ).toBe 'Sub2'
-            expect( child.computedAttributes ).toEqual { }
             expect( child.externalAttributes ).toEqual { 'test' : 'ing' }
             expect( child.children ).toEqual [ ]
             expect( child.exampleMethod2 ).toBeUndefined()
@@ -761,14 +734,9 @@ hierarchy, as well as all the same tests we did for the earlier cases.
 
             copy = Structure.fromJSON json
             expect( copy instanceof Structure ).toBeTruthy()
-            expect( copy.computedAttributes ).toEqual { }
             expect( copy.externalAttributes ).toEqual { }
-            expect( copy.computedAttributes ).not.toBe \
-                json.computedAttributes
             expect( copy.externalAttributes ).not.toBe \
                 json.externalAttributes
-            expect( copy.computedAttributes ).not.toBe \
-                bigger.computedAttributes
             expect( copy.externalAttributes ).not.toBe \
                 bigger.externalAttributes
             expect( copy.id() ).toBeUndefined()
@@ -778,14 +746,9 @@ hierarchy, as well as all the same tests we did for the earlier cases.
             expect( copy.children().length ).toBe 2
             child = copy.children()[0]
             expect( child instanceof Sub1 ).toBeTruthy()
-            expect( child.computedAttributes ).toEqual { }
             expect( child.externalAttributes ).toEqual { 10 : 100 }
-            expect( child.computedAttributes ).not.toBe \
-                json.computedAttributes
             expect( child.externalAttributes ).not.toBe \
                 json.externalAttributes
-            expect( child.computedAttributes ).not.toBe \
-                child1.computedAttributes
             expect( child.externalAttributes ).not.toBe \
                 child1.externalAttributes
             expect( child.id() ).toBeUndefined()
@@ -795,14 +758,9 @@ hierarchy, as well as all the same tests we did for the earlier cases.
             expect( child.children() ).toEqual [ ]
             child = copy.children()[1]
             expect( child instanceof Sub2 ).toBeTruthy()
-            expect( child.computedAttributes ).toEqual { }
             expect( child.externalAttributes ).toEqual { 'test' : 'ing' }
-            expect( child.computedAttributes ).not.toBe \
-                json.computedAttributes
             expect( child.externalAttributes ).not.toBe \
                 json.externalAttributes
-            expect( child.computedAttributes ).not.toBe \
-                child2.computedAttributes
             expect( child.externalAttributes ).not.toBe \
                 child2.externalAttributes
             expect( child.id() ).toBeUndefined()
@@ -821,127 +779,30 @@ argument and once with a false argument.
             expect( small.toJSON() ).toEqual {
                 className : 'Structure'
                 externalAttributes : id : 'Y', other : 'stuff'
-                computedAttributes : { }
                 children : [
                     className : 'Structure'
                     externalAttributes : id : 'X', other : 'things'
-                    computedAttributes : { }
                     children : [ ]
                 ]
             }
             expect( small.toJSON no ).toEqual {
                 className : 'Structure'
                 externalAttributes : other : 'stuff'
-                computedAttributes : { }
                 children : [
                     className : 'Structure'
                     externalAttributes : other : 'things'
-                    computedAttributes : { }
                     children : [ ]
                 ]
             }
-
-## Computed attributes
-
-    describe 'Computed attributes', ->
-
-Structure objects provide a computed attributes dictionary, which should
-function as any other Javascript object, storing key-value pairs.  Because
-the implementation of this is very straightforward, we do only a few short
-tests.
-
-        it 'should function as a key-value dictionary', ->
-
-Make a few new structures.
-
-            S1 = new Structure
-            S2 = new Structure
-
-There shouldn't be any values stored at first in either of them.
-
-            expect( S1.getComputedAttribute 'alpha' ).toBeUndefined()
-            expect( S2.getComputedAttribute 'alpha' ).toBeUndefined()
-            expect( S1.getComputedAttribute 'b e t a' ).toBeUndefined()
-            expect( S2.getComputedAttribute 'b e t a' ).toBeUndefined()
-
-We can set any type of data in them without error.
-
-            value1 = 55555
-            value2 = { example : 'JSON' }
-            S1.setComputedAttribute 'alpha', value1
-            S2.setComputedAttribute 'b e t a', value2
-
-We can then retrieve that exact data again.
-
-            expect( S1.getComputedAttribute 'alpha' ).toBe value1
-            expect( S2.getComputedAttribute 'b e t a' ).toBe value2
-
-Things added to S1 did not impact S2, and vice versa.
-
-            expect( S2.getComputedAttribute 'alpha' ).toBeUndefined()
-            expect( S1.getComputedAttribute 'b e t a' ).toBeUndefined()
-
-We can remove things from the dictionaries without error, even asking to
-remove things that weren't there in the first place.
-
-            S1.clearComputedAttributes 'alpha', 'b e t a'
-            S2.clearComputedAttributes 'alpha', 'b e t a'
-
-Now there's nothing in the dictionaries again.
-
-            expect( S1.getComputedAttribute 'alpha' ).toBeUndefined()
-            expect( S2.getComputedAttribute 'alpha' ).toBeUndefined()
-            expect( S1.getComputedAttribute 'b e t a' ).toBeUndefined()
-            expect( S2.getComputedAttribute 'b e t a' ).toBeUndefined()
-
-The `compute` function runs member functions within the Structure instance
-and stores the values.  See
-[the documentation](../src/structure.litcoffee#computed-attributes)
-for details.
-
-        it 'should compute and store attributes as requested', ->
-
-Create a structure instance.
-
-            S = new Structure
-
-Give it two member functions that do simple example computations.
-
-            counter = 0
-            S.count = -> counter++
-            S.add = ( a, b ) -> a + b
-
-Call `compute()` an then inspect the stored computed attributes to verify
-that compute calls `count` or `add` and stores the results appropriately.
-
-First, the zero-argument case.
-
-            S.compute 'count'
-            expect( S.getComputedAttribute 'count' ).toBe 0
-            S.compute 'count'
-            expect( S.getComputedAttribute 'count' ).toBe 1
-            S.compute 'count'
-            expect( S.getComputedAttribute 'count' ).toBe 2
-
-Next, the two-argument case.
-
-            S.compute [ 'add', 5, 6 ]
-            expect( S.getComputedAttribute 'add' ).toBe 11
-            S.compute [ 'add', 100, -200 ]
-            expect( S.getComputedAttribute 'add' ).toBe -100
-
-Finally, the many-calls case.
-
-            S.compute 'count', [ 'add', 1, 2 ], 'count'
-            expect( S.getComputedAttribute 'count' ).toBe 4
-            expect( S.getComputedAttribute 'add' ).toBe 3
 
 ## External attributes
 
     describe 'External attributes', ->
 
-Same first set of tests as for computed attributes, because that's the set
-of tests in which they behave the same.
+Structure objects provide an external attributes dictionary, which should
+function as any other Javascript object, storing key-value pairs.  Because
+the implementation of this is very straightforward, we do only a few short
+tests.
 
         it 'should function as a key-value dictionary', ->
 
@@ -1083,17 +944,12 @@ Now test whether change handlers work.
 
         it 'should send change events', ->
 
-Add external and/or computed attributes to each of A and B and ensure that
-the correct event handlers were called in each case.  Note that changing
-computed attributes should not call change events, because they were not
-triggered by the client, but by the LDE itself.
+Add external attributes to each of A and B and ensure that the correct event
+handlers were called in each case.
 
             A.setExternalAttribute 'a', 'b'
             expect( A.wasChanged ).toHaveBeenCalled()
             expect( A.willBeChanged ).toHaveBeenCalled()
-            expect( B.wasChanged ).not.toHaveBeenCalled()
-            expect( B.willBeChanged ).not.toHaveBeenCalled()
-            B.setComputedAttribute 5, { }
             expect( B.wasChanged ).not.toHaveBeenCalled()
             expect( B.willBeChanged ).not.toHaveBeenCalled()
 
@@ -1110,15 +966,11 @@ up for future tests.
             expect( B.willBeChanged ).not.toHaveBeenCalled()
 
 Modify the attributes already added to A and B and verify that the change
-event handlers are called again.  As above, changing computed attributes
-should not call change events.
+event handlers are called again.
 
             B.setExternalAttribute 5, { } # different object!
             expect( B.wasChanged ).toHaveBeenCalled()
             expect( B.willBeChanged ).toHaveBeenCalled()
-            expect( A.wasChanged ).not.toHaveBeenCalled()
-            expect( A.willBeChanged ).not.toHaveBeenCalled()
-            A.setComputedAttribute 'a', 'c'
             expect( A.wasChanged ).not.toHaveBeenCalled()
             expect( A.willBeChanged ).not.toHaveBeenCalled()
 
@@ -1135,15 +987,11 @@ up for future tests.
             expect( B.willBeChanged ).not.toHaveBeenCalled()
 
 Remove attributes from A and B and verify that this, too, calls change event
-handlers.  As above, changing computed attributes should not call change
-events.
+handlers.
 
             A.clearExternalAttributes 'a'
             expect( A.wasChanged ).toHaveBeenCalled()
             expect( A.willBeChanged ).toHaveBeenCalled()
-            expect( B.wasChanged ).not.toHaveBeenCalled()
-            expect( B.willBeChanged ).not.toHaveBeenCalled()
-            B.clearComputedAttributes 5
             expect( B.wasChanged ).not.toHaveBeenCalled()
             expect( B.willBeChanged ).not.toHaveBeenCalled()
 

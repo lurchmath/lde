@@ -20,7 +20,6 @@ argument is ignored.  See the next section for more details of child
 structures.
 
         constructor : ( children... ) ->
-            @computedAttributes = { }
             @externalAttributes = { }
             @parentNode = null
             @childList = [ ]
@@ -70,7 +69,6 @@ version.
                 externals = JSON.parse JSON.stringify @externalAttributes
                 delete externals.id
             className : @className
-            computedAttributes : @computedAttributes
             externalAttributes : externals
             children : ( child.toJSON includeID for child in @childList )
 
@@ -89,8 +87,6 @@ object.
             children =
                 ( Structure.fromJSON child for child in json.children )
             result = new classObj children...
-            result.computedAttributes =
-                JSON.parse JSON.stringify json.computedAttributes
             result.externalAttributes =
                 JSON.parse JSON.stringify json.externalAttributes
             result
@@ -119,8 +115,6 @@ Another possibly convenient utility is to make a copy of the Structure S
 
         copy : ->
             S = new Structure
-            S.computedAttributes =
-                JSON.parse JSON.stringify @computedAttributes
             S.externalAttributes =
                 JSON.parse JSON.stringify @externalAttributes
             S.childList = ( C.copy() for C in @childList )
@@ -236,68 +230,16 @@ above.
                 @removeFromParent()
                 originalParent.insertChild other, originalIndex
 
-## Computed attributes
+## External attributes
 
-The dictionary of computed attributes has getters and setters that work on
-keys or key-value pairs (respectively).  The intent is for them to store the
-results of computations done by the LDE.  There is also a corresponding
-"clear" function for deleting entries from the computed attributes
+The dictionary of external attributes has getters and setters that work on
+keys or key-value pairs (respectively).  There is also a corresponding
+"clear" function for deleting entries from the external attributes
 dictionary.
-
-The client is permitted to use any keys they like here, but the `feedback`
-key is special; see [the documentation
-here](https://lurchmath.github.io/lde/site/phase0-structures/#methods-in-the-structure-class)
-for details.
 
 No checks are put on what kind of data can be used for the values of this
 dictionary, but they should be JSON data only, to support serialization.
 (Checks are omitted for efficiency.)
-
-        getComputedAttribute : ( key ) -> @computedAttributes[key]
-        setComputedAttribute : ( key, value ) ->
-            if @computedAttributes[key] isnt value
-                @computedAttributes[key] = value
-        clearComputedAttributes : ( keys... ) ->
-            if keys.length is 0 then keys = Object.keys @computedAttributes
-            for key in keys
-                if key of @computedAttributes
-                    delete @computedAttributes[key]
-
-We do not notify the structure of changes to its computed attributes,
-because we assume that such changes were initiated internally by objects in
-this module.  We will, however, notify the structure of changes to its
-external attributes, which we expect are initiated by the client, and thus
-the structure may need to react to them. See the subsquent section for
-details.
-
-The default implementation of the `compute` member takes any number of keys
-as string arguments, and runs them as member functions, storing the results
-as computed attributes.  Arrays can be used to pass additional arguments.
-Specifically:
-
- * `S.compute('foo')` means `S.setComputedAttribute('foo',S.foo())`.
- * `S.compute(['foo',1,2,3])` means
-   `S.setComputedAttribute('foo',S.foo(1,2,3))`.
- * `S.compute(arg1,arg2,...)` means `S.compute(arg1)` and then
-   `S.compute(arg2)` and so on.
-
-More details re in [the documentation
-here](https://lurchmath.github.io/lde/site/phase0-structures/#methods-in-the-structure-class).
-
-        compute : ( args... ) ->
-            for arg in args
-                if arg not instanceof Array then arg = [ arg ]
-                [ func, params... ] = arg
-                @setComputedAttribute func, @[func] params...
-
-## External attributes
-
-The dictionary of external attributes has get/set/clear functions just as we
-have for computed attributes.  The intent is for them to store data provided
-by the client, and the LDE will not alter it.
-
-As with computed attributes, values should be JSON data only, to support
-serialization, but we do not check for this property, for efficiency.
 
 We notify the structure of changes to its external attributes through
 calling two event handlers (if they exist) in the object:

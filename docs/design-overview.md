@@ -131,14 +131,6 @@ These are of utmost importance, because
    are read-write from the point of view of the UI.  They are called
    "external" because, from the LDE's point of view, they come from
    elsewhere (the UI).
- * Every structure contains a key-value dictionary called *computed
-   attributes,* which are read-only from the point of view of the UI, and
-   are read-write from the point of view of the LDE.  They are called
-   "computed" because the LDE's job is to compute stuff, which it stores in
-   these attributes.
- * These two dictionaries are disjoint.  It is possible for a single key k
-   to have one value in the one dictionary, and another value in the other
-   dictionary.
 
 ## Document
 

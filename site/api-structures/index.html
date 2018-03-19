@@ -187,9 +187,9 @@ instances, as well as instances of its subclasses, using the member function
 <code>someInstance.toJSON()</code> (which obviously yields a JSON structure) or the
 class function <code>Structure.fromJSON(data)</code>, which accepts JSON data created
 from the first function.</p>
-<p>Serializing a structure preserves its class, its external and computed
-attributes (<a href="#structure-attributes-and-connections">documented below</a>), and
-the hierarchy for which it is the root.</p>
+<p>Serializing a structure preserves its class, its external attributes
+(<a href="#structure-attributes-and-connections">documented below</a>), and the
+hierarchy for which it is the root.</p>
 <h2 id="structure-hierarchies">Structure hierarchies</h2>
 <p>To navigate or alter a hierarchy of <code>Structure</code> instances, use the
 following member functions present in each instance.</p>
@@ -288,29 +288,20 @@ to the iterators.</p>
    they would be reported by <code>iteratorOverScope()</code>.</li>
 </ul>
 <h2 id="structure-attributes-and-connections">Structure attributes and connections</h2>
-<h3 id="attributes-in-general">Attributes in general</h3>
-<p>Structures have two types of attributes, computed and external.  The
-distinction is documented in the source code,
-<a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#computed-attributes">here</a> and
-<a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#external-attributes">here</a>.</p>
 <p>The following functions available in each instance of the structure class
-support external and computed attributes.</p>
+support external attributes.</p>
 <ul>
-<li><code>instance.getComputedAttribute(key)</code> and
-   <code>instance.getExternalAttribute(key)</code> look up computed or external
-   attributes by a given string <code>key</code>.</li>
-<li><code>instance.setComputedAttribute(key,value)</code> and
-   <code>instance.setExternalAttribute(key,value)</code> store computed or external
-   attributes under a given string <code>key</code> with value <code>value</code>, which should be
-   a JSON structure (or atomic data).  No check is made to verify that the
-   value is of this type, but errors will transpire later if this condition
-   is not satisfied (specifically, serialization errors).</li>
-<li><code>instance.clearComputedAttributes(key1,key2,...)</code> and
-   <code>instance.clearExternalAttributes(key1,key2,...)</code> remove the key-value
-   pairs of computed or external attributes associated with any of the keys
-   passed as parameters.  It is acceptable to pass any number of keys,
-   including just one.  If zero are passed, <em>all</em> key-value pairs are
-   removed.</li>
+<li><code>instance.getExternalAttribute(key)</code> looks up external attributes by a
+   given string <code>key</code>.</li>
+<li><code>instance.setExternalAttribute(key,value)</code> stores external attributes
+   under a given string <code>key</code> with value <code>value</code>, which should be a JSON
+   structure (or atomic data).  No check is made to verify that the value
+   is of this type, but errors will transpire later if this condition is
+   not satisfied (specifically, serialization errors).</li>
+<li><code>instance.clearExternalAttributes(key1,key2,...)</code> removes the key-value
+   pairs of external attributes associated with any of the keys passed as
+   parameters.  It is acceptable to pass any number of keys, including just
+   one.  If zero are passed, <em>all</em> key-value pairs are removed.</li>
 <li><code>instance.attr(object)</code> adds all attributes of the given object as
    external attributes to the instance, and returns the instance itself.
    This is useful when constructing hierarchies, as follows.</li>
@@ -321,12 +312,6 @@ support external and computed attributes.</p>
     );
 </code></pre>
 
-<ul>
-<li><code>instance.compute(arguments)</code> is a useful shortcut for storing computed
-   attributes.  We do not redocument its details here; see the documentation
-   in the source code at the end of
-   <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#computed-attributes">this section</a>.</li>
-</ul>
 <h3 id="connections-as-a-type-of-attribute">Connections as a type of attribute</h3>
 <p>Within a structure's external attributes are two key-value pairs that should
 not be used for any other purpose, those with keys <code>connectionsOut</code> and
@@ -401,8 +386,7 @@ object itself, as in <code>myStructure.willBeRemoved = myHandlerFunction</code>.
 as a child under a new parent.  Removal events are fired immediately
 before/after the <code>Structure</code> is removed from an existing parent.  Change
 events are fired immediately before/after an external attribute of the
-<code>Structure</code> instance changes.  No events are fired when computed attributes
-change.</p>
+<code>Structure</code> instance changes.</p>
 <p>Example:</p>
 <pre><code class="js">    var A = new Structure();
     var B = new Structure();

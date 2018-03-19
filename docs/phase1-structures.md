@@ -68,12 +68,12 @@ yet been implemented.  It should be done as follows:
 
 ### Computed attributes
 
- * [ ] Remove from `src/structure.litcoffee` the entire section entitled
+ * [x] Remove from `src/structure.litcoffee` the entire section entitled
    "Computed attributes," because we no longer need to distinguish computed
    from external attributes.
- * [ ] Remove any unit tests that dealt with any of the code deleted in the
+ * [x] Remove any unit tests that dealt with any of the code deleted in the
    previous step.  Ensure that all unit tests then still pass.
- * [ ] Search for any documentation that mentioned code deleted in that same
+ * [x] Search for any documentation that mentioned code deleted in that same
    step and remove it, because that code no longer exists.
 
 ### External attributes

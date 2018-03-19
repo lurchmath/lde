@@ -57,9 +57,9 @@ instances, as well as instances of its subclasses, using the member function
 class function `Structure.fromJSON(data)`, which accepts JSON data created
 from the first function.
 
-Serializing a structure preserves its class, its external and computed
-attributes ([documented below](#structure-attributes-and-connections)), and
-the hierarchy for which it is the root.
+Serializing a structure preserves its class, its external attributes
+([documented below](#structure-attributes-and-connections)), and the
+hierarchy for which it is the root.
 
 ## Structure hierarchies
 
@@ -165,31 +165,20 @@ to the iterators.
 
 ## Structure attributes and connections
 
-### Attributes in general
-
-Structures have two types of attributes, computed and external.  The
-distinction is documented in the source code,
-[here](https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#computed-attributes) and
-[here](https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#external-attributes).
-
 The following functions available in each instance of the structure class
-support external and computed attributes.
+support external attributes.
 
- * `instance.getComputedAttribute(key)` and
-   `instance.getExternalAttribute(key)` look up computed or external
-   attributes by a given string `key`.
- * `instance.setComputedAttribute(key,value)` and
-   `instance.setExternalAttribute(key,value)` store computed or external
-   attributes under a given string `key` with value `value`, which should be
-   a JSON structure (or atomic data).  No check is made to verify that the
-   value is of this type, but errors will transpire later if this condition
-   is not satisfied (specifically, serialization errors).
- * `instance.clearComputedAttributes(key1,key2,...)` and
-   `instance.clearExternalAttributes(key1,key2,...)` remove the key-value
-   pairs of computed or external attributes associated with any of the keys
-   passed as parameters.  It is acceptable to pass any number of keys,
-   including just one.  If zero are passed, *all* key-value pairs are
-   removed.
+ * `instance.getExternalAttribute(key)` looks up external attributes by a
+   given string `key`.
+ * `instance.setExternalAttribute(key,value)` stores external attributes
+   under a given string `key` with value `value`, which should be a JSON
+   structure (or atomic data).  No check is made to verify that the value
+   is of this type, but errors will transpire later if this condition is
+   not satisfied (specifically, serialization errors).
+ * `instance.clearExternalAttributes(key1,key2,...)` removes the key-value
+   pairs of external attributes associated with any of the keys passed as
+   parameters.  It is acceptable to pass any number of keys, including just
+   one.  If zero are passed, *all* key-value pairs are removed.
  * `instance.attr(object)` adds all attributes of the given object as
    external attributes to the instance, and returns the instance itself.
    This is useful when constructing hierarchies, as follows.
@@ -200,11 +189,6 @@ support external and computed attributes.
         ( new Structure() ).attr( { color : '#99ff00' } )
     );
 ```
-
- * `instance.compute(arguments)` is a useful shortcut for storing computed
-   attributes.  We do not redocument its details here; see the documentation
-   in the source code at the end of
-   [this section](https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#computed-attributes).
 
 ### Connections as a type of attribute
 
@@ -287,8 +271,7 @@ Insertion events are fired immediately before/after the `Structure` is added
 as a child under a new parent.  Removal events are fired immediately
 before/after the `Structure` is removed from an existing parent.  Change
 events are fired immediately before/after an external attribute of the
-`Structure` instance changes.  No events are fired when computed attributes
-change.
+`Structure` instance changes.
 
 Example:
 
