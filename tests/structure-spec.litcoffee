@@ -1006,10 +1006,16 @@ handlers have been called.
             A.wasInserted = jasmine.createSpy 'wasInserted'
             A.wasRemoved = jasmine.createSpy 'wasRemoved'
             A.wasChanged = jasmine.createSpy 'wasChanged'
+            A.willBeInserted = jasmine.createSpy 'willBeInserted'
+            A.willBeRemoved = jasmine.createSpy 'willBeRemoved'
+            A.willBeChanged = jasmine.createSpy 'willBeChanged'
             B = new Structure
             B.wasInserted = jasmine.createSpy 'wasInserted'
             B.wasRemoved = jasmine.createSpy 'wasRemoved'
             B.wasChanged = jasmine.createSpy 'wasChanged'
+            B.willBeInserted = jasmine.createSpy 'willBeInserted'
+            B.willBeRemoved = jasmine.createSpy 'willBeRemoved'
+            B.willBeChanged = jasmine.createSpy 'willBeChanged'
 
 Run a simple test to verify that the Jasmine event handler spies are working
 as expected; they have not yet been called.
@@ -1018,39 +1024,60 @@ as expected; they have not yet been called.
             expect( A.wasInserted ).not.toHaveBeenCalled()
             expect( A.wasRemoved ).not.toHaveBeenCalled()
             expect( A.wasChanged ).not.toHaveBeenCalled()
+            expect( A.willBeInserted ).not.toHaveBeenCalled()
+            expect( A.willBeRemoved ).not.toHaveBeenCalled()
+            expect( A.willBeChanged ).not.toHaveBeenCalled()
             expect( B.wasInserted ).not.toHaveBeenCalled()
             expect( B.wasRemoved ).not.toHaveBeenCalled()
             expect( B.wasChanged ).not.toHaveBeenCalled()
+            expect( B.willBeInserted ).not.toHaveBeenCalled()
+            expect( B.willBeRemoved ).not.toHaveBeenCalled()
+            expect( B.willBeChanged ).not.toHaveBeenCalled()
 
 Now test whether insertion and removal handlers work.
 
         it 'should send insertion and removal events', ->
 
-Insert A into B and verify that only the insertion event from A was called.
+Insert A into B and verify that only the insertion events from A were
+called.
 
             B.insertChild A
+            expect( A.willBeInserted ).toHaveBeenCalled()
             expect( A.wasInserted ).toHaveBeenCalled()
             expect( A.wasRemoved ).not.toHaveBeenCalled()
             expect( A.wasChanged ).not.toHaveBeenCalled()
+            expect( A.willBeRemoved ).not.toHaveBeenCalled()
+            expect( A.willBeChanged ).not.toHaveBeenCalled()
             expect( B.wasInserted ).not.toHaveBeenCalled()
             expect( B.wasRemoved ).not.toHaveBeenCalled()
             expect( B.wasChanged ).not.toHaveBeenCalled()
+            expect( B.willBeInserted ).not.toHaveBeenCalled()
+            expect( B.willBeRemoved ).not.toHaveBeenCalled()
+            expect( B.willBeChanged ).not.toHaveBeenCalled()
 
-Reset the insertion event for A as if it had not been called, cleaning up
+Reset the insertion events for A as if they had not been called, cleaning up
 for future tests.
 
             A.wasInserted = jasmine.createSpy 'wasInserted'
+            A.willBeInserted = jasmine.createSpy 'wasInserted'
             expect( A.wasInserted ).not.toHaveBeenCalled()
+            expect( A.willBeInserted ).not.toHaveBeenCalled()
 
-Remove A from B and verify that only the removal event from A was called.
+Remove A from B and verify that only the removal events from A were called.
 
             A.removeFromParent()
             expect( A.wasInserted ).not.toHaveBeenCalled()
+            expect( A.willBeInserted ).not.toHaveBeenCalled()
             expect( A.wasRemoved ).toHaveBeenCalled()
+            expect( A.willBeRemoved ).toHaveBeenCalled()
             expect( A.wasChanged ).not.toHaveBeenCalled()
+            expect( A.willBeChanged ).not.toHaveBeenCalled()
             expect( B.wasInserted ).not.toHaveBeenCalled()
             expect( B.wasRemoved ).not.toHaveBeenCalled()
             expect( B.wasChanged ).not.toHaveBeenCalled()
+            expect( B.willBeInserted ).not.toHaveBeenCalled()
+            expect( B.willBeRemoved ).not.toHaveBeenCalled()
+            expect( B.willBeChanged ).not.toHaveBeenCalled()
 
 Now test whether change handlers work.
 
@@ -1063,17 +1090,24 @@ triggered by the client, but by the LDE itself.
 
             A.setExternalAttribute 'a', 'b'
             expect( A.wasChanged ).toHaveBeenCalled()
+            expect( A.willBeChanged ).toHaveBeenCalled()
             expect( B.wasChanged ).not.toHaveBeenCalled()
+            expect( B.willBeChanged ).not.toHaveBeenCalled()
             B.setComputedAttribute 5, { }
             expect( B.wasChanged ).not.toHaveBeenCalled()
+            expect( B.willBeChanged ).not.toHaveBeenCalled()
 
 Reset the change events for A and B as if they had not been called, cleaning
 up for future tests.
 
             A.wasChanged = jasmine.createSpy 'wasChanged'
+            A.willBeChanged = jasmine.createSpy 'willBeChanged'
             B.wasChanged = jasmine.createSpy 'wasChanged'
+            B.willBeChanged = jasmine.createSpy 'willBeChanged'
             expect( A.wasChanged ).not.toHaveBeenCalled()
+            expect( A.willBeChanged ).not.toHaveBeenCalled()
             expect( B.wasChanged ).not.toHaveBeenCalled()
+            expect( B.willBeChanged ).not.toHaveBeenCalled()
 
 Modify the attributes already added to A and B and verify that the change
 event handlers are called again.  As above, changing computed attributes
@@ -1081,17 +1115,24 @@ should not call change events.
 
             B.setExternalAttribute 5, { } # different object!
             expect( B.wasChanged ).toHaveBeenCalled()
+            expect( B.willBeChanged ).toHaveBeenCalled()
             expect( A.wasChanged ).not.toHaveBeenCalled()
+            expect( A.willBeChanged ).not.toHaveBeenCalled()
             A.setComputedAttribute 'a', 'c'
             expect( A.wasChanged ).not.toHaveBeenCalled()
+            expect( A.willBeChanged ).not.toHaveBeenCalled()
 
 Reset the change events for A and B as if they had not been called, cleaning
 up for future tests.
 
             A.wasChanged = jasmine.createSpy 'wasChanged'
+            A.willBeChanged = jasmine.createSpy 'willBeChanged'
             B.wasChanged = jasmine.createSpy 'wasChanged'
+            B.willBeChanged = jasmine.createSpy 'willBeChanged'
             expect( A.wasChanged ).not.toHaveBeenCalled()
+            expect( A.willBeChanged ).not.toHaveBeenCalled()
             expect( B.wasChanged ).not.toHaveBeenCalled()
+            expect( B.willBeChanged ).not.toHaveBeenCalled()
 
 Remove attributes from A and B and verify that this, too, calls change event
 handlers.  As above, changing computed attributes should not call change
@@ -1099,9 +1140,90 @@ events.
 
             A.clearExternalAttributes 'a'
             expect( A.wasChanged ).toHaveBeenCalled()
+            expect( A.willBeChanged ).toHaveBeenCalled()
             expect( B.wasChanged ).not.toHaveBeenCalled()
+            expect( B.willBeChanged ).not.toHaveBeenCalled()
             B.clearComputedAttributes 5
             expect( B.wasChanged ).not.toHaveBeenCalled()
+            expect( B.willBeChanged ).not.toHaveBeenCalled()
+
+Now we test to be sure that "will-be" event handlers are called before "was"
+event handlers get called.
+
+        it 'should call event handlers in the correct order', ->
+
+We keep a variable called count, and we increment it during each event
+handler, and remember the values, so that we can tell the order in which
+they were called.
+
+            count = 0
+            countBeforeInsertion = countAfterInsertion = -1
+
+We also track whether node `A` had a parent node or not, during each event
+handler, so that we can tell which (if either) comes before the insertion
+event.
+
+            parentBeforeInsertion = parentAfterInsertion = null
+            A.willBeInserted = ->
+                countBeforeInsertion = count++
+                parentBeforeInsertion = A.parent()
+            A.wasInserted = ->
+                countAfterInsertion = count++
+                parentAfterInsertion = A.parent()
+
+Ensure that `willBeInserted` comes before the insertion, which comes before
+`wasInserted`.
+
+            B.insertChild A
+            expect( countBeforeInsertion ).toBe 0
+            expect( countAfterInsertion ).toBe 1
+            expect( count ).toBe 2
+            expect( parentBeforeInsertion ).toBe null
+            expect( parentAfterInsertion ).toBe B
+
+Ensure that `willBeRemoved` comes before the removal, which comes before
+`wasRemoved`.
+
+            count = 0
+            countBeforeRemoval = countAfterRemoval = -1
+            parentBeforeRemoval = parentAfterRemoval = null
+            A.willBeRemoved = ->
+                countBeforeRemoval = count++
+                parentBeforeRemoval = A.parent()
+            A.wasRemoved = ->
+                countAfterRemoval = count++
+                parentAfterRemoval = A.parent()
+            A.removeFromParent()
+            expect( countBeforeRemoval ).toBe 0
+            expect( countAfterRemoval ).toBe 1
+            expect( count ).toBe 2
+            expect( parentBeforeRemoval ).toBe B
+            expect( parentAfterRemoval ).toBe null
+
+Ensure that `willBeChanged` comes before the change, which comes before
+`wasChanged`.
+
+            count = 0
+            countBeforeChange = countAfterChange = -1
+            valueBeforeChange = valueAfterChange = null
+            A.willBeChanged = ->
+                countBeforeChange = count++
+                valueBeforeChange = A.getExternalAttribute 'test'
+            A.wasChanged = ->
+                countAfterChange = count++
+                valueAfterChange = A.getExternalAttribute 'test'
+            A.setExternalAttribute 'test', 100
+            expect( countBeforeChange ).toBe 0
+            expect( countAfterChange ).toBe 1
+            expect( count ).toBe 2
+            expect( valueBeforeChange ).toBeUndefined()
+            expect( valueAfterChange ).toBe 100
+            A.setExternalAttribute 'test', null
+            expect( countBeforeChange ).toBe 2
+            expect( countAfterChange ).toBe 3
+            expect( count ).toBe 4
+            expect( valueBeforeChange ).toBe 100
+            expect( valueAfterChange ).toBeNull()
 
 ## Unique IDs
 

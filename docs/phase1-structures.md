@@ -32,11 +32,11 @@ yet been implemented.  It should be done as follows:
 
 ## Tie up loose ends on the old version
 
- * [ ] Just as the `Structure` class has tests for all `was*` events (such
+ * [x] Just as the `Structure` class has tests for all `was*` events (such
    as `wasRemoved`, etc.), add tests for the corresponding `willBe*` events.
- * [ ] Add API documentation for these events, or update what documentation
+ * [x] Add API documentation for these events, or update what documentation
    is there.
- * [ ] Once the unit tests pass, commit.
+ * [x] Once the unit tests pass, commit.
 
 ## Remove files we no longer need (and what depends on them)
 

@@ -318,3 +318,27 @@ Here are the relevant functions:
    with that ID, if there is one, and that instance has recorded its ID in
    the class-level variable for this purpose by means of a call to
    `trackIDs()`, or null or undefined if there is none.
+
+## Events and event handlers
+
+Any `Structure` instance fires up to six different types of events during
+its lifetime: `willBeInserted`, `wasInserted`, `willBeRemoved`,
+`wasRemoved`, `willBeChanged`, and `wasChanged`.  To install an event
+handler for one of these, simply overwrite that key in the `Structure`
+object itself, as in `myStructure.willBeRemoved = myHandlerFunction`.
+
+Insertion events are fired immediately before/after the `Structure` is added
+as a child under a new parent.  Removal events are fired immediately
+before/after the `Structure` is removed from an existing parent.  Change
+events are fired immediately before/after an external attribute of the
+`Structure` instance changes.  No events are fired when computed attributes
+change.
+
+Example:
+
+```js
+    var A = new Structure();
+    var B = new Structure();
+    A.willBeInserted = function () { console.log( 'Now!' ); };
+    B.insertChild( A ); // prints 'Now!' to console just before inserting
+```
