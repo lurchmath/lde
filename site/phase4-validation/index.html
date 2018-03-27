@@ -155,25 +155,25 @@ themselves as they are added to the Output Tree.</p>
 <p>This has not been implemented.  See the tasks below.</p>
 <h2 id="automatic-validation-enqueueing">Automatic validation enqueueing</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled> Define a class variable in the <code>OutputStructure</code> class, an array of
+<li class="task-list-item"><input type="checkbox" disabled/> Define a class variable in the <code>OutputStructure</code> class, an array of
    all instances that need to be validated.  Initialize it to the empty
    array.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Extend the <code>OutputStructure</code> class with an instance method that adds
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the <code>OutputStructure</code> class with an instance method that adds
    that instance to the list in that class variable iff the instance has a
    <code>validate()</code> method.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Add documentation in that file describing the changes just made.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Extend the unit tests for the <code>OutputStructure</code> module to verify
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that file describing the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests for the <code>OutputStructure</code> module to verify
    that this works as described.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Add documentation in that test file describing the changes just made.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Extend the <code>recursiveInterpret</code> routine so that, for any
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that test file describing the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the <code>recursiveInterpret</code> routine so that, for any
    <code>OutputStructure</code> instances it had to create (not just re-use from its
    cache), it calls the method that adds them to the to-validate list.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Add documentation in that file describing the changes just made.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Extend the unit tests for the <code>InputStructure</code> module to verify
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that file describing the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests for the <code>InputStructure</code> module to verify
    that this works as described.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Add documentation in that test file describing the changes just made.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Once the unit tests pass, build everything and commit.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Add documentation to the <code>OutputStructure</code> class, explaining that any
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that test file describing the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation to the <code>OutputStructure</code> class, explaining that any
    subclass that wishes to implement a <code>validate()</code> routine must follow the
    following rules when it does so.<ul>
 <li>The functions should be written asynchronously, taking callbacks that
@@ -196,34 +196,43 @@ themselves as they are added to the Output Tree.</p>
   it may do so only if X is accessible to Y.</li>
 </ul>
 </li>
-<li class="task-list-item"><input type="checkbox" disabled> Rebuild the docs and commit.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Rebuild the docs and commit.</li>
 </ul>
 <h2 id="automatic-validation-processing">Automatic validation processing</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled> In the LDE module, run <code>setInterval()</code> at module creation so that it
+<li class="task-list-item"><input type="checkbox" disabled/> In the LDE module, run <code>setInterval()</code> at module creation so that it
    regularly (many times per second, but not so often as to consume copious
    CPU) checks to see if there is anything on the list of <code>OutputStructure</code>
    instances to be validated.  If there are any such things, call their
    <code>validate</code> routines (which are asynchronous).  The order in which these
    are processed is irrelevant.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Add documentation in that file describing the changes just made.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Extend the unit tests for the LDE module to verify that this works<code>OutputStructure</code> subclasses that
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that file describing the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests for the LDE module to verify that this works
+   as described.  That is, create some <code>OutputStructure</code> subclasses that
    have <code>validate</code> routines, and some <code>InputStructure</code> subclasses whose
    <code>interpret</code> routines produce instances of those classes that know how to
    validate themselves.  Verify that validation actually does take place.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Add documentation in that test file describing the changes just made.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Once the unit tests pass, build everything and commit.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that test file describing the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
 </ul>
 <h2 id="feedback-messages">Feedback messages</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled> Add a function to the LDE module that can be called whenever the<code>OutputStructure</code> in the Output Tree changes, and the
+<li class="task-list-item"><input type="checkbox" disabled/> Add a function to the LDE module that can be called whenever the
+   feedback on an <code>OutputStructure</code> in the Output Tree changes, and the
    function will send a message (to any listening client) containing this
    data: the ID of the origin of the node whose feedback changed, and the
    new feedback data.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Update the documentation in that file to describe the changes just</li>
-<li class="task-list-item"><input type="checkbox" disabled> Extend the unit tests for the LDE module to verify that this</li>
-<li class="task-list-item"><input type="checkbox" disabled> Add documentation in that test file describing the changes just made.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Once the unit tests pass, build everything and commit.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Update the documentation in that file to describe the changes just
+   made.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests for the LDE module to verify that this
+   works as described.  First, simply, just change the feedback of some
+   nodes in the Output Tree and verify that messages are sent by the LDE to
+   that effect.  Then extend the tests that go from API calls to validation
+   results to ensure that the entire process works, from API calls that add
+   to the Input Tree to feedback messages from validation being transmitted
+   back.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that test file describing the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
 </ul></div>
         </div>
 

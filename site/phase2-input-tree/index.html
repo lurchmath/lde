@@ -154,56 +154,66 @@ robust and useful product.</p>
 <p>This has not been implemented.  See the tasks below.</p>
 <h2 id="inputstructure-class"><code>InputStructure</code> class</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled> Create a subclass of <code>Structure</code>, in its own new module,
+<li class="task-list-item"><input type="checkbox" disabled/> Create a subclass of <code>Structure</code>, in its own new module,
    <code>src/input-structure.litcoffee</code>.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Add documentation explaining what it is and will do (though that</li>
-<li class="task-list-item"><input type="checkbox" disabled> Ensure that the <code>InputStructure</code> subclass registers itself with the
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation explaining what it is and will do (though that
+   documentation can grow with time).</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Ensure that the <code>InputStructure</code> subclass registers itself with the
    serialization code, as
    <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
    describes.  (That is, use a line like
    <code>className : Structure.addSubclass 'InputStructure', InputStructure</code> in
    the <code>InputStructure</code> class code.)</li>
-<li class="task-list-item"><input type="checkbox" disabled> Rewrite the LDE module so that it no longer takes as input generic<code>Structure</code> instances, but specifically <code>InputStructure</code> instances.  All
+<li class="task-list-item"><input type="checkbox" disabled/> Rewrite the LDE module so that it no longer takes as input generic
+   <code>Structure</code> instances, but specifically <code>InputStructure</code> instances.  All
    of its methods should be updated to use <code>InputStructure</code>s where they
    currently use <code>Structure</code>s.  This will require importing the
    <code>input-structure.litcoffee</code> module instead of the generic
    <code>structure.litcoffee</code> one.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Update all documentation in that file to reflect the changes just</li>
-<li class="task-list-item"><input type="checkbox" disabled> Create a new unit test file for <code>InputStructure</code>s that is extremely
+<li class="task-list-item"><input type="checkbox" disabled/> Update all documentation in that file to reflect the changes just
+   made.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Create a new unit test file for <code>InputStructure</code>s that is extremely
    basic, just testing to be sure that the symbol <code>InputStructure</code> is
    defined at the global scope and creates things that are instances of the
    generic <code>Structure</code> base class.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Add documentation for that unit test file, following the pattern</li>
-<li class="task-list-item"><input type="checkbox" disabled> Update all unit tests of the LDE module to reflect this change to<code>InputStructure</code>s.  This will require importing the
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation for that unit test file, following the pattern
+   established in the documentation of other unit test files in this
+   repository.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Update all unit tests of the LDE module to reflect this change to
+   <code>InputStructure</code>s.  This will require importing the
    <code>input-structure.litcoffee</code> module instead of the generic
    <code>structure.litcoffeee</code> one.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Once the unit tests pass, build everything and commit.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
 </ul>
 <h2 id="accepting-actual-instances">Accepting actual instances</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled> The LDE module was written to accept only JSON-serialized forms of<code>Structure</code>s as parameters to its methods.  Update those functions so
+<li class="task-list-item"><input type="checkbox" disabled/> The LDE module was written to accept only JSON-serialized forms of
+   <code>Structure</code>s as parameters to its methods.  Update those functions so
    that they now accept either serialized forms or actual instances, and can
    tell the difference and respond appropriately.  (That is, deserialize any
    serialized instances, but don't do that if the argument was already an
    instance.)</li>
-<li class="task-list-item"><input type="checkbox" disabled> Extend the unit test suite of the LDE module so that it tests this</li>
-<li class="task-list-item"><input type="checkbox" disabled> Update all documentation in that file to reflect the changes just</li>
-<li class="task-list-item"><input type="checkbox" disabled> Once the unit tests pass, build everything and commit.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit test suite of the LDE module so that it tests this
+   new feature of each API method of the LDE module.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Update all documentation in that file to reflect the changes just
+   made.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
 </ul>
 <h2 id="marking-structures-dirty">Marking structures dirty</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled> Extend the <code>InputStructure</code> class with a field called <code>dirty</code>, which
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the <code>InputStructure</code> class with a field called <code>dirty</code>, which
    is initialized to false in the constructor.  This field does not need to
    be part of any serialization or deserialization of instances.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Create an <code>isDirty()</code> method that returns the value of that member
+<li class="task-list-item"><input type="checkbox" disabled/> Create an <code>isDirty()</code> method that returns the value of that member
    variable.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Create a <code>markDirty()</code> method in the <code>InputStructure</code> class that sets
+<li class="task-list-item"><input type="checkbox" disabled/> Create a <code>markDirty()</code> method in the <code>InputStructure</code> class that sets
    the <code>dirty</code> flag to true, and does so for all ancestors as well.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Update all documentation in that file to reflect the changes just</li>
-<li class="task-list-item"><input type="checkbox" disabled> Add to the unit tests for <code>InputStructure</code>s a few simple tests for
+<li class="task-list-item"><input type="checkbox" disabled/> Update all documentation in that file to reflect the changes just
+   made.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add to the unit tests for <code>InputStructure</code>s a few simple tests for
    these new routines.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Add documentation in that file describing the changes just made.</li>
-<li class="task-list-item"><input type="checkbox" disabled> Once the unit tests pass, build everything and commit.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that file describing the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
 </ul></div>
         </div>
 
