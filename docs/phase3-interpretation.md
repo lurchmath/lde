@@ -207,19 +207,36 @@ then return lastInterpretation() as the result of this function
 ## Feedback messages
 
  * [ ] Add a function to the LDE module that can be called whenever the
-   feedback on an `InputStructure` in the Input Tree changes, and the
-   function will send a message (to any listening client) containing this
-   data: the ID of the node whose feedback changed, and the new feedback
-   data.
+   Input Tree wants to communicate to the UI some attribute of a node in the
+   Input Tree.  That function will send a message (to any listening client)
+   containing the ID of the node and a key-value pair for the attribute in
+   question.
  * [ ] Extend each of the LDE module's API functions so that, when any new
    `InputStructure` instances are added in the Input Tree, we recursively go
    through them and all their descendants, and set their `wasChanged` event
-   handlers to check to see if the feedback changed, and if so, call that
-   global message sending function.
+   handlers to call that global message sending function.  It should not
+   filter out any such messages by default; rather, the LDE can make
+   guarantees in its documentation about certain attribute keys that
+   follow certain rules, and the UI can choose whichever subset of those
+   keys it wants to watch for and display to the user in some way.  This
+   will include feedback about validation, but may include other things as
+   well.  Example:
+    * Consider a step of work that needs two premises, but none were cited,
+      and the option is enabled that lets Lurch seek the premises automatically.
+    * So Lurch fills in the preceding two steps as the reasons, and as it
+      does so, it might store in one of the step's attributes the fact that
+      it auto-filled, as the premises, those two preceding steps.
+    * A user interface might choose to implement a feature that watched for
+      when such an attribute appears on an OT node, and then display the
+      meaning of that attribute to the user, perhaps by showing
+      faint/dotted arrows connecting the step to its auto-inserted premises.
+    * In other words, when premises aren't provided, the user will just see
+      ghostly connections that communicate what the LDE inferred.  No more
+      mystery about which premises are auto-filled.
  * [ ] Update the documentation in that file to describe the changes just
    made.
  * [ ] Extend the unit tests for the LDE module to verify that this
-   works as described.  (Change the feedback of some nodes in the Input Tree
+   works as described.  (Change attributes of some nodes in the Input Tree
    and verify that messages are sent by the LDE to that effect.)
  * [ ] Add documentation in that test file describing the changes just made.
  * [ ] Once the unit tests pass, build everything and commit.

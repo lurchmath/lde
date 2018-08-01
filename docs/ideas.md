@@ -4,6 +4,27 @@
 This document records incomplete ideas the Lurch team is keeping in mind
 for integration into later design plans.
 
+ * How to handle dependencies in the new design:
+    * Every `OutputStructure` instance knows whether or not it should get
+      exported to dependencies or not.  For instance, steps of work don't
+      get exported, but declarations of grammar rules, ROIs, and constants
+      would get exported.
+    * A method in the generic `OutputStructure` class called `.export()`
+      would be called on the `OutputTree` root and would just check to see
+      if any of the children of the root have the property mentioned in
+      the previous bullet point (because only the children of the root are
+      accessible to subsequent documents; everything else is inside
+      something else).  It would return the result as an array.
+    * That array of `OutputTree` nodes would be serialized and packaged up
+      as the data that dependency would export, as a big chunk of JSON.
+    * Any future Lurch document that imported that dependency would
+      represent the dependency using, as you suggest, a single
+      `InputStructure` of type `InputDependency`, with a payload of data
+      that is that big chunk of JSON.
+    * The `.interpret()` routine for `InputDependency` instances is to
+      simply deserialize the `OutpuTree` nodes back from JSON.  So we are
+      quite literally copying nodes from a dependency document into the
+      documents on which they depend.
  * We have considered a UI with buttons with mathematical names on them,
    such as Justify (which would let you choose a reason and it would insert
    it), Cite (which would let you click any premise and it would make the
@@ -55,3 +76,19 @@ for integration into later design plans.
     * One specific subclass of this idea is when we require rigid formal
       syntax, like line-numbered proofs with
       `statement[whitespace]reason[whitespace]premise,...`
+ * We have long intended to support a feature in which a typical formal
+   proof line (statement, reason, premise numbers) might be auto-parsed, but
+   we now have an easy way to do so:
+    * Have the UI wrap every single numbered list item in an InputStructure
+      that parses its contents in that way.  That’s all you have to do!
+    * While this assumes line-numbered proofs, this is often how a course
+      begins.
+    * This brings about a very nice user experience, where users simply type
+      proofs and they are graded without any bubbling procedure!  Automated
+      feedback just appears near your proof as you type it, and no bubbles
+      have to exist anywhere.  This is the ideal.
+    * Later, this feature could be extended so that, within a proof block,
+      for example, every paragraph is treated this way even if it is not a
+      numbered list item, and such items are automatically labeled if they
+      end with standard math labeling markers like `(*)` or `(**)` or `(1)`
+      and so on.

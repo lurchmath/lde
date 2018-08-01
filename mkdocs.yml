@@ -7,6 +7,10 @@ pages:
     - Phase 2, The Input Tree: phase2-input-tree.md
     - Phase 3, Interpretation: phase3-interpretation.md
     - Phase 4, Validation: phase4-validation.md
+    - Phase 5, Labels: phase5-labels.md
+    - Phase 6, Expressions: phase6-expressions.md
+    - Phase 7, Citations: phase7-citations.md
+    - Phase 8, Validating Steps: phase8-validating-steps.md
     - Phase N, List of outdated phases: phaseN-archive.md
     - Enhancements for Later: enhancements.md
     - Ideas Archive: ideas.md

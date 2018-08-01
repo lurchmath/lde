@@ -26,43 +26,17 @@ This has not been implemented.  See the tasks below.
  * [ ] Define a class variable in the `OutputStructure` class, an array of
    all instances that need to be validated.  Initialize it to the empty
    array.
- * [ ] Extend the `OutputStructure` class with an instance method that adds
-   that instance to the list in that class variable iff the instance has a
-   `validate()` method.
- * [ ] Add documentation in that file describing the changes just made.
- * [ ] Extend the unit tests for the `OutputStructure` module to verify
-   that this works as described.
- * [ ] Add documentation in that test file describing the changes just made.
  * [ ] Extend the `recursiveInterpret` routine so that, for any
    `OutputStructure` instances it had to create (not just re-use from its
-   cache), it calls the method that adds them to the to-validate list.
- * [ ] Add documentation in that file describing the changes just made.
+   cache), if any of them are also `OutputStep` instances, then add them to
+   the to-validate list.  (The `OutputStep` class does not yet exist.  Make
+   it a stub for now, and come back to fully implementing it in
+   [phase 7](phase7-citations.md).)
+ * [ ] Add documentation in those files describing the changes just made.
  * [ ] Extend the unit tests for the `InputStructure` module to verify
    that this works as described.
  * [ ] Add documentation in that test file describing the changes just made.
  * [ ] Once the unit tests pass, build everything and commit.
- * [ ] Add documentation to the `OutputStructure` class, explaining that any
-   subclass that wishes to implement a `validate()` routine must follow the
-   following rules when it does so.
-    * The functions should be written asynchronously, taking callbacks that
-      notify when complete.  Care should be taken to ensure that no such
-      function throws an error.  Even if some code in them malfunctions, the
-      error should be caught and included as feedback in the node to be
-      validated, stating that an internal error occurred in the Lurch code.
-    * The result of X.validate() must be contingent only upon any
-      `OutputStructure` Y accessible to X.
-    * Because of the restrictions on interpretation routines, if X exists in
-      the output tree, then so does everything accessible to it upon which
-      it might depend.
-    * Note that `validate()` routines, because they are asynchronous and may
-      need to do lengthy tasks, should feel free to reference modules that
-      do lengthy tasks in background threads, and send their results via
-      callbacks.  (This is not a restriction, but rather an opportunity.)
-      The matching module is a prime example of how this may later be used.
-    * While the `validate()` routine for one `OutputStructure` instance X
-      may add some other instance Y to the queue of things to validate,
-      it may do so only if X is accessible to Y.
- * [ ] Rebuild the docs and commit.
 
 ## Automatic validation processing
 
@@ -74,24 +48,23 @@ This has not been implemented.  See the tasks below.
    are processed is irrelevant.
  * [ ] Add documentation in that file describing the changes just made.
  * [ ] Extend the unit tests for the LDE module to verify that this works
-   as described.  That is, create some `OutputStructure` subclasses that
-   have `validate` routines, and some `InputStructure` subclasses whose
-   `interpret` routines produce instances of those classes that know how to
-   validate themselves.  Verify that validation actually does take place.
+   as described.  That is, create some `OutputStep` subclasses and some
+   `InputStructure` subclasses whose `interpret` routines produce instances
+   of those classes.  Verify that validation actually does take place.
  * [ ] Add documentation in that test file describing the changes just made.
  * [ ] Once the unit tests pass, build everything and commit.
 
 ## Feedback messages
 
- * [ ] Add a function to the LDE module that can be called whenever the
-   feedback on an `OutputStructure` in the Output Tree changes, and the
-   function will send a message (to any listening client) containing this
-   data: the ID of the origin of the node whose feedback changed, and the
-   new feedback data.
+ * [ ] Add a function to the LDE module that can be called whenever an
+   attribute of an `OutputStructure` in the Output Tree changes, and the
+   function will send a message (to any listening client) containing the ID
+   of the origin of the node whose attribute changed, and the key-value pair
+   of the changed attribute.
  * [ ] Update the documentation in that file to describe the changes just
    made.
  * [ ] Extend the unit tests for the LDE module to verify that this
-   works as described.  First, simply, just change the feedback of some
+   works as described.  First, simply, just change an attribute of some
    nodes in the Output Tree and verify that messages are sent by the LDE to
    that effect.  Then extend the tests that go from API calls to validation
    results to ensure that the entire process works, from API calls that add
@@ -99,3 +72,58 @@ This has not been implemented.  See the tasks below.
    back.
  * [ ] Add documentation in that test file describing the changes just made.
  * [ ] Once the unit tests pass, build everything and commit.
+
+## Conclusions
+
+We now stipulate and prove a few facts about the preceding design.
+
+**Axiom 1:** Lurch creates an `InputStructure` from a portion of the user's
+document iff that portion is meaningful.
+
+**Remark:** This is the job of the UI, with the assistance of the user's
+settings.  So in some sense this axiom is aspirational, or conditioned upon
+the assumption that we can provide a robust enough set of UI settings to
+capture user meaning correctly.
+
+**Axiom 2:** Lurch performs interpretation on every `InputStructure`
+created by the UI, and on nothing else.
+
+**Remark:** The design so far has included this as an obvious goal.  Here
+we just explicitly state it.
+
+**Theorem 1:** Lurch does syntactic validation on X iff X corresponds to a piece of meaningful content in the user's document.
+
+**Proof:** Syntactic validation is a part of interpretation, which by Axiom
+2 gets applied to every `InputStructure`, and to nothing else.  By Axiom 1,
+those `InputStructure`s correspond directly to the meaningful content in
+the user's document.  QED
+
+**Axiom 3:** Both the creation and interpretation of `InputStructure`s faithfully preserve meaning.
+
+**Remark:** That is, neither the UI nor the interpretation phase will
+convert a premise into a rule, or a grammar rule into a subproof, or any
+other crazy change of meaning.  This is simply a commitment for us to design
+Lurch to do what seems mathematically normal and natural to mathematicians
+and math students, as human users of the software.  It's a bit strange to
+even state this rather obvious axiom, but it is needed in the proof of
+Theorem 2.
+
+**Theorem 2:** Lurch does semantic validation on X iff X corresponds to a
+syntactically valid step of work in the user's document.
+
+**Proof:** Assume X is a syntactically valid step of work in the document.
+Then by Axiom 1, it will become an `InputStructure`, and by Axiom 3, it
+will more precisely have the type of data that lets the LDE know that it is
+a step of work.  By Axiom 2, that step will be interpreted, and by Axiom 3,
+the result will be an `OutputStep`.  That `OutputStep` will have syntactic
+validation performed on it, because of the definition of validation
+enqueueing given above.
+
+In the other direction, assume Lurch does semantic validation on X.  Then by
+the definition of validation enqueueing above, X must be an `OutputStep`.
+Our design permits creation of `OutputStructure`s only through
+interpretation, and by Axiom 3, the interpretation step that created X must
+have taken as input some `InputStructure` that has all the data indicating
+it is a step of work.  By Axiom 1, that must have come from some meaningful
+portion of the user's document, and by Axiom 3, that in-document content
+must have represented a step of work.  QED

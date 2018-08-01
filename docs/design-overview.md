@@ -253,4 +253,61 @@ These are of utmost importance, because
    enabling more and more sophisticated Lurch libraries, until we have
    reached the level of power that supports a first proof course.
 
+## How to design support for new concepts
+
+ * Begin with how the new concept will be represented in the Output Tree
+   (OT).  As you do so, respect these constraints.
+    * The OT is pure data that the user never sees, so we are free to store
+      things there without concern for how they will appear to users.
+    * The OT must support validation, so we are constrained to storing
+      things there in a way that makes it easy to write and maintain
+      validation algorithms.
+    * Validation is complicated, and yet it must be 100% airtight and
+      correct; therefore we don't want our data storage decisions to add
+      any unnecessary complexity to validation and/or the OT.
+    * As a consequence, there should be one unique, canonical way to store
+      any given concept in the OT.
+ * Then ask *briefly* how the concept will show up in the main Lurch UI.
+    * Admit up front that it is something that will expand a lot with
+      time.  That is, whatever we design now will be the tip of the iceberg
+      of ideas that will occur to us over the coming years, and we should
+      accept that up front and plan for that as best we can.
+    * Start by listing the few ways that you already know that the new
+      feature will show up in the UI, simultaneously admitting that it is
+      just a sample of the ways that the feature might eventually appear.
+ * Come to the middle of the pipeline, the Input Tree (IT), whose job is to
+   bridge between the UI and the OT.  Recall that the UI will have many ways
+   to represent the new features, and the OT only one.  There are two steps
+   of translation between there that could possibly handle the conversion:
+   Should the UI-to-InputTree phase handle it, or should interpretation
+   handle it, or some combination?  Decide based on these guidelines:
+    * The UI-to-IT conversion does not know about the array of accessible
+      nodes, nor does it know about any of their semantics.  Only the
+      interpretation phase can depend on the semantics of all nodes
+      accessible to the one being interpreted.  So if that information is
+      relevant, the computation must be pushed to the interpretation
+      phase.  For instance, if some feature needs to know what variables
+      are declared and in scope, it would need to wait for the
+      interpretation phase, which will have access to all accessible nodes,
+      including all declarations.
+    * Only the UI knows about any of its features that are specific to that
+      UI.  For instance in the main UI, there may be features specific to
+      HTML and/or mouse events, or in a LaTeX package there may be features
+      specific to LaTeX.  Obviously such features must be handled in the
+      UI-to-IT conversion, because they depend upon the specific UI in
+      which they were invented.
+    * If the previous guidelines do not apply, prefer doing the work in the
+      interpretation phase rather than the UI-to-IT phase, for these
+      reasons:
+       * Doing so makes the whole LDE better, rather than just making one
+         of its UIs better.
+       * The interpretation phase can be converted into a queue and handled
+         efficiently, so adding computation burden to it is better than
+         adding computation burden where such efficiency measures are not
+         available.
+    * Keep in mind at all times that the features in the UI that
+      interpretation must support are just an example set that will grow
+      over time, so try to design an interpretation phase that can easily
+      be expanded also, to be ready for such later expansion in the UI.
+
 See other documentation on this site for the contents of each design phase.
