@@ -73,6 +73,22 @@
 </li>
                             
 <li >
+    <a href="../phase5-labels/">Phase 5, Labels</a>
+</li>
+                            
+<li >
+    <a href="../phase6-expressions/">Phase 6, Expressions</a>
+</li>
+                            
+<li >
+    <a href="../phase7-citations/">Phase 7, Citations</a>
+</li>
+                            
+<li >
+    <a href="../phase8-validating-steps/">Phase 8, Validating Steps</a>
+</li>
+                            
+<li >
     <a href="../phaseN-archive/">Phase N, List of outdated phases</a>
 </li>
                             
@@ -116,7 +132,7 @@
                         </a>
                     </li>
                     <li >
-                        <a rel="prev" href="../phaseN-archive/">
+                        <a rel="prev" href="../phase5-labels/">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -135,6 +151,7 @@
             <li><a href="#automatic-validation-enqueueing">Automatic validation enqueueing</a></li>
             <li><a href="#automatic-validation-processing">Automatic validation processing</a></li>
             <li><a href="#feedback-messages">Feedback messages</a></li>
+            <li><a href="#conclusions">Conclusions</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
@@ -158,45 +175,17 @@ themselves as they are added to the Output Tree.</p>
 <li class="task-list-item"><input type="checkbox" disabled/> Define a class variable in the <code>OutputStructure</code> class, an array of
    all instances that need to be validated.  Initialize it to the empty
    array.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the <code>OutputStructure</code> class with an instance method that adds
-   that instance to the list in that class variable iff the instance has a
-   <code>validate()</code> method.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that file describing the changes just made.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests for the <code>OutputStructure</code> module to verify
-   that this works as described.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that test file describing the changes just made.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Extend the <code>recursiveInterpret</code> routine so that, for any
    <code>OutputStructure</code> instances it had to create (not just re-use from its
-   cache), it calls the method that adds them to the to-validate list.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that file describing the changes just made.</li>
+   cache), if any of them are also <code>OutputStep</code> instances, then add them to
+   the to-validate list.  (The <code>OutputStep</code> class does not yet exist.  Make
+   it a stub for now, and come back to fully implementing it in
+   <a href="../phase7-citations/">phase 7</a>.)</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in those files describing the changes just made.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests for the <code>InputStructure</code> module to verify
    that this works as described.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that test file describing the changes just made.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation to the <code>OutputStructure</code> class, explaining that any
-   subclass that wishes to implement a <code>validate()</code> routine must follow the
-   following rules when it does so.<ul>
-<li>The functions should be written asynchronously, taking callbacks that
-  notify when complete.  Care should be taken to ensure that no such
-  function throws an error.  Even if some code in them malfunctions, the
-  error should be caught and included as feedback in the node to be
-  validated, stating that an internal error occurred in the Lurch code.</li>
-<li>The result of X.validate() must be contingent only upon any
-  <code>OutputStructure</code> Y accessible to X.</li>
-<li>Because of the restrictions on interpretation routines, if X exists in
-  the output tree, then so does everything accessible to it upon which
-  it might depend.</li>
-<li>Note that <code>validate()</code> routines, because they are asynchronous and may
-  need to do lengthy tasks, should feel free to reference modules that
-  do lengthy tasks in background threads, and send their results via
-  callbacks.  (This is not a restriction, but rather an opportunity.)
-  The matching module is a prime example of how this may later be used.</li>
-<li>While the <code>validate()</code> routine for one <code>OutputStructure</code> instance X
-  may add some other instance Y to the queue of things to validate,
-  it may do so only if X is accessible to Y.</li>
-</ul>
-</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Rebuild the docs and commit.</li>
 </ul>
 <h2 id="automatic-validation-processing">Automatic validation processing</h2>
 <ul class="task-list">
@@ -208,24 +197,23 @@ themselves as they are added to the Output Tree.</p>
    are processed is irrelevant.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that file describing the changes just made.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests for the LDE module to verify that this works
-   as described.  That is, create some <code>OutputStructure</code> subclasses that
-   have <code>validate</code> routines, and some <code>InputStructure</code> subclasses whose
-   <code>interpret</code> routines produce instances of those classes that know how to
-   validate themselves.  Verify that validation actually does take place.</li>
+   as described.  That is, create some <code>OutputStep</code> subclasses and some
+   <code>InputStructure</code> subclasses whose <code>interpret</code> routines produce instances
+   of those classes.  Verify that validation actually does take place.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that test file describing the changes just made.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
 </ul>
 <h2 id="feedback-messages">Feedback messages</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Add a function to the LDE module that can be called whenever the
-   feedback on an <code>OutputStructure</code> in the Output Tree changes, and the
-   function will send a message (to any listening client) containing this
-   data: the ID of the origin of the node whose feedback changed, and the
-   new feedback data.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add a function to the LDE module that can be called whenever an
+   attribute of an <code>OutputStructure</code> in the Output Tree changes, and the
+   function will send a message (to any listening client) containing the ID
+   of the origin of the node whose attribute changed, and the key-value pair
+   of the changed attribute.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Update the documentation in that file to describe the changes just
    made.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests for the LDE module to verify that this
-   works as described.  First, simply, just change the feedback of some
+   works as described.  First, simply, just change an attribute of some
    nodes in the Output Tree and verify that messages are sent by the LDE to
    that effect.  Then extend the tests that go from API calls to validation
    results to ensure that the entire process works, from API calls that add
@@ -233,7 +221,49 @@ themselves as they are added to the Output Tree.</p>
    back.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that test file describing the changes just made.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
-</ul></div>
+</ul>
+<h2 id="conclusions">Conclusions</h2>
+<p>We now stipulate and prove a few facts about the preceding design.</p>
+<p><strong>Axiom 1:</strong> Lurch creates an <code>InputStructure</code> from a portion of the user's
+document iff that portion is meaningful.</p>
+<p><strong>Remark:</strong> This is the job of the UI, with the assistance of the user's
+settings.  So in some sense this axiom is aspirational, or conditioned upon
+the assumption that we can provide a robust enough set of UI settings to
+capture user meaning correctly.</p>
+<p><strong>Axiom 2:</strong> Lurch performs interpretation on every <code>InputStructure</code>
+created by the UI, and on nothing else.</p>
+<p><strong>Remark:</strong> The design so far has included this as an obvious goal.  Here
+we just explicitly state it.</p>
+<p><strong>Theorem 1:</strong> Lurch does syntactic validation on X iff X corresponds to a piece of meaningful content in the user's document.</p>
+<p><strong>Proof:</strong> Syntactic validation is a part of interpretation, which by Axiom
+2 gets applied to every <code>InputStructure</code>, and to nothing else.  By Axiom 1,
+those <code>InputStructure</code>s correspond directly to the meaningful content in
+the user's document.  QED</p>
+<p><strong>Axiom 3:</strong> Both the creation and interpretation of <code>InputStructure</code>s faithfully preserve meaning.</p>
+<p><strong>Remark:</strong> That is, neither the UI nor the interpretation phase will
+convert a premise into a rule, or a grammar rule into a subproof, or any
+other crazy change of meaning.  This is simply a commitment for us to design
+Lurch to do what seems mathematically normal and natural to mathematicians
+and math students, as human users of the software.  It's a bit strange to
+even state this rather obvious axiom, but it is needed in the proof of
+Theorem 2.</p>
+<p><strong>Theorem 2:</strong> Lurch does semantic validation on X iff X corresponds to a
+syntactically valid step of work in the user's document.</p>
+<p><strong>Proof:</strong> Assume X is a syntactically valid step of work in the document.
+Then by Axiom 1, it will become an <code>InputStructure</code>, and by Axiom 3, it
+will more precisely have the type of data that lets the LDE know that it is
+a step of work.  By Axiom 2, that step will be interpreted, and by Axiom 3,
+the result will be an <code>OutputStep</code>.  That <code>OutputStep</code> will have syntactic
+validation performed on it, because of the definition of validation
+enqueueing given above.</p>
+<p>In the other direction, assume Lurch does semantic validation on X.  Then by
+the definition of validation enqueueing above, X must be an <code>OutputStep</code>.
+Our design permits creation of <code>OutputStructure</code>s only through
+interpretation, and by Axiom 3, the interpretation step that created X must
+have taken as input some <code>InputStructure</code> that has all the data indicating
+it is a step of work.  By Axiom 1, that must have come from some meaningful
+portion of the user's document, and by Axiom 3, that in-document content
+must have represented a step of work.  QED</p></div>
         </div>
 
         <footer class="col-md-12">

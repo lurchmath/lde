@@ -4,7 +4,7 @@
     
     <url>
      <loc>/</loc>
-     <lastmod>2018-03-27</lastmod>
+     <lastmod>2018-08-01</lastmod>
      <changefreq>daily</changefreq>
     </url>
     
@@ -13,49 +13,73 @@
         
     <url>
      <loc>/design-overview/</loc>
-     <lastmod>2018-03-27</lastmod>
+     <lastmod>2018-08-01</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>/phase1-structures/</loc>
-     <lastmod>2018-03-27</lastmod>
+     <lastmod>2018-08-01</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>/phase2-input-tree/</loc>
-     <lastmod>2018-03-27</lastmod>
+     <lastmod>2018-08-01</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>/phase3-interpretation/</loc>
-     <lastmod>2018-03-27</lastmod>
+     <lastmod>2018-08-01</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>/phase4-validation/</loc>
-     <lastmod>2018-03-27</lastmod>
+     <lastmod>2018-08-01</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>/phase5-labels/</loc>
+     <lastmod>2018-08-01</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>/phase6-expressions/</loc>
+     <lastmod>2018-08-01</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>/phase7-citations/</loc>
+     <lastmod>2018-08-01</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>/phase8-validating-steps/</loc>
+     <lastmod>2018-08-01</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>/phaseN-archive/</loc>
-     <lastmod>2018-03-27</lastmod>
+     <lastmod>2018-08-01</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>/enhancements/</loc>
-     <lastmod>2018-03-27</lastmod>
+     <lastmod>2018-08-01</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>/ideas/</loc>
-     <lastmod>2018-03-27</lastmod>
+     <lastmod>2018-08-01</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
@@ -65,19 +89,19 @@
         
     <url>
      <loc>/api-overview/</loc>
-     <lastmod>2018-03-27</lastmod>
+     <lastmod>2018-08-01</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>/api-lde/</loc>
-     <lastmod>2018-03-27</lastmod>
+     <lastmod>2018-08-01</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>/api-structures/</loc>
-     <lastmod>2018-03-27</lastmod>
+     <lastmod>2018-08-01</lastmod>
      <changefreq>daily</changefreq>
     </url>
         

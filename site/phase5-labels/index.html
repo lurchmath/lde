@@ -8,7 +8,7 @@
         
         
         <link rel="shortcut icon" href="../img/favicon.ico">
-        <title>Overview - Lurch Deductive Engine Documentation</title>
+        <title>Phase 5, Labels - Lurch Deductive Engine Documentation</title>
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
@@ -48,7 +48,7 @@
                     <li >
                         <a href="..">Home</a>
                     </li>
-                    <li class="dropdown">
+                    <li class="dropdown active">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Design Plans <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             
@@ -72,8 +72,8 @@
     <a href="../phase4-validation/">Phase 4, Validation</a>
 </li>
                             
-<li >
-    <a href="../phase5-labels/">Phase 5, Labels</a>
+<li class="active">
+    <a href="./">Phase 5, Labels</a>
 </li>
                             
 <li >
@@ -101,12 +101,12 @@
 </li>
                         </ul>
                     </li>
-                    <li class="dropdown active">
+                    <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Documentation <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             
-<li class="active">
-    <a href="./">Overview</a>
+<li >
+    <a href="../api-overview/">Overview</a>
 </li>
                             
 <li >
@@ -127,12 +127,12 @@
                     </a>
                 </li>
                     <li >
-                        <a rel="next" href="../ideas/">
+                        <a rel="next" href="../phase4-validation/">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
                     <li >
-                        <a rel="prev" href="../api-lde/">
+                        <a rel="prev" href="../phase6-expressions/">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -144,59 +144,77 @@
         <div class="container">
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
-        <li class="main active"><a href="#api-documentation-overview">API Documentation Overview</a></li>
-            <li><a href="#design-plans-vs-api-documentation">Design Plans vs. API Documentation</a></li>
-            <li><a href="#developer-workflow">Developer Workflow</a></li>
-            <li><a href="#for-the-reader">For the Reader</a></li>
+        <li class="main active"><a href="#lde-design-phase-5-labels">LDE Design Phase 5: Labels</a></li>
+            <li><a href="#content">Content</a></li>
+            <li><a href="#goal">Goal</a></li>
+            <li><a href="#status">Status</a></li>
+            <li><a href="#design">Design</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<h1 id="api-documentation-overview">API Documentation Overview</h1>
-<h2 id="design-plans-vs-api-documentation">Design Plans vs. API Documentation</h2>
-<p>At the top of this site, notice the two navigation menus entitled "Design
-Plans" and "API Documentation."  The difference between them is this:</p>
-<ul>
-<li><em>Design Plans</em> lists concepts that have not yet been implemented and
-   documented.  Consequently, the concepts are usually not described in full
-   detail, but just the best detail available in the planning phase.
-   It answers the question, "What do we plan to build?"</li>
-<li><em>API Documentation</em> lists concepts that have been implemented, and for
-   which the developers have therefore been able to document their work.
-   Having the benefit of hindsight, this is therefore more detailed, and
-   often even contains links directly into the source code.
-   It answers the question, "What did we build?" and is the official
-   documentation for the modules.</li>
-</ul>
-<p>Any page in the Design Plans that has been complete has had most of its
-content removed, because it has been superceded by the corresponding API
-documentation.  What remains is just a record of what was planne for that
-phase, with links to the corresponding API Documentation.</p>
-<h2 id="developer-workflow">Developer Workflow</h2>
-<p>Developers designing and/or implementing concepts should therefore progress
-those concepts through a lifecycle like so:</p>
-<ol>
-<li>Describe the concept in one of the Design Plans page.  Provide as much
-    detail as you can, knowing of course that full details is impossible to
-    provide before the work has been done.</li>
-<li>As you implement and test the concept, update those design documents
-    with whatever new information you create or learn as part of the work,
-    thus making them more precise.</li>
-<li>Once the concept is fully implemented and tested, document the work in
-    an existing or new page in the API Documentation section.  This may
-    involve copying and pasting some of the content from the design plan,
-    provided that it still applies.  It will probably also involve adding
-    significant detail about the particulars of the implementation.</li>
-<li>Replace the original (less detailed) documentation in the design plans
-    with a brief description of the concept, followed by a link to the
-    corresponding part of the API Documentation for full details.</li>
-</ol>
-<h2 id="for-the-reader">For the Reader</h2>
-<p>Readers of this documentation will therefore be able to see how much has
-been implemented by perusing the Design Plans pages.  Those that are brief
-overviews of concepts with links to API Documentation have been implemented.
-Those that are plans for future work, with no links to any API
-Documentation, have not yet been implemented.</p></div>
+<p>We have designed the work on the Lurch Deductive Engine (LDE) to progress in
+phases.  The idea is that each phase ends with a completed whole that can be
+tested in that state, and that provides more features than the previous
+state did.  By the time the final phase is complete, the LDE will be a
+robust and useful product.</p>
+<h1 id="lde-design-phase-5-labels">LDE Design Phase 5: Labels</h1>
+<h2 id="content">Content</h2>
+<p>In this phase, we build on the foundation of generic interpretation and
+validation to build the first feature necessary for validating steps of
+work:  Labels.</p>
+<h2 id="goal">Goal</h2>
+<p>By the end of this phase, the Input Tree can contain labels that will be
+preserved and transferred to the Output Tree by interpretation, and are
+available for use in validation.</p>
+<h2 id="status">Status</h2>
+<p>This has not been implemented.  In fact, the design below has not yet been
+converted into actionable tasks.  So the next steps are to do that
+conversion, and then execute the resulting tasks.</p>
+<h2 id="design">Design</h2>
+<p>We have high hopes for the flexibility of labels.  We don't want "1" to be
+a label and then the user says "1." and it's not recognized because of the
+minor difference in punctuation.  Furthermore, if "Theorem 6" were a label
+and the user said "thm 6" we might like that to be recognized.  So a label
+is not a string, but a string together with a set of policies defining an
+equivalence class surrounding that string in the space of all strings.  Of
+course, a subset of the set of all strings is also defined by a predicate,
+which would show up in JavaScript as a one-parameter function on strings
+returning true/false values.</p>
+<p>We therefore use this as our definition of "label."  That is, a label for
+an <code>OutputStructure</code> A is really a function f such that f(L) is true iff A
+answers to the label L.  Because an <code>OutputStructure</code> is a
+JavaScript object, it can have a field that stores, in an array, all its
+labels (as functions).  Like so:
+ * <code>myOutputStructure.labelFunctions</code>, an array initialized to empty in the
+   constructor
+ * <code>myOutputStructure.hasLabel( L )</code> returns true iff some f in
+   <code>myOutputStructure.labelFunctions</code> returns true on L, and false otherwise
+ * We already have built into the generic <code>Structure</code> class (and therefore
+   into its subclasses, including <code>OutputStructure</code> and <code>InputStructure</code>) a
+   routine that can search backwards through all accessible nodes to find
+   the first one satisfying a given predicate.  So we can simply look up
+   labels from any point X in the <code>OutputTree</code> with CoffeeScript code like
+   so: <code>lookupResult = X.firstAccessible ( y ) -&gt; y.hasLabel L</code></p>
+<p>Explicit label bubbles in the document, connected by arrows to their
+targets, can be passed directly from the UI to the IT without processing.
+The interpretation phase will then have to take these steps:
+ * Convert any labeling data into labeling predicates (as designed above)
+   that get embedded into Output Tree nodes.
+ * Delete any label bubbles, since they aren't part of validation, and
+   their data has been embedded in their targets.
+ * Hidden attributes will be passed directly from the UI to the Input Tree
+   without processing, and converted similarly during the interpretation
+   phase, but without the need to delete any label bubbles.
+ * HTML structures like ordered lists will be converted, by the UI, as it
+   creates the Input Tree, into hidden attributes, which would then be
+   handled by the interpretation phase as in the previous bullet point.</p>
+<p>Thus when the UI embeds into an <code>InputStructure</code> some information about a
+label automatically assigned based on a numbered list, it can also embed
+with it some data saying whether punctuation is optional, or any other
+option that should be applied when checking to see if a label applies.  That
+information will be used by the interpretation step when it creates label
+predicates that it embeds in Output Tree nodes.</p></div>
         </div>
 
         <footer class="col-md-12">

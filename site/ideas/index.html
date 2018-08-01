@@ -73,6 +73,22 @@
 </li>
                             
 <li >
+    <a href="../phase5-labels/">Phase 5, Labels</a>
+</li>
+                            
+<li >
+    <a href="../phase6-expressions/">Phase 6, Expressions</a>
+</li>
+                            
+<li >
+    <a href="../phase7-citations/">Phase 7, Citations</a>
+</li>
+                            
+<li >
+    <a href="../phase8-validating-steps/">Phase 8, Validating Steps</a>
+</li>
+                            
+<li >
     <a href="../phaseN-archive/">Phase N, List of outdated phases</a>
 </li>
                             
@@ -137,6 +153,29 @@
 <p>This document records incomplete ideas the Lurch team is keeping in mind
 for integration into later design plans.</p>
 <ul>
+<li>How to handle dependencies in the new design:<ul>
+<li>Every <code>OutputStructure</code> instance knows whether or not it should get
+  exported to dependencies or not.  For instance, steps of work don't
+  get exported, but declarations of grammar rules, ROIs, and constants
+  would get exported.</li>
+<li>A method in the generic <code>OutputStructure</code> class called <code>.export()</code>
+  would be called on the <code>OutputTree</code> root and would just check to see
+  if any of the children of the root have the property mentioned in
+  the previous bullet point (because only the children of the root are
+  accessible to subsequent documents; everything else is inside
+  something else).  It would return the result as an array.</li>
+<li>That array of <code>OutputTree</code> nodes would be serialized and packaged up
+  as the data that dependency would export, as a big chunk of JSON.</li>
+<li>Any future Lurch document that imported that dependency would
+  represent the dependency using, as you suggest, a single
+  <code>InputStructure</code> of type <code>InputDependency</code>, with a payload of data
+  that is that big chunk of JSON.</li>
+<li>The <code>.interpret()</code> routine for <code>InputDependency</code> instances is to
+  simply deserialize the <code>OutpuTree</code> nodes back from JSON.  So we are
+  quite literally copying nodes from a dependency document into the
+  documents on which they depend.</li>
+</ul>
+</li>
 <li>We have considered a UI with buttons with mathematical names on them,
    such as Justify (which would let you choose a reason and it would insert
    it), Cite (which would let you click any premise and it would make the
@@ -192,6 +231,24 @@ for integration into later design plans.</p>
 <li>One specific subclass of this idea is when we require rigid formal
   syntax, like line-numbered proofs with
   <code>statement[whitespace]reason[whitespace]premise,...</code></li>
+</ul>
+</li>
+<li>We have long intended to support a feature in which a typical formal
+   proof line (statement, reason, premise numbers) might be auto-parsed, but
+   we now have an easy way to do so:<ul>
+<li>Have the UI wrap every single numbered list item in an InputStructure
+  that parses its contents in that way.  That’s all you have to do!</li>
+<li>While this assumes line-numbered proofs, this is often how a course
+  begins.</li>
+<li>This brings about a very nice user experience, where users simply type
+  proofs and they are graded without any bubbling procedure!  Automated
+  feedback just appears near your proof as you type it, and no bubbles
+  have to exist anywhere.  This is the ideal.</li>
+<li>Later, this feature could be extended so that, within a proof block,
+  for example, every paragraph is treated this way even if it is not a
+  numbered list item, and such items are automatically labeled if they
+  end with standard math labeling markers like <code>(*)</code> or <code>(**)</code> or <code>(1)</code>
+  and so on.</li>
 </ul>
 </li>
 </ul></div>
