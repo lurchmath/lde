@@ -8,7 +8,7 @@
         
         
         <link rel="shortcut icon" href="../img/favicon.ico">
-        <title>Ideas Archive - Lurch Deductive Engine Documentation</title>
+        <title>Phase 7, Validation - Lurch Deductive Engine Documentation</title>
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
@@ -80,8 +80,8 @@
     <a href="../phase6-labels/">Phase 6, Labels</a>
 </li>
                             
-<li >
-    <a href="../phase7-validation/">Phase 7, Validation</a>
+<li class="active">
+    <a href="./">Phase 7, Validation</a>
 </li>
                             
 <li >
@@ -92,8 +92,8 @@
     <a href="../enhancements/">Enhancements for Later</a>
 </li>
                             
-<li class="active">
-    <a href="./">Ideas Archive</a>
+<li >
+    <a href="../ideas/">Ideas Archive</a>
 </li>
                         </ul>
                     </li>
@@ -123,12 +123,12 @@
                     </a>
                 </li>
                     <li >
-                        <a rel="next" href="../enhancements/">
+                        <a rel="next" href="../phase6-labels/">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
                     <li >
-                        <a rel="prev" href="../api-overview/">
+                        <a rel="prev" href="../phase8-expressions-and-rules/">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -140,113 +140,108 @@
         <div class="container">
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
-        <li class="main active"><a href="#lde-design-idea-archive">LDE Design Idea Archive</a></li>
+        <li class="main active"><a href="#lde-design-phase-7-validation">LDE Design Phase 7: Validation</a></li>
+            <li><a href="#content">Content</a></li>
+            <li><a href="#goal">Goal</a></li>
+            <li><a href="#status">Status</a></li>
+            <li><a href="#making-background-threads-easy-to-use">Making background threads easy to use</a></li>
+            <li><a href="#enabling-outputstructures-to-validate-themselves">Enabling OutputStructures to validate themselves</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<h1 id="lde-design-idea-archive">LDE Design Idea Archive</h1>
-<p>This document records incomplete ideas the Lurch team is keeping in mind
-for integration into later design plans.</p>
-<ul>
-<li>How to handle dependencies in the new design:<ul>
-<li>Every <code>OutputStructure</code> instance knows whether or not it should get
-  exported to dependencies or not.  For instance, steps of work don't
-  get exported, but declarations of grammar rules, ROIs, and constants
-  would get exported.</li>
-<li>A method in the generic <code>OutputStructure</code> class called <code>.export()</code>
-  would be called on the <code>OutputTree</code> root and would just check to see
-  if any of the children of the root have the property mentioned in
-  the previous bullet point (because only the children of the root are
-  accessible to subsequent documents; everything else is inside
-  something else).  It would return the result as an array.</li>
-<li>That array of <code>OutputTree</code> nodes would be serialized and packaged up
-  as the data that dependency would export, as a big chunk of JSON.</li>
-<li>Any future Lurch document that imported that dependency would
-  represent the dependency using, as you suggest, a single
-  <code>InputStructure</code> of type <code>InputDependency</code>, with a payload of data
-  that is that big chunk of JSON.</li>
-<li>The <code>.interpret()</code> routine for <code>InputDependency</code> instances is to
-  simply deserialize the <code>OutpuTree</code> nodes back from JSON.  So we are
-  quite literally copying nodes from a dependency document into the
-  documents on which they depend.</li>
+<p>We have designed the work on the Lurch Deductive Engine (LDE) to progress in
+phases.  The idea is that each phase ends with a completed whole that can be
+tested in that state, and that provides more features than the previous
+state did.  By the time the final phase is complete, the LDE will be a
+robust and useful product.</p>
+<h1 id="lde-design-phase-7-validation">LDE Design Phase 7: Validation</h1>
+<h2 id="content">Content</h2>
+<p>In this phase, we define the Validation Phase.</p>
+<h2 id="goal">Goal</h2>
+<p>The LDE will be able to follow the Interpretation Phase with the Validation
+Phase, giving semantic feedback about the validity of steps of work.</p>
+<h2 id="status">Status</h2>
+<p>This has not been implemented.  See the tasks below.</p>
+<h2 id="making-background-threads-easy-to-use">Making background threads easy to use</h2>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled/> Create a worker script that enables us to create instances of
+   <code>WebWorker</code>s who are able to respond to a variety of functions for
+   installing various routines and data in the workers, including:<ul>
+<li><code>worker.installScript(filename)</code></li>
+<li><code>worker.installFunction(varname,func)</code></li>
+<li><code>worker.installData(key,value)</code></li>
+<li><code>worker.uninstallData(key)</code></li>
+<li><code>worker.run(code,callback)</code></li>
+<li><code>worker.reboot(callback)</code> (which calls <code>terminate()</code> in the internal
+  <code>WebWorker</code> instance, then discards it and replaces it with a new one)</li>
 </ul>
 </li>
-<li>We have considered a UI with buttons with mathematical names on them,
-   such as Justify (which would let you choose a reason and it would insert
-   it), Cite (which would let you click any premise and it would make the
-   arrow), a toolbar of all math words.</li>
-<li>We have tested a Suggestions feature, and could really use it widely:<ul>
-<li>When the cursor is near something the software could recognize as a
-  statement or a reason, it gives a faint shadow over it of what it
-  thinks you're saying.</li>
-<li>A single keystroke confirms, and if you don't use that keystroke, the
-  shadowy suggestion is never actually realized in the document.</li>
-<li>Example usage:<ul>
-<li>Type, then hit <code>Ctrl+Enter</code> to approve an interpretation of what
-  you said as a statement.</li>
-<li>A visual indicator of some kind shows that the bubble was formed,
-  but since your cursor is after it, the bubble-forming animation
-  fades.</li>
-<li>Keep typing, then hit <code>Ctrl+Enter</code> to approve an interpretation of
-  what you said as a reason.</li>
-<li>Same visual indicator process.</li>
-<li>Immediately a suggested connection of the reason to the statement
-  appears, and you hit <code>Ctrl+Enter</code> again to connect them.</li>
-<li>Same visual indicator process.</li>
-<li>Start typing your next statement, and repeat from step 1.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Create a new unit testing file for these advanced <code>WebWorker</code>s,
+   documenting it in the same style as the rest of the test suite.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Once it is robust and all tests pass, commit the changes.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Create a global variable in the LDE that holds a pool of these
+   workers, with a function that lets you specify the size of the pool.
+   It should initialize itself, by default, to the number of threads the
+   CPU supports, minus 1 for the main thread.  (The minimum value is 1.)</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Create a function in each worker for marking it available or
+   unavailable.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Create a function in the worker pool for getting the next available
+   worker, or null if there isn't one.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add and document tests for these new features.</li>
+</ul>
+<h2 id="enabling-outputstructures-to-validate-themselves">Enabling <code>OutputStructures</code> to validate themselves</h2>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled/> Create a global validation pool in the LDE, which is a priority queue
+   that comes with a routine for adding an <code>OutputStructure</code> instance to the
+   queue, after first verifying that it has a <code>validate()</code> routine.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Create a routine that, if a worker is available, dequeues a structure
+   from the validation pool and calls its validation routine, passing it the
+   available worker.  If one is not available, this routine does nothing.
+   In the callback that routine passes the validation routine, place the
+   worker back on the list of available workers.  Also, the routine does
+   nothing in the case where modification or interpretation is currently
+   running.  We expect to define validation routines somewhat like this:</li>
+</ul>
+<pre><code>MyOutputStructure.validate = function ( callback, worker ) {
+    worker.installScript( &quot;some script file&quot; );
+    worker.installFunction( &quot;foo&quot;, foo );
+    worker.installData( &quot;key&quot;, value );
+    worker.run( &quot;some code&quot;, function ( result, error ) {
+        // here, generate feedback from result and/or error
+        callback();
+    } );
+};
+</code></pre>
+
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled/> Call that dequeueing routine whenever a worker becomes available.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Make unit tests for this much functionality, in a new unit testing
+   file for validation specifically.  Document such tests the usual way.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the enqueue process so that if a structure is already
+   enqueued, then enqueueing again does nothing.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the enqueue process so that if the structure being enqueued,
+   while not currently on the queue, has its validation routine still
+   running in a worker, then we find and reboot that worker, mark the
+   structure as no longer being validated, and <em>then</em> enqueue it as usual.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Create unit tests that ensure these behaviors work.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Create a default implementation of <code>justChanged()</code> in the
+   <code>OutputStructure</code> class that does the following things.<ul>
+<li>If the OS has a validate routine, add it to the global pool.  If its
+  origin IS has a validation priority, use that, otherwise use zero.  If
+  its origin has a validation priority of null, skip this step (no
+  enqueueing).  If you enqueue the OS, emit feedback saying its
+  validation is being recomputed.  If it had null priority, emit
+  feedback saying that its validation is being skipped.</li>
+<li>If any OS in the scope of this one cites this one, then add that other
+  OS to the validation pool.  Set priorities and emit feedback in the
+  same way.</li>
 </ul>
 </li>
-<li>Whenever your cursor is in a statement accessible to the most recent
-  justification you formed, a suggested premise citation arrow could
-  appear; <code>Ctrl+Enter</code> to confirm.</li>
-</ul>
-</li>
-<li>MathQuill (and, one day, MathJax, if we choose to add it) are UX sugar
-   that sits above the document, and can be converted to text as part of
-   the UI's processing of HTML into Structures.</li>
-<li>A UI idea from long ago recorded here for safe keeping:<ul>
-<li>Consider all situations in which it’s possible to write a small JS
-  function that can easily take in a string of text and split it into
-  an array of substrings, like <code>"Fred is a fish"</code> to
-  <code>["Fred is", "a", "fish"]</code>, such that the array alternates between
-  meaningful stuff and non-meaningful stuff. Then we have two things we
-  can do with such a function.</li>
-<li>First, the translator can obviously use that to trivially lift the
-  meaningful stuff out.</li>
-<li>Second, the UX can also use it to <em>highlight</em> <strong>while the user is
-  typing in a group</strong> which parts of the group’s content the app is
-  paying attention to, and which parts it’s ignoring. Imagine typing
-  <code>[Fred is a fish]</code> and the app is gently highlighting everything
-  except the 'a' or typing
-  <code>[Fred, who we all love, is a very nice fish]</code>
-  and the app highlights like so:
-  [<em>FRED</em>, who we all love, <em>IS</em> a very nice <em>FISH</em>].
-  Such highlighting would be in the overlay where the bubble is drawn,
-  and shown only when the cursor is in there.</li>
-<li>One specific subclass of this idea is when we require rigid formal
-  syntax, like line-numbered proofs with
-  <code>statement[whitespace]reason[whitespace]premise,...</code></li>
-</ul>
-</li>
-<li>We have long intended to support a feature in which a typical formal
-   proof line (statement, reason, premise numbers) might be auto-parsed, but
-   we now have an easy way to do so:<ul>
-<li>Have the UI wrap every single numbered list item in an InputStructure
-  that parses its contents in that way.  That’s all you have to do!</li>
-<li>While this assumes line-numbered proofs, this is often how a course
-  begins.</li>
-<li>This brings about a very nice user experience, where users simply type
-  proofs and they are graded without any bubbling procedure!  Automated
-  feedback just appears near your proof as you type it, and no bubbles
-  have to exist anywhere.  This is the ideal.</li>
-<li>Later, this feature could be extended so that, within a proof block,
-  for example, every paragraph is treated this way even if it is not a
-  numbered list item, and such items are automatically labeled if they
-  end with standard math labeling markers like <code>(*)</code> or <code>(**)</code> or <code>(1)</code>
-  and so on.</li>
-</ul>
-</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Call the dequeueing routine whenever interpretation ends.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Write unit tests to ensure that the already-tested validation
+   features still function when they are automatically triggered at the end
+   of the implementation phase.</li>
 </ul></div>
         </div>
 

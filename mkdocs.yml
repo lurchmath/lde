@@ -5,15 +5,13 @@ pages:
     - Overview: design-overview.md
     - Phase 1, Structures: phase1-structures.md
     - Phase 2, The Input Tree: phase2-input-tree.md
-    - Phase 3, Interpretation: phase3-interpretation.md
-    - Phase 4, Validation: phase4-validation.md
-    - Phase 5, Labels: phase5-labels.md
-    - Phase 6, Expressions: phase6-expressions.md
-    - Phase 7, Citations: phase7-citations.md
-    - Phase 8, Validating Steps: phase8-validating-steps.md
-    - Phase N, List of outdated phases: phaseN-archive.md
+    - Phase 3, The Output Tree: phase3-output-tree.md
+    - Phase 4, Modification: phase4-modification.md
+    - Phase 5, Interpretation: phase5-interpretation.md
+    - Phase 6, Labels: phase6-labels.md
+    - Phase 7, Validation: phase7-validation.md
+    - Phase 8, Expressions and Rules: phase8-expressions-and-rules.md
     - Enhancements for Later: enhancements.md
-    - Ideas Archive: ideas.md
 - API Documentation:
     - Overview: api-overview.md
     - The LDE: api-lde.md

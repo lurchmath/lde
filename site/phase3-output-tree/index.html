@@ -8,7 +8,7 @@
         
         
         <link rel="shortcut icon" href="../img/favicon.ico">
-        <title>Phase 4, Validation - Lurch Deductive Engine Documentation</title>
+        <title>Phase 3, The Output Tree - Lurch Deductive Engine Documentation</title>
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
@@ -64,32 +64,28 @@
     <a href="../phase2-input-tree/">Phase 2, The Input Tree</a>
 </li>
                             
-<li >
-    <a href="../phase3-interpretation/">Phase 3, Interpretation</a>
-</li>
-                            
 <li class="active">
-    <a href="./">Phase 4, Validation</a>
+    <a href="./">Phase 3, The Output Tree</a>
 </li>
                             
 <li >
-    <a href="../phase5-labels/">Phase 5, Labels</a>
+    <a href="../phase4-modification/">Phase 4, Modification</a>
 </li>
                             
 <li >
-    <a href="../phase6-expressions/">Phase 6, Expressions</a>
+    <a href="../phase5-interpretation/">Phase 5, Interpretation</a>
 </li>
                             
 <li >
-    <a href="../phase7-citations/">Phase 7, Citations</a>
+    <a href="../phase6-labels/">Phase 6, Labels</a>
 </li>
                             
 <li >
-    <a href="../phase8-validating-steps/">Phase 8, Validating Steps</a>
+    <a href="../phase7-validation/">Phase 7, Validation</a>
 </li>
                             
 <li >
-    <a href="../phaseN-archive/">Phase N, List of outdated phases</a>
+    <a href="../phase8-expressions-and-rules/">Phase 8, Expressions and Rules</a>
 </li>
                             
 <li >
@@ -127,12 +123,12 @@
                     </a>
                 </li>
                     <li >
-                        <a rel="next" href="../phase3-interpretation/">
+                        <a rel="next" href="../phase2-input-tree/">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
                     <li >
-                        <a rel="prev" href="../phase5-labels/">
+                        <a rel="prev" href="../phase4-modification/">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -144,14 +140,13 @@
         <div class="container">
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
-        <li class="main active"><a href="#lde-design-phase-4-validation">LDE Design Phase 4: Validation</a></li>
+        <li class="main active"><a href="#lde-design-phase-3-the-output-tree">LDE Design Phase 3: The Output Tree</a></li>
             <li><a href="#content">Content</a></li>
             <li><a href="#goal">Goal</a></li>
             <li><a href="#status">Status</a></li>
-            <li><a href="#automatic-validation-enqueueing">Automatic validation enqueueing</a></li>
-            <li><a href="#automatic-validation-processing">Automatic validation processing</a></li>
-            <li><a href="#feedback-messages">Feedback messages</a></li>
-            <li><a href="#conclusions">Conclusions</a></li>
+            <li><a href="#outputstructure-class">OutputStructure class</a></li>
+            <li><a href="#marking-structures-dirty">Marking structures dirty</a></li>
+            <li><a href="#connecting-modules">Connecting modules</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
@@ -161,109 +156,69 @@ phases.  The idea is that each phase ends with a completed whole that can be
 tested in that state, and that provides more features than the previous
 state did.  By the time the final phase is complete, the LDE will be a
 robust and useful product.</p>
-<h1 id="lde-design-phase-4-validation">LDE Design Phase 4: Validation</h1>
+<h1 id="lde-design-phase-3-the-output-tree">LDE Design Phase 3: The Output Tree</h1>
 <h2 id="content">Content</h2>
-<p>In this phase, we extend the formerly rudimentary <code>OutputStructure</code> class
-with its most important functionality: validating steps of work.</p>
+<p>In this phase, we add the Output Tree, a hierarchy comprised of a new kind
+of <code>Structure</code> subclass, called <code>OutputStructure</code>.</p>
 <h2 id="goal">Goal</h2>
-<p>Instance of the <code>OutputStructure</code> class will automatically validate
-themselves as they are added to the Output Tree.</p>
+<p>The <code>OutputStructure</code> class will exist, but will not yet be used by the LDE
+module.</p>
 <h2 id="status">Status</h2>
 <p>This has not been implemented.  See the tasks below.</p>
-<h2 id="automatic-validation-enqueueing">Automatic validation enqueueing</h2>
+<h2 id="outputstructure-class"><code>OutputStructure</code> class</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Define a class variable in the <code>OutputStructure</code> class, an array of
-   all instances that need to be validated.  Initialize it to the empty
-   array.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the <code>recursiveInterpret</code> routine so that, for any
-   <code>OutputStructure</code> instances it had to create (not just re-use from its
-   cache), if any of them are also <code>OutputStep</code> instances, then add them to
-   the to-validate list.  (The <code>OutputStep</code> class does not yet exist.  Make
-   it a stub for now, and come back to fully implementing it in
-   <a href="../phase7-citations/">phase 7</a>.)</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in those files describing the changes just made.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests for the <code>InputStructure</code> module to verify
-   that this works as described.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that test file describing the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Create a subclass of <code>Structure</code>, in its own new module,
+   <code>src/output-structure.litcoffee</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation explaining what it is and will do (though that
+   documentation can grow with time).</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Ensure that the <code>OutputStructure</code> subclass registers itself with the
+   serialization code, as
+   <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
+   describes.  (That is, use a line like
+   <code>className : Structure.addSubclass 'OutputStructure', OutputStructure</code> in
+   the <code>OutputStructure</code> class code.)</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Create a new unit test file for <code>OutputStructure</code>s that is extremely
+   basic, just testing to be sure that the symbol <code>OutputStructure</code> is
+   defined at the global scope and creates things that are instances of the
+   generic <code>Structure</code> base class.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation for that unit test file, following the pattern
+   established in the documentation of other unit test files in this
+   repository.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Update the LDE module to import the <code>output-structure.litcoffee</code>
+   module in addition to the generic <code>structure.litcoffeee</code> one and the one
+   for <code>InputStructure</code>s.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add a global <code>Structure</code> hierarchy in that file, called the
+   <code>OutputTree</code>, parallel to the <code>InputTree</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add a function that the LDE module exports that serializes the entire
+   <code>InputTree</code> and the entire <code>OutputTree</code> and returns them as a pair.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add a function that is the reverse, taking a pair of serialized trees
+   and deserializing them into the <code>InputTree</code> and the <code>OutputTree</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Update all unit tests of the LDE module to reflect the introduction
+   of <code>OutputStructure</code>s.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
 </ul>
-<h2 id="automatic-validation-processing">Automatic validation processing</h2>
+<h2 id="marking-structures-dirty">Marking structures dirty</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> In the LDE module, run <code>setInterval()</code> at module creation so that it
-   regularly (many times per second, but not so often as to consume copious
-   CPU) checks to see if there is anything on the list of <code>OutputStructure</code>
-   instances to be validated.  If there are any such things, call their
-   <code>validate</code> routines (which are asynchronous).  The order in which these
-   are processed is irrelevant.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that file describing the changes just made.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests for the LDE module to verify that this works
-   as described.  That is, create some <code>OutputStep</code> subclasses and some
-   <code>InputStructure</code> subclasses whose <code>interpret</code> routines produce instances
-   of those classes.  Verify that validation actually does take place.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that test file describing the changes just made.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
-</ul>
-<h2 id="feedback-messages">Feedback messages</h2>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Add a function to the LDE module that can be called whenever an
-   attribute of an <code>OutputStructure</code> in the Output Tree changes, and the
-   function will send a message (to any listening client) containing the ID
-   of the origin of the node whose attribute changed, and the key-value pair
-   of the changed attribute.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Update the documentation in that file to describe the changes just
+<li class="task-list-item"><input type="checkbox" disabled/> Create a <code>markDirty()</code> function in the <code>OutputStructure</code> class that
+   marks the instance dirty (but with no propagation, unlike with
+   <code>InputStructure</code> instances).</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the <code>OutputStructure</code> constructor to mark all instances dirty.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Update all documentation in that file to reflect the changes just
    made.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests for the LDE module to verify that this
-   works as described.  First, simply, just change an attribute of some
-   nodes in the Output Tree and verify that messages are sent by the LDE to
-   that effect.  Then extend the tests that go from API calls to validation
-   results to ensure that the entire process works, from API calls that add
-   to the Input Tree to feedback messages from validation being transmitted
-   back.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that test file describing the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add to the unit tests for <code>OutputStructure</code>s a few simple tests for
+   these new routines.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that file describing the changes just made.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
 </ul>
-<h2 id="conclusions">Conclusions</h2>
-<p>We now stipulate and prove a few facts about the preceding design.</p>
-<p><strong>Axiom 1:</strong> Lurch creates an <code>InputStructure</code> from a portion of the user's
-document iff that portion is meaningful.</p>
-<p><strong>Remark:</strong> This is the job of the UI, with the assistance of the user's
-settings.  So in some sense this axiom is aspirational, or conditioned upon
-the assumption that we can provide a robust enough set of UI settings to
-capture user meaning correctly.</p>
-<p><strong>Axiom 2:</strong> Lurch performs interpretation on every <code>InputStructure</code>
-created by the UI, and on nothing else.</p>
-<p><strong>Remark:</strong> The design so far has included this as an obvious goal.  Here
-we just explicitly state it.</p>
-<p><strong>Theorem 1:</strong> Lurch does syntactic validation on X iff X corresponds to a piece of meaningful content in the user's document.</p>
-<p><strong>Proof:</strong> Syntactic validation is a part of interpretation, which by Axiom
-2 gets applied to every <code>InputStructure</code>, and to nothing else.  By Axiom 1,
-those <code>InputStructure</code>s correspond directly to the meaningful content in
-the user's document.  QED</p>
-<p><strong>Axiom 3:</strong> Both the creation and interpretation of <code>InputStructure</code>s faithfully preserve meaning.</p>
-<p><strong>Remark:</strong> That is, neither the UI nor the interpretation phase will
-convert a premise into a rule, or a grammar rule into a subproof, or any
-other crazy change of meaning.  This is simply a commitment for us to design
-Lurch to do what seems mathematically normal and natural to mathematicians
-and math students, as human users of the software.  It's a bit strange to
-even state this rather obvious axiom, but it is needed in the proof of
-Theorem 2.</p>
-<p><strong>Theorem 2:</strong> Lurch does semantic validation on X iff X corresponds to a
-syntactically valid step of work in the user's document.</p>
-<p><strong>Proof:</strong> Assume X is a syntactically valid step of work in the document.
-Then by Axiom 1, it will become an <code>InputStructure</code>, and by Axiom 3, it
-will more precisely have the type of data that lets the LDE know that it is
-a step of work.  By Axiom 2, that step will be interpreted, and by Axiom 3,
-the result will be an <code>OutputStep</code>.  That <code>OutputStep</code> will have syntactic
-validation performed on it, because of the definition of validation
-enqueueing given above.</p>
-<p>In the other direction, assume Lurch does semantic validation on X.  Then by
-the definition of validation enqueueing above, X must be an <code>OutputStep</code>.
-Our design permits creation of <code>OutputStructure</code>s only through
-interpretation, and by Axiom 3, the interpretation step that created X must
-have taken as input some <code>InputStructure</code> that has all the data indicating
-it is a step of work.  By Axiom 1, that must have come from some meaningful
-portion of the user's document, and by Axiom 3, that in-document content
-must have represented a step of work.  QED</p></div>
+<h2 id="connecting-modules">Connecting modules</h2>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled/> Give the <code>OutputStructure</code> class a method called <code>feedback</code>, whose
+   default behavior is the same as that of <code>InputStructure</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add to the unit tests for <code>OutputStructure</code>s a few simple tests for
+   these new routines.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that file describing the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
+</ul></div>
         </div>
 
         <footer class="col-md-12">

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Phase 8, Expressions and Rules - Lurch Deductive Engine Documentation</title>
+        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/highlight.css">
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+        <script src="../js/jquery-1.10.2.min.js"></script>
+        <script src="../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../js/highlight.pack.js"></script> 
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="..">Lurch Deductive Engine Documentation</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                    <li >
+                        <a href="..">Home</a>
+                    </li>
+                    <li class="dropdown active">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Design Plans <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            
+<li >
+    <a href="../design-overview/">Overview</a>
+</li>
+                            
+<li >
+    <a href="../phase1-structures/">Phase 1, Structures</a>
+</li>
+                            
+<li >
+    <a href="../phase2-input-tree/">Phase 2, The Input Tree</a>
+</li>
+                            
+<li >
+    <a href="../phase3-output-tree/">Phase 3, The Output Tree</a>
+</li>
+                            
+<li >
+    <a href="../phase4-modification/">Phase 4, Modification</a>
+</li>
+                            
+<li >
+    <a href="../phase5-interpretation/">Phase 5, Interpretation</a>
+</li>
+                            
+<li >
+    <a href="../phase6-labels/">Phase 6, Labels</a>
+</li>
+                            
+<li >
+    <a href="../phase7-validation/">Phase 7, Validation</a>
+</li>
+                            
+<li class="active">
+    <a href="./">Phase 8, Expressions and Rules</a>
+</li>
+                            
+<li >
+    <a href="../enhancements/">Enhancements for Later</a>
+</li>
+                            
+<li >
+    <a href="../ideas/">Ideas Archive</a>
+</li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Documentation <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            
+<li >
+    <a href="../api-overview/">Overview</a>
+</li>
+                            
+<li >
+    <a href="../api-lde/">The LDE</a>
+</li>
+                            
+<li >
+    <a href="../api-structures/">Structures</a>
+</li>
+                        </ul>
+                    </li>
+                </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                        <i class="fa fa-search"></i> Search
+                    </a>
+                </li>
+                    <li >
+                        <a rel="next" href="../phase7-validation/">
+                            <i class="fa fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="prev" href="../enhancements/">
+                            Next <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+        <div class="container">
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="main active"><a href="#lde-design-phase-8-expressions-and-rules">LDE Design Phase 8: Expressions and Rules</a></li>
+            <li><a href="#content">Content</a></li>
+            <li><a href="#goal">Goal</a></li>
+            <li><a href="#status">Status</a></li>
+            <li><a href="#expressions">Expressions</a></li>
+            <li><a href="#common-types-of-interpretation">Common types of interpretation</a></li>
+            <li><a href="#rules-of-inference">Rules of inference</a></li>
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<p>We have designed the work on the Lurch Deductive Engine (LDE) to progress in
+phases.  The idea is that each phase ends with a completed whole that can be
+tested in that state, and that provides more features than the previous
+state did.  By the time the final phase is complete, the LDE will be a
+robust and useful product.</p>
+<h1 id="lde-design-phase-8-expressions-and-rules">LDE Design Phase 8: Expressions and Rules</h1>
+<h2 id="content">Content</h2>
+<p>In this phase, we define mathematical expressions and rules of inference.</p>
+<h2 id="goal">Goal</h2>
+<p>The LDE will be able to validate much of the mathematics we expect to use it
+for, without yet permitting customizable mathematical notation.</p>
+<h2 id="status">Status</h2>
+<p>This has not been implemented.  See the tasks below.</p>
+<h2 id="expressions">Expressions</h2>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled/> Create a subclass of <code>OutputStructure</code>, in the <code>OutputStructure</code>
+   module, called <code>OutputExpression</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation explaining what it is and will do.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Ensure that the <code>OutputExpression</code> subclass registers itself with the
+   serialization code, as
+   <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
+   describes.  (That is, use a line like
+   <code>className : Structure.addSubclass 'OutputExpression', OutputExpression</code>
+   in the <code>OutputExpression</code> class code.)</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add a constructor that takes three fields: OpenMath type (<code>OMS</code>,
+   <code>OMI</code>, etc.), atomic content (if any), and indices of bound variables (if
+   any).</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add an instance method <code>toOpenMath()</code> that converts instances of
+   the class to OpenMath expressions, using
+   <a href="https://github.com/lurchmath/openmath-js">the OpenMath package</a>.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add a class method <code>fromOpenMath()</code> that converts instances of
+   OpenMath expressions into <code>OutputExpression</code> trees.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the OpenMath class with a <code>toOutputExpression()</code> function that
+   just defers the task to <code>fromOpenMath()</code> in the <code>OutputExpression</code> class.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Write and document unit tests.</li>
+</ul>
+<h2 id="common-types-of-interpretation">Common types of interpretation</h2>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the default implementation of <code>interpret()</code> so that, if the
+   instance has a property called <code>correspondingClass</code>, then that property
+   is used to instantiate an <code>OutputStructure</code> instance rather than using
+   the base <code>OutputStructure</code> class.  This should be sufficient to implement
+   corresponding input and output expressions.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests for interpretation to verify that this can be
+   used to create arbitrary-sized trees that are nested combinations of the
+   correct subclasses of <code>OutputStructure</code>.  This will require creating some
+   dummy subclasses for testing purposes.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Create a subclass <code>ParsableExpression</code> of <code>InputExpression</code> that has
+   a property <code>parse</code> that maps strings to <code>OutputStructure</code> instances.  The
+   <code>interpret()</code> routine in the <code>ParsableExpression</code> class should call the
+   parser on the "text" attribute of the <code>InputExpression</code>, returning the
+   result.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation for that new subclass.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Ensure that the <code>ParsableExpression</code> subclass registers itself with the
+   serialization code, as
+   <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
+   describes.  (That is, use a line like
+   <code>className : Structure.addSubclass 'ParsableExpression', ParsableExpression</code>
+   in the <code>ParsableExpression</code> class code.)</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Define a global function in the LDE that uses the simple notation in
+   the OpenMath package (e.g., <code>f(x,y,2)</code>) to create OpenMath instances and
+   then converts them to <code>OutputExpression</code> trees.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Write unit tests that interpretation can use this global function.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Repeat the previous two steps for OpenMath XML as well.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests for interpretation to verify that parsable
+   nodes can exist on their own or within corresponding nodes in the Input
+   Tree, and the correct hierarchies will be produced in any case.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
+</ul>
+<h2 id="rules-of-inference">Rules of inference</h2>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled/> Create a subclass <code>OutputRule</code> of <code>OutputStructure</code> that has
+   a member <code>validateStep(step,callback,worker)</code> that can validate other
+   <code>OutputStructure</code> instances.  The default implementation just emits
+   feedback saying that it didn't actually validate anything.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation for that new subclass.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Ensure that the <code>OutputRule</code> subclass registers itself with the
+   serialization code, as
+   <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
+   describes.  (That is, use a line like
+   <code>className : Structure.addSubclass 'OutputRule', OutputRule</code> in the
+   <code>OutputRule</code> class code.)</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Define in the LDE a <code>deferValidation(callback,worker)</code> function that
+   can be installed in <code>OutputStructure</code> instances as their <code>validate</code>
+   field, and that finds the rule of inference cited by the
+   <code>OutputStructure</code> instance and defers validation to that rule's
+   <code>validateStep()</code> routine, passing both parameters along.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Test that <code>OutputStructures</code> can cite rules that will do the
+   validation for the structure.  Ensure that validation continues to work
+   even when delegated (athough so far all feedback will say no work was
+   done).</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Create a subclass <code>TemplateRule</code> of <code>OutputRule</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Ensure that the <code>TemplateRule</code> subclass registers itself with the
+   serialization code, as
+   <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
+   describes.  (That is, use a line like
+   <code>className : Structure.addSubclass 'TemplateRule', TemplateRule</code> in the
+   <code>TemplateRule</code> class code.)</li>
+<li class="task-list-item"><input type="checkbox" disabled/> In <code>TemplateRule</code>, override <code>validateStep()</code> so that it reads the
+   appropriate attributes and children of the rule object to determine how
+   to do validation.  For now, assume tree-based matching and if-style
+   inference.  You will need to use
+   <a href="https://github.com/lurchmath/first-order-matching">the Matching Package</a>,
+   probably loaded into background workers.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation for that new subclass.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Test that <code>OutputStructures</code> can cite rules that will do the
+   template-based validation, which is a huge step!</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend <code>TemplateRule</code> with the option to be iff rather than just if.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add unit tests for this new feature.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend <code>TemplateRule</code> with the option to use string-based matching
+   rather than just tree-based matching.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add unit tests for this new feature.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Create a subclass <code>InputRule</code> of <code>InputStructure</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Ensure that the <code>InputRule</code> subclass registers itself with the
+   serialization code, as
+   <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
+   describes.  (That is, use a line like
+   <code>className : Structure.addSubclass 'InputRule', InputRule</code> in the
+   <code>InputRule</code> class code.)</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Override <code>interpret()</code> in <code>InputRule</code> to create generic <code>OutputRule</code>
+   instances if a generic validation procedure is present, or specifically
+   <code>TemplateRule</code> instances if that kind of data is present.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add unit tests to show that the LDE can validate conclusions based on
+   rules defined earlier in the same document.</li>
+</ul></div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>var base_url = '..';</script>
+        <script src="../js/base.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="../search/require.js"></script>
+        <script src="../search/search.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>&larr;</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>&rarr;</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    </body>
+</html>

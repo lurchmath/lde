@@ -8,7 +8,7 @@
         
         
         <link rel="shortcut icon" href="../img/favicon.ico">
-        <title>Phase 5, Labels - Lurch Deductive Engine Documentation</title>
+        <title>Phase 6, Labels - Lurch Deductive Engine Documentation</title>
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
@@ -65,31 +65,27 @@
 </li>
                             
 <li >
-    <a href="../phase3-interpretation/">Phase 3, Interpretation</a>
+    <a href="../phase3-output-tree/">Phase 3, The Output Tree</a>
 </li>
                             
 <li >
-    <a href="../phase4-validation/">Phase 4, Validation</a>
+    <a href="../phase4-modification/">Phase 4, Modification</a>
+</li>
+                            
+<li >
+    <a href="../phase5-interpretation/">Phase 5, Interpretation</a>
 </li>
                             
 <li class="active">
-    <a href="./">Phase 5, Labels</a>
+    <a href="./">Phase 6, Labels</a>
 </li>
                             
 <li >
-    <a href="../phase6-expressions/">Phase 6, Expressions</a>
+    <a href="../phase7-validation/">Phase 7, Validation</a>
 </li>
                             
 <li >
-    <a href="../phase7-citations/">Phase 7, Citations</a>
-</li>
-                            
-<li >
-    <a href="../phase8-validating-steps/">Phase 8, Validating Steps</a>
-</li>
-                            
-<li >
-    <a href="../phaseN-archive/">Phase N, List of outdated phases</a>
+    <a href="../phase8-expressions-and-rules/">Phase 8, Expressions and Rules</a>
 </li>
                             
 <li >
@@ -127,12 +123,12 @@
                     </a>
                 </li>
                     <li >
-                        <a rel="next" href="../phase4-validation/">
+                        <a rel="next" href="../phase5-interpretation/">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
                     <li >
-                        <a rel="prev" href="../phase6-expressions/">
+                        <a rel="prev" href="../phase7-validation/">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -144,11 +140,12 @@
         <div class="container">
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
-        <li class="main active"><a href="#lde-design-phase-5-labels">LDE Design Phase 5: Labels</a></li>
+        <li class="main active"><a href="#lde-design-phase-6-labels">LDE Design Phase 6: Labels</a></li>
             <li><a href="#content">Content</a></li>
             <li><a href="#goal">Goal</a></li>
             <li><a href="#status">Status</a></li>
-            <li><a href="#design">Design</a></li>
+            <li><a href="#labeling-outputstructure-instances">Labeling OutputStructure instances</a></li>
+            <li><a href="#citations">Citations</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
@@ -158,63 +155,91 @@ phases.  The idea is that each phase ends with a completed whole that can be
 tested in that state, and that provides more features than the previous
 state did.  By the time the final phase is complete, the LDE will be a
 robust and useful product.</p>
-<h1 id="lde-design-phase-5-labels">LDE Design Phase 5: Labels</h1>
+<h1 id="lde-design-phase-6-labels">LDE Design Phase 6: Labels</h1>
 <h2 id="content">Content</h2>
-<p>In this phase, we build on the foundation of generic interpretation and
-validation to build the first feature necessary for validating steps of
-work:  Labels.</p>
+<p>In this phase, we make it possible for <code>OutputStructure</code> instances to be
+labeled.</p>
 <h2 id="goal">Goal</h2>
-<p>By the end of this phase, the Input Tree can contain labels that will be
-preserved and transferred to the Output Tree by interpretation, and are
-available for use in validation.</p>
+<p>The LDE will be able to look up <code>OutputStructure</code> instances by the labels
+attached to them, and we will have a convention for citing labels
+established and implemented.</p>
 <h2 id="status">Status</h2>
-<p>This has not been implemented.  In fact, the design below has not yet been
-converted into actionable tasks.  So the next steps are to do that
-conversion, and then execute the resulting tasks.</p>
-<h2 id="design">Design</h2>
-<p>We have high hopes for the flexibility of labels.  We don't want "1" to be
-a label and then the user says "1." and it's not recognized because of the
-minor difference in punctuation.  Furthermore, if "Theorem 6" were a label
-and the user said "thm 6" we might like that to be recognized.  So a label
-is not a string, but a string together with a set of policies defining an
-equivalence class surrounding that string in the space of all strings.  Of
-course, a subset of the set of all strings is also defined by a predicate,
-which would show up in JavaScript as a one-parameter function on strings
-returning true/false values.</p>
-<p>We therefore use this as our definition of "label."  That is, a label for
-an <code>OutputStructure</code> A is really a function f such that f(L) is true iff A
-answers to the label L.  Because an <code>OutputStructure</code> is a
-JavaScript object, it can have a field that stores, in an array, all its
-labels (as functions).  Like so:
- * <code>myOutputStructure.labelFunctions</code>, an array initialized to empty in the
-   constructor
- * <code>myOutputStructure.hasLabel( L )</code> returns true iff some f in
-   <code>myOutputStructure.labelFunctions</code> returns true on L, and false otherwise
- * We already have built into the generic <code>Structure</code> class (and therefore
-   into its subclasses, including <code>OutputStructure</code> and <code>InputStructure</code>) a
-   routine that can search backwards through all accessible nodes to find
-   the first one satisfying a given predicate.  So we can simply look up
-   labels from any point X in the <code>OutputTree</code> with CoffeeScript code like
-   so: <code>lookupResult = X.firstAccessible ( y ) -&gt; y.hasLabel L</code></p>
-<p>Explicit label bubbles in the document, connected by arrows to their
-targets, can be passed directly from the UI to the IT without processing.
-The interpretation phase will then have to take these steps:
- * Convert any labeling data into labeling predicates (as designed above)
-   that get embedded into Output Tree nodes.
- * Delete any label bubbles, since they aren't part of validation, and
-   their data has been embedded in their targets.
- * Hidden attributes will be passed directly from the UI to the Input Tree
-   without processing, and converted similarly during the interpretation
-   phase, but without the need to delete any label bubbles.
- * HTML structures like ordered lists will be converted, by the UI, as it
-   creates the Input Tree, into hidden attributes, which would then be
-   handled by the interpretation phase as in the previous bullet point.</p>
-<p>Thus when the UI embeds into an <code>InputStructure</code> some information about a
-label automatically assigned based on a numbered list, it can also embed
-with it some data saying whether punctuation is optional, or any other
-option that should be applied when checking to see if a label applies.  That
-information will be used by the interpretation step when it creates label
-predicates that it embeds in Output Tree nodes.</p></div>
+<p>This has not been implemented.  See the tasks below.</p>
+<h2 id="labeling-outputstructure-instances">Labeling <code>OutputStructure</code> instances</h2>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled/> Create in the <code>OutputStructure</code> base class a function called
+   <code>hasLabel(str)</code> that returns false always.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Create a function <code>addLabel(targets)</code> in the <code>InputStructure</code> class.
+   It should accept an array of <code>OutputStructure</code> instances, and should loop
+   through all of them, obeying the following conventions.<ul>
+<li>If the <code>InputStructure</code> has an attribute with key "label regex", then
+  place into the <code>OutputStructure</code>s a <code>hasLabel(str)</code> function that
+  tests the given string against the given regular expression.</li>
+<li>If the <code>InputStructure</code> has an attribute with key "label regex flags",
+  then apply those to the regular expression object you create in the
+  previous item.</li>
+<li>If the <code>InputStructure</code> has an attribute with key "label targets",
+  then call its value $V$ and apply the above techniques to only those
+  targets whose indices are on the $V$, when $V$ is treated as an array.</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that file describing the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests for the <code>InputStructure</code> module to include some
+   calls to this routine, passing it various example parameters and
+   verifying that it does its job as specified.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend <code>recursiveInterpret()</code> so that it calls this function in an
+   <code>InputStructure</code> as soon as it has completed <code>interpret()</code> on that
+   structure, passing in the set of interpretation results.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests to ensure that this is now a part of the
+   Interpretation Phase.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
+</ul>
+<h2 id="citations">Citations</h2>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled/> Create a stub function <code>copyCitations(targets)</code> in the
+   <code>InputStructure</code> base class, but at first it should do nothing.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Establish a convention for use in the Input Tree for citing reasons
+   and premises and document that convention above the stub function just
+   created.  Possibilities include the following.<ul>
+<li>An attribute with key "premise citations" indicates that its value is
+  a list of premise citations by label (that should be looked up with
+  the labels feature described above).  If its value is an array, it
+  will be treated as an array of strings.  If its value is not an array,
+  it will be converted to a string and treated as a one-element array
+  containing that string.</li>
+<li>An attribute with key "reason citations" behaves the same way, but
+  with obviously different semantics.</li>
+<li>A connection of type "premise citation" indicates that the source
+  wants to cite the target as a premise.</li>
+<li>A connection of type "reason citation" behaves the same way, but with
+  obviously different semantics.</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Implement the <code>copyCitations(targets)</code> function to copy all of the
+   data indicated by those document conventions from the <code>InputStructure</code> in
+   which it's called into all of the given targets, which will be an array
+   of <code>OutputStructure</code> instances just created from the given
+   <code>InputStructure</code>.<ul>
+<li>Note that <code>X.copyCitations(targets)</code> should copy all citations that go
+  to <em>or come from</em> nodes <code>Y</code> that are before (or equal to) <code>X</code> in the
+  Input Tree.</li>
+<li>It can make the connections in the Output Tree by looking up the last
+  interpretation of such nodes <code>Y</code>.</li>
+<li>If <code>X</code> has connections to or from nodes that appear after <code>X</code> in the
+  tree, then those nodes will create the connections later, when
+  recursive interpretation visits them.</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend <code>recursiveInterpret()</code> so that it calls this function in an
+   <code>InputStructure</code> as soon as it has completed <code>interpret()</code> on that
+   structure, passing in the set of interpretation results.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests to ensure that this is now a part of the
+   Interpretation Phase.  Be sure to test connections that go both
+   directions (forward and backward) in the Input Tree and ensure that they
+   are both correctly copied to the Output Tree.  Ensure that no connection
+   is copied redundantly.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
+</ul></div>
         </div>
 
         <footer class="col-md-12">

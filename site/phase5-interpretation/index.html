@@ -8,7 +8,7 @@
         
         
         <link rel="shortcut icon" href="../img/favicon.ico">
-        <title>Phase 3, Interpretation - Lurch Deductive Engine Documentation</title>
+        <title>Phase 5, Interpretation - Lurch Deductive Engine Documentation</title>
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
@@ -64,32 +64,28 @@
     <a href="../phase2-input-tree/">Phase 2, The Input Tree</a>
 </li>
                             
+<li >
+    <a href="../phase3-output-tree/">Phase 3, The Output Tree</a>
+</li>
+                            
+<li >
+    <a href="../phase4-modification/">Phase 4, Modification</a>
+</li>
+                            
 <li class="active">
-    <a href="./">Phase 3, Interpretation</a>
+    <a href="./">Phase 5, Interpretation</a>
 </li>
                             
 <li >
-    <a href="../phase4-validation/">Phase 4, Validation</a>
+    <a href="../phase6-labels/">Phase 6, Labels</a>
 </li>
                             
 <li >
-    <a href="../phase5-labels/">Phase 5, Labels</a>
+    <a href="../phase7-validation/">Phase 7, Validation</a>
 </li>
                             
 <li >
-    <a href="../phase6-expressions/">Phase 6, Expressions</a>
-</li>
-                            
-<li >
-    <a href="../phase7-citations/">Phase 7, Citations</a>
-</li>
-                            
-<li >
-    <a href="../phase8-validating-steps/">Phase 8, Validating Steps</a>
-</li>
-                            
-<li >
-    <a href="../phaseN-archive/">Phase N, List of outdated phases</a>
+    <a href="../phase8-expressions-and-rules/">Phase 8, Expressions and Rules</a>
 </li>
                             
 <li >
@@ -127,12 +123,12 @@
                     </a>
                 </li>
                     <li >
-                        <a rel="next" href="../phase2-input-tree/">
+                        <a rel="next" href="../phase4-modification/">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
                     <li >
-                        <a rel="prev" href="../phase4-validation/">
+                        <a rel="prev" href="../phase6-labels/">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -144,17 +140,17 @@
         <div class="container">
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
-        <li class="main active"><a href="#lde-design-phase-3-interpretation">LDE Design Phase 3: Interpretation</a></li>
+        <li class="main active"><a href="#lde-design-phase-5-interpretation">LDE Design Phase 5: Interpretation</a></li>
             <li><a href="#content">Content</a></li>
             <li><a href="#goal">Goal</a></li>
             <li><a href="#status">Status</a></li>
-            <li><a href="#outputstructure-class">OutputStructure class</a></li>
             <li><a href="#building-interpretation-routines">Building interpretation routines</a></li>
             <li><a href="#caching-interpretation-results">Caching interpretation results</a></li>
             <li><a href="#building-recursive-interpretation">Building recursive interpretation</a></li>
-            <li><a href="#calling-interpretation-routines">Calling interpretation routines</a></li>
             <li><a href="#tracking-origins">Tracking origins</a></li>
-            <li><a href="#feedback-messages">Feedback messages</a></li>
+            <li><a href="#the-interpretation-phase">The Interpretation Phase</a></li>
+            <li><a href="#adding-security">Adding security</a></li>
+            <li><a href="#dependency-support">Dependency support</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
@@ -164,42 +160,14 @@ phases.  The idea is that each phase ends with a completed whole that can be
 tested in that state, and that provides more features than the previous
 state did.  By the time the final phase is complete, the LDE will be a
 robust and useful product.</p>
-<h1 id="lde-design-phase-3-interpretation">LDE Design Phase 3: Interpretation</h1>
+<h1 id="lde-design-phase-5-interpretation">LDE Design Phase 5: Interpretation</h1>
 <h2 id="content">Content</h2>
-<p>In this phase, we add a very rudimentary <code>OutputStructure</code> class, and
-methods in the Input Tree to generate it by interpreting the contents of the
-input.</p>
+<p>In this phase, we implement the Interpretation Phase of the LDE.</p>
 <h2 id="goal">Goal</h2>
-<p>The <code>OutputStructure</code> class will exist and a hierarchy of such things will
-be created by the Input Tree.</p>
+<p>The LDE will be able to interpret the Input Tree, creating an Output Tree
+from it.</p>
 <h2 id="status">Status</h2>
 <p>This has not been implemented.  See the tasks below.</p>
-<h2 id="outputstructure-class"><code>OutputStructure</code> class</h2>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Create a subclass of <code>Structure</code>, in its own new module,
-   <code>src/output-structure.litcoffee</code>.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation explaining what it is and will do (though that
-   documentation can grow with time).</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Ensure that the <code>OutputStructure</code> subclass registers itself with the
-   serialization code, as
-   <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
-   describes.  (That is, use a line like
-   <code>className : Structure.addSubclass 'OutputStructure', OutputStructure</code> in
-   the <code>OutputStructure</code> class code.)</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Ensure that the LDE module also imports the
-   <code>output-structure.litcoffee</code> module in addition to the
-   <code>input-structure.litcoffee</code> one.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Update all documentation in that file to reflect the changes just
-   made.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Create a new unit test file for <code>OutputStructure</code>s that is extremely
-   basic, just testing to be sure that the symbol <code>OutputStructure</code> is
-   defined at the global scope and creates things that are instances of the
-   generic <code>Structure</code> base class.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation for that unit test file, following the pattern
-   established in the documentation of other unit test files in this
-   repository.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
-</ul>
 <h2 id="building-interpretation-routines">Building interpretation routines</h2>
 <ul class="task-list">
 <li class="task-list-item"><input type="checkbox" disabled/> Create an <code>interpret</code> routine in the <code>InputStructure</code> class that
@@ -227,26 +195,12 @@ for each childArray in childResults:
 <li class="task-list-item"><input type="checkbox" disabled/> Add documentation stating the limitations on how subclasses are
    permitted to override the <code>interpret</code> routine from the <code>InputStructure</code>
    class.  Specifically, the following rules must be obeyed:<ul>
-<li>For any two nodes A and B in the output tree, if A was created by
-  <code>X.interpret()</code> and B was created by <code>Y.interpret()</code>, and A is an
-  ancestor of B, then X must be an ancestor of Y.</li>
-<li>For any two nodes A and B in the output tree, if A was created by
-  <code>X.interpret()</code> and B was created by <code>Y.interpret()</code>, and A has any
-  ancestor that is an earlier sibling of any ancestor of B, then X must
-  have an ancestor that is an earlier sibling of some ancestor of Y.</li>
-<li>If <code>X.interpret()</code> calls <code>Y.markDirty()</code>, then X must be accessible
-  to Y.</li>
-<li>The result of <code>X.interpret()</code> may be contingent only upon the
-  following data.  (This is made easy by passing this stuff as
-  parameters to <code>X.interpret()</code>.  So as long as it just uses its
-  parameters and children, and doesn't go seeking out other data, this
-  rule is automatically followed.)</li>
-<li>Any descendant <code>InputStructure</code> Y of X, including (naturally) its
-     most recently computed interpretation.  (Note that X is not
-     accessible to any such Y.)</li>
-<li>Any <code>InputStructure</code> Y accessible to X, optionally with its most
-     recently computed interpretation as well.  (Note that this does not
-     include ancestors of X.)</li>
+<li>The routine should depend upon only the data passed to it in its
+  parameters.</li>
+<li>If <code>X.interpret()</code> calls <code>Y.markDirty()</code>, then the interpretation of
+  <code>Y</code> must not yet have begun.  Add a note that we may, in the future,
+  choose to add code that polices this restriction, but we have not yet
+  done so.</li>
 </ul>
 </li>
 <li class="task-list-item"><input type="checkbox" disabled/> Rebuild the docs and commit.</li>
@@ -257,11 +211,12 @@ for each childArray in childResults:
    <code>lastInterpretation</code>, which is initialized to undefined in the
    constructor.  This field does not need to be part of any serialization
    or deserialization of instances.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Create an <code>interpretation()</code> method that returns the value of
+<li class="task-list-item"><input type="checkbox" disabled/> Create an <code>getLastInterpretation()</code> method that returns the value of
    that member variable.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Create a <code>saveInterpretation(S)</code> method in the <code>InputStructure</code> class
-   that stores <code>OutputStructure</code> <code>S</code> in the <code>lastInterpretation</code> field.  If
-   no parameter <code>S</code> is passed, replace the cached value with undefined.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Create a <code>saveInterpretation(I)</code> method in the <code>InputStructure</code> class
+   that stores the array <code>I</code> (of zero or more Output Structures) in the
+   <code>lastInterpretation</code> field.  If no parameter is passed, clear the cached
+   value.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Update all documentation in that file to reflect the changes just
    made.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Add to the unit tests for <code>InputStructure</code>s a few simple tests for
@@ -326,35 +281,16 @@ then return lastInterpretation() as the result of this function
 <li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that test file describing the changes just made.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
 </ul>
-<h2 id="calling-interpretation-routines">Calling interpretation routines</h2>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> In the LDE module, in every one of the four functions it exposes as
-   part of its API, extend the function so that it calls <code>.markDirty()</code> on
-   the appropriate <code>InputStructure</code> instance, then
-   <code>.recursiveInterpret()</code> on the root of the LDE document (the Input Tree).</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Update the documentation in that file to describe the changes just
-   made.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests for the LDE module to verify that this
-   assembles an Output Tree that (by default) has exactly the same structure
-   as the Input Tree (but no actual content, just base class nodes).</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Write more unit tests that create and register some dummy subclasses
-   of <code>InputStructure</code> that have example custom <code>interpret</code> routines.
-   Verify that those routines get called and do exactly what's expected in
-   the creation of the Output Tree.  Ensure you test a variety of different
-   kinds of <code>interpret</code> routines, as you did in the previous section.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that test file describing the changes just made.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
-</ul>
 <h2 id="tracking-origins">Tracking origins</h2>
 <ul class="task-list">
 <li class="task-list-item"><input type="checkbox" disabled/> Create a class variable in the <code>InputStructure</code> class called
-   <code>instanceBeingInterpreted</code> that is initialized to null.</li>
+   <code>instancesBeingInterpreted</code> that is initialized to the empty array.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Extend the <code>recursiveInterpret</code> routine so that, before each call to
-   <code>X.interpret()</code>, it sets <code>instanceBeingInterpreted</code> to <code>X</code>, then sets it
-   back to null after <code>X.interpret()</code> is complete.</li>
+   <code>X.interpret()</code>, it pushes <code>X</code> onto <code>instanceBeingInterpreted</code>, then pops
+   after <code>X.interpret()</code> is complete.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Extend the constructor for <code>OutputStructure</code> nodes so that, if the
    global <code>InputStructure</code> class is defined, and its
-   <code>instanceBeingInterpreted</code> variable is non-null, then that instance is
+   <code>instanceBeingInterpreted</code> array is non-empty, then its last entry is
    stored within the newly constructed <code>OutputStructure</code> in a field called
    <code>origin</code>.  Otherwise, <code>origin</code> should be undefined (or null, whatever).</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests for the LDE module to verify that Output Trees
@@ -362,43 +298,85 @@ then return lastInterpretation() as the result of this function
    Tree that gave rise to that <code>OutputStructure</code>.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
 </ul>
-<h2 id="feedback-messages">Feedback messages</h2>
+<h2 id="the-interpretation-phase">The Interpretation Phase</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Add a function to the LDE module that can be called whenever the
-   Input Tree wants to communicate to the UI some attribute of a node in the
-   Input Tree.  That function will send a message (to any listening client)
-   containing the ID of the node and a key-value pair for the attribute in
-   question.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend each of the LDE module's API functions so that, when any new
-   <code>InputStructure</code> instances are added in the Input Tree, we recursively go
-   through them and all their descendants, and set their <code>wasChanged</code> event
-   handlers to call that global message sending function.  It should not
-   filter out any such messages by default; rather, the LDE can make
-   guarantees in its documentation about certain attribute keys that
-   follow certain rules, and the UI can choose whichever subset of those
-   keys it wants to watch for and display to the user in some way.  This
-   will include feedback about validation, but may include other things as
-   well.  Example:<ul>
-<li>Consider a step of work that needs two premises, but none were cited,
-  and the option is enabled that lets Lurch seek the premises automatically.</li>
-<li>So Lurch fills in the preceding two steps as the reasons, and as it
-  does so, it might store in one of the step's attributes the fact that
-  it auto-filled, as the premises, those two preceding steps.</li>
-<li>A user interface might choose to implement a feature that watched for
-  when such an attribute appears on an OT node, and then display the
-  meaning of that attribute to the user, perhaps by showing
-  faint/dotted arrows connecting the step to its auto-inserted premises.</li>
-<li>In other words, when premises aren't provided, the user will just see
-  ghostly connections that communicate what the LDE inferred.  No more
-  mystery about which premises are auto-filled.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Implement a <code>runInterpretation()</code> method in the LDE module.  It
+   should just call <code>recursiveInterpret()</code> in the root of the Input Tree,
+   store the result in the global Output Tree object, and then call a
+   callback.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend that implementation so that it also sends a feedback message
+   when it replaces the Output Tree, indicating that the Input and Output
+   Trees have been updated and are ready for exporting, should the client
+   wish to query them.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests of the LDE to test this new function.  This
+   should just involve taking some of the existing tests of
+   <code>recursiveInterpret()</code> and redoing them to use this new name.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend <code>runModification()</code> so that it no longer calls its own
+   callback when complete, but instead calls <code>runInterpretation()</code> and
+   passes the callback along to that function.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Enhance <code>recursiveInterpret()</code> to initialize an ancestor chain array
+   that marks its current position in the recursion (starting at <code>[]</code>) and
+   then uses a chain of <code>setTimeout()</code> calls to move to the first child,
+   next sibling, or parent, as required by the tree structure, calling the
+   callback when the traversal is complete.  (Use extremely brief timeout
+   delays.)</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Ensure that the unit tests still handle this asynchronous version.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Enhance <code>runInterpretation()</code> so that, if any LDE API call is made
+   while the interpretation phase is ongoing, it does not call the next step
+   of interpretation, but rather restarts the first step of modification,
+   passing it the same callback.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests to test this feature.  That is, make some
+   <code>interpret()</code> routines that take a long time to compute (say, 0.5
+   seconds) and some <code>updateConnections()</code> routine that log their calls to a
+   global array.  Make a set of API calls in succession about 0.3 seconds
+   apart, and ensure that the global call log is as expected.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
 </ul>
-</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Update the documentation in that file to describe the changes just
-   made.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests for the LDE module to verify that this
-   works as described.  (Change attributes of some nodes in the Input Tree
-   and verify that messages are sent by the LDE to that effect.)</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that test file describing the changes just made.</li>
+<h2 id="adding-security">Adding security</h2>
+<p>One of the policies by which interpretation function must abide is that no
+<code>InputStructure</code> may call <code>markDirty()</code> in any <code>InputStructure</code> whose
+interpretation has already begun.  We introduce policing for that policy
+here, to prevent infinite loops in interpretation.</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled/> Have the <code>runInterpretation()</code> method initialize a global variable to
+   an empty array; it will contain the list of instances whose
+   interpretations have begun.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Each step in the <code>recursiveInterpret()</code> process should begin by
+   adding the <code>InputStructure</code> being interepreted to that global array and
+   writing a flag into the <code>InputStructure</code> object itself as well.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> When <code>runInterpretation()</code> calls its callback or quits and restarts
+   the modification phase, erase the flags in all <code>InputStructure</code> instances
+   in that array, then set the array to empty again.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend <code>markDirty()</code> in the <code>InputStructure</code> class so that if the
+   instance has the flag set that indicates that its interpretation has
+   begun, we do not obey the request, but instead send a feedback message
+   about an internal error and also write the error message to the console.</li>
+</ul>
+<h2 id="dependency-support">Dependency support</h2>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled/> Create a subclass of <code>InputExpression</code>, in the <code>InputStructure</code>
+   module, called <code>Dependency</code>.  It takes an array of <code>OutputStructure</code>
+   instances at construction time, and stores them.  It provides a getter
+   for that same array, which can be overridden in subclasses to filter the
+   array in cases where it would be helpful to do so.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Make its <code>interpret()</code> routine simply call the getter, not even
+   bothering to make copies of the results; return the original array it was
+   given at construction time.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation explaining what it is and does.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Ensure that the <code>Dependency</code> subclass registers itself with the
+   serialization code, as
+   <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
+   describes.  (That is, use a line like
+   <code>className : Structure.addSubclass 'Dependency', Dependency</code> in the
+   <code>Dependency</code> class code.)</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Create a new unit test file for <code>Dependency</code> instances that not only
+   ensures that the symbol <code>Dependency</code> is defined at the global scope and
+   that its instances are also instances of the <code>InputStructure</code> class, but
+   also that the <code>interpret()</code> routine behaves as intended, including in the
+   context of recursive interpretation of the entire Input Tree.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation for that unit test file, following the pattern
+   established in the documentation of other unit test files in this
+   repository.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
 </ul></div>
         </div>

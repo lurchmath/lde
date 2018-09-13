@@ -65,31 +65,27 @@
 </li>
                             
 <li >
-    <a href="../phase3-interpretation/">Phase 3, Interpretation</a>
+    <a href="../phase3-output-tree/">Phase 3, The Output Tree</a>
 </li>
                             
 <li >
-    <a href="../phase4-validation/">Phase 4, Validation</a>
+    <a href="../phase4-modification/">Phase 4, Modification</a>
 </li>
                             
 <li >
-    <a href="../phase5-labels/">Phase 5, Labels</a>
+    <a href="../phase5-interpretation/">Phase 5, Interpretation</a>
 </li>
                             
 <li >
-    <a href="../phase6-expressions/">Phase 6, Expressions</a>
+    <a href="../phase6-labels/">Phase 6, Labels</a>
 </li>
                             
 <li >
-    <a href="../phase7-citations/">Phase 7, Citations</a>
+    <a href="../phase7-validation/">Phase 7, Validation</a>
 </li>
                             
 <li >
-    <a href="../phase8-validating-steps/">Phase 8, Validating Steps</a>
-</li>
-                            
-<li >
-    <a href="../phaseN-archive/">Phase N, List of outdated phases</a>
+    <a href="../phase8-expressions-and-rules/">Phase 8, Expressions and Rules</a>
 </li>
                             
 <li >
@@ -132,7 +128,7 @@
                         </a>
                     </li>
                     <li >
-                        <a rel="prev" href="../phase3-interpretation/">
+                        <a rel="prev" href="../phase3-output-tree/">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -151,6 +147,7 @@
             <li><a href="#inputstructure-class">InputStructure class</a></li>
             <li><a href="#accepting-actual-instances">Accepting actual instances</a></li>
             <li><a href="#marking-structures-dirty">Marking structures dirty</a></li>
+            <li><a href="#connecting-modules">Connecting modules</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
@@ -186,6 +183,8 @@ robust and useful product.</p>
    currently use <code>Structure</code>s.  This will require importing the
    <code>input-structure.litcoffee</code> module instead of the generic
    <code>structure.litcoffee</code> one.</li>
+<li>Rename the global <code>Structure</code> hierarchy in that file to be <code>InputTree</code>
+   rather than <code>LDEDocument</code>.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Update all documentation in that file to reflect the changes just
    made.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Create a new unit test file for <code>InputStructure</code>s that is extremely
@@ -217,13 +216,48 @@ robust and useful product.</p>
 </ul>
 <h2 id="marking-structures-dirty">Marking structures dirty</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the <code>InputStructure</code> class with a field called <code>dirty</code>, which
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the base <code>Structure</code> class with a field called <code>dirty</code>, which
    is initialized to false in the constructor.  This field does not need to
    be part of any serialization or deserialization of instances.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Create an <code>isDirty()</code> method that returns the value of that member
    variable.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Create a <code>markDirty()</code> method in the <code>InputStructure</code> class that sets
    the <code>dirty</code> flag to true, and does so for all ancestors as well.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Update all documentation in that file to reflect the changes just
+   made.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add to the unit tests for <code>InputStructure</code>s a few simple tests for
+   these new routines.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that file describing the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
+</ul>
+<h2 id="connecting-modules">Connecting modules</h2>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled/> Give the <code>Structure</code> class a class method called <code>feedback</code>, whose
+   default implementation just writes to the console saying that the
+   feedback implementation doesn't exist yet.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Give the <code>InputStructure</code> class a method called <code>feedback</code>, accepting
+   a data object as parameter, and extending it with a <code>subject</code> field whose
+   value is the unique ID of the <code>InputStructure</code> in question, then passing
+   that new object on to the <code>feedback</code> class method in the <code>Structure</code>
+   class.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> In the LDE module, if it detects that it has been loaded in Node.js
+   or the main browser thread, then create a global variable called
+   <code>Feedback</code> that is an instance of <code>EventTarget</code>.  In the module case,
+   export that variable; in the browser case, just let it be global.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> In the LDE, create a module-global <code>feedback</code> function that does one
+   of two things:<ul>
+<li>If it detects that the LDE is running in a Node.js module or in the
+  main browser thread, it calls, in the global <code>Feedback</code> object,
+  <code>dispatchEvent(e)</code>, where the <code>Event e</code> holds the parameter passed to
+  <code>feedback</code>.</li>
+<li>If it detects that the LDE is running in a WebWorker (or the
+  equivalent construct in Node.js), it sends its parameter along by
+  posting a message to be heard by the parent thread.</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" disabled/> In the LDE, when it imports the <code>Structure</code> module, have it overwrite
+   the default implementation of <code>feedback</code> in the <code>Structure</code> class with
+   a call directly to the <code>feedback</code> function in the LDE.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Update all documentation in that file to reflect the changes just
    made.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Add to the unit tests for <code>InputStructure</code>s a few simple tests for
