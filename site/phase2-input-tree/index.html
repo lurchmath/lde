@@ -91,10 +91,6 @@
 <li >
     <a href="../enhancements/">Enhancements for Later</a>
 </li>
-                            
-<li >
-    <a href="../ideas/">Ideas Archive</a>
-</li>
                         </ul>
                     </li>
                     <li class="dropdown">
@@ -148,6 +144,7 @@
             <li><a href="#accepting-actual-instances">Accepting actual instances</a></li>
             <li><a href="#marking-structures-dirty">Marking structures dirty</a></li>
             <li><a href="#connecting-modules">Connecting modules</a></li>
+            <li><a href="#api-documentation">API Documentation</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
@@ -264,6 +261,18 @@ robust and useful product.</p>
    these new routines.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that file describing the changes just made.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
+</ul>
+<h2 id="api-documentation">API Documentation</h2>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled/> Now that we have changed from a generic <code>Structure</code> class paradigm to
+   specific Input and Output Structures, reread the API Documentation of
+   both <a href="../api-lde/">the LDE</a> and <a href="../api-structures/">the Structure class</a>,
+   updating anything that's out-of-date.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add a page to the API documentation for the <code>InputStructure</code> class
+   and all of its upcoming subclasses.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Update <code>mkdocs.yml</code> in the project root to include that new file in
+   the generated documentation.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Rebuild docs and commit.</li>
 </ul></div>
         </div>
 

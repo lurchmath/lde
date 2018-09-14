@@ -91,10 +91,6 @@
 <li >
     <a href="../enhancements/">Enhancements for Later</a>
 </li>
-                            
-<li >
-    <a href="../ideas/">Ideas Archive</a>
-</li>
                         </ul>
                     </li>
                     <li class="dropdown">
@@ -151,6 +147,7 @@
             <li><a href="#the-interpretation-phase">The Interpretation Phase</a></li>
             <li><a href="#adding-security">Adding security</a></li>
             <li><a href="#dependency-support">Dependency support</a></li>
+            <li><a href="#api-documentation">API Documentation</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
@@ -314,22 +311,7 @@ then return lastInterpretation() as the result of this function
 <li class="task-list-item"><input type="checkbox" disabled/> Extend <code>runModification()</code> so that it no longer calls its own
    callback when complete, but instead calls <code>runInterpretation()</code> and
    passes the callback along to that function.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Enhance <code>recursiveInterpret()</code> to initialize an ancestor chain array
-   that marks its current position in the recursion (starting at <code>[]</code>) and
-   then uses a chain of <code>setTimeout()</code> calls to move to the first child,
-   next sibling, or parent, as required by the tree structure, calling the
-   callback when the traversal is complete.  (Use extremely brief timeout
-   delays.)</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Ensure that the unit tests still handle this asynchronous version.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Enhance <code>runInterpretation()</code> so that, if any LDE API call is made
-   while the interpretation phase is ongoing, it does not call the next step
-   of interpretation, but rather restarts the first step of modification,
-   passing it the same callback.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests to test this feature.  That is, make some
-   <code>interpret()</code> routines that take a long time to compute (say, 0.5
-   seconds) and some <code>updateConnections()</code> routine that log their calls to a
-   global array.  Make a set of API calls in succession about 0.3 seconds
-   apart, and ensure that the global call log is as expected.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests to test this feature.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
 </ul>
 <h2 id="adding-security">Adding security</h2>
@@ -378,6 +360,12 @@ here, to prevent infinite loops in interpretation.</p>
    established in the documentation of other unit test files in this
    repository.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
+</ul>
+<h2 id="api-documentation">API Documentation</h2>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the processing phases page of the API Documentation to include
+   all the work done in this phase, including interpretation.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Rebuild docs and commit.</li>
 </ul></div>
         </div>
 

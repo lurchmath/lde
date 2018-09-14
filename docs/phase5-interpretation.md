@@ -160,22 +160,7 @@ then return lastInterpretation() as the result of this function
  * [ ] Extend `runModification()` so that it no longer calls its own
    callback when complete, but instead calls `runInterpretation()` and
    passes the callback along to that function.
- * [ ] Enhance `recursiveInterpret()` to initialize an ancestor chain array
-   that marks its current position in the recursion (starting at `[]`) and
-   then uses a chain of `setTimeout()` calls to move to the first child,
-   next sibling, or parent, as required by the tree structure, calling the
-   callback when the traversal is complete.  (Use extremely brief timeout
-   delays.)
- * [ ] Ensure that the unit tests still handle this asynchronous version.
- * [ ] Enhance `runInterpretation()` so that, if any LDE API call is made
-   while the interpretation phase is ongoing, it does not call the next step
-   of interpretation, but rather restarts the first step of modification,
-   passing it the same callback.
- * [ ] Extend the unit tests to test this feature.  That is, make some
-   `interpret()` routines that take a long time to compute (say, 0.5
-   seconds) and some `updateConnections()` routine that log their calls to a
-   global array.  Make a set of API calls in succession about 0.3 seconds
-   apart, and ensure that the global call log is as expected.
+ * [ ] Extend the unit tests to test this feature.
  * [ ] Once the unit tests pass, build everything and commit.
 
 ## Adding security
