@@ -91,6 +91,48 @@ This has not been implemented.  See the tasks below.
    is copied redundantly.
  * [ ] Once the unit tests pass, build everything and commit.
 
+## Lookup
+
+ * [ ] Create a class method `lookup(string,accessibles)` in the
+   `OutputStructure` class, which loops backwards through the list of
+   `accessibles`, trying to find one that `hasLabel()` the given `string`.
+   It returns the latest one found, or null if there is none.
+ * [ ] Create an instance method `lookup(string)` in the `OutputStructure`
+   class, which loops backwards through the list of structures accessible to
+   the one on which it was called, trying to find one that `hasLabel()` the
+   given `string`.  It returns the first one encountered, or null if there
+   is none.
+
+The remainder of this section is efficiency improvements.  Consequently,
+they can be deferred until later in the project, and can even be considered
+optional if we notice no performance problems without implementing them.  If
+you wish to skip them for now, simply jump to the last few tasks in this
+section, about unit tests and documentation.
+
+ * [ ] Extend the `Dependency` subclass of IS so that it marks all of its
+   interpretation results with an attribute, flagging them as having come
+   from a dependency.  Let us call such `OutputStructures` "fromdeps," and
+   `OutputStructures` that are not so marked we will call "non-fromdeps."
+ * [ ] We will be creating a cache to speed up lookups into dependencies.
+   To support this, create an LDE-global variable
+   `LDE.dependencyLookupCache`, and initialize it to the empty object.
+ * [ ] Extend the `lookup(string)` routine so that any time it is called
+   from a non-fromdep, and the result is either null or a fromdep, then we
+   store in `LDE.dependencyLookupCache` the association of the given
+   `string` as a key with the result (a fromdep or null) as the value.
+   Future calls of `lookup()` from a non-fromdep can be sped up by, whenever
+   their search first comes upon a fromdep, if there is a cached result
+   (which can be null) for the `string` they're searching, just return that
+   immediately.  This work is not yet correct without the next bullet point.
+ * [ ] Extend the `Dependency` subclass of IS so that, if it ever needs to
+   actually reload content from the dependency, and thus possibly change the
+   set of fromdeps it placed in the Output Tree, then it should also revert
+   the value of `LDE.dependencyLookupCache` to the empty object.
+ * [ ] Extend the unit tests to ensure that this works.  This can be done by
+   defining a custom `hasLabel()` routine that records when it was called,
+   and ensuring it is called only once for many lookups.
+ * [ ] Once the unit tests pass, build everything and commit.
+
 ## API Documentation
 
  * [ ] Extend the `OutputStructure` page of the API Documentation to include

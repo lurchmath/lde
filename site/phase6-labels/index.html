@@ -142,6 +142,7 @@
             <li><a href="#status">Status</a></li>
             <li><a href="#labeling-outputstructure-instances">Labeling OutputStructure instances</a></li>
             <li><a href="#citations">Citations</a></li>
+            <li><a href="#lookup">Lookup</a></li>
             <li><a href="#api-documentation">API Documentation</a></li>
     </ul>
 </div></div>
@@ -235,6 +236,48 @@ established and implemented.</p>
    directions (forward and backward) in the Input Tree and ensure that they
    are both correctly copied to the Output Tree.  Ensure that no connection
    is copied redundantly.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
+</ul>
+<h2 id="lookup">Lookup</h2>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled/> Create a class method <code>lookup(string,accessibles)</code> in the
+   <code>OutputStructure</code> class, which loops backwards through the list of
+   <code>accessibles</code>, trying to find one that <code>hasLabel()</code> the given <code>string</code>.
+   It returns the latest one found, or null if there is none.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Create an instance method <code>lookup(string)</code> in the <code>OutputStructure</code>
+   class, which loops backwards through the list of structures accessible to
+   the one on which it was called, trying to find one that <code>hasLabel()</code> the
+   given <code>string</code>.  It returns the first one encountered, or null if there
+   is none.</li>
+</ul>
+<p>The remainder of this section is efficiency improvements.  Consequently,
+they can be deferred until later in the project, and can even be considered
+optional if we notice no performance problems without implementing them.  If
+you wish to skip them for now, simply jump to the last few tasks in this
+section, about unit tests and documentation.</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the <code>Dependency</code> subclass of IS so that it marks all of its
+   interpretation results with an attribute, flagging them as having come
+   from a dependency.  Let us call such <code>OutputStructures</code> "fromdeps," and
+   <code>OutputStructures</code> that are not so marked we will call "non-fromdeps."</li>
+<li class="task-list-item"><input type="checkbox" disabled/> We will be creating a cache to speed up lookups into dependencies.
+   To support this, create an LDE-global variable
+   <code>LDE.dependencyLookupCache</code>, and initialize it to the empty object.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the <code>lookup(string)</code> routine so that any time it is called
+   from a non-fromdep, and the result is either null or a fromdep, then we
+   store in <code>LDE.dependencyLookupCache</code> the association of the given
+   <code>string</code> as a key with the result (a fromdep or null) as the value.
+   Future calls of <code>lookup()</code> from a non-fromdep can be sped up by, whenever
+   their search first comes upon a fromdep, if there is a cached result
+   (which can be null) for the <code>string</code> they're searching, just return that
+   immediately.  This work is not yet correct without the next bullet point.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the <code>Dependency</code> subclass of IS so that, if it ever needs to
+   actually reload content from the dependency, and thus possibly change the
+   set of fromdeps it placed in the Output Tree, then it should also revert
+   the value of <code>LDE.dependencyLookupCache</code> to the empty object.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests to ensure that this works.  This can be done by
+   defining a custom <code>hasLabel()</code> routine that records when it was called,
+   and ensuring it is called only once for many lookups.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
 </ul>
 <h2 id="api-documentation">API Documentation</h2>
