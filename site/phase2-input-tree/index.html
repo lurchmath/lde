@@ -357,6 +357,11 @@ robust and useful product.</p>
    <code>InputStructure</code> instances <em>not</em> being altered, then those connections
    are severd as part of the replacement process.  (Connections among the
    descendants of a subtree replaced as a whole should stay connected.)</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Create a function in the <code>Structure</code> class that will transfer all
+   connections in/out of node <code>X</code> to node <code>Y</code> instead, written as
+   <code>X.transferConnectionsTo( Y )</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Document the above routine as something that <code>interpret()</code> routines
+   are welcome to use, if it is useful to them.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Add an optional third parameter to <code>replaceStructure()</code>, which
    defaults to false, but can be set to true to have <code>replaceStructure()</code>
    transfer all such connections to the replacement structure, rather than
