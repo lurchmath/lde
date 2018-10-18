@@ -118,7 +118,7 @@ This has not been implemented.  See the tasks below.
  * [ ] Add documentation in that file describing the changes just made.
  * [ ] Once the unit tests pass, build everything and commit.
 
-## API Documentation
+## LDE API
 
  * [ ] Now that we have changed from a generic `Structure` class paradigm to
    specific Input and Output Structures, reread the API Documentation of
@@ -128,4 +128,59 @@ This has not been implemented.  See the tasks below.
    and all of its upcoming subclasses.
  * [ ] Update `mkdocs.yml` in the project root to include that new file in
    the generated documentation.
+ * [ ] Update the API in the LDE module to include the word "Structure" in
+   each method call, because we will soon add methods for connections as
+   well.  So for instance, make it `insertStructure` rather than just
+   `insert`, and so on.
+ * [ ] Update all unit tests and API documentation, and when the unit test
+   pass, then commit.
+ * [ ] Tweak the existing `setStructureAttribute()` API method so that it
+   does not permit the client to use attribute names that begin with an
+   underscore, so that we can "namespace" those for internal purposes.
+ * [ ] Update the LDE API documentation page to cover these new routines.
+ * [ ] Add a unit test for that change to `setStructureAttribute()` as well.
+ * [ ] Update the implementation in the `Structure` method for connections,
+   to satisfy the following requirements.
+    * Do not put all connections data in one big attribute.  Rather, when
+      creating a connection between two nodes, place it in an attribute with
+      a key of the form `_connection_N` for some natural number `N` not yet
+      used by either endpoint of the connection.  This number `N` should be
+      returned by the routine; always use `N`>1 so that we do not mistake
+      `N`=0 for a return of a false value, as if the routine failed.
+    * Do not restrict the third element of the connection tuple to being a
+      string, but permit it to be arbitrary JSON data.  Store this only in
+      the source of the connection, so as not to waste space.  This will
+      necessitate changing the signature for disconnecting to not take a
+      connection triple (source, target, type) but rather just the number
+      `N` used when the connection was created.
+ * [ ] All the unit tests should still pass; ensure this, then write a few
+   more tests to ensure that you can use non-string JSON data as the third
+   parameter when setting up the connection.  Then commit.
+ * [ ] Add to the API a new method, `insertConnection(source,target,data)`,
+   which connects two `InputStructure`s that are already in the Input Tree.
+   We require each newly inserted connection to have, in its `data` object,
+   an attribute whose key is "id" and whose values are strings that are
+   unique across the Input Tree.  The `source` and `target` parameters are
+   unique ids, just as `parent` is for `insertStructure`.  The `data`
+   parameter is any JSON data that will be stored with the connection.
+   If any of the above requirements on the parameters are not satisfied,
+   the routine does nothing.
+ * [ ] Add to the API a new method, `removeConnection(id)`, which
+   disconnects two `InputStructure`s that are connected by the connection
+   whose unique id was given.  If the parameter isn't the unique id for a
+   connection in the Input Tree, the routine does nothing.
+ * [ ] Add to the API a new method,
+   `setConnectionAttribute(connection,key,value)`, which alters the data of
+   an existing connection between two `InputStructure`s in the Input Tree.
+   The first parameter must be the unique id of a connection, just as with
+   `removeConnection`.  The `key` should be a string that is the key of the
+   attribute to be modified, but if it is not a string it will be converted into one using the `String` constructor.  It cannot be the string "id"
+   because that attribute must remain constant throughout the life of any
+   connection.  The `value` can be any JSON data to use as the new attribute
+   value, or `undefined` to indicate that the key-value pair should be
+   deleted.  If any of the above requirements on the parameters are not
+   satisfied, the routine does nothing.
+ * [ ] Create unit tests for all of these new routines and ensure that they
+   pass.
  * [ ] Rebuild docs and commit.
+ * [ ] Commit.
