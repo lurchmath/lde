@@ -253,7 +253,7 @@ methods and the Modification phase will be implemented.</p>
    the <code>InputModifier</code> class code.)</li>
 <li class="task-list-item"><input type="checkbox" disabled/> The class should provide two functions that, in the base class, do
    nothing, but will be overridden by subclasses to do something smarter.
-   These are <code>updateConnectsion()</code> and <code>updateDataIn(target)</code>.  Add these
+   These are <code>updateConnections()</code> and <code>updateDataIn(target)</code>.  Add these
    stubs now.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Document the two functions you just added regarding their purposes
    in subclasses.</li>
@@ -305,7 +305,10 @@ methods and the Modification phase will be implemented.</p>
    unit test file.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Increase efficiency by calling the backup routine in the target
    first, and at the end marks itself dirty if and only if its new state is
-   different from its original state in some attribute set by a modifier.</li>
+   different from its original state in some attribute set by a modifier.
+   (Note that this task, since it is just an increase in efficiency, can be
+   deferred until later in the project, and can even be considered optional
+   if we notice no performance problems without implementing it.)</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests to handle this new feature.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
 </ul>
@@ -315,6 +318,13 @@ methods and the Modification phase will be implemented.</p>
    run the <code>updateConnections()</code> function in every IM in the Input Tree, in
    an unspecified order, and then call a callback.  (This function is
    asynchronous.)</li>
+</ul>
+<p>The remainder of this section is efficiency improvements.  Consequently,
+they can be deferred until later in the project, and can even be considered
+optional if we notice no performance problems without implementing them.  If
+you wish to skip them for now, simply jump to the last few tasks in this
+section, about unit tests and documentation.</p>
+<ul class="task-list">
 <li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests of the LDE to test this new function.  This
    will require creating some dummy subclasses of <code>InputModifier</code> that
    implement <code>updateConnections()</code> in various ways.</li>

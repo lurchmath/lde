@@ -163,6 +163,9 @@ All of the following functions should be added as members in the
  * [ ] Increase efficiency by calling the backup routine in the target
    first, and at the end marks itself dirty if and only if its new state is
    different from its original state in some attribute set by a modifier.
+   (Note that this task, since it is just an increase in efficiency, can be
+   deferred until later in the project, and can even be considered optional
+   if we notice no performance problems without implementing it.)
  * [ ] Extend the unit tests to handle this new feature.
  * [ ] Once the unit tests pass, build everything and commit.
 
@@ -172,6 +175,13 @@ All of the following functions should be added as members in the
    run the `updateConnections()` function in every IM in the Input Tree, in
    an unspecified order, and then call a callback.  (This function is
    asynchronous.)
+
+The remainder of this section is efficiency improvements.  Consequently,
+they can be deferred until later in the project, and can even be considered
+optional if we notice no performance problems without implementing them.  If
+you wish to skip them for now, simply jump to the last few tasks in this
+section, about unit tests and documentation.
+
  * [ ] Extend the unit tests of the LDE to test this new function.  This
    will require creating some dummy subclasses of `InputModifier` that
    implement `updateConnections()` in various ways.

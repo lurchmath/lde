@@ -55,6 +55,12 @@ for each childArray in childResults:
 
 ## Caching interpretation results
 
+This section is efficiency improvements.  Consequently, they can be deferred
+until later in the project, and can even be considered optional if we notice
+no performance problems without implementing them.  If you wish to skip them
+for now, simply move on to the next section, or implement these routines as
+stubs that do nothing yet.
+
  * [ ] Extend the `InputStructure` class with a field called
    `lastInterpretation`, which is initialized to undefined in the
    constructor.  This field does not need to be part of any serialization
