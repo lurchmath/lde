@@ -78,6 +78,24 @@ stubs that do nothing yet.
  * [ ] Add documentation in that file describing the changes just made.
  * [ ] Once the unit tests pass, build everything and commit.
 
+Here is another miscellaneous efficiency improvement related to
+interpretation, so I will place it here:
+
+ * [ ] Create a `setChildrenList(newChildren)` function in the `Structure`
+   base class.  It should change as little as possible (maybe nothing) to
+   make the structure's children array equal to the given one.  This lets
+   `interpret()` routines reuse old Output Structures from cache, just
+   adjusting their children lists, rather than constructing new ones, even
+   if their children list changed.  Many `interpret()` routines may
+   therefore be simply `lastInterpretation.setChildrenList(childResults)`
+   followed by returning the last interpretation again.  This will often
+   just verify that the children list is already correct, change nothing,
+   and move on.
+ * [ ] Add to the unit tests for this new routine.
+ * [ ] Add documentation in the `Structure` module describing the new
+   routine.
+ * [ ] Once the unit tests pass, build everything and commit.
+
 ## Building recursive interpretation
 
  * [ ] Create a `recursiveInterpret` routine in the `InputStructure` class

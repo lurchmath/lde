@@ -226,6 +226,24 @@ stubs that do nothing yet.</p>
 <li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that file describing the changes just made.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
 </ul>
+<p>Here is another miscellaneous efficiency improvement related to
+interpretation, so I will place it here:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled/> Create a <code>setChildrenList(newChildren)</code> function in the <code>Structure</code>
+   base class.  It should change as little as possible (maybe nothing) to
+   make the structure's children array equal to the given one.  This lets
+   <code>interpret()</code> routines reuse old Output Structures from cache, just
+   adjusting their children lists, rather than constructing new ones, even
+   if their children list changed.  Many <code>interpret()</code> routines may
+   therefore be simply <code>lastInterpretation.setChildrenList(childResults)</code>
+   followed by returning the last interpretation again.  This will often
+   just verify that the children list is already correct, change nothing,
+   and move on.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add to the unit tests for this new routine.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in the <code>Structure</code> module describing the new
+   routine.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
+</ul>
 <h2 id="building-recursive-interpretation">Building recursive interpretation</h2>
 <ul class="task-list">
 <li class="task-list-item"><input type="checkbox" disabled/> Create a <code>recursiveInterpret</code> routine in the <code>InputStructure</code> class
