@@ -301,6 +301,58 @@ then return lastInterpretation() as the result of this function
 <li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that test file describing the changes just made.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
 </ul>
+<p>The remainder of this section is efficiency improvements.  Consequently,
+they can be deferred until later in the project, and can even be considered
+optional if we notice no performance problems without implementing them.  If
+you wish to skip them for now, simply jump to the last few tasks in this
+section, about unit tests and documentation.</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled/> Create a subclass of <code>OutputStructure</code>, in the <code>OutputStructure</code>
+   module, called <code>InterpretationDirective</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation explaining what it is and will do (though that
+   documentation can grow with time).</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Ensure that the <code>InterpretationDirective</code> subclass registers itself
+   with the serialization code, as
+   <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
+   describes.  (That is, use a line like
+   <code>className : Structure.addSubclass 'InterpretationDirective', InterpretationDirective</code> in
+   the <code>InterpretationDirective</code> class code.)</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Create a new unit test file for <code>InterpretationDirective</code>s that is
+   extremely basic, just testing to be sure that the symbol
+   <code>InterpretationDirective</code> is defined at the global scope and creates
+   things that are instances of the <code>InterpretationDirective</code> class.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation for that unit test file, following the pattern
+   established in the documentation of other unit test files in this
+   repository.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Create a subclass <code>FilterableArray</code> of <code>Array</code> that, at construction
+   time, is given a predicate.  It stores, internally, a filtered version of
+   itself, which is initialized to the empty array.  It guarantees to keep
+   this filtered version correct iff it is manipulated only through calls to
+   its <code>push()</code> and <code>pop()</code> routines, which we override below.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Override <code>FilterableArray::push()</code> to do an ordinary <code>Array::push()</code>
+   and then also a push on the internal filtered version iff the predicate
+   holds of the new item.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Override <code>FilterableArray::pop()</code> to do an ordinary <code>Array::pop()</code>
+   and then also a pop on the internal filtered version iff the object
+   popped was also on the end of that array.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add a new method <code>FilterableArray::filtered()</code> that returns the
+   filtered version.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Update the default version of <code>recursiveInterpret()</code> to create the
+   <code>accessibles</code> array as an instance of <code>FilterableArray</code>, with the
+   predicate being whether the Structure is an instance of the
+   <code>InterpretationDirective</code> class.  Ensure that adding items to the array
+   and removing them from it are done with calls to <code>push()</code> and <code>pop()</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Document this so that later implementations of <code>interpret()</code> can be
+   faster by leveraging <code>accessibles.filtered()</code> rather than the entire
+   <code>accessibles</code> array.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Ensure all the unit tests still pass.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add new unit tests for the <code>FilterableArray</code> class independently of
+   the rest of the LDE.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add some new unit tests that verify that <code>accessibles.filtered()</code> is
+   exactly what it should be (i.e., the Interpretation Directive predicate
+   is being used correctly).</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
+</ul>
 <h2 id="tracking-origins">Tracking origins</h2>
 <ul class="task-list">
 <li class="task-list-item"><input type="checkbox" disabled/> Create a class variable in the <code>InputStructure</code> class called

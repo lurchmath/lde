@@ -151,6 +151,58 @@ then return lastInterpretation() as the result of this function
  * [ ] Add documentation in that test file describing the changes just made.
  * [ ] Once the unit tests pass, build everything and commit.
 
+The remainder of this section is efficiency improvements.  Consequently,
+they can be deferred until later in the project, and can even be considered
+optional if we notice no performance problems without implementing them.  If
+you wish to skip them for now, simply jump to the last few tasks in this
+section, about unit tests and documentation.
+
+ * [ ] Create a subclass of `OutputStructure`, in the `OutputStructure`
+   module, called `InterpretationDirective`.
+ * [ ] Add documentation explaining what it is and will do (though that
+   documentation can grow with time).
+ * [ ] Ensure that the `InterpretationDirective` subclass registers itself
+   with the serialization code, as
+   [the documentation here](https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names)
+   describes.  (That is, use a line like
+   `className : Structure.addSubclass 'InterpretationDirective', InterpretationDirective` in
+   the `InterpretationDirective` class code.)
+ * [ ] Create a new unit test file for `InterpretationDirective`s that is
+   extremely basic, just testing to be sure that the symbol
+   `InterpretationDirective` is defined at the global scope and creates
+   things that are instances of the `InterpretationDirective` class.
+ * [ ] Add documentation for that unit test file, following the pattern
+   established in the documentation of other unit test files in this
+   repository.
+ * [ ] Create a subclass `FilterableArray` of `Array` that, at construction
+   time, is given a predicate.  It stores, internally, a filtered version of
+   itself, which is initialized to the empty array.  It guarantees to keep
+   this filtered version correct iff it is manipulated only through calls to
+   its `push()` and `pop()` routines, which we override below.
+ * [ ] Override `FilterableArray::push()` to do an ordinary `Array::push()`
+   and then also a push on the internal filtered version iff the predicate
+   holds of the new item.
+ * [ ] Override `FilterableArray::pop()` to do an ordinary `Array::pop()`
+   and then also a pop on the internal filtered version iff the object
+   popped was also on the end of that array.
+ * [ ] Add a new method `FilterableArray::filtered()` that returns the
+   filtered version.
+ * [ ] Update the default version of `recursiveInterpret()` to create the
+   `accessibles` array as an instance of `FilterableArray`, with the
+   predicate being whether the Structure is an instance of the
+   `InterpretationDirective` class.  Ensure that adding items to the array
+   and removing them from it are done with calls to `push()` and `pop()`.
+ * [ ] Document this so that later implementations of `interpret()` can be
+   faster by leveraging `accessibles.filtered()` rather than the entire
+   `accessibles` array.
+ * [ ] Ensure all the unit tests still pass.
+ * [ ] Add new unit tests for the `FilterableArray` class independently of
+   the rest of the LDE.
+ * [ ] Add some new unit tests that verify that `accessibles.filtered()` is
+   exactly what it should be (i.e., the Interpretation Directive predicate
+   is being used correctly).
+ * [ ] Once the unit tests pass, build everything and commit.
+
 ## Tracking origins
 
  * [ ] Create a class variable in the `InputStructure` class called
