@@ -365,6 +365,11 @@ section, about unit tests and documentation.</p>
    <code>instanceBeingInterpreted</code> array is non-empty, then its last entry is
    stored within the newly constructed <code>OutputStructure</code> in a field called
    <code>origin</code>.  Otherwise, <code>origin</code> should be undefined (or null, whatever).</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Override the <code>OutputStructure</code>'s routine for creating connections so
+   that, in addition to forming the connection, it also adds to its JSON
+   data an <code>_origin</code> key whose value is the unique id in the Input Tree of
+   the last entry on the <code>instanceBeingInterpreted</code> array, if one exists.
+   (If not, leave the <code>_origin</code> field undefined.)</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests for the LDE module to verify that Output Trees
    now have, in each of their nodes, the correct origin node from the Input
    Tree that gave rise to that <code>OutputStructure</code>.</li>
@@ -390,7 +395,7 @@ section, about unit tests and documentation.</p>
 <li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
 </ul>
 <h2 id="adding-security">Adding security</h2>
-<p>One of the policies by which interpretation function must abide is that no
+<p>One of the policies by which interpretation functions must abide is that no
 <code>InputStructure</code> may call <code>markDirty()</code> in any <code>InputStructure</code> whose
 interpretation has already begun.  We introduce policing for that policy
 here, to prevent infinite loops in interpretation.</p>
@@ -408,6 +413,21 @@ here, to prevent infinite loops in interpretation.</p>
    instance has the flag set that indicates that its interpretation has
    begun, we do not obey the request, but instead send a feedback message
    about an internal error and also write the error message to the console.</li>
+</ul>
+<p>Another of the policies interpretation must obey is that it should not yield
+an Output Tree in which any one of the <code>OutputStructure</code> nodes has a
+connection to a node outside the Output Tree.  We enforce that policy as
+follows.</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled/> Add to the end of the <code>runInterpretation()</code> function a full traversal
+   of the newly created Output Tree.  At every subtree, if that node has any
+   connections, examine the other side of the connection, and walk up its
+   ancestor chain to verify that it is in the Output Tree.  If not, sever
+   the connection.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add unit tests of this feature by creating a few different situations
+   in which such an invalid Output Tree might arise, and verifying that the
+   invalid connections (and no others) are removed in each case.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
 </ul>
 <h2 id="dependency-support">Dependency support</h2>
 <ul class="task-list">
