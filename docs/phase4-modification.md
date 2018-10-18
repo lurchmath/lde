@@ -110,7 +110,7 @@ All of the following functions should be added as members in the
    the `InputModifier` class code.)
  * [ ] The class should provide two functions that, in the base class, do
    nothing, but will be overridden by subclasses to do something smarter.
-   These are `updateConnectsion()` and `updateDataIn(target)`.  Add these
+   These are `updateConnections()` and `updateDataIn(target)`.  Add these
    stubs now.
  * [ ] Document the two functions you just added regarding their purposes
    in subclasses.
