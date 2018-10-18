@@ -246,7 +246,7 @@ section, about unit tests and documentation.
 
 ## Adding security
 
-One of the policies by which interpretation function must abide is that no
+One of the policies by which interpretation functions must abide is that no
 `InputStructure` may call `markDirty()` in any `InputStructure` whose
 interpretation has already begun.  We introduce policing for that policy
 here, to prevent infinite loops in interpretation.
@@ -264,6 +264,21 @@ here, to prevent infinite loops in interpretation.
    instance has the flag set that indicates that its interpretation has
    begun, we do not obey the request, but instead send a feedback message
    about an internal error and also write the error message to the console.
+
+Another of the policies interpretation must obey is that it should not yield
+an Output Tree in which any one of the `OutputStructure` nodes has a
+connection to a node outside the Output Tree.  We enforce that policy as
+follows.
+
+ * [ ] Add to the end of the `runInterpretation()` function a full traversal
+   of the newly created Output Tree.  At every subtree, if that node has any
+   connections, examine the other side of the connection, and walk up its
+   ancestor chain to verify that it is in the Output Tree.  If not, sever
+   the connection.
+ * [ ] Add unit tests of this feature by creating a few different situations
+   in which such an invalid Output Tree might arise, and verifying that the
+   invalid connections (and no others) are removed in each case.
+ * [ ] Once the unit tests pass, build everything and commit.
 
 ## Dependency support
 

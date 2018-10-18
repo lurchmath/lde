@@ -120,6 +120,8 @@ This has not been implemented.  See the tasks below.
 
 ## LDE API
 
+### Small, Miscellaneous Updates
+
  * [ ] Now that we have changed from a generic `Structure` class paradigm to
    specific Input and Output Structures, reread the API Documentation of
    both [the LDE](api-lde.md) and [the Structure class](api-structures.md),
@@ -139,6 +141,9 @@ This has not been implemented.  See the tasks below.
    underscore, so that we can "namespace" those for internal purposes.
  * [ ] Update the LDE API documentation page to cover these new routines.
  * [ ] Add a unit test for that change to `setStructureAttribute()` as well.
+
+### Upgrading Connections
+
  * [ ] Update the implementation in the `Structure` method for connections,
    to satisfy the following requirements.
     * Do not put all connections data in one big attribute.  Rather, when
@@ -183,4 +188,33 @@ This has not been implemented.  See the tasks below.
  * [ ] Create unit tests for all of these new routines and ensure that they
    pass.
  * [ ] Rebuild docs and commit.
- * [ ] Commit.
+
+### Policing Connections
+
+ * [ ] Add a function to the `Structure` class,
+   `connectionsOutsideSubtree()`, which finds all connections that lead from
+   any node in the subtree to nodes outside the subtree, and returns them in
+   a list.  Each element in the list should be an object of the form
+   `{ structure : structureInstance, number : connectionNumber }`, where the
+   number is the `N` used in the attribute storing the connection.  This
+   will be useful in the following routine, and also for clients who wish to
+   know which connections may be severed by the following routine
+   beforehand, so that they might move them or record them for later
+   reconnecting somewhere.  (Document this function with this purpose.)
+ * [ ] Update the `removeStructure()` function in the LDE API so that, if
+   there are any connections from the structure being removed to other
+   `InputStructure` instances *not* being removed, then those connections
+   are severed as part of the removal process.  (Connections among the
+   descendants of a subtree removed as a whole should stay connected.)
+ * [ ] Add unit tests to ensure that these routines work.
+ * [ ] Update the `replaceStructure()` function in the LDE API so that, if
+   there are any connections from the structure being replaced to other
+   `InputStructure` instances *not* being altered, then those connections
+   are severd as part of the replacement process.  (Connections among the
+   descendants of a subtree replaced as a whole should stay connected.)
+ * [ ] Add an optional third parameter to `replaceStructure()`, which
+   defaults to false, but can be set to true to have `replaceStructure()`
+   transfer all such connections to the replacement structure, rather than
+   just sever them.
+ * [ ] Add unit tests to ensure that these features work.
+ * [ ] Rebuild and commit.
