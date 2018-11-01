@@ -80,8 +80,9 @@ This has not been implemented.  See the tasks below.
 
  * [ ] Create a subclass `OutputRule` of `OutputStructure` that has
    a member `validateStep(step,callback,worker)` that can validate other
-   `OutputStructure` instances.  The default implementation just emits
-   feedback saying that it didn't actually validate anything.
+   `OutputStructure` instances.  The default implementation just calls the
+   callback object with a feedback object expressing that it didn't
+   actually validate anything.
  * [ ] Add documentation for that new subclass.
  * [ ] Ensure that the `OutputRule` subclass registers itself with the
    serialization code, as
@@ -89,7 +90,7 @@ This has not been implemented.  See the tasks below.
    describes.  (That is, use a line like
    `className : Structure.addSubclass 'OutputRule', OutputRule` in the
    `OutputRule` class code.)
- * [ ] Define in the LDE a `deferValidation(callback,worker)` function that
+ * [ ] Define in the LDE a `basicValidate(callback,worker)` function that
    can be installed in `OutputStructure` instances as their `validate`
    field, and that finds the rule of inference cited by the
    `OutputStructure` instance and defers validation to that rule's

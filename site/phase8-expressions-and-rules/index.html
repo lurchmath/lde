@@ -221,8 +221,9 @@ for, without yet permitting customizable mathematical notation.</p>
 <ul class="task-list">
 <li class="task-list-item"><input type="checkbox" disabled/> Create a subclass <code>OutputRule</code> of <code>OutputStructure</code> that has
    a member <code>validateStep(step,callback,worker)</code> that can validate other
-   <code>OutputStructure</code> instances.  The default implementation just emits
-   feedback saying that it didn't actually validate anything.</li>
+   <code>OutputStructure</code> instances.  The default implementation just calls the
+   callback object with a feedback object expressing that it didn't
+   actually validate anything.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Add documentation for that new subclass.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Ensure that the <code>OutputRule</code> subclass registers itself with the
    serialization code, as
@@ -230,7 +231,7 @@ for, without yet permitting customizable mathematical notation.</p>
    describes.  (That is, use a line like
    <code>className : Structure.addSubclass 'OutputRule', OutputRule</code> in the
    <code>OutputRule</code> class code.)</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Define in the LDE a <code>deferValidation(callback,worker)</code> function that
+<li class="task-list-item"><input type="checkbox" disabled/> Define in the LDE a <code>basicValidate(callback,worker)</code> function that
    can be installed in <code>OutputStructure</code> instances as their <code>validate</code>
    field, and that finds the rule of inference cited by the
    <code>OutputStructure</code> instance and defers validation to that rule's
