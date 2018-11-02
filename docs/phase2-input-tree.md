@@ -53,7 +53,7 @@ This has not been implemented.  See the tasks below.
  * [x] Add documentation for that unit test file, following the pattern
    established in the documentation of other unit test files in this
    repository.
- * [ ] Once the unit tests pass, build everything and commit.
+ * [x] Once the unit tests pass, build everything and commit.
 
 ## Accepting actual instances
 
