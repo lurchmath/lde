@@ -1,5 +1,5 @@
 
-# Tests of the Structure class
+# Tests of the `Structure` class
 
 Here we import the module we're about to test.
 
@@ -7,7 +7,7 @@ Here we import the module we're about to test.
 
 ## Global objects
 
-Verify that the globals exposed by the Structure module are visible.
+Verify that the globals exposed by the `Structure` module are visible.
 
     describe 'Structure module globals', ->
         it 'should be defined', ->
@@ -67,7 +67,7 @@ Ensure that previous and next sibling functions work as expected.
             expect( B.previousSibling() ).toBe A
             expect( B.nextSibling() ).toBeUndefined()
 
-The next test verifies that the constructor ignores non-Structures when
+The next test verifies that the constructor ignores non-`Structure`s when
 building hierarchies.
 
         it 'should drop invalid content from hierarchies', ->
@@ -453,11 +453,11 @@ Replace A with one of its own children, as a corner case test.
             expect( C.parent() ).toBe root
             expect( B.parent() ).toBe A
 
-The next test is whether we can make a deep copy of a Structure.
+The next test is whether we can make a deep copy of a `Structure`.
 
         it 'should support deep copying structures', ->
 
-Make a tiny Structure for testing.
+Make a tiny `Structure` for testing.
 
             tiny = new Structure
             tiny.setAttribute 5, 6
@@ -482,7 +482,7 @@ Ensure that changing data within the original doesn't change the copy.
             expect( tiny.getAttribute 5 ).toBe 10
             expect( C.getAttribute 5 ).toBe 6
 
-Make a more complex Structure for testing.
+Make a more complex `Structure` for testing.
 
             tween = new Structure(
                 A = new Structure(
@@ -523,7 +523,7 @@ Ensure that changing data within the original doesn't change the copy.
             expect( AB.getAttribute 2 ).toEqual 9
             expect( DAB.getAttribute 2 ).toEqual 7
 
-The next section tests the tree ordering relation defined in the Structure
+The next section tests the tree ordering relation defined in the `Structure`
 class, `isEarlierThan()`.
 
         it 'correctly judges which subtrees are earlier', ->
@@ -789,8 +789,8 @@ argument and once with a false argument.
 
     describe 'Attributes', ->
 
-Structure objects provide an attributes dictionary, which should function as
-any other Javascript object, storing key-value pairs.  Because the
+`Structure` objects provide an attributes dictionary, which should function
+as any other Javascript object, storing key-value pairs.  Because the
 implementation of this is very straightforward, we do only a few short
 tests.
 
@@ -1563,7 +1563,7 @@ Next, connections between specific pairs:
 ## Convenience constructions
 
 There are two member functions, `attr` and `setup`, that are mostly just
-used within this unit testing framework, for easily constructing Structure
+used within this unit testing framework, for easily constructing `Structure`
 hierarchies.  We use them here, then verify that they have created the
 hierarchies we expect, so that we can use them hereafter in testing.
 
@@ -1602,10 +1602,10 @@ the `attr` objects, and deletes those attributes afterwards.
 ## Accessibility
 
 The accessibility relation is documented in [the source code for the
-Structure class](../src/structure.litcoffee#accessibility).  The first test
-in this section just tests the two functions implementing that relation:
-the forward direction in `isAccessibleTo` and the reverse direction in
-`isInTheScopeOf`.
+`Structure` class](../src/structure.litcoffee#accessibility).  The first
+test in this section just tests the two functions implementing that
+relation: the forward direction in `isAccessibleTo` and the reverse
+direction in `isInTheScopeOf`.
 
     describe 'Accessibility relations', ->
 

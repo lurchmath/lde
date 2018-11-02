@@ -6,61 +6,64 @@ through its `exports` member, so that clients can import just this one file
 and have access to all the functionality from all the source files in this
 repository.
 
-Import the structure class and export it to clients as well.  The following
-lines detect whether this is being used in Node.js or a WebWorker, or a
-WebWorker-like background thread within Node.js, and do the right thing in
-any case.
+Import the structure class; it will be exported to clients as well using
+code at the end of this file.  The following lines detect whether this is
+being used in Node.js or a WebWorker, or a WebWorker-like background thread
+within Node.js, and do the right thing in any case.
 
     if require?
         { Structure } = require './structure'
+        { InputStructure } = require './input-structure'
     else if WorkerGlobalScope?
         importScripts 'structure.js'
+        importScripts 'input-structure.js'
     else if self?.importScripts?
         importScripts 'release/structure.js'
+        importScripts 'release/input-structure.js'
 
-## The LDE Document
+## The Input Tree
 
-The LDE Document is a global instance of the `Structure` class, representing
-the meaningful content of the user's document.  It has the special ID
-"root."
+The Input Tree is a global instance of the `InputStructure` class,
+representing the content of the user's document as expressed to this module
+by the client.  It has the special ID "root."
 
-    LDEDocument = ( new Structure ).attr 'id' : 'root'
-    LDEDocument.trackIDs()
+    InputTree = ( new InputStructure ).attr 'id' : 'root'
+    InputTree.trackIDs()
 
-Clients should treat the global LDE Document as read-only, *except* through
+Clients should treat the global Input Tree as read-only, *except* through
 the API provided in [the following section](#the-main-api).  But we provide
 the following function for two reasons.
 
- 1. It is usable to *read* the LDE Document.  Although the client could also
-    use it to manipulate that document, doing so violates the preconditions
-    of this module, and thus discards any behavior guarantees it provides.
+ 1. It is usable to *read* the Input Tree.  Although the client could also
+    use it to manipulate that tree, doing so violates the preconditions of
+    this module, and thus discards any behavior guarantees it provides.
  2. As an important special case of the previous, it is usable in the unit
-    testing suite to verify that the API below is manipulating the document
+    testing suite to verify that the API below is manipulating the tree
     according to its specifications.
 
-The following function returns the root of the LDE Document structure.
+The following function returns the root of the Input Tree structure.
 
     functions = { }
-    functions.getDocument = -> LDEDocument
+    functions.getInputTree = -> InputTree
 
 ## Utilities
 
 We create a function for use privately in this module, for verifying that a
-particular structure is a descendant of the LDE Document.
+particular structure is a descendant of the Input Tree.
 
-    isInTheDocument = ( structure ) ->
-        while structure instanceof Structure
-            if structure is LDEDocument then return yes
+    isInTheInputTree = ( structure ) ->
+        while structure instanceof InputStructure
+            if structure is InputTree then return yes
             structure = structure.parent()
         no
 
 ## The Main API
 
 This module presents to clients a four-function API defined in this section.
-Each of these functions manipulates the global LDE Document.
+Each of these functions manipulates the global Input Tree.
 
 The following insertion function deserializes the given structure from JSON,
-finds the descendant of the LDE Document that has the given ID, and inserts
+finds the descendant of the Input Tree that has the given ID, and inserts
 the deserialized version as one of its children, at the given index. If
 anything goes wrong in that process then it does nothing.  The ID must be
 the ID of a Structure, as defined in that class (a string ID stored in the
@@ -72,37 +75,39 @@ tracked.
     functions.insert = ( json, parentID, insertionIndex ) ->
         if ( parent = Structure.instanceWithID parentID )? and \
            ( 0 <= insertionIndex <= parent.children().length ) and \
-           ( isInTheDocument parent ) and \
-           ( newInstance = Structure.fromJSON( json ).setup() )?
+           ( isInTheInputTree parent ) and \
+           ( newInstance = Structure.fromJSON( json ).setup() )? and \
+           ( newInstance instanceof InputStructure )
             parent.insertChild newInstance, insertionIndex
             newInstance.trackIDs()
 
-The following function finds the descendant of the global LDE Document that
+The following function finds the descendant of the global Input Tree that
 has the given ID and, assuming such a structure exists, removes it from its
 parent and stops tracking all IDs within it.
 
     functions.delete = ( subtreeID ) ->
         if ( subtree = Structure.instanceWithID subtreeID )? and \
-           ( isInTheDocument subtree ) and subtree isnt LDEDocument
+           ( isInTheInputTree subtree ) and subtree isnt InputTree
             subtree.removeFromParent()
             subtree.untrackIDs()
 
-The following function finds the descendant of the global LDE Document that
+The following function finds the descendant of the global Input Tree that
 has the given ID and, assuming such a structure exists, deserializes the
 second argument as a Structure object and uses it to replace the original
-structure in the LDE Document.  The deserialized version will have all of
+structure in the Input Tree.  The deserialized version will have all of
 the IDs in its hierarchy tracked.  This module will also stop tracking all
 IDs in the structure that was removed.
 
     functions.replace = ( subtreeID, json ) ->
         if ( subtree = Structure.instanceWithID subtreeID )? and \
-           ( isInTheDocument subtree ) and subtree isnt LDEDocument and \
-           ( newInstance = Structure.fromJSON( json ).setup() )?
+           ( isInTheInputTree subtree ) and subtree isnt InputTree and \
+           ( newInstance = Structure.fromJSON( json ).setup() )? and \
+           ( newInstance instanceof InputStructure )
             subtree.replaceWith newInstance
             subtree.untrackIDs()
             newInstance.trackIDs()
 
-The following function finds the descendant of the global LDE Document that
+The following function finds the descendant of the global Input Tree that
 has the given ID and, assuming such a structure exists, calls its member
 function for setting an attribute with the given key and value.  As per the
 requirements of the `Structure.setAttribute` function, be sure to provide
@@ -110,7 +115,7 @@ only values that are amenable to `JSON.stringify`.
 
     functions.setAttribute = ( subtreeID, key, value ) ->
         if ( subtree = Structure.instanceWithID subtreeID )? and \
-           isInTheDocument subtree
+           isInTheInputTree subtree
             if key is 'id' then subtree.untrackIDs no
             subtree.setAttribute key, value
             if key is 'id' then subtree.trackIDs no
@@ -128,9 +133,9 @@ messages of five types:
    messages
  * `setAttribute`, with three arguments, which calls `setAttribute` and
    sends no messages
- * `getDocument`, with zero arguments, which sends back a message containing
-   the JSON serialized form of the document, as fetched using the
-   `getDocument` function defined above
+ * `getInputTree`, with zero arguments, which sends back a message
+   containing the JSON serialized form of the document, as fetched using the
+   `getInputTree` function defined above
 
 
     if WorkerGlobalScope? or self?.importScripts?
@@ -142,7 +147,7 @@ Here are the numbers of arguments we accept for each message we accept.
             delete : 1
             replace : 2
             setAttribute : 3
-            getDocument : 0
+            getInputTree : 0
 
 Messages received expect data arrays of the form `[ command, args... ]`.
 
@@ -154,8 +159,8 @@ corresponding function.  That function may or may not do anything, depending
 on whether the data is in the correct form.
 
             if expectedArgumentCount[command] is args.length
-                if command is 'getDocument'
-                    self.postMessage functions.getDocument().toJSON()
+                if command is 'getInputTree'
+                    self.postMessage functions.getInputTree().toJSON()
                 else
                     functions[command] args...
 
@@ -163,8 +168,9 @@ Now export anything that needs exporting.
 
     if exports?
         exports.Structure = Structure
+        exports.InputStructure = InputStructure
         exports.insert = functions.insert
         exports.delete = functions.delete
         exports.replace = functions.replace
         exports.setAttribute = functions.setAttribute
-        exports.getDocument = functions.getDocument
+        exports.getInputTree = functions.getInputTree

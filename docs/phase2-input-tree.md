@@ -22,37 +22,37 @@ This has not been implemented.  See the tasks below.
 
 ## `InputStructure` class
 
- * [ ] Create a subclass of `Structure`, in its own new module,
+ * [x] Create a subclass of `Structure`, in its own new module,
    `src/input-structure.litcoffee`.
- * [ ] Add documentation explaining what it is and will do (though that
+ * [x] Add documentation explaining what it is and will do (though that
    documentation can grow with time).
- * [ ] Ensure that the `InputStructure` subclass registers itself with the
+ * [x] Ensure that the `InputStructure` subclass registers itself with the
    serialization code, as
    [the documentation here](https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names)
    describes.  (That is, use a line like
    `className : Structure.addSubclass 'InputStructure', InputStructure` in
    the `InputStructure` class code.)
- * [ ] Rewrite the LDE module so that it no longer takes as input generic
+ * [x] Rewrite the LDE module so that it no longer takes as input generic
    `Structure` instances, but specifically `InputStructure` instances.  All
    of its methods should be updated to use `InputStructure`s where they
    currently use `Structure`s.  This will require importing the
    `input-structure.litcoffee` module instead of the generic
    `structure.litcoffee` one.
- * Rename the global `Structure` hierarchy in that file to be `InputTree`
-   rather than `LDEDocument`.
- * [ ] Update all documentation in that file to reflect the changes just
+ * [x] Rename the global `Structure` hierarchy in that file to be
+   `InputTree` rather than `LDEDocument`.
+ * [x] Update all documentation in that file to reflect the changes just
    made.
- * [ ] Create a new unit test file for `InputStructure`s that is extremely
-   basic, just testing to be sure that the symbol `InputStructure` is
-   defined at the global scope and creates things that are instances of the
-   generic `Structure` base class.
- * [ ] Add documentation for that unit test file, following the pattern
-   established in the documentation of other unit test files in this
-   repository.
- * [ ] Update all unit tests of the LDE module to reflect this change to
+ * [x] Update all unit tests of the LDE module to reflect this change to
    `InputStructure`s.  This will require importing the
    `input-structure.litcoffee` module instead of the generic
    `structure.litcoffeee` one.
+ * [x] Create a new unit test file for `InputStructure`s that is extremely
+   basic, just testing to be sure that the symbol `InputStructure` is
+   defined at the global scope and creates things that are instances of the
+   generic `Structure` base class.
+ * [x] Add documentation for that unit test file, following the pattern
+   established in the documentation of other unit test files in this
+   repository.
  * [ ] Once the unit tests pass, build everything and commit.
 
 ## Accepting actual instances
