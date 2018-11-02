@@ -44,4 +44,4 @@ installed on your system.
 
 The default task is to do all of the above tasks.
 
-    gulp.task 'default', gulp.series 'test', 'build', 'docs'
+    gulp.task 'default', gulp.series 'build', 'test', 'docs'
