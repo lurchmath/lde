@@ -8,16 +8,18 @@
 
 ## Purpose
 
-The Lurch Deductive Engine (LDE, [documented here](api-lde.md)) maintains a
-document called the LDE Document, which is a hierarchy (or tree).  The nodes
-in that tree are instances of this class (`Structure`) or one of its
-subclasses.
+The Lurch Deductive Engine (LDE, [documented here](api-lde.md)) maintains
+two data structures, one called the Input Tree and one called the Output
+Tree.  In both cases, the trees' nodes are instances of this class
+(`Structure`).  In particular, the Input Tree is composed of
+`InputStructure` instances (a direct subclass of `Structure`) and the Output
+Tree is composed of `OutputStructure` instances (another direct subclass)
 
 We build into this base class all the functionality that must be present at
-every point in that hierarchy, and leave to subclasses that functionality
+every point in those hierarchies, and leave to subclasses that functionality
 that makes sense only for specific types of structures.  For instance, this
 class contains no functionality to support rules of inference, because they
-are one specific type of structure, so their functionality will be
+are one specific type of `OutputStructure`, so their functionality will be
 implemented in a subclass for that purpose.
 
 ## Constructing and Serialization
@@ -98,7 +100,7 @@ following member functions present in each instance.
    want to call `copiedInstance.clearIDs()` afterwards.
 
 The order of nodes in the hierarchy is often important.  We have one simple
-order relation on the nodes in the hierarchy, and one more complex.  The
+order relation on the nodes in the hierarchy and one more complex.  The
 simplest is just whether node A is "earlier than" node B, in the order
 induced by an in-order tree traversal (that is, the order in which the open
 parentheses would appear if the tree were written as a LISP expression).

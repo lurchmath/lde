@@ -18,7 +18,8 @@ The `InputStructure` class will exist and be used by the LDE module.
 
 ## Status
 
-This has not been implemented.  See the tasks below.
+This has been partially implemented.  See the tasks below, some marked
+complete and some not yet marked complete.
 
 ## `InputStructure` class
 

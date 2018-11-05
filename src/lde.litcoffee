@@ -117,7 +117,10 @@ only values that are amenable to `JSON.stringify`.
         if ( subtree = Structure.instanceWithID subtreeID )? and \
            isInTheInputTree subtree
             if key is 'id' then subtree.untrackIDs no
-            subtree.setAttribute key, value
+            if typeof value is 'undefined'
+                subtree.clearAttributes key
+            else
+                subtree.setAttribute key, value
             if key is 'id' then subtree.trackIDs no
 
 ## Event Listeners
