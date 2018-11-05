@@ -58,17 +58,17 @@ complete and some not yet marked complete.
 
 ## Accepting actual instances
 
- * [ ] The LDE module was written to accept only JSON-serialized forms of
+ * [x] The LDE module was written to accept only JSON-serialized forms of
    `Structure`s as parameters to its methods.  Update those functions so
    that they now accept either serialized forms or actual instances, and can
    tell the difference and respond appropriately.  (That is, deserialize any
    serialized instances, but don't do that if the argument was already an
    instance.)
- * [ ] Extend the unit test suite of the LDE module so that it tests this
+ * [x] Extend the unit test suite of the LDE module so that it tests this
    new feature of each API method of the LDE module.
- * [ ] Update all documentation in that file to reflect the changes just
+ * [x] Update all documentation in that file to reflect the changes just
    made.
- * [ ] Once the unit tests pass, build everything and commit.
+ * [x] Once the unit tests pass, build everything and commit.
 
 ## Marking structures dirty
 

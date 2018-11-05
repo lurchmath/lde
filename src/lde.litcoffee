@@ -57,6 +57,17 @@ particular structure is a descendant of the Input Tree.
             structure = structure.parent()
         no
 
+We create another function for use privately in this module, which takes a
+parameter that may be an `InputStructure` instance or a JSON serialization
+thereof.  It returns an `InputStructure` instance; in the first case by
+doing nothing, and in the second case by attempting to deserialize it.
+
+    deserializeIfNeeded = ( jsonOrInputStructure ) ->
+        if jsonOrInputStructure instanceof InputStructure
+            jsonOrInputStructure
+        else
+            Structure.fromJSON jsonOrInputStructure
+
 ## The Main API
 
 This module presents to clients a four-function API defined in this section.
@@ -69,14 +80,19 @@ anything goes wrong in that process then it does nothing.  The ID must be
 the ID of a Structure, as defined in that class (a string ID stored in the
 attribute "id").
 
+It is also permitted for the first parameter to be an actual structure
+instance rather than a JSON serialization of one.  This is primarily useful
+in very simple clients, where the LDE module will be loaded directly into
+the client.
+
 All newly inserted structures and their descendants have all their IDs
 tracked.
 
-    functions.insert = ( json, parentID, insertionIndex ) ->
+    functions.insert = ( newChild, parentID, insertionIndex ) ->
         if ( parent = Structure.instanceWithID parentID )? and \
            ( 0 <= insertionIndex <= parent.children().length ) and \
            ( isInTheInputTree parent ) and \
-           ( newInstance = Structure.fromJSON( json ).setup() )? and \
+           ( newInstance = deserializeIfNeeded( newChild ).setup() )? and \
            ( newInstance instanceof InputStructure )
             parent.insertChild newInstance, insertionIndex
             newInstance.trackIDs()
@@ -98,10 +114,13 @@ structure in the Input Tree.  The deserialized version will have all of
 the IDs in its hierarchy tracked.  This module will also stop tracking all
 IDs in the structure that was removed.
 
-    functions.replace = ( subtreeID, json ) ->
+This functionl, also, permits passing an actual `InputStructure` instance as
+the second argument, rather than a serialized version.
+
+    functions.replace = ( subtreeID, newTree ) ->
         if ( subtree = Structure.instanceWithID subtreeID )? and \
            ( isInTheInputTree subtree ) and subtree isnt InputTree and \
-           ( newInstance = Structure.fromJSON( json ).setup() )? and \
+           ( newInstance = deserializeIfNeeded( newTree ).setup() )? and \
            ( newInstance instanceof InputStructure )
             subtree.replaceWith newInstance
             subtree.untrackIDs()

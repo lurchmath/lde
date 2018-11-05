@@ -22,13 +22,13 @@ this module:
 
  * `insert(structureToInsert,parentID,insertionIndex)` inserts a new
    `InputStructure` within the Input Tree, as follows:
-    * `structureToInsert` should be the serialized form of the structure to
-      insert (optionally created with `.toJSON()` in an `InputStructure`
-      instance).  After the structure is deserialized and inserted into the
-      document, `trackIDs()` will be called in it; for more information on
-      that function, see [its entry in the API docs](api-lde.md#unique-ids).
-      Note that if the deserialized object is not an `InputStructure`
-      instance, `insert()` does nothing.
+    * `structureToInsert` should be either the structure to insert or the
+      serialized version thereof (optionally created with `.toJSON()` in an
+      `InputStructure` instance).  After the structure is deserialized (if
+      needed) and inserted into the document, `trackIDs()` will be called
+      in it; for more information on that function, see [its entry in the
+      API docs](api-lde.md#unique-ids).  Note that if the deserialized
+      object is not an `InputStructure` instance, `insert()` does nothing.
     * `parentID` is the ID of the parent under which this new child should
       be inserted.  This must be a string ID that belongs to a structure
       already in the Input Tree.  If it is not, `insert()` does nothing.
@@ -47,9 +47,10 @@ this module:
    the given new structure.
     * `ID` is interpreted with the same conventions as the `parentID` is for
       the `insert` function
-    * `newStructure` is a serialized structure, as `structureToInsert` is
-      for the `insert` function (and again, if it does not deserialize to
-      an `InputStructure` instance, this function does nothing)
+    * `newStructure` is a structure (optionally serialized), as
+      `structureToInsert` is for the `insert` function (and again, if it is
+      not an `InputStructure` instance or the serialization of one, this
+      function does nothing)
     * After this operation, `untrackIDs()` will be called in the replaced
       structure and `trackIDs()` in the replacement; for more information
       on those functions, see
@@ -89,3 +90,7 @@ For example, you could start an LDE in a WebWorker and insert a new
     var A = new InputStructure();
     worker.postMessage( [ 'insert', A.toJSON(), 'root', 0 ] );
 ```
+
+Because message passing across thread boundaries can only transfer JSON
+data, the versions of `insert()` and `replace()` that take `InputStructure`
+instances will need to be called with serialized `InputStructure`s instead.

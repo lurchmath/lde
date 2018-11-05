@@ -161,13 +161,13 @@ this module:</p>
 <ul>
 <li><code>insert(structureToInsert,parentID,insertionIndex)</code> inserts a new
    <code>InputStructure</code> within the Input Tree, as follows:<ul>
-<li><code>structureToInsert</code> should be the serialized form of the structure to
-  insert (optionally created with <code>.toJSON()</code> in an <code>InputStructure</code>
-  instance).  After the structure is deserialized and inserted into the
-  document, <code>trackIDs()</code> will be called in it; for more information on
-  that function, see <a href="./#unique-ids">its entry in the API docs</a>.
-  Note that if the deserialized object is not an <code>InputStructure</code>
-  instance, <code>insert()</code> does nothing.</li>
+<li><code>structureToInsert</code> should be either the structure to insert or the
+  serialized version thereof (optionally created with <code>.toJSON()</code> in an
+  <code>InputStructure</code> instance).  After the structure is deserialized (if
+  needed) and inserted into the document, <code>trackIDs()</code> will be called
+  in it; for more information on that function, see <a href="./#unique-ids">its entry in the
+  API docs</a>.  Note that if the deserialized
+  object is not an <code>InputStructure</code> instance, <code>insert()</code> does nothing.</li>
 <li><code>parentID</code> is the ID of the parent under which this new child should
   be inserted.  This must be a string ID that belongs to a structure
   already in the Input Tree.  If it is not, <code>insert()</code> does nothing.
@@ -188,9 +188,10 @@ this module:</p>
    the given new structure.<ul>
 <li><code>ID</code> is interpreted with the same conventions as the <code>parentID</code> is for
   the <code>insert</code> function</li>
-<li><code>newStructure</code> is a serialized structure, as <code>structureToInsert</code> is
-  for the <code>insert</code> function (and again, if it does not deserialize to
-  an <code>InputStructure</code> instance, this function does nothing)</li>
+<li><code>newStructure</code> is a structure (optionally serialized), as
+  <code>structureToInsert</code> is for the <code>insert</code> function (and again, if it is
+  not an <code>InputStructure</code> instance or the serialization of one, this
+  function does nothing)</li>
 <li>After this operation, <code>untrackIDs()</code> will be called in the replaced
   structure and <code>trackIDs()</code> in the replacement; for more information
   on those functions, see
@@ -228,7 +229,11 @@ as documented in the previous section on this page.</p>
     var worker = new Worker( 'lde.js' );
     var A = new InputStructure();
     worker.postMessage( [ 'insert', A.toJSON(), 'root', 0 ] );
-</code></pre></div>
+</code></pre>
+
+<p>Because message passing across thread boundaries can only transfer JSON
+data, the versions of <code>insert()</code> and <code>replace()</code> that take <code>InputStructure</code>
+instances will need to be called with serialized <code>InputStructure</code>s instead.</p></div>
         </div>
 
         <footer class="col-md-12">

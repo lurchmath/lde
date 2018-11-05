@@ -147,6 +147,58 @@ Insert each one and verify that nothing happened.
             expect( -> LDE.insert C.toJSON(), 'root', 0 ).not.toThrow()
             expect( LDE.getInputTree().children().length ).toBe 0
 
+
+We now repeat the first test, but pass the actual `InputStructure` instances
+rather than serialized versions, to verify that it supports this style.
+
+        it 'should permit inserting non-serialized Input Structures', ->
+
+Define some structures that we will want to insert.
+
+            A = new InputStructure().attr text : 'some text', id : 'A'
+            B = new InputStructure().attr reference : yes, id : 'B'
+            C = new InputStructure().attr name : 'C', id : 'C'
+
+Insert one and verify that it has been added and its ID tracked.
+
+            expect( -> LDE.insert A, 'root', 0 ).not.toThrow()
+            expect( LDE.getInputTree().children().length ).toBe 1
+            insertedA = LDE.getInputTree().children()[0]
+            expect( insertedA ).not.toBeUndefined()
+            expect( insertedA.className ).toBe 'InputStructure'
+            expect( insertedA.getAttribute 'text' ).toBe 'some text'
+            expect( insertedA.id() ).toBe 'A'
+            expect( insertedA.parent() ).toBe LDE.getInputTree()
+            expect( Structure.instanceWithID 'A' ).toBe insertedA
+
+Insert another as its sibling and do the same verifications.
+
+            expect( -> LDE.insert B, 'root', 1 ).not.toThrow()
+            expect( LDE.getInputTree().children().length ).toBe 2
+            insertedB = LDE.getInputTree().children()[1]
+            expect( insertedB ).not.toBeUndefined()
+            expect( insertedB.className ).toBe 'InputStructure'
+            expect( insertedB.getAttribute 'reference' )
+                .toBeTruthy()
+            expect( insertedB.id() ).toBe 'B'
+            expect( insertedB.parent() ).toBe LDE.getInputTree()
+            expect( insertedA.nextSibling() ).toBe insertedB
+            expect( insertedB.previousSibling() ).toBe insertedA
+            expect( Structure.instanceWithID 'B' ).toBe insertedB
+
+Insert a grandchild and do similar verifications, but one level lower.
+
+            expect( -> LDE.insert C, 'A', 0 ).not.toThrow()
+            expect( LDE.getInputTree().children().length ).toBe 2
+            expect( insertedA.children().length ).toBe 1
+            insertedC = insertedA.children()[0]
+            expect( insertedC ).not.toBeUndefined()
+            expect( insertedC.className ).toBe 'InputStructure'
+            expect( insertedC.getAttribute 'name' ).toBe 'C'
+            expect( insertedC.id() ).toBe 'C'
+            expect( insertedC.parent() ).toBe insertedA
+            expect( Structure.instanceWithID 'C' ).toBe insertedC
+
 Next we test the `delete` member of the API.  We re-populate the document
 and then slowly delete pieces.
 
@@ -239,7 +291,7 @@ Then delete A, which also deletes C.
 Next we test the `replace` member of the API.  We re-populate the document
 and then replace some substructures with new ones.
 
-        it 'should permit replacing structures', ->
+        it 'should permit replacing structures with JSON', ->
 
 We begin with the same structures (and insertion pattern) from an earlier
 test.
@@ -400,6 +452,99 @@ Do it again.
             expect( insertedB.previousSibling() ).toBe insertedA
             shouldBeC = insertedA.children()[0]
             expect( shouldBeC ).toBe insertedC
+
+Repeat the first test of the `replace` member of the API, but now the
+replacement nodes will be actual `InputStructure` instances rather than
+serialized versions thereof.
+
+        it 'should permit replacing structures with structures', ->
+
+We begin with the same structures (and insertion pattern) from an earlier
+test.
+
+            A = new InputStructure().attr text : 'some text', id : 'A'
+            B = new InputStructure().attr reference : yes, id : 'B'
+            C = new InputStructure().attr name : 'C', id : 'C'
+            expect( -> LDE.insert A.toJSON(), 'root', 0 ).not.toThrow()
+            insertedA = LDE.getInputTree().children()[0]
+            expect( -> LDE.insert B.toJSON(), 'root', 1 ).not.toThrow()
+            insertedB = LDE.getInputTree().children()[1]
+            expect( -> LDE.insert C.toJSON(), 'A', 0 ).not.toThrow()
+            insertedC = insertedA.children()[0]
+
+Verify that it has the expected structure before we begin manipulating it.
+
+            expect( insertedA.className ).toBe 'InputStructure'
+            expect( insertedA.getAttribute 'text' ).toBe 'some text'
+            expect( insertedA.id() ).toBe 'A'
+            expect( Structure.instanceWithID 'A' ).toBe insertedA
+            expect( insertedA.parent() ).toBe LDE.getInputTree()
+            expect( insertedB.className ).toBe 'InputStructure'
+            expect( insertedB.getAttribute 'reference' ).toBeTruthy()
+            expect( insertedB.id() ).toBe 'B'
+            expect( Structure.instanceWithID 'B' ).toBe insertedB
+            expect( insertedB.parent() ).toBe LDE.getInputTree()
+            expect( insertedA.nextSibling() ).toBe insertedB
+            expect( insertedB.previousSibling() ).toBe insertedA
+            expect( insertedC.className ).toBe 'InputStructure'
+            expect( insertedC.getAttribute 'name' ).toBe 'C'
+            expect( insertedC.id() ).toBe 'C'
+            expect( Structure.instanceWithID 'C' ).toBe insertedC
+            expect( insertedC.parent() ).toBe insertedA
+
+Then we create some structures to use to replace those.
+
+            D = new InputStructure().attr name : 'Dan', id : 'D'
+            E = new InputStructure().attr name : 'Eli', id : 'E'
+
+Replace a grandchild of the root, then verify that all structures are
+positioned as expected with respect to one another.  This is the same test
+as above, except that C has been replaced by D.
+
+            expect( -> LDE.replace 'C', D ).not.toThrow()
+            expect( insertedA.className ).toBe 'InputStructure'
+            expect( insertedA.getAttribute 'text' ).toBe 'some text'
+            expect( insertedA.id() ).toBe 'A'
+            expect( insertedA.parent() ).toBe LDE.getInputTree()
+            expect( insertedB.className ).toBe 'InputStructure'
+            expect( insertedB.getAttribute 'reference' ).toBeTruthy()
+            expect( insertedB.id() ).toBe 'B'
+            expect( insertedB.parent() ).toBe LDE.getInputTree()
+            expect( insertedA.nextSibling() ).toBe insertedB
+            expect( insertedB.previousSibling() ).toBe insertedA
+            shouldBeD = insertedA.children()[0]
+            expect( shouldBeD ).not.toBe insertedC
+            expect( shouldBeD.className ).toBe 'InputStructure'
+            expect( shouldBeD.getAttribute 'name' ).toBe 'Dan'
+            expect( shouldBeD.id() ).toBe 'D'
+            expect( shouldBeD.parent() ).toBe insertedA
+
+Verify that C is no longer in the hierarchy, and that its ID has been
+released.
+
+            expect( insertedC.parent() ).toBeNull()
+            expect( Structure.instanceWithID 'C' ).toBeUndefined()
+
+Now replace a nonatomic subtree with an atomic subtree, then do the same
+type of tests to verify the structure.
+
+            expect( -> LDE.replace 'A', E ).not.toThrow()
+            shouldBeE = LDE.getInputTree().children()[0]
+            expect( shouldBeE ).not.toBe insertedA
+            expect( shouldBeE.className ).toBe 'InputStructure'
+            expect( shouldBeE.getAttribute 'name' ).toBe 'Eli'
+            expect( shouldBeE.id() ).toBe 'E'
+            expect( shouldBeE.parent() ).toBe LDE.getInputTree()
+            expect( insertedB.className ).toBe 'InputStructure'
+            expect( insertedB.getAttribute 'reference' ).toBeTruthy()
+            expect( insertedB.id() ).toBe 'B'
+            expect( insertedB.parent() ).toBe LDE.getInputTree()
+            expect( shouldBeE.nextSibling() ).toBe insertedB
+            expect( insertedB.previousSibling() ).toBe shouldBeE
+            expect( insertedA.parent() ).toBeNull()
+            expect( shouldBeD.parent() ).toBe insertedA
+            expect( Structure.instanceWithID 'A' ).toBeUndefined()
+            expect( Structure.instanceWithID 'D' ).toBeUndefined()
 
 Finally we test the `setAttribute` member of the API.  We re-populate the
 document and then replace some substructures with new ones.
