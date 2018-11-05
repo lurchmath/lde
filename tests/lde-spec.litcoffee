@@ -23,18 +23,18 @@ indeed exported.
             expect( LDE.Structure ).toBeTruthy()
             expect( LDE.InputStructure ).toBeTruthy()
             expect( LDE.getInputTree ).toBeTruthy()
-            expect( LDE.insert ).toBeTruthy()
-            expect( LDE.delete ).toBeTruthy()
-            expect( LDE.replace ).toBeTruthy()
-            expect( LDE.setAttribute ).toBeTruthy()
+            expect( LDE.insertStructure ).toBeTruthy()
+            expect( LDE.deleteStructure ).toBeTruthy()
+            expect( LDE.replaceStructure ).toBeTruthy()
+            expect( LDE.setStructureAttribute ).toBeTruthy()
 
 ## Input Tree Editing API
 
 The LDE provides a global Input Tree object that we can edit with the four
-functions in the API (`insert`, `delete`, `replace`, and `setAttribute`).
-We use those functions here to create and modify the Input Tree in several
-ways, each time comparing the results to JSON structures of what they
-should be.
+functions in the API (`insertStructure`, `deleteStructure`,
+`replaceStructure`, and `setStructureAttribute`). We use those functions
+here to create and modify the Input Tree in several ways, each time
+comparing the results to JSON structures of what they should be.
 
     describe 'Input Tree editing API', ->
 
@@ -78,7 +78,9 @@ Define some structures that we will want to insert.
 
 Insert one and verify that it has been added and its ID tracked.
 
-            expect( -> LDE.insert A.toJSON(), 'root', 0 ).not.toThrow()
+            expect(
+                -> LDE.insertStructure A.toJSON(), 'root', 0
+            ).not.toThrow()
             expect( LDE.getInputTree().children().length ).toBe 1
             insertedA = LDE.getInputTree().children()[0]
             expect( insertedA ).not.toBeUndefined()
@@ -90,7 +92,9 @@ Insert one and verify that it has been added and its ID tracked.
 
 Insert another as its sibling and do the same verifications.
 
-            expect( -> LDE.insert B.toJSON(), 'root', 1 ).not.toThrow()
+            expect(
+                -> LDE.insertStructure B.toJSON(), 'root', 1
+            ).not.toThrow()
             expect( LDE.getInputTree().children().length ).toBe 2
             insertedB = LDE.getInputTree().children()[1]
             expect( insertedB ).not.toBeUndefined()
@@ -105,7 +109,9 @@ Insert another as its sibling and do the same verifications.
 
 Insert a grandchild and do similar verifications, but one level lower.
 
-            expect( -> LDE.insert C.toJSON(), 'A', 0 ).not.toThrow()
+            expect(
+                -> LDE.insertStructure C.toJSON(), 'A', 0
+            ).not.toThrow()
             expect( LDE.getInputTree().children().length ).toBe 2
             expect( insertedA.children().length ).toBe 1
             insertedC = insertedA.children()[0]
@@ -140,11 +146,17 @@ Define some structures that we will try to insert, but shouldn't work.
 
 Insert each one and verify that nothing happened.
 
-            expect( -> LDE.insert A.toJSON(), 'root', 0 ).not.toThrow()
+            expect(
+                -> LDE.insertStructure A.toJSON(), 'root', 0
+            ).not.toThrow()
             expect( LDE.getInputTree().children().length ).toBe 0
-            expect( -> LDE.insert B.toJSON(), 'root', 0 ).not.toThrow()
+            expect(
+                -> LDE.insertStructure B.toJSON(), 'root', 0
+            ).not.toThrow()
             expect( LDE.getInputTree().children().length ).toBe 0
-            expect( -> LDE.insert C.toJSON(), 'root', 0 ).not.toThrow()
+            expect(
+                -> LDE.insertStructure C.toJSON(), 'root', 0
+            ).not.toThrow()
             expect( LDE.getInputTree().children().length ).toBe 0
 
 
@@ -161,7 +173,7 @@ Define some structures that we will want to insert.
 
 Insert one and verify that it has been added and its ID tracked.
 
-            expect( -> LDE.insert A, 'root', 0 ).not.toThrow()
+            expect( -> LDE.insertStructure A, 'root', 0 ).not.toThrow()
             expect( LDE.getInputTree().children().length ).toBe 1
             insertedA = LDE.getInputTree().children()[0]
             expect( insertedA ).not.toBeUndefined()
@@ -173,7 +185,7 @@ Insert one and verify that it has been added and its ID tracked.
 
 Insert another as its sibling and do the same verifications.
 
-            expect( -> LDE.insert B, 'root', 1 ).not.toThrow()
+            expect( -> LDE.insertStructure B, 'root', 1 ).not.toThrow()
             expect( LDE.getInputTree().children().length ).toBe 2
             insertedB = LDE.getInputTree().children()[1]
             expect( insertedB ).not.toBeUndefined()
@@ -188,7 +200,7 @@ Insert another as its sibling and do the same verifications.
 
 Insert a grandchild and do similar verifications, but one level lower.
 
-            expect( -> LDE.insert C, 'A', 0 ).not.toThrow()
+            expect( -> LDE.insertStructure C, 'A', 0 ).not.toThrow()
             expect( LDE.getInputTree().children().length ).toBe 2
             expect( insertedA.children().length ).toBe 1
             insertedC = insertedA.children()[0]
@@ -199,8 +211,8 @@ Insert a grandchild and do similar verifications, but one level lower.
             expect( insertedC.parent() ).toBe insertedA
             expect( Structure.instanceWithID 'C' ).toBe insertedC
 
-Next we test the `delete` member of the API.  We re-populate the document
-and then slowly delete pieces.
+Next we test the `deleteStructure` member of the API.  We re-populate the
+document and then slowly delete pieces.
 
         it 'should permit deleting structures', ->
 
@@ -210,21 +222,27 @@ test.
             A = new InputStructure().attr text : 'some text', id : 'A'
             B = new InputStructure().attr reference : yes, id : 'B'
             C = new InputStructure().attr name : 'C', id : 'C'
-            expect( -> LDE.insert A.toJSON(), 'root', 0 ).not.toThrow()
+            expect(
+                -> LDE.insertStructure A.toJSON(), 'root', 0
+            ).not.toThrow()
             insertedA = LDE.getInputTree().children()[0]
-            expect( -> LDE.insert B.toJSON(), 'root', 1 ).not.toThrow()
+            expect(
+                -> LDE.insertStructure B.toJSON(), 'root', 1
+            ).not.toThrow()
             insertedB = LDE.getInputTree().children()[1]
-            expect( -> LDE.insert C.toJSON(), 'A', 0 ).not.toThrow()
+            expect(
+                -> LDE.insertStructure C.toJSON(), 'A', 0
+            ).not.toThrow()
             insertedC = insertedA.children()[0]
 
 First, let's delete them from the leaves up, to be sure we can do multiple
-deletions, one after another.  After each call to the `delete` function, we
-verify that the children and parent pointers are as expected, and the
-various attributes as well.
+deletions, one after another.  After each call to the `deleteStructure`
+function, we verify that the children and parent pointers are as expected,
+and the various attributes as well.
 
 First delete C.
 
-            expect( -> LDE.delete 'C' ).not.toThrow()
+            expect( -> LDE.deleteStructure 'C' ).not.toThrow()
             doc = LDE.getInputTree()
             expect( doc.children().length ).toBe 2
             expect( doc.children()[0].parent() ).toBe doc
@@ -242,7 +260,7 @@ Was its ID also released?
 
 Next delete A.
 
-            expect( -> LDE.delete 'A' ).not.toThrow()
+            expect( -> LDE.deleteStructure 'A' ).not.toThrow()
             expect( doc.children().length ).toBe 1
             expect( doc.children()[0].parent() ).toBe doc
             expect( doc.children()[0].children().length ).toBe 0
@@ -252,23 +270,29 @@ Next delete A.
 
 Finally, delete B.
 
-            expect( -> LDE.delete 'B' ).not.toThrow()
+            expect( -> LDE.deleteStructure 'B' ).not.toThrow()
             expect( doc.children().length ).toBe 0
             expect( Structure.instanceWithID 'B' ).toBeUndefined()
 
 Next, let's re-add the same structures, but then delete them in a different
 order, this time including a deletion of a nonatomic subtree.
 
-            expect( -> LDE.insert A.toJSON(), 'root', 0 ).not.toThrow()
+            expect(
+                -> LDE.insertStructure A.toJSON(), 'root', 0
+            ).not.toThrow()
             insertedA = LDE.getInputTree().children()[0]
-            expect( -> LDE.insert B.toJSON(), 'root', 1 ).not.toThrow()
+            expect(
+                -> LDE.insertStructure B.toJSON(), 'root', 1
+            ).not.toThrow()
             insertedB = LDE.getInputTree().children()[1]
-            expect( -> LDE.insert C.toJSON(), 'A', 0 ).not.toThrow()
+            expect(
+                -> LDE.insertStructure C.toJSON(), 'A', 0
+            ).not.toThrow()
             insertedC = insertedA.children()[0]
 
 First delete B.
 
-            expect( -> LDE.delete 'B' ).not.toThrow()
+            expect( -> LDE.deleteStructure 'B' ).not.toThrow()
             doc = LDE.getInputTree()
             expect( doc.children().length ).toBe 1
             insertedA = doc.children()[0]
@@ -283,13 +307,13 @@ First delete B.
 
 Then delete A, which also deletes C.
 
-            expect( -> LDE.delete 'A' ).not.toThrow()
+            expect( -> LDE.deleteStructure 'A' ).not.toThrow()
             expect( doc.children().length ).toBe 0
             expect( Structure.instanceWithID 'A' ).toBeUndefined()
             expect( Structure.instanceWithID 'C' ).toBeUndefined()
 
-Next we test the `replace` member of the API.  We re-populate the document
-and then replace some substructures with new ones.
+Next we test the `replaceStructure` member of the API.  We re-populate the
+document and then replace some substructures with new ones.
 
         it 'should permit replacing structures with JSON', ->
 
@@ -299,11 +323,17 @@ test.
             A = new InputStructure().attr text : 'some text', id : 'A'
             B = new InputStructure().attr reference : yes, id : 'B'
             C = new InputStructure().attr name : 'C', id : 'C'
-            expect( -> LDE.insert A.toJSON(), 'root', 0 ).not.toThrow()
+            expect(
+                -> LDE.insertStructure A.toJSON(), 'root', 0
+            ).not.toThrow()
             insertedA = LDE.getInputTree().children()[0]
-            expect( -> LDE.insert B.toJSON(), 'root', 1 ).not.toThrow()
+            expect(
+                -> LDE.insertStructure B.toJSON(), 'root', 1
+            ).not.toThrow()
             insertedB = LDE.getInputTree().children()[1]
-            expect( -> LDE.insert C.toJSON(), 'A', 0 ).not.toThrow()
+            expect(
+                -> LDE.insertStructure C.toJSON(), 'A', 0
+            ).not.toThrow()
             insertedC = insertedA.children()[0]
 
 Verify that it has the expected structure before we begin manipulating it.
@@ -335,7 +365,7 @@ Replace a grandchild of the root, then verify that all structures are
 positioned as expected with respect to one another.  This is the same test
 as above, except that C has been replaced by D.
 
-            expect( -> LDE.replace 'C', D.toJSON() ).not.toThrow()
+            expect( -> LDE.replaceStructure 'C', D.toJSON() ).not.toThrow()
             expect( insertedA.className ).toBe 'InputStructure'
             expect( insertedA.getAttribute 'text' ).toBe 'some text'
             expect( insertedA.id() ).toBe 'A'
@@ -362,7 +392,7 @@ released.
 Now replace a nonatomic subtree with an atomic subtree, then do the same
 type of tests to verify the structure.
 
-            expect( -> LDE.replace 'A', E.toJSON() ).not.toThrow()
+            expect( -> LDE.replaceStructure 'A', E.toJSON() ).not.toThrow()
             shouldBeE = LDE.getInputTree().children()[0]
             expect( shouldBeE ).not.toBe insertedA
             expect( shouldBeE.className ).toBe 'InputStructure'
@@ -391,11 +421,17 @@ Same as previous test:
             A = new InputStructure().attr text : 'some text', id : 'A'
             B = new InputStructure().attr reference : yes, id : 'B'
             C = new InputStructure().attr name : 'C', id : 'C'
-            expect( -> LDE.insert A.toJSON(), 'root', 0 ).not.toThrow()
+            expect(
+                -> LDE.insertStructure A.toJSON(), 'root', 0
+            ).not.toThrow()
             insertedA = LDE.getInputTree().children()[0]
-            expect( -> LDE.insert B.toJSON(), 'root', 1 ).not.toThrow()
+            expect(
+                -> LDE.insertStructure B.toJSON(), 'root', 1
+            ).not.toThrow()
             insertedB = LDE.getInputTree().children()[1]
-            expect( -> LDE.insert C.toJSON(), 'A', 0 ).not.toThrow()
+            expect(
+                -> LDE.insertStructure C.toJSON(), 'A', 0
+            ).not.toThrow()
             insertedC = insertedA.children()[0]
             expect( insertedA.className ).toBe 'InputStructure'
             expect( insertedA.getAttribute 'text' ).toBe 'some text'
@@ -423,7 +459,7 @@ instances, not `InputStructure` instances.
 
 Replace a grandchild of the root, then verify that nothing happened.
 
-            expect( -> LDE.replace 'C', D.toJSON() ).not.toThrow()
+            expect( -> LDE.replaceStructure 'C', D.toJSON() ).not.toThrow()
             expect( insertedA.className ).toBe 'InputStructure'
             expect( insertedA.getAttribute 'text' ).toBe 'some text'
             expect( insertedA.id() ).toBe 'A'
@@ -439,7 +475,7 @@ Replace a grandchild of the root, then verify that nothing happened.
 
 Do it again.
 
-            expect( -> LDE.replace 'C', E.toJSON() ).not.toThrow()
+            expect( -> LDE.replaceStructure 'C', E.toJSON() ).not.toThrow()
             expect( insertedA.className ).toBe 'InputStructure'
             expect( insertedA.getAttribute 'text' ).toBe 'some text'
             expect( insertedA.id() ).toBe 'A'
@@ -453,8 +489,8 @@ Do it again.
             shouldBeC = insertedA.children()[0]
             expect( shouldBeC ).toBe insertedC
 
-Repeat the first test of the `replace` member of the API, but now the
-replacement nodes will be actual `InputStructure` instances rather than
+Repeat the first test of the `replaceStructure` member of the API, but now
+the replacement nodes will be actual `InputStructure` instances rather than
 serialized versions thereof.
 
         it 'should permit replacing structures with structures', ->
@@ -465,11 +501,17 @@ test.
             A = new InputStructure().attr text : 'some text', id : 'A'
             B = new InputStructure().attr reference : yes, id : 'B'
             C = new InputStructure().attr name : 'C', id : 'C'
-            expect( -> LDE.insert A.toJSON(), 'root', 0 ).not.toThrow()
+            expect(
+                -> LDE.insertStructure A.toJSON(), 'root', 0
+            ).not.toThrow()
             insertedA = LDE.getInputTree().children()[0]
-            expect( -> LDE.insert B.toJSON(), 'root', 1 ).not.toThrow()
+            expect(
+                -> LDE.insertStructure B.toJSON(), 'root', 1
+            ).not.toThrow()
             insertedB = LDE.getInputTree().children()[1]
-            expect( -> LDE.insert C.toJSON(), 'A', 0 ).not.toThrow()
+            expect(
+                -> LDE.insertStructure C.toJSON(), 'A', 0
+            ).not.toThrow()
             insertedC = insertedA.children()[0]
 
 Verify that it has the expected structure before we begin manipulating it.
@@ -501,7 +543,7 @@ Replace a grandchild of the root, then verify that all structures are
 positioned as expected with respect to one another.  This is the same test
 as above, except that C has been replaced by D.
 
-            expect( -> LDE.replace 'C', D ).not.toThrow()
+            expect( -> LDE.replaceStructure 'C', D ).not.toThrow()
             expect( insertedA.className ).toBe 'InputStructure'
             expect( insertedA.getAttribute 'text' ).toBe 'some text'
             expect( insertedA.id() ).toBe 'A'
@@ -528,7 +570,7 @@ released.
 Now replace a nonatomic subtree with an atomic subtree, then do the same
 type of tests to verify the structure.
 
-            expect( -> LDE.replace 'A', E ).not.toThrow()
+            expect( -> LDE.replaceStructure 'A', E ).not.toThrow()
             shouldBeE = LDE.getInputTree().children()[0]
             expect( shouldBeE ).not.toBe insertedA
             expect( shouldBeE.className ).toBe 'InputStructure'
@@ -546,8 +588,8 @@ type of tests to verify the structure.
             expect( Structure.instanceWithID 'A' ).toBeUndefined()
             expect( Structure.instanceWithID 'D' ).toBeUndefined()
 
-Finally we test the `setAttribute` member of the API.  We re-populate the
-document and then replace some substructures with new ones.
+Finally we test the `setStructureAttribute` member of the API.  We
+re-populate the document and then replace some substructures with new ones.
 
         it 'should permit altering attributes', ->
 
@@ -557,11 +599,17 @@ test.
             A = new InputStructure().attr text : 'some text', id : 'A'
             B = new InputStructure().attr reference : yes, id : 'B'
             C = new InputStructure().attr name : 'C', id : 'C'
-            expect( -> LDE.insert A.toJSON(), 'root', 0 ).not.toThrow()
+            expect(
+                -> LDE.insertStructure A.toJSON(), 'root', 0
+            ).not.toThrow()
             insertedA = LDE.getInputTree().children()[0]
-            expect( -> LDE.insert B.toJSON(), 'root', 1 ).not.toThrow()
+            expect(
+                -> LDE.insertStructure B.toJSON(), 'root', 1
+            ).not.toThrow()
             insertedB = LDE.getInputTree().children()[1]
-            expect( -> LDE.insert C.toJSON(), 'A', 0 ).not.toThrow()
+            expect(
+                -> LDE.insertStructure C.toJSON(), 'A', 0
+            ).not.toThrow()
             insertedC = insertedA.children()[0]
 
 We do not at this point test whether the structure looks the way we expect,
@@ -571,13 +619,13 @@ to be sure that it creates the structure as expected.
 Let us add an attribute to each of the nodes, including the root, and verify
 that they were successfully added.
 
-            expect( -> LDE.setAttribute 'root',
+            expect( -> LDE.setStructureAttribute 'root',
                 'test key 1', 'test value 1' ).not.toThrow()
-            expect( -> LDE.setAttribute 'A',
+            expect( -> LDE.setStructureAttribute 'A',
                 'test key 2', 'test value 2' ).not.toThrow()
-            expect( -> LDE.setAttribute 'B',
+            expect( -> LDE.setStructureAttribute 'B',
                 'test key 3', 'test value 3' ).not.toThrow()
-            expect( -> LDE.setAttribute 'C',
+            expect( -> LDE.setStructureAttribute 'C',
                 'test key 4', 'test value 4' ).not.toThrow()
             expect( LDE.getInputTree().getAttribute 'test key 1' )
                 .toBe 'test value 1'
@@ -588,12 +636,57 @@ that they were successfully added.
             expect( insertedC.getAttribute 'test key 4' )
                 .toBe 'test value 4'
 
-Then we call `setAttribute` with no value, and ensure that this removes
-attributes.
+Then we call `setStructureAttribute` with no value, and ensure that this
+removes attributes.
 
-            expect( -> LDE.setAttribute 'root', 'test key 1' ).not.toThrow()
+            expect(
+                -> LDE.setStructureAttribute 'root', 'test key 1'
+            ).not.toThrow()
             expect( LDE.getInputTree().getAttribute 'test key 1' )
                 .toBeUndefined()
+
+Now verify that the restriction on keys for attributes is correctly policed.
+
+        it 'should not permit attribute keys starting with underscore', ->
+
+If you insert stuff with such keys, those key-value pairs are removed before
+insertion.
+
+            A = new InputStructure().attr
+                text : 'some text'
+                id : 'A'
+                _thing : 'this is totally not allowed'
+            expect(
+                -> LDE.insertStructure A.toJSON(), 'root', 0
+            ).not.toThrow()
+            insertedA = LDE.getInputTree().children()[0]
+            expect( insertedA.getAttribute 'text' ).toBe 'some text'
+            expect( insertedA.getAttribute 'id' ).toBe 'A'
+            expect( insertedA.getAttribute '_thing' ).toBeUndefined()
+
+If you replace a `Structure` with another that has a key starting with an
+underscore, those key-value pairs are removed before the replacement.
+
+            B = new InputStructure().attr
+                value : 500000
+                id : 'B'
+                __ : 'this is really going to make the LDE mad'
+            expect( -> LDE.replaceStructure 'A', B ).not.toThrow()
+            insertedB = LDE.getInputTree().children()[0]
+            expect( insertedB.getAttribute 'value' ).toBe 500000
+            expect( insertedB.getAttribute 'id' ).toBe 'B'
+            expect( insertedB.getAttribute '__' ).toBeUndefined()
+
+If you try to set a key-value pair where the key begins with underscore,
+nothing happens.
+
+            expect(
+                -> LDE.setStructureAttribute 'B', '_key', 'value'
+            ).not.toThrow()
+            insertedB = LDE.getInputTree().children()[0]
+            expect( insertedB.getAttribute 'value' ).toBe 500000
+            expect( insertedB.getAttribute 'id' ).toBe 'B'
+            expect( insertedB.getAttribute '_key' ).toBeUndefined()
 
 ## WebWorker Support
 
@@ -631,7 +724,7 @@ background thread, not to re-test the same functionality as before.
 
         it 'should allow inserting things', ( done ) ->
             A = new InputStructure().attr name : 'A', ID : 'foo'
-            worker.postMessage [ 'insert', A.toJSON(), 'root', 0 ]
+            worker.postMessage [ 'insertStructure', A.toJSON(), 'root', 0 ]
             asyncTest [ 'getInputTree' ], ( result ) ->
                 expect( result.type ).toBe 'getInputTree'
                 expect( result.payload ).toEqual {
@@ -649,8 +742,8 @@ background thread, not to re-test the same functionality as before.
 
         it 'should allow deleting things', ( done ) ->
             A = new InputStructure().attr name : 'A', id : 'foo'
-            worker.postMessage [ 'insert', A.toJSON(), 'root', 0 ]
-            worker.postMessage [ 'delete', 'foo' ]
+            worker.postMessage [ 'insertStructure', A.toJSON(), 'root', 0 ]
+            worker.postMessage [ 'deleteStructure', 'foo' ]
             asyncTest [ 'getInputTree' ], ( result ) ->
                 expect( result.type ).toBe 'getInputTree'
                 expect( result.payload ).toEqual {
@@ -665,8 +758,8 @@ background thread, not to re-test the same functionality as before.
         it 'should allow replacing things', ( done ) ->
             A = new InputStructure().attr name : 'A', id : 'foo'
             B = new InputStructure().attr name : 'B', id : 'bar'
-            worker.postMessage [ 'insert', A.toJSON(), 'root', 0 ]
-            worker.postMessage [ 'replace', 'foo', B.toJSON() ]
+            worker.postMessage [ 'insertStructure', A.toJSON(), 'root', 0 ]
+            worker.postMessage [ 'replaceStructure', 'foo', B.toJSON() ]
             asyncTest [ 'getInputTree' ], ( result ) ->
                 expect( result.type ).toBe 'getInputTree'
                 expect( result.payload ).toEqual {
@@ -684,8 +777,9 @@ background thread, not to re-test the same functionality as before.
 
         it 'should allow setting attributes', ( done ) ->
             A = new InputStructure().attr name : 'A', id : 'foo'
-            worker.postMessage [ 'insert', A.toJSON(), 'root', 0 ]
-            worker.postMessage [ 'setAttribute', 'foo', 'color', 'red' ]
+            worker.postMessage [ 'insertStructure', A.toJSON(), 'root', 0 ]
+            worker.postMessage [
+                'setStructureAttribute', 'foo', 'color', 'red' ]
             asyncTest [ 'getInputTree' ], ( result ) ->
                 expect( result.type ).toBe 'getInputTree'
                 expect( result.payload ).toEqual {
@@ -745,7 +839,7 @@ Set up the worker and its tree.
             { Worker } = require 'webworker-threads'
             worker = new Worker 'release/lde.js'
             A = new InputStructure().attr name : 'A', id : 'foo'
-            worker.postMessage [ 'insert', A.toJSON(), 'root', 0 ]
+            worker.postMessage [ 'insertStructure', A.toJSON(), 'root', 0 ]
 
 Set up our expectations for the upcoming feedback-generation event.
 

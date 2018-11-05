@@ -85,15 +85,23 @@ instance rather than a JSON serialization of one.  This is primarily useful
 in very simple clients, where the LDE module will be loaded directly into
 the client.
 
+In either case, attributes whose keys begin with an underscore are not
+permitted; they are for internal use only.  Such attributes will be stripped
+before the structure is inserted.
+
 All newly inserted structures and their descendants have all their IDs
 tracked.
 
-    functions.insert = ( newChild, parentID, insertionIndex ) ->
+    functions.insertStructure = ( newChild, parentID, insertionIndex ) ->
         if ( parent = Structure.instanceWithID parentID )? and \
            ( 0 <= insertionIndex <= parent.children().length ) and \
            ( isInTheInputTree parent ) and \
            ( newInstance = deserializeIfNeeded( newChild ).setup() )? and \
            ( newInstance instanceof InputStructure )
+            disallowed = ( key \
+                for own key of newInstance.attributes when key[0] is '_' )
+            if disallowed.length > 0
+                newInstance.clearAttributes disallowed...
             parent.insertChild newInstance, insertionIndex
             newInstance.trackIDs()
 
@@ -101,7 +109,7 @@ The following function finds the descendant of the global Input Tree that
 has the given ID and, assuming such a structure exists, removes it from its
 parent and stops tracking all IDs within it.
 
-    functions.delete = ( subtreeID ) ->
+    functions.deleteStructure = ( subtreeID ) ->
         if ( subtree = Structure.instanceWithID subtreeID )? and \
            ( isInTheInputTree subtree ) and subtree isnt InputTree
             subtree.removeFromParent()
@@ -114,14 +122,22 @@ structure in the Input Tree.  The deserialized version will have all of
 the IDs in its hierarchy tracked.  This module will also stop tracking all
 IDs in the structure that was removed.
 
+In either case, attributes whose keys begin with an underscore are not
+permitted; they are for internal use only.  Such attributes will be stripped
+before the structure is inserted.
+
 This functionl, also, permits passing an actual `InputStructure` instance as
 the second argument, rather than a serialized version.
 
-    functions.replace = ( subtreeID, newTree ) ->
+    functions.replaceStructure = ( subtreeID, newTree ) ->
         if ( subtree = Structure.instanceWithID subtreeID )? and \
            ( isInTheInputTree subtree ) and subtree isnt InputTree and \
            ( newInstance = deserializeIfNeeded( newTree ).setup() )? and \
            ( newInstance instanceof InputStructure )
+            disallowed = ( key \
+                for own key of newInstance.attributes when key[0] is '_' )
+            if disallowed.length > 0
+                newInstance.clearAttributes disallowed...
             subtree.replaceWith newInstance
             subtree.untrackIDs()
             newInstance.trackIDs()
@@ -132,7 +148,12 @@ function for setting an attribute with the given key and value.  As per the
 requirements of the `Structure.setAttribute` function, be sure to provide
 only values that are amenable to `JSON.stringify`.
 
-    functions.setAttribute = ( subtreeID, key, value ) ->
+The key may not begin with an underscore; such key names are reserved for
+internal use by the LDE.  If the given key begins with an underscore, this
+function does nothing.
+
+    functions.setStructureAttribute = ( subtreeID, key, value ) ->
+        if key[0] is '_' then return
         if ( subtree = Structure.instanceWithID subtreeID )? and \
            isInTheInputTree subtree
             if key is 'id' then subtree.untrackIDs no
@@ -148,13 +169,14 @@ If the LDE detects that it is being run in a background thread, it will set
 up listeners for messages from the parent thread.  These listeners handle
 messages of five types:
 
- * `insert`, with three arguments, which calls the `insert` function defined
-   above and sends no messages back
- * `delete`, with one argument, which calls `delete` and sends no messages
- * `replace`, with two arguments, which calls `replace` and sends no
-   messages
- * `setAttribute`, with three arguments, which calls `setAttribute` and
+ * `insertStructure`, with three arguments, which calls the
+   `insertStructure` function defined above and sends no messages back
+ * `deleteStructure`, with one argument, which calls `deleteStructure` and
    sends no messages
+ * `replaceStructure`, with two arguments, which calls `replaceStructure`
+   and sends no messages
+ * `setStructureAttribute`, with three arguments, which calls
+   `setStructureAttribute` and sends no messages
  * `getInputTree`, with zero arguments, which sends back a message
    containing the JSON serialized form of the document, as fetched using the
    `getInputTree` function defined above
@@ -165,10 +187,10 @@ messages of five types:
 Here are the numbers of arguments we accept for each message we accept.
 
         expectedArgumentCount =
-            insert : 3
-            delete : 1
-            replace : 2
-            setAttribute : 3
+            insertStructure : 3
+            deleteStructure : 1
+            replaceStructure : 2
+            setStructureAttribute : 3
             getInputTree : 0
 
 Messages received expect data arrays of the form `[ command, args... ]`.
@@ -222,7 +244,7 @@ instead.
     feedback = ( feedbackData ) ->
         if Feedback?.dispatchEvent?
             event = new Event 'feedback'
-            event.payload = feedbackData
+            event.data = feedbackData
             Feedback.dispatchEvent event
         else if Feedback?.emit?
             Feedback.emit 'feedback', feedbackData
@@ -241,8 +263,8 @@ And export anything else that needs exporting.
     if exports?
         exports.Structure = Structure
         exports.InputStructure = InputStructure
-        exports.insert = functions.insert
-        exports.delete = functions.delete
-        exports.replace = functions.replace
-        exports.setAttribute = functions.setAttribute
+        exports.insertStructure = functions.insertStructure
+        exports.deleteStructure = functions.deleteStructure
+        exports.replaceStructure = functions.replaceStructure
+        exports.setStructureAttribute = functions.setStructureAttribute
         exports.getInputTree = functions.getInputTree

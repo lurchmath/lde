@@ -131,17 +131,17 @@ complete and some not yet marked complete.
    and all of its upcoming subclasses.
  * [x] Update `mkdocs.yml` in the project root to include that new file in
    the generated documentation.
- * [ ] Update the API in the LDE module to include the word "Structure" in
+ * [x] Update the API in the LDE module to include the word "Structure" in
    each method call, because we will soon add methods for connections as
    well.  So for instance, make it `insertStructure` rather than just
    `insert`, and so on.
- * [ ] Update all unit tests and API documentation, and when the unit test
+ * [x] Update all unit tests and API documentation, and when the unit test
    pass, then commit.
- * [ ] Tweak the existing `setStructureAttribute()` API method so that it
+ * [x] Tweak the existing `setStructureAttribute()` API method so that it
    does not permit the client to use attribute names that begin with an
    underscore, so that we can "namespace" those for internal purposes.
- * [ ] Update the LDE API documentation page to cover these new routines.
- * [ ] Add a unit test for that change to `setStructureAttribute()` as well.
+ * [x] Update the LDE API documentation page to cover these new routines.
+ * [x] Add a unit test for that change to `setStructureAttribute()` as well.
 
 ### Upgrading Connections
 

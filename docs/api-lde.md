@@ -20,7 +20,7 @@ modifies this structure except at the request of the client.
 The Input Tree can be manipulated with four functions in the public API of
 this module:
 
- * `insert(structureToInsert,parentID,insertionIndex)` inserts a new
+ * `inserStructure(structureToInsert,parentID,insertionIndex)` inserts a new
    `InputStructure` within the Input Tree, as follows:
     * `structureToInsert` should be either the structure to insert or the
       serialized version thereof (optionally created with `.toJSON()` in an
@@ -28,40 +28,44 @@ this module:
       needed) and inserted into the document, `trackIDs()` will be called
       in it; for more information on that function, see [its entry in the
       API docs](api-lde.md#unique-ids).  Note that if the deserialized
-      object is not an `InputStructure` instance, `insert()` does nothing.
+      object is not an `InputStructure` instance, `insertStructure()` does
+      nothing.
     * `parentID` is the ID of the parent under which this new child should
       be inserted.  This must be a string ID that belongs to a structure
-      already in the Input Tree.  If it is not, `insert()` does nothing.
-      Note that the root of the hierarchy is given the ID "root" at the
-      time the module is loaded.
+      already in the Input Tree.  If it is not, `insertStructure()` does
+      nothing.  Note that the root of the hierarchy is given the ID "root"
+      at the time the module is loaded.
     * `insertionIndex` is the index of the child to insert, which must be
       greater than or equal to zero and less than or equal to the number of
-      children of the parent.  If that constraint does not hold, `insert()`
-      does nothing.
- * `delete(ID)` deletes from the Input Tree the structure with the given
-   ID, which is interpreted with the same conventions as the `parentID` is
-   for the `insert()` function.  After the structure is deleted,
-   `untrackIDs()` will be called in it; for more information on that
-   function, see [its entry in the API docs](api-lde.md#unique-ids).
- * `replace(ID,newStructure)` replaces the structure with the given ID with
-   the given new structure.
+      children of the parent.  If that constraint does not hold,
+      `insertStructure()` does nothing.
+ * `deleteStructure(ID)` deletes from the Input Tree the structure with the
+   given ID, which is interpreted with the same conventions as the
+   `parentID` is for the `insertStructure()` function.  After the structure
+   is deleted, `untrackIDs()` will be called in it; for more information on
+   that function, see [its entry in the API docs](api-lde.md#unique-ids).
+ * `replaceStructure(ID,newStructure)` replaces the structure with the
+   given ID with the given new structure.
     * `ID` is interpreted with the same conventions as the `parentID` is for
-      the `insert` function
+      the `insertStructure()` function
     * `newStructure` is a structure (optionally serialized), as
-      `structureToInsert` is for the `insert` function (and again, if it is
-      not an `InputStructure` instance or the serialization of one, this
-      function does nothing)
+      `structureToInsert` is for the `insertStructure()` function (and
+      again, if it is not an `InputStructure` instance or the serialization
+      of one, this function does nothing)
     * After this operation, `untrackIDs()` will be called in the replaced
       structure and `trackIDs()` in the replacement; for more information
       on those functions, see
       [their entries in the API docs](api-lde.md#unique-ids).
- * `setAttribute(ID,key,value)` modifies a single attribute of a structure
-   within the Input Tree, as follows:
+ * `setStructureAttribute(ID,key,value)` modifies a single attribute of a
+   structure within the Input Tree, as follows:
     * `ID` is interpreted with the same conventions as the `parentID` is for
-      the `insert` function
+      the `insertStructure()` function
     * `key` is the key of the attribute to create or overwrite.  If this
       key happens to be "id", then the class-level tracking of IDs will be
-      updated to repsect the change.
+      updated to repsect the change.  This is not permitted to begin with an
+      underscore; such key names are reserved for internal use by the LDE.
+      If the given key begins with an underscore, this function does
+      nothing.
     * `value` is the new value, which must be JSON data.  (No checks are
       done to verify that it is JSON data, but errors will transpire
       eventually if non-JSON data is passed.)  Alternately, `value` can be
@@ -72,14 +76,15 @@ this module:
 
 If the LDE detects that it is being run in a background thread, it will set
 up listeners for messages from the parent thread.  These listeners will
-handle messages of four types (`insert`, `delete`, `replace`,
-`setAttribute`, and `getInputTree`) mirroring the four functions given
-above (plus `getInputTree()`) and calling them internally.
+handle messages of four types (`insertStructure`, `deleteStructure`,
+`replaceStructure`, `setStructureAttribute`, and `getInputTree`) mirroring
+the four functions given above (plus `getInputTree()`) and calling them
+internally.
 
 They can be called by passing a message of the form `[ command, args... ]`,
-where the command is a string (one of `"insert"`, `"delete"`, etc.) and the
-arguments list is the same list that would be passed to the function itself,
-as documented above.
+where the command is a string (one of `"insertStructure"`,
+`"deleteStructure"`, etc.) and the arguments list is the same list that
+would be passed to the function itself, as documented above.
 
 For example, you could start an LDE in a WebWorker and insert a new
 `InputStructure` as the first child of its global document as follows.
@@ -89,12 +94,13 @@ For example, you could start an LDE in a WebWorker and insert a new
     // (This requires having the structure.js file in the same folder.)
     var worker = new Worker( 'lde.js' );
     var A = new InputStructure();
-    worker.postMessage( [ 'insert', A.toJSON(), 'root', 0 ] );
+    worker.postMessage( [ 'insertStructure', A.toJSON(), 'root', 0 ] );
 ```
 
 Because message passing across thread boundaries can only transfer JSON
-data, the versions of `insert()` and `replace()` that take `InputStructure`
-instances will need to be called with serialized `InputStructure`s instead.
+data, the versions of `insertStructure()` and `replaceStructure()` that take
+`InputStructure` instances will need to be called with serialized
+`InputStructure`s instead.
 
 Only one of these five functions sends a message back to the parent context.
 If you post a `getInputTree` message (which requires no parameters), you

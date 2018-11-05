@@ -838,6 +838,25 @@ Now there's nothing in the dictionaries again.
             expect( S1.getAttribute 'b e t a' ).toBeUndefined()
             expect( S2.getAttribute 'b e t a' ).toBeUndefined()
 
+Try again with attributes that begin with an underscore.  There is a policy
+in the LDE that its API will not permit attributes with such keys, but we
+must be able to use them if we directly call functions in the `Structure`s
+themselves.  Thus this test verifies that the LDE's restriction does not
+apply to the underlying `Structure` objects alone.
+
+            S1.setAttribute '_A', value1
+            S2.setAttribute '_B', value2
+            expect( S1.getAttribute '_A' ).toBe value1
+            expect( S1.getAttribute '_B' ).toBeUndefined()
+            expect( S2.getAttribute '_A' ).toBeUndefined()
+            expect( S2.getAttribute '_B' ).toBe value2
+            S1.clearAttributes '_A', '_B'
+            S2.clearAttributes '_A', '_B'
+            expect( S1.getAttribute '_A' ).toBeUndefined()
+            expect( S2.getAttribute '_A' ).toBeUndefined()
+            expect( S1.getAttribute '_B' ).toBeUndefined()
+            expect( S2.getAttribute '_B' ).toBeUndefined()
+
 ## Event handling
 
     describe 'Event handling', ->

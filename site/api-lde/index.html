@@ -165,7 +165,7 @@ modifies this structure except at the request of the client.</p>
 <p>The Input Tree can be manipulated with four functions in the public API of
 this module:</p>
 <ul>
-<li><code>insert(structureToInsert,parentID,insertionIndex)</code> inserts a new
+<li><code>inserStructure(structureToInsert,parentID,insertionIndex)</code> inserts a new
    <code>InputStructure</code> within the Input Tree, as follows:<ul>
 <li><code>structureToInsert</code> should be either the structure to insert or the
   serialized version thereof (optionally created with <code>.toJSON()</code> in an
@@ -173,44 +173,48 @@ this module:</p>
   needed) and inserted into the document, <code>trackIDs()</code> will be called
   in it; for more information on that function, see <a href="./#unique-ids">its entry in the
   API docs</a>.  Note that if the deserialized
-  object is not an <code>InputStructure</code> instance, <code>insert()</code> does nothing.</li>
+  object is not an <code>InputStructure</code> instance, <code>insertStructure()</code> does
+  nothing.</li>
 <li><code>parentID</code> is the ID of the parent under which this new child should
   be inserted.  This must be a string ID that belongs to a structure
-  already in the Input Tree.  If it is not, <code>insert()</code> does nothing.
-  Note that the root of the hierarchy is given the ID "root" at the
-  time the module is loaded.</li>
+  already in the Input Tree.  If it is not, <code>insertStructure()</code> does
+  nothing.  Note that the root of the hierarchy is given the ID "root"
+  at the time the module is loaded.</li>
 <li><code>insertionIndex</code> is the index of the child to insert, which must be
   greater than or equal to zero and less than or equal to the number of
-  children of the parent.  If that constraint does not hold, <code>insert()</code>
-  does nothing.</li>
+  children of the parent.  If that constraint does not hold,
+  <code>insertStructure()</code> does nothing.</li>
 </ul>
 </li>
-<li><code>delete(ID)</code> deletes from the Input Tree the structure with the given
-   ID, which is interpreted with the same conventions as the <code>parentID</code> is
-   for the <code>insert()</code> function.  After the structure is deleted,
-   <code>untrackIDs()</code> will be called in it; for more information on that
-   function, see <a href="./#unique-ids">its entry in the API docs</a>.</li>
-<li><code>replace(ID,newStructure)</code> replaces the structure with the given ID with
-   the given new structure.<ul>
+<li><code>deleteStructure(ID)</code> deletes from the Input Tree the structure with the
+   given ID, which is interpreted with the same conventions as the
+   <code>parentID</code> is for the <code>insertStructure()</code> function.  After the structure
+   is deleted, <code>untrackIDs()</code> will be called in it; for more information on
+   that function, see <a href="./#unique-ids">its entry in the API docs</a>.</li>
+<li><code>replaceStructure(ID,newStructure)</code> replaces the structure with the
+   given ID with the given new structure.<ul>
 <li><code>ID</code> is interpreted with the same conventions as the <code>parentID</code> is for
-  the <code>insert</code> function</li>
+  the <code>insertStructure()</code> function</li>
 <li><code>newStructure</code> is a structure (optionally serialized), as
-  <code>structureToInsert</code> is for the <code>insert</code> function (and again, if it is
-  not an <code>InputStructure</code> instance or the serialization of one, this
-  function does nothing)</li>
+  <code>structureToInsert</code> is for the <code>insertStructure()</code> function (and
+  again, if it is not an <code>InputStructure</code> instance or the serialization
+  of one, this function does nothing)</li>
 <li>After this operation, <code>untrackIDs()</code> will be called in the replaced
   structure and <code>trackIDs()</code> in the replacement; for more information
   on those functions, see
   <a href="./#unique-ids">their entries in the API docs</a>.</li>
 </ul>
 </li>
-<li><code>setAttribute(ID,key,value)</code> modifies a single attribute of a structure
-   within the Input Tree, as follows:<ul>
+<li><code>setStructureAttribute(ID,key,value)</code> modifies a single attribute of a
+   structure within the Input Tree, as follows:<ul>
 <li><code>ID</code> is interpreted with the same conventions as the <code>parentID</code> is for
-  the <code>insert</code> function</li>
+  the <code>insertStructure()</code> function</li>
 <li><code>key</code> is the key of the attribute to create or overwrite.  If this
   key happens to be "id", then the class-level tracking of IDs will be
-  updated to repsect the change.</li>
+  updated to repsect the change.  This is not permitted to begin with an
+  underscore; such key names are reserved for internal use by the LDE.
+  If the given key begins with an underscore, this function does
+  nothing.</li>
 <li><code>value</code> is the new value, which must be JSON data.  (No checks are
   done to verify that it is JSON data, but errors will transpire
   eventually if non-JSON data is passed.)  Alternately, <code>value</code> can be
@@ -222,25 +226,27 @@ this module:</p>
 <h2 id="asynchronous-api">Asynchronous API</h2>
 <p>If the LDE detects that it is being run in a background thread, it will set
 up listeners for messages from the parent thread.  These listeners will
-handle messages of four types (<code>insert</code>, <code>delete</code>, <code>replace</code>,
-<code>setAttribute</code>, and <code>getInputTree</code>) mirroring the four functions given
-above (plus <code>getInputTree()</code>) and calling them internally.</p>
+handle messages of four types (<code>insertStructure</code>, <code>deleteStructure</code>,
+<code>replaceStructure</code>, <code>setStructureAttribute</code>, and <code>getInputTree</code>) mirroring
+the four functions given above (plus <code>getInputTree()</code>) and calling them
+internally.</p>
 <p>They can be called by passing a message of the form <code>[ command, args... ]</code>,
-where the command is a string (one of <code>"insert"</code>, <code>"delete"</code>, etc.) and the
-arguments list is the same list that would be passed to the function itself,
-as documented above.</p>
+where the command is a string (one of <code>"insertStructure"</code>,
+<code>"deleteStructure"</code>, etc.) and the arguments list is the same list that
+would be passed to the function itself, as documented above.</p>
 <p>For example, you could start an LDE in a WebWorker and insert a new
 <code>InputStructure</code> as the first child of its global document as follows.</p>
 <pre><code class="js">    // import the lde.js file (kept in the release/ folder)
     // (This requires having the structure.js file in the same folder.)
     var worker = new Worker( 'lde.js' );
     var A = new InputStructure();
-    worker.postMessage( [ 'insert', A.toJSON(), 'root', 0 ] );
+    worker.postMessage( [ 'insertStructure', A.toJSON(), 'root', 0 ] );
 </code></pre>
 
 <p>Because message passing across thread boundaries can only transfer JSON
-data, the versions of <code>insert()</code> and <code>replace()</code> that take <code>InputStructure</code>
-instances will need to be called with serialized <code>InputStructure</code>s instead.</p>
+data, the versions of <code>insertStructure()</code> and <code>replaceStructure()</code> that take
+<code>InputStructure</code> instances will need to be called with serialized
+<code>InputStructure</code>s instead.</p>
 <p>Only one of these five functions sends a message back to the parent context.
 If you post a <code>getInputTree</code> message (which requires no parameters), you
 will immediately get a message in response whose event has the following
