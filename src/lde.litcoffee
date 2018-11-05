@@ -186,7 +186,54 @@ on whether the data is in the correct form.
                 else
                     functions[command] args...
 
-Now export anything that needs exporting.
+We also add the following function that is useless in production, but is
+useful in testing.  It transmits feedback about any given node in the
+Input Tree.
+
+            if command is 'sendFeedback'
+                [ id, feedbackData ] = args
+                subject = Structure.instanceWithID id
+                if subject?.feedback?
+                    subject.feedback feedbackData
+                else
+                    self.postMessage "No such Structure: #{id}"
+
+## Feedback
+
+If we have been loaded in node.js or the browser, create a global feedback
+mechanism called `Feedback`, an instance of `EventTarget` or `EventEmitter`,
+depending on whether this is node.js or the browser.
+
+    if window? and EventTarget?
+        Feedback = window.Feedback = new EventTarget() # browser
+    if require? and exports?
+        EventEmitter = require 'events'
+        Feedback = exports.Feedback = new EventEmitter() # node
+        Feedback.addEventListener = Feedback.addListener # make API same
+
+We also create a function global to this module that implements the sending
+of feedback to our context.  In node.js or the browser, we emit an event
+from the `Feedback` object just created.  If we are running in a `WebWorker`
+(or node.js's equivalent of one) then we post a message to our parent
+instead.
+
+    feedback = ( feedbackData ) ->
+        if Feedback?.dispatchEvent?
+            event = new Event 'feedback'
+            for own key, value of feedbackData
+                event[key] = value
+            Feedback.dispatchEvent event
+        else if Feedback?.emit?
+            Feedback.emit 'feedback', feedbackData
+        else if self?.postMessage?
+            self.postMessage feedbackData
+
+Install that function in the `Structure` class, overriding the stub class
+method that module installs in itself.
+
+    Structure.feedback = feedback
+
+And export anything else that needs exporting.
 
     if exports?
         exports.Structure = Structure

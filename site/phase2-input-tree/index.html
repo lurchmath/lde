@@ -230,19 +230,19 @@ complete and some not yet marked complete.</p>
 </ul>
 <h2 id="connecting-modules">Connecting modules</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Give the <code>Structure</code> class a class method called <code>feedback</code>, whose
+<li class="task-list-item"><input type="checkbox" disabled checked/> Give the <code>Structure</code> class a class method called <code>feedback</code>, whose
    default implementation just writes to the console saying that the
    feedback implementation doesn't exist yet.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Give the <code>InputStructure</code> class a method called <code>feedback</code>, accepting
+<li class="task-list-item"><input type="checkbox" disabled checked/> Give the <code>InputStructure</code> class a method called <code>feedback</code>, accepting
    a data object as parameter, and extending it with a <code>subject</code> field whose
    value is the unique ID of the <code>InputStructure</code> in question, then passing
    that new object on to the <code>feedback</code> class method in the <code>Structure</code>
    class.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> In the LDE module, if it detects that it has been loaded in Node.js
+<li class="task-list-item"><input type="checkbox" disabled checked/> In the LDE module, if it detects that it has been loaded in Node.js
    or the main browser thread, then create a global variable called
    <code>Feedback</code> that is an instance of <code>EventTarget</code>.  In the module case,
    export that variable; in the browser case, just let it be global.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> In the LDE, create a module-global <code>feedback</code> function that does one
+<li class="task-list-item"><input type="checkbox" disabled checked/> In the LDE, create a module-global <code>feedback</code> function that does one
    of two things:<ul>
 <li>If it detects that the LDE is running in a Node.js module or in the
   main browser thread, it calls, in the global <code>Feedback</code> object,
@@ -253,15 +253,15 @@ complete and some not yet marked complete.</p>
   posting a message to be heard by the parent thread.</li>
 </ul>
 </li>
-<li class="task-list-item"><input type="checkbox" disabled/> In the LDE, when it imports the <code>Structure</code> module, have it overwrite
+<li class="task-list-item"><input type="checkbox" disabled checked/> In the LDE, when it imports the <code>Structure</code> module, have it overwrite
    the default implementation of <code>feedback</code> in the <code>Structure</code> class with
    a call directly to the <code>feedback</code> function in the LDE.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Update all documentation in that file to reflect the changes just
+<li class="task-list-item"><input type="checkbox" disabled checked/> Update all documentation in that file to reflect the changes just
    made.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add to the unit tests for <code>InputStructure</code>s a few simple tests for
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add to the unit tests for the LDE module a few simple tests for
    these new routines.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that file describing the changes just made.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation in that file describing the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Once the unit tests pass, build everything and commit.</li>
 </ul>
 <h2 id="lde-api">LDE API</h2>
 <h3 id="small-miscellaneous-updates">Small, Miscellaneous Updates</h3>

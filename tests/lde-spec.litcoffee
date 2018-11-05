@@ -696,3 +696,63 @@ background thread, not to re-test the same functionality as before.
                     ]
                 }
                 done()
+
+## Feedback
+
+This section tests whether the LDE module can correctly emit feedback.
+
+    describe 'Transmission of feedback data structures', ->
+
+If we construct an `InputStructure` instance, then have it send feedback
+about itself, we should be able to hear that feedback being transmitted from
+the LDE module, through its exported `Feedback` member.
+
+        it 'happens correctly when using the LDE synchronously', ->
+
+Construct an object `A` about which we'll send feedback, and a null feedback
+object `F`.
+
+            A = new InputStructure().attr name : 'A', id : 'foo'
+            F = null
+            expect( F ).toBe null
+
+Verify that there is a feedback `EventEmitter` to listen to, then attach a
+listener to it that will fill `F` with any feedback data received.
+
+            expect( LDE.Feedback ).toBeTruthy()
+            LDE.Feedback.addEventListener 'feedback', ( event ) ->
+                F = event
+
+Send feedback and be sure we heard it, with the right contents.
+
+            A.feedback bar : 'baz'
+            expect( F ).not.toBe null
+            expect( F.subject ).toBe A.getAttribute 'id'
+            expect( F.bar ).toBe 'baz'
+
+Now repeat the same test, but asynchronously, in a worker.
+
+        it 'happens correctly when using the LDE asynchronously',
+        ( done ) ->
+
+Set up the worker and its tree.
+
+            { Worker } = require 'webworker-threads'
+            worker = new Worker 'release/lde.js'
+            A = new InputStructure().attr name : 'A', id : 'foo'
+            worker.postMessage [ 'insert', A.toJSON(), 'root', 0 ]
+
+Set up our expectations for the upcoming feedback-generation event.
+
+            worker.onmessage = ( event ) ->
+                expect( event.data.myFavoriteNumberIs ).toBe 5
+                expect( event.data.subject ).toBe 'foo'
+                done()
+
+Ask the worker to send feedback.
+
+            worker.postMessage [
+                'sendFeedback'
+                'foo'
+                myFavoriteNumberIs : 5
+            ]

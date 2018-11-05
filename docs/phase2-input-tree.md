@@ -88,19 +88,19 @@ complete and some not yet marked complete.
 
 ## Connecting modules
 
- * [ ] Give the `Structure` class a class method called `feedback`, whose
+ * [x] Give the `Structure` class a class method called `feedback`, whose
    default implementation just writes to the console saying that the
    feedback implementation doesn't exist yet.
- * [ ] Give the `InputStructure` class a method called `feedback`, accepting
+ * [x] Give the `InputStructure` class a method called `feedback`, accepting
    a data object as parameter, and extending it with a `subject` field whose
    value is the unique ID of the `InputStructure` in question, then passing
    that new object on to the `feedback` class method in the `Structure`
    class.
- * [ ] In the LDE module, if it detects that it has been loaded in Node.js
+ * [x] In the LDE module, if it detects that it has been loaded in Node.js
    or the main browser thread, then create a global variable called
    `Feedback` that is an instance of `EventTarget`.  In the module case,
    export that variable; in the browser case, just let it be global.
- * [ ] In the LDE, create a module-global `feedback` function that does one
+ * [x] In the LDE, create a module-global `feedback` function that does one
    of two things:
     * If it detects that the LDE is running in a Node.js module or in the
       main browser thread, it calls, in the global `Feedback` object,
@@ -109,15 +109,15 @@ complete and some not yet marked complete.
     * If it detects that the LDE is running in a WebWorker (or the
       equivalent construct in Node.js), it sends its parameter along by
       posting a message to be heard by the parent thread.
- * [ ] In the LDE, when it imports the `Structure` module, have it overwrite
+ * [x] In the LDE, when it imports the `Structure` module, have it overwrite
    the default implementation of `feedback` in the `Structure` class with
    a call directly to the `feedback` function in the LDE.
- * [ ] Update all documentation in that file to reflect the changes just
+ * [x] Update all documentation in that file to reflect the changes just
    made.
- * [ ] Add to the unit tests for `InputStructure`s a few simple tests for
+ * [x] Add to the unit tests for the LDE module a few simple tests for
    these new routines.
- * [ ] Add documentation in that file describing the changes just made.
- * [ ] Once the unit tests pass, build everything and commit.
+ * [x] Add documentation in that file describing the changes just made.
+ * [x] Once the unit tests pass, build everything and commit.
 
 ## LDE API
 

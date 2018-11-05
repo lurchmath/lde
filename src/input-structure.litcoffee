@@ -41,6 +41,19 @@ necessarily propagate upwards.
             @dirty = yesOrNo
             if yesOrNo then @parentNode?.markDirty()
 
+## Feedback
+
+To give feedback about a particular `InputStructure` instance, call the
+`feedback` method in that instance, which will delegate the work to the
+class-level `feedback` method in the `Structure` class, but only after
+adding itself as the subject of the feedback data.  While that method's
+default implementation is a stub, it is overwritten by the LDE when
+[the Structure module](structure.litcoffee) is loaded into the LDE.
+
+        feedback : ( feedbackData ) ->
+            feedbackData.subject = @id()
+            Structure.feedback feedbackData
+
 Now if this is being used in a Node.js context, export the class we defined.
 
     if exports? then exports.InputStructure = InputStructure

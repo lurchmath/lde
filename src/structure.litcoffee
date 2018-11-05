@@ -623,6 +623,20 @@ by combining the tools above.
         allInScope : ( predicate = -> yes ) ->
             all @iteratorOverScope(), predicate
 
+## Feedback
+
+We create a stub function here for passing feedback to the LDE client.  In
+this module, it does nothing but report to the console that it is not yet
+implemented.  When the LDE module imports this one, it will overwrite this
+with a real implementation that connects into the LDE's feedback mechanisms.
+
+The intent is to pass a single feedback JSON structure that would be passed
+to the client.
+
+        @feedback : ( feedbackData ) ->
+            console.log 'Structure class feedback not implemented:',
+                feedbackData
+
 Now if this is being used in a Node.js context, export the class we defined.
 
     if exports? then exports.Structure = Structure
