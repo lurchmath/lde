@@ -32,6 +32,15 @@ We do so for this class with the following line of code.
 
         className : Structure.addSubclass 'InputStructure', InputStructure
 
+Marking an `InputStructure` dirty means marking its entire ancestor chain
+dirty, because if a child's meaning has changed, that may impact the meaning
+of its parent, and so on up the chain.  If it is marked clean, this does not
+necessarily propagate upwards.
+
+        markDirty : ( yesOrNo = yes ) ->
+            @dirty = yesOrNo
+            if yesOrNo then @parentNode?.markDirty()
+
 Now if this is being used in a Node.js context, export the class we defined.
 
     if exports? then exports.InputStructure = InputStructure

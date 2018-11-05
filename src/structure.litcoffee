@@ -25,6 +25,12 @@ structures.
             @childList = [ ]
             for child in children
                 @insertChild child, @childList.length
+            @dirty = no
+
+We also include here a simple getter for the `dirty` attribute.  Subclasses
+will define appropriate setters.
+
+        isDirty : -> @dirty
 
 ## Serialization and deserialization
 

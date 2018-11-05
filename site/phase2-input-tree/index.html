@@ -210,23 +210,23 @@ complete and some not yet marked complete.</p>
    new feature of each API method of the LDE module.</li>
 <li class="task-list-item"><input type="checkbox" disabled checked/> Update all documentation in that file to reflect the changes just
    made.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Once the unit tests pass, build everything and commit.</li>
 </ul>
 <h2 id="marking-structures-dirty">Marking structures dirty</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the base <code>Structure</code> class with a field called <code>dirty</code>, which
+<li class="task-list-item"><input type="checkbox" disabled checked/> Extend the base <code>Structure</code> class with a field called <code>dirty</code>, which
    is initialized to false in the constructor.  This field does not need to
    be part of any serialization or deserialization of instances.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Create an <code>isDirty()</code> method that returns the value of that member
+<li class="task-list-item"><input type="checkbox" disabled checked/> Create an <code>isDirty()</code> method that returns the value of that member
    variable.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Create a <code>markDirty()</code> method in the <code>InputStructure</code> class that sets
+<li class="task-list-item"><input type="checkbox" disabled checked/> Create a <code>markDirty()</code> method in the <code>InputStructure</code> class that sets
    the <code>dirty</code> flag to true, and does so for all ancestors as well.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Update all documentation in that file to reflect the changes just
+<li class="task-list-item"><input type="checkbox" disabled checked/> Update all documentation in that file to reflect the changes just
    made.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add to the unit tests for <code>InputStructure</code>s a few simple tests for
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add to the unit tests for <code>InputStructure</code>s a few simple tests for
    these new routines.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that file describing the changes just made.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation in that file describing the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Once the unit tests pass, build everything and commit.</li>
 </ul>
 <h2 id="connecting-modules">Connecting modules</h2>
 <ul class="task-list">
@@ -266,7 +266,7 @@ complete and some not yet marked complete.</p>
 <h2 id="lde-api">LDE API</h2>
 <h3 id="small-miscellaneous-updates">Small, Miscellaneous Updates</h3>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Now that we have changed from a generic <code>Structure</code> class paradigm to
+<li class="task-list-item"><input type="checkbox" disabled checked/> Now that we have changed from a generic <code>Structure</code> class paradigm to
    specific Input and Output Structures, reread the API Documentation of
    both <a href="../api-lde/">the LDE</a> and <a href="../api-structures/">the Structure class</a>,
    updating anything that's out-of-date.</li>

@@ -72,19 +72,19 @@ complete and some not yet marked complete.
 
 ## Marking structures dirty
 
- * [ ] Extend the base `Structure` class with a field called `dirty`, which
+ * [x] Extend the base `Structure` class with a field called `dirty`, which
    is initialized to false in the constructor.  This field does not need to
    be part of any serialization or deserialization of instances.
- * [ ] Create an `isDirty()` method that returns the value of that member
+ * [x] Create an `isDirty()` method that returns the value of that member
    variable.
- * [ ] Create a `markDirty()` method in the `InputStructure` class that sets
+ * [x] Create a `markDirty()` method in the `InputStructure` class that sets
    the `dirty` flag to true, and does so for all ancestors as well.
- * [ ] Update all documentation in that file to reflect the changes just
+ * [x] Update all documentation in that file to reflect the changes just
    made.
- * [ ] Add to the unit tests for `InputStructure`s a few simple tests for
+ * [x] Add to the unit tests for `InputStructure`s a few simple tests for
    these new routines.
- * [ ] Add documentation in that file describing the changes just made.
- * [ ] Once the unit tests pass, build everything and commit.
+ * [x] Add documentation in that file describing the changes just made.
+ * [x] Once the unit tests pass, build everything and commit.
 
 ## Connecting modules
 
@@ -123,7 +123,7 @@ complete and some not yet marked complete.
 
 ### Small, Miscellaneous Updates
 
- * [ ] Now that we have changed from a generic `Structure` class paradigm to
+ * [x] Now that we have changed from a generic `Structure` class paradigm to
    specific Input and Output Structures, reread the API Documentation of
    both [the LDE](api-lde.md) and [the Structure class](api-structures.md),
    updating anything that's out-of-date.

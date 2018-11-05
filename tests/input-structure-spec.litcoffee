@@ -25,3 +25,72 @@ can make instances of this class.
             expect( -> myIS = new InputStructure() ).not.toThrow()
             expect( myIS instanceof InputStructure ).toBeTruthy()
             expect( myIS.className ).toBe 'InputStructure'
+
+## Propagating dirty status
+
+If an `InputStructure` instance is marked dirty, this status is supposed to
+propagate upward to its parent, and so on recursively.  We test that here.
+
+        it 'should propagate dirty status to ancestors', ->
+            A = new InputStructure(
+                B = new InputStructure().attr name : 'B'
+                C = new InputStructure(
+                    D = new InputStructure().attr name : 'D'
+                ).attr name : 'C'
+            ).attr name : 'A'
+
+Ensure that all are clean to start.
+
+            expect( A.isDirty() ).toBeFalsy()
+            expect( B.isDirty() ).toBeFalsy()
+            expect( C.isDirty() ).toBeFalsy()
+            expect( D.isDirty() ).toBeFalsy()
+
+Mark just the root dirty, and verify that it is dirty, but nothing else is.
+
+            A.markDirty()
+            expect( A.isDirty() ).toBeTruthy()
+            expect( B.isDirty() ).toBeFalsy()
+            expect( C.isDirty() ).toBeFalsy()
+            expect( D.isDirty() ).toBeFalsy()
+
+Clean the root and verify that it worked.
+
+            A.markDirty no
+            expect( A.isDirty() ).toBeFalsy()
+            expect( B.isDirty() ).toBeFalsy()
+            expect( C.isDirty() ).toBeFalsy()
+            expect( D.isDirty() ).toBeFalsy()
+
+Mark the lowest node dirty, and verify that it and all its ancestors are
+dirty, but its uncle (B) is not.
+
+            D.markDirty()
+            expect( A.isDirty() ).toBeTruthy()
+            expect( B.isDirty() ).toBeFalsy()
+            expect( C.isDirty() ).toBeTruthy()
+            expect( D.isDirty() ).toBeTruthy()
+
+Clean the lowest node, and verify that cleanness did not propagate upward.
+
+            D.markDirty no
+            expect( A.isDirty() ).toBeTruthy()
+            expect( B.isDirty() ).toBeFalsy()
+            expect( C.isDirty() ).toBeTruthy()
+            expect( D.isDirty() ).toBeFalsy()
+
+Repeat the previous test one step higher in the tree.
+
+            C.markDirty no
+            expect( A.isDirty() ).toBeTruthy()
+            expect( B.isDirty() ).toBeFalsy()
+            expect( C.isDirty() ).toBeFalsy()
+            expect( D.isDirty() ).toBeFalsy()
+
+And clean the root once more.
+
+            A.markDirty no
+            expect( A.isDirty() ).toBeFalsy()
+            expect( B.isDirty() ).toBeFalsy()
+            expect( C.isDirty() ).toBeFalsy()
+            expect( D.isDirty() ).toBeFalsy()
