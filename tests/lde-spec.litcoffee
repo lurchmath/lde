@@ -619,7 +619,8 @@ background thread, not to re-test the same functionality as before.
 
         it 'should allow querying the document', ( done ) ->
             asyncTest [ 'getInputTree' ], ( result ) ->
-                expect( result ).toEqual {
+                expect( result.type ).toBe 'getInputTree'
+                expect( result.payload ).toEqual {
                     className : 'InputStructure'
                     attributes : { id : 'root' }
                     children : [ ]
@@ -632,7 +633,8 @@ background thread, not to re-test the same functionality as before.
             A = new InputStructure().attr name : 'A', ID : 'foo'
             worker.postMessage [ 'insert', A.toJSON(), 'root', 0 ]
             asyncTest [ 'getInputTree' ], ( result ) ->
-                expect( result ).toEqual {
+                expect( result.type ).toBe 'getInputTree'
+                expect( result.payload ).toEqual {
                     className : 'InputStructure'
                     attributes : { id : 'root' }
                     children : [
@@ -650,7 +652,8 @@ background thread, not to re-test the same functionality as before.
             worker.postMessage [ 'insert', A.toJSON(), 'root', 0 ]
             worker.postMessage [ 'delete', 'foo' ]
             asyncTest [ 'getInputTree' ], ( result ) ->
-                expect( result ).toEqual {
+                expect( result.type ).toBe 'getInputTree'
+                expect( result.payload ).toEqual {
                     className : 'InputStructure'
                     attributes : { id : 'root' }
                     children : [ ]
@@ -665,7 +668,8 @@ background thread, not to re-test the same functionality as before.
             worker.postMessage [ 'insert', A.toJSON(), 'root', 0 ]
             worker.postMessage [ 'replace', 'foo', B.toJSON() ]
             asyncTest [ 'getInputTree' ], ( result ) ->
-                expect( result ).toEqual {
+                expect( result.type ).toBe 'getInputTree'
+                expect( result.payload ).toEqual {
                     className : 'InputStructure'
                     attributes : { id : 'root' }
                     children : [
@@ -683,7 +687,8 @@ background thread, not to re-test the same functionality as before.
             worker.postMessage [ 'insert', A.toJSON(), 'root', 0 ]
             worker.postMessage [ 'setAttribute', 'foo', 'color', 'red' ]
             asyncTest [ 'getInputTree' ], ( result ) ->
-                expect( result ).toEqual {
+                expect( result.type ).toBe 'getInputTree'
+                expect( result.payload ).toEqual {
                     className : 'InputStructure'
                     attributes : { id : 'root' }
                     children : [
@@ -745,8 +750,9 @@ Set up the worker and its tree.
 Set up our expectations for the upcoming feedback-generation event.
 
             worker.onmessage = ( event ) ->
-                expect( event.data.myFavoriteNumberIs ).toBe 5
-                expect( event.data.subject ).toBe 'foo'
+                expect( event.data.type ).toBe 'feedback'
+                expect( event.data.payload.myFavoriteNumberIs ).toBe 5
+                expect( event.data.payload.subject ).toBe 'foo'
                 done()
 
 Ask the worker to send feedback.

@@ -108,6 +108,10 @@
 <li >
     <a href="../api-structures/">Structures</a>
 </li>
+                            
+<li >
+    <a href="../api-input-structures/">Input Structures</a>
+</li>
                         </ul>
                     </li>
                 </ul>
@@ -140,6 +144,8 @@
             <li><a href="#the-input-tree">The Input Tree</a></li>
             <li><a href="#manipulating-the-input-tree">Manipulating the Input Tree</a></li>
             <li><a href="#asynchronous-api">Asynchronous API</a></li>
+            <li><a href="#receiving-feedback">Receiving Feedback</a></li>
+            <li><a href="#other-inputstructure-subclasses">Other InputStructure Subclasses</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
@@ -216,12 +222,13 @@ this module:</p>
 <h2 id="asynchronous-api">Asynchronous API</h2>
 <p>If the LDE detects that it is being run in a background thread, it will set
 up listeners for messages from the parent thread.  These listeners will
-handle messages of four types, <code>insert</code>/<code>delete</code>/<code>replace</code>/<code>setAttribute</code>,
-mirroring the four functions given above, and calling them internally.</p>
+handle messages of four types (<code>insert</code>, <code>delete</code>, <code>replace</code>,
+<code>setAttribute</code>, and <code>getInputTree</code>) mirroring the four functions given
+above (plus <code>getInputTree()</code>) and calling them internally.</p>
 <p>They can be called by passing a message of the form <code>[ command, args... ]</code>,
 where the command is a string (one of <code>"insert"</code>, <code>"delete"</code>, etc.) and the
 arguments list is the same list that would be passed to the function itself,
-as documented in the previous section on this page.</p>
+as documented above.</p>
 <p>For example, you could start an LDE in a WebWorker and insert a new
 <code>InputStructure</code> as the first child of its global document as follows.</p>
 <pre><code class="js">    // import the lde.js file (kept in the release/ folder)
@@ -233,7 +240,49 @@ as documented in the previous section on this page.</p>
 
 <p>Because message passing across thread boundaries can only transfer JSON
 data, the versions of <code>insert()</code> and <code>replace()</code> that take <code>InputStructure</code>
-instances will need to be called with serialized <code>InputStructure</code>s instead.</p></div>
+instances will need to be called with serialized <code>InputStructure</code>s instead.</p>
+<p>Only one of these five functions sends a message back to the parent context.
+If you post a <code>getInputTree</code> message (which requires no parameters), you
+will immediately get a message in response whose event has the following
+properties.</p>
+<ul>
+<li><code>event.data.type</code> is the string <code>"getInputTree"</code>.</li>
+<li><code>event.data.payload</code> is the JSON representation of the entire Input Tree,
+   as serialized by <code>Structure.toJSON()</code>.</li>
+</ul>
+<h2 id="receiving-feedback">Receiving Feedback</h2>
+<p>The LDE will occasionally need to send feedback to the client about the
+input provided to it.  This takes different forms, depending on how the LDE
+has been loaded.</p>
+<ul>
+<li>If the LDE has been loaded into a node.js application as a module, using
+   <code>require()</code>, then the module will have a member called <code>Feedback</code>, an
+   instance of <code>EventEmitter</code>.  Clients can listen for feedback events by
+   calling <code>theModule.Feedback.addEventListener('feedback',f)</code>, with their
+   own function <code>f</code>.  That function will be called with one argument when
+   the LDE generates feedback, a JSON object with feedback data.  The most
+   important field in the object is the <code>subject</code> field, which will contain
+   the ID of the <code>InputStructure</code> instance to which the feedback pertains.</li>
+<li>If the LDE has been loaded into the browser directly (not in a WebWorker
+   instance, but in the UI thread) then it installs a <code>Feedback</code> object in
+   the <code>window</code> namespace.  The client can listen to events by calling
+   <code>window.Feedback.addEventListener('feedback',f)</code>, and <code>f</code> will be called
+   with an event <code>E</code> such that <code>E.data</code> has the structure described in the
+   previous bullet point (e.g., <code>E.data.subject</code> is an <code>InputStructure</code> ID).</li>
+<li>If the LDE has been loaded into a node.js application in a background
+   thread, using Workers, then it will occasionally post messages to the
+   parent context when one of its computations requires sending feedback
+   about the result.  If the LDE is loaded into a worker <code>W</code>, then you can
+   listen for such messages with <code>W.onmessage = function (event) {...}</code>.
+   Feedback events passed to such a handler will have <code>event.type</code> equal to
+   the string <code>"feedback"</code> and <code>event.payload</code> equal to the feedback data
+   itself as documented in the previous two bullet points (e.g.,
+   <code>event.payload.subject</code> an <code>InputStructure</code> ID).</li>
+</ul>
+<p>For an example of how this works, see
+<a href="https://github.com/lurchmath/lde/blob/master/tests/lde-spec.litcoffee#feedback">the unit tests regarding feedback in the LDE</a>.</p>
+<h2 id="other-inputstructure-subclasses">Other <code>InputStructure</code> Subclasses</h2>
+<p>None yet.  More to come.</p></div>
         </div>
 
         <footer class="col-md-12">

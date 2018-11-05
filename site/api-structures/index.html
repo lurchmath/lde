@@ -108,6 +108,10 @@
 <li class="active">
     <a href="./">Structures</a>
 </li>
+                            
+<li >
+    <a href="../api-input-structures/">Input Structures</a>
+</li>
                         </ul>
                     </li>
                 </ul>
@@ -123,8 +127,8 @@
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
-                    <li class="disabled">
-                        <a rel="prev" >
+                    <li >
+                        <a rel="prev" href="../api-input-structures/">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -160,7 +164,9 @@ two data structures, one called the Input Tree and one called the Output
 Tree.  In both cases, the trees' nodes are instances of this class
 (<code>Structure</code>).  In particular, the Input Tree is composed of
 <code>InputStructure</code> instances (a direct subclass of <code>Structure</code>) and the Output
-Tree is composed of <code>OutputStructure</code> instances (another direct subclass)</p>
+Tree is composed of <code>OutputStructure</code> instances (another direct subclass).
+See also <a href="../api-input-structures/">the API documentation for the <code>InputStructure</code> class and its
+subclasses</a>.</p>
 <p>We build into this base class all the functionality that must be present at
 every point in those hierarchies, and leave to subclasses that functionality
 that makes sense only for specific types of structures.  For instance, this

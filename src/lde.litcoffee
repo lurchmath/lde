@@ -182,7 +182,9 @@ on whether the data is in the correct form.
 
             if expectedArgumentCount[command] is args.length
                 if command is 'getInputTree'
-                    self.postMessage functions.getInputTree().toJSON()
+                    self.postMessage
+                        type : 'getInputTree'
+                        payload : functions.getInputTree().toJSON()
                 else
                     functions[command] args...
 
@@ -220,13 +222,14 @@ instead.
     feedback = ( feedbackData ) ->
         if Feedback?.dispatchEvent?
             event = new Event 'feedback'
-            for own key, value of feedbackData
-                event[key] = value
+            event.payload = feedbackData
             Feedback.dispatchEvent event
         else if Feedback?.emit?
             Feedback.emit 'feedback', feedbackData
         else if self?.postMessage?
-            self.postMessage feedbackData
+            self.postMessage
+                type : 'feedback'
+                payload : feedbackData
 
 Install that function in the `Structure` class, overriding the stub class
 method that module installs in itself.

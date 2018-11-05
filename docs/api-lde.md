@@ -72,13 +72,14 @@ this module:
 
 If the LDE detects that it is being run in a background thread, it will set
 up listeners for messages from the parent thread.  These listeners will
-handle messages of four types, `insert`/`delete`/`replace`/`setAttribute`,
-mirroring the four functions given above, and calling them internally.
+handle messages of four types (`insert`, `delete`, `replace`,
+`setAttribute`, and `getInputTree`) mirroring the four functions given
+above (plus `getInputTree()`) and calling them internally.
 
 They can be called by passing a message of the form `[ command, args... ]`,
 where the command is a string (one of `"insert"`, `"delete"`, etc.) and the
 arguments list is the same list that would be passed to the function itself,
-as documented in the previous section on this page.
+as documented above.
 
 For example, you could start an LDE in a WebWorker and insert a new
 `InputStructure` as the first child of its global document as follows.
@@ -94,3 +95,49 @@ For example, you could start an LDE in a WebWorker and insert a new
 Because message passing across thread boundaries can only transfer JSON
 data, the versions of `insert()` and `replace()` that take `InputStructure`
 instances will need to be called with serialized `InputStructure`s instead.
+
+Only one of these five functions sends a message back to the parent context.
+If you post a `getInputTree` message (which requires no parameters), you
+will immediately get a message in response whose event has the following
+properties.
+
+ * `event.data.type` is the string `"getInputTree"`.
+ * `event.data.payload` is the JSON representation of the entire Input Tree,
+   as serialized by `Structure.toJSON()`.
+
+## Receiving Feedback
+
+The LDE will occasionally need to send feedback to the client about the
+input provided to it.  This takes different forms, depending on how the LDE
+has been loaded.
+
+ * If the LDE has been loaded into a node.js application as a module, using
+   `require()`, then the module will have a member called `Feedback`, an
+   instance of `EventEmitter`.  Clients can listen for feedback events by
+   calling `theModule.Feedback.addEventListener('feedback',f)`, with their
+   own function `f`.  That function will be called with one argument when
+   the LDE generates feedback, a JSON object with feedback data.  The most
+   important field in the object is the `subject` field, which will contain
+   the ID of the `InputStructure` instance to which the feedback pertains.
+ * If the LDE has been loaded into the browser directly (not in a WebWorker
+   instance, but in the UI thread) then it installs a `Feedback` object in
+   the `window` namespace.  The client can listen to events by calling
+   `window.Feedback.addEventListener('feedback',f)`, and `f` will be called
+   with an event `E` such that `E.data` has the structure described in the
+   previous bullet point (e.g., `E.data.subject` is an `InputStructure` ID).
+ * If the LDE has been loaded into a node.js application in a background
+   thread, using Workers, then it will occasionally post messages to the
+   parent context when one of its computations requires sending feedback
+   about the result.  If the LDE is loaded into a worker `W`, then you can
+   listen for such messages with `W.onmessage = function (event) {...}`.
+   Feedback events passed to such a handler will have `event.type` equal to
+   the string `"feedback"` and `event.payload` equal to the feedback data
+   itself as documented in the previous two bullet points (e.g.,
+   `event.payload.subject` an `InputStructure` ID).
+
+For an example of how this works, see
+[the unit tests regarding feedback in the LDE](https://github.com/lurchmath/lde/blob/master/tests/lde-spec.litcoffee#feedback).
+
+## Other `InputStructure` Subclasses
+
+None yet.  More to come.

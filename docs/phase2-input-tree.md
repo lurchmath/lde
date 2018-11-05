@@ -127,9 +127,9 @@ complete and some not yet marked complete.
    specific Input and Output Structures, reread the API Documentation of
    both [the LDE](api-lde.md) and [the Structure class](api-structures.md),
    updating anything that's out-of-date.
- * [ ] Add a page to the API documentation for the `InputStructure` class
+ * [x] Add a page to the API documentation for the `InputStructure` class
    and all of its upcoming subclasses.
- * [ ] Update `mkdocs.yml` in the project root to include that new file in
+ * [x] Update `mkdocs.yml` in the project root to include that new file in
    the generated documentation.
  * [ ] Update the API in the LDE module to include the word "Structure" in
    each method call, because we will soon add methods for connections as

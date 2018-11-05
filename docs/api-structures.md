@@ -13,7 +13,9 @@ two data structures, one called the Input Tree and one called the Output
 Tree.  In both cases, the trees' nodes are instances of this class
 (`Structure`).  In particular, the Input Tree is composed of
 `InputStructure` instances (a direct subclass of `Structure`) and the Output
-Tree is composed of `OutputStructure` instances (another direct subclass)
+Tree is composed of `OutputStructure` instances (another direct subclass).
+See also [the API documentation for the `InputStructure` class and its
+subclasses](api-input-structures.md).
 
 We build into this base class all the functionality that must be present at
 every point in those hierarchies, and leave to subclasses that functionality

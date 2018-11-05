@@ -93,6 +93,12 @@
      <changefreq>daily</changefreq>
     </url>
         
+    <url>
+     <loc>/api-input-structures/</loc>
+     <lastmod>2018-11-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
     
 
 </urlset>
