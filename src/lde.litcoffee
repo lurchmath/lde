@@ -322,3 +322,6 @@ And export anything else that needs exporting.
         exports.replaceStructure = functions.replaceStructure
         exports.setStructureAttribute = functions.setStructureAttribute
         exports.getInputTree = functions.getInputTree
+        exports.insertConnection = functions.insertConnection
+        exports.removeConnection = functions.removeConnection
+        exports.setConnectionAttribute = functions.setConnectionAttribute

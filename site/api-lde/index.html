@@ -237,7 +237,7 @@ this module:</p>
   source to the target with the given data.</li>
 </ul>
 </li>
-<li><code>deleteConnection(ID)</code> deletes from the Input Tree the connection with
+<li><code>removeConnection(ID)</code> deletes from the Input Tree the connection with
    the given ID, which must be the unique ID of a connection given to the
    <code>insertConnection()</code> function documented immediately above, otherwise,
    this function does nothing.  If it is a valid connection ID, then the
@@ -245,7 +245,7 @@ this module:</p>
    used again.</li>
 <li><code>setConnectionAttribute(ID,key,value)</code> modifies a single attribute of a
    connection within the Input Tree, as follows:<ul>
-<li><code>ID</code> is interpreted just as in <code>deleteConnection()</code>, above.</li>
+<li><code>ID</code> is interpreted just as in <code>removeConnection()</code>, above.</li>
 <li><code>key</code> is the key of the attribute to create or overwrite.  This may
   not be the string <code>"id"</code>, which is already used to store the
   connection's unique ID, which cannot be changed.  (If this is <code>"id"</code>,

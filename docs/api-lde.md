@@ -85,7 +85,7 @@ this module:
       If this is not satisfied, this function does nothing.  If all the
       above conditions are satisfied, a new connection is formed from the
       source to the target with the given data.
- * `deleteConnection(ID)` deletes from the Input Tree the connection with
+ * `removeConnection(ID)` deletes from the Input Tree the connection with
    the given ID, which must be the unique ID of a connection given to the
    `insertConnection()` function documented immediately above, otherwise,
    this function does nothing.  If it is a valid connection ID, then the
@@ -93,7 +93,7 @@ this module:
    used again.
  * `setConnectionAttribute(ID,key,value)` modifies a single attribute of a
    connection within the Input Tree, as follows:
-    * `ID` is interpreted just as in `deleteConnection()`, above.
+    * `ID` is interpreted just as in `removeConnection()`, above.
     * `key` is the key of the attribute to create or overwrite.  This may
       not be the string `"id"`, which is already used to store the
       connection's unique ID, which cannot be changed.  (If this is `"id"`,

@@ -429,27 +429,9 @@ complete and some not yet marked complete.</p>
 </ul>
 <h3 id="policing-connections">Policing Connections</h3>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Add a function to the <code>Structure</code> class,
-   <code>connectionsOutsideSubtree()</code>, which finds all connections that lead from
-   any node in the subtree to nodes outside the subtree, and returns them in
-   a list.  Each element in the list should be an object of the form
-   <code>{ structure : structureInstance, number : connectionNumber }</code>, where the
-   number is the <code>N</code> used in the attribute storing the connection.  This
-   will be useful in the following routine, and also for clients who wish to
-   know which connections may be severed by the following routine
-   beforehand, so that they might move them or record them for later
-   reconnecting somewhere.  (Document this function with this purpose.)</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Update the <code>removeStructure()</code> function in the LDE API so that, if
-   there are any connections from the structure being removed to other
-   <code>InputStructure</code> instances <em>not</em> being removed, then those connections
-   are severed as part of the removal process.  (Connections among the
-   descendants of a subtree removed as a whole should stay connected.)</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add unit tests to ensure that these routines work.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Update the <code>replaceStructure()</code> function in the LDE API so that, if
-   there are any connections from the structure being replaced to other
-   <code>InputStructure</code> instances <em>not</em> being altered, then those connections
-   are severd as part of the replacement process.  (Connections among the
-   descendants of a subtree replaced as a whole should stay connected.)</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add unit tests to ensure that removing or replacing nodes in the
+   Input Tree automatically severs any relevant connections on the outgoing
+   node.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Create a function in the <code>Structure</code> class that will transfer all
    connections in/out of node <code>X</code> to node <code>Y</code> instead, written as
    <code>X.transferConnectionsTo( Y )</code>.</li>

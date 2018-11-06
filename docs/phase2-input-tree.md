@@ -255,27 +255,9 @@ complete and some not yet marked complete.
 
 ### Policing Connections
 
- * [ ] Add a function to the `Structure` class,
-   `connectionsOutsideSubtree()`, which finds all connections that lead from
-   any node in the subtree to nodes outside the subtree, and returns them in
-   a list.  Each element in the list should be an object of the form
-   `{ structure : structureInstance, number : connectionNumber }`, where the
-   number is the `N` used in the attribute storing the connection.  This
-   will be useful in the following routine, and also for clients who wish to
-   know which connections may be severed by the following routine
-   beforehand, so that they might move them or record them for later
-   reconnecting somewhere.  (Document this function with this purpose.)
- * [ ] Update the `removeStructure()` function in the LDE API so that, if
-   there are any connections from the structure being removed to other
-   `InputStructure` instances *not* being removed, then those connections
-   are severed as part of the removal process.  (Connections among the
-   descendants of a subtree removed as a whole should stay connected.)
- * [ ] Add unit tests to ensure that these routines work.
- * [ ] Update the `replaceStructure()` function in the LDE API so that, if
-   there are any connections from the structure being replaced to other
-   `InputStructure` instances *not* being altered, then those connections
-   are severd as part of the replacement process.  (Connections among the
-   descendants of a subtree replaced as a whole should stay connected.)
+ * [x] Add unit tests to ensure that removing or replacing nodes in the
+   Input Tree automatically severs any relevant connections on the outgoing
+   node.
  * [ ] Create a function in the `Structure` class that will transfer all
    connections in/out of node `X` to node `Y` instead, written as
    `X.transferConnectionsTo( Y )`.

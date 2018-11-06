@@ -688,6 +688,122 @@ nothing happens.
             expect( insertedB.getAttribute 'id' ).toBe 'B'
             expect( insertedB.getAttribute '_key' ).toBeUndefined()
 
+Now, a few tests regarding connections within the Input Tree.
+
+First, can we form them?
+
+        it 'should permit forming connections between nodes', ->
+            A = new InputStructure().attr id : 'A'
+            expect(
+                -> LDE.insertStructure A.toJSON(), 'root', 0
+            ).not.toThrow()
+            insertedA = LDE.getInputTree().children()[0]
+            B = new InputStructure().attr id : 'B'
+            expect(
+                -> LDE.insertStructure B.toJSON(), 'root', 1
+            ).not.toThrow()
+            insertedB = LDE.getInputTree().children()[1]
+            expect(
+                -> LDE.insertConnection 'A', 'B', id : 'C'
+            ).not.toThrow()
+            expect( insertedA.getConnectionsOut() ).toEqual [ 'C' ]
+            expect( insertedB.getConnectionsIn() ).toEqual [ 'C' ]
+
+Second, can we delete them?
+
+        it 'should permit deleting connections between nodes', ->
+            A = new InputStructure().attr id : 'A'
+            expect(
+                -> LDE.insertStructure A.toJSON(), 'root', 0
+            ).not.toThrow()
+            insertedA = LDE.getInputTree().children()[0]
+            B = new InputStructure().attr id : 'B'
+            expect(
+                -> LDE.insertStructure B.toJSON(), 'root', 1
+            ).not.toThrow()
+            insertedB = LDE.getInputTree().children()[1]
+            expect(
+                -> LDE.insertConnection 'A', 'B', id : 'C'
+            ).not.toThrow()
+            expect( -> LDE.removeConnection 'C' ).not.toThrow()
+            expect( insertedA.getConnectionsOut() ).toEqual [ ]
+            expect( insertedB.getConnectionsIn() ).toEqual [ ]
+
+Third, can we edit their attributes?
+
+        it 'should permit editing connection data', ->
+            A = new InputStructure().attr id : 'A'
+            expect(
+                -> LDE.insertStructure A.toJSON(), 'root', 0
+            ).not.toThrow()
+            insertedA = LDE.getInputTree().children()[0]
+            B = new InputStructure().attr id : 'B'
+            expect(
+                -> LDE.insertStructure B.toJSON(), 'root', 1
+            ).not.toThrow()
+            insertedB = LDE.getInputTree().children()[1]
+            expect(
+                -> LDE.insertConnection 'A', 'B', id : 'C'
+            ).not.toThrow()
+            expect( Structure.getConnectionData 'C' ).toEqual id : 'C'
+            expect( -> LDE.setConnectionAttribute 'C', 1, 2 ).not.toThrow()
+            expect( Structure.getConnectionData 'C' ).toEqual
+                id : 'C', 1 : 2
+
+Fourth, are connections automatically severed if one node leaves the tree?
+
+        it 'should automatically sever connections when deleting nodes', ->
+            A = new InputStructure().attr id : 'A'
+            expect(
+                -> LDE.insertStructure A.toJSON(), 'root', 0
+            ).not.toThrow()
+            insertedA = LDE.getInputTree().children()[0]
+            B = new InputStructure().attr id : 'B'
+            expect(
+                -> LDE.insertStructure B.toJSON(), 'root', 1
+            ).not.toThrow()
+            insertedB = LDE.getInputTree().children()[1]
+            expect(
+                -> LDE.insertConnection 'A', 'B', id : 'C'
+            ).not.toThrow()
+            expect( insertedA.getConnectionsOut() ).toEqual [ 'C' ]
+            expect( insertedB.getConnectionsIn() ).toEqual [ 'C' ]
+            expect( Structure.getConnectionData 'C' ).toEqual id : 'C'
+            expect( -> LDE.deleteStructure 'B' ).not.toThrow()
+            expect( LDE.getInputTree().children() ).toEqual [ insertedA ]
+            expect( insertedA.getConnectionsOut() ).toEqual [ ]
+            expect( insertedB.getConnectionsIn() ).toEqual [ ]
+            expect( Structure.getConnectionData 'C' ).toBeUndefined()
+
+Finally, are connections automatically severed if one endpoint of the
+connection is replaced with a different node?
+
+        it 'should automatically sever connections when replacing nodes', ->
+            A = new InputStructure().attr id : 'A'
+            expect(
+                -> LDE.insertStructure A.toJSON(), 'root', 0
+            ).not.toThrow()
+            insertedA = LDE.getInputTree().children()[0]
+            B = new InputStructure().attr id : 'B'
+            expect(
+                -> LDE.insertStructure B.toJSON(), 'root', 1
+            ).not.toThrow()
+            insertedB = LDE.getInputTree().children()[1]
+            expect(
+                -> LDE.insertConnection 'A', 'B', id : 'C'
+            ).not.toThrow()
+            expect( insertedA.getConnectionsOut() ).toEqual [ 'C' ]
+            expect( insertedB.getConnectionsIn() ).toEqual [ 'C' ]
+            expect( Structure.getConnectionData 'C' ).toEqual id : 'C'
+            D = new InputStructure().attr id : 'D'
+            expect( -> LDE.replaceStructure 'B', D ).not.toThrow()
+            insertedD = LDE.getInputTree().children()[1]
+            expect( LDE.getInputTree().children() ).toEqual \
+                [ insertedA, insertedD ]
+            expect( insertedA.getConnectionsOut() ).toEqual [ ]
+            expect( insertedB.getConnectionsIn() ).toEqual [ ]
+            expect( Structure.getConnectionData 'C' ).toBeUndefined()
+
 ## WebWorker Support
 
 This section tests the same four functions as the previous section, but
