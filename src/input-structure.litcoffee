@@ -57,3 +57,7 @@ default implementation is a stub, it is overwritten by the LDE when
 Now if this is being used in a Node.js context, export the class we defined.
 
     if exports? then exports.InputStructure = InputStructure
+
+## Other `InputStructure` Subclasses
+
+None yet.  More to come.

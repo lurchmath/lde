@@ -143,7 +143,3 @@ has been loaded.
 
 For an example of how this works, see
 [the unit tests regarding feedback in the LDE](https://github.com/lurchmath/lde/blob/master/tests/lde-spec.litcoffee#feedback).
-
-## Other `InputStructure` Subclasses
-
-None yet.  More to come.
