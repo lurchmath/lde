@@ -1134,7 +1134,7 @@ And if you ask it to stop, it does that, too.
 
 ## Connections
 
-    describe 'Connections among structures', ->
+    xdescribe 'Connections among structures', ->
 
 Connections are documented
 [here](https://lurchmath.github.io/lde/site/phase0-structures/#connections).

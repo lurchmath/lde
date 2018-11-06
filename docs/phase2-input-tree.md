@@ -155,12 +155,12 @@ complete and some not yet marked complete.
  * [x] Update `untrackIDs()` to make that unit test pass for it.
  * [x] Update `clearIDs()` to make that unit test pass for it.
 
- * [ ] Define `connectionIDs : { }` in the `Structure` class.
- * [ ] Define `@sourceOfConnection : ( id ) -> Structure::connectionIDs[id]`
+ * [x] Define `connectionIDs : { }` in the `Structure` class.
+ * [x] Define `@sourceOfConnection : ( id ) -> Structure::connectionIDs[id]`
    in the `Structure` class.
- * [ ] Ensure that this did not break any unit tests.
+ * [x] Ensure that this did not break any unit tests.
 
- * [ ] Disable all unit tests for `connectTo` and `disconnectFrom`, then
+ * [x] Disable all unit tests for `connectTo` and `disconnectFrom`, then
    ensure that all remaining unit tests pass.
 
  * [ ] Rewrite `Structure::connect(source,target,data)` to do this:

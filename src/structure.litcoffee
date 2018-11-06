@@ -369,8 +369,18 @@ connections involving this structure.
 Structures may have connections among them, specified using attributes.  The
 documentation
 [here](https://lurchmath.github.io/lde/site/phase0-structures/#connections)
-covers the concept in detail.  We provide the following functions to make it
-easier for clients to create, remove, or query connections.
+covers the concept in detail.  We begin by providing a similar global store
+for unique IDs of connections, like we do for instances.
+
+The following class member will map unique connection IDs to the source
+Structure for the connection.  Thus we provide the accompanying function for
+querying that mapping.
+
+        connectionIDs : { }
+        @sourceOfConnection : ( id ) -> Structure::connectionIDs[id]
+
+We also provide the following functions to make it easier for clients to
+create, remove, or query connections.
 
 ### Making connections consistent
 
