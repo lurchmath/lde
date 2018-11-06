@@ -17,11 +17,11 @@ modifies this structure except at the request of the client.
 
 ## Manipulating the Input Tree
 
-The Input Tree can be manipulated with four functions in the public API of
+The Input Tree can be manipulated with seven functions in the public API of
 this module:
 
- * `inserStructure(structureToInsert,parentID,insertionIndex)` inserts a new
-   `InputStructure` within the Input Tree, as follows:
+ * `insertStructure(structureToInsert,parentID,insertionIndex)` inserts a
+   new `InputStructure` within the Input Tree, as follows:
     * `structureToInsert` should be either the structure to insert or the
       serialized version thereof (optionally created with `.toJSON()` in an
       `InputStructure` instance).  After the structure is deserialized (if
@@ -62,10 +62,42 @@ this module:
       the `insertStructure()` function
     * `key` is the key of the attribute to create or overwrite.  If this
       key happens to be "id", then the class-level tracking of IDs will be
-      updated to repsect the change.  This is not permitted to begin with an
+      updated to respect the change.  This is not permitted to begin with an
       underscore; such key names are reserved for internal use by the LDE.
       If the given key begins with an underscore, this function does
       nothing.
+    * `value` is the new value, which must be JSON data.  (No checks are
+      done to verify that it is JSON data, but errors will transpire
+      eventually if non-JSON data is passed.)  Alternately, `value` can be
+      `undefined`, which will serve to delete the old key-value pair from
+      the attributes without replacing it with any new key-value pair.
+ * `insertConnection(sourceID,targetID,connectionData)` inserts a new
+   connection between two existing `InputStructure` instances, as follows:
+    * `sourceID` must be the ID of an `InputStructure` already in the Input
+      Tree.  If not, this function does nothing.
+    * `targetID` must be the ID of an `InputStructure` already in the Input
+      Tree.  If not, this function does nothing.  It is acceptable for the
+      source and target to be the same node; connections from a thing to
+      itself are permitted.
+    * `connectionData` an object containing arbitrary JSON data about the
+      new connection.  It must at least contain a field whose key is `"id"`
+      and whose value is a new, unique ID (which no connection has yet).
+      If this is not satisfied, this function does nothing.  If all the
+      above conditions are satisfied, a new connection is formed from the
+      source to the target with the given data.
+ * `deleteConnection(ID)` deletes from the Input Tree the connection with
+   the given ID, which must be the unique ID of a connection given to the
+   `insertConnection()` function documented immediately above, otherwise,
+   this function does nothing.  If it is a valid connection ID, then the
+   connection is removed from the Input Tree and the ID is available to be
+   used again.
+ * `setConnectionAttribute(ID,key,value)` modifies a single attribute of a
+   connection within the Input Tree, as follows:
+    * `ID` is interpreted just as in `deleteConnection()`, above.
+    * `key` is the key of the attribute to create or overwrite.  This may
+      not be the string `"id"`, which is already used to store the
+      connection's unique ID, which cannot be changed.  (If this is `"id"`,
+      this function does nothing.)
     * `value` is the new value, which must be JSON data.  (No checks are
       done to verify that it is JSON data, but errors will transpire
       eventually if non-JSON data is passed.)  Alternately, `value` can be

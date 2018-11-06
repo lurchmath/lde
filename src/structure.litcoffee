@@ -469,6 +469,7 @@ key will be removed from the connection data.
 
         @setConnectionData : ( connectionID, key, value ) ->
             return no unless \
+                ( key isnt 'id' ) and \
                 ( source = Structure::connectionIDs[connectionID] ) and \
                 ( targetID = source.getAttribute \
                     "_conn #{connectionID} to" ) and \
