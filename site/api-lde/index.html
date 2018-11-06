@@ -145,7 +145,6 @@
             <li><a href="#manipulating-the-input-tree">Manipulating the Input Tree</a></li>
             <li><a href="#asynchronous-api">Asynchronous API</a></li>
             <li><a href="#receiving-feedback">Receiving Feedback</a></li>
-            <li><a href="#other-inputstructure-subclasses">Other InputStructure Subclasses</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
@@ -162,11 +161,11 @@ no attributes, but an ID.</p>
 LDE stores all input passed from the client.  In particular, the LDE never
 modifies this structure except at the request of the client.</p>
 <h2 id="manipulating-the-input-tree">Manipulating the Input Tree</h2>
-<p>The Input Tree can be manipulated with four functions in the public API of
+<p>The Input Tree can be manipulated with seven functions in the public API of
 this module:</p>
 <ul>
-<li><code>inserStructure(structureToInsert,parentID,insertionIndex)</code> inserts a new
-   <code>InputStructure</code> within the Input Tree, as follows:<ul>
+<li><code>insertStructure(structureToInsert,parentID,insertionIndex)</code> inserts a
+   new <code>InputStructure</code> within the Input Tree, as follows:<ul>
 <li><code>structureToInsert</code> should be either the structure to insert or the
   serialized version thereof (optionally created with <code>.toJSON()</code> in an
   <code>InputStructure</code> instance).  After the structure is deserialized (if
@@ -211,10 +210,46 @@ this module:</p>
   the <code>insertStructure()</code> function</li>
 <li><code>key</code> is the key of the attribute to create or overwrite.  If this
   key happens to be "id", then the class-level tracking of IDs will be
-  updated to repsect the change.  This is not permitted to begin with an
+  updated to respect the change.  This is not permitted to begin with an
   underscore; such key names are reserved for internal use by the LDE.
   If the given key begins with an underscore, this function does
   nothing.</li>
+<li><code>value</code> is the new value, which must be JSON data.  (No checks are
+  done to verify that it is JSON data, but errors will transpire
+  eventually if non-JSON data is passed.)  Alternately, <code>value</code> can be
+  <code>undefined</code>, which will serve to delete the old key-value pair from
+  the attributes without replacing it with any new key-value pair.</li>
+</ul>
+</li>
+<li><code>insertConnection(sourceID,targetID,connectionData)</code> inserts a new
+   connection between two existing <code>InputStructure</code> instances, as follows:<ul>
+<li><code>sourceID</code> must be the ID of an <code>InputStructure</code> already in the Input
+  Tree.  If not, this function does nothing.</li>
+<li><code>targetID</code> must be the ID of an <code>InputStructure</code> already in the Input
+  Tree.  If not, this function does nothing.  It is acceptable for the
+  source and target to be the same node; connections from a thing to
+  itself are permitted.</li>
+<li><code>connectionData</code> an object containing arbitrary JSON data about the
+  new connection.  It must at least contain a field whose key is <code>"id"</code>
+  and whose value is a new, unique ID (which no connection has yet).
+  If this is not satisfied, this function does nothing.  If all the
+  above conditions are satisfied, a new connection is formed from the
+  source to the target with the given data.</li>
+</ul>
+</li>
+<li><code>deleteConnection(ID)</code> deletes from the Input Tree the connection with
+   the given ID, which must be the unique ID of a connection given to the
+   <code>insertConnection()</code> function documented immediately above, otherwise,
+   this function does nothing.  If it is a valid connection ID, then the
+   connection is removed from the Input Tree and the ID is available to be
+   used again.</li>
+<li><code>setConnectionAttribute(ID,key,value)</code> modifies a single attribute of a
+   connection within the Input Tree, as follows:<ul>
+<li><code>ID</code> is interpreted just as in <code>deleteConnection()</code>, above.</li>
+<li><code>key</code> is the key of the attribute to create or overwrite.  This may
+  not be the string <code>"id"</code>, which is already used to store the
+  connection's unique ID, which cannot be changed.  (If this is <code>"id"</code>,
+  this function does nothing.)</li>
 <li><code>value</code> is the new value, which must be JSON data.  (No checks are
   done to verify that it is JSON data, but errors will transpire
   eventually if non-JSON data is passed.)  Alternately, <code>value</code> can be
@@ -286,9 +321,7 @@ has been loaded.</p>
    <code>event.payload.subject</code> an <code>InputStructure</code> ID).</li>
 </ul>
 <p>For an example of how this works, see
-<a href="https://github.com/lurchmath/lde/blob/master/tests/lde-spec.litcoffee#feedback">the unit tests regarding feedback in the LDE</a>.</p>
-<h2 id="other-inputstructure-subclasses">Other <code>InputStructure</code> Subclasses</h2>
-<p>None yet.  More to come.</p></div>
+<a href="https://github.com/lurchmath/lde/blob/master/tests/lde-spec.litcoffee#feedback">the unit tests regarding feedback in the LDE</a>.</p></div>
         </div>
 
         <footer class="col-md-12">

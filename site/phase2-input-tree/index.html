@@ -292,52 +292,140 @@ complete and some not yet marked complete.</p>
 </ul>
 <h3 id="upgrading-connections">Upgrading Connections</h3>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Update the implementation in the <code>Structure</code> method for connections,
-   to satisfy the following requirements.<ul>
-<li>Do not put all connections data in one big attribute.  Rather, when
-  creating a connection between two nodes, place it in an attribute with
-  a key of the form <code>_connection_N</code> for some natural number <code>N</code> not yet
-  used by either endpoint of the connection.  This number <code>N</code> should be
-  returned by the routine; always use <code>N</code>&gt;1 so that we do not mistake
-  <code>N</code>=0 for a return of a false value, as if the routine failed.</li>
-<li>Do not restrict the third element of the connection tuple to being a
-  string, but permit it to be arbitrary JSON data.  Store this only in
-  the source of the connection, so as not to waste space.  This will
-  necessitate changing the signature for disconnecting to not take a
-  connection triple (source, target, type) but rather just the number
-  <code>N</code> used when the connection was created.</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Remove the <code>allConnectionsIn()</code>, <code>allConnectionsOut()</code>, and
+   <code>allConnectionsTo()</code> functions and their unit tests.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Create a unit test that verifies that when <code>untrackIDs()</code> or
+   <code>clearIDs()</code> is called in a <code>Structure</code>, then all connections to/from
+   that structure are first removed.  This unit test will not pass, at
+   first.</p>
+</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Update <code>untrackIDs()</code> to make that unit test pass for it.</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Update <code>clearIDs()</code> to make that unit test pass for it.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Define <code>connectionIDs : { }</code> in the <code>Structure</code> class.</p>
+</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Define <code>@sourceOfConnection : ( id ) -&gt; Structure::connectionIDs[id]</code>
+   in the <code>Structure</code> class.</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Ensure that this did not break any unit tests.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Disable all unit tests for <code>connectTo</code> and <code>disconnectFrom</code>, then
+   ensure that all remaining unit tests pass.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Rewrite <code>Structure::connect(source,target,data)</code> to do this:</p>
+<ul>
+<li>Quit if <code>data.id</code> is already used in <code>Structure::connectionIDs</code>;
+  return false in that case.</li>
+<li>Write the target's ID to the <code>"_conn #{id} to"</code> attribute of the
+  source.</li>
+<li>Write the source's ID to the <code>"_conn #{id} from"</code> attribute of the
+  target.</li>
+<li>Write the data to the <code>"_conn #{id} data"</code> attribute of the source.</li>
+<li>Add <code>data.id</code> to <code>Structure::connectionIDs</code>.</li>
+<li>Call the <code>connectionInserted</code> handler, if it exists, in the source and
+  target <code>Structure</code>s.</li>
+<li>Return true.</li>
 </ul>
 </li>
-<li class="task-list-item"><input type="checkbox" disabled/> All the unit tests should still pass; ensure this, then write a few
-   more tests to ensure that you can use non-string JSON data as the third
-   parameter when setting up the connection.  Then commit.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add to the API a new method, <code>insertConnection(source,target,data)</code>,
-   which connects two <code>InputStructure</code>s that are already in the Input Tree.
-   We require each newly inserted connection to have, in its <code>data</code> object,
-   an attribute whose key is "id" and whose values are strings that are
-   unique across the Input Tree.  The <code>source</code> and <code>target</code> parameters are
-   unique ids, just as <code>parent</code> is for <code>insertStructure</code>.  The <code>data</code>
-   parameter is any JSON data that will be stored with the connection.
-   If any of the above requirements on the parameters are not satisfied,
-   the routine does nothing.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add to the API a new method, <code>removeConnection(id)</code>, which
-   disconnects two <code>InputStructure</code>s that are connected by the connection
-   whose unique id was given.  If the parameter isn't the unique id for a
-   connection in the Input Tree, the routine does nothing.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add to the API a new method,
-   <code>setConnectionAttribute(connection,key,value)</code>, which alters the data of
-   an existing connection between two <code>InputStructure</code>s in the Input Tree.
-   The first parameter must be the unique id of a connection, just as with
-   <code>removeConnection</code>.  The <code>key</code> should be a string that is the key of the
-   attribute to be modified, but if it is not a string it will be converted into one using the <code>String</code> constructor.  It cannot be the string "id"
-   because that attribute must remain constant throughout the life of any
-   connection.  The <code>value</code> can be any JSON data to use as the new attribute
-   value, or <code>undefined</code> to indicate that the key-value pair should be
-   deleted.  If any of the above requirements on the parameters are not
-   satisfied, the routine does nothing.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Create unit tests for all of these new routines and ensure that they
+<li class="task-list-item"><input type="checkbox" disabled checked/> Ensure that <code>someStruct.connectTo(t,d)</code> is an alias for
+   <code>Structure::connect(someStruct,t,d)</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Replace <code>disconnectFrom()</code> with <code>Structure::disconnect(connectionID)</code>
+   that does this:<ul>
+<li>Quit unless <code>connectionID</code> is already used in
+  <code>Structure::connectionIDs</code>; return false in that case.</li>
+<li>Get the structure that is the source.  From it, get the target.</li>
+<li>In the source, remove the <code>"_conn #{id} to"</code> attribute.</li>
+<li>In the source, remove the <code>"_conn #{id} data"</code> attribute.</li>
+<li>In the target, remove the <code>"_conn #{id} from"</code> attribute.</li>
+<li>Remove <code>data.id</code> from <code>Structure::connectionIDs</code>.</li>
+<li>Call the <code>connectionRemoved</code> handler, if it exists, in the source and
+  target <code>Structure</code>s.</li>
+<li>Return true.</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Ensure that <code>someStruct.disconnect(id)</code> is an alias for
+   <code>Structure::disconnect(id)</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add <code>Structure::setConnectionData(connID,key,value)</code> that does this:<ul>
+<li>Quit unless <code>connID</code> is already used in <code>Structure::connectionIDs</code>;
+  if so, return false.</li>
+<li>If <code>value</code> is undefined, remove any existing key-value pair with the
+  given <code>key</code> from the connection data for the specified connection.</li>
+<li>Otherwise, replace any existing key-value pair with the given one in
+  the specified connection.</li>
+<li>In any case, call the <code>connectionChanged</code> handler, if it exists, in
+  the source and target <code>Structure</code>s.</li>
+<li>Return true.</li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Ensure that <code>someStruct.setConnectionData(id,k,v)</code> is an alias for
+   <code>Structure::setConnectionData(id,k,v)</code>.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Implement <code>Structure::getConnectionSource(id)</code> and ensure that
+   <code>someStruct.getConnectionSource(id)</code> is an alias for it.</p>
+</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Implement <code>Structure::getConnectionTarget(id)</code> and ensure that
+   <code>someStruct.getConnectionTarget(id)</code> is an alias for it.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Implement <code>Structure::getConnectionData(id)</code> and ensure that
+   <code>someStruct.getConnectionData(id)</code> is an alias for it.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Implement <code>someStruct.getConnectionsIn()</code>, returning a list of IDs.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Implement <code>someStruct.getConnectionsOut()</code>, returning a list of IDs.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Implement <code>someStruct.getAllConnections()</code>, returning a list of IDs.</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Reimplement a new version of <code>removeAllConnections()</code> that uses these
+   new functions to do its work.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Replace all the old unit tests for <code>connectTo</code> and <code>disconnectFrom</code>
+   with new ones that test all the features just added by all the recent
+   changes.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Add unit tests for all new functions and features added in the steps
+   above.</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled checked/> Test <code>trackIDs()</code> and <code>noticeAllConnections()</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Test <code>Structure.sourceOfConnection()</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Test <code>getConnectionSource()</code>, <code>getConnectionTarget()</code>, and
+  <code>getConnectionData()</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Test <code>setConnectionData()</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Test event handlers <code>connectionWillBeInserted()</code> and
+  <code>connectionWasInserted()</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Test event handlers <code>connectionWillBeRemoved()</code> and
+  <code>connectionWasRemoved()</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Test event handlers <code>connectionWillBeChanged()</code> and
+  <code>connectionWasChanged()</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Verify that functions fail when their preconditions aren't
+  satisfied.</li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Add to the API a new method, <code>insertConnection(source,target,data)</code>,
+   which directly calls <code>Structure::connect()</code>, but only if both the source
+   and the target are <code>InputStructure</code> instances.</p>
+</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add to the API a new method, <code>removeConnection(id)</code>, which
+   directly calls <code>Structure::disconnect()</code>, but only if both the source
+   and the target are <code>InputStructure</code> instances.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add to the API a new method,
+   <code>setConnectionAttribute(connection,key,value)</code>, which directly calls
+   <code>Structure::setConnectionData(connection,key,value)</code>, but only if both
+   the source and the target are <code>InputStructure</code> instances.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Create unit tests for all of these new routines and ensure that they
    pass.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Rebuild docs and commit.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add API documentation for all events (<code>wasInserted</code>, <code>wasRemoved</code>,
+   <code>wasChanged</code>, <code>connectionWasInserted</code>, <code>connectionWasRemoved</code>,
+   <code>connectionWasChanged</code>, and the <code>willBe</code> variants for all of them).
+   Link to that documentation from the unit tests.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Rebuild docs and commit.</li>
 </ul>
 <h3 id="policing-connections">Policing Connections</h3>
 <ul class="task-list">
