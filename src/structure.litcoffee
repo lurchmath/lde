@@ -530,6 +530,31 @@ returns false, it still adds all those that it can.
                     success = no
             success
 
+When replacing one node in a `Structure` hierarchy with another, sometimes
+it is convenient to transfer all connections into or out of the original
+over to the replacement.  We therefore provide the following function that
+does this work for you, to make it easier.  If the given `Structure` does
+not have an ID, this does nothing.  It returns false on failure, true on
+success.
+
+        transferConnectionsTo : ( recipient ) ->
+            return no unless recipient.id()?
+            for id in @getAllConnections()
+                if ( targetID = @getAttribute( "_conn #{id} to" ) ) and \
+                   target = Structure.instanceWithID targetID
+                    @clearAttributes "_conn #{id} to"
+                    recipient.setAttribute "_conn #{id} to", targetID
+                    target.setAttribute "_conn #{id} from", recipient.id()
+                    data = @getAttribute "_conn #{id} data"
+                    @clearAttributes "_conn #{id} data"
+                    recipient.setAttribute "_conn #{id} data", data
+                if ( sourceID = @getAttribute( "_conn #{id} from" ) ) and \
+                   source = Structure.instanceWithID sourceID
+                    @clearAttributes "_conn #{id} from"
+                    recipient.setAttribute "_conn #{id} from", sourceID
+                    source.setAttribute "_conn #{id} to", recipient.id()
+            yes
+
 ## Accessibility
 
 A structure A is accessible to a structure B if they have a common ancestor

@@ -775,7 +775,7 @@ Fourth, are connections automatically severed if one node leaves the tree?
             expect( insertedB.getConnectionsIn() ).toEqual [ ]
             expect( Structure.getConnectionData 'C' ).toBeUndefined()
 
-Finally, are connections automatically severed if one endpoint of the
+Fifth, are connections automatically severed if one endpoint of the
 connection is replaced with a different node?
 
         it 'should automatically sever connections when replacing nodes', ->
@@ -802,7 +802,40 @@ connection is replaced with a different node?
                 [ insertedA, insertedD ]
             expect( insertedA.getConnectionsOut() ).toEqual [ ]
             expect( insertedB.getConnectionsIn() ).toEqual [ ]
+            expect( insertedD.getConnectionsIn() ).toEqual [ ]
             expect( Structure.getConnectionData 'C' ).toBeUndefined()
+
+But are connections transferred instead of severed if we ask for that
+explicitly?
+
+        it 'should automatically sever connections when replacing nodes', ->
+            A = new InputStructure().attr id : 'A'
+            expect(
+                -> LDE.insertStructure A.toJSON(), 'root', 0
+            ).not.toThrow()
+            insertedA = LDE.getInputTree().children()[0]
+            B = new InputStructure().attr id : 'B'
+            expect(
+                -> LDE.insertStructure B.toJSON(), 'root', 1
+            ).not.toThrow()
+            insertedB = LDE.getInputTree().children()[1]
+            expect(
+                -> LDE.insertConnection 'A', 'B', id : 'C'
+            ).not.toThrow()
+            expect( insertedA.getConnectionsOut() ).toEqual [ 'C' ]
+            expect( insertedB.getConnectionsIn() ).toEqual [ 'C' ]
+            expect( Structure.getConnectionData 'C' ).toEqual id : 'C'
+            D = new InputStructure().attr id : 'D'
+            expect( -> LDE.replaceStructure 'B', D, yes ).not.toThrow()
+            insertedD = LDE.getInputTree().children()[1]
+            expect( LDE.getInputTree().children() ).toEqual \
+                [ insertedA, insertedD ]
+            expect( insertedA.getConnectionsOut() ).toEqual [ 'C' ]
+            expect( insertedB.getConnectionsIn() ).toEqual [ ]
+            expect( insertedD.getConnectionsIn() ).toEqual [ 'C' ]
+            expect( Structure.getConnectionSource 'C' ).toBe insertedA
+            expect( Structure.getConnectionTarget 'C' ).toBe insertedD
+            expect( Structure.getConnectionData 'C' ).toEqual id : 'C'
 
 ## WebWorker Support
 

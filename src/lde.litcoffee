@@ -129,7 +129,8 @@ before the structure is inserted.
 This functionl, also, permits passing an actual `InputStructure` instance as
 the second argument, rather than a serialized version.
 
-    functions.replaceStructure = ( subtreeID, newTree ) ->
+    functions.replaceStructure =
+    ( subtreeID, newTree, transferConnections = no ) ->
         if ( subtree = Structure.instanceWithID subtreeID )? and \
            ( isInTheInputTree subtree ) and subtree isnt InputTree and \
            ( newInstance = deserializeIfNeeded newTree )? and \
@@ -139,6 +140,8 @@ the second argument, rather than a serialized version.
             if disallowed.length > 0
                 newInstance.clearAttributes disallowed...
             subtree.replaceWith newInstance
+            if transferConnections
+                subtree.transferConnectionsTo newInstance
             subtree.untrackIDs()
             newInstance.trackIDs()
 
@@ -240,7 +243,7 @@ Each is an array, any number in the array is acceptable.
         expectedArgumentCount =
             insertStructure : [ 3 ]
             deleteStructure : [ 1 ]
-            replaceStructure : [ 2 ]
+            replaceStructure : [ 2, 3 ]
             setStructureAttribute : [ 2, 3 ]
             insertConnection : [ 3 ]
             removeConnection : [ 1 ]

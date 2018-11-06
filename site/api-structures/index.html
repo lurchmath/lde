@@ -386,6 +386,12 @@ have a unique ID, as documented <a href="#unique-ids">below</a>.</p>
 }
 </code></pre>
 
+<p>You can transfer all the connections in and out of one <code>Structure</code> instance
+to another structure instance by calling
+<code>first.transferConnectionsTo(second)</code>.  This is useful if <code>second</code> is about
+to take the place of <code>first</code>, and you want it to inherit all of <code>first</code>'s
+connections.  This may be particularly useful to <code>interpret()</code> routines in
+subclasses of <code>InputStructure</code>.</p>
 <h2 id="unique-ids">Unique IDs</h2>
 <p>The <code>Structure</code> class maintains a mapping from IDs (as strings) to instances
 of the class.  An instance gets its ID from the attribute with key "id."

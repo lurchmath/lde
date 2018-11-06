@@ -257,6 +257,13 @@ function getConnectionsBetween ( A, B ) {
 }
 ```
 
+You can transfer all the connections in and out of one `Structure` instance
+to another structure instance by calling
+`first.transferConnectionsTo(second)`.  This is useful if `second` is about
+to take the place of `first`, and you want it to inherit all of `first`'s
+connections.  This may be particularly useful to `interpret()` routines in
+subclasses of `InputStructure`.
+
 ## Unique IDs
 
 The `Structure` class maintains a mapping from IDs (as strings) to instances

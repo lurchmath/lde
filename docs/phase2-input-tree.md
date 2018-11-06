@@ -258,14 +258,14 @@ complete and some not yet marked complete.
  * [x] Add unit tests to ensure that removing or replacing nodes in the
    Input Tree automatically severs any relevant connections on the outgoing
    node.
- * [ ] Create a function in the `Structure` class that will transfer all
+ * [x] Create a function in the `Structure` class that will transfer all
    connections in/out of node `X` to node `Y` instead, written as
    `X.transferConnectionsTo( Y )`.
- * [ ] Document the above routine as something that `interpret()` routines
+ * [x] Document the above routine as something that `interpret()` routines
    are welcome to use, if it is useful to them.
- * [ ] Add an optional third parameter to `replaceStructure()`, which
+ * [x] Add an optional third parameter to `replaceStructure()`, which
    defaults to false, but can be set to true to have `replaceStructure()`
    transfer all such connections to the replacement structure, rather than
    just sever them.
- * [ ] Add unit tests to ensure that these features work.
- * [ ] Rebuild and commit.
+ * [x] Add unit tests to ensure that these features work.
+ * [x] Rebuild and commit.
