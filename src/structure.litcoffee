@@ -497,7 +497,7 @@ defined earlier.
 
         removeAllConnections : ->
             Structure.disconnect id for id in @getAllConnections()
-            child.removeAllConnections() for child in @children
+            child.removeAllConnections() for child in @children()
 
 A sort of inverse of the previous function is to find all connections that
 exist in the attributes of a `Structure` hierarchy and import them into the
