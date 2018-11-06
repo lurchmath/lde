@@ -419,6 +419,54 @@ from the source of the connection.
 
         connectTo : ( target, data ) -> Structure.connect @, target, data
 
+The following query functions simply make use of the data storage protocol
+established by the above function.  For each one, we provide a class method
+(to be consistent with connection creation, and so that connections can be
+queried even without a particular instance being known) and an instance
+method as well, which just redirects the call to the class method, as a
+convenience.
+
+First, functions that find the source, target, or data of a connection,
+given its unique ID.  The first one is not strictly necessary, but we
+provide it for the sake of symmetry.
+
+        @getConnectionSource : ( connectionID ) ->
+            Structure.sourceOfConnection connectionID
+        @getConnectionTarget : ( connectionID ) ->
+            return undefined unless \
+                ( source = Structure.sourceOfConnection connectionID ) and \
+                targetID = source.getAttribute "_conn #{connectionID} to"
+            Structure.instanceWithID targetID
+        @getConnectionData : ( connectionID ) ->
+            return undefined unless \
+                source = Structure.sourceOfConnection connectionID
+            source.getAttribute "_conn #{connectionID} data"
+        getConnectionSource : ( connectionID ) ->
+            Structure.getConnectionSource connectionID
+        getConnectionTarget : ( connectionID ) ->
+            Structure.getConnectionTarget connectionID
+        getConnectionData : ( connectionID ) ->
+            Structure.getConnectionData connectionID
+
+Second, functions that can find the list of IDs associated with a given
+Structure instance, either as outgoing connections, incoming connections, or
+both.
+
+        getConnectionsIn : ->
+            result = [ ]
+            for own key of @attributes
+                if key[...6] is '_conn ' and key[-5...] is ' from'
+                    result.push key[6...-5]
+            result
+        getConnectionsOut : ->
+            result = [ ]
+            for own key of @attributes
+                if key[...6] is '_conn ' and key[-3...] is ' to'
+                    result.push key[6...-3]
+            result
+        getAllConnections : ->
+            @getConnectionsIn().concat @getConnectionsOut()
+
 Breaking a connection takes as input the unique ID for the connection, and
 it can then look up all the other relevant data in the `connectionIDs` class
 variable.  If the ID is not in that object, this function does nothing.

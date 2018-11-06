@@ -204,17 +204,18 @@ complete and some not yet marked complete.
  * [x] Ensure that `someStruct.setConnectionData(id,k,v)` is an alias for
    `Structure::setConnectionData(id,k,v)`.
 
- * [ ] Implement `Structure::getConnectionSource(id)` and ensure that
+ * [x] Implement `Structure::getConnectionSource(id)` and ensure that
    `someStruct.getConnectionSource(id)` is an alias for it.
- * [ ] Implement `Structure::getConnectionTarget(id)` and ensure that
+ * [x] Implement `Structure::getConnectionTarget(id)` and ensure that
    `someStruct.getConnectionTarget(id)` is an alias for it.
- * [ ] Implement `Structure::getConnectionData(id)` and ensure that
+ * [x] Implement `Structure::getConnectionData(id)` and ensure that
    `someStruct.getConnectionData(id)` is an alias for it.
- * [ ] Implement `someStruct.getConnectionsIn()`, returning a list of IDs.
- * [ ] Implement `someStruct.getConnectionsOut()`, returning a list of IDs.
- * [ ] Implement `someStruct.getAllConnections()`, returning a list of IDs.
+ * [x] Implement `someStruct.getConnectionsIn()`, returning a list of IDs.
+ * [x] Implement `someStruct.getConnectionsOut()`, returning a list of IDs.
+ * [x] Implement `someStruct.getAllConnections()`, returning a list of IDs.
  * [ ] Reimplement a new version of `removeAllConnections()` that uses these
    new functions to do its work.
+
  * [ ] Replace all the old unit tests for `connectTo` and `disconnectFrom`
    with new ones that test all the features just added by all the recent
    changes.
