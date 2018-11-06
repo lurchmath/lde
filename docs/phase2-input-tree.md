@@ -225,13 +225,15 @@ complete and some not yet marked complete.
     * [x] Test `Structure.sourceOfConnection()`.
     * [x] Test `getConnectionSource()`, `getConnectionTarget()`, and
       `getConnectionData()`.
-    * [ ] Test `setConnectionData()`.
+    * [x] Test `setConnectionData()`.
     * [ ] Test event handlers `connectionWillBeInserted()` and
       `connectionWasInserted()`.
     * [ ] Test event handlers `connectionWillBeRemoved()` and
       `connectionWasRemoved()`.
     * [ ] Test event handlers `connectionWillBeChanged()` and
       `connectionWasChanged()`.
+    * [ ] Verify that functions fail when their preconditions aren't
+      satisfied.
 
  * [ ] Add to the API a new method, `insertConnection(source,target,data)`,
    which directly calls `Structure::connect()`, but only if both the source

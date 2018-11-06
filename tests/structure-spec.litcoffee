@@ -1461,6 +1461,68 @@ time querying the source with `getConnectionSource()`).
                 id : '3', 1 : 2, 3 : 4
             A.untrackIDs()
 
+Let's verify that the functions for setting connection data work as they
+claim in their documentation.
+
+        it 'can edit connection data correctly', ->
+
+Build the same structure as in the previous section, with the connection
+data as before.
+
+            A = new Structure(
+                B = new Structure().attr id : 'B'
+                C = new Structure().attr id : 'C'
+            ).attr id : 'A'
+            A.trackIDs()
+            expect( A.connectTo B, id : 'example', num : 1 ).toBeTruthy()
+            expect( B.connectTo A, id : 'other', str : 'foo' ).toBeTruthy()
+            expect( B.connectTo A, id : 'another', bud : 'Ed' ).toBeTruthy()
+            expect( C.connectTo C, id : '1', mom : 'Edna' ).toBeTruthy()
+            expect( C.connectTo C, id : '2', dad : 'Billy' ).toBeTruthy()
+            expect( C.connectTo C, id : '3', 1 : 2, 3 : 4 ).toBeTruthy()
+
+Verify that the connection data is as it was before.
+
+            expect( Structure.getConnectionData 'example' ).toEqual
+                id : 'example', num : 1
+            expect( Structure.getConnectionData 'other' ).toEqual
+                id : 'other', str : 'foo'
+            expect( Structure.getConnectionData 'another' ).toEqual
+                id : 'another', bud : 'Ed'
+            expect( Structure.getConnectionData '1' ).toEqual
+                id : '1', mom : 'Edna'
+            expect( Structure.getConnectionData '2' ).toEqual
+                id : '2', dad : 'Billy'
+            expect( Structure.getConnectionData '3' ).toEqual
+                id : '3', 1 : 2, 3 : 4
+
+Now try to alter some of it.
+
+            expect( Structure.setConnectionData 'example', 'num', 2 )
+                .toBeTruthy()
+            expect( Structure.setConnectionData 'other', 'color', 'blue' )
+                .toBeTruthy()
+            expect( Structure.setConnectionData 'another', 'JSON',
+                [ { 1 : 2 }, 'five' ] ).toBeTruthy()
+            expect( Structure.setConnectionData '1', 'mom', undefined )
+                .toBeTruthy()
+            expect( Structure.setConnectionData '3', 3 ).toBeTruthy()
+
+Check to see that every one of those changes succeeded (but that no changes
+were made to connection 2, which was not altered).
+
+            expect( Structure.getConnectionData 'example' ).toEqual
+                id : 'example', num : 2
+            expect( Structure.getConnectionData 'other' ).toEqual
+                id : 'other', str : 'foo', color : 'blue'
+            expect( Structure.getConnectionData 'another' ).toEqual
+                id : 'another', bud : 'Ed', JSON : [ { 1 : 2 }, 'five' ]
+            expect( Structure.getConnectionData '1' ).toEqual id : '1'
+            expect( Structure.getConnectionData '2' ).toEqual
+                id : '2', dad : 'Billy'
+            expect( Structure.getConnectionData '3' ).toEqual
+                id : '3', 1 : 2
+
 ## Convenience constructions
 
 The member function `attr` is mostly just used within this unit testing
