@@ -221,9 +221,9 @@ complete and some not yet marked complete.
    changes.
  * [ ] Add unit tests for all new functions and features added in the steps
    above.
-    * [ ] Test `trackIDs()` and `noticeAllConnections()`.
-    * [ ] Test `Structure.sourceOfConnection()`.
-    * [ ] Test `getConnectionSource()`, `getConnectionTarget()`, and
+    * [x] Test `trackIDs()` and `noticeAllConnections()`.
+    * [x] Test `Structure.sourceOfConnection()`.
+    * [x] Test `getConnectionSource()`, `getConnectionTarget()`, and
       `getConnectionData()`.
     * [ ] Test `setConnectionData()`.
     * [ ] Test event handlers `connectionWillBeInserted()` and

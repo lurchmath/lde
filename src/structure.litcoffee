@@ -439,7 +439,6 @@ source and the target if it succeeds.  It returns true on success and false
 on failure.
 
         @disconnect : ( connectionID ) ->
-            console.log 'deleting', connectionID, '?'
             return no unless \
                 ( source = Structure::connectionIDs[connectionID] ) and \
                 ( targetID = source.getAttribute \
@@ -454,7 +453,6 @@ on failure.
             delete Structure::connectionIDs[connectionID]
             source.connectionWasRemoved? connectionID
             target.connectionWasRemoved? connectionID
-            console.log '\tyup!'
             yes
 
 The convenience function for accessing this from instances can be called

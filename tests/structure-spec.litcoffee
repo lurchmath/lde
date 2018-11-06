@@ -1224,9 +1224,8 @@ Fourth, connect C to itself three times and ensure they all appear.
             expect( C.getConnectionsOut() ).toEqual [ '1', '2', '3' ]
             expect( C.getAllConnections() ).toEqual [ '1', '2', '3' ]
             A.untrackIDs()
-            console.log Structure::connectionIDs
 
-The following section tests the function `disconnectFrom()`; it is the
+The following section tests the function `disconnect()`; it is the
 companion to the previous section.
 
         it 'should break connections consistently when asked', ->
@@ -1361,6 +1360,106 @@ all connections were broken.
             expect( C.getConnectionsIn() ).toEqual [ ]
             expect( C.getConnectionsOut() ).toEqual [ ]
             expect( C.getAllConnections() ).toEqual [ ]
+
+If a `Structure` tree comes with connection data built in, perhaps because
+it was serialized long ago with that connection data built into it, and now
+is being deserialized, we expect the `Structure` class to be able to notice
+those connections and track them correctly in the class variable for that
+purpose.  We test that here.
+
+        it 'can notice and track connections', ->
+
+Create a connections hierarchy with connection data added manually by
+attributes.
+
+            A = new Structure(
+                B = new Structure().attr
+                    id : 'B'
+                    '_conn one from' : 'A'
+                    '_conn two to' : 'C'
+                    '_conn two data' : id : 'two'
+                C = new Structure().attr
+                    id : 'C'
+                    '_conn two from' : 'B'
+            ).attr
+                id : 'A'
+                '_conn one to' : 'B'
+                '_conn one data' : num : 5, id : 'one'
+
+Ask the system to track its IDs, which includes the IDs of its connections.
+
+            A.trackIDs()
+
+Verify that all connections were noticed.
+
+            expect( A.getConnectionsIn() ).toEqual [ ]
+            expect( A.getConnectionsOut() ).toEqual [ 'one' ]
+            expect( A.getAllConnections() ).toEqual [ 'one' ]
+            expect( B.getConnectionsIn() ).toEqual [ 'one' ]
+            expect( B.getConnectionsOut() ).toEqual [ 'two' ]
+            expect( B.getAllConnections() ).toEqual [ 'one', 'two' ]
+            expect( C.getConnectionsIn() ).toEqual [ 'two' ]
+            expect( C.getConnectionsOut() ).toEqual [ ]
+            expect( C.getAllConnections() ).toEqual [ 'two' ]
+
+Let's verify that the functions for querying connection data work as they
+claim in their documentation.
+
+        it 'can report connection data correctly', ->
+
+Build the same structure as in an earlier section, but this time with some
+connection data added.
+
+            A = new Structure(
+                B = new Structure().attr id : 'B'
+                C = new Structure().attr id : 'C'
+            ).attr id : 'A'
+            A.trackIDs()
+            expect( A.connectTo B, id : 'example', num : 1 ).toBeTruthy()
+            expect( B.connectTo A, id : 'other', str : 'foo' ).toBeTruthy()
+            expect( B.connectTo A, id : 'another', bud : 'Ed' ).toBeTruthy()
+            expect( C.connectTo C, id : '1', mom : 'Edna' ).toBeTruthy()
+            expect( C.connectTo C, id : '2', dad : 'Billy' ).toBeTruthy()
+            expect( C.connectTo C, id : '3', 1 : 2, 3 : 4 ).toBeTruthy()
+
+Verify that we can query the source structure of each connection using the
+function `sourceOfConnection()`.
+
+            expect( Structure.sourceOfConnection 'example' ).toBe A
+            expect( Structure.sourceOfConnection 'other' ).toBe B
+            expect( Structure.sourceOfConnection 'another' ).toBe B
+            expect( Structure.sourceOfConnection '1' ).toBe C
+            expect( Structure.sourceOfConnection '2' ).toBe C
+            expect( Structure.sourceOfConnection '3' ).toBe C
+
+Verify that we can query source, target, and data of any connection (this
+time querying the source with `getConnectionSource()`).
+
+            expect( Structure.getConnectionSource 'example' ).toBe A
+            expect( Structure.getConnectionSource 'other' ).toBe B
+            expect( Structure.getConnectionSource 'another' ).toBe B
+            expect( Structure.getConnectionSource '1' ).toBe C
+            expect( Structure.getConnectionSource '2' ).toBe C
+            expect( Structure.getConnectionSource '3' ).toBe C
+            expect( Structure.getConnectionTarget 'example' ).toBe B
+            expect( Structure.getConnectionTarget 'other' ).toBe A
+            expect( Structure.getConnectionTarget 'another' ).toBe A
+            expect( Structure.getConnectionTarget '1' ).toBe C
+            expect( Structure.getConnectionTarget '2' ).toBe C
+            expect( Structure.getConnectionTarget '3' ).toBe C
+            expect( Structure.getConnectionData 'example' ).toEqual
+                id : 'example', num : 1
+            expect( Structure.getConnectionData 'other' ).toEqual
+                id : 'other', str : 'foo'
+            expect( Structure.getConnectionData 'another' ).toEqual
+                id : 'another', bud : 'Ed'
+            expect( Structure.getConnectionData '1' ).toEqual
+                id : '1', mom : 'Edna'
+            expect( Structure.getConnectionData '2' ).toEqual
+                id : '2', dad : 'Billy'
+            expect( Structure.getConnectionData '3' ).toEqual
+                id : '3', 1 : 2, 3 : 4
+            A.untrackIDs()
 
 ## Convenience constructions
 
