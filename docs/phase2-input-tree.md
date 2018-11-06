@@ -219,8 +219,19 @@ complete and some not yet marked complete.
  * [x] Replace all the old unit tests for `connectTo` and `disconnectFrom`
    with new ones that test all the features just added by all the recent
    changes.
- * [ ] Add unit tests for all new function and features added in the steps
+ * [ ] Add unit tests for all new functions and features added in the steps
    above.
+    * [ ] Test `trackIDs()` and `noticeAllConnections()`.
+    * [ ] Test `Structure.sourceOfConnection()`.
+    * [ ] Test `getConnectionSource()`, `getConnectionTarget()`, and
+      `getConnectionData()`.
+    * [ ] Test `setConnectionData()`.
+    * [ ] Test event handlers `connectionWillBeInserted()` and
+      `connectionWasInserted()`.
+    * [ ] Test event handlers `connectionWillBeRemoved()` and
+      `connectionWasRemoved()`.
+    * [ ] Test event handlers `connectionWillBeChanged()` and
+      `connectionWasChanged()`.
 
  * [ ] Add to the API a new method, `insertConnection(source,target,data)`,
    which directly calls `Structure::connect()`, but only if both the source

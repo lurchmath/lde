@@ -496,7 +496,6 @@ out of this structure, which is used by `untrackIDs()` and `clearIDs()`,
 defined earlier.
 
         removeAllConnections : ->
-            console.log 'removing from', @id()
             Structure.disconnect id for id in @getAllConnections()
             child.removeAllConnections() for child in @children
 
