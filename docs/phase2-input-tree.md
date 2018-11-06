@@ -177,7 +177,7 @@ complete and some not yet marked complete.
     * Return true.
  * [x] Ensure that `someStruct.connectTo(t,d)` is an alias for
    `Structure::connect(someStruct,t,d)`.
- * [ ] Replace `disconnectFrom()` with `Structure::disconnect(connectionID)`
+ * [x] Replace `disconnectFrom()` with `Structure::disconnect(connectionID)`
    that does this:
     * Quit unless `connectionID` is already used in
       `Structure::connectionIDs`; return false in that case.
@@ -189,9 +189,9 @@ complete and some not yet marked complete.
     * Call the `connectionRemoved` handler, if it exists, in the source and
       target `Structure`s.
     * Return true.
- * [ ] Ensure that `someStruct.disconnect(id)` is an alias for
+ * [x] Ensure that `someStruct.disconnect(id)` is an alias for
    `Structure::disconnect(id)`.
- * [ ] Add `Structure::setConnectionData(connID,key,value)` that does this:
+ * [x] Add `Structure::setConnectionData(connID,key,value)` that does this:
     * Quit unless `connID` is already used in `Structure::connectionIDs`;
       if so, return false.
     * If `value` is undefined, remove any existing key-value pair with the
@@ -201,7 +201,7 @@ complete and some not yet marked complete.
     * In any case, call the `connectionChanged` handler, if it exists, in
       the source and target `Structure`s.
     * Return true.
- * [ ] Ensure that `someStruct.setConnectionData(id,k,v)` is an alias for
+ * [x] Ensure that `someStruct.setConnectionData(id,k,v)` is an alias for
    `Structure::setConnectionData(id,k,v)`.
 
  * [ ] Implement `Structure::getConnectionSource(id)` and ensure that

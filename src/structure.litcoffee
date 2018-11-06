@@ -400,6 +400,7 @@ case.
 
         @connect : ( source, target, data ) ->
             return no unless \
+                ( data instanceof Object ) and \
                 ( not connectionIDs.hasOwnProperty data.id ) and \
                 ( source instanceof Structure ) and source.id()? and \
                 ( target instanceof Structure ) and target.id()?
@@ -417,6 +418,66 @@ The convenience function for accessing this from instances should be called
 from the source of the connection.
 
         connectTo : ( target, data ) -> Structure.connect @, target, data
+
+Breaking a connection takes as input the unique ID for the connection, and
+it can then look up all the other relevant data in the `connectionIDs` class
+variable.  If the ID is not in that object, this function does nothing.
+
+It will alter both the source and the target, as well as the `connectionIDs`
+structure.  It will call the `connectionRemoved` event handler in both the
+source and the target if it succeeds.  It returns true on success and false
+on failure.
+
+        @disconnect : ( connectionID ) ->
+            return no unless \
+                ( source = connectionIDs[connectionID] ) and \
+                ( targetID = source.getAttribute \
+                    "_conn #{connectionID} target" ) and \
+                ( target = Structure::instanceWithID targetID ) and \
+                ( data = source.getAttribute "_conn #{connectionID} data" )
+            source.connectionWillBeRemoved? connectionID
+            target.connectionWillBeRemoved? connectionID
+            source.removeAttribute "_conn #{connectionID} data"
+            source.removeAttribute "_conn #{connectionID} to"
+            target.removeAttribute "_conn #{connectionID} from"
+            delete Structure::connectionIDs[connectionID]
+            source.connectionWasRemoved? connectionID
+            target.connectionWasRemoved? connectionID
+            yes
+
+The convenience function for accessing this from instances can be called
+from any instance, because it needs the connection's ID.
+
+        disconnect : ( connectionID ) -> Structure.disconnect connectionID
+
+We also permit clients to update the data for a connection that has already
+been made, using the following function.  They must provide the ID for the
+connection and a key-valuep pair to update in the existing connection data.
+If `value` is undefined, then any key-value pair associated with the given
+key will be removed from the connection data.
+
+        @setConnectionData : ( connectionID, key, value ) ->
+            return no unless \
+                ( source = connectionIDs[connectionID] ) and \
+                ( targetID = source.getAttribute \
+                    "_conn #{connectionID} target" ) and \
+                ( target = Structure::instanceWithID targetID ) and \
+                ( data = source.getAttribute "_conn #{connectionID} data" )
+            source.connectionWillBeChanged? connectionID
+            target.connectionWillBeChanged? connectionID
+            if typeof value is 'undefined'
+                delete data[key]
+            else
+                data[key] = value
+            source.connectionWasChanged? connectionID
+            target.connectionWasChanged? connectionID
+            yes
+
+The convenience function for accessing this from instances can be called
+from any instance, because it needs the connection's ID.
+
+        setConnectionData : ( connectionID, key, value ) ->
+            Structure.setConnectionData connectionID, key, value
 
 We also define the following function for removing all connections into or
 out of this structure, which is used by `untrackIDs()` and `clearIDs()`,
