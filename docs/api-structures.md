@@ -167,7 +167,7 @@ to the iterators.
    yields all nodes in the scope of `A` that satisfy `P`, in the same order
    they would be reported by `iteratorOverScope()`.
 
-## Structure attributes and connections
+## Structure attributes
 
 The following functions available in each instance of the structure class
 support attributes.
@@ -193,49 +193,69 @@ support attributes.
     );
 ```
 
-### Connections as a type of attribute
+You may not use attribute keys that begin with an underscore.  These are
+reserved for internal use.
 
-Within a structure's attributes are two key-value pairs that should not be
-used for any other purpose, those with keys `connectionsOut` and
-`connectionsIn`.  These store data about connections between pairs of
-structures in the same heirarchy.  The data is stored by structure IDs, so
-making connections assumes that structures each have a unique ID, as
-documented [below](#unique-ids).
+## Connections
 
-You can query the connections among structures with these functions:
+Structure hierarchies support the notion of making connections (directed
+edges, in the graph theory sense) between any two nodes in a hierarchy.
+(Actually, between any two `Structure` instances at all, but typically we
+use it within the same hierarchy.)  Each such edge can have arbitrary JSON
+data attached to it.
 
- * `source.allConnectionsOut(type)` returns a list of all destinations to
-   which the source is connected by one or more connections of the given
-   type.  Each destination appears on the list a number of times equal to
-   the number of connections of the given type from the source to that
-   destination.
- * `destination.allConnectionsIn(type)` functions analogously to the
-   previous, but for connections into a destination, rather than out from a
-   source.
- * `source.allConnectionsOut()` returns a list of destination-type pairs,
-   all connections that go out from the given source structure.
- * `destination.allConnectionsIn()` functions analogously to the previous,
-   but for connections into a destination, rather than out from a source.
+To enable this feature, we expose the following functions from the
+`Structure` class.  They will function only if both ends of the connection
+have a unique ID, as documented [below](#unique-ids).
 
 To create or destroy connections, use these functions:
 
- * `source.connectTo(destination,type)`, where `source` and `destination`
-   are `Structure` instances and `type` is a string containing the type of
-   connection, creates a new connection.  There can be multiple connections
-   between the same two structures, even of the same type.  Returns true if
-   the connection was formed, false if some error prevented it (such as the
-   destination not being a structure, or not having an ID, or the source
-   not having an ID).
- * `source.disconnectFrom(destination,type)` undoes the previous operation.
-   Because there may be multiple connections between the source and
-   destination of the same type, this simply decreases that number by one.
+ * `source.connectTo(target,data)`, where `source` and `target` are
+   `Structure` instances and `data` is an object containing the JSON data of
+   connection, which must at least contain the connection's unique ID in the
+   `"id"` field.  There can be multiple connections between the same two
+   structures, even with the same JSON data, except for their unique IDs.
+   Returns true if the connection was formed, false if some error prevented
+   it (such as the destination not being a structure, or not having an ID,
+   or the source not having an ID, or the connection ID already in use).
+ * `Structure.disconnect(connectionID)` undoes the previous operation.
    Returns true on success or false on failure (for example, if there were
-   no connection to delete).
+   no connection with that ID).
+ * `Structure.setConnectionData(connectionID,key,value)` can be called after
+   a connection was already formed to update its data.
+ * `myStructure.removeAllConnections()` does exactly what it sounds like;
+   the `Structure` will then have no connections in or out.
 
-If the `connectionsOut` and `connectionsIn` data is directly manipulated by
-the client (not recommended), then you can call `root.fillOutConnections()`
-to ensure that the connection data stored in every source matches that
-stored in the corresponding destinations, and vice versa.
+You can query the connections among structures with these functions:
+
+ * `source.getConnectionsOut()` returns a list of unique IDs for
+   connections (which are different than the IDs for structures
+   themselves).  To see what you can do with a connection ID, read on.
+   The IDs are always returned in alphabetical order.
+ * `target.getConnectionsIn()` functions analogously to the previous, but
+   for connections into a target, rather than out from a source.
+ * `node.getAllConnections()` returns the union of the previous two lists,
+   each entry listed only once (even if the node connects to itself), and
+   still in alphabetical order.
+ * `Structure.getConnectionSource(ID)` returns the `Structure` instance that
+   is the source for the connection with the given ID (or undefined if the
+   ID is not in use).
+ * `Structure.getConnectionTarget(ID)` and `Structure.getConnectionData(ID)`
+   are similar to the previous.
+
+Example usage:
+
+```javascript
+function getConnectionsBetween ( A, B ) {
+    var result = [ ];
+    var connIDs = A.getConnectionsOut();
+    for ( var i = 0 ; i < connIDs.length ; i++ ) {
+        if ( target == Structure.getConnectionTarget( connIDs[i] ) )
+            result.push( Structure.getConnectionData( connIDs[i] ) );
+    }
+    return result;
+}
+```
 
 ## Unique IDs
 
@@ -263,17 +283,33 @@ Here are the relevant functions:
 
 ## Events and event handlers
 
-Any `Structure` instance fires up to six different types of events during
-its lifetime: `willBeInserted`, `wasInserted`, `willBeRemoved`,
-`wasRemoved`, `willBeChanged`, and `wasChanged`.  To install an event
-handler for one of these, simply overwrite that key in the `Structure`
-object itself, as in `myStructure.willBeRemoved = myHandlerFunction`.
+Any `Structure` instance fires up to twelve different types of events during
+its lifetime:
+
+ * `willBeInserted`
+ * `willBeRemoved`
+ * `willBeChanged`
+ * `wasInserted`
+ * `wasRemoved`
+ * `wasChanged`
+ * `connectionWillBeInserted`
+ * `connectionWillBeRemoved`
+ * `connectionWillBeChanged`
+ * `connectionWasInserted`
+ * `connectionWasRemoved`
+ * `connectionWasChanged`
+
+To install an event handler for one of these, simply overwrite that key in
+the `Structure` object itself, as in `myStructure.willBeRemoved =
+myHandlerFunction`.
 
 Insertion events are fired immediately before/after the `Structure` is added
 as a child under a new parent.  Removal events are fired immediately
 before/after the `Structure` is removed from an existing parent.  Change
 events are fired immediately before/after an attribute of the `Structure`
-instance changes.
+instance changes.  The same holds true for changing connections, and the
+events fire on both the source and target of the connection.  (In the case
+where the source is the target, this will result in the event firing twice.)
 
 Example:
 

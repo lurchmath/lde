@@ -247,11 +247,11 @@ complete and some not yet marked complete.
    the source and the target are `InputStructure` instances.
  * [x] Create unit tests for all of these new routines and ensure that they
    pass.
- * [ ] Add API documentation for all events (`wasInserted`, `wasRemoved`,
+ * [x] Add API documentation for all events (`wasInserted`, `wasRemoved`,
    `wasChanged`, `connectionWasInserted`, `connectionWasRemoved`,
    `connectionWasChanged`, and the `willBe` variants for all of them).
    Link to that documentation from the unit tests.
- * [ ] Rebuild docs and commit.
+ * [x] Rebuild docs and commit.
 
 ### Policing Connections
 
