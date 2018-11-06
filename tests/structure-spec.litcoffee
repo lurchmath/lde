@@ -1510,6 +1510,61 @@ connections are as they should be.
             expect( toTest.length ).toBe 1
             A.untrackIDs()
 
+Since connections depend upon IDs (and you can't even create connections
+without IDs in the structures to be connected), if we clear IDs or stop
+tracking them from a subtree, then we should also disconnect any connections
+that depend upon those IDs.  Here we test to be sure that this happens.
+
+        it 'should break connections when necessitated by ID removal', ->
+
+Build a similar structure to the one from the previous section, but a bit
+simpler.
+
+            A = new Structure(
+                B = new Structure().attr id : 'B'
+                C = new Structure().attr id : 'C'
+            ).attr id : 'A'
+            A.trackIDs()
+            expect( A.connectTo B, 'foo' ).toBeTruthy()
+            expect( B.connectTo A, 'bar' ).toBeTruthy()
+            expect( C.connectTo C, 'baz' ).toBeTruthy()
+            expect( C.connectTo B, 'bax' ).toBeTruthy()
+
+Verify that connections exist.
+
+            toTest = A.getAttribute 'connectionsOut'
+            expect( pairCount toTest, [ 'B', 'foo' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+            toTest = B.getAttribute 'connectionsOut'
+            expect( pairCount toTest, [ 'A', 'bar' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+            toTest = C.getAttribute 'connectionsOut'
+            expect( pairCount toTest, [ 'C', 'baz' ] ).toBe 1
+            expect( pairCount toTest, [ 'B', 'bax' ] ).toBe 1
+            expect( toTest.length ).toBe 2
+
+Clear the IDs from B and verify that all connections to or from it were
+broken, but the other connections remained.
+
+            B.clearIDs()
+            toTest = A.getAttribute 'connectionsOut'
+            expect( toTest.length ).toBe 0
+            toTest = B.getAttribute 'connectionsOut'
+            expect( toTest.length ).toBe 0
+            toTest = C.getAttribute 'connectionsOut'
+            expect( pairCount toTest, [ 'C', 'baz' ] ).toBe 1
+            expect( toTest.length ).toBe 1
+
+Untrack IDs from A on down and verify that all connections were broken.
+
+            A.untrackIDs()
+            toTest = A.getAttribute 'connectionsOut'
+            expect( toTest.length ).toBe 0
+            toTest = B.getAttribute 'connectionsOut'
+            expect( toTest.length ).toBe 0
+            toTest = C.getAttribute 'connectionsOut'
+            expect( toTest.length ).toBe 0
+
 ## Convenience constructions
 
 There are two member functions, `attr` and `setup`, that are mostly just

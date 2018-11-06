@@ -148,12 +148,12 @@ complete and some not yet marked complete.
  * [x] Remove the `allConnectionsIn()`, `allConnectionsOut()`, and
    `allConnectionsTo()` functions and their unit tests.
 
- * [ ] Create a unit test that verifies that when `untrackIDs()` or
+ * [x] Create a unit test that verifies that when `untrackIDs()` or
    `clearIDs()` is called in a `Structure`, then all connections to/from
    that structure are first removed.  This unit test will not pass, at
    first.
- * [ ] Update `untrackIDs()` to make that unit test pass for it.
- * [ ] Update `clearIDs()` to make that unit test pass for it.
+ * [x] Update `untrackIDs()` to make that unit test pass for it.
+ * [x] Update `clearIDs()` to make that unit test pass for it.
 
  * [ ] Define `connectionIDs : { }` in the `Structure` class.
  * [ ] Define `@sourceOfConnection : ( id ) -> Structure::connectionIDs[id]`

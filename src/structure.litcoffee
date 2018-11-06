@@ -340,11 +340,15 @@ save all of its IDs into (or delete all of its IDs from) the above class
 variable.  Whenever a structure hierarchy is no longer used by the client,
 `untrackIDs` should be called on that hierarchy to prevent memory leaks.
 
+Because connections depend on IDs, we will also disconnect in `untrackIDs()`
+any connections involving this structure.
+
         id : -> @getAttribute 'id'
         trackIDs : ( recursive = yes ) ->
             if @id()? then Structure::IDs[@id()] = @
             if recursive then child.trackIDs() for child in @children()
         untrackIDs : ( recursive = yes ) ->
+            @removeAllConnections()
             if @id()? then delete Structure::IDs[@id()]
             if recursive then child.untrackIDs() for child in @children()
 
@@ -352,7 +356,11 @@ The following function removes all ID attributes from a structure hierarchy.
 This is useful, for example, after making a deep copy of a structure, so
 that the copied version does not violate the global uniqueness of IDs.
 
+Because connections depend on IDs, we will also disconnect here any
+connections involving this structure.
+
         clearIDs : ( recursive = yes ) ->
+            @removeAllConnections()
             @clearAttributes 'id'
             if recursive then child.clearIDs() for child in @children()
 
@@ -491,6 +499,18 @@ The delete function does nothing if there is no connection to delete.
             @setAttribute 'connectionsOut', outs
             otherStructure.setAttribute 'connectionsIn', ins
             yes
+
+We also define the following function for removing all connections into or
+out of this structure, which is used by `untrackIDs()` and `clearIDs()`,
+defined earlier.
+
+        removeAllConnections : ->
+            for pair in ( ( @getAttribute 'connectionsOut' ) ? [ ] )[..]
+                [ id, type ] = pair
+                @disconnectFrom Structure.instanceWithID( id ), type
+            for pair in ( ( @getAttribute 'connectionsIn' ) ? [ ] )[..]
+                [ id, type ] = pair
+                Structure.instanceWithID( id )?.disconnectFrom @, type
 
 ## Accessibility
 
