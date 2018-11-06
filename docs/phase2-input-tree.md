@@ -145,47 +145,94 @@ complete and some not yet marked complete.
 
 ### Upgrading Connections
 
- * [ ] Update the implementation in the `Structure` method for connections,
-   to satisfy the following requirements.
-    * Do not put all connections data in one big attribute.  Rather, when
-      creating a connection between two nodes, place it in an attribute with
-      a key of the form `_connection_N` for some natural number `N` not yet
-      used by either endpoint of the connection.  This number `N` should be
-      returned by the routine; always use `N`>1 so that we do not mistake
-      `N`=0 for a return of a false value, as if the routine failed.
-    * Do not restrict the third element of the connection tuple to being a
-      string, but permit it to be arbitrary JSON data.  Store this only in
-      the source of the connection, so as not to waste space.  This will
-      necessitate changing the signature for disconnecting to not take a
-      connection triple (source, target, type) but rather just the number
-      `N` used when the connection was created.
- * [ ] All the unit tests should still pass; ensure this, then write a few
-   more tests to ensure that you can use non-string JSON data as the third
-   parameter when setting up the connection.  Then commit.
+ * [ ] Remove the `fillOutConnections()` function and its unit tests; it is
+   not used anywhere except in the unit testing suite.
+ * [ ] Remove the `allConnectionsIn()`, `allConnectionsOut()`, and
+   `allConnectionsTo()` functions and their unit tests; same reasons.
+
+ * [ ] Create a unit test that verifies that when `untrackIDs()` or
+   `clearIDs()` is called in a `Structure`, then all connections to/from
+   that structure are first removed.  This unit test will not pass, at
+   first.
+ * [ ] Update `untrackIDs()` to make that unit test pass for it.
+ * [ ] Update `clearIDs()` to make that unit test pass for it.
+
+ * [ ] Define `connectionIDs : { }` in the `Structure` class.
+ * [ ] Define `@sourceOfConnection : ( id ) -> Structure::connectionIDs[id]`
+   in the `Structure` class.
+ * [ ] Ensure that this did not break any unit tests.
+
+ * [ ] Disable all unit tests for `connectTo` and `disconnectFrom`, then
+   ensure that all remaining unit tests pass.
+
+ * [ ] Rewrite `Structure::connect(source,target,data)` to do this:
+    * Quit if `data.id` is already used in `Structure::connectionIDs`;
+      return false in that case.
+    * Write the target's ID to the `"_conn #{id} to"` attribute of the
+      source.
+    * Write the source's ID to the `"_conn #{id} from"` attribute of the
+      target.
+    * Write the data to the `"_conn #{id} data"` attribute of the source.
+    * Add `data.id` to `Structure::connectionIDs`.
+    * Call the `connectionInserted` handler, if it exists, in the source and
+      target `Structure`s.
+    * Return true.
+ * [ ] Ensure that `someStruct.connect(t,d)` is an alias for
+   `Structure::connect(someStruct,t,d)`.
+ * [ ] Ensure that this did not break any unit tests.
+ * [ ] Replace `disconnectFrom()` with `Structure::disconnect(connectionID)`
+   that does this:
+    * Quit unless `connectionID` is already used in
+      `Structure::connectionIDs`; return false in that case.
+    * Get the structure that is the source.  From it, get the target.
+    * In the source, remove the `"_conn #{id} to"` attribute.
+    * In the source, remove the `"_conn #{id} data"` attribute.
+    * In the target, remove the `"_conn #{id} from"` attribute.
+    * Remove `data.id` from `Structure::connectionIDs`.
+    * Call the `connectionRemoved` handler, if it exists, in the source and
+      target `Structure`s.
+    * Return true.
+ * [ ] Ensure that this did not break any unit tests.
+ * [ ] Ensure that `someStruct.disconnect(id)` is an alias for
+   `Structure::disconnect(id)`.
+ * [ ] Add `Structure::setConnectionData(connID,key,value)` that does this:
+    * Quit unless `connID` is already used in `Structure::connectionIDs`;
+      if so, return false.
+    * If `value` is undefined, remove any existing key-value pair with the
+      given `key` from the connection data for the specified connection.
+    * Otherwise, replace any existing key-value pair with the given one in
+      the specified connection.
+    * In any case, call the `connectionChanged` handler, if it exists, in
+      the source and target `Structure`s.
+    * Return true.
+ * [ ] Ensure that `someStruct.setConnectionData(id,k,v)` is an alias for
+   `Structure::setConnectionData(id,k,v)`.
+ * [ ] Ensure that this did not break any unit tests.
+
+ * [ ] Implement `Structure::getConnectionSource(id)` and ensure that
+   `someStruct.getConnectionSource(id)` is an alias for it.
+ * [ ] Implement `Structure::getConnectionTarget(id)` and ensure that
+   `someStruct.getConnectionTarget(id)` is an alias for it.
+ * [ ] Implement `Structure::getConnectionData(id)` and ensure that
+   `someStruct.getConnectionData(id)` is an alias for it.
+ * [ ] Implement `someStruct.getConnectionsIn()`, returning a list of IDs.
+ * [ ] Implement `someStruct.getConnectionsOut()`, returning a list of IDs.
+ * [ ] Implement `someStruct.getAllConnections()`, returning a list of IDs.
+ * [ ] Ensure that this did not break any unit tests.
+ * [ ] Replace all the old unit tests for `connectTo` and `disconnectFrom`
+   with new ones that test all the features just added by all the recent
+   changes.
+
  * [ ] Add to the API a new method, `insertConnection(source,target,data)`,
-   which connects two `InputStructure`s that are already in the Input Tree.
-   We require each newly inserted connection to have, in its `data` object,
-   an attribute whose key is "id" and whose values are strings that are
-   unique across the Input Tree.  The `source` and `target` parameters are
-   unique ids, just as `parent` is for `insertStructure`.  The `data`
-   parameter is any JSON data that will be stored with the connection.
-   If any of the above requirements on the parameters are not satisfied,
-   the routine does nothing.
+   which directly calls `Structure::connect()`, but only if both the source
+   and the target are `InputStructure` instances.
  * [ ] Add to the API a new method, `removeConnection(id)`, which
-   disconnects two `InputStructure`s that are connected by the connection
-   whose unique id was given.  If the parameter isn't the unique id for a
-   connection in the Input Tree, the routine does nothing.
+   directly calls `Structure::disconnect()`, but only if both the source
+   and the target are `InputStructure` instances.
  * [ ] Add to the API a new method,
-   `setConnectionAttribute(connection,key,value)`, which alters the data of
-   an existing connection between two `InputStructure`s in the Input Tree.
-   The first parameter must be the unique id of a connection, just as with
-   `removeConnection`.  The `key` should be a string that is the key of the
-   attribute to be modified, but if it is not a string it will be converted into one using the `String` constructor.  It cannot be the string "id"
-   because that attribute must remain constant throughout the life of any
-   connection.  The `value` can be any JSON data to use as the new attribute
-   value, or `undefined` to indicate that the key-value pair should be
-   deleted.  If any of the above requirements on the parameters are not
-   satisfied, the routine does nothing.
+   `setConnectionAttribute(connection,key,value)`, which directly calls
+   `Structure::setConnectionData(connection,key,value)`, but only if both
+   the source and the target are `InputStructure` instances.
  * [ ] Create unit tests for all of these new routines and ensure that they
    pass.
  * [ ] Rebuild docs and commit.
