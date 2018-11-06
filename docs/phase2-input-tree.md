@@ -213,7 +213,7 @@ complete and some not yet marked complete.
  * [x] Implement `someStruct.getConnectionsIn()`, returning a list of IDs.
  * [x] Implement `someStruct.getConnectionsOut()`, returning a list of IDs.
  * [x] Implement `someStruct.getAllConnections()`, returning a list of IDs.
- * [ ] Reimplement a new version of `removeAllConnections()` that uses these
+ * [x] Reimplement a new version of `removeAllConnections()` that uses these
    new functions to do its work.
 
  * [ ] Replace all the old unit tests for `connectTo` and `disconnectFrom`

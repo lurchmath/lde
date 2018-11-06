@@ -532,12 +532,7 @@ out of this structure, which is used by `untrackIDs()` and `clearIDs()`,
 defined earlier.
 
         removeAllConnections : ->
-            for pair in ( ( @getAttribute 'connectionsOut' ) ? [ ] )[..]
-                [ id, type ] = pair
-                @disconnectFrom Structure.instanceWithID( id ), type
-            for pair in ( ( @getAttribute 'connectionsIn' ) ? [ ] )[..]
-                [ id, type ] = pair
-                Structure.instanceWithID( id )?.disconnectFrom @, type
+            Structure.disconnect id for id in @getAllConnections()
 
 We also provide the following functions to make it easier for clients to
 create, remove, or query connections.

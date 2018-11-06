@@ -1134,7 +1134,7 @@ And if you ask it to stop, it does that, too.
 
 ## Connections
 
-    xdescribe 'Connections among structures', ->
+    describe 'Connections among structures', ->
 
 Connections are documented
 [here](https://lurchmath.github.io/lde/site/phase0-structures/#connections).
@@ -1146,7 +1146,7 @@ We will be comparing things as multisets, and some utility functions help.
         pairCount = ( array, pair ) ->
             ( a for a in array when samePair a, pair ).length
 
-        it 'should be made consistent by fillOutConnections()', ->
+        xit 'should be made consistent by fillOutConnections()', ->
 
 We begin with the `fillOutConnections()` function, which is supposed to make
 connections consistent, in the sense that outgoing connections lists to
@@ -1297,7 +1297,7 @@ That completes the tests of `fillOutConnections()`.
 
 The following section tests the function `connectTo()`.
 
-        it 'should make consistent connections when asked', ->
+        xit 'should make consistent connections when asked', ->
 
 Make a simple structure to use for testing.  Give all structures in it IDs,
 and verify that they have no connections to start with.
@@ -1410,7 +1410,7 @@ Fourth, connect C to itself three times and ensure they all appear.
 The following section tests the function `disconnectFrom()`; it is the
 companion to the previous section.
 
-        it 'should break connections consistently when asked', ->
+        xit 'should break connections consistently when asked', ->
 
 Build the same structure as in the previous section, and make the same
 connections within it.
@@ -1515,7 +1515,7 @@ without IDs in the structures to be connected), if we clear IDs or stop
 tracking them from a subtree, then we should also disconnect any connections
 that depend upon those IDs.  Here we test to be sure that this happens.
 
-        it 'should break connections when necessitated by ID removal', ->
+        xit 'should break connections when necessitated by ID removal', ->
 
 Build a similar structure to the one from the previous section, but a bit
 simpler.
