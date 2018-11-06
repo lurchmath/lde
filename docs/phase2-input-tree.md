@@ -235,22 +235,22 @@ complete and some not yet marked complete.
     * [x] Verify that functions fail when their preconditions aren't
       satisfied.
 
- * [ ] Add to the API a new method, `insertConnection(source,target,data)`,
+ * [x] Add to the API a new method, `insertConnection(source,target,data)`,
    which directly calls `Structure::connect()`, but only if both the source
    and the target are `InputStructure` instances.
- * [ ] Add to the API a new method, `removeConnection(id)`, which
+ * [x] Add to the API a new method, `removeConnection(id)`, which
    directly calls `Structure::disconnect()`, but only if both the source
    and the target are `InputStructure` instances.
- * [ ] Add to the API a new method,
+ * [x] Add to the API a new method,
    `setConnectionAttribute(connection,key,value)`, which directly calls
    `Structure::setConnectionData(connection,key,value)`, but only if both
    the source and the target are `InputStructure` instances.
+ * [x] Create unit tests for all of these new routines and ensure that they
+   pass.
  * [ ] Add API documentation for all events (`wasInserted`, `wasRemoved`,
    `wasChanged`, `connectionWasInserted`, `connectionWasRemoved`,
    `connectionWasChanged`, and the `willBe` variants for all of them).
    Link to that documentation from the unit tests.
- * [ ] Create unit tests for all of these new routines and ensure that they
-   pass.
  * [ ] Rebuild docs and commit.
 
 ### Policing Connections

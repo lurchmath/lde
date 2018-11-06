@@ -715,32 +715,32 @@ background thread, not to re-test the same functionality as before.
                 expect( result.type ).toBe 'getInputTree'
                 expect( result.payload ).toEqual {
                     className : 'InputStructure'
-                    attributes : { id : 'root' }
+                    attributes : id : 'root'
                     children : [ ]
                 }
                 done()
 
-### should allow inserting things
+### should allow inserting structures
 
-        it 'should allow inserting things', ( done ) ->
-            A = new InputStructure().attr name : 'A', ID : 'foo'
+        it 'should allow inserting structures', ( done ) ->
+            A = new InputStructure().attr name : 'A', id : 'foo'
             worker.postMessage [ 'insertStructure', A.toJSON(), 'root', 0 ]
             asyncTest [ 'getInputTree' ], ( result ) ->
                 expect( result.type ).toBe 'getInputTree'
                 expect( result.payload ).toEqual {
                     className : 'InputStructure'
-                    attributes : { id : 'root' }
+                    attributes : id : 'root'
                     children : [
                         className : 'InputStructure'
-                        attributes : name : 'A', ID : 'foo'
+                        attributes : name : 'A', id : 'foo'
                         children : [ ]
                     ]
                 }
                 done()
 
-### should allow deleting things
+### should allow deleting structures
 
-        it 'should allow deleting things', ( done ) ->
+        it 'should allow deleting structures', ( done ) ->
             A = new InputStructure().attr name : 'A', id : 'foo'
             worker.postMessage [ 'insertStructure', A.toJSON(), 'root', 0 ]
             worker.postMessage [ 'deleteStructure', 'foo' ]
@@ -748,14 +748,14 @@ background thread, not to re-test the same functionality as before.
                 expect( result.type ).toBe 'getInputTree'
                 expect( result.payload ).toEqual {
                     className : 'InputStructure'
-                    attributes : { id : 'root' }
+                    attributes : id : 'root'
                     children : [ ]
                 }
                 done()
 
-### should allow replacing things
+### should allow replacing structures
 
-        it 'should allow replacing things', ( done ) ->
+        it 'should allow replacing structures', ( done ) ->
             A = new InputStructure().attr name : 'A', id : 'foo'
             B = new InputStructure().attr name : 'B', id : 'bar'
             worker.postMessage [ 'insertStructure', A.toJSON(), 'root', 0 ]
@@ -764,7 +764,7 @@ background thread, not to re-test the same functionality as before.
                 expect( result.type ).toBe 'getInputTree'
                 expect( result.payload ).toEqual {
                     className : 'InputStructure'
-                    attributes : { id : 'root' }
+                    attributes : id : 'root'
                     children : [
                         className : 'InputStructure'
                         attributes : name : 'B', id : 'bar'
@@ -773,9 +773,9 @@ background thread, not to re-test the same functionality as before.
                 }
                 done()
 
-### should allow setting attributes
+### should allow setting structure attributes
 
-        it 'should allow setting attributes', ( done ) ->
+        it 'should allow setting structure attributes', ( done ) ->
             A = new InputStructure().attr name : 'A', id : 'foo'
             worker.postMessage [ 'insertStructure', A.toJSON(), 'root', 0 ]
             worker.postMessage [
@@ -784,13 +784,166 @@ background thread, not to re-test the same functionality as before.
                 expect( result.type ).toBe 'getInputTree'
                 expect( result.payload ).toEqual {
                     className : 'InputStructure'
-                    attributes : { id : 'root' }
+                    attributes : id : 'root'
                     children : [
                         className : 'InputStructure'
                         attributes :
                             name : 'A'
                             id : 'foo'
                             color : 'red'
+                        children : [ ]
+                    ]
+                }
+                done()
+
+### should allow removing structure attributes
+
+        it 'should allow removing structure attributes', ( done ) ->
+            A = new InputStructure().attr name : 'A', id : 'foo', 98 : 76
+            worker.postMessage [ 'insertStructure', A.toJSON(), 'root', 0 ]
+            worker.postMessage [ 'setStructureAttribute', 'foo', 98 ]
+            asyncTest [ 'getInputTree' ], ( result ) ->
+                expect( result.type ).toBe 'getInputTree'
+                expect( result.payload ).toEqual {
+                    className : 'InputStructure'
+                    attributes : id : 'root'
+                    children : [
+                        className : 'InputStructure'
+                        attributes :
+                            name : 'A'
+                            id : 'foo'
+                        children : [ ]
+                    ]
+                }
+                done()
+
+### should allow inserting connections
+
+        it 'should allow inserting connections', ( done ) ->
+            A = new InputStructure().attr name : 'A', id : 'foo'
+            worker.postMessage [ 'insertStructure', A.toJSON(), 'root', 0 ]
+            B = new InputStructure().attr name : 'B', id : 'bar'
+            worker.postMessage [ 'insertStructure', B.toJSON(), 'root', 1 ]
+            worker.postMessage [ 'insertConnection', 'foo', 'bar',
+                id : 'C', width : 20, height : 30 ]
+            asyncTest [ 'getInputTree' ], ( result ) ->
+                expect( result.type ).toBe 'getInputTree'
+                expect( result.payload ).toEqual {
+                    className : 'InputStructure'
+                    attributes : id : 'root'
+                    children : [
+                        className : 'InputStructure'
+                        attributes :
+                            name : 'A'
+                            id : 'foo'
+                            '_conn C to' : 'bar'
+                            '_conn C data' :
+                                id : 'C', width : 20, height : 30
+                        children : [ ]
+                    ,
+                        className : 'InputStructure'
+                        attributes :
+                            name : 'B'
+                            id : 'bar'
+                            '_conn C from' : 'foo'
+                        children : [ ]
+                    ]
+                }
+                done()
+
+### should allow removing connections
+
+        it 'should allow removing connections', ( done ) ->
+            A = new InputStructure().attr name : 'A', id : 'foo'
+            worker.postMessage [ 'insertStructure', A.toJSON(), 'root', 0 ]
+            B = new InputStructure().attr name : 'B', id : 'bar'
+            worker.postMessage [ 'insertStructure', B.toJSON(), 'root', 1 ]
+            worker.postMessage [ 'insertConnection', 'foo', 'bar',
+                id : 'C', width : 20, height : 30 ]
+            worker.postMessage [ 'removeConnection', 'C' ]
+            asyncTest [ 'getInputTree' ], ( result ) ->
+                expect( result.type ).toBe 'getInputTree'
+                expect( result.payload ).toEqual {
+                    className : 'InputStructure'
+                    attributes : id : 'root'
+                    children : [
+                        className : 'InputStructure'
+                        attributes : name : 'A', id : 'foo'
+                        children : [ ]
+                    ,
+                        className : 'InputStructure'
+                        attributes : name : 'B', id : 'bar'
+                        children : [ ]
+                    ]
+                }
+                done()
+
+### should allow setting connection attributes
+
+        it 'should allow setting connection attributes', ( done ) ->
+            A = new InputStructure().attr name : 'A', id : 'foo'
+            worker.postMessage [ 'insertStructure', A.toJSON(), 'root', 0 ]
+            B = new InputStructure().attr name : 'B', id : 'bar'
+            worker.postMessage [ 'insertStructure', B.toJSON(), 'root', 1 ]
+            worker.postMessage [ 'insertConnection', 'foo', 'bar',
+                id : 'C', width : 20, height : 30 ]
+            worker.postMessage [ 'setConnectionAttribute',
+                'C', 'width', 999 ]
+            asyncTest [ 'getInputTree' ], ( result ) ->
+                expect( result.type ).toBe 'getInputTree'
+                expect( result.payload ).toEqual {
+                    className : 'InputStructure'
+                    attributes : id : 'root'
+                    children : [
+                        className : 'InputStructure'
+                        attributes :
+                            name : 'A'
+                            id : 'foo'
+                            '_conn C to' : 'bar'
+                            '_conn C data' :
+                                id : 'C', width : 999, height : 30
+                        children : [ ]
+                    ,
+                        className : 'InputStructure'
+                        attributes :
+                            name : 'B'
+                            id : 'bar'
+                            '_conn C from' : 'foo'
+                        children : [ ]
+                    ]
+                }
+                done()
+
+### should allow removing connection attributes
+
+        it 'should allow removing connection attributes', ( done ) ->
+            A = new InputStructure().attr name : 'A', id : 'foo'
+            worker.postMessage [ 'insertStructure', A.toJSON(), 'root', 0 ]
+            B = new InputStructure().attr name : 'B', id : 'bar'
+            worker.postMessage [ 'insertStructure', B.toJSON(), 'root', 1 ]
+            worker.postMessage [ 'insertConnection', 'foo', 'bar',
+                id : 'C', width : 20, height : 30 ]
+            worker.postMessage [ 'setConnectionAttribute', 'C', 'height' ]
+            asyncTest [ 'getInputTree' ], ( result ) ->
+                expect( result.type ).toBe 'getInputTree'
+                expect( result.payload ).toEqual {
+                    className : 'InputStructure'
+                    attributes : id : 'root'
+                    children : [
+                        className : 'InputStructure'
+                        attributes :
+                            name : 'A'
+                            id : 'foo'
+                            '_conn C to' : 'bar'
+                            '_conn C data' :
+                                id : 'C', width : 20
+                        children : [ ]
+                    ,
+                        className : 'InputStructure'
+                        attributes :
+                            name : 'B'
+                            id : 'bar'
+                            '_conn C from' : 'foo'
                         children : [ ]
                     ]
                 }

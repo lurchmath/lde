@@ -70,8 +70,8 @@ doing nothing, and in the second case by attempting to deserialize it.
 
 ## The Main API
 
-This module presents to clients a four-function API defined in this section.
-Each of these functions manipulates the global Input Tree.
+This module presents to clients a seven-function API defined in this
+section.  Each of these functions manipulates the global Input Tree.
 
 The following insertion function deserializes the given structure from JSON,
 finds the descendant of the Input Tree that has the given ID, and inserts
@@ -163,11 +163,54 @@ function does nothing.
                 subtree.setAttribute key, value
             if key is 'id' then subtree.trackIDs no
 
+We turn now to functions that add, remove, or alter connections.
+
+The following function adds a connection between two existing nodes in the
+Input Tree.  It accepts three parameters, the ID of the source node, the ID
+of the target node, and the JSON data for the connection.  That data must at
+least contain an `id` field for the connection, which must be unique across
+the entire Input Tree.  If any of these conditions are not satisfied, this
+function does nothing.  Otherwise, it creates the connection.
+
+    functions.insertConnection = ( sourceID, targetID, data ) ->
+        return no unless \
+            ( source = Structure.instanceWithID sourceID ) and \
+            ( target = Structure.instanceWithID targetID ) and \
+            ( isInTheInputTree source ) and ( isInTheInputTree target )
+        Structure.connect source, target, data
+
+The following function removes a connection between two nodes in the Input
+Tree.  It takes just one parameter, the unique ID of the connection to
+remove.  It returns no if there is no such connection in the Input Tree, and
+yes if there is one; in the latter case, it removes it, otherwise it does
+nothing.
+
+    functions.removeConnection = ( id ) ->
+        return no unless \
+            ( isInTheInputTree Structure.getConnectionSource id ) and \
+            ( isInTheInputTree Structure.getConnectionTarget id )
+        Structure.disconnect id
+
+The following function permits editing the attributes of a connection in the
+Input Tree.  It takes three parameters, a connection ID, a key, and a value.
+If there is a connection in the Input Tree with the given unique ID, then
+this function edits its attributes by assigning the given key-value pair,
+overwriting any with the same key that may have been there.  If the value is
+undefined (or omitted) then this function removes any old key-value pair
+with the same key.  If any of the requirements given above are not
+satisfied, the function does nothing.
+
+    functions.setConnectionAttribute = ( id, key, value ) ->
+        return no unless \
+            ( isInTheInputTree Structure.getConnectionSource id ) and \
+            ( isInTheInputTree Structure.getConnectionTarget id )
+        Structure.setConnectionData id, key, value
+
 ## Event Listeners
 
 If the LDE detects that it is being run in a background thread, it will set
 up listeners for messages from the parent thread.  These listeners handle
-messages of five types:
+messages of eight types:
 
  * `insertStructure`, with three arguments, which calls the
    `insertStructure` function defined above and sends no messages back
@@ -177,6 +220,13 @@ messages of five types:
    and sends no messages
  * `setStructureAttribute`, with three arguments, which calls
    `setStructureAttribute` and sends no messages
+ * `insertConnection`, with three arguments, which calls the
+   `insertConnection` function defined above and sends no messages back
+ * `removeConnection`, with one argument, which calls the
+   `removeConnection` function defined above and sends no messages back
+ * `setConnectionAttribute`, with three arguments, which calls the
+   `setConnectionAttribute` function defined above and sends no messages
+   back
  * `getInputTree`, with zero arguments, which sends back a message
    containing the JSON serialized form of the document, as fetched using the
    `getInputTree` function defined above
@@ -185,13 +235,17 @@ messages of five types:
     if WorkerGlobalScope? or self?.importScripts?
 
 Here are the numbers of arguments we accept for each message we accept.
+Each is an array, any number in the array is acceptable.
 
         expectedArgumentCount =
-            insertStructure : 3
-            deleteStructure : 1
-            replaceStructure : 2
-            setStructureAttribute : 3
-            getInputTree : 0
+            insertStructure : [ 3 ]
+            deleteStructure : [ 1 ]
+            replaceStructure : [ 2 ]
+            setStructureAttribute : [ 2, 3 ]
+            insertConnection : [ 3 ]
+            removeConnection : [ 1 ]
+            setConnectionAttribute : [ 2, 3 ]
+            getInputTree : [ 0 ]
 
 Messages received expect data arrays of the form `[ command, args... ]`.
 
@@ -202,7 +256,7 @@ Anything with the right number of arguments is passed on to the
 corresponding function.  That function may or may not do anything, depending
 on whether the data is in the correct form.
 
-            if expectedArgumentCount[command] is args.length
+            if args.length in ( expectedArgumentCount[command] ? [ ] )
                 if command is 'getInputTree'
                     self.postMessage
                         type : 'getInputTree'
