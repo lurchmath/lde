@@ -293,10 +293,14 @@ variable.  Whenever a structure hierarchy is no longer used by the client,
 `untrackIDs` should be called on that hierarchy to prevent memory leaks.
 
 Because connections depend on IDs, we will also disconnect in `untrackIDs()`
-any connections involving this structure.
+any connections involving this structure.  Similarly, in `trackIDs()`, we
+must notice any connections that exist in the structure and store them in
+the appropriate global data structures; connection IDs are a close kin to
+`Structure` IDs.
 
         id : -> @getAttribute 'id'
         trackIDs : ( recursive = yes ) ->
+            @noticeAllConnections()
             if @id()? then Structure::IDs[@id()] = @
             if recursive then child.trackIDs() for child in @children()
         untrackIDs : ( recursive = yes ) ->
@@ -353,7 +357,7 @@ case.
         @connect : ( source, target, data ) ->
             return no unless \
                 ( data instanceof Object ) and \
-                ( not connectionIDs.hasOwnProperty data.id ) and \
+                ( not Structure::connectionIDs.hasOwnProperty data.id ) and\
                 ( source instanceof Structure ) and source.id()? and \
                 ( target instanceof Structure ) and target.id()?
             source.connectionWillBeInserted? data.id
@@ -409,15 +413,21 @@ both.
             for own key of @attributes
                 if key[...6] is '_conn ' and key[-5...] is ' from'
                     result.push key[6...-5]
+            result.sort()
             result
         getConnectionsOut : ->
             result = [ ]
             for own key of @attributes
                 if key[...6] is '_conn ' and key[-3...] is ' to'
                     result.push key[6...-3]
+            result.sort()
             result
         getAllConnections : ->
-            @getConnectionsIn().concat @getConnectionsOut()
+            result = @getConnectionsIn()
+            for out in @getConnectionsOut()
+                if out not in result then result.push out
+            result.sort()
+            result
 
 Breaking a connection takes as input the unique ID for the connection, and
 it can then look up all the other relevant data in the `connectionIDs` class
@@ -429,20 +439,22 @@ source and the target if it succeeds.  It returns true on success and false
 on failure.
 
         @disconnect : ( connectionID ) ->
+            console.log 'deleting', connectionID, '?'
             return no unless \
-                ( source = connectionIDs[connectionID] ) and \
+                ( source = Structure::connectionIDs[connectionID] ) and \
                 ( targetID = source.getAttribute \
-                    "_conn #{connectionID} target" ) and \
-                ( target = Structure::instanceWithID targetID ) and \
+                    "_conn #{connectionID} to" ) and \
+                ( target = Structure.instanceWithID targetID ) and \
                 ( data = source.getAttribute "_conn #{connectionID} data" )
             source.connectionWillBeRemoved? connectionID
             target.connectionWillBeRemoved? connectionID
-            source.removeAttribute "_conn #{connectionID} data"
-            source.removeAttribute "_conn #{connectionID} to"
-            target.removeAttribute "_conn #{connectionID} from"
+            source.clearAttributes "_conn #{connectionID} data",
+                "_conn #{connectionID} to"
+            target.clearAttributes "_conn #{connectionID} from"
             delete Structure::connectionIDs[connectionID]
             source.connectionWasRemoved? connectionID
             target.connectionWasRemoved? connectionID
+            console.log '\tyup!'
             yes
 
 The convenience function for accessing this from instances can be called
@@ -460,8 +472,8 @@ key will be removed from the connection data.
             return no unless \
                 ( source = connectionIDs[connectionID] ) and \
                 ( targetID = source.getAttribute \
-                    "_conn #{connectionID} target" ) and \
-                ( target = Structure::instanceWithID targetID ) and \
+                    "_conn #{connectionID} to" ) and \
+                ( target = Structure.instanceWithID targetID ) and \
                 ( data = source.getAttribute "_conn #{connectionID} data" )
             source.connectionWillBeChanged? connectionID
             target.connectionWillBeChanged? connectionID
@@ -484,10 +496,40 @@ out of this structure, which is used by `untrackIDs()` and `clearIDs()`,
 defined earlier.
 
         removeAllConnections : ->
+            console.log 'removing from', @id()
             Structure.disconnect id for id in @getAllConnections()
+            child.removeAllConnections() for child in @children
 
-We also provide the following functions to make it easier for clients to
-create, remove, or query connections.
+A sort of inverse of the previous function is to find all connections that
+exist in the attributes of a `Structure` hierarchy and import them into the
+class-level data structures that should store them.  This is useful if a
+tree has been removed and then moved to a new location.  When it was
+removed, its connections were removed from `connectionIDs`; when it is
+re-inserted, they need to be re-added.
+
+This presumes that the source node already has the `"_conn #{id} to"` and
+`"_conn #{id} data"` attributes and the target already has the
+`"_conn #{id} from"` attribute, and that both ends of each connection are
+registered in `Structure::IDs`.
+
+If this succeeds (because all the IDs that would need to be added to
+`connectionIDs` were not there, and thus could be added fresh) it returns
+true.  If any of the additions failed because the ID in question was already
+in `connectionIDs`, it returns false (and does not overwrite).  Even if it
+returns false, it still adds all those that it can.
+
+        noticeAllConnections : ->
+            success = yes
+            for id in @getConnectionsOut()
+                if Structure::connectionIDs.hasOwnProperty id
+                    success = no
+                else
+                    Structure::connectionIDs[id] = @
+            # connections in will be handled at the source node
+            for child in @children
+                if not child.noticeAllConnections()
+                    success = no
+            success
 
 ## Accessibility
 

@@ -1142,7 +1142,7 @@ The following unit tests are for all functions related to them.
 
 The following section tests the function `connectTo()`.
 
-        xit 'should make consistent connections when asked', ->
+        it 'should make consistent connections when asked', ->
 
 Make a simple structure to use for testing.  Give all structures in it IDs,
 and verify that they have no connections to start with.
@@ -1152,18 +1152,15 @@ and verify that they have no connections to start with.
                 C = new Structure().attr id : 'C'
             ).attr id : 'A'
             A.trackIDs()
-            expect( A.getAttribute 'connectionsIn' )
-                .toBeUndefined()
-            expect( A.getAttribute 'connectionsOut' )
-                .toBeUndefined()
-            expect( B.getAttribute 'connectionsIn' )
-                .toBeUndefined()
-            expect( B.getAttribute 'connectionsOut' )
-                .toBeUndefined()
-            expect( C.getAttribute 'connectionsIn' )
-                .toBeUndefined()
-            expect( C.getAttribute 'connectionsOut' )
-                .toBeUndefined()
+            expect( A.getConnectionsIn() ).toEqual [ ]
+            expect( A.getConnectionsOut() ).toEqual [ ]
+            expect( A.getAllConnections() ).toEqual [ ]
+            expect( B.getConnectionsIn() ).toEqual [ ]
+            expect( B.getConnectionsOut() ).toEqual [ ]
+            expect( B.getAllConnections() ).toEqual [ ]
+            expect( C.getConnectionsIn() ).toEqual [ ]
+            expect( C.getConnectionsOut() ).toEqual [ ]
+            expect( C.getAllConnections() ).toEqual [ ]
 
 Make four connections of various types, and ensure that the connection sets
 are created correctly in each case.  Furthermore, in each case, ensure that
@@ -1171,91 +1168,68 @@ the attempt to make a connection succeeds.
 
 First, a simple connection.
 
-            expect( A.connectTo B, 'example' ).toBeTruthy()
-            expect( A.getAttribute 'connectionsIn' )
-                .toBeUndefined()
-            toTest = A.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'B', 'example' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-            toTest = B.getAttribute 'connectionsIn'
-            expect( pairCount toTest, [ 'A', 'example' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-            expect( B.getAttribute 'connectionsOut' )
-                .toBeUndefined()
-            expect( C.getAttribute 'connectionsIn' )
-                .toBeUndefined()
-            expect( C.getAttribute 'connectionsOut' )
-                .toBeUndefined()
+            expect( A.connectTo B, id : 'example' ).toBeTruthy()
+            expect( A.getConnectionsIn() ).toEqual [ ]
+            expect( A.getConnectionsOut() ).toEqual [ 'example' ]
+            expect( A.getAllConnections() ).toEqual [ 'example' ]
+            expect( B.getConnectionsIn() ).toEqual [ 'example' ]
+            expect( B.getConnectionsOut() ).toEqual [ ]
+            expect( B.getAllConnections() ).toEqual [ 'example' ]
+            expect( C.getConnectionsIn() ).toEqual [ ]
+            expect( C.getConnectionsOut() ).toEqual [ ]
+            expect( C.getAllConnections() ).toEqual [ ]
 
 Second, a connection going the other way, and of the same type.
 
-            expect( B.connectTo A, 'example' ).toBeTruthy()
-            toTest = A.getAttribute 'connectionsIn'
-            expect( pairCount toTest, [ 'B', 'example' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-            toTest = A.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'B', 'example' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-            toTest = B.getAttribute 'connectionsIn'
-            expect( pairCount toTest, [ 'A', 'example' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-            toTest = B.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'A', 'example' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-            expect( C.getAttribute 'connectionsIn' )
-                .toBeUndefined()
-            expect( C.getAttribute 'connectionsOut' )
-                .toBeUndefined()
+            expect( B.connectTo A, id : 'other' ).toBeTruthy()
+            expect( A.getConnectionsIn() ).toEqual [ 'other' ]
+            expect( A.getConnectionsOut() ).toEqual [ 'example' ]
+            expect( A.getAllConnections() ).toEqual [ 'example', 'other' ]
+            expect( B.getConnectionsIn() ).toEqual [ 'example' ]
+            expect( B.getConnectionsOut() ).toEqual [ 'other' ]
+            expect( B.getAllConnections() ).toEqual [ 'example', 'other' ]
+            expect( C.getConnectionsIn() ).toEqual [ ]
+            expect( C.getConnectionsOut() ).toEqual [ ]
+            expect( C.getAllConnections() ).toEqual [ ]
 
 Third, repeat the previous connection and ensure that there are now two.
 
-            expect( B.connectTo A, 'example' ).toBeTruthy()
-            toTest = A.getAttribute 'connectionsIn'
-            expect( pairCount toTest, [ 'B', 'example' ] ).toBe 2
-            expect( toTest.length ).toBe 2
-            toTest = A.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'B', 'example' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-            toTest = B.getAttribute 'connectionsIn'
-            expect( pairCount toTest, [ 'A', 'example' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-            toTest = B.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'A', 'example' ] ).toBe 2
-            expect( toTest.length ).toBe 2
-            expect( C.getAttribute 'connectionsIn' )
-                .toBeUndefined()
-            expect( C.getAttribute 'connectionsOut' )
-                .toBeUndefined()
+            expect( B.connectTo A, id : 'another' ).toBeTruthy()
+            expect( A.getConnectionsIn() ).toEqual [ 'another', 'other' ]
+            expect( A.getConnectionsOut() ).toEqual [ 'example' ]
+            expect( A.getAllConnections() ).toEqual [
+                'another', 'example', 'other' ]
+            expect( B.getConnectionsIn() ).toEqual [ 'example' ]
+            expect( B.getConnectionsOut() ).toEqual [ 'another', 'other' ]
+            expect( B.getAllConnections() ).toEqual [
+                'another', 'example', 'other' ]
+            expect( C.getConnectionsIn() ).toEqual [ ]
+            expect( C.getConnectionsOut() ).toEqual [ ]
+            expect( C.getAllConnections() ).toEqual [ ]
 
 Fourth, connect C to itself three times and ensure they all appear.
 
-            expect( C.connectTo C, 'other' ).toBeTruthy()
-            expect( C.connectTo C, 'other' ).toBeTruthy()
-            expect( C.connectTo C, 'other' ).toBeTruthy()
-            toTest = A.getAttribute 'connectionsIn'
-            expect( pairCount toTest, [ 'B', 'example' ] ).toBe 2
-            expect( toTest.length ).toBe 2
-            toTest = A.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'B', 'example' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-            toTest = B.getAttribute 'connectionsIn'
-            expect( pairCount toTest, [ 'A', 'example' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-            toTest = B.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'A', 'example' ] ).toBe 2
-            expect( toTest.length ).toBe 2
-            toTest = C.getAttribute 'connectionsIn'
-            expect( pairCount toTest, [ 'C', 'other' ] ).toBe 3
-            expect( toTest.length ).toBe 3
-            toTest = C.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'C', 'other' ] ).toBe 3
-            expect( toTest.length ).toBe 3
+            expect( C.connectTo C, id : '1' ).toBeTruthy()
+            expect( C.connectTo C, id : '2' ).toBeTruthy()
+            expect( C.connectTo C, id : '3' ).toBeTruthy()
+            expect( A.getConnectionsIn() ).toEqual [ 'another', 'other' ]
+            expect( A.getConnectionsOut() ).toEqual [ 'example' ]
+            expect( A.getAllConnections() ).toEqual [
+                'another', 'example', 'other' ]
+            expect( B.getConnectionsIn() ).toEqual [ 'example' ]
+            expect( B.getConnectionsOut() ).toEqual [ 'another', 'other' ]
+            expect( B.getAllConnections() ).toEqual [
+                'another', 'example', 'other' ]
+            expect( C.getConnectionsIn() ).toEqual [ '1', '2', '3' ]
+            expect( C.getConnectionsOut() ).toEqual [ '1', '2', '3' ]
+            expect( C.getAllConnections() ).toEqual [ '1', '2', '3' ]
             A.untrackIDs()
+            console.log Structure::connectionIDs
 
 The following section tests the function `disconnectFrom()`; it is the
 companion to the previous section.
 
-        xit 'should break connections consistently when asked', ->
+        it 'should break connections consistently when asked', ->
 
 Build the same structure as in the previous section, and make the same
 connections within it.
@@ -1265,94 +1239,64 @@ connections within it.
                 C = new Structure().attr id : 'C'
             ).attr id : 'A'
             A.trackIDs()
-            expect( A.connectTo B, 'example' ).toBeTruthy()
-            expect( B.connectTo A, 'example' ).toBeTruthy()
-            expect( B.connectTo A, 'example' ).toBeTruthy()
-            expect( C.connectTo C, 'other' ).toBeTruthy()
-            expect( C.connectTo C, 'other' ).toBeTruthy()
-            expect( C.connectTo C, 'other' ).toBeTruthy()
+            expect( A.connectTo B, id : 'example' ).toBeTruthy()
+            expect( B.connectTo A, id : 'other' ).toBeTruthy()
+            expect( B.connectTo A, id : 'another' ).toBeTruthy()
+            expect( C.connectTo C, id : '1' ).toBeTruthy()
+            expect( C.connectTo C, id : '2' ).toBeTruthy()
+            expect( C.connectTo C, id : '3' ).toBeTruthy()
 
 Verify that the currenct connection setup is, as expected, what it was at
 the end of the last section.
 
-            toTest = A.getAttribute 'connectionsIn'
-            expect( pairCount toTest, [ 'B', 'example' ] ).toBe 2
-            expect( toTest.length ).toBe 2
-            toTest = A.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'B', 'example' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-            toTest = B.getAttribute 'connectionsIn'
-            expect( pairCount toTest, [ 'A', 'example' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-            toTest = B.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'A', 'example' ] ).toBe 2
-            expect( toTest.length ).toBe 2
-            toTest = C.getAttribute 'connectionsIn'
-            expect( pairCount toTest, [ 'C', 'other' ] ).toBe 3
-            expect( toTest.length ).toBe 3
-            toTest = C.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'C', 'other' ] ).toBe 3
-            expect( toTest.length ).toBe 3
+            expect( A.getConnectionsIn() ).toEqual [ 'another', 'other' ]
+            expect( A.getConnectionsOut() ).toEqual [ 'example' ]
+            expect( A.getAllConnections() ).toEqual [
+                'another', 'example', 'other' ]
+            expect( B.getConnectionsIn() ).toEqual [ 'example' ]
+            expect( B.getConnectionsOut() ).toEqual [ 'another', 'other' ]
+            expect( B.getAllConnections() ).toEqual [
+                'another', 'example', 'other' ]
+            expect( C.getConnectionsIn() ).toEqual [ '1', '2', '3' ]
+            expect( C.getConnectionsOut() ).toEqual [ '1', '2', '3' ]
+            expect( C.getAllConnections() ).toEqual [ '1', '2', '3' ]
 
 Remove a few connections one at a time and ensure that at each point all
 connections are as they should be.
 
-            expect( B.disconnectFrom A, 'example' ).toBeTruthy()
-            toTest = A.getAttribute 'connectionsIn'
-            expect( pairCount toTest, [ 'B', 'example' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-            toTest = A.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'B', 'example' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-            toTest = B.getAttribute 'connectionsIn'
-            expect( pairCount toTest, [ 'A', 'example' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-            toTest = B.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'A', 'example' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-            toTest = C.getAttribute 'connectionsIn'
-            expect( pairCount toTest, [ 'C', 'other' ] ).toBe 3
-            expect( toTest.length ).toBe 3
-            toTest = C.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'C', 'other' ] ).toBe 3
-            expect( toTest.length ).toBe 3
+            expect( B.disconnect 'another' ).toBeTruthy()
+            expect( A.getConnectionsIn() ).toEqual [ 'other' ]
+            expect( A.getConnectionsOut() ).toEqual [ 'example' ]
+            expect( A.getAllConnections() ).toEqual [ 'example', 'other' ]
+            expect( B.getConnectionsIn() ).toEqual [ 'example' ]
+            expect( B.getConnectionsOut() ).toEqual [ 'other' ]
+            expect( B.getAllConnections() ).toEqual [ 'example', 'other' ]
+            expect( C.getConnectionsIn() ).toEqual [ '1', '2', '3' ]
+            expect( C.getConnectionsOut() ).toEqual [ '1', '2', '3' ]
+            expect( C.getAllConnections() ).toEqual [ '1', '2', '3' ]
 
-            expect( B.disconnectFrom A, 'example' ).toBeTruthy()
-            expect( A.getAttribute 'connectionsIn' )
-                .toEqual [ ]
-            toTest = A.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'B', 'example' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-            toTest = B.getAttribute 'connectionsIn'
-            expect( pairCount toTest, [ 'A', 'example' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-            expect( B.getAttribute 'connectionsOut' )
-                .toEqual [ ]
-            toTest = C.getAttribute 'connectionsIn'
-            expect( pairCount toTest, [ 'C', 'other' ] ).toBe 3
-            expect( toTest.length ).toBe 3
-            toTest = C.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'C', 'other' ] ).toBe 3
-            expect( toTest.length ).toBe 3
+            expect( A.disconnect 'example' ).toBeTruthy()
+            expect( A.getConnectionsIn() ).toEqual [ 'other' ]
+            expect( A.getConnectionsOut() ).toEqual [ ]
+            expect( A.getAllConnections() ).toEqual [ 'other' ]
+            expect( B.getConnectionsIn() ).toEqual [ ]
+            expect( B.getConnectionsOut() ).toEqual [ 'other' ]
+            expect( B.getAllConnections() ).toEqual [ 'other' ]
+            expect( C.getConnectionsIn() ).toEqual [ '1', '2', '3' ]
+            expect( C.getConnectionsOut() ).toEqual [ '1', '2', '3' ]
+            expect( C.getAllConnections() ).toEqual [ '1', '2', '3' ]
 
-            expect( C.disconnectFrom C, 'other' ).toBeTruthy()
-            expect( C.disconnectFrom C, 'other' ).toBeTruthy()
-            expect( A.getAttribute 'connectionsIn' )
-                .toEqual [ ]
-            toTest = A.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'B', 'example' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-            toTest = B.getAttribute 'connectionsIn'
-            expect( pairCount toTest, [ 'A', 'example' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-            expect( B.getAttribute 'connectionsOut' )
-                .toEqual [ ]
-            toTest = C.getAttribute 'connectionsIn'
-            expect( pairCount toTest, [ 'C', 'other' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-            toTest = C.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'C', 'other' ] ).toBe 1
-            expect( toTest.length ).toBe 1
+            expect( C.disconnect '1' ).toBeTruthy()
+            expect( C.disconnect '3' ).toBeTruthy()
+            expect( A.getConnectionsIn() ).toEqual [ 'other' ]
+            expect( A.getConnectionsOut() ).toEqual [ ]
+            expect( A.getAllConnections() ).toEqual [ 'other' ]
+            expect( B.getConnectionsIn() ).toEqual [ ]
+            expect( B.getConnectionsOut() ).toEqual [ 'other' ]
+            expect( B.getAllConnections() ).toEqual [ 'other' ]
+            expect( C.getConnectionsIn() ).toEqual [ '2' ]
+            expect( C.getConnectionsOut() ).toEqual [ '2' ]
+            expect( C.getAllConnections() ).toEqual [ '2' ]
             A.untrackIDs()
 
 Since connections depend upon IDs (and you can't even create connections
@@ -1360,55 +1304,63 @@ without IDs in the structures to be connected), if we clear IDs or stop
 tracking them from a subtree, then we should also disconnect any connections
 that depend upon those IDs.  Here we test to be sure that this happens.
 
-        xit 'should break connections when necessitated by ID removal', ->
+        it 'should break connections when necessitated by ID removal', ->
 
-Build a similar structure to the one from the previous section, but a bit
-simpler.
+Build the same structure as in the previous section.
 
             A = new Structure(
                 B = new Structure().attr id : 'B'
                 C = new Structure().attr id : 'C'
             ).attr id : 'A'
             A.trackIDs()
-            expect( A.connectTo B, 'foo' ).toBeTruthy()
-            expect( B.connectTo A, 'bar' ).toBeTruthy()
-            expect( C.connectTo C, 'baz' ).toBeTruthy()
-            expect( C.connectTo B, 'bax' ).toBeTruthy()
+            expect( A.connectTo B, id : 'example' ).toBeTruthy()
+            expect( B.connectTo A, id : 'other' ).toBeTruthy()
+            expect( B.connectTo A, id : 'another' ).toBeTruthy()
+            expect( C.connectTo C, id : '1' ).toBeTruthy()
+            expect( C.connectTo C, id : '2' ).toBeTruthy()
+            expect( C.connectTo C, id : '3' ).toBeTruthy()
 
 Verify that connections exist.
 
-            toTest = A.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'B', 'foo' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-            toTest = B.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'A', 'bar' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-            toTest = C.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'C', 'baz' ] ).toBe 1
-            expect( pairCount toTest, [ 'B', 'bax' ] ).toBe 1
-            expect( toTest.length ).toBe 2
+            expect( A.getConnectionsIn() ).toEqual [ 'another', 'other' ]
+            expect( A.getConnectionsOut() ).toEqual [ 'example' ]
+            expect( A.getAllConnections() ).toEqual [
+                'another', 'example', 'other' ]
+            expect( B.getConnectionsIn() ).toEqual [ 'example' ]
+            expect( B.getConnectionsOut() ).toEqual [ 'another', 'other' ]
+            expect( B.getAllConnections() ).toEqual [
+                'another', 'example', 'other' ]
+            expect( C.getConnectionsIn() ).toEqual [ '1', '2', '3' ]
+            expect( C.getConnectionsOut() ).toEqual [ '1', '2', '3' ]
+            expect( C.getAllConnections() ).toEqual [ '1', '2', '3' ]
 
 Clear the IDs from B and verify that all connections to or from it were
 broken, but the other connections remained.
 
             B.clearIDs()
-            toTest = A.getAttribute 'connectionsOut'
-            expect( toTest.length ).toBe 0
-            toTest = B.getAttribute 'connectionsOut'
-            expect( toTest.length ).toBe 0
-            toTest = C.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'C', 'baz' ] ).toBe 1
-            expect( toTest.length ).toBe 1
+            expect( A.getConnectionsIn() ).toEqual [ ]
+            expect( A.getConnectionsOut() ).toEqual [ ]
+            expect( A.getAllConnections() ).toEqual [ ]
+            expect( B.getConnectionsIn() ).toEqual [ ]
+            expect( B.getConnectionsOut() ).toEqual [ ]
+            expect( B.getAllConnections() ).toEqual [ ]
+            expect( C.getConnectionsIn() ).toEqual [ '1', '2', '3' ]
+            expect( C.getConnectionsOut() ).toEqual [ '1', '2', '3' ]
+            expect( C.getAllConnections() ).toEqual [ '1', '2', '3' ]
 
-Untrack IDs from A on down and verify that all connections were broken.
+Untrack IDs from A (which propagates downward recursively) and verify that
+all connections were broken.
 
             A.untrackIDs()
-            toTest = A.getAttribute 'connectionsOut'
-            expect( toTest.length ).toBe 0
-            toTest = B.getAttribute 'connectionsOut'
-            expect( toTest.length ).toBe 0
-            toTest = C.getAttribute 'connectionsOut'
-            expect( toTest.length ).toBe 0
+            expect( A.getConnectionsIn() ).toEqual [ ]
+            expect( A.getConnectionsOut() ).toEqual [ ]
+            expect( A.getAllConnections() ).toEqual [ ]
+            expect( B.getConnectionsIn() ).toEqual [ ]
+            expect( B.getConnectionsOut() ).toEqual [ ]
+            expect( B.getAllConnections() ).toEqual [ ]
+            expect( C.getConnectionsIn() ).toEqual [ ]
+            expect( C.getConnectionsOut() ).toEqual [ ]
+            expect( C.getAllConnections() ).toEqual [ ]
 
 ## Convenience constructions
 

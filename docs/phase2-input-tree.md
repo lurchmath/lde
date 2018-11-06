@@ -216,11 +216,11 @@ complete and some not yet marked complete.
  * [x] Reimplement a new version of `removeAllConnections()` that uses these
    new functions to do its work.
 
- * [ ] Replace all the old unit tests for `connectTo` and `disconnectFrom`
+ * [x] Replace all the old unit tests for `connectTo` and `disconnectFrom`
    with new ones that test all the features just added by all the recent
    changes.
- * [ ] There are commented-out tests for `setup()` that used to use
-   `allConnectionsIn()`, etc., which can now be updated to use these.
+ * [ ] Add unit tests for all new function and features added in the steps
+   above.
 
  * [ ] Add to the API a new method, `insertConnection(source,target,data)`,
    which directly calls `Structure::connect()`, but only if both the source
