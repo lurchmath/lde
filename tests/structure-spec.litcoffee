@@ -857,14 +857,12 @@ apply to the underlying `Structure` objects alone.
             expect( S1.getAttribute '_B' ).toBeUndefined()
             expect( S2.getAttribute '_B' ).toBeUndefined()
 
-## Event handling
+## Event handling for Structure changes
 
-    describe 'Event handling', ->
+    describe 'Event handling for Structure changes', ->
 
 Changes to a structure hierarchy should result in event handlers being
-called in the various structures in the hierarchy.  See [this
-documentation](https://lurchmath.github.io/lde/site/phase0-structures/#event-handling-in-the-structure-hierarchy)
-for details about the events.
+called in the various structures in the hierarchy.
 
         A = B = null
         beforeEach ->
@@ -1522,6 +1520,293 @@ were made to connection 2, which was not altered).
                 id : '2', dad : 'Billy'
             expect( Structure.getConnectionData '3' ).toEqual
                 id : '3', 1 : 2
+            A.untrackIDs()
+
+Finally, we test to be sure that all of the above functions correctly report
+when they can't take any action, and don't do anything in that case.
+
+        it 'should not take action if the parameters are invalid', ->
+
+Start by defining a structure hierarchy as in many of the previous tests.
+
+            A = new Structure(
+                B = new Structure().attr id : 'B'
+                C = new Structure().attr id : 'C'
+            ).attr id : 'A'
+            A.trackIDs()
+
+Just add a few connections.
+
+            expect( A.connectTo B, id : 'example', num : 1 ).toBeTruthy()
+            expect( B.connectTo A, id : 'other', str : 'foo' ).toBeTruthy()
+            expect( C.connectTo C, id : '1', mom : 'Edna' ).toBeTruthy()
+
+Now let's try to add some invalid connections and be sure that they return
+false values and don't change anything.
+
+This one is invalid because it doesn't have an ID specified.
+
+            expect( B.connectTo A, bud : 'Ed' ).toBeFalsy()
+            expect( A.getConnectionsIn() ).toEqual [ 'other' ]
+            expect( A.getConnectionsOut() ).toEqual [ 'example' ]
+            expect( A.getAllConnections() ).toEqual [ 'example', 'other' ]
+            expect( B.getConnectionsIn() ).toEqual [ 'example' ]
+            expect( B.getConnectionsOut() ).toEqual [ 'other' ]
+            expect( B.getAllConnections() ).toEqual [ 'example', 'other' ]
+            expect( C.getConnectionsIn() ).toEqual [ '1' ]
+            expect( C.getConnectionsOut() ).toEqual [ '1' ]
+            expect( C.getAllConnections() ).toEqual [ '1' ]
+            expect( Structure.getConnectionData 'example' ).toEqual
+                id : 'example', num : 1
+            expect( Structure.getConnectionData 'other' ).toEqual
+                id : 'other', str : 'foo'
+            expect( Structure.getConnectionData '1' ).toEqual
+                id : '1', mom : 'Edna'
+
+This one is invalid because the ID it has is already in use.
+
+            expect( C.connectTo C, id : '1', dad : 'Billy' ).toBeFalsy()
+            expect( A.getConnectionsIn() ).toEqual [ 'other' ]
+            expect( A.getConnectionsOut() ).toEqual [ 'example' ]
+            expect( A.getAllConnections() ).toEqual [ 'example', 'other' ]
+            expect( B.getConnectionsIn() ).toEqual [ 'example' ]
+            expect( B.getConnectionsOut() ).toEqual [ 'other' ]
+            expect( B.getAllConnections() ).toEqual [ 'example', 'other' ]
+            expect( C.getConnectionsIn() ).toEqual [ '1' ]
+            expect( C.getConnectionsOut() ).toEqual [ '1' ]
+            expect( C.getAllConnections() ).toEqual [ '1' ]
+            expect( Structure.getConnectionData 'example' ).toEqual
+                id : 'example', num : 1
+            expect( Structure.getConnectionData 'other' ).toEqual
+                id : 'other', str : 'foo'
+            expect( Structure.getConnectionData '1' ).toEqual
+                id : '1', mom : 'Edna'
+
+This one is invalid because the data parameter isn't an object.
+
+            expect( C.connectTo C, 5000 ).toBeFalsy()
+            expect( A.getConnectionsIn() ).toEqual [ 'other' ]
+            expect( A.getConnectionsOut() ).toEqual [ 'example' ]
+            expect( A.getAllConnections() ).toEqual [ 'example', 'other' ]
+            expect( B.getConnectionsIn() ).toEqual [ 'example' ]
+            expect( B.getConnectionsOut() ).toEqual [ 'other' ]
+            expect( B.getAllConnections() ).toEqual [ 'example', 'other' ]
+            expect( C.getConnectionsIn() ).toEqual [ '1' ]
+            expect( C.getConnectionsOut() ).toEqual [ '1' ]
+            expect( C.getAllConnections() ).toEqual [ '1' ]
+            expect( Structure.getConnectionData 'example' ).toEqual
+                id : 'example', num : 1
+            expect( Structure.getConnectionData 'other' ).toEqual
+                id : 'other', str : 'foo'
+            expect( Structure.getConnectionData '1' ).toEqual
+                id : '1', mom : 'Edna'
+
+This one is invalid because the source isn't a `Structure`.
+
+            expect( Structure.connect 'A', C, id : 9 ).toBeFalsy()
+            expect( A.getConnectionsIn() ).toEqual [ 'other' ]
+            expect( A.getConnectionsOut() ).toEqual [ 'example' ]
+            expect( A.getAllConnections() ).toEqual [ 'example', 'other' ]
+            expect( B.getConnectionsIn() ).toEqual [ 'example' ]
+            expect( B.getConnectionsOut() ).toEqual [ 'other' ]
+            expect( B.getAllConnections() ).toEqual [ 'example', 'other' ]
+            expect( C.getConnectionsIn() ).toEqual [ '1' ]
+            expect( C.getConnectionsOut() ).toEqual [ '1' ]
+            expect( C.getAllConnections() ).toEqual [ '1' ]
+            expect( Structure.getConnectionData 'example' ).toEqual
+                id : 'example', num : 1
+            expect( Structure.getConnectionData 'other' ).toEqual
+                id : 'other', str : 'foo'
+            expect( Structure.getConnectionData '1' ).toEqual
+                id : '1', mom : 'Edna'
+
+This one is invalid because the target isn't a `Structure`.
+
+            expect( Structure.connect A, 'C', id : 9 ).toBeFalsy()
+            expect( A.getConnectionsIn() ).toEqual [ 'other' ]
+            expect( A.getConnectionsOut() ).toEqual [ 'example' ]
+            expect( A.getAllConnections() ).toEqual [ 'example', 'other' ]
+            expect( B.getConnectionsIn() ).toEqual [ 'example' ]
+            expect( B.getConnectionsOut() ).toEqual [ 'other' ]
+            expect( B.getAllConnections() ).toEqual [ 'example', 'other' ]
+            expect( C.getConnectionsIn() ).toEqual [ '1' ]
+            expect( C.getConnectionsOut() ).toEqual [ '1' ]
+            expect( C.getAllConnections() ).toEqual [ '1' ]
+            expect( Structure.getConnectionData 'example' ).toEqual
+                id : 'example', num : 1
+            expect( Structure.getConnectionData 'other' ).toEqual
+                id : 'other', str : 'foo'
+            expect( Structure.getConnectionData '1' ).toEqual
+                id : '1', mom : 'Edna'
+
+Now let's try removing connections in invalid ways, again verifying that the
+removal method returns false and doesn't change anything.
+
+This one is invalid because it tries to remove an ID that isn't in the tree.
+
+            expect( Structure.disconnect 'not here' ).toBeFalsy()
+            expect( A.getConnectionsIn() ).toEqual [ 'other' ]
+            expect( A.getConnectionsOut() ).toEqual [ 'example' ]
+            expect( A.getAllConnections() ).toEqual [ 'example', 'other' ]
+            expect( B.getConnectionsIn() ).toEqual [ 'example' ]
+            expect( B.getConnectionsOut() ).toEqual [ 'other' ]
+            expect( B.getAllConnections() ).toEqual [ 'example', 'other' ]
+            expect( C.getConnectionsIn() ).toEqual [ '1' ]
+            expect( C.getConnectionsOut() ).toEqual [ '1' ]
+            expect( C.getAllConnections() ).toEqual [ '1' ]
+            expect( Structure.getConnectionData 'example' ).toEqual
+                id : 'example', num : 1
+            expect( Structure.getConnectionData 'other' ).toEqual
+                id : 'other', str : 'foo'
+            expect( Structure.getConnectionData '1' ).toEqual
+                id : '1', mom : 'Edna'
+
+All the other cases of possible invalidity occur only if the tree has
+inconsistent data, so we don't try to construct such a tree here.  One could
+extend these tests later.
+
+Now let's try setting connection data in invalid ways, again verifying that
+the change method returns false and doesn't change anything.
+
+This one is invalid because it tries to change a connection whose ID isn't
+in the tree.
+
+            expect( Structure.setConnectionData 'NOPE', 1, 2 ).toBeFalsy()
+            expect( A.getConnectionsIn() ).toEqual [ 'other' ]
+            expect( A.getConnectionsOut() ).toEqual [ 'example' ]
+            expect( A.getAllConnections() ).toEqual [ 'example', 'other' ]
+            expect( B.getConnectionsIn() ).toEqual [ 'example' ]
+            expect( B.getConnectionsOut() ).toEqual [ 'other' ]
+            expect( B.getAllConnections() ).toEqual [ 'example', 'other' ]
+            expect( C.getConnectionsIn() ).toEqual [ '1' ]
+            expect( C.getConnectionsOut() ).toEqual [ '1' ]
+            expect( C.getAllConnections() ).toEqual [ '1' ]
+            expect( Structure.getConnectionData 'example' ).toEqual
+                id : 'example', num : 1
+            expect( Structure.getConnectionData 'other' ).toEqual
+                id : 'other', str : 'foo'
+            expect( Structure.getConnectionData '1' ).toEqual
+                id : '1', mom : 'Edna'
+
+All the other cases of possible invalidity occur only if the tree has
+inconsistent data, so we don't try to construct such a tree here.  One could
+extend these tests later.
+
+## Event handling for connection changes
+
+    describe 'Event handling for connection changes', ->
+
+Changes to connections should result in event handlers being
+called in the various structures in the hierarchy that are the endpoints for those connections.
+
+        A = B = null
+        beforeEach ->
+
+Create two structres and install utilities to spy on when their
+connection-related event handlers have been called.
+
+            A = new Structure().attr id : 'A'
+            A.connectionWasInserted = jasmine.createSpy 'wasInserted'
+            A.connectionWasRemoved = jasmine.createSpy 'wasRemoved'
+            A.connectionWasChanged = jasmine.createSpy 'wasChanged'
+            A.connectionWillBeInserted = jasmine.createSpy 'willBeInserted'
+            A.connectionWillBeRemoved = jasmine.createSpy 'willBeRemoved'
+            A.connectionWillBeChanged = jasmine.createSpy 'willBeChanged'
+            B = new Structure().attr id : 'B'
+            B.connectionWasInserted = jasmine.createSpy 'wasInserted'
+            B.connectionWasRemoved = jasmine.createSpy 'wasRemoved'
+            B.connectionWasChanged = jasmine.createSpy 'wasChanged'
+            B.connectionWillBeInserted = jasmine.createSpy 'willBeInserted'
+            B.connectionWillBeRemoved = jasmine.createSpy 'willBeRemoved'
+            B.connectionWillBeChanged = jasmine.createSpy 'willBeChanged'
+            A.trackIDs()
+            B.trackIDs()
+
+        afterEach ->
+            A.untrackIDs()
+            B.untrackIDs()
+
+Run a simple test to verify that the Jasmine event handler spies are working
+as expected; they have not yet been called.
+
+        it 'should begin with no event handlers called', ->
+            expect( A.connectionWillBeInserted ).not.toHaveBeenCalled()
+            expect( A.connectionWillBeRemoved ).not.toHaveBeenCalled()
+            expect( A.connectionWillBeChanged ).not.toHaveBeenCalled()
+            expect( A.connectionWasInserted ).not.toHaveBeenCalled()
+            expect( A.connectionWasRemoved ).not.toHaveBeenCalled()
+            expect( A.connectionWasChanged ).not.toHaveBeenCalled()
+            expect( B.connectionWillBeInserted ).not.toHaveBeenCalled()
+            expect( B.connectionWillBeRemoved ).not.toHaveBeenCalled()
+            expect( B.connectionWillBeChanged ).not.toHaveBeenCalled()
+            expect( B.connectionWasInserted ).not.toHaveBeenCalled()
+            expect( B.connectionWasRemoved ).not.toHaveBeenCalled()
+            expect( B.connectionWasChanged ).not.toHaveBeenCalled()
+
+Now test whether handlers for making connections work.
+
+        it 'should send connection insertion events', ->
+
+Add a connection from A to B and verify that the connection insertion events
+for both A and B were called.
+
+            B.connectTo A, id : 'some ID', number : 5, string : 'Hello!'
+            expect( A.connectionWillBeInserted ).toHaveBeenCalled()
+            expect( A.connectionWillBeRemoved ).not.toHaveBeenCalled()
+            expect( A.connectionWillBeChanged ).not.toHaveBeenCalled()
+            expect( A.connectionWasInserted ).toHaveBeenCalled()
+            expect( A.connectionWasRemoved ).not.toHaveBeenCalled()
+            expect( A.connectionWasChanged ).not.toHaveBeenCalled()
+            expect( B.connectionWillBeInserted ).toHaveBeenCalled()
+            expect( B.connectionWillBeRemoved ).not.toHaveBeenCalled()
+            expect( B.connectionWillBeChanged ).not.toHaveBeenCalled()
+            expect( B.connectionWasInserted ).toHaveBeenCalled()
+            expect( B.connectionWasRemoved ).not.toHaveBeenCalled()
+            expect( B.connectionWasChanged ).not.toHaveBeenCalled()
+
+Now test whether handlers for removing connections work.
+
+        it 'should send connection removal events', ->
+
+Add a connection from A to B then remove it and verify that the connection
+removal events for both A and B were called.
+
+            B.connectTo A, id : 'some ID', number : 5, string : 'Hello!'
+            Structure.disconnect 'some ID'
+            expect( A.connectionWillBeInserted ).toHaveBeenCalled()
+            expect( A.connectionWillBeRemoved ).toHaveBeenCalled()
+            expect( A.connectionWillBeChanged ).not.toHaveBeenCalled()
+            expect( A.connectionWasInserted ).toHaveBeenCalled()
+            expect( A.connectionWasRemoved ).toHaveBeenCalled()
+            expect( A.connectionWasChanged ).not.toHaveBeenCalled()
+            expect( B.connectionWillBeInserted ).toHaveBeenCalled()
+            expect( B.connectionWillBeRemoved ).toHaveBeenCalled()
+            expect( B.connectionWillBeChanged ).not.toHaveBeenCalled()
+            expect( B.connectionWasInserted ).toHaveBeenCalled()
+            expect( B.connectionWasRemoved ).toHaveBeenCalled()
+            expect( B.connectionWasChanged ).not.toHaveBeenCalled()
+
+Now test whether handlers for changing connections work.
+
+        it 'should send connection change events', ->
+
+Add a connection from A to B, then change its data, and verify that the
+connection change events for both A and B were called.
+
+            B.connectTo A, id : 'some ID', number : 5, string : 'Hello!'
+            Structure.setConnectionData 'some ID', 'number' # delete it
+            expect( A.connectionWillBeInserted ).toHaveBeenCalled()
+            expect( A.connectionWillBeRemoved ).not.toHaveBeenCalled()
+            expect( A.connectionWillBeChanged ).toHaveBeenCalled()
+            expect( A.connectionWasInserted ).toHaveBeenCalled()
+            expect( A.connectionWasRemoved ).not.toHaveBeenCalled()
+            expect( A.connectionWasChanged ).toHaveBeenCalled()
+            expect( B.connectionWillBeInserted ).toHaveBeenCalled()
+            expect( B.connectionWillBeRemoved ).not.toHaveBeenCalled()
+            expect( B.connectionWillBeChanged ).toHaveBeenCalled()
+            expect( B.connectionWasInserted ).toHaveBeenCalled()
+            expect( B.connectionWasRemoved ).not.toHaveBeenCalled()
+            expect( B.connectionWasChanged ).toHaveBeenCalled()
 
 ## Convenience constructions
 

@@ -357,6 +357,7 @@ case.
         @connect : ( source, target, data ) ->
             return no unless \
                 ( data instanceof Object ) and \
+                ( data.hasOwnProperty 'id' ) and \
                 ( not Structure::connectionIDs.hasOwnProperty data.id ) and\
                 ( source instanceof Structure ) and source.id()? and \
                 ( target instanceof Structure ) and target.id()?

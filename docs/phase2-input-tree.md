@@ -219,20 +219,20 @@ complete and some not yet marked complete.
  * [x] Replace all the old unit tests for `connectTo` and `disconnectFrom`
    with new ones that test all the features just added by all the recent
    changes.
- * [ ] Add unit tests for all new functions and features added in the steps
+ * [x] Add unit tests for all new functions and features added in the steps
    above.
     * [x] Test `trackIDs()` and `noticeAllConnections()`.
     * [x] Test `Structure.sourceOfConnection()`.
     * [x] Test `getConnectionSource()`, `getConnectionTarget()`, and
       `getConnectionData()`.
     * [x] Test `setConnectionData()`.
-    * [ ] Test event handlers `connectionWillBeInserted()` and
+    * [x] Test event handlers `connectionWillBeInserted()` and
       `connectionWasInserted()`.
-    * [ ] Test event handlers `connectionWillBeRemoved()` and
+    * [x] Test event handlers `connectionWillBeRemoved()` and
       `connectionWasRemoved()`.
-    * [ ] Test event handlers `connectionWillBeChanged()` and
+    * [x] Test event handlers `connectionWillBeChanged()` and
       `connectionWasChanged()`.
-    * [ ] Verify that functions fail when their preconditions aren't
+    * [x] Verify that functions fail when their preconditions aren't
       satisfied.
 
  * [ ] Add to the API a new method, `insertConnection(source,target,data)`,
@@ -245,6 +245,10 @@ complete and some not yet marked complete.
    `setConnectionAttribute(connection,key,value)`, which directly calls
    `Structure::setConnectionData(connection,key,value)`, but only if both
    the source and the target are `InputStructure` instances.
+ * [ ] Add API documentation for all events (`wasInserted`, `wasRemoved`,
+   `wasChanged`, `connectionWasInserted`, `connectionWasRemoved`,
+   `connectionWasChanged`, and the `willBe` variants for all of them).
+   Link to that documentation from the unit tests.
  * [ ] Create unit tests for all of these new routines and ensure that they
    pass.
  * [ ] Rebuild docs and commit.
