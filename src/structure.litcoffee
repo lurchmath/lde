@@ -379,6 +379,55 @@ querying that mapping.
         connectionIDs : { }
         @sourceOfConnection : ( id ) -> Structure::connectionIDs[id]
 
+We then define, in some class methods, the protocol for creating and
+breaking connections.  We will then provide some instance methods for
+accessing these class methods more conveniently.
+
+### Making consistent connections
+
+Forming a connection takes as input a source structure, a target structure,
+and a JSON data object describing the connection.  It may have any data it
+likes in it, but the one requirement is that its `id` field is unique (that
+is, not yet mentioned in the `connectionIDs` member defined above).  This
+method also requires the source and target to both have IDs.
+
+It writes data into the source, the target, and the `connectionIDs` object,
+recording the connection.  It returns true if it was able to create the
+connection, and false otherwise.  If it returns true, then just before
+returning, it calls teh `connectionInserted` handlers in both the source and
+the target (iff they are present), passing the new connection's ID in each
+case.
+
+        @connect : ( source, target, data ) ->
+            return no unless \
+                ( not connectionIDs.hasOwnProperty data.id ) and \
+                ( source instanceof Structure ) and source.id()? and \
+                ( target instanceof Structure ) and target.id()?
+            source.setAttribute "_conn #{data.id} data", data
+            source.setAttribute "_conn #{data.id} to", target.id()
+            target.setAttribute "_conn #{data.id} from", source.id()
+            Structure::connectionIDs[data.id] = source
+            source.connectionInserted? data.id
+            target.connectionInserted? data.id
+            yes
+
+The convenience function for accessing this from instances should be called
+from the source of the connection.
+
+        connectTo : ( target, data ) -> Structure.connect @, target, data
+
+We also define the following function for removing all connections into or
+out of this structure, which is used by `untrackIDs()` and `clearIDs()`,
+defined earlier.
+
+        removeAllConnections : ->
+            for pair in ( ( @getAttribute 'connectionsOut' ) ? [ ] )[..]
+                [ id, type ] = pair
+                @disconnectFrom Structure.instanceWithID( id ), type
+            for pair in ( ( @getAttribute 'connectionsIn' ) ? [ ] )[..]
+                [ id, type ] = pair
+                Structure.instanceWithID( id )?.disconnectFrom @, type
+
 We also provide the following functions to make it easier for clients to
 create, remove, or query connections.
 
@@ -453,74 +502,6 @@ Repeat the same exrecise for my incoming connections.
                     moreData[type] = sourceOuts[@id()][type] =
                         Math.max count, sourceOuts[@id()][type] ? 0
                 S.setAttribute 'connectionsOut', objectToArray sourceOuts
-
-### Making consistent connections
-
-Another way to ensure that connections among structures in a hierarchy are
-consistent is to avoid directly editing the attribute containing the
-connections data, and instead use the following two convenience functions
-for creating or deleting connections.
-
-Note that the LDE should not be directly editing attributes anyway, because
-they are defined to be read-only from this side.  But these two functions
-are useful when constructing structures to use in testing, and in particular
-for implementing the `attr` and `setup` functions above, which are very
-useful in the unit testing suite.
-
-The first one creates a new connection of the given type from this structure
-to another.  Because there may be multiple connections of a given type
-between the same two structures, calling this repeatedly adds new
-connections.
-
-These functions do nothing if either of the two structures is lacking an ID.
-They return true on success and false on failure.
-
-        connectTo : ( otherStructure, connectionType = '' ) ->
-            return no unless @id()? and \
-                otherStructure instanceof Structure and otherStructure.id()?
-            outs = ( @getAttribute 'connectionsOut' ) ? [ ]
-            ins = ( otherStructure.getAttribute 'connectionsIn' ) ? [ ]
-            outs.push [ otherStructure.id(), connectionType ]
-            ins.push [ @id(), connectionType ]
-            @setAttribute 'connectionsOut', outs
-            otherStructure.setAttribute 'connectionsIn', ins
-            yes
-
-The delete function does nothing if there is no connection to delete.
-
-        disconnectFrom : ( otherStructure, connectionType = '' ) ->
-            return no unless @id()? and \
-                otherStructure instanceof Structure and otherStructure.id()?
-            outs = ( @getAttribute 'connectionsOut' ) ? [ ]
-            ins = ( otherStructure.getAttribute 'connectionsIn' ) ? [ ]
-            outIndex = inIndex = 0
-            while outIndex < outs.length and \
-                  ( outs[outIndex][0] isnt otherStructure.id() or \
-                    outs[outIndex][1] isnt connectionType )
-                outIndex++
-            if outIndex is outs.length then return no
-            while inIndex < ins.length and \
-                  ( ins[inIndex][0] isnt @id() or \
-                    ins[inIndex][1] isnt connectionType )
-                inIndex++
-            if inIndex is ins.length then return no
-            outs.splice outIndex, 1
-            ins.splice inIndex, 1
-            @setAttribute 'connectionsOut', outs
-            otherStructure.setAttribute 'connectionsIn', ins
-            yes
-
-We also define the following function for removing all connections into or
-out of this structure, which is used by `untrackIDs()` and `clearIDs()`,
-defined earlier.
-
-        removeAllConnections : ->
-            for pair in ( ( @getAttribute 'connectionsOut' ) ? [ ] )[..]
-                [ id, type ] = pair
-                @disconnectFrom Structure.instanceWithID( id ), type
-            for pair in ( ( @getAttribute 'connectionsIn' ) ? [ ] )[..]
-                [ id, type ] = pair
-                Structure.instanceWithID( id )?.disconnectFrom @, type
 
 ## Accessibility
 

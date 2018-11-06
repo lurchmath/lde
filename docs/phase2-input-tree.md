@@ -163,7 +163,7 @@ complete and some not yet marked complete.
  * [x] Disable all unit tests for `connectTo` and `disconnectFrom`, then
    ensure that all remaining unit tests pass.
 
- * [ ] Rewrite `Structure::connect(source,target,data)` to do this:
+ * [x] Rewrite `Structure::connect(source,target,data)` to do this:
     * Quit if `data.id` is already used in `Structure::connectionIDs`;
       return false in that case.
     * Write the target's ID to the `"_conn #{id} to"` attribute of the
@@ -175,9 +175,8 @@ complete and some not yet marked complete.
     * Call the `connectionInserted` handler, if it exists, in the source and
       target `Structure`s.
     * Return true.
- * [ ] Ensure that `someStruct.connect(t,d)` is an alias for
+ * [x] Ensure that `someStruct.connectTo(t,d)` is an alias for
    `Structure::connect(someStruct,t,d)`.
- * [ ] Ensure that this did not break any unit tests.
  * [ ] Replace `disconnectFrom()` with `Structure::disconnect(connectionID)`
    that does this:
     * Quit unless `connectionID` is already used in
@@ -190,7 +189,6 @@ complete and some not yet marked complete.
     * Call the `connectionRemoved` handler, if it exists, in the source and
       target `Structure`s.
     * Return true.
- * [ ] Ensure that this did not break any unit tests.
  * [ ] Ensure that `someStruct.disconnect(id)` is an alias for
    `Structure::disconnect(id)`.
  * [ ] Add `Structure::setConnectionData(connID,key,value)` that does this:
@@ -205,7 +203,6 @@ complete and some not yet marked complete.
     * Return true.
  * [ ] Ensure that `someStruct.setConnectionData(id,k,v)` is an alias for
    `Structure::setConnectionData(id,k,v)`.
- * [ ] Ensure that this did not break any unit tests.
 
  * [ ] Implement `Structure::getConnectionSource(id)` and ensure that
    `someStruct.getConnectionSource(id)` is an alias for it.
@@ -216,7 +213,8 @@ complete and some not yet marked complete.
  * [ ] Implement `someStruct.getConnectionsIn()`, returning a list of IDs.
  * [ ] Implement `someStruct.getConnectionsOut()`, returning a list of IDs.
  * [ ] Implement `someStruct.getAllConnections()`, returning a list of IDs.
- * [ ] Ensure that this did not break any unit tests.
+ * [ ] Reimplement a new version of `removeAllConnections()` that uses these
+   new functions to do its work.
  * [ ] Replace all the old unit tests for `connectTo` and `disconnectFrom`
    with new ones that test all the features just added by all the recent
    changes.
