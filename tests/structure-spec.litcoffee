@@ -1510,75 +1510,6 @@ connections are as they should be.
             expect( toTest.length ).toBe 1
             A.untrackIDs()
 
-The following section tests the three querying utilities for connections.
-
-        it 'should give correct results from connection queries', ->
-
-Build the same structure as in the previous section, and make the same
-connections within it.
-
-            A = new Structure(
-                B = new Structure().attr id : 'B'
-                C = new Structure().attr id : 'C'
-            ).attr id : 'A'
-            A.trackIDs()
-            expect( A.connectTo B, 'example' ).toBeTruthy()
-            expect( B.connectTo A, 'example' ).toBeTruthy()
-            expect( B.connectTo A, 'example' ).toBeTruthy()
-            expect( C.connectTo C, 'other' ).toBeTruthy()
-            expect( C.connectTo C, 'other' ).toBeTruthy()
-            expect( C.connectTo C, 'other' ).toBeTruthy()
-
-Verify that all connection queries yield correct results.
-
-First, connections in and out of A:
-
-            expect( A.allConnectionsIn 'example' ).toEqual [ 'B', 'B' ]
-            expect( A.allConnectionsIn 'other' ).toEqual [ ]
-            expect( A.allConnectionsIn() )
-                .toEqual [ [ 'B', 'example' ], [ 'B', 'example' ] ]
-            expect( A.allConnectionsOut 'example' ).toEqual [ 'B' ]
-            expect( A.allConnectionsOut 'other' ).toEqual [ ]
-            expect( A.allConnectionsOut() ).toEqual [ [ 'B', 'example' ] ]
-
-Next, connections in and out of B:
-
-            expect( B.allConnectionsIn 'example' ).toEqual [ 'A' ]
-            expect( B.allConnectionsIn 'other' ).toEqual [ ]
-            expect( B.allConnectionsIn() ).toEqual [ [ 'A', 'example' ] ]
-            expect( B.allConnectionsOut 'example' ).toEqual [ 'A', 'A' ]
-            expect( B.allConnectionsOut 'other' ).toEqual [ ]
-            expect( B.allConnectionsOut() )
-                .toEqual [ [ 'A', 'example' ], [ 'A', 'example' ] ]
-
-Next, connections in and out of C:
-
-            expect( C.allConnectionsIn 'example' ).toEqual [ ]
-            expect( C.allConnectionsIn 'other' )
-                .toEqual [ 'C', 'C', 'C' ]
-            expect( C.allConnectionsIn() ).toEqual [
-                [ 'C', 'other' ], [ 'C', 'other' ], [ 'C', 'other' ]
-            ]
-            expect( C.allConnectionsOut 'example' ).toEqual [ ]
-            expect( C.allConnectionsOut 'other' )
-                .toEqual [ 'C', 'C', 'C' ]
-            expect( C.allConnectionsOut() ).toEqual [
-                [ 'C', 'other' ], [ 'C', 'other' ], [ 'C', 'other' ]
-            ]
-
-Next, connections between specific pairs:
-
-            expect( A.allConnectionsTo A ).toEqual [ ]
-            expect( A.allConnectionsTo B ).toEqual [ 'example' ]
-            expect( A.allConnectionsTo C ).toEqual [ ]
-            expect( B.allConnectionsTo A ).toEqual [ 'example', 'example' ]
-            expect( B.allConnectionsTo B ).toEqual [ ]
-            expect( B.allConnectionsTo C ).toEqual [ ]
-            expect( C.allConnectionsTo A ).toEqual [ ]
-            expect( C.allConnectionsTo B ).toEqual [ ]
-            expect( C.allConnectionsTo C )
-                .toEqual [ 'other', 'other', 'other' ]
-
 ## Convenience constructions
 
 There are two member functions, `attr` and `setup`, that are mostly just
@@ -1608,13 +1539,13 @@ the `attr` objects, and deletes those attributes afterwards.
                 C = new Structure().attr id : 3, 'reason for': 'previous'
             ).attr id : 1, 'label for' : 2
             .setup()
-            expect( A.allConnectionsIn() ).toEqual [ ]
-            expect( A.allConnectionsOut() ).toEqual [ [ 2, 'label' ] ]
-            expect( B.allConnectionsIn() )
-                .toEqual [ [ 1, 'label' ], [ 3, 'reason' ] ]
-            expect( B.allConnectionsOut() ).toEqual [ ]
-            expect( C.allConnectionsIn() ).toEqual [ ]
-            expect( C.allConnectionsOut() ).toEqual [ [ 2, 'reason' ] ]
+            # expect( A.allConnectionsIn() ).toEqual [ ]
+            # expect( A.allConnectionsOut() ).toEqual [ [ 2, 'label' ] ]
+            # expect( B.allConnectionsIn() )
+            #     .toEqual [ [ 1, 'label' ], [ 3, 'reason' ] ]
+            # expect( B.allConnectionsOut() ).toEqual [ ]
+            # expect( C.allConnectionsIn() ).toEqual [ ]
+            # expect( C.allConnectionsOut() ).toEqual [ [ 2, 'reason' ] ]
             expect( A.getAttribute 'label for' ).toBeUndefined()
             expect( C.getAttribute 'reason for' ).toBeUndefined()
 

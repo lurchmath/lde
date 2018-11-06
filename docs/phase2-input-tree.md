@@ -145,10 +145,8 @@ complete and some not yet marked complete.
 
 ### Upgrading Connections
 
- * [ ] Remove the `fillOutConnections()` function and its unit tests; it is
-   not used anywhere except in the unit testing suite.
- * [ ] Remove the `allConnectionsIn()`, `allConnectionsOut()`, and
-   `allConnectionsTo()` functions and their unit tests; same reasons.
+ * [x] Remove the `allConnectionsIn()`, `allConnectionsOut()`, and
+   `allConnectionsTo()` functions and their unit tests.
 
  * [ ] Create a unit test that verifies that when `untrackIDs()` or
    `clearIDs()` is called in a `Structure`, then all connections to/from
@@ -222,6 +220,8 @@ complete and some not yet marked complete.
  * [ ] Replace all the old unit tests for `connectTo` and `disconnectFrom`
    with new ones that test all the features just added by all the recent
    changes.
+ * [ ] There are commented-out tests for `setup()` that used to use
+   `allConnectionsIn()`, etc., which can now be updated to use these.
 
  * [ ] Add to the API a new method, `insertConnection(source,target,data)`,
    which directly calls `Structure::connect()`, but only if both the source

@@ -492,40 +492,6 @@ The delete function does nothing if there is no connection to delete.
             otherStructure.setAttribute 'connectionsIn', ins
             yes
 
-### Querying connections
-
-The following functions are some conveniences for querying what connections
-exist from a given structure object to/from others.
-
-First, we can fetch all connections of a given type that exit a given
-structure object.  It returns a multiset of target structure IDs, in the
-form of an array with possible repeated entries.  If the user omits the
-type, then all outgoing connections are returned, not as targets only, but
-as target-type pairs, `[[targetID,typeString],...]`.
-
-        allConnectionsOut : ( ofThisType ) ->
-            outs = ( @getAttribute 'connectionsOut' ) ? [ ]
-            if not ofThisType? then return outs
-            ( conn[0] for conn in outs when conn[1] is ofThisType )
-
-Then we can do the same thing for incoming connections.
-
-        allConnectionsIn : ( ofThisType ) ->
-            ins = ( @getAttribute 'connectionsIn' ) ? [ ]
-            if not ofThisType? then return ins
-            ( conn[0] for conn in ins when conn[1] is ofThisType )
-
-We can also request all connections between two given structures, which will
-return a multiset of connection types, in the form of an array with possible
-repeated entries.  Returns null if the argument is not a structure, or is
-one without an ID.
-
-        allConnectionsTo : ( otherStructure ) ->
-            return null unless otherStructure instanceof Structure and \
-                otherStructure.id()?
-            outs = ( @getAttribute 'connectionsOut' ) ? [ ]
-            ( conn[1] for conn in outs when conn[0] is otherStructure.id() )
-
 ## Accessibility
 
 A structure A is accessible to a structure B if they have a common ancestor
