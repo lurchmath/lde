@@ -693,7 +693,7 @@ hierarchy a unique ID.
             bigger = new Structure(
                 child1 = new Sub1().attr 10 : 100
                 child2 = new Sub2().attr 'test' : 'ing'
-            ).setup()
+            )
 
 Verify that the children are of the expected classes.
 
@@ -1140,161 +1140,6 @@ Connections are documented
 [here](https://lurchmath.github.io/lde/site/phase0-structures/#connections).
 The following unit tests are for all functions related to them.
 
-We will be comparing things as multisets, and some utility functions help.
-
-        samePair = ( a, b ) -> a[0] is b[0] and a[1] is b[1]
-        pairCount = ( array, pair ) ->
-            ( a for a in array when samePair a, pair ).length
-
-        xit 'should be made consistent by fillOutConnections()', ->
-
-We begin with the `fillOutConnections()` function, which is supposed to make
-connections consistent, in the sense that outgoing connections lists to
-various targets match the incoming connections lists at those targets.  We
-thus create two structure hierarchies with inconsistent connection lists,
-call `fillOutConnections()`, and ensure that the inconsistencies are fixed.
-
-Structure 1:
-
-            A = new Structure(
-                B = new Structure().attr id : 'B'
-                C = new Structure().attr id : 'C'
-            ).attr id : 'A'
-            A.trackIDs()
-
-We now connect A to B, but only note it within A.
-And we connect B to C, but only note it within C.
-These are the two inconsistencies we will test here.
-
-            A.setAttribute 'connectionsOut', [ [ 'B', 'foo' ] ]
-            C.setAttribute 'connectionsIn', [ [ 'B', 'bar' ] ]
-
-Make the connections consistent.
-
-            A.fillOutConnections()
-
-Verify that no old connections were removed.
-
-            expect( A.getAttribute 'connectionsOut' )
-                .toEqual [ [ 'B', 'foo' ] ]
-            expect( C.getAttribute 'connectionsIn' )
-                .toEqual [ [ 'B', 'bar' ] ]
-
-Verify that all the appropriate new connections were added.
-
-            expect( B.getAttribute 'connectionsIn' )
-                .toEqual [ [ 'A', 'foo' ] ]
-            expect( B.getAttribute 'connectionsOut' )
-                .toEqual [ [ 'C', 'bar' ] ]
-
-Verify that no other connections were created.
-
-            expect( C.getAttribute 'connectionsOut' )
-                .toBeUndefined()
-            expect( A.getAttribute 'connectionsIn' )
-                .toBeUndefined()
-            A.untrackIDs()
-
-Structure 2:
-
-This is much more complex than structure 1, including multiple connections
-between the same two structures, connections both ways between the same two
-structures, some already-filled-out connections, connections from a node to
-itself, and so on.
-
-            root = new Structure(
-                A = new Structure(
-                    B = new Structure().attr id : 'B'
-                    C = new Structure().attr id : 'C'
-                ).attr id : 'A'
-                D = new Structure(
-                    E = new Structure().attr id : 'E'
-                ).attr id : 'D'
-            ).attr id : 'root'
-            root.trackIDs()
-            A.setAttribute 'connectionsOut',
-                [ [ 'B', '1' ], [ 'E', '2' ] ]
-            B.setAttribute 'connectionsIn',
-                [ [ 'A', '1' ], [ 'A', '1' ], [ 'A', '1' ],
-                  [ 'A', '2' ] ]
-            B.setAttribute 'connectionsOut', [ [ 'C', '1' ] ]
-            C.setAttribute 'connectionsIn', [ [ 'D', '3' ] ]
-            C.setAttribute 'connectionsOut', [ [ 'D', '3' ] ]
-            D.setAttribute 'connectionsIn', [ [ 'C', '3' ] ]
-            E.setAttribute 'connectionsIn',
-                [ [ 'A', '2' ], [ 'A', '2' ], [ 'E', '4' ], [ 'E', '4' ] ]
-            E.setAttribute 'connectionsOut',
-                [ [ 'C', '3' ], [ 'E', '4' ], [ 'E', '5' ] ]
-
-Make the connections consistent.
-
-            root.fillOutConnections()
-
-Check the connections of each of the six nodes.
-
-Root:
-
-            expect( root.getAttribute 'connectionsIn' )
-                .toBeUndefined()
-            expect( root.getAttribute 'connectionsOut' )
-                .toBeUndefined()
-
-A:
-
-            expect( A.getAttribute 'connectionsIn' )
-                .toBeUndefined()
-            toTest = A.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'B', '1' ] ).toBe 3
-            expect( pairCount toTest, [ 'B', '2' ] ).toBe 1
-            expect( pairCount toTest, [ 'E', '2' ] ).toBe 2
-            expect( toTest.length ).toBe 6
-
-B:
-
-            toTest = B.getAttribute 'connectionsIn'
-            expect( pairCount toTest, [ 'A', '1' ] ).toBe 3
-            expect( pairCount toTest, [ 'A', '2' ] ).toBe 1
-            expect( toTest.length ).toBe 4
-            toTest = B.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'C', '1' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-
-C:
-
-            toTest = C.getAttribute 'connectionsIn'
-            expect( pairCount toTest, [ 'B', '1' ] ).toBe 1
-            expect( pairCount toTest, [ 'D', '3' ] ).toBe 1
-            expect( pairCount toTest, [ 'E', '3' ] ).toBe 1
-            expect( toTest.length ).toBe 3
-            toTest = C.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'D', '3' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-
-D:
-
-            toTest = D.getAttribute 'connectionsIn'
-            expect( pairCount toTest, [ 'C', '3' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-            toTest = D.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'C', '3' ] ).toBe 1
-            expect( toTest.length ).toBe 1
-
-E:
-
-            toTest = E.getAttribute 'connectionsIn'
-            expect( pairCount toTest, [ 'A', '2' ] ).toBe 2
-            expect( pairCount toTest, [ 'E', '4' ] ).toBe 2
-            expect( pairCount toTest, [ 'E', '5' ] ).toBe 1
-            expect( toTest.length ).toBe 5
-            toTest = E.getAttribute 'connectionsOut'
-            expect( pairCount toTest, [ 'C', '3' ] ).toBe 1
-            expect( pairCount toTest, [ 'E', '4' ] ).toBe 2
-            expect( pairCount toTest, [ 'E', '5' ] ).toBe 1
-            expect( toTest.length ).toBe 4
-            root.untrackIDs()
-
-That completes the tests of `fillOutConnections()`.
-
 The following section tests the function `connectTo()`.
 
         xit 'should make consistent connections when asked', ->
@@ -1567,15 +1412,15 @@ Untrack IDs from A on down and verify that all connections were broken.
 
 ## Convenience constructions
 
-There are two member functions, `attr` and `setup`, that are mostly just
-used within this unit testing framework, for easily constructing `Structure`
-hierarchies.  We use them here, then verify that they have created the
-hierarchies we expect, so that we can use them hereafter in testing.
+The member function `attr` is mostly just used within this unit testing
+framework, for easily constructing `Structure` hierarchies.  We use it here,
+then verify that it has created the hierarchies we expect, so that we can
+use it thereafter in testing.
 
     describe 'Convenience constructions', ->
 
-First, check to be sure `attr` works.  This is a short test because that
-function is straightforward.
+Check to be sure `attr` works.  This is a short test because that function
+is straightforward.
 
         it 'build things correctly with attr', ->
             A = new Structure(
@@ -1584,25 +1429,6 @@ function is straightforward.
             expect( A.getAttribute 'one' ).toBe 1
             expect( A.getAttribute 'two' ).toBe 2
             expect( B.getAttribute 'example' ).toBe 'text'
-
-Next, verify that `setup` makes connections as requested by entries in
-the `attr` objects, and deletes those attributes afterwards.
-
-        it 'makes connections with setup and attr together', ->
-            A = new Structure(
-                B = new Structure().attr id : 2
-                C = new Structure().attr id : 3, 'reason for': 'previous'
-            ).attr id : 1, 'label for' : 2
-            .setup()
-            # expect( A.allConnectionsIn() ).toEqual [ ]
-            # expect( A.allConnectionsOut() ).toEqual [ [ 2, 'label' ] ]
-            # expect( B.allConnectionsIn() )
-            #     .toEqual [ [ 1, 'label' ], [ 3, 'reason' ] ]
-            # expect( B.allConnectionsOut() ).toEqual [ ]
-            # expect( C.allConnectionsIn() ).toEqual [ ]
-            # expect( C.allConnectionsOut() ).toEqual [ [ 2, 'reason' ] ]
-            expect( A.getAttribute 'label for' ).toBeUndefined()
-            expect( C.getAttribute 'reason for' ).toBeUndefined()
 
 ## Accessibility
 

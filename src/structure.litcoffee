@@ -274,54 +274,6 @@ all of its key-value pairs as attributes.
             @setAttribute key, value for own key, value of object
             this
 
-On the topic of conveniences for constructing instances, the following
-method can be used at the top level of a nested set of constructor calls,
-to traverse the final tree after constructing it, and performs the
-convenience cleanup routines described within the function itself.
-
-This is intended to be used when constructing large structures, as in
-`result = Structure( ...lots of children... ).setup()`.
-
-        setup : ->
-
-Every structure with an attribute key "label for", "reason for", or "premise
-for" and value X will be converted into a connection to node X of type
-"label", "reason", or "premise", respectively.  Node X will be found by
-seeking a node with attribute key "id" and value X.
-
-All attributes with key id are then deleted.
-
-Alternately the same keys could be associated with value "previous" or
-"next" to indicate connection to a sibling, with no id required.
-
-            targets = { }
-            recurFindTargets = ( node ) ->
-                if ( id = node.getAttribute 'id' )?
-                    targets[id] = node
-                recurFindTargets child for child in node.children()
-            recurFindTargets this
-            recurConnect = ( node ) ->
-                for attr in [ 'label', 'premise', 'reason' ]
-                    if ( value = node.getAttribute "#{attr} for" )?
-                        if value is 'previous'
-                            target = node.previousSibling()
-                        else if value is 'next'
-                            target = node.nextSibling()
-                        else if targets.hasOwnProperty value
-                            target = targets[value]
-                        else
-                            target = null
-                        if target? then node.connectTo target, attr
-                        node.clearAttributes "#{attr} for"
-                recurConnect child for child in node.children()
-            recurConnect this
-
-We then check all connections within this structure for consistency, and
-return the structure for use in chaining.
-
-            @fillOutConnections()
-            this
-
 ## Unique IDs for instances
 
 Clients of this class may give instances of it unique IDs stored in
@@ -536,78 +488,6 @@ defined earlier.
 
 We also provide the following functions to make it easier for clients to
 create, remove, or query connections.
-
-### Making connections consistent
-
-The first function ensures that all connections in a hierarchy are properly
-recorded twice, once as outgoing from the source, and once as incoming to
-the target.  This consistency is assumed by the query functions.  Run this
-on the root of your hierarchy if you have any reason to believe that the
-connections may not be stored consistently.
-
-Because connections depend on IDs, this routine does nothing if this
-Structure does not already have an ID.
-
-        fillOutConnections : ->
-
-Recur on children, but if this object has no ID, we can't go beyond that.
-
-            child.fillOutConnections() for child in @childList
-            if not @id()? then return
-
-We define an internal function for converting multisets of target-type pairs
-from array representation to an easier-to-work-with object representation,
-and then an inverse of that function.  These make the rest of this function
-eaiser to write.
-
-The "array" form is as in the docs linked to above,
-`[ [targID, connType], ... ]`.  The "object" form maps target keys to
-objects whose key-value pairs are type-count pairs, where the count is the
-number of times the `[targID,connType]` pair appeared in the array.
-That is, `{ targID: { type: count, ... }, ... }`.
-
-            arrayToObject = ( array ) ->
-                result = { }
-                for connection in array
-                    [ target, type ] = connection
-                    result[target] ?= { }
-                    result[target][type] ?= 0
-                    result[target][type]++
-                result
-            objectToArray = ( object ) ->
-                result = [ ]
-                for own target, moreData of object
-                    for own type, count of moreData
-                        for i in [1..count]
-                            result.push [ target, type ]
-                result
-
-Now find all my outgoing connections, and ensure they exist in at least the
-same quantity on both sides.
-
-            outs = arrayToObject ( @getAttribute 'connectionsOut' ) ? [ ]
-            for own target, moreData of outs
-                continue unless ( T = Structure.instanceWithID target )?
-                targetIns = arrayToObject \
-                    ( T.getAttribute 'connectionsIn' ) ? [ ]
-                targetIns[@id()] ?= { }
-                for own type, count of moreData
-                    moreData[type] = targetIns[@id()][type] =
-                        Math.max count, targetIns[@id()][type] ? 0
-                T.setAttribute 'connectionsIn', objectToArray targetIns
-
-Repeat the same exrecise for my incoming connections.
-
-            ins = arrayToObject ( @getAttribute 'connectionsIn' ) ? [ ]
-            for own source, moreData of ins
-                continue unless ( S = Structure.instanceWithID source )?
-                sourceOuts = arrayToObject \
-                    ( S.getAttribute 'connectionsOut' ) ? [ ]
-                sourceOuts[@id()] ?= { }
-                for own type, count of moreData
-                    moreData[type] = sourceOuts[@id()][type] =
-                        Math.max count, sourceOuts[@id()][type] ? 0
-                S.setAttribute 'connectionsOut', objectToArray sourceOuts
 
 ## Accessibility
 

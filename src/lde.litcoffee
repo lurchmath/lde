@@ -96,7 +96,7 @@ tracked.
         if ( parent = Structure.instanceWithID parentID )? and \
            ( 0 <= insertionIndex <= parent.children().length ) and \
            ( isInTheInputTree parent ) and \
-           ( newInstance = deserializeIfNeeded( newChild ).setup() )? and \
+           ( newInstance = deserializeIfNeeded newChild )? and \
            ( newInstance instanceof InputStructure )
             disallowed = ( key \
                 for own key of newInstance.attributes when key[0] is '_' )
@@ -132,7 +132,7 @@ the second argument, rather than a serialized version.
     functions.replaceStructure = ( subtreeID, newTree ) ->
         if ( subtree = Structure.instanceWithID subtreeID )? and \
            ( isInTheInputTree subtree ) and subtree isnt InputTree and \
-           ( newInstance = deserializeIfNeeded( newTree ).setup() )? and \
+           ( newInstance = deserializeIfNeeded newTree )? and \
            ( newInstance instanceof InputStructure )
             disallowed = ( key \
                 for own key of newInstance.attributes when key[0] is '_' )
