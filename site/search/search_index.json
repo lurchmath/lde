@@ -579,6 +579,41 @@
             "location": "/api-input-structures/#feedback", 
             "text": "To make it easy to give feedback about  InputStructure  instances, we\nprovide an instance method called  feedback() .  You can call X.feedback(Y)  in any  InputStructure   X , passing any JSON object  Y \ncontaining the feedback you wish to send, and it will add  X.id()  as the subject  field of  Y , then call the LDE's global feedback function to\ntransmit  Y  to the client.  This transmission takes different forms depending on the client.  See the relevant section in the LDE API documentation .", 
             "title": "Feedback"
+        }, 
+        {
+            "location": "/api-output-structures/", 
+            "text": "API Documentation for the \nOutputStructure\n Class and its Subclasses\n\n\nSource Code\n\n\n\n\nThe \nOutputStructure\n class\n\n\nUnit tests of the \nOutputStructure\n class\n\n\n\n\nPurpose\n\n\nFor information on the generic notion of Structures, see\n\nthe API documentation for the base \nStructure\n class\n.\nThat explains not only the concepts common to all Structures, but also how\n\nOutputStructure\ns fit into the bigger picture.\n\n\nIn this file, we cover the details specific to the \nOutputStructure\n\nsubclass as well as its subclasses.  We break this document into sections,\none for each subclass of \nOutputStructure\n, including \nOutputStructure\n\nitself.\n\n\nThe \nOutputStructure\n class\n\n\nThis class overrides none of the methods of its superclass, so you can refer\nto \nthe superclass API documentation\n for information\nabout many of the class's features.  It adds the following features.\n\n\nDirty/Clean Status\n\n\nIn the Output Tree, the \ndirty\n flag of an \nOutputStructure\n signifies\nwhether that node in the tree needs to be revalidated (i.e., has changed\nsince its last validation, or something else that's relevant changed since\nits last validation).  Because the validation of one node in the Output Tree\nis independent of the validation of any other node, if a node is marked\ndirty, it is marked dirty in isolation.  Unlike \nInputStructure\ns, we do not\npropagate dirty status up the ancestor chain.\n\n\nThus the \nOutputStructure\n class provides a \nmarkDirty(yesOrNo)\n function\nthat is just a simple setter for the internal dirty status.  The same\n\nisDirty()\n function from the \nStructure\n base class remains available,\nunchanged.\n\n\nFeedback\n\n\nTo make it easy to give feedback about \nOutputStructure\n instances, we\nprovide an instance method called \nfeedback()\n.  You can call\n\nX.feedback(Y)\n in any \nOutputStructure\n \nX\n, passing any JSON object \nY\n\ncontaining the feedback you wish to send, and it will delegate the work to\nthe \nInputStructure\n stored in \nX.origin\n, or do nothing if there is no such\nobject.  See \nthe API documentation for Input Structures\n\nfor further details on what that means.", 
+            "title": "Output Structures"
+        }, 
+        {
+            "location": "/api-output-structures/#api-documentation-for-the-outputstructure-class-and-its-subclasses", 
+            "text": "", 
+            "title": "API Documentation for the OutputStructure Class and its Subclasses"
+        }, 
+        {
+            "location": "/api-output-structures/#source-code", 
+            "text": "The  OutputStructure  class  Unit tests of the  OutputStructure  class", 
+            "title": "Source Code"
+        }, 
+        {
+            "location": "/api-output-structures/#purpose", 
+            "text": "For information on the generic notion of Structures, see the API documentation for the base  Structure  class .\nThat explains not only the concepts common to all Structures, but also how OutputStructure s fit into the bigger picture.  In this file, we cover the details specific to the  OutputStructure \nsubclass as well as its subclasses.  We break this document into sections,\none for each subclass of  OutputStructure , including  OutputStructure \nitself.", 
+            "title": "Purpose"
+        }, 
+        {
+            "location": "/api-output-structures/#the-outputstructure-class", 
+            "text": "This class overrides none of the methods of its superclass, so you can refer\nto  the superclass API documentation  for information\nabout many of the class's features.  It adds the following features.", 
+            "title": "The OutputStructure class"
+        }, 
+        {
+            "location": "/api-output-structures/#dirtyclean-status", 
+            "text": "In the Output Tree, the  dirty  flag of an  OutputStructure  signifies\nwhether that node in the tree needs to be revalidated (i.e., has changed\nsince its last validation, or something else that's relevant changed since\nits last validation).  Because the validation of one node in the Output Tree\nis independent of the validation of any other node, if a node is marked\ndirty, it is marked dirty in isolation.  Unlike  InputStructure s, we do not\npropagate dirty status up the ancestor chain.  Thus the  OutputStructure  class provides a  markDirty(yesOrNo)  function\nthat is just a simple setter for the internal dirty status.  The same isDirty()  function from the  Structure  base class remains available,\nunchanged.", 
+            "title": "Dirty/Clean Status"
+        }, 
+        {
+            "location": "/api-output-structures/#feedback", 
+            "text": "To make it easy to give feedback about  OutputStructure  instances, we\nprovide an instance method called  feedback() .  You can call X.feedback(Y)  in any  OutputStructure   X , passing any JSON object  Y \ncontaining the feedback you wish to send, and it will delegate the work to\nthe  InputStructure  stored in  X.origin , or do nothing if there is no such\nobject.  See  the API documentation for Input Structures \nfor further details on what that means.", 
+            "title": "Feedback"
         }
     ]
 }

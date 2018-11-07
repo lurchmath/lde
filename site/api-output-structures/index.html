@@ -8,7 +8,7 @@
         
         
         <link rel="shortcut icon" href="../img/favicon.ico">
-        <title>Phase 3, The Output Tree - Lurch Deductive Engine Documentation</title>
+        <title>Output Structures - Lurch Deductive Engine Documentation</title>
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
@@ -48,7 +48,7 @@
                     <li >
                         <a href="..">Home</a>
                     </li>
-                    <li class="dropdown active">
+                    <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Design Plans <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             
@@ -64,8 +64,8 @@
     <a href="../phase2-input-tree/">Phase 2, The Input Tree</a>
 </li>
                             
-<li class="active">
-    <a href="./">Phase 3, The Output Tree</a>
+<li >
+    <a href="../phase3-output-tree/">Phase 3, The Output Tree</a>
 </li>
                             
 <li >
@@ -93,7 +93,7 @@
 </li>
                         </ul>
                     </li>
-                    <li class="dropdown">
+                    <li class="dropdown active">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Documentation <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             
@@ -113,8 +113,8 @@
     <a href="../api-input-structures/">Input Structures</a>
 </li>
                             
-<li >
-    <a href="../api-output-structures/">Output Structures</a>
+<li class="active">
+    <a href="./">Output Structures</a>
 </li>
                         </ul>
                     </li>
@@ -127,12 +127,12 @@
                     </a>
                 </li>
                     <li >
-                        <a rel="next" href="../phase2-input-tree/">
+                        <a rel="next" href="../api-input-structures/">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
-                    <li >
-                        <a rel="prev" href="../phase4-modification/">
+                    <li class="disabled">
+                        <a rel="prev" >
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -144,85 +144,53 @@
         <div class="container">
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
-        <li class="main active"><a href="#lde-design-phase-3-the-output-tree">LDE Design Phase 3: The Output Tree</a></li>
-            <li><a href="#content">Content</a></li>
-            <li><a href="#goal">Goal</a></li>
-            <li><a href="#status">Status</a></li>
-            <li><a href="#outputstructure-class">OutputStructure class</a></li>
-            <li><a href="#marking-structures-dirty">Marking structures dirty</a></li>
-            <li><a href="#api-documentation">API Documentation</a></li>
+        <li class="main active"><a href="#api-documentation-for-the-outputstructure-class-and-its-subclasses">API Documentation for the OutputStructure Class and its Subclasses</a></li>
+            <li><a href="#source-code">Source Code</a></li>
+            <li><a href="#purpose">Purpose</a></li>
+            <li><a href="#the-outputstructure-class">The OutputStructure class</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<p>We have designed the work on the Lurch Deductive Engine (LDE) to progress in
-phases.  The idea is that each phase ends with a completed whole that can be
-tested in that state, and that provides more features than the previous
-state did.  By the time the final phase is complete, the LDE will be a
-robust and useful product.</p>
-<h1 id="lde-design-phase-3-the-output-tree">LDE Design Phase 3: The Output Tree</h1>
-<h2 id="content">Content</h2>
-<p>In this phase, we add the Output Tree, a hierarchy comprised of a new kind
-of <code>Structure</code> subclass, called <code>OutputStructure</code>.</p>
-<h2 id="goal">Goal</h2>
-<p>The <code>OutputStructure</code> class will exist and be imported by the LDE module
-but not yet used for anything.</p>
-<h2 id="status">Status</h2>
-<p>This has not been implemented.  See the tasks below.</p>
-<h2 id="outputstructure-class"><code>OutputStructure</code> class</h2>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create a subclass of <code>Structure</code>, in its own new module,
-   <code>src/output-structure.litcoffee</code>.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation explaining what it is and will do (though that
-   documentation can grow with time).</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Ensure that the <code>OutputStructure</code> subclass registers itself with the
-   serialization code, as
-   <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
-   describes.  (That is, use a line like
-   <code>className : Structure.addSubclass 'OutputStructure', OutputStructure</code> in
-   the <code>OutputStructure</code> class code.)</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create a new unit test file for <code>OutputStructure</code>s that is extremely
-   basic, just testing to be sure that the symbol <code>OutputStructure</code> is
-   defined at the global scope and creates things that are instances of the
-   generic <code>Structure</code> base class.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation for that unit test file, following the pattern
-   established in the documentation of other unit test files in this
-   repository.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Update the LDE module to import the <code>output-structure.litcoffee</code>
-   module in addition to the generic <code>structure.litcoffeee</code> one and the one
-   for <code>InputStructure</code>s.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add a global <code>Structure</code> hierarchy in that file, called the
-   <code>OutputTree</code>, parallel to the <code>InputTree</code>.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add a function that the LDE module exports that serializes the entire
-   <code>OutputTree</code> and returns it, like the <code>getInputTree()</code> function.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add a function that is the reverse of that pair, taking a pair of
-   serialized trees and deserializing them into the <code>InputTree</code> and the
-   <code>OutputTree</code>.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Update all unit tests of the LDE module to reflect the introduction
-   of <code>OutputStructure</code>s.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Once the unit tests pass, build everything and commit.</li>
+<h1 id="api-documentation-for-the-outputstructure-class-and-its-subclasses">API Documentation for the <code>OutputStructure</code> Class and its Subclasses</h1>
+<h2 id="source-code">Source Code</h2>
+<ul>
+<li><a href="https://github.com/lurchmath/lde/blob/master/src/output-structure.litcoffee">The <code>OutputStructure</code> class</a></li>
+<li><a href="https://github.com/lurchmath/lde/blob/master/tests/output-structure-spec.litcoffee">Unit tests of the <code>OutputStructure</code> class</a></li>
 </ul>
-<h2 id="marking-structures-dirty">Marking structures dirty</h2>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create a <code>markDirty()</code> function in the <code>OutputStructure</code> class that
-   marks the instance dirty (but with no propagation, unlike with
-   <code>InputStructure</code> instances).</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create the <code>OutputStructure</code> constructor to mark all instances dirty.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Update all documentation in that file to reflect the changes just
-   made.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add to the unit tests for <code>OutputStructure</code>s a few simple tests for
-   these new routines.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation in that file describing the changes just made.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Once the unit tests pass, build everything and commit.</li>
-</ul>
-<h2 id="api-documentation">API Documentation</h2>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Add a page to the API documentation for the <code>OutputStructure</code> class
-   and all of its upcoming subclasses.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Update <code>mkdocs.yml</code> in the project root to include that new file in
-   the generated documentation.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Rebuild docs and commit.</li>
-</ul></div>
+<h2 id="purpose">Purpose</h2>
+<p>For information on the generic notion of Structures, see
+<a href="../api-structures/">the API documentation for the base <code>Structure</code> class</a>.
+That explains not only the concepts common to all Structures, but also how
+<code>OutputStructure</code>s fit into the bigger picture.</p>
+<p>In this file, we cover the details specific to the <code>OutputStructure</code>
+subclass as well as its subclasses.  We break this document into sections,
+one for each subclass of <code>OutputStructure</code>, including <code>OutputStructure</code>
+itself.</p>
+<h2 id="the-outputstructure-class">The <code>OutputStructure</code> class</h2>
+<p>This class overrides none of the methods of its superclass, so you can refer
+to <a href="../api-structures/">the superclass API documentation</a> for information
+about many of the class's features.  It adds the following features.</p>
+<h3 id="dirtyclean-status">Dirty/Clean Status</h3>
+<p>In the Output Tree, the <code>dirty</code> flag of an <code>OutputStructure</code> signifies
+whether that node in the tree needs to be revalidated (i.e., has changed
+since its last validation, or something else that's relevant changed since
+its last validation).  Because the validation of one node in the Output Tree
+is independent of the validation of any other node, if a node is marked
+dirty, it is marked dirty in isolation.  Unlike <code>InputStructure</code>s, we do not
+propagate dirty status up the ancestor chain.</p>
+<p>Thus the <code>OutputStructure</code> class provides a <code>markDirty(yesOrNo)</code> function
+that is just a simple setter for the internal dirty status.  The same
+<code>isDirty()</code> function from the <code>Structure</code> base class remains available,
+unchanged.</p>
+<h3 id="feedback">Feedback</h3>
+<p>To make it easy to give feedback about <code>OutputStructure</code> instances, we
+provide an instance method called <code>feedback()</code>.  You can call
+<code>X.feedback(Y)</code> in any <code>OutputStructure</code> <code>X</code>, passing any JSON object <code>Y</code>
+containing the feedback you wish to send, and it will delegate the work to
+the <code>InputStructure</code> stored in <code>X.origin</code>, or do nothing if there is no such
+object.  See <a href="../api-input-structures/#feedback">the API documentation for Input Structures</a>
+for further details on what that means.</p></div>
         </div>
 
         <footer class="col-md-12">

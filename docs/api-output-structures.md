@@ -1,0 +1,50 @@
+
+# API Documentation for the `OutputStructure` Class and its Subclasses
+
+## Source Code
+
+ * [The `OutputStructure` class](https://github.com/lurchmath/lde/blob/master/src/output-structure.litcoffee)
+ * [Unit tests of the `OutputStructure` class](https://github.com/lurchmath/lde/blob/master/tests/output-structure-spec.litcoffee)
+
+## Purpose
+
+For information on the generic notion of Structures, see
+[the API documentation for the base `Structure` class](api-structures.md).
+That explains not only the concepts common to all Structures, but also how
+`OutputStructure`s fit into the bigger picture.
+
+In this file, we cover the details specific to the `OutputStructure`
+subclass as well as its subclasses.  We break this document into sections,
+one for each subclass of `OutputStructure`, including `OutputStructure`
+itself.
+
+## The `OutputStructure` class
+
+This class overrides none of the methods of its superclass, so you can refer
+to [the superclass API documentation](api-structures.md) for information
+about many of the class's features.  It adds the following features.
+
+### Dirty/Clean Status
+
+In the Output Tree, the `dirty` flag of an `OutputStructure` signifies
+whether that node in the tree needs to be revalidated (i.e., has changed
+since its last validation, or something else that's relevant changed since
+its last validation).  Because the validation of one node in the Output Tree
+is independent of the validation of any other node, if a node is marked
+dirty, it is marked dirty in isolation.  Unlike `InputStructure`s, we do not
+propagate dirty status up the ancestor chain.
+
+Thus the `OutputStructure` class provides a `markDirty(yesOrNo)` function
+that is just a simple setter for the internal dirty status.  The same
+`isDirty()` function from the `Structure` base class remains available,
+unchanged.
+
+### Feedback
+
+To make it easy to give feedback about `OutputStructure` instances, we
+provide an instance method called `feedback()`.  You can call
+`X.feedback(Y)` in any `OutputStructure` `X`, passing any JSON object `Y`
+containing the feedback you wish to send, and it will delegate the work to
+the `InputStructure` stored in `X.origin`, or do nothing if there is no such
+object.  See [the API documentation for Input Structures](api-input-structures.md#feedback)
+for further details on what that means.
