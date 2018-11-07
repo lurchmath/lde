@@ -148,9 +148,6 @@
             <li><a href="#content">Content</a></li>
             <li><a href="#goal">Goal</a></li>
             <li><a href="#status">Status</a></li>
-            <li><a href="#outputstructure-class">OutputStructure class</a></li>
-            <li><a href="#marking-structures-dirty">Marking structures dirty</a></li>
-            <li><a href="#api-documentation">API Documentation</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
@@ -168,61 +165,10 @@ of <code>Structure</code> subclass, called <code>OutputStructure</code>.</p>
 <p>The <code>OutputStructure</code> class will exist and be imported by the LDE module
 but not yet used for anything.</p>
 <h2 id="status">Status</h2>
-<p>This has not been implemented.  See the tasks below.</p>
-<h2 id="outputstructure-class"><code>OutputStructure</code> class</h2>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create a subclass of <code>Structure</code>, in its own new module,
-   <code>src/output-structure.litcoffee</code>.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation explaining what it is and will do (though that
-   documentation can grow with time).</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Ensure that the <code>OutputStructure</code> subclass registers itself with the
-   serialization code, as
-   <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
-   describes.  (That is, use a line like
-   <code>className : Structure.addSubclass 'OutputStructure', OutputStructure</code> in
-   the <code>OutputStructure</code> class code.)</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create a new unit test file for <code>OutputStructure</code>s that is extremely
-   basic, just testing to be sure that the symbol <code>OutputStructure</code> is
-   defined at the global scope and creates things that are instances of the
-   generic <code>Structure</code> base class.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation for that unit test file, following the pattern
-   established in the documentation of other unit test files in this
-   repository.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Update the LDE module to import the <code>output-structure.litcoffee</code>
-   module in addition to the generic <code>structure.litcoffeee</code> one and the one
-   for <code>InputStructure</code>s.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add a global <code>Structure</code> hierarchy in that file, called the
-   <code>OutputTree</code>, parallel to the <code>InputTree</code>.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add a function that the LDE module exports that serializes the entire
-   <code>OutputTree</code> and returns it, like the <code>getInputTree()</code> function.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add a function that is the reverse of that pair, taking a pair of
-   serialized trees and deserializing them into the <code>InputTree</code> and the
-   <code>OutputTree</code>.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Update all unit tests of the LDE module to reflect the introduction
-   of <code>OutputStructure</code>s.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Once the unit tests pass, build everything and commit.</li>
-</ul>
-<h2 id="marking-structures-dirty">Marking structures dirty</h2>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create a <code>markDirty()</code> function in the <code>OutputStructure</code> class that
-   marks the instance dirty (but with no propagation, unlike with
-   <code>InputStructure</code> instances).</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create the <code>OutputStructure</code> constructor to mark all instances dirty.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Update all documentation in that file to reflect the changes just
-   made.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add to the unit tests for <code>OutputStructure</code>s a few simple tests for
-   these new routines.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation in that file describing the changes just made.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Once the unit tests pass, build everything and commit.</li>
-</ul>
-<h2 id="api-documentation">API Documentation</h2>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Add a page to the API documentation for the <code>OutputStructure</code> class
-   and all of its upcoming subclasses.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Update <code>mkdocs.yml</code> in the project root to include that new file in
-   the generated documentation.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Rebuild docs and commit.</li>
-</ul></div>
+<p>This phase has been implemented and documented in the API Documentation. It
+added some features to the <code>LDE</code> module (<a href="../api-lde/">API Documentation
+here</a>) and created the <code>OutputStructure</code> module (<a href="../api-output-structures/">API
+documentation here</a>).</p></div>
         </div>
 
         <footer class="col-md-12">
