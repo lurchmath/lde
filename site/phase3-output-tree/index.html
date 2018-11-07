@@ -146,7 +146,6 @@
             <li><a href="#status">Status</a></li>
             <li><a href="#outputstructure-class">OutputStructure class</a></li>
             <li><a href="#marking-structures-dirty">Marking structures dirty</a></li>
-            <li><a href="#connecting-modules">Connecting modules</a></li>
             <li><a href="#api-documentation">API Documentation</a></li>
     </ul>
 </div></div>
@@ -162,8 +161,8 @@ robust and useful product.</p>
 <p>In this phase, we add the Output Tree, a hierarchy comprised of a new kind
 of <code>Structure</code> subclass, called <code>OutputStructure</code>.</p>
 <h2 id="goal">Goal</h2>
-<p>The <code>OutputStructure</code> class will exist, but will not yet be used by the LDE
-module.</p>
+<p>The <code>OutputStructure</code> class will exist and be imported by the LDE module
+but not yet used for anything.</p>
 <h2 id="status">Status</h2>
 <p>This has not been implemented.  See the tasks below.</p>
 <h2 id="outputstructure-class"><code>OutputStructure</code> class</h2>
@@ -191,9 +190,10 @@ module.</p>
 <li class="task-list-item"><input type="checkbox" disabled/> Add a global <code>Structure</code> hierarchy in that file, called the
    <code>OutputTree</code>, parallel to the <code>InputTree</code>.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Add a function that the LDE module exports that serializes the entire
-   <code>InputTree</code> and the entire <code>OutputTree</code> and returns them as a pair.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add a function that is the reverse, taking a pair of serialized trees
-   and deserializing them into the <code>InputTree</code> and the <code>OutputTree</code>.</li>
+   <code>OutputTree</code> and returns it, like the <code>getInputTree()</code> function.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add a function that is the reverse of that pair, taking a pair of
+   serialized trees and deserializing them into the <code>InputTree</code> and the
+   <code>OutputTree</code>.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Update all unit tests of the LDE module to reflect the introduction
    of <code>OutputStructure</code>s.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
@@ -203,18 +203,9 @@ module.</p>
 <li class="task-list-item"><input type="checkbox" disabled/> Create a <code>markDirty()</code> function in the <code>OutputStructure</code> class that
    marks the instance dirty (but with no propagation, unlike with
    <code>InputStructure</code> instances).</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the <code>OutputStructure</code> constructor to mark all instances dirty.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Create the <code>OutputStructure</code> constructor to mark all instances dirty.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Update all documentation in that file to reflect the changes just
    made.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add to the unit tests for <code>OutputStructure</code>s a few simple tests for
-   these new routines.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that file describing the changes just made.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
-</ul>
-<h2 id="connecting-modules">Connecting modules</h2>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Give the <code>OutputStructure</code> class a method called <code>feedback</code>, whose
-   default behavior is the same as that of <code>InputStructure</code>.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Add to the unit tests for <code>OutputStructure</code>s a few simple tests for
    these new routines.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that file describing the changes just made.</li>

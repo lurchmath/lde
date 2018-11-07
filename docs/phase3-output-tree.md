@@ -14,8 +14,8 @@ of `Structure` subclass, called `OutputStructure`.
 
 ## Goal
 
-The `OutputStructure` class will exist, but will not yet be used by the LDE
-module.
+The `OutputStructure` class will exist and be imported by the LDE module
+but not yet used for anything.
 
 ## Status
 
@@ -46,9 +46,10 @@ This has not been implemented.  See the tasks below.
  * [ ] Add a global `Structure` hierarchy in that file, called the
    `OutputTree`, parallel to the `InputTree`.
  * [ ] Add a function that the LDE module exports that serializes the entire
-   `InputTree` and the entire `OutputTree` and returns them as a pair.
- * [ ] Add a function that is the reverse, taking a pair of serialized trees
-   and deserializing them into the `InputTree` and the `OutputTree`.
+   `OutputTree` and returns it, like the `getInputTree()` function.
+ * [ ] Add a function that is the reverse of that pair, taking a pair of
+   serialized trees and deserializing them into the `InputTree` and the
+   `OutputTree`.
  * [ ] Update all unit tests of the LDE module to reflect the introduction
    of `OutputStructure`s.
  * [ ] Once the unit tests pass, build everything and commit.
@@ -58,18 +59,9 @@ This has not been implemented.  See the tasks below.
  * [ ] Create a `markDirty()` function in the `OutputStructure` class that
    marks the instance dirty (but with no propagation, unlike with
    `InputStructure` instances).
- * [ ] Extend the `OutputStructure` constructor to mark all instances dirty.
+ * [ ] Create the `OutputStructure` constructor to mark all instances dirty.
  * [ ] Update all documentation in that file to reflect the changes just
    made.
- * [ ] Add to the unit tests for `OutputStructure`s a few simple tests for
-   these new routines.
- * [ ] Add documentation in that file describing the changes just made.
- * [ ] Once the unit tests pass, build everything and commit.
-
-## Connecting modules
-
- * [ ] Give the `OutputStructure` class a method called `feedback`, whose
-   default behavior is the same as that of `InputStructure`.
  * [ ] Add to the unit tests for `OutputStructure`s a few simple tests for
    these new routines.
  * [ ] Add documentation in that file describing the changes just made.
