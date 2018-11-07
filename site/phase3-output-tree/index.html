@@ -167,31 +167,31 @@ but not yet used for anything.</p>
 <p>This has not been implemented.  See the tasks below.</p>
 <h2 id="outputstructure-class"><code>OutputStructure</code> class</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Create a subclass of <code>Structure</code>, in its own new module,
+<li class="task-list-item"><input type="checkbox" disabled checked/> Create a subclass of <code>Structure</code>, in its own new module,
    <code>src/output-structure.litcoffee</code>.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation explaining what it is and will do (though that
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation explaining what it is and will do (though that
    documentation can grow with time).</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Ensure that the <code>OutputStructure</code> subclass registers itself with the
+<li class="task-list-item"><input type="checkbox" disabled checked/> Ensure that the <code>OutputStructure</code> subclass registers itself with the
    serialization code, as
    <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
    describes.  (That is, use a line like
    <code>className : Structure.addSubclass 'OutputStructure', OutputStructure</code> in
    the <code>OutputStructure</code> class code.)</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Create a new unit test file for <code>OutputStructure</code>s that is extremely
+<li class="task-list-item"><input type="checkbox" disabled checked/> Create a new unit test file for <code>OutputStructure</code>s that is extremely
    basic, just testing to be sure that the symbol <code>OutputStructure</code> is
    defined at the global scope and creates things that are instances of the
    generic <code>Structure</code> base class.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation for that unit test file, following the pattern
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation for that unit test file, following the pattern
    established in the documentation of other unit test files in this
    repository.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Update the LDE module to import the <code>output-structure.litcoffee</code>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Update the LDE module to import the <code>output-structure.litcoffee</code>
    module in addition to the generic <code>structure.litcoffeee</code> one and the one
    for <code>InputStructure</code>s.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add a global <code>Structure</code> hierarchy in that file, called the
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add a global <code>Structure</code> hierarchy in that file, called the
    <code>OutputTree</code>, parallel to the <code>InputTree</code>.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add a function that the LDE module exports that serializes the entire
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add a function that the LDE module exports that serializes the entire
    <code>OutputTree</code> and returns it, like the <code>getInputTree()</code> function.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add a function that is the reverse of that pair, taking a pair of
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add a function that is the reverse of that pair, taking a pair of
    serialized trees and deserializing them into the <code>InputTree</code> and the
    <code>OutputTree</code>.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Update all unit tests of the LDE module to reflect the introduction

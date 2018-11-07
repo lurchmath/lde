@@ -7,20 +7,29 @@ defined in this module, `InputStructure`.
 
 These have entirely different functionality than their cousins
 `OutputStructure` instances.  In short, these support interpretation while
-`OutputStructure`s support validation.
+`OutputStructure`s support validation.  You can also think of the difference
+as this:  `InputStructure`s represent the syntax of what the user has
+expressed to the client, and `OutputStructure`s represent the semantics into
+which we interpret that syntax.
 
 ## Import modules
 
-Import the `InputStructure` class.  The following lines detect whether this
+Import the `Structure` class.  The following lines detect whether this
 is being used in Node.js or a WebWorker, or a WebWorker-like background
 thread within Node.js, and do the right thing in any case.
+
+In the Worker cases, it is important not to call `importScripts` on the same
+module more than once from different files, or all manner of confusing logic
+errors manifest at runtime, hence the checks below.
 
     if require?
         { Structure } = require './structure'
     else if WorkerGlobalScope?
-        importScripts 'structure.js'
+        if not WorkerGlobalScope.Structure?
+            importScripts 'structure.js'
     else if self?.importScripts?
-        importScripts 'release/structure.js'
+        if not self.Structure?
+            importScripts 'release/structure.js'
 
 ## Define the `InputStructure` class
 

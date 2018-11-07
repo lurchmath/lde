@@ -23,31 +23,31 @@ This has not been implemented.  See the tasks below.
 
 ## `OutputStructure` class
 
- * [ ] Create a subclass of `Structure`, in its own new module,
+ * [x] Create a subclass of `Structure`, in its own new module,
    `src/output-structure.litcoffee`.
- * [ ] Add documentation explaining what it is and will do (though that
+ * [x] Add documentation explaining what it is and will do (though that
    documentation can grow with time).
- * [ ] Ensure that the `OutputStructure` subclass registers itself with the
+ * [x] Ensure that the `OutputStructure` subclass registers itself with the
    serialization code, as
    [the documentation here](https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names)
    describes.  (That is, use a line like
    `className : Structure.addSubclass 'OutputStructure', OutputStructure` in
    the `OutputStructure` class code.)
- * [ ] Create a new unit test file for `OutputStructure`s that is extremely
+ * [x] Create a new unit test file for `OutputStructure`s that is extremely
    basic, just testing to be sure that the symbol `OutputStructure` is
    defined at the global scope and creates things that are instances of the
    generic `Structure` base class.
- * [ ] Add documentation for that unit test file, following the pattern
+ * [x] Add documentation for that unit test file, following the pattern
    established in the documentation of other unit test files in this
    repository.
- * [ ] Update the LDE module to import the `output-structure.litcoffee`
+ * [x] Update the LDE module to import the `output-structure.litcoffee`
    module in addition to the generic `structure.litcoffeee` one and the one
    for `InputStructure`s.
- * [ ] Add a global `Structure` hierarchy in that file, called the
+ * [x] Add a global `Structure` hierarchy in that file, called the
    `OutputTree`, parallel to the `InputTree`.
- * [ ] Add a function that the LDE module exports that serializes the entire
+ * [x] Add a function that the LDE module exports that serializes the entire
    `OutputTree` and returns it, like the `getInputTree()` function.
- * [ ] Add a function that is the reverse of that pair, taking a pair of
+ * [x] Add a function that is the reverse of that pair, taking a pair of
    serialized trees and deserializing them into the `InputTree` and the
    `OutputTree`.
  * [ ] Update all unit tests of the LDE module to reflect the introduction

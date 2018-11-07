@@ -14,12 +14,15 @@ within Node.js, and do the right thing in any case.
     if require?
         { Structure } = require './structure'
         { InputStructure } = require './input-structure'
+        { OutputStructure } = require './output-structure'
     else if WorkerGlobalScope?
         importScripts 'structure.js'
         importScripts 'input-structure.js'
+        importScripts 'output-structure.js'
     else if self?.importScripts?
         importScripts 'release/structure.js'
         importScripts 'release/input-structure.js'
+        importScripts 'release/output-structure.js'
 
 ## The Input Tree
 
@@ -45,6 +48,55 @@ The following function returns the root of the Input Tree structure.
 
     functions = { }
     functions.getInputTree = -> InputTree
+
+Clients can also replace the entire Input Tree in certain circumstances; see
+details in the following section.
+
+## The Output Tree
+
+The Output Tree is a global instance of the `OutputStructure` class,
+representing the content of the user's document as interpreted by this
+module from the Input Tree.  It has the special ID "OT root."
+
+We do not use the symmetric name "IT root" for the Input Tree's root,
+because the Input Tree is client-facing, and we do not wish to put on the
+client the burden of using the "IT" prefix.  But we must distinguish the
+two, because these IDs are used by the global `Structure` class to
+distinguish `Structure` instances, including those in both the Input Tree
+and the Output Tree.  Thus node IDs must be globally unique across both
+trees.
+
+    OutputTree = ( new OutputStructure ).attr 'id' : 'OT root'
+    OutputTree.trackIDs()
+
+Clients do not *ever* write to the Output Tree.  They can read from it,
+however, for the same two reasons as given for the Input Tree in the
+previous section.  Thus the following function returns the root of the
+Output Tree structure.
+
+    functions.getOutputTree = -> OutputTree
+
+Clients may occasionally wish to replace the entire Input and Output Tree
+pair.  This most likely happens when the state of the LDE is saved by
+fetching that pair and saving it to some filesystem, then later the state
+is restored by fetching the archived versions and putting them back into the
+LDE.
+
+Both trees should be inserted at once, to keep things consistent, so we
+provide a function for querying both trees at once, and another function for
+setting both trees at once.  So that clients don't need to think about the
+Output Tree at all, we just call the tree pair the LDE's "internal state."
+
+    functions.getInternalState = ->
+        inputTree : InputTree.toJSON()
+        outputTree : OutputTree.toJSON()
+    functions.setInternalState = ( state ) ->
+        InputTree.untrackIDs()
+        InputTree = Structure.fromJSON state.inputTree
+        InputTree.trackIDs()
+        OutputTree.untrackIDs()
+        OutputTree = Structure.fromJSON state.outputTree
+        OutputTree.trackIDs()
 
 ## Utilities
 
@@ -233,6 +285,14 @@ messages of eight types:
  * `getInputTree`, with zero arguments, which sends back a message
    containing the JSON serialized form of the document, as fetched using the
    `getInputTree` function defined above
+ * `getOutputTree`, with zero arguments, which sends back a message
+   containing the JSON serialized form of the document, as fetched using the
+   `getOutputTree` function defined above
+ * `getInternalState`, with zero arguments, which sends back a message
+   containing both of the previous two results (Input and Output Trees)
+ * `setInternalState` can be passed a single argument, a previous response
+   to the `getInternalState` query, to restore the Input and Output Trees
+   to the state they were in at the time of that query.
 
 
     if WorkerGlobalScope? or self?.importScripts?
@@ -249,6 +309,9 @@ Each is an array, any number in the array is acceptable.
             removeConnection : [ 1 ]
             setConnectionAttribute : [ 2, 3 ]
             getInputTree : [ 0 ]
+            getOutputTree : [ 0 ]
+            getInternalState : [ 0 ]
+            setInternalState : [ 1 ]
 
 Messages received expect data arrays of the form `[ command, args... ]`.
 
@@ -264,6 +327,10 @@ on whether the data is in the correct form.
                     self.postMessage
                         type : 'getInputTree'
                         payload : functions.getInputTree().toJSON()
+                else if command is 'getOutputTree'
+                    self.postMessage
+                        type : 'getOutputTree'
+                        payload : functions.getOutputTree().toJSON()
                 else
                     functions[command] args...
 
@@ -320,11 +387,15 @@ And export anything else that needs exporting.
     if exports?
         exports.Structure = Structure
         exports.InputStructure = InputStructure
+        exports.OutputStructure = OutputStructure
         exports.insertStructure = functions.insertStructure
         exports.deleteStructure = functions.deleteStructure
         exports.replaceStructure = functions.replaceStructure
         exports.setStructureAttribute = functions.setStructureAttribute
-        exports.getInputTree = functions.getInputTree
         exports.insertConnection = functions.insertConnection
         exports.removeConnection = functions.removeConnection
         exports.setConnectionAttribute = functions.setConnectionAttribute
+        exports.getInputTree = functions.getInputTree
+        exports.getOutputTree = functions.getOutputTree
+        exports.getInternalState = functions.getInternalState
+        exports.setInternalState = functions.setInternalState

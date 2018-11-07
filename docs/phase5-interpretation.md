@@ -231,6 +231,9 @@ section, about unit tests and documentation.
  * [ ] Extend the unit tests for the LDE module to verify that Output Trees
    now have, in each of their nodes, the correct origin node from the Input
    Tree that gave rise to that `OutputStructure`.
+ * [ ] Add unit tests verifying that the `feedback()` function in
+   `OutputStructure` instances correctly delegates the work to that
+   instance's `origin`.
  * [ ] Once the unit tests pass, build everything and commit.
 
 ## The Interpretation Phase
