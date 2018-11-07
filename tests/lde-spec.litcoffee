@@ -908,6 +908,13 @@ with the class all over the place, which may bork other tests.
 
             LDE.reset()
 
+The Output Tree we get from the LDE should default to being marked dirty,
+unlike the Input Tree.
+
+        it 'should call the Output Tree dirty and the Input Tree clean', ->
+            expect( LDE.getInputTree().isDirty() ).toBeFalsy()
+            expect( LDE.getOutputTree().isDirty() ).toBeTruthy()
+
 ## WebWorker Support
 
 This section tests the same four functions as the previous section, but

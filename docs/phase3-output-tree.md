@@ -56,16 +56,16 @@ This has not been implemented.  See the tasks below.
 
 ## Marking structures dirty
 
- * [ ] Create a `markDirty()` function in the `OutputStructure` class that
+ * [x] Create a `markDirty()` function in the `OutputStructure` class that
    marks the instance dirty (but with no propagation, unlike with
    `InputStructure` instances).
- * [ ] Create the `OutputStructure` constructor to mark all instances dirty.
- * [ ] Update all documentation in that file to reflect the changes just
+ * [x] Create the `OutputStructure` constructor to mark all instances dirty.
+ * [x] Update all documentation in that file to reflect the changes just
    made.
- * [ ] Add to the unit tests for `OutputStructure`s a few simple tests for
+ * [x] Add to the unit tests for `OutputStructure`s a few simple tests for
    these new routines.
- * [ ] Add documentation in that file describing the changes just made.
- * [ ] Once the unit tests pass, build everything and commit.
+ * [x] Add documentation in that file describing the changes just made.
+ * [x] Once the unit tests pass, build everything and commit.
 
 ## API Documentation
 

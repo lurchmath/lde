@@ -40,8 +40,20 @@ status upward to its parent.  We test that here.
                 ).attr name : 'C'
             ).attr name : 'A'
 
-Ensure that all are clean to start.
+Ensure that all are dirty to start.
 
+            expect( A.isDirty() ).toBeTruthy()
+            expect( B.isDirty() ).toBeTruthy()
+            expect( C.isDirty() ).toBeTruthy()
+            expect( D.isDirty() ).toBeTruthy()
+
+Then clean them all to prepare for further testing, and verify that it
+worked.
+
+            A.markDirty no
+            B.markDirty no
+            C.markDirty no
+            D.markDirty no
             expect( A.isDirty() ).toBeFalsy()
             expect( B.isDirty() ).toBeFalsy()
             expect( C.isDirty() ).toBeFalsy()

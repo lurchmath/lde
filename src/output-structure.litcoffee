@@ -49,6 +49,13 @@ recursive propagation.
 
         markDirty : ( yesOrNo = yes ) -> @dirty = yesOrNo
 
+A newly constructed instance should be considered dirty (because it probably
+just changed and thus may need to be validated).
+
+        constructor : ->
+            super arguments...
+            @markDirty()
+
 ## Feedback
 
 To give feedback about a particular `OutputStructure` instance, find the
