@@ -50,9 +50,9 @@ This has not been implemented.  See the tasks below.
  * [x] Add a function that is the reverse of that pair, taking a pair of
    serialized trees and deserializing them into the `InputTree` and the
    `OutputTree`.
- * [ ] Update all unit tests of the LDE module to reflect the introduction
+ * [x] Update all unit tests of the LDE module to reflect the introduction
    of `OutputStructure`s.
- * [ ] Once the unit tests pass, build everything and commit.
+ * [x] Once the unit tests pass, build everything and commit.
 
 ## Marking structures dirty
 

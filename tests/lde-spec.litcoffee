@@ -30,9 +30,10 @@ indeed exported.
 
 ## Input Tree Editing API
 
-The LDE provides a global Input Tree object that we can edit with the four
+The LDE provides a global Input Tree object that we can edit with the seven
 functions in the API (`insertStructure`, `deleteStructure`,
-`replaceStructure`, and `setStructureAttribute`). We use those functions
+`replaceStructure`, `setStructureAttribute`, `insertConnection`,
+`deleteConnection`, and `setConnectionAttribute`).  We use those functions
 here to create and modify the Input Tree in several ways, each time
 comparing the results to JSON structures of what they should be.
 
@@ -43,20 +44,16 @@ ensure that after each such tests, we clear out all the changes it made, so
 that tests that follow it start from a pristine state (an Input Tree with a
 root only, no children).
 
-        afterEach ->
-            while LDE.getInputTree().children().length > 0
-                toDelete = LDE.getInputTree().children()[0]
-                toDelete.removeFromParent()
-                toDelete.untrackIDs()
+        afterEach -> LDE.reset()
 
 The LDE should begin life with an empty Input Tree, that is, a root with no
 attributes and no children, and an instance of the `InputStructure` class.
 
         it 'should begin with an empty Input Tree with ID "root"', ->
-            serialized = LDE.getInputTree().toJSON()
-            expect( serialized.className ).toBe 'InputStructure'
-            expect( serialized.children ).toEqual [ ]
-            expect( serialized.attributes ).toEqual { id : 'root' }
+            expect( LDE.getInputTree().toJSON() ).toEqual
+                className : 'InputStructure'
+                children : [ ]
+                attributes : id : 'root'
 
 In order for us to work with the Input Tree, we will need the root to have
 an ID that we can pass to various editing functions.  Let's verify that it
@@ -836,6 +833,80 @@ explicitly?
             expect( Structure.getConnectionSource 'C' ).toBe insertedA
             expect( Structure.getConnectionTarget 'C' ).toBe insertedD
             expect( Structure.getConnectionData 'C' ).toEqual id : 'C'
+
+## Output Tree Querying API
+
+The LDE provides a global Output Tree object that we can query with the
+`getOutputTree()` function and the `getInternalState()` function.  We test
+those functions here.
+
+    describe 'Output Tree querying API', ->
+
+The LDE should begin life with an empty Output Tree, that is, a root with no
+attributes and no children, and an instance of the `OutputStructure` class.
+
+        it 'should begin with an empty Output Tree with ID "OT root"', ->
+            expect( LDE.getOutputTree().toJSON() ).toEqual
+                className : 'OutputStructure'
+                children : [ ]
+                attributes : id : 'OT root'
+
+The LDE should permit querying the Input and Output Trees at once with the
+`getInternalState()` function.
+
+        it 'should permit querying the internal state', ->
+            expect( LDE.getInternalState() ).toEqual
+                inputTree :
+                    className : 'InputStructure'
+                    children : [ ]
+                    attributes : id : 'root'
+                outputTree :
+                    className : 'OutputStructure'
+                    children : [ ]
+                    attributes : id : 'OT root'
+
+The LDE should permit writing to the Input and Output Trees at once with the
+inverse of the `getInternalState()` function, `setInternalState()`.
+
+        it 'should permit writing the internal state', ->
+            newInternalState =
+                inputTree :
+                    className : 'InputStructure'
+                    children : [
+                        className : 'InputStructure'
+                        children : [ ]
+                        attributes : id : 'something'
+                    ]
+                    attributes : id : 'root'
+                outputTree :
+                    className : 'OutputStructure'
+                    children : [
+                        className : 'OutputStructure'
+                        children : [ ]
+                        attributes : id : 'one'
+                    ,
+                        className : 'OutputStructure'
+                        children : [ ]
+                        attributes : id : 'two'
+                    ]
+                    attributes : id : 'OT root'
+            expect( -> LDE.setInternalState newInternalState ).not.toThrow()
+            expect( LDE.getInternalState() ).toEqual newInternalState
+            expect( Structure.instanceWithID( 'root' ).toJSON() ).toEqual \
+                newInternalState.inputTree
+            expect( Structure.instanceWithID( 'OT root' ).toJSON() )
+                .toEqual newInternalState.outputTree
+            expect( Structure.instanceWithID( 'something' ).toJSON() )
+                .toEqual newInternalState.inputTree.children[0]
+            expect( Structure.instanceWithID( 'one' ).toJSON() ).toEqual \
+                newInternalState.outputTree.children[0]
+            expect( Structure.instanceWithID( 'two' ).toJSON() ).toEqual \
+                newInternalState.outputTree.children[1]
+
+Clean up after ourselves so we don't leave `Structure` instances registered
+with the class all over the place, which may bork other tests.
+
+            LDE.reset()
 
 ## WebWorker Support
 

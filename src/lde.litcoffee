@@ -28,10 +28,9 @@ within Node.js, and do the right thing in any case.
 
 The Input Tree is a global instance of the `InputStructure` class,
 representing the content of the user's document as expressed to this module
-by the client.  It has the special ID "root."
+by the client.  We define the variable here and initialize it later.
 
-    InputTree = ( new InputStructure ).attr 'id' : 'root'
-    InputTree.trackIDs()
+    InputTree = null
 
 Clients should treat the global Input Tree as read-only, *except* through
 the API provided in [the following section](#the-main-api).  But we provide
@@ -56,18 +55,10 @@ details in the following section.
 
 The Output Tree is a global instance of the `OutputStructure` class,
 representing the content of the user's document as interpreted by this
-module from the Input Tree.  It has the special ID "OT root."
+module from the Input Tree.  We define the variable here and initialize it
+later.
 
-We do not use the symmetric name "IT root" for the Input Tree's root,
-because the Input Tree is client-facing, and we do not wish to put on the
-client the burden of using the "IT" prefix.  But we must distinguish the
-two, because these IDs are used by the global `Structure` class to
-distinguish `Structure` instances, including those in both the Input Tree
-and the Output Tree.  Thus node IDs must be globally unique across both
-trees.
-
-    OutputTree = ( new OutputStructure ).attr 'id' : 'OT root'
-    OutputTree.trackIDs()
+    OutputTree = null
 
 Clients do not *ever* write to the Output Tree.  They can read from it,
 however, for the same two reasons as given for the Input Tree in the
@@ -91,12 +82,40 @@ Output Tree at all, we just call the tree pair the LDE's "internal state."
         inputTree : InputTree.toJSON()
         outputTree : OutputTree.toJSON()
     functions.setInternalState = ( state ) ->
-        InputTree.untrackIDs()
+        InputTree?.untrackIDs()
         InputTree = Structure.fromJSON state.inputTree
         InputTree.trackIDs()
-        OutputTree.untrackIDs()
+        OutputTree?.untrackIDs()
         OutputTree = Structure.fromJSON state.outputTree
         OutputTree.trackIDs()
+
+We then use those functions to define a setup routine for the LDE's internal
+state.  It clears out and re-initializes both the Input and Output Trees to
+be empty.
+
+The Input Tree gets the ID "root" and the Output Tree gets the ID "OT root".
+We do not use the symmetric name "IT root" for the Input Tree's root,
+because the Input Tree is client-facing, and we do not wish to put on the
+client the burden of using the "IT" prefix.  But we must distinguish the
+two, because these IDs are used by the global `Structure` class to
+distinguish `Structure` instances, including those in both the Input Tree
+and the Output Tree.  Thus node IDs must be globally unique across both
+trees.
+
+    functions.reset = ->
+        functions.setInternalState
+            inputTree :
+                className : 'InputStructure'
+                children : [ ]
+                attributes : id : 'root'
+            outputTree :
+                className : 'OutputStructure'
+                children : [ ]
+                attributes : id : 'OT root'
+
+Use the `reset()` function to initialize our internal state.
+
+    functions.reset()
 
 ## Utilities
 
@@ -293,6 +312,8 @@ messages of eight types:
  * `setInternalState` can be passed a single argument, a previous response
    to the `getInternalState` query, to restore the Input and Output Trees
    to the state they were in at the time of that query.
+ * `reset` takes no parameters and calls `setInternalState` with blank Input
+   and Output Trees.
 
 
     if WorkerGlobalScope? or self?.importScripts?
@@ -312,6 +333,7 @@ Each is an array, any number in the array is acceptable.
             getOutputTree : [ 0 ]
             getInternalState : [ 0 ]
             setInternalState : [ 1 ]
+            reset : [ 0 ]
 
 Messages received expect data arrays of the form `[ command, args... ]`.
 
@@ -388,14 +410,4 @@ And export anything else that needs exporting.
         exports.Structure = Structure
         exports.InputStructure = InputStructure
         exports.OutputStructure = OutputStructure
-        exports.insertStructure = functions.insertStructure
-        exports.deleteStructure = functions.deleteStructure
-        exports.replaceStructure = functions.replaceStructure
-        exports.setStructureAttribute = functions.setStructureAttribute
-        exports.insertConnection = functions.insertConnection
-        exports.removeConnection = functions.removeConnection
-        exports.setConnectionAttribute = functions.setConnectionAttribute
-        exports.getInputTree = functions.getInputTree
-        exports.getOutputTree = functions.getOutputTree
-        exports.getInternalState = functions.getInternalState
-        exports.setInternalState = functions.setInternalState
+        exports[key] = functions[key] for own key, value of functions
