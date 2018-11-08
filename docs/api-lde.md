@@ -15,6 +15,9 @@ This structure is called the *Input Tree,* and is the structure in which the
 LDE stores all input passed from the client.  In particular, the LDE never
 modifies this structure except at the request of the client.
 
+The phases by which the Input Tree is processed into the Output Tree and
+validated are discussed [in a separate document](api-phases.md).
+
 ## Manipulating the Input Tree
 
 The Input Tree can be manipulated with seven functions in the public API of

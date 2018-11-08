@@ -18,6 +18,7 @@ pages:
     - Structures: api-structures.md
     - Input Structures: api-input-structures.md
     - Output Structures: api-output-structures.md
+    - Phases of processing: api-phases.md
 dev_addr: 127.0.0.1:8888
 extra_javascript:
     - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML

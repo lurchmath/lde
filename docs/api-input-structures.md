@@ -52,3 +52,75 @@ transmit `Y` to the client.
 
 This transmission takes different forms depending on the client.  See the
 [relevant section in the LDE API documentation](api-lde.md#receiving-feedback).
+
+## The `InputExpression` class
+
+An `InputExpression` is the type of `InputStructure` that the LDE will
+interpret into meaningful content in its Output Tree.  This is the first of
+two `InputStructure` subclasses.  They are intended to be the *only* two
+`InputStructure` subclasses; most other things should be subclasses of one
+of these two.
+
+`InputExpression`s are what we typically think of as the meaningful things
+in the Input Tree.  They will have interpretation routines that will
+produce nodes in the Output Tree.
+
+To do their job, they have the following features.  (Some of these make more
+sense if you've skipped ahead and read the purpose of `InputModifier`s
+first.)
+
+ * An `updateData()` function, which imports from any `InputModifier`
+   connected to the expression all the data that such a modifier wishes to
+   import, by calling `updateDataIn()` in the modifier, passing the
+   expression as parameter.
+ * Several functions for tracking which attributes of the expression were
+   written by modifiers.  (See the miscellaneous technical details
+   documented in [the relevant section of the source code](https://github.com/lurchmath/lde/blob/master/src/input-structure.litcoffee#expression-specific-functionality).)
+ * Three convenience functions to make it easier for `InputModifier`
+   instances to implement their `updateDataIn()` functions without causing
+   collisions or overwriting of data in expressions.  See the documentation
+   in [the relevant section of the source code](https://github.com/lurchmath/lde/blob/master/src/input-structure.litcoffee#convenience-functions-for-inputmodifiers).
+
+## The `InputModifier` class
+
+An `InputModifier` is the type of `InputStructure` that will modify
+`InputExpression`s, and thus impact how they are interpreted.  It does not
+directly have an interpretation in the Output Tree itself, but only impacts
+the interpretation of zero or more `InputExpression`s.
+
+To support that, they have this functionality:
+
+ * An overridden constructor and `insertChild()` routine that prevent adding
+   children to an `InputModifier` instance.
+ * Default (noop) implementations of `updateConnections()` and
+   `updateDataIn()` that subclasses can override.
+
+The most common way to use this class will probably be to instead use the
+following simple subclass.
+
+## The `BasicInputModifier` class
+
+The most common purpose of modifiers is probably going to be embedding
+attributes into their targets.  To that end, we provide a class that does
+exactly that.
+
+It contains support for calling any of the three convenience functions that
+expressions expose to modifiers: `setSingleValue`, `addListItem`, and
+`addSetElement`.  The data for these calls can be given at construction time
+so that one need not subclass this further to get the desired functionality,
+but can just instantiate it instead.
+
+Here is an example:
+
+```javascript
+var example = new BasicInputModifier(
+    [ 'color', 'red', 'setSingleValue' ],
+    [ 'brother', 'Steve', 'addSetElement' ],
+    [ 'brother', 'Eric', 'addSetElement' ]
+);
+example.updateDataIn( expression );
+// does all of the following:
+// expression.setSingleValue( 'color', 'red' );
+// expression.addSetElement( 'brother', 'Steve' );
+// expression.addSetElement( 'brother', 'Eric' );
+```

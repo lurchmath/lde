@@ -116,6 +116,10 @@
 <li >
     <a href="../api-output-structures/">Output Structures</a>
 </li>
+                            
+<li >
+    <a href="../api-phases/">Phases of processing</a>
+</li>
                         </ul>
                     </li>
                 </ul>
@@ -148,6 +152,9 @@
             <li><a href="#source-code">Source Code</a></li>
             <li><a href="#purpose">Purpose</a></li>
             <li><a href="#the-inputstructure-class">The InputStructure class</a></li>
+            <li><a href="#the-inputexpression-class">The InputExpression class</a></li>
+            <li><a href="#the-inputmodifier-class">The InputModifier class</a></li>
+            <li><a href="#the-basicinputmodifier-class">The BasicInputModifier class</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
@@ -192,7 +199,67 @@ containing the feedback you wish to send, and it will add <code>X.id()</code> as
 <code>subject</code> field of <code>Y</code>, then call the LDE's global feedback function to
 transmit <code>Y</code> to the client.</p>
 <p>This transmission takes different forms depending on the client.  See the
-<a href="../api-lde/#receiving-feedback">relevant section in the LDE API documentation</a>.</p></div>
+<a href="../api-lde/#receiving-feedback">relevant section in the LDE API documentation</a>.</p>
+<h2 id="the-inputexpression-class">The <code>InputExpression</code> class</h2>
+<p>An <code>InputExpression</code> is the type of <code>InputStructure</code> that the LDE will
+interpret into meaningful content in its Output Tree.  This is the first of
+two <code>InputStructure</code> subclasses.  They are intended to be the <em>only</em> two
+<code>InputStructure</code> subclasses; most other things should be subclasses of one
+of these two.</p>
+<p><code>InputExpression</code>s are what we typically think of as the meaningful things
+in the Input Tree.  They will have interpretation routines that will
+produce nodes in the Output Tree.</p>
+<p>To do their job, they have the following features.  (Some of these make more
+sense if you've skipped ahead and read the purpose of <code>InputModifier</code>s
+first.)</p>
+<ul>
+<li>An <code>updateData()</code> function, which imports from any <code>InputModifier</code>
+   connected to the expression all the data that such a modifier wishes to
+   import, by calling <code>updateDataIn()</code> in the modifier, passing the
+   expression as parameter.</li>
+<li>Several functions for tracking which attributes of the expression were
+   written by modifiers.  (See the miscellaneous technical details
+   documented in <a href="https://github.com/lurchmath/lde/blob/master/src/input-structure.litcoffee#expression-specific-functionality">the relevant section of the source code</a>.)</li>
+<li>Three convenience functions to make it easier for <code>InputModifier</code>
+   instances to implement their <code>updateDataIn()</code> functions without causing
+   collisions or overwriting of data in expressions.  See the documentation
+   in <a href="https://github.com/lurchmath/lde/blob/master/src/input-structure.litcoffee#convenience-functions-for-inputmodifiers">the relevant section of the source code</a>.</li>
+</ul>
+<h2 id="the-inputmodifier-class">The <code>InputModifier</code> class</h2>
+<p>An <code>InputModifier</code> is the type of <code>InputStructure</code> that will modify
+<code>InputExpression</code>s, and thus impact how they are interpreted.  It does not
+directly have an interpretation in the Output Tree itself, but only impacts
+the interpretation of zero or more <code>InputExpression</code>s.</p>
+<p>To support that, they have this functionality:</p>
+<ul>
+<li>An overridden constructor and <code>insertChild()</code> routine that prevent adding
+   children to an <code>InputModifier</code> instance.</li>
+<li>Default (noop) implementations of <code>updateConnections()</code> and
+   <code>updateDataIn()</code> that subclasses can override.</li>
+</ul>
+<p>The most common way to use this class will probably be to instead use the
+following simple subclass.</p>
+<h2 id="the-basicinputmodifier-class">The <code>BasicInputModifier</code> class</h2>
+<p>The most common purpose of modifiers is probably going to be embedding
+attributes into their targets.  To that end, we provide a class that does
+exactly that.</p>
+<p>It contains support for calling any of the three convenience functions that
+expressions expose to modifiers: <code>setSingleValue</code>, <code>addListItem</code>, and
+<code>addSetElement</code>.  The data for these calls can be given at construction time
+so that one need not subclass this further to get the desired functionality,
+but can just instantiate it instead.</p>
+<p>Here is an example:</p>
+<pre><code class="javascript">var example = new BasicInputModifier(
+    [ 'color', 'red', 'setSingleValue' ],
+    [ 'brother', 'Steve', 'addSetElement' ],
+    [ 'brother', 'Eric', 'addSetElement' ]
+);
+example.updateDataIn( expression );
+// does all of the following:
+// expression.setSingleValue( 'color', 'red' );
+// expression.addSetElement( 'brother', 'Steve' );
+// expression.addSetElement( 'brother', 'Eric' );
+</code></pre></div>
         </div>
 
         <footer class="col-md-12">

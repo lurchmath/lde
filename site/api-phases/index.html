@@ -8,7 +8,7 @@
         
         
         <link rel="shortcut icon" href="../img/favicon.ico">
-        <title>Phase 1, Structures - Lurch Deductive Engine Documentation</title>
+        <title>Phases of processing - Lurch Deductive Engine Documentation</title>
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
@@ -48,7 +48,7 @@
                     <li >
                         <a href="..">Home</a>
                     </li>
-                    <li class="dropdown active">
+                    <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Design Plans <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             
@@ -56,8 +56,8 @@
     <a href="../design-overview/">Overview</a>
 </li>
                             
-<li class="active">
-    <a href="./">Phase 1, Structures</a>
+<li >
+    <a href="../phase1-structures/">Phase 1, Structures</a>
 </li>
                             
 <li >
@@ -93,7 +93,7 @@
 </li>
                         </ul>
                     </li>
-                    <li class="dropdown">
+                    <li class="dropdown active">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Documentation <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             
@@ -117,8 +117,8 @@
     <a href="../api-output-structures/">Output Structures</a>
 </li>
                             
-<li >
-    <a href="../api-phases/">Phases of processing</a>
+<li class="active">
+    <a href="./">Phases of processing</a>
 </li>
                         </ul>
                     </li>
@@ -131,12 +131,12 @@
                     </a>
                 </li>
                     <li >
-                        <a rel="next" href="../design-overview/">
+                        <a rel="next" href="../api-output-structures/">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
-                    <li >
-                        <a rel="prev" href="../phase2-input-tree/">
+                    <li class="disabled">
+                        <a rel="prev" >
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -148,35 +148,36 @@
         <div class="container">
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
-        <li class="main active"><a href="#lde-design-phase-1-structures">LDE Design Phase 1: Structures</a></li>
-            <li><a href="#content">Content</a></li>
-            <li><a href="#goal">Goal</a></li>
-            <li><a href="#status">Status</a></li>
+        <li class="main active"><a href="#api-documentation-for-the-ldes-phases">API Documentation for the LDE's Phases</a></li>
+            <li><a href="#modification">Modification</a></li>
+            <li><a href="#interpretation">Interpretation</a></li>
+            <li><a href="#validation">Validation</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<p>We have designed the work on the Lurch Deductive Engine (LDE) to progress in
-phases.  The idea is that each phase ends with a completed whole that can be
-tested in that state, and that provides more features than the previous
-state did.  By the time the final phase is complete, the LDE will be a
-robust and useful product.</p>
-<h1 id="lde-design-phase-1-structures">LDE Design Phase 1: Structures</h1>
-<h2 id="content">Content</h2>
-<p>In this phase, we just design the generic Structure class on which
-everything else will depend, and the infrastructure of the LDE itself.</p>
-<p>The <code>Structure</code> module defines a single <code>Structure</code> class, and has been
-implemented. <a href="../api-structures/">Its API Documentation appears here</a>.</p>
-<p>The <code>LDE</code> module defines several global functions, and has been implemented.
-<a href="../api-lde/">Its API Documentation appears here</a>.</p>
-<h2 id="goal">Goal</h2>
-<p>At the end of this phase, we could write unit tests of the whole Structure
-class and its LDE context, thus guaranteeing that all later phases rest on a
-good foundation.</p>
-<h2 id="status">Status</h2>
-<p>This phase has been implemented and documented in the API Documentation,
-and then was thoroughly overhauled to match a new and updated design.  That
-overhaul is complete, and this phase is ready to be used in later phases.</p></div>
+<h1 id="api-documentation-for-the-ldes-phases">API Documentation for the LDE's Phases</h1>
+<p>The LDE processes the Input Tree into the Output Tree and also does some
+processing of the Output Tree as well.  This all happens in several phases
+that proceed in sequence, each working with the output of the previous. We
+document those phases below.</p>
+<p>This documentation is not yet complete, because the phases have not yet all
+been implemented.</p>
+<h2 id="modification">Modification</h2>
+<p>The modification phase is the briefest.  It is implemented in the LDE's
+<code>runModification()</code> phase in its API, documented <a href="https://github.com/lurchmath/lde/blob/master/src/lde.litcoffee#the-modification-phase">here</a>.</p>
+<p>That function loops through all <code>InputModifier</code> instances in the Input Tree
+and calls the <code>updateConnections()</code> routine in each.  Each modifier should
+take that opportunity to connect itself to the correct modification targets.
+The reason for this is because those connections will govern, in the
+subsequent interpretation phase, which expressions ask which modifiers to
+embed data in the expressions.  In order for the expressions to make those
+requests correctly, the modifiers need to decide in the modification phase
+which expressions they should target.</p>
+<h2 id="interpretation">Interpretation</h2>
+<p>This phase is not yet implemented nor documented.</p>
+<h2 id="validation">Validation</h2>
+<p>This phase is not yet implemented nor documented.</p></div>
         </div>
 
         <footer class="col-md-12">
