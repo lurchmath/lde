@@ -197,30 +197,30 @@ methods and the Modification phase will be implemented.</p>
 </ul>
 <h2 id="inputmodifier-class"><code>InputModifier</code> class</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Create a subclass of <code>InputStructure</code>, in the <code>InputStructure</code>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Create a subclass of <code>InputStructure</code>, in the <code>InputStructure</code>
    module, called <code>InputModifier</code>.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation explaining what it is and will do (though that
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation explaining what it is and will do (though that
    documentation can grow with time).</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Ensure that the <code>InputModifier</code> subclass registers itself with the
+<li class="task-list-item"><input type="checkbox" disabled checked/> Ensure that the <code>InputModifier</code> subclass registers itself with the
    serialization code, as
    <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
    describes.  (That is, use a line like
    <code>className : Structure.addSubclass 'InputModifier', InputModifier</code> in
    the <code>InputModifier</code> class code.)</li>
-<li class="task-list-item"><input type="checkbox" disabled/> The class should provide two functions that, in the base class, do
+<li class="task-list-item"><input type="checkbox" disabled checked/> The class should provide two functions that, in the base class, do
    nothing, but will be overridden by subclasses to do something smarter.
    These are <code>updateConnections()</code> and <code>updateDataIn(target)</code>.  Add these
    stubs now.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Document the two functions you just added regarding their purposes
+<li class="task-list-item"><input type="checkbox" disabled checked/> Document the two functions you just added regarding their purposes
    in subclasses.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Create a new unit test file for <code>InputModifier</code>s that is extremely
+<li class="task-list-item"><input type="checkbox" disabled checked/> Create a new unit test file for <code>InputModifier</code>s that is extremely
    basic, just testing to be sure that the symbol <code>InputModifier</code> is
    defined at the global scope and creates things that are instances of the
    <code>InputStructure</code> class.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation for that unit test file, following the pattern
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation for that unit test file, following the pattern
    established in the documentation of other unit test files in this
    repository.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Once the unit tests pass, build everything and commit.</li>
 </ul>
 <h2 id="extending-inputexpression-to-respect-modifiers">Extending <code>InputExpression</code> to respect modifiers</h2>
 <ul class="task-list">

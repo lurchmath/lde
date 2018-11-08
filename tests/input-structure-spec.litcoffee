@@ -8,7 +8,8 @@ Here we import the module we're about to test.
 This file does not test every component of that module.  It tests the
 `InputStructure` class, and other classes defined in the same module are
 tested in other files (for example, see
-[the tests for `InputExpression`s](input-expression-spec.md)).
+[the tests for `InputExpression`s](input-expression-spec.md) and
+[the tests for `InputModifier`s](input-modifier-spec.md)).
 
 ## Global objects
 

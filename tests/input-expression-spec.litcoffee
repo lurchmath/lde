@@ -9,7 +9,8 @@ defined in the same module as `InputStructure`s.
 This file does not test every component of that module.  It tests the
 `InputExpression` class, and other classes defined in the same module are
 tested in other files (for example, see
-[the tests for `InputStructure`s](input-structure-spec.md)).
+[the tests for `InputStructure`s](input-structure-spec.md) and
+[the tests for `InputModifier`s](input-modifier-spec.md)).
 
 ## Global objects
 

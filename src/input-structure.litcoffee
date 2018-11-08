@@ -68,9 +68,9 @@ default implementation is a stub, it is overwritten by the LDE when
 `InputStructure`s come in two varieties, each represented by a subclass. The
 first is defined in this section:  An `InputExpression` is the type of
 `InputStructure` that the LDE will interpret into meaningful content in its
-Output Tree.  Later we will define `InputModifier`s, which do not produce
-nodes in the Output Tree, but just modify `InputExpression` instances and
-thus impact how they produce nodes in the Output Tree.
+Output Tree.  In the next section, we define `InputModifier`s, which do not
+produce nodes in the Output Tree, but just modify `InputExpression`
+instances and thus impact how they produce nodes in the Output Tree.
 
     class InputExpression extends InputStructure
 
@@ -80,8 +80,50 @@ We do so for this class with the following line of code.
 
         className : Structure.addSubclass 'InputExpression', InputExpression
 
+## Define `InputModifier`s as a type of `InputStructure`
+
+As documented in the previous section, `InputModifier`s are the subclass of
+`InputStructure` that do not produce interpretations in the LDE's Output
+Tree, but instead modify the interpretations of `InputExpression`s, which
+do.
+
+    class InputModifier extends InputStructure
+
+In order for a hierarchy of structures to be able to be serialized and
+deserialized, we need to track the class of each structure in the hierarchy.
+We do so for this class with the following line of code.
+
+        className : Structure.addSubclass 'InputModifier', InputModifier
+
+One unique characteristic of modifiers is that they cannot contain other
+nodes as children.  Thus we alter the constructor so that when it calls the
+parent class's constructor, it does not pass on any arguments, and we
+redefine the `insertChild()` routine to do nothing.
+
+        constructor : -> super()
+        insertChild : ->
+
+### Modifier-specific functionality
+
+The LDE guarantees that, before it interprets the Input Tree into the Output
+Tree, it will run `updateConnections()` in every `InputModifier`.  This
+gives the modifier an opportunity to ensure that it is connected (using the
+ordinary connections features built into all `Structure`s) to the correct
+set of `InputExpressions`, precisely those that it modifies.  Those
+`InputExpression`s will, during interpretation, then call the
+`updateDataIn()` functions in the modifiers attached to them, giving each
+such modifier a chance to impact the expression before it is interpreted.
+
+Here, we provide default implementations of both `updateConnections()` and
+`updateDataIn()`, which do nothing.  Subclasses of `InputModifier` can
+reimplement them to take actions appropriate to that subclass.
+
+        updateConnections : ->
+        updateDataIn : ( targetExpression ) ->
+
 Now if this is being used in a Node.js context, export the class we defined.
 
     if exports?
         exports.InputStructure = InputStructure
         exports.InputExpression = InputExpression
+        exports.InputModifier = InputModifier

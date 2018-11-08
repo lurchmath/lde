@@ -44,30 +44,30 @@ This has not been implemented.  See the tasks below.
 
 ## `InputModifier` class
 
- * [ ] Create a subclass of `InputStructure`, in the `InputStructure`
+ * [x] Create a subclass of `InputStructure`, in the `InputStructure`
    module, called `InputModifier`.
- * [ ] Add documentation explaining what it is and will do (though that
+ * [x] Add documentation explaining what it is and will do (though that
    documentation can grow with time).
- * [ ] Ensure that the `InputModifier` subclass registers itself with the
+ * [x] Ensure that the `InputModifier` subclass registers itself with the
    serialization code, as
    [the documentation here](https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names)
    describes.  (That is, use a line like
    `className : Structure.addSubclass 'InputModifier', InputModifier` in
    the `InputModifier` class code.)
- * [ ] The class should provide two functions that, in the base class, do
+ * [x] The class should provide two functions that, in the base class, do
    nothing, but will be overridden by subclasses to do something smarter.
    These are `updateConnections()` and `updateDataIn(target)`.  Add these
    stubs now.
- * [ ] Document the two functions you just added regarding their purposes
+ * [x] Document the two functions you just added regarding their purposes
    in subclasses.
- * [ ] Create a new unit test file for `InputModifier`s that is extremely
+ * [x] Create a new unit test file for `InputModifier`s that is extremely
    basic, just testing to be sure that the symbol `InputModifier` is
    defined at the global scope and creates things that are instances of the
    `InputStructure` class.
- * [ ] Add documentation for that unit test file, following the pattern
+ * [x] Add documentation for that unit test file, following the pattern
    established in the documentation of other unit test files in this
    repository.
- * [ ] Once the unit tests pass, build everything and commit.
+ * [x] Once the unit tests pass, build everything and commit.
 
 ## Extending `InputExpression` to respect modifiers
 
