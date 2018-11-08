@@ -4,8 +4,8 @@
 Here we import the module we're about to test.  `InputModifier`s are
 defined in the same module as `InputStructure`s.
 
-    { InputStructure, InputExpression, InputModifier } = \
-        require '../src/input-structure'
+    { InputStructure, InputExpression, InputModifier, \
+      BasicInputModifier } = require '../src/input-structure'
 
 This file does not test every component of that module.  It tests the
 `InputModifier` class, and other classes defined in the same module are
@@ -101,3 +101,61 @@ not appear to do anything.
             expect( myIM.updateDataIn() ).toBeUndefined()
             expect( -> myIM.updateDataIn target ).not.toThrow()
             expect( myIM.updateDataIn target ).toBeUndefined()
+
+## The `BasicInputModifier` subclass
+
+This subclass is simple enough that it doesn't need its own test file.
+
+    describe 'The BasicInputModifier subclass', ->
+
+Here we verify the following things about it.
+
+Is it defined?
+
+        it 'is in the global scope', ->
+            expect( BasicInputModifier ).not.toBeUndefined()
+
+Is it a subclass of `InputModifier`?
+
+        it 'is a subclass of InputModifier', ->
+            BIM = new BasicInputModifier()
+            expect( BIM instanceof InputModifier ).toBeTruthy()
+
+Does a plain vanilla version do absolutely nothing to change its target?
+
+        it 'should embed no data if constructed without arguments', ->
+            BIM = new BasicInputModifier()
+            IE = new InputExpression()
+            initialState = IE.toJSON()
+            expect( -> BIM.updateDataIn IE ).not.toThrow()
+            expect( IE.toJSON() ).toEqual initialState
+
+Does a version with many arguments call all of the appropriate functions?
+
+        it 'should all the actions given to it at construction time', ->
+            BIM = new BasicInputModifier(
+                [ 'x', { text : 'expect this' }, 'setSingleValue' ]
+                [ 'x', { text : 'you won\'t see this' }, 'setSingleValue' ]
+                [ 'L', [], 'addListItem' ]
+                [ 'L', [[]], 'addListItem' ]
+                [ 'L', [[[]]], 'addListItem' ]
+                [ 'L', [[]], 'addListItem' ]
+                [ 'S', {}, 'addSetElement' ]
+                [ 'S', {}, 'addSetElement' ] # won't be added
+                [ 'S', -3, 'addSetElement' ]
+                [ 'S', -3, 'addSetElement' ] # won't be added
+            )
+            IE = new InputExpression()
+            expect( IE.getAttribute 'x' ).toBeUndefined()
+            expect( IE.getAttribute 'L' ).toBeUndefined()
+            expect( IE.getAttribute 'S' ).toBeUndefined()
+            expect( IE.getCameFromModifier 'x' ).toBeFalsy()
+            expect( IE.getCameFromModifier 'L' ).toBeFalsy()
+            expect( IE.getCameFromModifier 'S' ).toBeFalsy()
+            expect( -> BIM.updateDataIn IE ).not.toThrow()
+            expect( IE.getAttribute 'x' ).toEqual text : 'expect this'
+            expect( IE.getAttribute 'L' ).toEqual [ [], [[]], [[[]]], [[]] ]
+            expect( IE.getAttribute 'S' ).toEqual [ {}, -3 ]
+            expect( IE.getCameFromModifier 'x' ).toBeTruthy()
+            expect( IE.getCameFromModifier 'L' ).toBeTruthy()
+            expect( IE.getCameFromModifier 'S' ).toBeTruthy()

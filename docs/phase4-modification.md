@@ -126,32 +126,27 @@ All of the following functions should be added as members in the
 
 ## `BasicInputModifier` class
 
- * [ ] Create a subclass of `InputModifier`, in the `InputStructure`
+ * [x] Create a subclass of `InputModifier`, in the `InputStructure`
    module, called `BasicInputModifier`.  It takes a set of key-value-type
    triples at construction time and stores them for later embedding in a
    target.  The "type" of the triple will be which kind of function should
    be used to insert it (single value, list item, set element).
- * [ ] Override the `updateDataIn(target)` function to embed exactly those
+ * [x] Override the `updateDataIn(target)` function to embed exactly those
    key-value pairs in the target.  Take care to ensure that copies of values
    are used rather than the original objects.  Be sure to use the
    appropriate functions that will mark the attribute as having been set by
    an `InputModifier`.
- * [ ] Add documentation explaining what it is and does.
- * [ ] Ensure that the `BasicInputModifier` subclass registers itself with the
+ * [x] Add documentation explaining what it is and does.
+ * [x] Ensure that the `BasicInputModifier` subclass registers itself with the
    serialization code, as
    [the documentation here](https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names)
    describes.  (That is, use a line like
    `className : Structure.addSubclass 'BasicInputModifier', BasicInputModifier`
    in the `BasicInputModifier` class code.)
- * [ ] Create a new unit test file for `BasicInputModifier`s that not only
-   ensures that the symbol `BasicInputModifier` is defined at the global
-   scope and that its instances are also instances of the `InputStructure`
-   class, but also that the `updateDataIn(target)` function behaves as
-   intended.
- * [ ] Add documentation for that unit test file, following the pattern
-   established in the documentation of other unit test files in this
-   repository.
- * [ ] Once the unit tests pass, build everything and commit.
+ * [x] Add unit tests for `BasicInputModifier`s to the `InputModifier`
+   class's unit test file.
+ * [x] Add documentation for those new tests.
+ * [x] Once the unit tests pass, build everything and commit.
 
 ## The Modification Phase
 

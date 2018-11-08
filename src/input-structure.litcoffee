@@ -213,9 +213,45 @@ reimplement them to take actions appropriate to that subclass.
         updateConnections : ->
         updateDataIn : ( targetExpression ) ->
 
+## Define `BasicInputModifier`s as a type of `InputModifier`
+
+This class implements the simplest (and probably most common) type of
+`InputModifier`, one that makes a series of calls to `setSingleValue()`,
+`addListItem()`, and/or `addSetElement()` in its target(s).  Thus its
+constructor takes a set of key-value-type triples and stores them for later
+embedding in any target.  The "type" of the triple will be which kind of
+function should be used to insert it (single value, list item, set element),
+as the string name of that function (`"setSingleValue"`, `"addListItem"`,
+and `"addSetElement"`).
+
+    class BasicInputModifier extends InputModifier
+
+The constructor that stores the set of triples, discarding any that don't
+match the format given above.
+
+        constructor : ->
+            super()
+            @actions = ( triple for triple in arguments \
+                when triple.length is 3 and triple[2] in \
+                [ 'setSingleValue', 'addListItem', 'addSetElement' ] )
+
+The `updateDataIn()` method that just runs the functions described by the
+triples.
+
+        updateDataIn : ( target ) ->
+            target[type] key, value for [ key, value, type ] in @actions
+
+In order for a hierarchy of structures to be able to be serialized and
+deserialized, we need to track the class of each structure in the hierarchy.
+We do so for this class with the following line of code.
+
+        className : Structure.addSubclass 'BasicInputModifier',
+            BasicInputModifier
+
 Now if this is being used in a Node.js context, export the class we defined.
 
     if exports?
         exports.InputStructure = InputStructure
         exports.InputExpression = InputExpression
         exports.InputModifier = InputModifier
+        exports.BasicInputModifier = BasicInputModifier

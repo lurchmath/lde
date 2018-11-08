@@ -278,32 +278,27 @@ methods and the Modification phase will be implemented.</p>
 </ul>
 <h2 id="basicinputmodifier-class"><code>BasicInputModifier</code> class</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Create a subclass of <code>InputModifier</code>, in the <code>InputStructure</code>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Create a subclass of <code>InputModifier</code>, in the <code>InputStructure</code>
    module, called <code>BasicInputModifier</code>.  It takes a set of key-value-type
    triples at construction time and stores them for later embedding in a
    target.  The "type" of the triple will be which kind of function should
    be used to insert it (single value, list item, set element).</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Override the <code>updateDataIn(target)</code> function to embed exactly those
+<li class="task-list-item"><input type="checkbox" disabled checked/> Override the <code>updateDataIn(target)</code> function to embed exactly those
    key-value pairs in the target.  Take care to ensure that copies of values
    are used rather than the original objects.  Be sure to use the
    appropriate functions that will mark the attribute as having been set by
    an <code>InputModifier</code>.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation explaining what it is and does.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Ensure that the <code>BasicInputModifier</code> subclass registers itself with the
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation explaining what it is and does.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Ensure that the <code>BasicInputModifier</code> subclass registers itself with the
    serialization code, as
    <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
    describes.  (That is, use a line like
    <code>className : Structure.addSubclass 'BasicInputModifier', BasicInputModifier</code>
    in the <code>BasicInputModifier</code> class code.)</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Create a new unit test file for <code>BasicInputModifier</code>s that not only
-   ensures that the symbol <code>BasicInputModifier</code> is defined at the global
-   scope and that its instances are also instances of the <code>InputStructure</code>
-   class, but also that the <code>updateDataIn(target)</code> function behaves as
-   intended.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation for that unit test file, following the pattern
-   established in the documentation of other unit test files in this
-   repository.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add unit tests for <code>BasicInputModifier</code>s to the <code>InputModifier</code>
+   class's unit test file.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation for those new tests.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Once the unit tests pass, build everything and commit.</li>
 </ul>
 <h2 id="the-modification-phase">The Modification Phase</h2>
 <ul class="task-list">
