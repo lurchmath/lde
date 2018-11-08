@@ -89,9 +89,11 @@ interpretation.  We provide the following function for doing so.
 
 It is required to process incoming connections in the order that the
 modifiers appear in the Input Tree.  Thus we find all the modifiers first,
-then sort them by their order in the tree, then embed the data.
+then sort them by their order in the tree, then embed the data.  The
+`clearAttributesFromModifiers()` function is documented later.
 
         updateData : ->
+            @clearAttributesFromModifiers()
             sources = [ ]
             for incomingConnection in @getConnectionsIn()
                 source = @getConnectionSource incomingConnection
@@ -99,6 +101,29 @@ then sort them by their order in the tree, then embed the data.
             sources.sort ( a, b ) ->
                 if a is b then 0 else if a.isEarlierThan b then -1 else 1
             source.updateDataIn @ for source in sources
+
+When an `InputModifier` writes to an attribute of this object, we may want
+to mark the attribute as having come from a modifier.  This will help us
+provide some convenience features to modifiers as they write to attributes.
+We thus provide the following two functions that use internal attributes
+(ones beginning with underscore) to store metadata about an attribute.
+
+        setCameFromModifier : ( attrKey ) ->
+            @setAttribute "_from modifier #{attrKey}", yes
+        getCameFromModifier : ( attrKey ) ->
+            @getAttribute "_from modifier #{attrKey}"
+
+Before the modification phase, it can be useful to delete everything that
+was set by a modifier, so that modifiers can accumulate list or set data in
+their target without worrying about compounding what they added in the last
+run of the modification phase.  Thus the following function guarantees that
+the expression is in a pristine state, as far as modifier data is concerned.
+
+        clearAttributesFromModifiers : ->
+            for own key of @attributes
+                if key[...15] is '_from modifier '
+                    delete @attributes[key]
+                    delete @attributes[key[15...]]
 
 ## Define `InputModifier`s as a type of `InputStructure`
 

@@ -184,3 +184,124 @@ update the data in the target before `modifier1`.
             expect( target.getAttribute 'attr2' ).toBe 'm1 wrote this'
             expect( target.getAttribute 'attr3' ).toBe 'm2 wrote this'
             root.untrackIDs()
+
+## Tracking which data came from modifiers
+
+The `InputExpression` class provides two functions for marking attributes
+with the metadata of whether they were set by `InputModifier`s.  They are
+then used by several supporting functions.  We test all of these below.
+
+    describe 'Convenience functions for use by InputModifiers', ->
+
+The foundation is made up of two very simple functions, for which we write
+brief tests due to the functions' simplicity.
+
+        it 'should provide a simple, working getter and setter', ->
+            guineaPig = new InputExpression()
+            expect( guineaPig.getCameFromModifier 'key' ).toBeFalsy()
+            expect( -> guineaPig.setCameFromModifier 'key' ).not.toThrow()
+            expect( guineaPig.getCameFromModifier 'key' ).toBeTruthy()
+            expect( guineaPig.getCameFromModifier 'foo' ).toBeFalsy()
+            expect( -> guineaPig.setCameFromModifier 'foo' ).not.toThrow()
+            expect( guineaPig.getCameFromModifier 'foo' ).toBeTruthy()
+            nonGuineaPig = new InputStructure()
+            expect( nonGuineaPig.setCameFromModifier ).toBeUndefined()
+            expect( nonGuineaPig.getCameFromModifier ).toBeUndefined()
+
+The function `clearAttributesFromModifiers()` should remove all attributes
+that were marked as set by modifiers, and should remove those metadata marks
+as well.
+
+        it 'should be able to clear out all attributes set by modifiers', ->
+            guineaPig = new InputExpression()
+            guineaPig.setAttribute 1, 2
+            guineaPig.setAttribute 3, 4
+            guineaPig.setCameFromModifier 3
+            guineaPig.setAttribute 5, 6
+            guineaPig.setAttribute 7, 8
+            guineaPig.setCameFromModifier 7
+            guineaPig.setAttribute 9, 10
+            expect( guineaPig.getAttribute 1 ).toBe 2
+            expect( guineaPig.getAttribute 3 ).toBe 4
+            expect( guineaPig.getAttribute 5 ).toBe 6
+            expect( guineaPig.getAttribute 7 ).toBe 8
+            expect( guineaPig.getAttribute 9 ).toBe 10
+            expect( guineaPig.getCameFromModifier 1 ).toBeFalsy()
+            expect( guineaPig.getCameFromModifier 3 ).toBeTruthy()
+            expect( guineaPig.getCameFromModifier 5 ).toBeFalsy()
+            expect( guineaPig.getCameFromModifier 7 ).toBeTruthy()
+            expect( guineaPig.getCameFromModifier 9 ).toBeFalsy()
+            expect( -> guineaPig.clearAttributesFromModifiers() )
+                .not.toThrow()
+            expect( guineaPig.getAttribute 1 ).toBe 2
+            expect( guineaPig.getAttribute 3 ).toBeUndefined()
+            expect( guineaPig.getAttribute 5 ).toBe 6
+            expect( guineaPig.getAttribute 7 ).toBeUndefined()
+            expect( guineaPig.getAttribute 9 ).toBe 10
+            expect( guineaPig.getCameFromModifier 1 ).toBeFalsy()
+            expect( guineaPig.getCameFromModifier 3 ).toBeFalsy()
+            expect( guineaPig.getCameFromModifier 5 ).toBeFalsy()
+            expect( guineaPig.getCameFromModifier 7 ).toBeFalsy()
+            expect( guineaPig.getCameFromModifier 9 ).toBeFalsy()
+
+We call `clearAttributesFromModifiers()` at the start of `updateData()` so
+that if some modifiers incrementally accumulate data in an attribute of
+their target, it doesn't accumulate across runs of `updateData()`, but the
+target expression starts in a pristine state each time.  In the following
+test, we verify that this works as expected.
+
+        it 'should help us make each run of updateData() start clean', ->
+
+First, build a target expression and some modifiers that will accumulate
+data in it.  Verify that if we just had them embed their data over and over,
+it would indeed accumulate, which is not the goal.
+
+            target = new InputExpression().attr id : 'target'
+            mod1 = new InputModifier().attr id : 'mod1'
+            mod1.updateDataIn = ( target ) ->
+                last = ( target.getAttribute 'list' ) ? [ ]
+                target.setAttribute 'list', last.concat [ 1 ]
+                target.setCameFromModifier 'list'
+            mod2 = new InputModifier().attr id : 'mod2'
+            mod2.updateDataIn = ( target ) ->
+                last = ( target.getAttribute 'list' ) ? [ ]
+                target.setAttribute 'list', last.concat [ 2 ]
+                target.setCameFromModifier 'list'
+            sequence = new InputStructure target, mod1, mod2
+            sequence.trackIDs()
+            mod1.connectTo target, id : 'conn1'
+            mod2.connectTo target, id : 'conn2'
+            expect( target.getAttribute 'list' ).toBeUndefined()
+            mod1.updateDataIn target
+            expect( target.getAttribute 'list' ).toEqual [ 1 ]
+            mod1.updateDataIn target
+            expect( target.getAttribute 'list' ).toEqual [ 1, 1 ]
+            mod2.updateDataIn target
+            expect( target.getAttribute 'list' ).toEqual [ 1, 1, 2 ]
+            mod2.updateDataIn target
+            expect( target.getAttribute 'list' ).toEqual [ 1, 1, 2, 2 ]
+            expect( target.getCameFromModifier 'list' ).toBeTruthy()
+
+Next, clear out all that data and verify that it's gone.
+
+            target.clearAttributesFromModifiers()
+            expect( target.getAttribute 'list' ).toBeUndefined()
+            expect( target.getCameFromModifier 'list' ).toBeFalsy()
+
+Now run the data embedding the way we're supposed to, with `updateData()` in
+the target, which will call `clearAttributesFromModifiers()` before each
+run.  This way, we can verify that duplicates do not appear, as they did
+above.  This is the intended behavior.  (What is above was just a hack to
+verify that the intended behavior doesn't happen unless we use the correct
+routine, with build-in checks to guarantee it.)
+
+            target.updateData()
+            expect( target.getAttribute 'list' ).toEqual [ 1, 2 ]
+            expect( target.getCameFromModifier 'list' ).toBeTruthy()
+            target.updateData()
+            expect( target.getAttribute 'list' ).toEqual [ 1, 2 ]
+            expect( target.getCameFromModifier 'list' ).toBeTruthy()
+            target.updateData()
+            expect( target.getAttribute 'list' ).toEqual [ 1, 2 ]
+            expect( target.getCameFromModifier 'list' ).toBeTruthy()
+            sequence.untrackIDs()

@@ -84,18 +84,18 @@ This has not been implemented.  See the tasks below.
 All of the following functions should be added as members in the
 `InputExpression` class.
 
- * [ ] A function for marking an attribute of the expression as having been
+ * [x] A function for marking an attribute of the expression as having been
    changed by an `InputModifier` (a class that we will define later, as
    described below).  If the function is called on attribute key `k`, it
    could, for example, just call `X.setAttribute( "_modified "+k, true )`.
- * [ ] Extend the new unit test file for `InputExpression`s to test this
+ * [x] Extend the new unit test file for `InputExpression`s to test this
    new routine and document such tests.
- * [ ] A function for deleting all attributes set by modifiers (which not
+ * [x] A function for deleting all attributes set by modifiers (which not
    only deletes a pair $(k,v)$, but also the corresponding attribute with
    key `"_modified $k$"`).
- * [ ] Call that deleting function at the start of the `updateDataIn()`
+ * [x] Call that deleting function at the start of the `updateDataIn()`
    function in the `InputExpression` class.
- * [ ] Extend the new unit test file for `InputExpression`s to test this
+ * [x] Extend the new unit test file for `InputExpression`s to test this
    new routine and document such tests.
  * [ ] A function `setSingleValue(k,v)` that first checks whether the
    expression has an attribute with key $k$.  If so, it returns false and
