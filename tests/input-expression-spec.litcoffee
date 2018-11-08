@@ -126,7 +126,7 @@ Repeat the first test, but this time connect two modifiers.  Place them all
 into a single tree together, and verify that they can add multiple
 attributes, and that later ones overwrite earlier ones.
 
-        it 'should import a single attribute from a modifier', ->
+        it 'should import multiple attributes from modifiers', ->
             root = new InputStructure(
                 target = new InputExpression().attr id : 'target'
                 modifier1 = new InputModifier().attr id : 'm1'
@@ -158,7 +158,7 @@ exist in the tree, *not* the order of any other calls in the test.  Then
 verify that the results are different, because now `modifier2` gets to
 update the data in the target before `modifier1`.
 
-        it 'should import a single attribute from a modifier', ->
+        it 'should import multiple attributes from modifiers, reversed', ->
             root = new InputStructure(
                 target = new InputExpression().attr id : 'target'
                 modifier2 = new InputModifier().attr id : 'm2'
