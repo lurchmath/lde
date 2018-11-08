@@ -1236,3 +1236,71 @@ Ask the worker to send feedback.
                 'foo'
                 myFavoriteNumberIs : 5
             ]
+
+## The Modification Phase
+
+In the Modification Phase, the LDE runs the `updateConnections()` function
+in every `InputModifier` instance in the Input Tree, in no specified order.
+
+Here we make some example subclasses of `InputModifier` that record when
+their `updateConnections()` functions are called, and we verify that the
+correct values are recorded after each run of the LDE's modification phase
+function.
+
+    describe 'The Modification Phase', ->
+
+Just verify that the function is exported in the LDE's API.
+
+        it 'should be defined', ->
+            expect( LDE.runModification ).not.toBeUndefined()
+
+Now let's verify that it does its job.
+
+        it 'should call all the updateConnections() functions', ( done ) ->
+
+Define a subclass of `InputModifier` that records when its
+`updateConnections()` member is called.
+
+            recordedCalls = [ ]
+            class IMRecorder extends LDE.InputModifier
+                updateConnections : ->
+                    recordedCalls.push @id() unless @id() in recordedCalls
+                className : Structure.addSubclass 'IMRecorder', IMRecorder
+
+Install a few instances of that class into the LDE, sprinkled among generic
+`InputStructure` and `InputExpression` instances.
+
+            LDE.reset()
+            IS1 = new InputStructure().attr id : 'is1'
+            IS2 = new InputStructure().attr id : 'is2'
+            IE1 = new LDE.InputExpression().attr id : 'ie1'
+            IE2 = new LDE.InputExpression().attr id : 'ie2'
+            IMR1 = new IMRecorder().attr id : 'r1'
+            IMR2 = new IMRecorder().attr id : 'r2'
+            IMR3 = new IMRecorder().attr id : 'r3'
+            LDE.insertStructure IS1, 'root', 0
+            LDE.insertStructure IMR1, 'is1', 0
+            LDE.insertStructure IE1, 'root', 1
+            LDE.insertStructure IS2, 'ie1', 0
+            LDE.insertStructure IMR2, 'ie1', 1
+            LDE.insertStructure IMR3, 'root', 2
+
+So we have this hierarchy:
+```
+root( IS1( IMR1 ), IE1( IS2, IMR2 ), IMR3 )
+```
+
+And so far we've recorded no calls to `updateConnections()`.
+
+            expect( recordedCalls ).toEqual [ ]
+
+Run the modification process and ensure that we have all the right calls
+recorded, one per `IMRecorder` instance.  Notice that we test in such a way
+that we do not specify an order in which they will have been recorded.
+
+            LDE.runModification ->
+                expect( recordedCalls.length ).toBe 3
+                expect( 'r1' in recordedCalls ).toBeTruthy()
+                expect( 'r2' in recordedCalls ).toBeTruthy()
+                expect( 'r3' in recordedCalls ).toBeTruthy()
+                done()

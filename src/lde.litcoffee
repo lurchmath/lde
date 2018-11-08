@@ -13,7 +13,7 @@ within Node.js, and do the right thing in any case.
 
     if require?
         { Structure } = require './structure'
-        { InputStructure } = require './input-structure'
+        { InputStructure, InputModifier } = require './input-structure'
         { OutputStructure } = require './output-structure'
     else if WorkerGlobalScope?
         importScripts 'structure.js'
@@ -144,6 +144,8 @@ doing nothing, and in the second case by attempting to deserialize it.
 This module presents to clients a seven-function API defined in this
 section.  Each of these functions manipulates the global Input Tree.
 
+### Editing Structures in the Input Tree
+
 The following insertion function deserializes the given structure from JSON,
 finds the descendant of the Input Tree that has the given ID, and inserts
 the deserialized version as one of its children, at the given index. If
@@ -237,7 +239,7 @@ function does nothing.
                 subtree.setAttribute key, value
             if key is 'id' then subtree.trackIDs no
 
-We turn now to functions that add, remove, or alter connections.
+### Editing Connections in the Input Tree
 
 The following function adds a connection between two existing nodes in the
 Input Tree.  It accepts three parameters, the ID of the source node, the ID
@@ -280,7 +282,25 @@ satisfied, the function does nothing.
             ( isInTheInputTree Structure.getConnectionTarget id )
         Structure.setConnectionData id, key, value
 
-## Event Listeners
+### The Modification Phase
+
+In the Modification Phase, the LDE runs the `updateConnections()` function
+in every `InputModifier` instance in the Input Tree, in no specified order.
+This function is asynchronous, calling a callback when complete.
+
+Although it contains no asynchronous components in its current
+implementation, we write its signature that way so that it can be made
+asynchronous later if we need to make it more efficient, and clients will
+not need to change their use of it.
+
+    functions.runModification = ( callback ) ->
+        updateAllConnections = ( node ) ->
+            node.updateConnections() if node instanceof InputModifier
+            updateAllConnections child for child in node.children()
+        updateAllConnections InputTree
+        callback()
+
+### Event Listeners
 
 If the LDE detects that it is being run in a background thread, it will set
 up listeners for messages from the parent thread.  These listeners handle
@@ -334,6 +354,7 @@ Each is an array, any number in the array is acceptable.
             getInternalState : [ 0 ]
             setInternalState : [ 1 ]
             reset : [ 0 ]
+            runModification : [ 0 ]
 
 Messages received expect data arrays of the form `[ command, args... ]`.
 
@@ -407,7 +428,6 @@ method that module installs in itself.
 And export anything else that needs exporting.
 
     if exports?
-        exports.Structure = Structure
-        exports.InputStructure = InputStructure
-        exports.OutputStructure = OutputStructure
+        for own className, classObj of Structure::subclasses
+            exports[className] = classObj
         exports[key] = functions[key] for own key, value of functions

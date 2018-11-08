@@ -302,15 +302,15 @@ methods and the Modification phase will be implemented.</p>
 </ul>
 <h2 id="the-modification-phase">The Modification Phase</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Implement a <code>runModification()</code> method in the LDE module.  It should
+<li class="task-list-item"><input type="checkbox" disabled checked/> Implement a <code>runModification()</code> method in the LDE module.  It should
    run the <code>updateConnections()</code> function in every IM in the Input Tree, in
    an unspecified order, and then call a callback.  (This function is
    asynchronous.)</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests of the LDE to test this new function.  This
+<li class="task-list-item"><input type="checkbox" disabled checked/> Extend the unit tests of the LDE to test this new function.  This
    will require creating some dummy subclasses of <code>InputModifier</code> that
    implement <code>updateConnections()</code> in various ways.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Update the documentation to describe the changes just made.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Update the documentation to describe the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Once the unit tests pass, build everything and commit.</li>
 </ul>
 <h2 id="api-documentation">API Documentation</h2>
 <ul class="task-list">

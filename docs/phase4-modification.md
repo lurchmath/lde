@@ -150,15 +150,15 @@ All of the following functions should be added as members in the
 
 ## The Modification Phase
 
- * [ ] Implement a `runModification()` method in the LDE module.  It should
+ * [x] Implement a `runModification()` method in the LDE module.  It should
    run the `updateConnections()` function in every IM in the Input Tree, in
    an unspecified order, and then call a callback.  (This function is
    asynchronous.)
- * [ ] Extend the unit tests of the LDE to test this new function.  This
+ * [x] Extend the unit tests of the LDE to test this new function.  This
    will require creating some dummy subclasses of `InputModifier` that
    implement `updateConnections()` in various ways.
- * [ ] Update the documentation to describe the changes just made.
- * [ ] Once the unit tests pass, build everything and commit.
+ * [x] Update the documentation to describe the changes just made.
+ * [x] Once the unit tests pass, build everything and commit.
 
 ## API Documentation
 
