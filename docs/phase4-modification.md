@@ -42,6 +42,43 @@ This has not been implemented.  See the tasks below.
    repository.
  * [x] Once the unit tests pass, build everything and commit.
 
+## `InputModifier` class
+
+ * [ ] Create a subclass of `InputStructure`, in the `InputStructure`
+   module, called `InputModifier`.
+ * [ ] Add documentation explaining what it is and will do (though that
+   documentation can grow with time).
+ * [ ] Ensure that the `InputModifier` subclass registers itself with the
+   serialization code, as
+   [the documentation here](https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names)
+   describes.  (That is, use a line like
+   `className : Structure.addSubclass 'InputModifier', InputModifier` in
+   the `InputModifier` class code.)
+ * [ ] The class should provide two functions that, in the base class, do
+   nothing, but will be overridden by subclasses to do something smarter.
+   These are `updateConnections()` and `updateDataIn(target)`.  Add these
+   stubs now.
+ * [ ] Document the two functions you just added regarding their purposes
+   in subclasses.
+ * [ ] Create a new unit test file for `InputModifier`s that is extremely
+   basic, just testing to be sure that the symbol `InputModifier` is
+   defined at the global scope and creates things that are instances of the
+   `InputStructure` class.
+ * [ ] Add documentation for that unit test file, following the pattern
+   established in the documentation of other unit test files in this
+   repository.
+ * [ ] Once the unit tests pass, build everything and commit.
+
+## Extending `InputExpression` to respect modifiers
+
+ * [ ] Implement `InputExpression`'s `updateData()` function to loop through
+   all `InputModifiers` that connect to it as the target and call their
+   `updateDataIn()` routines on itself.
+ * [ ] Create unit tests for this, probably located in the `InputExpression`
+   unit test file.
+ * [ ] Extend the unit tests to handle this new feature.
+ * [ ] Once the unit tests pass, build everything and commit.
+
 ## Convenience functions
 
 All of the following functions should be added as members in the
@@ -50,23 +87,14 @@ All of the following functions should be added as members in the
  * [ ] A function for marking an attribute of the expression as having been
    changed by an `InputModifier` (a class that we will define later, as
    described below).  If the function is called on attribute key `k`, it
-   could, for example, just call `X.setAttribute( "IM changed "+k, true )`.
+   could, for example, just call `X.setAttribute( "_modified "+k, true )`.
  * [ ] Extend the new unit test file for `InputExpression`s to test this
    new routine and document such tests.
- * [ ] A function for creating a backup copy of all attributes set by
-   modifiers, which loops through all attribute keys, and when it encounters
-   any of the form "IM changed $k$", it lifts out the value associated with
-   $k$ and stores a copy of it in the backup being generated.  That backup
-   object is returned.
- * [ ] Extend the new unit test file for `InputExpression`s to test this
-   new routine and document such tests.
- * [ ] A function for comparing the state of an `InputExpression` to such a
-   backup, either reporting that its set of attributes changed by modifiers
-   matches the backup (nothing has changed) or it does not (something was
-   added, removed, or changed by an IM).
  * [ ] A function for deleting all attributes set by modifiers (which not
    only deletes a pair $(k,v)$, but also the corresponding attribute with
-   key "IM changed $k$").
+   key `"_modified $k$"`).
+ * [ ] Call that deleting function at the start of the `updateDataIn()`
+   function in the `InputExpression` class.
  * [ ] Extend the new unit test file for `InputExpression`s to test this
    new routine and document such tests.
  * [ ] A function `setSingleValue(k,v)` that first checks whether the
@@ -94,33 +122,6 @@ All of the following functions should be added as members in the
    intended only to be called by IMs.
  * [ ] Extend the new unit test file for `InputExpression`s to test this
    new routine and document such tests.
- * [ ] Once the unit tests pass, build everything and commit.
-
-## `InputModifier` class
-
- * [ ] Create a subclass of `InputStructure`, in the `InputStructure`
-   module, called `InputModifier`.
- * [ ] Add documentation explaining what it is and will do (though that
-   documentation can grow with time).
- * [ ] Ensure that the `InputModifier` subclass registers itself with the
-   serialization code, as
-   [the documentation here](https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names)
-   describes.  (That is, use a line like
-   `className : Structure.addSubclass 'InputModifier', InputModifier` in
-   the `InputModifier` class code.)
- * [ ] The class should provide two functions that, in the base class, do
-   nothing, but will be overridden by subclasses to do something smarter.
-   These are `updateConnections()` and `updateDataIn(target)`.  Add these
-   stubs now.
- * [ ] Document the two functions you just added regarding their purposes
-   in subclasses.
- * [ ] Create a new unit test file for `InputModifier`s that is extremely
-   basic, just testing to be sure that the symbol `InputModifier` is
-   defined at the global scope and creates things that are instances of the
-   `InputStructure` class.
- * [ ] Add documentation for that unit test file, following the pattern
-   established in the documentation of other unit test files in this
-   repository.
  * [ ] Once the unit tests pass, build everything and commit.
 
 ## `BasicInputModifier` class
@@ -152,39 +153,66 @@ All of the following functions should be added as members in the
    repository.
  * [ ] Once the unit tests pass, build everything and commit.
 
-## Extending `InputExpression`
-
- * [ ] Implement `InputExpression`'s `updateData()` function to loop through
-   all `InputModifiers` that connect to it as the target and call their
-   `updateDataIn()` routines on itself.  Be sure to begin by using the
-   function that clears out all attributes set by a modifier.
- * [ ] Create unit tests for this, probably located in the `InputExpression`
-   unit test file.
- * [ ] Increase efficiency by calling the backup routine in the target
-   first, and at the end marks itself dirty if and only if its new state is
-   different from its original state in some attribute set by a modifier.
-   (Note that this task, since it is just an increase in efficiency, can be
-   deferred until later in the project, and can even be considered optional
-   if we notice no performance problems without implementing it.)
- * [ ] Extend the unit tests to handle this new feature.
- * [ ] Once the unit tests pass, build everything and commit.
-
 ## The Modification Phase
 
  * [ ] Implement a `runModification()` method in the LDE module.  It should
    run the `updateConnections()` function in every IM in the Input Tree, in
    an unspecified order, and then call a callback.  (This function is
    asynchronous.)
-
-The remainder of this section is efficiency improvements.  Consequently,
-they can be deferred until later in the project, and can even be considered
-optional if we notice no performance problems without implementing them.  If
-you wish to skip them for now, simply jump to the last few tasks in this
-section, about unit tests and documentation.
-
  * [ ] Extend the unit tests of the LDE to test this new function.  This
    will require creating some dummy subclasses of `InputModifier` that
    implement `updateConnections()` in various ways.
+ * [ ] Update the documentation to describe the changes just made.
+ * [ ] Once the unit tests pass, build everything and commit.
+
+## API Documentation
+
+ * [ ] Extend the `InputStructure` page of the API Documentation to include
+   all the work done in this phase.
+ * [ ] Add a page to the API Documentation for the phases of processing the
+   Input and Output Trees.  Begin it by documenting the modification phase,
+   and say that more content is to come later.
+ * [ ] Update `mkdocs.yml` in the project root to include that new file in
+   the generated documentation.
+ * [ ] As you remove the completed task lists from this documentation file,
+   keep the efficiency improvements tasks below, but rewrite their
+   introduction paragraph to state that they are optional efficiency
+   improvements whose details are being kept in the file in case we want to
+   do those improvements later.
+ * [ ] Rebuild docs and commit.
+
+## Efficiency improvements
+
+Because this section is efficiency improvements, they can be deferred until
+later in the project, and can even be considered optional if we notice no
+performance problems without implementing them.
+
+First, efficiency improvements to the `updateData()` and `updateDataIn()`
+routines:
+
+ * [ ] Write a function that creates a backup copy of all attributes in an
+   `InputExpression` that were set by modifiers, by looping through all
+   attribute keys, and when it encounters any of the form `"_modified $k$"`,
+   it lifts out the value associated with $k$ and stores a copy of it in
+   the backup being generated.  That backup object is returned.
+ * [ ] Extend the unit tests for `InputExpression`s to test this new
+   routine and document such tests.
+ * [ ] Write a function for comparing the state of an `InputExpression` to
+   such a backup, either reporting that its set of attributes changed by
+   modifiers matches the backup (nothing has changed) or it does not
+   (something was added, removed, or changed by an IM).
+ * [ ] Extend the unit tests for `InputExpression`s to test this new
+   routine and document such tests.
+ * [ ] Call the backup routine in the target at the start of the
+   `updateData()` function in `InputExpression`.  At the end, mark the
+   expression dirty if and only if its new state is different from its
+   original state in some attribute set by a modifier.
+ * [ ] Extend the unit tests for `InputExpression`s to test this new
+   routine and document such tests.
+ * [ ] Once the unit tests pass, build everything and commit.
+
+Second, efficiency improvements to the modification phase overall:
+
  * [ ] Enhance `runModification()` to initialize a list of `InputModifier`
    instances that are to be processed, then start a chain of `setTimeout()`
    calls that pop things off the list and process them, calling the callback
@@ -205,14 +233,3 @@ section, about unit tests and documentation.
  * [ ] Update the documentation to describe the changes just made.
  * [ ] Extend the unit tests for the LDE module to verify that this works.
  * [ ] Once the unit tests pass, build everything and commit.
-
-## API Documentation
-
- * [ ] Extend the `InputStructure` page of the API Documentation to include
-   all the work done in this phase.
- * [ ] Add a page to the API Documentation for the phases of processing the
-   Input and Output Trees.  Begin it by documenting the modification phase,
-   and say that more content is to come later.
- * [ ] Update `mkdocs.yml` in the project root to include that new file in
-   the generated documentation.
- * [ ] Rebuild docs and commit.
