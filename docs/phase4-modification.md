@@ -71,13 +71,13 @@ This has not been implemented.  See the tasks below.
 
 ## Extending `InputExpression` to respect modifiers
 
- * [ ] Implement `InputExpression`'s `updateData()` function to loop through
+ * [x] Implement `InputExpression`'s `updateData()` function to loop through
    all `InputModifiers` that connect to it as the target and call their
    `updateDataIn()` routines on itself.
- * [ ] Create unit tests for this, probably located in the `InputExpression`
+ * [x] Create unit tests for this, probably located in the `InputExpression`
    unit test file.
- * [ ] Extend the unit tests to handle this new feature.
- * [ ] Once the unit tests pass, build everything and commit.
+ * [x] Extend the unit tests to handle this new feature.
+ * [x] Once the unit tests pass, build everything and commit.
 
 ## Convenience functions
 

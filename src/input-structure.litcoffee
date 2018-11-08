@@ -80,6 +80,26 @@ We do so for this class with the following line of code.
 
         className : Structure.addSubclass 'InputExpression', InputExpression
 
+### Expression-specific functionality
+
+During interpretation of the Input Tree, each expression will need to import
+from the modifiers connected to it any data that they wish to embed into the
+expression, so that such data can be used to inform the expression's
+interpretation.  We provide the following function for doing so.
+
+It is required to process incoming connections in the order that the
+modifiers appear in the Input Tree.  Thus we find all the modifiers first,
+then sort them by their order in the tree, then embed the data.
+
+        updateData : ->
+            sources = [ ]
+            for incomingConnection in @getConnectionsIn()
+                source = @getConnectionSource incomingConnection
+                sources.push source if source instanceof InputModifier
+            sources.sort ( a, b ) ->
+                if a is b then 0 else if a.isEarlierThan b then -1 else 1
+            source.updateDataIn @ for source in sources
+
 ## Define `InputModifier`s as a type of `InputStructure`
 
 As documented in the previous section, `InputModifier`s are the subclass of
