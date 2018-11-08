@@ -50,7 +50,7 @@ necessarily propagate upwards.
             @dirty = yesOrNo
             if yesOrNo then @parentNode?.markDirty()
 
-## Feedback
+### Feedback
 
 To give feedback about a particular `InputStructure` instance, call the
 `feedback` method in that instance, which will delegate the work to the
@@ -63,10 +63,25 @@ default implementation is a stub, it is overwritten by the LDE when
             feedbackData.subject = @id()
             Structure.feedback feedbackData
 
+## Define `InputExpression`s as a type of `InputStructure`
+
+`InputStructure`s come in two varieties, each represented by a subclass. The
+first is defined in this section:  An `InputExpression` is the type of
+`InputStructure` that the LDE will interpret into meaningful content in its
+Output Tree.  Later we will define `InputModifier`s, which do not produce
+nodes in the Output Tree, but just modify `InputExpression` instances and
+thus impact how they produce nodes in the Output Tree.
+
+    class InputExpression extends InputStructure
+
+In order for a hierarchy of structures to be able to be serialized and
+deserialized, we need to track the class of each structure in the hierarchy.
+We do so for this class with the following line of code.
+
+        className : Structure.addSubclass 'InputExpression', InputExpression
+
 Now if this is being used in a Node.js context, export the class we defined.
 
-    if exports? then exports.InputStructure = InputStructure
-
-## Other `InputStructure` Subclasses
-
-None yet.  More to come.
+    if exports?
+        exports.InputStructure = InputStructure
+        exports.InputExpression = InputExpression

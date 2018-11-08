@@ -175,24 +175,24 @@ methods and the Modification phase will be implemented.</p>
 <p>This has not been implemented.  See the tasks below.</p>
 <h2 id="inputexpression-class"><code>InputExpression</code> class</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Create a subclass of <code>InputStructure</code>, in the <code>InputStructure</code>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Create a subclass of <code>InputStructure</code>, in the <code>InputStructure</code>
    module, called <code>InputExpression</code>.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation explaining what it is and will do (though that
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation explaining what it is and will do (though that
    documentation can grow with time).</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Ensure that the <code>InputExpression</code> subclass registers itself with the
+<li class="task-list-item"><input type="checkbox" disabled checked/> Ensure that the <code>InputExpression</code> subclass registers itself with the
    serialization code, as
    <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
    describes.  (That is, use a line like
    <code>className : Structure.addSubclass 'InputExpression', InputExpression</code> in
    the <code>InputExpression</code> class code.)</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Create a new unit test file for <code>InputExpression</code>s that is extremely
+<li class="task-list-item"><input type="checkbox" disabled checked/> Create a new unit test file for <code>InputExpression</code>s that is extremely
    basic, just testing to be sure that the symbol <code>InputExpression</code> is
    defined at the global scope and creates things that are instances of the
    <code>InputStructure</code> class.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation for that unit test file, following the pattern
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation for that unit test file, following the pattern
    established in the documentation of other unit test files in this
    repository.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Once the unit tests pass, build everything and commit.</li>
 </ul>
 <h2 id="convenience-functions">Convenience functions</h2>
 <p>All of the following functions should be added as members in the

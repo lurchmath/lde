@@ -5,15 +5,21 @@ Here we import the module we're about to test.
 
     { InputStructure } = require '../src/input-structure'
 
+This file does not test every component of that module.  It tests the
+`InputStructure` class, and other classes defined in the same module are
+tested in other files (for example, see
+[the tests for `InputExpression`s](input-expression-spec.md)).
+
 ## Global objects
 
-Verify that the globals exposed by the `InputStructure` module are visible.
+Verify that the relevant globals exposed by the `InputStructure` module are
+visible.
 
     describe 'InputStructure module globals', ->
-        it 'should be defined', ->
+        it 'expose the InputStructure class', ->
             expect( InputStructure ).toBeTruthy()
 
-## Structure trees
+## Constructing instances
 
     describe 'InputStructure class', ->
 

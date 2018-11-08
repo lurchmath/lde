@@ -23,24 +23,24 @@ This has not been implemented.  See the tasks below.
 
 ## `InputExpression` class
 
- * [ ] Create a subclass of `InputStructure`, in the `InputStructure`
+ * [x] Create a subclass of `InputStructure`, in the `InputStructure`
    module, called `InputExpression`.
- * [ ] Add documentation explaining what it is and will do (though that
+ * [x] Add documentation explaining what it is and will do (though that
    documentation can grow with time).
- * [ ] Ensure that the `InputExpression` subclass registers itself with the
+ * [x] Ensure that the `InputExpression` subclass registers itself with the
    serialization code, as
    [the documentation here](https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names)
    describes.  (That is, use a line like
    `className : Structure.addSubclass 'InputExpression', InputExpression` in
    the `InputExpression` class code.)
- * [ ] Create a new unit test file for `InputExpression`s that is extremely
+ * [x] Create a new unit test file for `InputExpression`s that is extremely
    basic, just testing to be sure that the symbol `InputExpression` is
    defined at the global scope and creates things that are instances of the
    `InputStructure` class.
- * [ ] Add documentation for that unit test file, following the pattern
+ * [x] Add documentation for that unit test file, following the pattern
    established in the documentation of other unit test files in this
    repository.
- * [ ] Once the unit tests pass, build everything and commit.
+ * [x] Once the unit tests pass, build everything and commit.
 
 ## Convenience functions
 
