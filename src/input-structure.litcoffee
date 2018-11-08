@@ -125,6 +125,53 @@ the expression is in a pristine state, as far as modifier data is concerned.
                     delete @attributes[key]
                     delete @attributes[key[15...]]
 
+### Convenience functions for `InputModifier`s
+
+An `InputModifier` may want to write a single value into its target
+expression, but not overwrite any value already stored there.  To that end,
+we have the following function.  It does exactly that, and also marks the
+written value as having come from a modifier.  Thus this function is
+intended to be called only by `InputModifier`s.  It returns true if it set
+the value, and false if it did not because one was already there.  Because
+attributes written by modifiers are cleared at the start of every run of
+`updateData()`, the first modifier to attempt to write a single value will
+succeed, and all others will fail.
+
+        setSingleValue : ( key, value ) ->
+            return no if @attributes.hasOwnProperty key
+            @setAttribute key, value
+            @setCameFromModifier key
+            yes
+
+An `InputModifier` may want to append a single value to an array stored in
+its target expression, but not change any of the earlier values already
+stored in the array.  To that end, we have the following function.  It does
+exactly that, and also marks the array as having come from a modifier.  Thus
+this function is intended to be called only by `InputModifier`s.  Because
+attributes written by modifiers are cleared at the start of every run of
+`updateData()`, the result at the end of a run of `updateData()` will be the
+list of values appended by all connected modifiers that write to the array,
+in the order the modifiers appear in the document.
+
+        addListItem : ( key, item ) ->
+            listSoFar = @getAttribute key
+            if listSoFar not instanceof Array then listSoFar = [ ]
+            @setAttribute key, listSoFar.concat [ item ]
+            @setCameFromModifier key
+
+This function is just like the previous, except it builds a set rather than
+a list, and thus the order in which things are added is unimportant (and, of
+course, duplicates are not added twice).
+
+        addSetElement : ( key, element ) ->
+            asString = JSON.stringify element
+            setSoFar = @getAttribute key
+            @setCameFromModifier key
+            if setSoFar not instanceof Array then setSoFar = [ ]
+            for otherElement in setSoFar # is it already there?
+                return if asString is JSON.stringify otherElement
+            @setAttribute key, setSoFar.concat [ element ]
+
 ## Define `InputModifier`s as a type of `InputStructure`
 
 As documented in the previous section, `InputModifier`s are the subclass of

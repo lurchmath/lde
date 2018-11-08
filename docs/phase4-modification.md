@@ -97,32 +97,32 @@ All of the following functions should be added as members in the
    function in the `InputExpression` class.
  * [x] Extend the new unit test file for `InputExpression`s to test this
    new routine and document such tests.
- * [ ] A function `setSingleValue(k,v)` that first checks whether the
+ * [x] A function `setSingleValue(k,v)` that first checks whether the
    expression has an attribute with key $k$.  If so, it returns false and
    takes no further action.  If it doesn't have such an attribute, this one
    adds it and marks it as having been changed by a modifier.  Thus this
    function is intended only to be called by IMs.  In such a case, it
    returns true.
- * [ ] Extend the new unit test file for `InputExpression`s to test this
+ * [x] Extend the new unit test file for `InputExpression`s to test this
    new routine and document such tests.
- * [ ] A function `addListItem(k,i)` that first checks whether the
+ * [x] A function `addListItem(k,i)` that first checks whether the
    expression has an attribute with key $k$ and value an array.  If not,
    it sets the value to `[ i ]`, an array containing the item `i`.  If it
    already had an array value, we append `i` to it.  In either case, we mark
    this as having been changed by a modifier.  Thus this function is
    intended only to be called by IMs.
- * [ ] Extend the new unit test file for `InputExpression`s to test this
+ * [x] Extend the new unit test file for `InputExpression`s to test this
    new routine and document such tests.
- * [ ] A function `addSetElement(k,e)` that first checks whether the
+ * [x] A function `addSetElement(k,e)` that first checks whether the
    expression has an attribute with key $k$ and value an array.  If not,
    it sets the value to `[ e ]`, a set containing the element `e`.  If it
    already had an array value, we append `e` to it iff it was not already in
    the array.  In any of these cases (even the one where nothing changed),
    we mark this as having been changed by a modifier.  Thus this function is
    intended only to be called by IMs.
- * [ ] Extend the new unit test file for `InputExpression`s to test this
+ * [x] Extend the new unit test file for `InputExpression`s to test this
    new routine and document such tests.
- * [ ] Once the unit tests pass, build everything and commit.
+ * [x] Once the unit tests pass, build everything and commit.
 
 ## `BasicInputModifier` class
 

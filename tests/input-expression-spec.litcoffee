@@ -305,3 +305,116 @@ routine, with build-in checks to guarantee it.)
             expect( target.getAttribute 'list' ).toEqual [ 1, 2 ]
             expect( target.getCameFromModifier 'list' ).toBeTruthy()
             sequence.untrackIDs()
+
+The `setSingleValue()` function should write a value iff one is not yet
+written.  It should mark that value as having come from a modifier.
+
+        it 'should provide a working setSingleValue() function', ->
+
+First we prepare the context for the test.
+
+            context = new InputStructure(
+                IM1 = new InputModifier().attr id : 'IM1'
+                IM2 = new InputModifier().attr id : 'IM2'
+                IE = new InputExpression().attr id : 'IE'
+            )
+            context.trackIDs()
+            IM1.connectTo IE, id : 'conn1'
+            IM1.updateDataIn = ( target ) -> target.setSingleValue 'A', 'B'
+            IM2.connectTo IE, id : 'conn2'
+            IM2.updateDataIn = ( target ) -> target.setSingleValue 'A', 'C'
+
+Then we verify that no attributes have been written yet.
+
+            expect( IE.getAttribute 'A' ).toBeUndefined()
+            expect( IE.getCameFromModifier 'A' ).toBeFalsy()
+
+Then we run the update procedure twice, and each time verify that only one
+value is written to the attribute, and it's the value written by `IM1`,
+which comes first in the `context` tree.
+
+            expect( -> IE.updateData() ).not.toThrow()
+            expect( IE.getAttribute 'A' ).toBe 'B'
+            expect( IE.getCameFromModifier 'A' ).toBeTruthy()
+            expect( -> IE.updateData() ).not.toThrow()
+            expect( IE.getAttribute 'A' ).toBe 'B'
+            expect( IE.getCameFromModifier 'A' ).toBeTruthy()
+            context.untrackIDs()
+
+The `addListItem()` function should append a value to a list and mark that
+list as having come from a modifier.
+
+        it 'should provide a working addListItem() function', ->
+
+First we prepare the context for the test.
+
+            context = new InputStructure(
+                IM1 = new InputModifier().attr id : 'IM1'
+                IM2 = new InputModifier().attr id : 'IM2'
+                IM3 = new InputModifier().attr id : 'IM3'
+                IE = new InputExpression().attr id : 'IE'
+            )
+            context.trackIDs()
+            IM1.connectTo IE, id : 'conn1'
+            IM1.updateDataIn = ( target ) -> target.addListItem 'A', 'B'
+            IM2.connectTo IE, id : 'conn2'
+            IM2.updateDataIn = ( target ) -> target.addListItem 'A', 'C'
+            IM3.connectTo IE, id : 'conn3'
+            IM3.updateDataIn = ( target ) -> target.addListItem 'A', 'B'
+
+Then we verify that no attributes have been written yet.
+
+            expect( IE.getAttribute 'A' ).toBeUndefined()
+            expect( IE.getCameFromModifier 'A' ).toBeFalsy()
+
+Then we run the update procedure twice, and each time verify that all three
+values have been written to the attribute, forming an array with the value
+written by `IM1` coming before the value written by `IM2`, which comes
+before the value written by `IM3`, because that's the order those modifiers
+appear in the context tree.
+
+            expect( -> IE.updateData() ).not.toThrow()
+            expect( IE.getAttribute 'A' ).toEqual [ 'B', 'C', 'B' ]
+            expect( IE.getCameFromModifier 'A' ).toBeTruthy()
+            expect( -> IE.updateData() ).not.toThrow()
+            expect( IE.getAttribute 'A' ).toEqual [ 'B', 'C', 'B' ]
+            expect( IE.getCameFromModifier 'A' ).toBeTruthy()
+            context.untrackIDs()
+
+The `addListElement()` function should add a value to a set and mark that
+set as having come from a modifier.
+
+        it 'should provide a working addSetElement() function', ->
+
+First we prepare the context for the test.
+
+            context = new InputStructure(
+                IM1 = new InputModifier().attr id : 'IM1'
+                IM2 = new InputModifier().attr id : 'IM2'
+                IM3 = new InputModifier().attr id : 'IM3'
+                IE = new InputExpression().attr id : 'IE'
+            )
+            context.trackIDs()
+            IM1.connectTo IE, id : 'conn1'
+            IM1.updateDataIn = ( target ) -> target.addSetElement 'A', 'B'
+            IM2.connectTo IE, id : 'conn2'
+            IM2.updateDataIn = ( target ) -> target.addSetElement 'A', 'C'
+            IM3.connectTo IE, id : 'conn3'
+            IM3.updateDataIn = ( target ) -> target.addSetElement 'A', 'B'
+
+Then we verify that no attributes have been written yet.
+
+            expect( IE.getAttribute 'A' ).toBeUndefined()
+            expect( IE.getCameFromModifier 'A' ).toBeFalsy()
+
+Then we run the update procedure twice, and each time verify that two values
+have been written to the attribute, because even though three were written,
+they are a set, and thus only two matter.
+
+            expect( -> IE.updateData() ).not.toThrow()
+            expect( IE.getAttribute 'A' ).toEqual [ 'B', 'C' ]
+            expect( IE.getCameFromModifier 'A' ).toBeTruthy()
+            expect( -> IE.updateData() ).not.toThrow()
+            expect( IE.getAttribute 'A' ).toEqual [ 'B', 'C' ]
+            expect( IE.getCameFromModifier 'A' ).toBeTruthy()
+            context.untrackIDs()
