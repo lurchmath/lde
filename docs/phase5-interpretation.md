@@ -63,9 +63,6 @@ return [ result ] // return an array of exactly one tree
    invoked).  Both arguments should default to an empty array.
    Pseudocode:
 ```
-// use the cache if it's there:
-if my lastInterpretation() is not undefined, return that and quit
-otherwise...
 // remember the size of accessibles for later:
 let L = the current length of the accessibles array.
 // we will be recursively computing child result arrays,
@@ -97,10 +94,9 @@ let accessibles = just the first L entries of accessibles
 // light of (a) what's accessible to it and (b) all the recursive
 // results of interpreting its children.
 // So we need the right accessibles array to do this:
-saveInterpretation(
-    X.interpret( accessibles, allChildResults, childScope ) )
+result = X.interpret( accessibles, allChildResults, childScope )
 mark X as no longer dirty
-then return lastInterpretation() as the result of this function
+then return result as the result of this function
 ```
  * [ ] Add documentation in that file describing the changes just made.
  * [ ] Extend the unit tests for the `InputStructure` module to include some
@@ -255,6 +251,11 @@ return to these ideas later and follow the steps below to implement them.
    that stores the array `I` (of zero or more Output Structures) in the
    `lastInterpretation` field.  If no parameter is passed, clear the cached
    value.
+ * [ ] At the end of the `recursiveInterpret()` routine, just before
+   returning the result, call `saveInterpretation()` on it.
+ * [ ] At the start of the `recursiveInterpret()` routine, if the structure
+   is not marked dirty and there is a `lastInterpretation` defined, just
+   return that immediately.
  * [ ] Update all documentation in that file to reflect the changes just
    made.
  * [ ] Add to the unit tests for `InputStructure`s a few simple tests for
