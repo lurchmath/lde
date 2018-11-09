@@ -217,17 +217,14 @@ return [ result ] // return an array of exactly one tree
 </ul>
 <h2 id="building-recursive-interpretation">Building recursive interpretation</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Create a <code>recursiveInterpret</code> routine in the <code>InputStructure</code> class
+<li class="task-list-item"><input type="checkbox" disabled checked/> Create a <code>recursiveInterpret</code> routine in the <code>InputStructure</code> class
    that takes two arguments, <code>accessibles</code> (with the same meaning as in the
    <code>interpret</code> routine) and <code>scope</code> (which should be the list of top-level
    structures in the scope of the object in which the function is being
    invoked).  Both arguments should default to an empty array.
    Pseudocode:</li>
 </ul>
-<pre><code>// use the cache if it's there:
-if my lastInterpretation() is not undefined, return that and quit
-otherwise...
-// remember the size of accessibles for later:
+<pre><code>// remember the size of accessibles for later:
 let L = the current length of the accessibles array.
 // we will be recursively computing child result arrays,
 // and will want to keep a list of them, so initialize that list to empty:
@@ -258,15 +255,14 @@ let accessibles = just the first L entries of accessibles
 // light of (a) what's accessible to it and (b) all the recursive
 // results of interpreting its children.
 // So we need the right accessibles array to do this:
-saveInterpretation(
-    X.interpret( accessibles, allChildResults, childScope ) )
+result = X.interpret( accessibles, allChildResults, scope )
 mark X as no longer dirty
-then return lastInterpretation() as the result of this function
+then return result as the result of this function
 </code></pre>
 
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that file describing the changes just made.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests for the <code>InputStructure</code> module to include some
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation in that file describing the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Extend the unit tests for the <code>InputStructure</code> module to include some
    calls to this routine, passing it various example parameters and
    verifying that it does its job as specified.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Write more unit tests that create and register some dummy subclasses
@@ -415,6 +411,11 @@ return to these ideas later and follow the steps below to implement them.</p>
    that stores the array <code>I</code> (of zero or more Output Structures) in the
    <code>lastInterpretation</code> field.  If no parameter is passed, clear the cached
    value.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> At the end of the <code>recursiveInterpret()</code> routine, just before
+   returning the result, call <code>saveInterpretation()</code> on it.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> At the start of the <code>recursiveInterpret()</code> routine, if the structure
+   is not marked dirty and there is a <code>lastInterpretation</code> defined, just
+   return that immediately.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Update all documentation in that file to reflect the changes just
    made.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Add to the unit tests for <code>InputStructure</code>s a few simple tests for

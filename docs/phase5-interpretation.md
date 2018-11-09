@@ -56,7 +56,7 @@ return [ result ] // return an array of exactly one tree
 
 ## Building recursive interpretation
 
- * [ ] Create a `recursiveInterpret` routine in the `InputStructure` class
+ * [x] Create a `recursiveInterpret` routine in the `InputStructure` class
    that takes two arguments, `accessibles` (with the same meaning as in the
    `interpret` routine) and `scope` (which should be the list of top-level
    structures in the scope of the object in which the function is being
@@ -94,12 +94,12 @@ let accessibles = just the first L entries of accessibles
 // light of (a) what's accessible to it and (b) all the recursive
 // results of interpreting its children.
 // So we need the right accessibles array to do this:
-result = X.interpret( accessibles, allChildResults, childScope )
+result = X.interpret( accessibles, allChildResults, scope )
 mark X as no longer dirty
 then return result as the result of this function
 ```
- * [ ] Add documentation in that file describing the changes just made.
- * [ ] Extend the unit tests for the `InputStructure` module to include some
+ * [x] Add documentation in that file describing the changes just made.
+ * [x] Extend the unit tests for the `InputStructure` module to include some
    calls to this routine, passing it various example parameters and
    verifying that it does its job as specified.
  * [ ] Write more unit tests that create and register some dummy subclasses

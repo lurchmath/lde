@@ -86,10 +86,60 @@ properties.
 
         interpret : ( accessibles, childResults, scope ) ->
             result = new OutputStructure() # plain vanilla wrapper node
+            count = 0
             for childArray in childResults
-                for node in childArray
-                    result.insertChild node, result.children().length
+                result.insertChild node, count++ for node in childArray
             [ result ] # must be an array even if it contains only one node
+
+The `recursiveInterpret()` function defines how the Input Tree will be
+traversed, making calls to the `interpret()` functions of its nodes as
+needed to assemble the final interpretation of the entire Input Tree.  The
+`accessibles` and `scope` parameters default to empty (as they should when
+this is run at the root of the Input Tree) but then in recursive calls have
+the same meanings as documented above for the `interpret()` routine.  No
+`childResults` are passed in this case because the job of this routine is to
+do the recursion that produces the recursive results from children.
+
+        recursiveInterpret : ( accessibles = [ ], scope = [ ] ) ->
+            # console.log 'recursiveInterpret for', @id()
+            originalAccessiblesLength = accessibles.length
+            allChildResults = [ ]
+
+This loop does the actual recursion, to compute `allChildResults`.
+
+            for child, index in children = @children()
+
+For the first child, the same list of accessibles for the parent applies to
+that child, so we don't need to modify `accessibles`.  As the `scope`, we
+pass the list of all subsequent siblings, in order.
+
+                # console.log 'about to recur in',
+                #     ( x.id() for x in children ),
+                #     'from index', index, 'with scope',
+                #     ( x.id() for x in children[index+1...] )
+                childResult = child.recursiveInterpret accessibles,
+                    children[index+1...]
+                allChildResults.push childResult
+
+But for later children, more things are accessible.  Specifically, anything
+just created by interpreting `child` should be accessible to its next
+sibling, so we update `accessibles` as follows, in preparation for the next
+iteration of this loop through the children.
+
+                accessibles = accessibles.concat childResult
+
+Now that the recursion into children is complete, we will ask this structure
+to interpret itself in light of what's accessible to it.  To prepare for
+that, we must first restore the `accessibles` array to its original content.
+
+            accessibles = accessibles[...originalAccessiblesLength]
+
+Call `interpret()` on this node, with all the correct parameters, mark this
+structure as clean for interpretation, and return the result.
+
+            result = @interpret accessibles, allChildResults, scope
+            @markDirty no
+            result
 
 ### Feedback
 

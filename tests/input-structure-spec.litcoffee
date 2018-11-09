@@ -168,3 +168,233 @@ out of them.
             expect( OS2.parentNode ).toBe result[0]
             expect( OS3.parentNode ).toBe result[0]
             expect( OS4.parentNode ).toBe OS3
+
+We now turn to tests of recursive interpretation, the framework that places
+calls to `interpret()` in individual nodes.
+
+    describe 'The recursiveInterpret() framework', ->
+
+First, we verify that it calls all the correct `interpret()` routines in the
+correct order, passing them the correct parameters.  We do so by creating
+`interpret()` routines that just record in the object the parameters they
+were passed, and the order of their invocation, so we can test it after the
+fact.
+
+        it 'should make calls with the right sequence and arguments', ->
+
+This subclass records the sequence of calls and the arguments passed to
+them.  We will then make a hierarchy of such instances in order to run our
+test.
+
+            sequenceOfCalls = [ ]
+            class ISRecorder extends InputStructure
+                interpret : ( accessibles, childResults, scope ) ->
+                    sequenceOfCalls.push @
+                    @recorded =
+                        accessibles : accessibles[...]
+                        childResults : childResults[...]
+                        scope : scope[...]
+                    @interpretation = super accessibles, childResults, scope
+
+Now build the hierarchy.
+
+            tree = new ISRecorder(
+                child1 = new ISRecorder(
+                    grandchild1 = new ISRecorder(
+                        greatgrandchild1 = new ISRecorder(
+                        ).attr id : 'greatgrandchild1'
+                        greatgrandchild2 = new ISRecorder(
+                        ).attr id : 'greatgrandchild2'
+                    ).attr id : 'grandchild1'
+                ).attr id : 'child1'
+                child2 = new ISRecorder(
+                    grandchild2 = new ISRecorder(
+                    ).attr id : 'grandchild2'
+                    grandchild3 = new ISRecorder(
+                    ).attr id : 'grandchild3'
+                ).attr id : 'child2'
+            ).attr id : 'tree'
+
+Ensure the data we expect to find later is completely empty before the test
+begins.
+
+            expect( sequenceOfCalls ).toEqual [ ]
+            expect( tree.recorded ).toBeUndefined()
+            expect( child1.recorded ).toBeUndefined()
+            expect( child2.recorded ).toBeUndefined()
+            expect( grandchild1.recorded ).toBeUndefined()
+            expect( grandchild2.recorded ).toBeUndefined()
+            expect( grandchild3.recorded ).toBeUndefined()
+            expect( greatgrandchild1.recorded ).toBeUndefined()
+            expect( greatgrandchild2.recorded ).toBeUndefined()
+
+Now run the recursive interpretation routine and verify that we get from it
+just one big tree.
+
+            result = tree.recursiveInterpret()
+            expect( result instanceof Array ).toBeTruthy()
+            expect( result.length ).toBe 1
+            resultTree = result[0]
+
+Were the calls made in the correct order?  Note that this is *not* the same
+as the order the nodes are read in the nested code that constructs the tree.
+The leaves are interpreted first, and then on up to the root last.
+
+            expect( sequenceOfCalls ).toEqual [
+                greatgrandchild1
+                greatgrandchild2
+                grandchild1
+                child1
+                grandchild2
+                grandchild3
+                child2
+                tree
+            ]
+
+Was each call passed the correct accessibles array?
+
+            expect( tree.recorded.accessibles ).toEqual [ ]
+            expect( child1.recorded.accessibles ).toEqual [ ]
+            expect( grandchild1.recorded.accessibles ).toEqual [ ]
+            expect( greatgrandchild1.recorded.accessibles ).toEqual [ ]
+            expect( greatgrandchild2.recorded.accessibles )
+                .toEqual greatgrandchild1.interpretation
+            expect( greatgrandchild2.recorded.accessibles )
+                .toEqual greatgrandchild1.interpretation
+            expect( child2.recorded.accessibles )
+                .toEqual child1.interpretation
+            expect( grandchild2.recorded.accessibles )
+                .toEqual child1.interpretation
+            expect( grandchild3.recorded.accessibles ).toEqual [
+                child1.interpretation...
+                grandchild2.interpretation...
+            ]
+
+Was each call passed the correct scope array?
+
+            expect( tree.recorded.scope ).toEqual [ ]
+            expect( child1.recorded.scope ).toEqual [ child2 ]
+            expect( grandchild1.recorded.scope ).toEqual [ ]
+            expect( greatgrandchild1.recorded.scope )
+                .toEqual [ greatgrandchild2 ]
+            expect( greatgrandchild2.recorded.scope ).toEqual [ ]
+            expect( child2.recorded.scope ).toEqual [ ]
+            expect( grandchild2.recorded.scope )
+                .toEqual [ grandchild3 ]
+            expect( grandchild3.recorded.scope ).toEqual [ ]
+
+Finally, was each call passed the correct `childResults` array?
+
+            expect( tree.recorded.childResults ).toEqual [
+                [ resultTree.children()[0] ]
+                [ resultTree.children()[1] ]
+            ]
+            expect( child1.recorded.childResults ).toEqual [
+                [ resultTree.children()[0].children()[0] ]
+            ]
+            expect( grandchild1.recorded.childResults ).toEqual [
+                [ resultTree.children()[0].children()[0].children()[0] ]
+                [ resultTree.children()[0].children()[0].children()[1] ]
+            ]
+            expect( greatgrandchild1.recorded.childResults ).toEqual [ ]
+            expect( child2.recorded.childResults ).toEqual [
+                [ resultTree.children()[1].children()[0] ]
+                [ resultTree.children()[1].children()[1] ]
+            ]
+            expect( grandchild2.recorded.childResults ).toEqual [ ]
+            expect( grandchild3.recorded.childResults ).toEqual [ ]
+
+Now we repeat the previous test, but with a simpler hierarchy, but some of
+the nodes are more complex because they return more than one
+`OutputStructure` as their interpretation.
+
+        it 'should do just as well with multiple interpretation nodes', ->
+
+Set things up just like in the last test, but with a custom interpretation
+routine that adds one or more bonus `OutputStructure` nodes, just for
+testing.
+
+            sequenceOfCalls = [ ]
+            class ISMultiplier extends InputStructure
+                interpret : ( accessibles, childResults, scope ) ->
+                    sequenceOfCalls.push @
+                    @recorded =
+                        accessibles : accessibles[...]
+                        childResults : childResults[...]
+                        scope : scope[...]
+                    @interpretation = super accessibles, childResults, scope
+                    numToAdd = ( @getAttribute 'howManyToAdd' ) ? 0
+                    for counter in [0...numToAdd]
+                        @interpretation.push \
+                            new OutputStructure().attr idx : counter
+                    @interpretation
+
+Now build the hierarchy.
+
+            tree = new ISMultiplier(
+                child1 = new ISMultiplier(
+                    grandchild1 = new ISMultiplier(
+                    ).attr id : 'grandchild1', howManyToAdd : 2
+                ).attr id : 'child1', howManyToAdd : 1
+                child2 = new ISMultiplier(
+                ).attr id : 'child2'
+            ).attr id : 'tree'
+
+Ensure the data we expect to find later is completely empty before the test
+begins.
+
+            expect( sequenceOfCalls ).toEqual [ ]
+            expect( tree.recorded ).toBeUndefined()
+            expect( child1.recorded ).toBeUndefined()
+            expect( child2.recorded ).toBeUndefined()
+            expect( grandchild1.recorded ).toBeUndefined()
+
+Now run the recursive interpretation routine and verify that we get from it
+just one big tree.
+
+            result = tree.recursiveInterpret()
+            expect( result instanceof Array ).toBeTruthy()
+            expect( result.length ).toBe 1
+            resultTree = result[0]
+
+Were the calls made in the correct order?  Note that this is *not* the same
+as the order the nodes are read in the nested code that constructs the tree.
+The leaves are interpreted first, and then on up to the root last.
+
+            expect( sequenceOfCalls ).toEqual [
+                grandchild1
+                child1
+                child2
+                tree
+            ]
+
+Was each call passed the correct accessibles array?
+
+            expect( tree.recorded.accessibles ).toEqual [ ]
+            expect( child1.recorded.accessibles ).toEqual [ ]
+            expect( grandchild1.recorded.accessibles ).toEqual [ ]
+            expect( child2.recorded.accessibles )
+                .toEqual child1.interpretation
+
+Was each call passed the correct scope array?
+
+            expect( tree.recorded.scope ).toEqual [ ]
+            expect( child1.recorded.scope ).toEqual [ child2 ]
+            expect( grandchild1.recorded.scope ).toEqual [ ]
+            expect( child2.recorded.scope ).toEqual [ ]
+
+Finally, was each call passed the correct `childResults` array?
+
+            expect( tree.recorded.childResults ).toEqual [
+                [
+                    resultTree.children()[0]
+                    resultTree.children()[1]
+                ]
+                [
+                    resultTree.children()[2]
+                ]
+            ]
+            expect( child1.recorded.childResults )
+                .toEqual [ resultTree.children()[0].children() ]
+            expect( grandchild1.recorded.childResults ).toEqual [ ]
+            expect( child2.recorded.childResults ).toEqual [ ]
