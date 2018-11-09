@@ -24,12 +24,15 @@ errors manifest at runtime, hence the checks below.
 
     if require?
         { Structure } = require './structure'
+        { OutputStructure } = require './output-structure'
     else if WorkerGlobalScope?
         if not WorkerGlobalScope.Structure?
             importScripts 'structure.js'
+            importScripts 'output-structure.js'
     else if self?.importScripts?
         if not self.Structure?
             importScripts 'release/structure.js'
+            importScripts 'release/output-structure.js'
 
 ## Define the `InputStructure` class
 
@@ -49,6 +52,44 @@ necessarily propagate upwards.
         markDirty : ( yesOrNo = yes ) ->
             @dirty = yesOrNo
             if yesOrNo then @parentNode?.markDirty()
+
+### Interpretation
+
+The main purpose of `InputStructure`s is to be interpretable, converting the
+LDE's Input Tree (analogous to syntax) into its Output Tree (semantics).
+The functions in this section support that purpose.
+
+The `interpret()` function defines how each subclass of `InputStructure`
+produces one or more nodes in the Output Tree.  It returns zero or more
+`OutputStructure` instances, in an array.  We provide the following default
+implementation that makes `InputStructure` instances behave like generic
+wrappers around their children.
+
+The parameters have the following meanings:
+ * `accessibles` - the list of `OutputStructure` instances in the Output
+   Tree accessible to the structures produced by this function
+ * `childResults` - the list of results produced by interpreting the
+   children of this node (already computed), which will be a list of lists,
+   because each child's results are an array of `OutputStructure`s.
+ * `scope` - the list of highest-level nodes in the Input Tree whose
+   interpretations will be placed in the scope of the interpretation of this
+   node, in the Output Tree
+
+Subclasses which override this must be sure to satisfy the following
+properties.
+ * Compute the result based *only* on the data in the first two parameters,
+   `accessibles` and `childResults`.  Do not read from other parts of the
+   Input or Output Trees, including the data in `scope`.
+ * Mark another `InputStructure` dirty *only* if it is a descendant of one
+   of the structures in the `scope` array (the third parameter).
+
+
+        interpret : ( accessibles, childResults, scope ) ->
+            result = new OutputStructure() # plain vanilla wrapper node
+            for childArray in childResults
+                for node in childArray
+                    result.insertChild node, result.children().length
+            [ result ] # must be an array even if it contains only one node
 
 ### Feedback
 

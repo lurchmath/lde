@@ -1,9 +1,12 @@
 
 # Tests of the `InputStructure` class
 
-Here we import the module we're about to test.
+Here we import the module we're about to test.  We also need to import the
+`OutputStructure` module, in order to test the default interpretation
+function.
 
     { InputStructure } = require '../src/input-structure'
+    { OutputStructure } = require '../src/output-structure'
 
 This file does not test every component of that module.  It tests the
 `InputStructure` class, and other classes defined in the same module are
@@ -101,3 +104,67 @@ And clean the root once more.
             expect( B.isDirty() ).toBeFalsy()
             expect( C.isDirty() ).toBeFalsy()
             expect( D.isDirty() ).toBeFalsy()
+
+## Interpretation
+
+The default `interpret()` function makes `InputStructure`s function like
+plain vanilla wrapper nodes.  We verify here that it works, given various
+inputs.  Recall that its three required parameters are `accessibles`,
+`childResults`, and `scope`, documented in [the source
+code](../src/input-structure.litcoffee#interpretation).
+
+    describe 'The default interpret() implementation', ->
+
+Verify that it produces an empty `OutputStructure` wrapper if passed empty
+arrays as all of its arguments.
+
+        it 'produces one empty result when given empty arguments', ->
+            IS = new InputStructure()
+            result = IS.interpret [ ], [ ], [ ]
+            expect( result instanceof Array ).toBeTruthy()
+            expect( result.length ).toBe 1
+            expect( result[0] instanceof OutputStructure ).toBeTruthy()
+            expect( result[0].children() ).toEqual [ ]
+            expect( result[0].className ).toBe 'OutputStructure'
+            expect( result[0].parentNode ).toBeNull()
+
+Verify that it ignores both the `accessibles` array and the `scope` array.
+We pass nonsense into those arrays (that is, they do not contain any
+`Structure` instances, but random other data) and note that it doesn't
+matter; the same result is produced because it does not depend in any way on
+those parameters.
+
+        it 'ignores the accessibles and scope parameters', ->
+            IS = new InputStructure()
+            result = IS.interpret [ 1, '2', /3/ ], [ ], [ { }, '!!!' ]
+            expect( result instanceof Array ).toBeTruthy()
+            expect( result.length ).toBe 1
+            expect( result[0] instanceof OutputStructure ).toBeTruthy()
+            expect( result[0].children() ).toEqual [ ]
+            expect( result[0].className ).toBe 'OutputStructure'
+            expect( result[0].parentNode ).toBeNull()
+
+Verify that all child results provided in the second parameter are used in
+the output as children of the single node produced.  Note that such child
+results are provided in arrays (because each child produces zero or more
+`OutputStructure` instances from its own interpretation) and must be lifted
+out of them.
+
+        it 'flattens child results into a wrapper node in the output', ->
+            IS = new InputStructure()
+            OS1 = new OutputStructure().attr id : 1
+            OS2 = new OutputStructure().attr id : 2, direction : 'west'
+            OS3 = new OutputStructure(
+                OS4 = new OutputStructure().attr id : 4, title : 'Mrs.'
+            ).attr id : 3
+            result = IS.interpret [ ], [ [ OS1, OS2 ], [ OS3 ] ], [ ]
+            expect( result instanceof Array ).toBeTruthy()
+            expect( result.length ).toBe 1
+            expect( result[0] instanceof OutputStructure ).toBeTruthy()
+            expect( result[0].children() ).toEqual [ OS1, OS2, OS3 ]
+            expect( result[0].className ).toBe 'OutputStructure'
+            expect( result[0].parentNode ).toBeNull()
+            expect( OS1.parentNode ).toBe result[0]
+            expect( OS2.parentNode ).toBe result[0]
+            expect( OS3.parentNode ).toBe result[0]
+            expect( OS4.parentNode ).toBe OS3

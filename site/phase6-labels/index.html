@@ -156,6 +156,7 @@
             <li><a href="#citations">Citations</a></li>
             <li><a href="#lookup">Lookup</a></li>
             <li><a href="#api-documentation">API Documentation</a></li>
+            <li><a href="#efficiency-improvements">Efficiency improvements</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
@@ -262,11 +263,21 @@ established and implemented.</p>
    given <code>string</code>.  It returns the first one encountered, or null if there
    is none.</li>
 </ul>
-<p>The remainder of this section is efficiency improvements.  Consequently,
-they can be deferred until later in the project, and can even be considered
-optional if we notice no performance problems without implementing them.  If
-you wish to skip them for now, simply jump to the last few tasks in this
-section, about unit tests and documentation.</p>
+<h2 id="api-documentation">API Documentation</h2>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled/> Extend the <code>OutputStructure</code> page of the API Documentation to include
+   all the work done in this phase.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Rebuild docs and commit.</li>
+</ul>
+<h2 id="efficiency-improvements">Efficiency improvements</h2>
+<p>This section lists a potential efficiency improvement related to all the
+code written during this phase of development.  Because it is only an
+efficiency improvement (and thus not required to make the code work
+correctly), it can be deferred until later in the project.  It is not
+sensible to invest development time on an efficiency improvement if we do
+not even yet know whether its lack will be perceived.  If we notice any
+performance bottlenecks that this improvement could fix, we can return to it
+later and follow the steps below to implement it.</p>
 <ul class="task-list">
 <li class="task-list-item"><input type="checkbox" disabled/> Extend the <code>Dependency</code> subclass of IS so that it marks all of its
    interpretation results with an attribute, flagging them as having come
@@ -291,12 +302,6 @@ section, about unit tests and documentation.</p>
    defining a custom <code>hasLabel()</code> routine that records when it was called,
    and ensuring it is called only once for many lookups.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
-</ul>
-<h2 id="api-documentation">API Documentation</h2>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the <code>OutputStructure</code> page of the API Documentation to include
-   all the work done in this phase.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Rebuild docs and commit.</li>
 </ul></div>
         </div>
 
