@@ -36,7 +36,7 @@ let result = new OutputStructure() // plain vanilla wrapper node
 for each childArray in childResults:
     for each node in childArray:
         result.appendChild( node ) // put everything in it
-        return [ result ] // return an array of exactly one tree
+return [ result ] // return an array of exactly one tree
 ```
  * [ ] Add documentation in that file describing the changes just made.
  * [ ] Extend the unit tests for the `InputStructure` module to include some
