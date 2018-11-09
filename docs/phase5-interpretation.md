@@ -54,49 +54,6 @@ for each childArray in childResults:
       descendants).
  * [ ] Rebuild the docs and commit.
 
-## Caching interpretation results
-
-This section is efficiency improvements.  Consequently, they can be deferred
-until later in the project, and can even be considered optional if we notice
-no performance problems without implementing them.  If you wish to skip them
-for now, simply move on to the next section, or implement these routines as
-stubs that do nothing yet.
-
- * [ ] Extend the `InputStructure` class with a field called
-   `lastInterpretation`, which is initialized to undefined in the
-   constructor.  This field does not need to be part of any serialization
-   or deserialization of instances.
- * [ ] Create an `getLastInterpretation()` method that returns the value of
-   that member variable.
- * [ ] Create a `saveInterpretation(I)` method in the `InputStructure` class
-   that stores the array `I` (of zero or more Output Structures) in the
-   `lastInterpretation` field.  If no parameter is passed, clear the cached
-   value.
- * [ ] Update all documentation in that file to reflect the changes just
-   made.
- * [ ] Add to the unit tests for `InputStructure`s a few simple tests for
-   these new routines.
- * [ ] Add documentation in that file describing the changes just made.
- * [ ] Once the unit tests pass, build everything and commit.
-
-Here is another miscellaneous efficiency improvement related to
-interpretation, so I will place it here:
-
- * [ ] Create a `setChildrenList(newChildren)` function in the `Structure`
-   base class.  It should change as little as possible (maybe nothing) to
-   make the structure's children array equal to the given one.  This lets
-   `interpret()` routines reuse old Output Structures from cache, just
-   adjusting their children lists, rather than constructing new ones, even
-   if their children list changed.  Many `interpret()` routines may
-   therefore be simply `lastInterpretation.setChildrenList(childResults)`
-   followed by returning the last interpretation again.  This will often
-   just verify that the children list is already correct, change nothing,
-   and move on.
- * [ ] Add to the unit tests for this new routine.
- * [ ] Add documentation in the `Structure` module describing the new
-   routine.
- * [ ] Once the unit tests pass, build everything and commit.
-
 ## Building recursive interpretation
 
  * [ ] Create a `recursiveInterpret` routine in the `InputStructure` class
@@ -157,58 +114,6 @@ then return lastInterpretation() as the result of this function
    copy or create attributes, delete children, don't include the default
    wrapper, etc.
  * [ ] Add documentation in that test file describing the changes just made.
- * [ ] Once the unit tests pass, build everything and commit.
-
-The remainder of this section is efficiency improvements.  Consequently,
-they can be deferred until later in the project, and can even be considered
-optional if we notice no performance problems without implementing them.  If
-you wish to skip them for now, simply jump to the last few tasks in this
-section, about unit tests and documentation.
-
- * [ ] Create a subclass of `OutputStructure`, in the `OutputStructure`
-   module, called `InterpretationDirective`.
- * [ ] Add documentation explaining what it is and will do (though that
-   documentation can grow with time).
- * [ ] Ensure that the `InterpretationDirective` subclass registers itself
-   with the serialization code, as
-   [the documentation here](https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names)
-   describes.  (That is, use a line like
-   `className : Structure.addSubclass 'InterpretationDirective', InterpretationDirective` in
-   the `InterpretationDirective` class code.)
- * [ ] Create a new unit test file for `InterpretationDirective`s that is
-   extremely basic, just testing to be sure that the symbol
-   `InterpretationDirective` is defined at the global scope and creates
-   things that are instances of the `InterpretationDirective` class.
- * [ ] Add documentation for that unit test file, following the pattern
-   established in the documentation of other unit test files in this
-   repository.
- * [ ] Create a subclass `FilterableArray` of `Array` that, at construction
-   time, is given a predicate.  It stores, internally, a filtered version of
-   itself, which is initialized to the empty array.  It guarantees to keep
-   this filtered version correct iff it is manipulated only through calls to
-   its `push()` and `pop()` routines, which we override below.
- * [ ] Override `FilterableArray::push()` to do an ordinary `Array::push()`
-   and then also a push on the internal filtered version iff the predicate
-   holds of the new item.
- * [ ] Override `FilterableArray::pop()` to do an ordinary `Array::pop()`
-   and then also a pop on the internal filtered version iff the object
-   popped was also on the end of that array.
- * [ ] Add a new method `FilterableArray::filtered()` that returns the
-   filtered version.
- * [ ] Update the default version of `recursiveInterpret()` to create the
-   `accessibles` array as an instance of `FilterableArray`, with the
-   predicate being whether the Structure is an instance of the
-   `InterpretationDirective` class.  Ensure that adding items to the array
-   and removing them from it are done with calls to `push()` and `pop()`.
- * [ ] Document this so that later implementations of `interpret()` can be
-   faster by leveraging `accessibles.filtered()` rather than the entire
-   `accessibles` array.
- * [ ] Ensure all the unit tests still pass.
- * [ ] Add new unit tests for the `FilterableArray` class independently of
-   the rest of the LDE.
- * [ ] Add some new unit tests that verify that `accessibles.filtered()` is
-   exactly what it should be (i.e., the Interpretation Directive predicate
-   is being used correctly).
  * [ ] Once the unit tests pass, build everything and commit.
 
 ## Tracking origins
@@ -326,3 +231,98 @@ follows.
  * [ ] Extend the processing phases page of the API Documentation to include
    all the work done in this phase, including interpretation.
  * [ ] Rebuild docs and commit.
+
+## Efficiency improvements
+
+This section lists all the potential efficiency improvements related to all
+the code written during this phase of development.  Because they are only
+efficiency improvements (and thus not required to make the code work
+correctly), they can be deferred until later in the project.  It is not
+sensible to invest development time on an efficiency improvement if we do
+not even yet know whether its lack will be perceived.  If we notice any
+performance bottlenecks that any of these improvements could fix, we can
+return to these ideas later and follow the steps below to implement them.
+
+### Caching interpretation results
+
+ * [ ] Extend the `InputStructure` class with a field called
+   `lastInterpretation`, which is initialized to undefined in the
+   constructor.  This field does not need to be part of any serialization
+   or deserialization of instances.
+ * [ ] Create an `getLastInterpretation()` method that returns the value of
+   that member variable.
+ * [ ] Create a `saveInterpretation(I)` method in the `InputStructure` class
+   that stores the array `I` (of zero or more Output Structures) in the
+   `lastInterpretation` field.  If no parameter is passed, clear the cached
+   value.
+ * [ ] Update all documentation in that file to reflect the changes just
+   made.
+ * [ ] Add to the unit tests for `InputStructure`s a few simple tests for
+   these new routines.
+ * [ ] Add documentation in that file describing the changes just made.
+ * [ ] Once the unit tests pass, build everything and commit.
+
+### Miscellaneous
+
+ * [ ] Create a `setChildrenList(newChildren)` function in the `Structure`
+   base class.  It should change as little as possible (maybe nothing) to
+   make the structure's children array equal to the given one.  This lets
+   `interpret()` routines reuse old Output Structures from cache, just
+   adjusting their children lists, rather than constructing new ones, even
+   if their children list changed.  Many `interpret()` routines may
+   therefore be simply `lastInterpretation.setChildrenList(childResults)`
+   followed by returning the last interpretation again.  This will often
+   just verify that the children list is already correct, change nothing,
+   and move on.
+ * [ ] Add to the unit tests for this new routine.
+ * [ ] Add documentation in the `Structure` module describing the new
+   routine.
+ * [ ] Once the unit tests pass, build everything and commit.
+
+### Recursive interpretation
+
+ * [ ] Create a subclass of `OutputStructure`, in the `OutputStructure`
+   module, called `InterpretationDirective`.
+ * [ ] Add documentation explaining what it is and will do (though that
+   documentation can grow with time).
+ * [ ] Ensure that the `InterpretationDirective` subclass registers itself
+   with the serialization code, as
+   [the documentation here](https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names)
+   describes.  (That is, use a line like
+   `className : Structure.addSubclass 'InterpretationDirective', InterpretationDirective` in
+   the `InterpretationDirective` class code.)
+ * [ ] Create a new unit test file for `InterpretationDirective`s that is
+   extremely basic, just testing to be sure that the symbol
+   `InterpretationDirective` is defined at the global scope and creates
+   things that are instances of the `InterpretationDirective` class.
+ * [ ] Add documentation for that unit test file, following the pattern
+   established in the documentation of other unit test files in this
+   repository.
+ * [ ] Create a subclass `FilterableArray` of `Array` that, at construction
+   time, is given a predicate.  It stores, internally, a filtered version of
+   itself, which is initialized to the empty array.  It guarantees to keep
+   this filtered version correct iff it is manipulated only through calls to
+   its `push()` and `pop()` routines, which we override below.
+ * [ ] Override `FilterableArray::push()` to do an ordinary `Array::push()`
+   and then also a push on the internal filtered version iff the predicate
+   holds of the new item.
+ * [ ] Override `FilterableArray::pop()` to do an ordinary `Array::pop()`
+   and then also a pop on the internal filtered version iff the object
+   popped was also on the end of that array.
+ * [ ] Add a new method `FilterableArray::filtered()` that returns the
+   filtered version.
+ * [ ] Update the default version of `recursiveInterpret()` to create the
+   `accessibles` array as an instance of `FilterableArray`, with the
+   predicate being whether the Structure is an instance of the
+   `InterpretationDirective` class.  Ensure that adding items to the array
+   and removing them from it are done with calls to `push()` and `pop()`.
+ * [ ] Document this so that later implementations of `interpret()` can be
+   faster by leveraging `accessibles.filtered()` rather than the entire
+   `accessibles` array.
+ * [ ] Ensure all the unit tests still pass.
+ * [ ] Add new unit tests for the `FilterableArray` class independently of
+   the rest of the LDE.
+ * [ ] Add some new unit tests that verify that `accessibles.filtered()` is
+   exactly what it should be (i.e., the Interpretation Directive predicate
+   is being used correctly).
+ * [ ] Once the unit tests pass, build everything and commit.
