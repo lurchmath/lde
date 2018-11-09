@@ -236,6 +236,59 @@ just one big tree.
             expect( result.length ).toBe 1
             resultTree = result[0]
 
+Before we inspect all the recorded data, was the interpreted result the
+correct OutputStructure?
+
+            expect( tree.interpretation.length ).toBe 1
+            expect( child1.interpretation.length ).toBe 1
+            expect( child2.interpretation.length ).toBe 1
+            expect( grandchild1.interpretation.length ).toBe 1
+            expect( grandchild2.interpretation.length ).toBe 1
+            expect( grandchild3.interpretation.length ).toBe 1
+            expect( greatgrandchild1.interpretation.length ).toBe 1
+            expect( greatgrandchild2.interpretation.length ).toBe 1
+            expect( tree.interpretation[0] instanceof OutputStructure )
+                .toBeTruthy()
+            expect( child1.interpretation[0] instanceof OutputStructure )
+                .toBeTruthy()
+            expect( child2.interpretation[0] instanceof OutputStructure )
+                .toBeTruthy()
+            expect( grandchild1.interpretation[0] instanceof \
+                OutputStructure ).toBeTruthy()
+            expect( grandchild2.interpretation[0] instanceof \
+                OutputStructure ).toBeTruthy()
+            expect( grandchild3.interpretation[0] instanceof \
+                OutputStructure ).toBeTruthy()
+            expect( greatgrandchild1.interpretation[0] instanceof \
+                OutputStructure ).toBeTruthy()
+            expect( greatgrandchild2.interpretation[0] instanceof \
+                OutputStructure ).toBeTruthy()
+            expect( tree.interpretation[0].children().length ).toBe 2
+            expect( child1.interpretation[0].children().length ).toBe 1
+            expect( child2.interpretation[0].children().length ).toBe 2
+            expect( grandchild1.interpretation[0].children().length ).toBe 2
+            expect( grandchild2.interpretation[0].children().length ).toBe 0
+            expect( grandchild3.interpretation[0].children().length ).toBe 0
+            expect( greatgrandchild1.interpretation[0].children().length )
+                .toBe 0
+            expect( greatgrandchild2.interpretation[0].children().length )
+                .toBe 0
+            expect( tree.interpretation[0].parentNode ).toBeNull()
+            expect( child1.interpretation[0].parentNode )
+                .toBe tree.interpretation[0]
+            expect( child2.interpretation[0].parentNode )
+                .toBe tree.interpretation[0]
+            expect( grandchild1.interpretation[0].parentNode )
+                .toBe child1.interpretation[0]
+            expect( grandchild2.interpretation[0].parentNode )
+                .toBe child2.interpretation[0]
+            expect( grandchild3.interpretation[0].parentNode )
+                .toBe child2.interpretation[0]
+            expect( greatgrandchild1.interpretation[0].parentNode )
+                .toBe grandchild1.interpretation[0]
+            expect( greatgrandchild2.interpretation[0].parentNode )
+                .toBe grandchild1.interpretation[0]
+
 Were the calls made in the correct order?  Note that this is *not* the same
 as the order the nodes are read in the nested code that constructs the tree.
 The leaves are interpreted first, and then on up to the root last.
@@ -356,6 +409,48 @@ just one big tree.
             expect( result instanceof Array ).toBeTruthy()
             expect( result.length ).toBe 1
             resultTree = result[0]
+
+Before we inspect all the recorded data, was the interpreted result the
+correct OutputStructure?
+
+            expect( tree.interpretation.length ).toBe 1
+            expect( child1.interpretation.length ).toBe 2
+            expect( child2.interpretation.length ).toBe 1
+            expect( grandchild1.interpretation.length ).toBe 3
+            expect( tree.interpretation[0] instanceof OutputStructure )
+                .toBeTruthy()
+            expect( child1.interpretation[0] instanceof OutputStructure )
+                .toBeTruthy()
+            expect( child1.interpretation[1] instanceof OutputStructure )
+                .toBeTruthy()
+            expect( child2.interpretation[0] instanceof OutputStructure )
+                .toBeTruthy()
+            expect( grandchild1.interpretation[0] \
+                instanceof OutputStructure ).toBeTruthy()
+            expect( grandchild1.interpretation[1] \
+                instanceof OutputStructure ).toBeTruthy()
+            expect( grandchild1.interpretation[2] \
+                instanceof OutputStructure ).toBeTruthy()
+            expect( tree.interpretation[0].children().length ).toBe 3
+            expect( child1.interpretation[0].children().length ).toBe 3
+            expect( child1.interpretation[1].children().length ).toBe 0
+            expect( child2.interpretation[0].children().length ).toBe 0
+            expect( grandchild1.interpretation[0].children().length ).toBe 0
+            expect( grandchild1.interpretation[1].children().length ).toBe 0
+            expect( grandchild1.interpretation[2].children().length ).toBe 0
+            expect( tree.interpretation[0].parentNode ).toBeNull()
+            expect( child1.interpretation[0].parentNode )
+                .toBe tree.interpretation[0]
+            expect( child1.interpretation[1].parentNode )
+                .toBe tree.interpretation[0]
+            expect( child2.interpretation[0].parentNode )
+                .toBe tree.interpretation[0]
+            expect( grandchild1.interpretation[0].parentNode )
+                .toBe child1.interpretation[0]
+            expect( grandchild1.interpretation[1].parentNode )
+                .toBe child1.interpretation[0]
+            expect( grandchild1.interpretation[2].parentNode )
+                .toBe child1.interpretation[0]
 
 Were the calls made in the correct order?  Note that this is *not* the same
 as the order the nodes are read in the nested code that constructs the tree.
