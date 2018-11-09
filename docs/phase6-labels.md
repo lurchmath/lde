@@ -103,11 +103,22 @@ This has not been implemented.  See the tasks below.
    given `string`.  It returns the first one encountered, or null if there
    is none.
 
-The remainder of this section is efficiency improvements.  Consequently,
-they can be deferred until later in the project, and can even be considered
-optional if we notice no performance problems without implementing them.  If
-you wish to skip them for now, simply jump to the last few tasks in this
-section, about unit tests and documentation.
+## API Documentation
+
+ * [ ] Extend the `OutputStructure` page of the API Documentation to include
+   all the work done in this phase.
+ * [ ] Rebuild docs and commit.
+
+## Efficiency improvements
+
+This section lists a potential efficiency improvement related to all the
+code written during this phase of development.  Because it is only an
+efficiency improvement (and thus not required to make the code work
+correctly), it can be deferred until later in the project.  It is not
+sensible to invest development time on an efficiency improvement if we do
+not even yet know whether its lack will be perceived.  If we notice any
+performance bottlenecks that this improvement could fix, we can return to it
+later and follow the steps below to implement it.
 
  * [ ] Extend the `Dependency` subclass of IS so that it marks all of its
    interpretation results with an attribute, flagging them as having come
@@ -132,9 +143,3 @@ section, about unit tests and documentation.
    defining a custom `hasLabel()` routine that records when it was called,
    and ensuring it is called only once for many lookups.
  * [ ] Once the unit tests pass, build everything and commit.
-
-## API Documentation
-
- * [ ] Extend the `OutputStructure` page of the API Documentation to include
-   all the work done in this phase.
- * [ ] Rebuild docs and commit.
