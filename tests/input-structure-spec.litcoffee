@@ -288,6 +288,21 @@ correct OutputStructure?
                 .toBe grandchild1.interpretation[0]
             expect( greatgrandchild2.interpretation[0].parentNode )
                 .toBe grandchild1.interpretation[0]
+            expect( resultTree.children() ).toEqual [
+                child1.interpretation...
+                child2.interpretation...
+            ]
+            expect( resultTree.children()[0].children() )
+                .toEqual grandchild1.interpretation
+            expect( resultTree.children()[1].children() ).toEqual [
+                grandchild2.interpretation...
+                grandchild3.interpretation...
+            ]
+            expect( resultTree.children()[0].children()[0].children() )
+                .toEqual [
+                    greatgrandchild1.interpretation...
+                    greatgrandchild2.interpretation...
+                ]
 
 Were the calls made in the correct order?  Note that this is *not* the same
 as the order the nodes are read in the nested code that constructs the tree.
@@ -451,6 +466,20 @@ correct OutputStructure?
                 .toBe child1.interpretation[0]
             expect( grandchild1.interpretation[2].parentNode )
                 .toBe child1.interpretation[0]
+            expect( resultTree.children() ).toEqual [
+                child1.interpretation...
+                child2.interpretation...
+            ]
+            expect( resultTree.children()[0].children() )
+                .toEqual grandchild1.interpretation
+            expect( resultTree.children()[1].children() ).toEqual [ ]
+            expect( resultTree.children()[2].children() ).toEqual [ ]
+            expect( resultTree.children()[0].children()[0].children() )
+                .toEqual [ ]
+            expect( resultTree.children()[0].children()[1].children() )
+                .toEqual [ ]
+            expect( resultTree.children()[0].children()[2].children() )
+                .toEqual [ ]
 
 Were the calls made in the correct order?  Note that this is *not* the same
 as the order the nodes are read in the nested code that constructs the tree.
