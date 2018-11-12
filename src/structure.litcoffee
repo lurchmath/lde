@@ -78,6 +78,13 @@ version.
             attributes : attributes
             children : ( child.toJSON includeID for child in @childList )
 
+The serialization tool lets us write a simple structural equality comparison
+function for two `Structure` hierarchies.  This is not an efficient
+comparison function, but it can be used in unit testing.
+
+        equals : ( other ) ->
+            JSON.stringify( @toJSON() ) is JSON.stringify other.toJSON()
+
 ### Deserialization from JSON
 
 Deserialization is a method in the class, because of course it is called

@@ -239,70 +239,41 @@ just one big tree.
 Before we inspect all the recorded data, was the interpreted result the
 correct OutputStructure?
 
+            correctOT = new OutputStructure(
+                OTchild1 = new OutputStructure(
+                    OTgrandchild1 = new OutputStructure(
+                        OTgreatgrandchild1 = new OutputStructure()
+                        OTgreatgrandchild2 = new OutputStructure()
+                    )
+                )
+                OTchild2 = new OutputStructure(
+                    OTgrandchild2 = new OutputStructure()
+                    OTgrandchild3 = new OutputStructure()
+                )
+            )
+            expect( resultTree.equals correctOT ).toBeTruthy()
             expect( tree.interpretation.length ).toBe 1
+            expect( tree.interpretation[0].equals correctOT )
+                .toBeTruthy()
             expect( child1.interpretation.length ).toBe 1
+            expect( child1.interpretation[0].equals OTchild1 ).toBeTruthy()
             expect( child2.interpretation.length ).toBe 1
+            expect( child2.interpretation[0].equals OTchild2 ).toBeTruthy()
             expect( grandchild1.interpretation.length ).toBe 1
+            expect( grandchild1.interpretation[0].equals OTgrandchild1 )
+                .toBeTruthy()
             expect( grandchild2.interpretation.length ).toBe 1
+            expect( grandchild2.interpretation[0].equals OTgrandchild2 )
+                .toBeTruthy()
             expect( grandchild3.interpretation.length ).toBe 1
+            expect( grandchild3.interpretation[0].equals OTgrandchild3 )
+                .toBeTruthy()
             expect( greatgrandchild1.interpretation.length ).toBe 1
+            expect( greatgrandchild1.interpretation[0]
+                .equals OTgreatgrandchild1 ).toBeTruthy()
             expect( greatgrandchild2.interpretation.length ).toBe 1
-            expect( tree.interpretation[0] instanceof OutputStructure )
-                .toBeTruthy()
-            expect( child1.interpretation[0] instanceof OutputStructure )
-                .toBeTruthy()
-            expect( child2.interpretation[0] instanceof OutputStructure )
-                .toBeTruthy()
-            expect( grandchild1.interpretation[0] instanceof \
-                OutputStructure ).toBeTruthy()
-            expect( grandchild2.interpretation[0] instanceof \
-                OutputStructure ).toBeTruthy()
-            expect( grandchild3.interpretation[0] instanceof \
-                OutputStructure ).toBeTruthy()
-            expect( greatgrandchild1.interpretation[0] instanceof \
-                OutputStructure ).toBeTruthy()
-            expect( greatgrandchild2.interpretation[0] instanceof \
-                OutputStructure ).toBeTruthy()
-            expect( tree.interpretation[0].children().length ).toBe 2
-            expect( child1.interpretation[0].children().length ).toBe 1
-            expect( child2.interpretation[0].children().length ).toBe 2
-            expect( grandchild1.interpretation[0].children().length ).toBe 2
-            expect( grandchild2.interpretation[0].children().length ).toBe 0
-            expect( grandchild3.interpretation[0].children().length ).toBe 0
-            expect( greatgrandchild1.interpretation[0].children().length )
-                .toBe 0
-            expect( greatgrandchild2.interpretation[0].children().length )
-                .toBe 0
-            expect( tree.interpretation[0].parentNode ).toBeNull()
-            expect( child1.interpretation[0].parentNode )
-                .toBe tree.interpretation[0]
-            expect( child2.interpretation[0].parentNode )
-                .toBe tree.interpretation[0]
-            expect( grandchild1.interpretation[0].parentNode )
-                .toBe child1.interpretation[0]
-            expect( grandchild2.interpretation[0].parentNode )
-                .toBe child2.interpretation[0]
-            expect( grandchild3.interpretation[0].parentNode )
-                .toBe child2.interpretation[0]
-            expect( greatgrandchild1.interpretation[0].parentNode )
-                .toBe grandchild1.interpretation[0]
-            expect( greatgrandchild2.interpretation[0].parentNode )
-                .toBe grandchild1.interpretation[0]
-            expect( resultTree.children() ).toEqual [
-                child1.interpretation...
-                child2.interpretation...
-            ]
-            expect( resultTree.children()[0].children() )
-                .toEqual grandchild1.interpretation
-            expect( resultTree.children()[1].children() ).toEqual [
-                grandchild2.interpretation...
-                grandchild3.interpretation...
-            ]
-            expect( resultTree.children()[0].children()[0].children() )
-                .toEqual [
-                    greatgrandchild1.interpretation...
-                    greatgrandchild2.interpretation...
-                ]
+            expect( greatgrandchild2.interpretation[0]
+                .equals OTgreatgrandchild2 ).toBeTruthy()
 
 Were the calls made in the correct order?  Note that this is *not* the same
 as the order the nodes are read in the nested code that constructs the tree.
@@ -428,58 +399,30 @@ just one big tree.
 Before we inspect all the recorded data, was the interpreted result the
 correct OutputStructure?
 
+            correctOT = new OutputStructure(
+                OTchild1 = new OutputStructure(
+                    OTgrandchild1 = new OutputStructure()
+                    OTextra1 = new OutputStructure().attr idx : 0
+                    OTextra2 = new OutputStructure().attr idx : 1
+                )
+                OTextra3 = new OutputStructure().attr idx : 0
+                OTchild2 = new OutputStructure()
+            )
+            expect( resultTree.equals correctOT ).toBeTruthy()
             expect( tree.interpretation.length ).toBe 1
+            expect( tree.interpretation[0].equals correctOT ).toBeTruthy()
             expect( child1.interpretation.length ).toBe 2
+            expect( child1.interpretation[0].equals OTchild1 ).toBeTruthy()
+            expect( child1.interpretation[1].equals OTextra3 ).toBeTruthy()
             expect( child2.interpretation.length ).toBe 1
+            expect( child2.interpretation[0].equals OTchild2 ).toBeTruthy()
             expect( grandchild1.interpretation.length ).toBe 3
-            expect( tree.interpretation[0] instanceof OutputStructure )
+            expect( grandchild1.interpretation[0].equals OTgrandchild1 )
                 .toBeTruthy()
-            expect( child1.interpretation[0] instanceof OutputStructure )
+            expect( grandchild1.interpretation[1].equals OTextra1 )
                 .toBeTruthy()
-            expect( child1.interpretation[1] instanceof OutputStructure )
+            expect( grandchild1.interpretation[2].equals OTextra2 )
                 .toBeTruthy()
-            expect( child2.interpretation[0] instanceof OutputStructure )
-                .toBeTruthy()
-            expect( grandchild1.interpretation[0] \
-                instanceof OutputStructure ).toBeTruthy()
-            expect( grandchild1.interpretation[1] \
-                instanceof OutputStructure ).toBeTruthy()
-            expect( grandchild1.interpretation[2] \
-                instanceof OutputStructure ).toBeTruthy()
-            expect( tree.interpretation[0].children().length ).toBe 3
-            expect( child1.interpretation[0].children().length ).toBe 3
-            expect( child1.interpretation[1].children().length ).toBe 0
-            expect( child2.interpretation[0].children().length ).toBe 0
-            expect( grandchild1.interpretation[0].children().length ).toBe 0
-            expect( grandchild1.interpretation[1].children().length ).toBe 0
-            expect( grandchild1.interpretation[2].children().length ).toBe 0
-            expect( tree.interpretation[0].parentNode ).toBeNull()
-            expect( child1.interpretation[0].parentNode )
-                .toBe tree.interpretation[0]
-            expect( child1.interpretation[1].parentNode )
-                .toBe tree.interpretation[0]
-            expect( child2.interpretation[0].parentNode )
-                .toBe tree.interpretation[0]
-            expect( grandchild1.interpretation[0].parentNode )
-                .toBe child1.interpretation[0]
-            expect( grandchild1.interpretation[1].parentNode )
-                .toBe child1.interpretation[0]
-            expect( grandchild1.interpretation[2].parentNode )
-                .toBe child1.interpretation[0]
-            expect( resultTree.children() ).toEqual [
-                child1.interpretation...
-                child2.interpretation...
-            ]
-            expect( resultTree.children()[0].children() )
-                .toEqual grandchild1.interpretation
-            expect( resultTree.children()[1].children() ).toEqual [ ]
-            expect( resultTree.children()[2].children() ).toEqual [ ]
-            expect( resultTree.children()[0].children()[0].children() )
-                .toEqual [ ]
-            expect( resultTree.children()[0].children()[1].children() )
-                .toEqual [ ]
-            expect( resultTree.children()[0].children()[2].children() )
-                .toEqual [ ]
 
 Were the calls made in the correct order?  Note that this is *not* the same
 as the order the nodes are read in the nested code that constructs the tree.
