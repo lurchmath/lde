@@ -371,6 +371,13 @@ returning, it calls teh `connectionInserted` handlers in both the source and
 the target (iff they are present), passing the new connection's ID in each
 case.
 
+We also call an additional handler, `addConnectionOrigin()`, in the target,
+because during interpretation, connections formed in the Output Tree will
+want to use that handler to mark which `InputStructure` gave rise to them.
+Whether we call it in the source or the target is irrelevant, since it
+should be tracked only if both are `OutputStructure`s created during
+interpretation.
+
         @connect : ( source, target, data ) ->
             return no unless \
                 ( data instanceof Object ) and \
@@ -381,6 +388,7 @@ case.
                 source.idIsTracked() and target.idIsTracked()
             source.connectionWillBeInserted? source, target, data
             target.connectionWillBeInserted? source, target, data
+            source.addConnectionOrigin? source, target, data
             source.setAttribute "_conn #{data.id} data", data
             source.setAttribute "_conn #{data.id} to", target.id()
             target.setAttribute "_conn #{data.id} from", source.id()
