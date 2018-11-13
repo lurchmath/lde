@@ -59,6 +59,14 @@ The main purpose of `InputStructure`s is to be interpretable, converting the
 LDE's Input Tree (analogous to syntax) into its Output Tree (semantics).
 The functions in this section support that purpose.
 
+We will track which instance we are interpreting with a class variable.  It
+will be a stack, because interpretation is recursive, and will track the
+current nested recursive calls.  This will help us know, from anywhere in
+the LDE, which structures are currently being interpreted.  This will be
+udpated in the `recursiveInterpret()` routine defined further below.
+
+        instancesBeingInterpreted : [ ]
+
 The `interpret()` function defines how each subclass of `InputStructure`
 produces one or more nodes in the Output Tree.  It returns zero or more
 `OutputStructure` instances, in an array.  We provide the following default
@@ -131,9 +139,19 @@ that, we must first restore the `accessibles` array to its original content.
             accessibles = accessibles[...originalAccessiblesLength]
 
 Call `interpret()` on this node, with all the correct parameters, mark this
-structure as clean for interpretation, and return the result.
+structure as clean for interpretation, and return the result.  Push this
+onto the stack of instances being interpreted right before, and pop it right
+after.
 
+            InputStructure::instancesBeingInterpreted.push @
             result = @interpret accessibles, allChildResults, scope
+            InputStructure::instancesBeingInterpreted.pop()
+
+As we build the tree, we need to track the IDs used in it, so that nodes
+that wish to form connections among descendants can do so.  Thus we must
+begin tracking IDs as soon as new nodes are formed.  We do so here.
+
+            structure.trackIDs() for structure in result
             @markDirty no
             result
 

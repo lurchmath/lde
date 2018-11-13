@@ -25,12 +25,15 @@ errors manifest at runtime, hence the checks below.
 
     if require?
         { Structure } = require './structure'
+        { InputStructure } = require './input-structure'
     else if WorkerGlobalScope?
         if not WorkerGlobalScope.Structure?
             importScripts 'structure.js'
+            importScripts 'input-structure.js'
     else if self?.importScripts?
         if not self.Structure?
             importScripts 'release/structure.js'
+            importScripts 'release/input-structure.js'
 
 ## Define the `OutputStructure` class
 
@@ -50,11 +53,27 @@ recursive propagation.
         markDirty : ( yesOrNo = yes ) -> @dirty = yesOrNo
 
 A newly constructed instance should be considered dirty (because it probably
-just changed and thus may need to be validated).
+just changed and thus may need to be validated).  It should also record the
+`InputStructure` instance that gave rise to it, if indeed this construction
+happend as part of interpretation.
 
         constructor : ->
             super arguments...
             @markDirty()
+            IS = Structure::subclasses.InputStructure
+            if len = IS::instancesBeingInterpreted?.length
+                @origin = IS::instancesBeingInterpreted[len-1]
+
+Similar to tracking origins for `OutputStructure` nodes, if a connection is
+formed between `OutputStructure` instances, we will want to track its origin
+in the sense of which `InputStructure` was being interpreted when the
+connection was formed.
+
+        addConnectionOrigin : ( source, target, data ) ->
+            IS = Structure::subclasses.InputStructure
+            if ( target instanceof OutputStructure ) and \
+               ( len = IS::instancesBeingInterpreted?.length )
+                data._origin = IS::instancesBeingInterpreted[len-1].id()
 
 ## Feedback
 
