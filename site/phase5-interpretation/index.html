@@ -328,19 +328,23 @@ interpretation.  We rely on the fact that one <code>InputStructure</code> is in 
 <code>scope</code> variable of another (which is not the same as scope in the Input
 Tree) iff it is interpreted after the other.</p>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Have the <code>runInterpretation()</code> method initialize a global variable to
+<li class="task-list-item"><input type="checkbox" disabled checked/> Have the <code>runInterpretation()</code> method initialize a global variable to
    an empty array; it will contain the list of instances whose
    interpretations have begun.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Each step in the <code>recursiveInterpret()</code> process should begin by
+<li class="task-list-item"><input type="checkbox" disabled checked/> Each step in the <code>recursiveInterpret()</code> process should begin by
    adding the <code>InputStructure</code> being interepreted to that global array and
    writing a flag into the <code>InputStructure</code> object itself as well.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> When <code>runInterpretation()</code> calls its callback or quits and restarts
+<li class="task-list-item"><input type="checkbox" disabled checked/> When <code>runInterpretation()</code> calls its callback or quits and restarts
    the modification phase, erase the flags in all <code>InputStructure</code> instances
    in that array, then set the array to empty again.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend <code>markDirty()</code> in the <code>InputStructure</code> class so that if the
+<li class="task-list-item"><input type="checkbox" disabled checked/> Extend <code>markDirty()</code> in the <code>InputStructure</code> class so that if the
    instance has the flag set that indicates that its interpretation has
    begun, we do not obey the request, but instead send a feedback message
    about an internal error and also write the error message to the console.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add unit tests of this feature by creating a few different situations
+   in which such an invalid marking loop might arise, and verifying that the
+   feedback is sent (and the marking-dirty prevented) in each case.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Once the unit tests pass, build everything and commit.</li>
 </ul>
 <p>Another of the policies interpretation must obey is that it should not yield
 an Output Tree in which any one of the <code>OutputStructure</code> nodes has a

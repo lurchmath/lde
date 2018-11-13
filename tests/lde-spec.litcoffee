@@ -1408,9 +1408,9 @@ Is it also automatically triggered by the end of the Modification Phase?
 Repeat the previous test exactly, but this time trigger it with the
 modification phase, to prove that modification leads to interpretation.
 
-            feedbackReceived = null
+            feedbackReceived = [ ]
             LDE.Feedback.addEventListener 'feedback', ( feedbackData ) ->
-                feedbackReceived = feedbackData
+                feedbackReceived.push feedbackData
             LDE.reset()
             LDE.insertStructure ( new InputStructure().attr id : 'isr1' ),
                 'root', 0
@@ -1418,9 +1418,102 @@ modification phase, to prove that modification leads to interpretation.
                 'root', 1
             LDE.insertStructure ( new InputStructure().attr id : 'isr3' ),
                 'root', 2
-            expect( feedbackReceived ).toBeNull()
+            expect( feedbackReceived ).toEqual [ ]
             LDE.runModification ->
-                expect( feedbackReceived ).not.toBeNull()
-                expect( feedbackReceived.subject ).toBe 'root'
-                expect( feedbackReceived.type ).toBe 'updated LDE state'
+                expect( feedbackReceived.length ).toBe 1
+                expect( feedbackReceived[0].subject ).toBe 'root'
+                expect( feedbackReceived[0].type ).toBe 'updated LDE state'
+                done()
+
+## Policing
+
+    describe 'Policing procedures for interpretation', ->
+
+### Preventing infinite interpretation loops
+
+`InputStructure`s can call `markDirty()` only in other `InputStructures`
+whose interpretations have not yet begun.  We verify that here by creating a
+situation that violates it, and ensuring that the incorrect step is not
+obeyed, and the correct feedback is transmitted.
+
+First, let's check that it's OK for an `InputStructure` to mark a *later*
+`InputStructure` dirty, and that doing so actually succeeds.
+
+        it 'should permit marking dirty when doing so is legal', ( done ) ->
+
+Listen for any feedback coming out of the LDE.  We expect to only hear when
+interpretation completes; we expect *not* to hear complaints about illegal
+marking of things as dirty.
+
+            feedbackReceived = [ ]
+            LDE.Feedback.addEventListener 'feedback', ( feedbackData ) ->
+                feedbackReceived.push feedbackData
+
+Make an Input Tree with two children of the root; the first will mark the
+second dirty, then record whether that worked.
+
+            LDE.reset()
+            willMark = new InputStructure().attr id : 'willMark'
+            getsMarked = new InputStructure().attr id : 'getsMarked'
+            markResult = null
+            willMark.interpret = ( accessibles, childResults, scope ) ->
+                getsMarked.markDirty()
+                markResult = getsMarked.isDirty()
+                InputStructure::interpret.apply willMark, arguments
+            LDE.insertStructure willMark, 'root', 0
+            LDE.insertStructure getsMarked, 'root', 1
+            expect( feedbackReceived ).toEqual [ ]
+
+Run modification (and thus then interpretation) and verify that we get just
+one feedback message (that interpretation completed) and also verify that
+it worked to mark the second child dirty during the first child's
+interpretation.
+
+            LDE.runModification ->
+                expect( feedbackReceived.length ).toBe 1
+                expect( feedbackReceived[0].subject ).toBe 'root'
+                expect( feedbackReceived[0].type ).toBe 'updated LDE state'
+                expect( markResult ).toBe yes
+                done()
+
+Next, we check that it's not OK for an `InputStructure` to mark an *earlier*
+`InputStructure` dirty, and that doing so fails with appropriate feedback.
+
+        it 'should prevent marking dirty when it would cause a loop',
+        ( done ) ->
+
+Listen for any feedback coming out of the LDE.  We expect to hear when
+interpretation completes and when the illegal dirty loop is prevented.
+
+            feedbackReceived = [ ]
+            LDE.Feedback.addEventListener 'feedback', ( feedbackData ) ->
+                feedbackReceived.push feedbackData
+
+Setup is exactly as in the previous test, but with the nodes in the other
+order.
+
+            LDE.reset()
+            willMark = new InputStructure().attr id : 'willMark'
+            getsMarked = new InputStructure().attr id : 'getsMarked'
+            markResult = null
+            willMark.interpret = ( accessibles, childResults, scope ) ->
+                getsMarked.markDirty()
+                markResult = getsMarked.isDirty()
+                InputStructure::interpret.apply willMark, arguments
+            LDE.insertStructure getsMarked, 'root', 0
+            LDE.insertStructure willMark, 'root', 1
+            expect( feedbackReceived ).toEqual [ ]
+
+Run modification (and thus then interpretation) and verify that we get two
+feedback messages (that the dirty loop was prevented and that interpretation
+completed) and also verify that it failed when attempting to mark the first
+child dirty during the second child's interpretation.
+
+            LDE.runModification ->
+                expect( feedbackReceived.length ).toBe 2
+                expect( feedbackReceived[0].subject ).toBe 'getsMarked'
+                expect( feedbackReceived[0].type ).toBe 'dirty loop'
+                expect( feedbackReceived[1].subject ).toBe 'root'
+                expect( feedbackReceived[1].type ).toBe 'updated LDE state'
+                expect( markResult ).toBe no
                 done()

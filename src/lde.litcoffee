@@ -314,6 +314,7 @@ For the type of feedback this sends, see
 [the API documentation page for the LDE](https://lurchmath.github.io/lde/site/api-lde/).
 
     functions.runInterpretation = ( callback ) ->
+        InputStructure.clearAlreadyStarted()
         try
             maybeCorrect = InputTree.recursiveInterpret()
             if maybeCorrect not instanceof Array
@@ -335,6 +336,7 @@ For the type of feedback this sends, see
                 subject : 'root'
                 type : 'interpretation error'
                 details : e
+        InputStructure.clearAlreadyStarted()
         callback()
 
 ### Event Listeners

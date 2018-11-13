@@ -166,19 +166,23 @@ interpretation.  We rely on the fact that one `InputStructure` is in the
 `scope` variable of another (which is not the same as scope in the Input
 Tree) iff it is interpreted after the other.
 
- * [ ] Have the `runInterpretation()` method initialize a global variable to
+ * [x] Have the `runInterpretation()` method initialize a global variable to
    an empty array; it will contain the list of instances whose
    interpretations have begun.
- * [ ] Each step in the `recursiveInterpret()` process should begin by
+ * [x] Each step in the `recursiveInterpret()` process should begin by
    adding the `InputStructure` being interepreted to that global array and
    writing a flag into the `InputStructure` object itself as well.
- * [ ] When `runInterpretation()` calls its callback or quits and restarts
+ * [x] When `runInterpretation()` calls its callback or quits and restarts
    the modification phase, erase the flags in all `InputStructure` instances
    in that array, then set the array to empty again.
- * [ ] Extend `markDirty()` in the `InputStructure` class so that if the
+ * [x] Extend `markDirty()` in the `InputStructure` class so that if the
    instance has the flag set that indicates that its interpretation has
    begun, we do not obey the request, but instead send a feedback message
    about an internal error and also write the error message to the console.
+ * [x] Add unit tests of this feature by creating a few different situations
+   in which such an invalid marking loop might arise, and verifying that the
+   feedback is sent (and the marking-dirty prevented) in each case.
+ * [x] Once the unit tests pass, build everything and commit.
 
 Another of the policies interpretation must obey is that it should not yield
 an Output Tree in which any one of the `OutputStructure` nodes has a

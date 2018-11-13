@@ -204,3 +204,7 @@ of data it transmits.)
    Tree, and thus the Output Tree has not been updated.  In this case, the
    `details` member of the feedback object will have a brief, English phrase
    summarizing the problem.
+ * `"dirty loop"` - feedback of this type means that some `InputStructure`
+   tried to mark dirty another `InputStructure` whose interpretation had
+   already begun.  This could lead to an infinite loop of interpretation,
+   and thus it is disallowed, sending this feedback to help in debugging.

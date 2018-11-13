@@ -355,6 +355,10 @@ of data it transmits.)</p>
    Tree, and thus the Output Tree has not been updated.  In this case, the
    <code>details</code> member of the feedback object will have a brief, English phrase
    summarizing the problem.</li>
+<li><code>"dirty loop"</code> - feedback of this type means that some <code>InputStructure</code>
+   tried to mark dirty another <code>InputStructure</code> whose interpretation had
+   already begun.  This could lead to an infinite loop of interpretation,
+   and thus it is disallowed, sending this feedback to help in debugging.</li>
 </ul></div>
         </div>
 

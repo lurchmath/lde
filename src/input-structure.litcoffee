@@ -49,7 +49,15 @@ dirty, because if a child's meaning has changed, that may impact the meaning
 of its parent, and so on up the chain.  If it is marked clean, this does not
 necessarily propagate upwards.
 
+If interpretation for this instance has already begun, then it is illegal to
+mark it dirty (or we might cause an infinite loop of reinterpretations).
+Subclasses should not do this, but in case they do, we police it here by not
+respecting the request, and sending a feedback error.  For information on
+types of feedback, see [the API documentation page for the LDE](https://lurchmath.github.io/lde/site/api-lde/).
+
         markDirty : ( yesOrNo = yes ) ->
+            if yesOrNo and @alreadyStarted
+                return @feedback type : 'dirty loop'
             @dirty = yesOrNo
             if yesOrNo then @parentNode?.markDirty()
 
@@ -60,12 +68,26 @@ LDE's Input Tree (analogous to syntax) into its Output Tree (semantics).
 The functions in this section support that purpose.
 
 We will track which instance we are interpreting with a class variable.  It
-will be a stack, because interpretation is recursive, and will track the
-current nested recursive calls.  This will help us know, from anywhere in
-the LDE, which structures are currently being interpreted.  This will be
-udpated in the `recursiveInterpret()` routine defined further below.
+will be a stack, in case one `interpret()` routine ever calls another
+(although this is not expected).  It will track the current set of running
+`interpret()` calls.  This will help us know, from anywhere in the LDE,
+which structures are currently being interpreted.  This variable is
+maintained by the `recursiveInterpret()` routine defined further below.
 
         instancesBeingInterpreted : [ ]
+
+We will track which instances have started being interpreted with another
+class variable.  This is important for preventing infinite loops in the
+recursive interpretation process, should some instance try to mark as dirty
+another instance whose interpretation has already begun (or even finished).
+This, too, is managed by `recursiveInterpret()`, as well as the function
+defined here.
+
+        instancesAlreadyStarted : [ ]
+        @clearAlreadyStarted : ->
+            for instance in InputStructure::instancesAlreadyStarted
+                delete instance.alreadyStarted
+            InputStructure::instancesAlreadyStarted = [ ]
 
 The `interpret()` function defines how each subclass of `InputStructure`
 produces one or more nodes in the Output Tree.  It returns zero or more
@@ -144,6 +166,8 @@ onto the stack of instances being interpreted right before, and pop it right
 after.
 
             InputStructure::instancesBeingInterpreted.push @
+            InputStructure::instancesAlreadyStarted.push @
+            @alreadyStarted = yes
             result = @interpret accessibles, allChildResults, scope
             InputStructure::instancesBeingInterpreted.pop()
 
