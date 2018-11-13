@@ -368,14 +368,14 @@ case.
                 ( not Structure::connectionIDs.hasOwnProperty data.id ) and\
                 ( source instanceof Structure ) and source.id()? and \
                 ( target instanceof Structure ) and target.id()?
-            source.connectionWillBeInserted? data.id
-            target.connectionWillBeInserted? data.id
+            source.connectionWillBeInserted? source, target, data
+            target.connectionWillBeInserted? source, target, data
             source.setAttribute "_conn #{data.id} data", data
             source.setAttribute "_conn #{data.id} to", target.id()
             target.setAttribute "_conn #{data.id} from", source.id()
             Structure::connectionIDs[data.id] = source
-            source.connectionWasInserted? data.id
-            target.connectionWasInserted? data.id
+            source.connectionWasInserted? source, target, data
+            target.connectionWasInserted? source, target, data
             yes
 
 The convenience function for accessing this from instances should be called
