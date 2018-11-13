@@ -114,28 +114,28 @@ then return result as the result of this function
 
 ## Tracking origins
 
- * [ ] Create a class variable in the `InputStructure` class called
+ * [x] Create a class variable in the `InputStructure` class called
    `instancesBeingInterpreted` that is initialized to the empty array.
- * [ ] Extend the `recursiveInterpret` routine so that, before each call to
+ * [x] Extend the `recursiveInterpret` routine so that, before each call to
    `X.interpret()`, it pushes `X` onto `instanceBeingInterpreted`, then pops
    after `X.interpret()` is complete.
- * [ ] Extend the constructor for `OutputStructure` nodes so that, if the
+ * [x] Extend the constructor for `OutputStructure` nodes so that, if the
    global `InputStructure` class is defined, and its
    `instanceBeingInterpreted` array is non-empty, then its last entry is
    stored within the newly constructed `OutputStructure` in a field called
    `origin`.  Otherwise, `origin` should be undefined (or null, whatever).
- * [ ] Override the `OutputStructure`'s routine for creating connections so
+ * [x] Override the `OutputStructure`'s routine for creating connections so
    that, in addition to forming the connection, it also adds to its JSON
    data an `_origin` key whose value is the unique id in the Input Tree of
    the last entry on the `instanceBeingInterpreted` array, if one exists.
    (If not, leave the `_origin` field undefined.)
- * [ ] Extend the unit tests for the LDE module to verify that Output Trees
+ * [x] Extend the unit tests for the LDE module to verify that Output Trees
    now have, in each of their nodes, the correct origin node from the Input
    Tree that gave rise to that `OutputStructure`.
- * [ ] Add unit tests verifying that the `feedback()` function in
+ * [x] Add unit tests verifying that the `feedback()` function in
    `OutputStructure` instances correctly delegates the work to that
    instance's `origin`.
- * [ ] Once the unit tests pass, build everything and commit.
+ * [x] Once the unit tests pass, build everything and commit.
 
 ## The Interpretation Phase
 
