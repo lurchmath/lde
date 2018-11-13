@@ -302,22 +302,22 @@ then return result as the result of this function
 </ul>
 <h2 id="the-interpretation-phase">The Interpretation Phase</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Implement a <code>runInterpretation()</code> method in the LDE module.  It
+<li class="task-list-item"><input type="checkbox" disabled checked/> Implement a <code>runInterpretation()</code> method in the LDE module.  It
    should just call <code>recursiveInterpret()</code> in the root of the Input Tree,
    store the result in the global Output Tree object, and then call a
    callback.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend that implementation so that it also sends a feedback message
+<li class="task-list-item"><input type="checkbox" disabled checked/> Extend that implementation so that it also sends a feedback message
    when it replaces the Output Tree, indicating that the Input and Output
    Trees have been updated and are ready for exporting, should the client
    wish to query them.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests of the LDE to test this new function.  This
+<li class="task-list-item"><input type="checkbox" disabled checked/> Extend the unit tests of the LDE to test this new function.  This
    should just involve taking some of the existing tests of
    <code>recursiveInterpret()</code> and redoing them to use this new name.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend <code>runModification()</code> so that it no longer calls its own
+<li class="task-list-item"><input type="checkbox" disabled checked/> Extend <code>runModification()</code> so that it no longer calls its own
    callback when complete, but instead calls <code>runInterpretation()</code> and
    passes the callback along to that function.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests to test this feature.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Extend the unit tests to test this feature.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Once the unit tests pass, build everything and commit.</li>
 </ul>
 <h2 id="adding-security">Adding security</h2>
 <p>One of the policies by which interpretation functions must abide is that an

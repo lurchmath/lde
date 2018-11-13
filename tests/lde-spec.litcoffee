@@ -1296,11 +1296,131 @@ And so far we've recorded no calls to `updateConnections()`.
 
 Run the modification process and ensure that we have all the right calls
 recorded, one per `IMRecorder` instance.  Notice that we test in such a way
-that we do not specify an order in which they will have been recorded.
+that we do not specify an order in which they will have been recorded.  The
+way we run this test also indirectly verifies that the LDE does indeed call
+the callback of the `runModification()` routine.
 
             LDE.runModification ->
                 expect( recordedCalls.length ).toBe 3
                 expect( 'r1' in recordedCalls ).toBeTruthy()
                 expect( 'r2' in recordedCalls ).toBeTruthy()
                 expect( 'r3' in recordedCalls ).toBeTruthy()
+                done()
+
+## The Interpretation Phase
+
+In the Interpretation Phase, the LDE runs the `recursiveInterpret()`
+function on the root of the the Input Tree, placing the result in the Output
+Tree.
+
+We test the `recursiveInterpret()` function extensively in [the unit tests
+for the InputStructure module](input-structure-spec.litcoffee), so we do not
+repeat such tests here.  Rather, we just verify that the
+`runInterpretation()` call does indeed trigger the `recursiveInterpret()`
+call, which updates the Output Tree, calls the callback, and sends the
+correct feedback message.
+
+    describe 'The Interpretation Phase', ->
+
+Just verify that the function is exported in the LDE's API.
+
+        it 'should be defined', ->
+            expect( LDE.runInterpretation ).not.toBeUndefined()
+
+Now let's verify that it does its job.
+
+        it 'should call the recursiveInterpret() function on the IT',
+        ( done ) ->
+
+Define a subclass of `InputStructure` that records when its
+`interpret()` member is called.
+
+            recordedCalls = [ ]
+            class ISRecorder2 extends LDE.InputStructure
+                interpret : ( accessibles, childResults, scope ) ->
+                    recordedCalls.push @
+                    super accessibles, childResults, scope
+                className : Structure.addSubclass 'ISRecorder2', ISRecorder2
+
+Install a few instances of that class into the Input Tree.
+
+            LDE.reset()
+            ISR1 = new ISRecorder2().attr id : 'isr1'
+            ISR2 = new ISRecorder2().attr id : 'isr2'
+            ISR3 = new ISRecorder2().attr id : 'isr3'
+            LDE.insertStructure ISR1, 'root', 0
+            LDE.insertStructure ISR2, 'root', 1
+            LDE.insertStructure ISR3, 'root', 2
+
+And so far we've recorded no calls to `interpret()`.
+
+            expect( recordedCalls ).toEqual [ ]
+
+Run the interpretation process and ensure that we have all the right calls
+recorded, one per `ISRecorder2` instance.  Unlike the previous test, here we
+test in such a way that verifies the order in which they will have been
+recorded.  The way we run this test also indirectly verifies that the LDE
+does indeed call the callback of the `runInterpretation()` routine.
+
+            LDE.runInterpretation ->
+                expect( recordedCalls ).toEqual [ ISR1, ISR2, ISR3 ]
+                done()
+
+Does it also send feedback when interpretation completes?
+
+        it 'should send feedback when interpretation completes', ( done ) ->
+
+Install an event handler that will notice when we receive feedback from the
+LDE about interpretation being complete.
+
+            feedbackReceived = null
+            LDE.Feedback.addEventListener 'feedback', ( feedbackData ) ->
+                feedbackReceived = feedbackData
+
+Install a few empty `InputStructure`s into the Input Tree.
+
+            LDE.reset()
+            LDE.insertStructure ( new InputStructure().attr id : 'isr1' ),
+                'root', 0
+            LDE.insertStructure ( new InputStructure().attr id : 'isr2' ),
+                'root', 1
+            LDE.insertStructure ( new InputStructure().attr id : 'isr3' ),
+                'root', 2
+
+And so far we've recorded no feedback.
+
+            expect( feedbackReceived ).toBeNull()
+
+Run the interpretation process and ensure that we get feedback with the
+correct structure.  The way we run this test also indirectly verifies that
+the LDE does indeed call the callback of the `runInterpretation()` routine.
+
+            LDE.runInterpretation ->
+                expect( feedbackReceived ).not.toBeNull()
+                expect( feedbackReceived.subject ).toBe 'root'
+                expect( feedbackReceived.type ).toBe 'updated LDE state'
+                done()
+
+Is it also automatically triggered by the end of the Modification Phase?
+
+        it 'should be triggered at the end of modification', ( done ) ->
+
+Repeat the previous test exactly, but this time trigger it with the
+modification phase, to prove that modification leads to interpretation.
+
+            feedbackReceived = null
+            LDE.Feedback.addEventListener 'feedback', ( feedbackData ) ->
+                feedbackReceived = feedbackData
+            LDE.reset()
+            LDE.insertStructure ( new InputStructure().attr id : 'isr1' ),
+                'root', 0
+            LDE.insertStructure ( new InputStructure().attr id : 'isr2' ),
+                'root', 1
+            LDE.insertStructure ( new InputStructure().attr id : 'isr3' ),
+                'root', 2
+            expect( feedbackReceived ).toBeNull()
+            LDE.runModification ->
+                expect( feedbackReceived ).not.toBeNull()
+                expect( feedbackReceived.subject ).toBe 'root'
+                expect( feedbackReceived.type ).toBe 'updated LDE state'
                 done()

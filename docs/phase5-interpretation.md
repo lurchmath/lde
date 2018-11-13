@@ -139,22 +139,22 @@ then return result as the result of this function
 
 ## The Interpretation Phase
 
- * [ ] Implement a `runInterpretation()` method in the LDE module.  It
+ * [x] Implement a `runInterpretation()` method in the LDE module.  It
    should just call `recursiveInterpret()` in the root of the Input Tree,
    store the result in the global Output Tree object, and then call a
    callback.
- * [ ] Extend that implementation so that it also sends a feedback message
+ * [x] Extend that implementation so that it also sends a feedback message
    when it replaces the Output Tree, indicating that the Input and Output
    Trees have been updated and are ready for exporting, should the client
    wish to query them.
- * [ ] Extend the unit tests of the LDE to test this new function.  This
+ * [x] Extend the unit tests of the LDE to test this new function.  This
    should just involve taking some of the existing tests of
    `recursiveInterpret()` and redoing them to use this new name.
- * [ ] Extend `runModification()` so that it no longer calls its own
+ * [x] Extend `runModification()` so that it no longer calls its own
    callback when complete, but instead calls `runInterpretation()` and
    passes the callback along to that function.
- * [ ] Extend the unit tests to test this feature.
- * [ ] Once the unit tests pass, build everything and commit.
+ * [x] Extend the unit tests to test this feature.
+ * [x] Once the unit tests pass, build everything and commit.
 
 ## Adding security
 

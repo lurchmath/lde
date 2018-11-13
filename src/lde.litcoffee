@@ -286,6 +286,9 @@ satisfied, the function does nothing.
 
 In the Modification Phase, the LDE runs the `updateConnections()` function
 in every `InputModifier` instance in the Input Tree, in no specified order.
+The Modification Phase then hands off work to the Interpretation Phase,
+which always follows immediately after it.
+
 This function is asynchronous, calling a callback when complete.
 
 Although it contains no asynchronous components in its current
@@ -298,6 +301,40 @@ not need to change their use of it.
             node.updateConnections() if node instanceof InputModifier
             updateAllConnections child for child in node.children()
         updateAllConnections InputTree
+        functions.runInterpretation callback
+
+### The Interpretation Phase
+
+In the Interpretation Phase, the LDE runs the `recursiveInterpret()`
+function in the root of the Input Tree, replacing the Output Tree with the
+result.  Like the above function, this one is asynchronous even though its
+current implementation is synchronous.
+
+For the type of feedback this sends, see
+[the API documentation page for the LDE](https://lurchmath.github.io/lde/site/api-lde/).
+
+    functions.runInterpretation = ( callback ) ->
+        try
+            maybeCorrect = InputTree.recursiveInterpret()
+            if maybeCorrect not instanceof Array
+                feedback
+                    subject : 'root'
+                    type : 'interpretation error'
+                    details : 'Interpretation did not produce an array.'
+            else if maybeCorrect[0] not instanceof OutputStructure
+                feedback
+                    subject : 'root'
+                    type : 'interpretation error'
+                    details : 'Interpretation did not produce an
+                        OutputStructure'
+            else
+                OutputTree = maybeCorrect[0]
+                feedback subject : 'root', type : 'updated LDE state'
+        catch e
+            feedback
+                subject : 'root'
+                type : 'interpretation error'
+                details : e
         callback()
 
 ### Event Listeners

@@ -172,7 +172,8 @@ modifies this structure except at the request of the client.</p>
 validated are discussed <a href="../api-phases/">in a separate document</a>.</p>
 <h2 id="manipulating-the-input-tree">Manipulating the Input Tree</h2>
 <p>The Input Tree can be manipulated with seven functions in the public API of
-this module:</p>
+this module.</p>
+<h3 id="functions-for-manipulating-structures">Functions for manipulating <code>Structure</code>s</h3>
 <ul>
 <li><code>insertStructure(structureToInsert,parentID,insertionIndex)</code> inserts a
    new <code>InputStructure</code> within the Input Tree, as follows:<ul>
@@ -231,6 +232,9 @@ this module:</p>
   the attributes without replacing it with any new key-value pair.</li>
 </ul>
 </li>
+</ul>
+<h3 id="functions-for-manipulating-connections">Functions for manipulating connections</h3>
+<ul>
 <li><code>insertConnection(sourceID,targetID,connectionData)</code> inserts a new
    connection between two existing <code>InputStructure</code> instances, as follows:<ul>
 <li><code>sourceID</code> must be the ID of an <code>InputStructure</code> already in the Input
@@ -331,7 +335,27 @@ has been loaded.</p>
    <code>event.payload.subject</code> an <code>InputStructure</code> ID).</li>
 </ul>
 <p>For an example of how this works, see
-<a href="https://github.com/lurchmath/lde/blob/master/tests/lde-spec.litcoffee#feedback">the unit tests regarding feedback in the LDE</a>.</p></div>
+<a href="https://github.com/lurchmath/lde/blob/master/tests/lde-spec.litcoffee#feedback">the unit tests regarding feedback in the LDE</a>.</p>
+<h3 id="types-of-feedback">Types of feedback</h3>
+<p>We will establish conventions about the <code>type</code> attribute of the feedback
+object.  A predefined list of string constants will be permitted as <code>type</code>s,
+each with a meaning specified here, so that various clients and user
+interfaces can decide how best to express these meanings to their users.
+(Sending the short strings given here rather than their detailed meanings
+also makes the LDE ready for localization and more efficient in the amount
+of data it transmits.)</p>
+<ul>
+<li><code>"updated LDE state"</code> - feedback of this type means that the LDE has just
+   finished recomputing the Output Tree from the Input Tree, and these can
+   now be queried using the <code>getInternalState()</code> function of the LDE.
+   (Validation has not necessarily yet begun.)</li>
+<li><code>"interpretation error"</code> - feedback of this type means that an internal
+   error occurred (at the level of the JavaScript implementation of the LDE
+   or one of its <code>Structure</code> subclasses) when trying to interpret the Input
+   Tree, and thus the Output Tree has not been updated.  In this case, the
+   <code>details</code> member of the feedback object will have a brief, English phrase
+   summarizing the problem.</li>
+</ul></div>
         </div>
 
         <footer class="col-md-12">

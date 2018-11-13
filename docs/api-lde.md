@@ -21,7 +21,9 @@ validated are discussed [in a separate document](api-phases.md).
 ## Manipulating the Input Tree
 
 The Input Tree can be manipulated with seven functions in the public API of
-this module:
+this module.
+
+### Functions for manipulating `Structure`s
 
  * `insertStructure(structureToInsert,parentID,insertionIndex)` inserts a
    new `InputStructure` within the Input Tree, as follows:
@@ -74,6 +76,9 @@ this module:
       eventually if non-JSON data is passed.)  Alternately, `value` can be
       `undefined`, which will serve to delete the old key-value pair from
       the attributes without replacing it with any new key-value pair.
+
+### Functions for manipulating connections
+
  * `insertConnection(sourceID,targetID,connectionData)` inserts a new
    connection between two existing `InputStructure` instances, as follows:
     * `sourceID` must be the ID of an `InputStructure` already in the Input
@@ -178,3 +183,24 @@ has been loaded.
 
 For an example of how this works, see
 [the unit tests regarding feedback in the LDE](https://github.com/lurchmath/lde/blob/master/tests/lde-spec.litcoffee#feedback).
+
+### Types of feedback
+
+We will establish conventions about the `type` attribute of the feedback
+object.  A predefined list of string constants will be permitted as `type`s,
+each with a meaning specified here, so that various clients and user
+interfaces can decide how best to express these meanings to their users.
+(Sending the short strings given here rather than their detailed meanings
+also makes the LDE ready for localization and more efficient in the amount
+of data it transmits.)
+
+ * `"updated LDE state"` - feedback of this type means that the LDE has just
+   finished recomputing the Output Tree from the Input Tree, and these can
+   now be queried using the `getInternalState()` function of the LDE.
+   (Validation has not necessarily yet begun.)
+ * `"interpretation error"` - feedback of this type means that an internal
+   error occurred (at the level of the JavaScript implementation of the LDE
+   or one of its `Structure` subclasses) when trying to interpret the Input
+   Tree, and thus the Output Tree has not been updated.  In this case, the
+   `details` member of the feedback object will have a brief, English phrase
+   summarizing the problem.
