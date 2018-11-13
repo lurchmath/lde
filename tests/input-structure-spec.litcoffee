@@ -5,6 +5,7 @@ Here we import the module we're about to test.  We also need to import the
 `OutputStructure` module, in order to test the default interpretation
 function.
 
+    { Structure } = require '../src/structure'
     { InputStructure } = require '../src/input-structure'
     { OutputStructure } = require '../src/output-structure'
 
@@ -194,6 +195,8 @@ test.
                         accessibles : accessibles[...]
                         childResults : childResults[...]
                         scope : scope[...]
+                        stack : \
+                            InputStructure::instancesBeingInterpreted[...]
                     @interpretation = super accessibles, childResults, scope
 
 Now build the hierarchy.
@@ -322,7 +325,7 @@ Was each call passed the correct scope array?
                 .toEqual [ grandchild3 ]
             expect( grandchild3.recorded.scope ).toEqual [ ]
 
-Finally, was each call passed the correct `childResults` array?
+Was each call passed the correct `childResults` array?
 
             expect( tree.recorded.childResults ).toEqual [
                 [ resultTree.children()[0] ]
@@ -343,6 +346,33 @@ Finally, was each call passed the correct `childResults` array?
             expect( grandchild2.recorded.childResults ).toEqual [ ]
             expect( grandchild3.recorded.childResults ).toEqual [ ]
 
+Did each call happen with the correct stack of instances being interpreted?
+
+            expect( tree.recorded.stack ).toEqual [ tree ]
+            expect( child1.recorded.stack ).toEqual [ child1 ]
+            expect( grandchild1.recorded.stack ).toEqual [ grandchild1 ]
+            expect( greatgrandchild1.recorded.stack )
+                .toEqual [ greatgrandchild1 ]
+            expect( greatgrandchild2.recorded.stack )
+                .toEqual [ greatgrandchild2 ]
+            expect( child2.recorded.stack ).toEqual [ child2 ]
+            expect( grandchild2.recorded.stack ).toEqual [ grandchild2 ]
+            expect( grandchild3.recorded.stack ).toEqual [ grandchild3 ]
+
+Were `OutputStructure`s marked with the correct origin properties?
+
+            expect( tree.interpretation[0].origin ).toBe tree
+            expect( child1.interpretation[0].origin ).toBe child1
+            expect( grandchild1.interpretation[0].origin ).toBe grandchild1
+            expect( greatgrandchild1.interpretation[0].origin )
+                .toBe greatgrandchild1
+            expect( greatgrandchild2.interpretation[0].origin )
+                .toBe greatgrandchild2
+            expect( child2.interpretation[0].origin ).toBe child2
+            expect( grandchild2.interpretation[0].origin ).toBe grandchild2
+            expect( grandchild3.interpretation[0].origin ).toBe grandchild3
+            resultTree.untrackIDs()
+
 Now we repeat the previous test, but with a simpler hierarchy, but some of
 the nodes are more complex because they return more than one
 `OutputStructure` as their interpretation.
@@ -361,6 +391,8 @@ testing.
                         accessibles : accessibles[...]
                         childResults : childResults[...]
                         scope : scope[...]
+                        stack : \
+                            InputStructure::instancesBeingInterpreted[...]
                     @interpretation = super accessibles, childResults, scope
                     numToAdd = ( @getAttribute 'howManyToAdd' ) ? 0
                     for counter in [0...numToAdd]
@@ -450,7 +482,7 @@ Was each call passed the correct scope array?
             expect( grandchild1.recorded.scope ).toEqual [ ]
             expect( child2.recorded.scope ).toEqual [ ]
 
-Finally, was each call passed the correct `childResults` array?
+Was each call passed the correct `childResults` array?
 
             expect( tree.recorded.childResults ).toEqual [
                 [
@@ -465,3 +497,165 @@ Finally, was each call passed the correct `childResults` array?
                 .toEqual [ resultTree.children()[0].children() ]
             expect( grandchild1.recorded.childResults ).toEqual [ ]
             expect( child2.recorded.childResults ).toEqual [ ]
+
+Did each call happen with the correct stack of instances being interpreted?
+
+            expect( tree.recorded.stack ).toEqual [ tree ]
+            expect( child1.recorded.stack ).toEqual [ child1 ]
+            expect( grandchild1.recorded.stack ).toEqual [ grandchild1 ]
+            expect( child2.recorded.stack ).toEqual [ child2 ]
+
+Were `OutputStructure`s marked with the correct origin properties?
+
+            expect( tree.interpretation[0].origin ).toBe tree
+            expect( child1.interpretation[0].origin ).toBe child1
+            expect( child1.interpretation[1].origin ).toBe child1
+            expect( child2.interpretation[0].origin ).toBe child2
+            expect( grandchild1.interpretation[0].origin ).toBe grandchild1
+            expect( grandchild1.interpretation[1].origin ).toBe grandchild1
+            expect( grandchild1.interpretation[2].origin ).toBe grandchild1
+            resultTree.untrackIDs()
+
+Now we do a much simpler hierarchy, just to be sure that origins are also
+tracked for connections.  This hierarchy just makes a few nodes and
+connections among them.
+
+        it 'should mark origins of connections as well', ->
+
+The custom interpretation routine here produces as many children as you
+want, and connects them in pairs (one to two, three to four, etc.).
+
+            sequenceOfCalls = [ ]
+            class ISConnector extends InputStructure
+                interpret : ( accessibles, childResults, scope ) ->
+                    sequenceOfCalls.push @
+                    @recorded =
+                        accessibles : accessibles[...]
+                        childResults : childResults[...]
+                        scope : scope[...]
+                        stack : \
+                            InputStructure::instancesBeingInterpreted[...]
+                    @interpretation = new OutputStructure()
+                    numChildren = ( @getAttribute 'numChildren' ) ? 0
+                    for counter in [0...numChildren]
+                        child = new OutputStructure().attr id : counter
+                        child.trackIDs()
+                        @interpretation.insertChild child, counter
+                        if counter % 2
+                            last = @interpretation.children()[counter-1]
+                            curr = @interpretation.children()[counter]
+                            last.connectTo curr, id : "conn#{(counter-1)/2}"
+                    [ @interpretation ]
+
+Now build the hierarchy.
+
+            tree = new InputStructure(
+                child = new ISConnector().attr id : 'child', numChildren : 5
+            ).attr id : 'tree'
+
+Ensure the data we expect to find later is completely empty before the test
+begins.
+
+            expect( sequenceOfCalls ).toEqual [ ]
+            expect( tree.recorded ).toBeUndefined()
+            expect( child.recorded ).toBeUndefined()
+
+Now run the recursive interpretation routine and verify that we get from it
+just one big tree.
+
+            result = tree.recursiveInterpret()
+            expect( result instanceof Array ).toBeTruthy()
+            expect( result.length ).toBe 1
+            resultTree = result[0]
+
+Before we inspect all the recorded data, was the interpreted result the
+correct OutputStructure?  Here we cannot do as earlier tests have done,
+building the expected output tree and comparing, because that would involve
+re-using both structure IDs and connection IDs, which are supposed to be
+globally unique.  So we do a more manual/painstaking test.
+
+            expect( resultTree instanceof OutputStructure ).toBeTruthy()
+            expect( resultTree.children().length ).toBe 1
+            expect( resultTree.getAllConnections() ).toEqual [ ]
+            OTchild = resultTree.children()[0]
+            expect( OTchild instanceof OutputStructure ).toBeTruthy()
+            expect( OTchild.children().length ).toBe 5
+            expect( OTchild.getAllConnections() ).toEqual [ ]
+            OTbaby0 = OTchild.children()[0]
+            OTbaby1 = OTchild.children()[1]
+            OTbaby2 = OTchild.children()[2]
+            OTbaby3 = OTchild.children()[3]
+            OTbaby4 = OTchild.children()[4]
+            expect( OTbaby0 instanceof OutputStructure ).toBeTruthy()
+            expect( OTbaby1 instanceof OutputStructure ).toBeTruthy()
+            expect( OTbaby2 instanceof OutputStructure ).toBeTruthy()
+            expect( OTbaby3 instanceof OutputStructure ).toBeTruthy()
+            expect( OTbaby4 instanceof OutputStructure ).toBeTruthy()
+            expect( OTbaby0.id() ).toBe 0
+            expect( OTbaby1.id() ).toBe 1
+            expect( OTbaby2.id() ).toBe 2
+            expect( OTbaby3.id() ).toBe 3
+            expect( OTbaby4.id() ).toBe 4
+            expect( OTbaby0.getConnectionsOut() ).toEqual [ 'conn0' ]
+            expect( OTbaby1.getConnectionsOut() ).toEqual [ ]
+            expect( OTbaby2.getConnectionsOut() ).toEqual [ 'conn1' ]
+            expect( OTbaby3.getConnectionsOut() ).toEqual [ ]
+            expect( OTbaby4.getConnectionsOut() ).toEqual [ ]
+            expect( OTbaby0.getConnectionsIn() ).toEqual [ ]
+            expect( OTbaby1.getConnectionsIn() ).toEqual [ 'conn0' ]
+            expect( OTbaby2.getConnectionsIn() ).toEqual [ ]
+            expect( OTbaby3.getConnectionsIn() ).toEqual [ 'conn1' ]
+            expect( OTbaby4.getConnectionsIn() ).toEqual [ ]
+
+Were the calls made in the correct order?  Unlike in previous tests, here we
+have only one instance of the subclass that records its calls in
+`sequenceOfCalls`, so here we will verify that `ISConnector` instances
+record their interpretations but plain `InputStructure` instances do not.
+
+            expect( sequenceOfCalls ).toEqual [ child ]
+
+Was each call passed the correct accessibles array?  (Keep in mind that,
+again, nothing was recorded for `tree`.)
+
+            expect( tree.recorded ).toBeUndefined()
+            expect( child.recorded.accessibles ).toEqual [ ]
+
+Was each call passed the correct scope array?
+
+            expect( child.recorded.scope ).toEqual [ ]
+
+Was each call passed the correct `childResults` array?
+
+            expect( child.recorded.childResults ).toEqual [ ]
+
+Did each call happen with the correct stack of instances being interpreted?
+
+            expect( child.recorded.stack ).toEqual [ child ]
+
+Were `OutputStructure`s marked with the correct origin properties?
+
+            expect( resultTree.origin ).toBe tree
+            expect( OTchild.origin ).toBe child
+            expect( OTbaby0.origin ).toBe child
+            expect( OTbaby1.origin ).toBe child
+            expect( OTbaby2.origin ).toBe child
+            expect( OTbaby3.origin ).toBe child
+            expect( OTbaby4.origin ).toBe child
+
+Were connections in the output tree marked with the correct origin
+properties?
+
+            expect( OTbaby0.getConnectionData( 'conn0' )._origin )
+                .toBe child.id()
+            expect( OTbaby2.getConnectionData( 'conn1' )._origin )
+                .toBe child.id()
+
+Do `OutputStructure`s with origins correctly delegate their feedback calls
+to those origins?
+
+            child.feedback = jasmine.createSpy 'childFeedback'
+            expect( child.feedback ).not.toHaveBeenCalled()
+            OTbaby0.feedback example : 'data'
+            expect( child.feedback ).toHaveBeenCalled()
+
+            resultTree.untrackIDs()
