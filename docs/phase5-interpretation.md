@@ -189,15 +189,15 @@ an Output Tree in which any one of the `OutputStructure` nodes has a
 connection to a node outside the Output Tree.  We enforce that policy as
 follows.
 
- * [ ] Add to the end of the `runInterpretation()` function a full traversal
+ * [x] Add to the end of the `runInterpretation()` function a full traversal
    of the newly created Output Tree.  At every subtree, if that node has any
    connections, examine the other side of the connection, and walk up its
    ancestor chain to verify that it is in the Output Tree.  If not, sever
    the connection.
- * [ ] Add unit tests of this feature by creating a few different situations
+ * [x] Add unit tests of this feature by creating a few different situations
    in which such an invalid Output Tree might arise, and verifying that the
    invalid connections (and no others) are removed in each case.
- * [ ] Once the unit tests pass, build everything and commit.
+ * [x] Once the unit tests pass, build everything and commit.
 
 ## Dependency support
 

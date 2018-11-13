@@ -208,3 +208,9 @@ of data it transmits.)
    tried to mark dirty another `InputStructure` whose interpretation had
    already begun.  This could lead to an infinite loop of interpretation,
    and thus it is disallowed, sending this feedback to help in debugging.
+ * `"connection removed"` - feedback of this type means that an illegal
+   connection was formed in the Output Tree by the interpretation procedure,
+   and that connection was severed.  "Illegal" means it connected a node in
+   the Output Tree to some `Structure` not in the Output Tree.  The feedback
+   will also contain an `id` field containing the unique ID of the
+   connection that was severed.

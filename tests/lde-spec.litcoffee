@@ -6,6 +6,7 @@ Here we import the module we're about to test.
     LDE = require '../src/lde.litcoffee'
     Structure = LDE.Structure
     InputStructure = LDE.InputStructure
+    OutputStructure = LDE.OutputStructure
 
 ## LDE members
 
@@ -1471,8 +1472,9 @@ interpretation.
 
             LDE.runModification ->
                 expect( feedbackReceived.length ).toBe 1
-                expect( feedbackReceived[0].subject ).toBe 'root'
-                expect( feedbackReceived[0].type ).toBe 'updated LDE state'
+                expect( feedbackReceived[0] ).toEqual
+                    type : 'updated LDE state'
+                    subject : 'root'
                 expect( markResult ).toBe yes
                 done()
 
@@ -1511,9 +1513,96 @@ child dirty during the second child's interpretation.
 
             LDE.runModification ->
                 expect( feedbackReceived.length ).toBe 2
-                expect( feedbackReceived[0].subject ).toBe 'getsMarked'
-                expect( feedbackReceived[0].type ).toBe 'dirty loop'
-                expect( feedbackReceived[1].subject ).toBe 'root'
-                expect( feedbackReceived[1].type ).toBe 'updated LDE state'
+                expect( feedbackReceived[0] ).toEqual
+                    subject : 'getsMarked'
+                    type : 'dirty loop'
+                expect( feedbackReceived[1] ).toEqual
+                    type : 'updated LDE state'
+                    subject : 'root'
                 expect( markResult ).toBe no
+                done()
+
+Next, we run a test to be sure that the LDE also polices the Output Tree to
+ensure that interpretation does not place into it any connections from one
+of its nodes to or from a `Structure` outside the Output Tree.
+
+        it 'should ensure connection closure of the OT', ( done ) ->
+
+Listen for any feedback coming out of the LDE.  We expect to hear when
+interpretation completes and when the illegal connections are removed.
+
+            feedbackReceived = [ ]
+            LDE.Feedback.addEventListener 'feedback', ( feedbackData ) ->
+                feedbackReceived.push feedbackData
+
+We create an LDE tree that will form four connections, two permissible and
+two illegal.
+
+            LDE.reset()
+            child1 = new InputStructure().attr id : 'child1'
+            child2 = new InputStructure().attr id : 'child2'
+            child3 = new InputStructure().attr id : 'child3'
+            extra1 = new OutputStructure().attr id : 'extra1'
+            extra2 = new OutputStructure().attr id : 'extra2'
+            extra1.trackIDs()
+            extra2.trackIDs()
+            LDE.insertStructure child1, 'root', 0
+            LDE.insertStructure child2, 'root', 1
+            LDE.insertStructure child3, 'root', 2
+            child1.interpret = ( accessibles, childResults, scope ) ->
+                result = InputStructure::interpret.apply child1, arguments
+                result[0].attr id : 'output1'
+                result[0].trackIDs()
+                result[0].connectTo extra1, id : 'illegal-1'
+                result
+            child2.interpret = ( accessibles, childResults, scope ) ->
+                result = InputStructure::interpret.apply child2, arguments
+                result[0].attr id : 'output2'
+                result[0].trackIDs()
+                result[0].connectTo accessibles[0], id : 'legal-1'
+                result
+            child3.interpret = ( accessibles, childResults, scope ) ->
+                result = InputStructure::interpret.apply child3, arguments
+                result[0].attr id : 'output3'
+                result[0].trackIDs()
+                result[0].connectTo extra2, id : 'illegal-2'
+                accessibles[1].connectTo result[0], id : 'legal-2'
+                result
+            expect( feedbackReceived ).toEqual [ ]
+
+This will generate structures with these properties:
+ * The Output Tree root has three children, `output1`, `output2`, `output3`.
+ * Illegal connection: `output1` to `extra1` (called `illegal-1`)
+ * Illegal connection: `output3` to `extra2` (called `illegal-2`)
+ * Legal connection: `output1` to `output2` (called `legal-1`)
+ * Legal connection: `output2` to `output3` (called `legal-2`)
+
+Run modification (and thus then interpretation) and verify that we get three
+feedback messages (that each of the two illegal connections were removed and
+that interpretation completed) and also verify that the legal connections
+remain while the illegal ones were indeed removed.
+
+            LDE.runModification ->
+                expect( feedbackReceived.length ).toBe 3
+                expect( feedbackReceived[0] ).toEqual
+                    type : 'connection removed'
+                    subject : 'child1'
+                    id : 'illegal-1'
+                expect( feedbackReceived[1] ).toEqual
+                    type : 'connection removed'
+                    subject : 'child3'
+                    id : 'illegal-2'
+                expect( feedbackReceived[2] ).toEqual
+                    type : 'updated LDE state'
+                    subject : 'root'
+                expect( output1 = Structure.instanceWithID 'output1' )
+                    .not.toBeUndefined()
+                expect( output2 = Structure.instanceWithID 'output2' )
+                    .not.toBeUndefined()
+                expect( output3 = Structure.instanceWithID 'output3' )
+                    .not.toBeUndefined()
+                expect( output1.getAllConnections() ).toEqual [ 'legal-1' ]
+                expect( output2.getAllConnections() )
+                    .toEqual [ 'legal-1', 'legal-2' ]
+                expect( output3.getAllConnections() ).toEqual [ 'legal-2' ]
                 done()

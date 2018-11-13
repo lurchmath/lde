@@ -119,12 +119,18 @@ Use the `reset()` function to initialize our internal state.
 
 ## Utilities
 
-We create a function for use privately in this module, for verifying that a
-particular structure is a descendant of the Input Tree.
+We create functions for use privately in this module, for verifying that a
+particular structure is a descendant of the Input Tree or the Output Tree,
+respectively.
 
     isInTheInputTree = ( structure ) ->
         while structure instanceof InputStructure
             if structure is InputTree then return yes
+            structure = structure.parent()
+        no
+    isInTheOutputTree = ( structure ) ->
+        while structure instanceof OutputStructure
+            if structure is OutputTree then return yes
             structure = structure.parent()
         no
 
@@ -310,10 +316,37 @@ function in the root of the Input Tree, replacing the Output Tree with the
 result.  Like the above function, this one is asynchronous even though its
 current implementation is synchronous.
 
+After interpretation, this function traverses the Output Tree and ensures
+that every connection into or out of any node in it leads to another node in
+the Output Tree.  (Any connection that leads outside that tree is removed.)
+
 For the type of feedback this sends, see
 [the API documentation page for the LDE](https://lurchmath.github.io/lde/site/api-lde/).
 
     functions.runInterpretation = ( callback ) ->
+
+First, define the function that ensures the Output Tree does not have
+connections that lead outside of itself.  We will use this later if needed.
+
+        removeConnectionsOutside = ( node ) ->
+            for connection in node.getConnectionsIn()
+                if not isInTheOutputTree node.getConnectionSource connection
+                    node.disconnect connection
+                    node.feedback
+                        type : 'connection removed'
+                        id : connection
+            for connection in node.getConnectionsOut()
+                if not isInTheOutputTree node.getConnectionTarget connection
+                    node.disconnect connection
+                    node.feedback
+                        type : 'connection removed'
+                        id : connection
+            removeConnectionsOutside child for child in node.children()
+
+Next, produce the Output Tree, using the above routine and sending feedback
+if and when needed.
+
+        didReplaceOutputTree = no
         InputStructure.clearAlreadyStarted()
         try
             maybeCorrect = InputTree.recursiveInterpret()
@@ -330,6 +363,7 @@ For the type of feedback this sends, see
                         OutputStructure'
             else
                 OutputTree = maybeCorrect[0]
+                removeConnectionsOutside OutputTree
                 feedback subject : 'root', type : 'updated LDE state'
         catch e
             feedback

@@ -351,15 +351,15 @@ an Output Tree in which any one of the <code>OutputStructure</code> nodes has a
 connection to a node outside the Output Tree.  We enforce that policy as
 follows.</p>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Add to the end of the <code>runInterpretation()</code> function a full traversal
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add to the end of the <code>runInterpretation()</code> function a full traversal
    of the newly created Output Tree.  At every subtree, if that node has any
    connections, examine the other side of the connection, and walk up its
    ancestor chain to verify that it is in the Output Tree.  If not, sever
    the connection.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add unit tests of this feature by creating a few different situations
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add unit tests of this feature by creating a few different situations
    in which such an invalid Output Tree might arise, and verifying that the
    invalid connections (and no others) are removed in each case.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Once the unit tests pass, build everything and commit.</li>
 </ul>
 <h2 id="dependency-support">Dependency support</h2>
 <ul class="task-list">
