@@ -315,6 +315,16 @@ the appropriate global data structures; connection IDs are a close kin to
             if @id()? then delete Structure::IDs[@id()]
             if recursive then child.untrackIDs() for child in @children()
 
+We can also ask whether this `Structure` has its ID tracked.  We do not
+merely mean that there is an ID tracked that matches this `Structure`'s ID,
+but also that this `Structure` is the one recorded for that ID.  Thus in
+case there are multiple structures with the same ID (which is not the
+intent, but clients may make a mistake) we can detect which one has been
+officially recorded for the given ID.
+
+        idIsTracked : ->
+            @id()? and ( @ is Structure.instanceWithID @id() )
+
 The following function removes all ID attributes from a structure hierarchy.
 This is useful, for example, after making a deep copy of a structure, so
 that the copied version does not violate the global uniqueness of IDs.
@@ -366,8 +376,9 @@ case.
                 ( data instanceof Object ) and \
                 ( data.hasOwnProperty 'id' ) and \
                 ( not Structure::connectionIDs.hasOwnProperty data.id ) and\
-                ( source instanceof Structure ) and source.id()? and \
-                ( target instanceof Structure ) and target.id()?
+                ( source instanceof Structure ) and \
+                ( target instanceof Structure ) and \
+                source.idIsTracked() and target.idIsTracked()
             source.connectionWillBeInserted? source, target, data
             target.connectionWillBeInserted? source, target, data
             source.setAttribute "_conn #{data.id} data", data
