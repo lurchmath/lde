@@ -113,10 +113,6 @@ For the first child, the same list of accessibles for the parent applies to
 that child, so we don't need to modify `accessibles`.  As the `scope`, we
 pass the list of all subsequent siblings, in order.
 
-                # console.log 'about to recur in',
-                #     ( x.id() for x in children ),
-                #     'from index', index, 'with scope',
-                #     ( x.id() for x in children[index+1...] )
                 childResult = child.recursiveInterpret accessibles,
                     children[index+1...]
                 allChildResults.push childResult
