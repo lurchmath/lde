@@ -95,6 +95,25 @@ base implementation is as follows.
 
         hasLabel : ( label ) -> no
 
+We can look back through a list of all the `OutputStructure`s accessible to
+a given one, seeking the first one that admits to having a given label, by
+use of the `hasLabel()` function on each accessible structure.  We implement
+that generically with the following class method, then make a shortcut for
+use by instances below.  Here we assume that the accessibles array is given
+in the order in which the nodes appear in the tree
+(`Structure.isEarlierThan()`).
+
+        @lookupIn : ( label, accessibles ) ->
+            for candidate in accessibles[...].reverse()
+                return candidate if candidate.hasLabel label
+            null
+
+When an instance asks to look up the nearest accessible thing with a given
+label, what it means is among those things accessible to that instance.
+
+        lookup : ( label ) ->
+            @firstAccessible ( candidate ) -> candidate.hasLabel label
+
 Now if this is being used in a Node.js context, export the class we defined.
 
     if exports? then exports.OutputStructure = OutputStructure
