@@ -175,7 +175,26 @@ embed data in the expressions.  In order for the expressions to make those
 requests correctly, the modifiers need to decide in the modification phase
 which expressions they should target.</p>
 <h2 id="interpretation">Interpretation</h2>
-<p>This phase is not yet implemented nor documented.</p>
+<p>The interpretatin phase follows immediately after the modification phase;
+indeed, the modification phase terminates by passing control directly to the
+interpretation phase.</p>
+<p>In this phase, the contents of the Input Tree (which can be thought of as a
+generalized kind of syntax, representing anything the user wrote in the
+client and the client passed on to the LDE) are <em>interpreted</em> into the
+Output Tree (which can be thought of as the usable mathematical meaning of
+the user's content).  Thus this phase is like a compiler in computer
+science, or an interpretation function in model theory; it maps syntax to
+(actionable) semantics.</p>
+<p>It is implemented in the <code>runInterpretation()</code> method of the LDE's API,
+documented <a href="https://github.com/lurchmath/lde/blob/master/src/lde.litcoffee#the-modification-phase">here</a>.</p>
+<p>That function runs <code>recursiveInterpret()</code> on the root of the Input Tree, a
+function implemented in <a href="https://github.com/lurchmath/lde/blob/master/src/input-structure.litcoffee">the InputStructure class</a>.
+That function recursively traverses the Input Tree, runs the <code>interpret()</code>
+function at each node, and assembles their results into the new Output Tree.</p>
+<p>Some types of policing are done to ensure that <code>recursiveInterpret()</code> and
+<code>interpret()</code> behave as they ought to, even if they are redefined in
+subclasses not yet written.  For more information, see the errors that may
+be generated as feedback, <a href="../api-lde/#types-of-feedback">documented here</a>.</p>
 <h2 id="validation">Validation</h2>
 <p>This phase is not yet implemented nor documented.</p></div>
         </div>

@@ -153,6 +153,7 @@
             <li><a href="#purpose">Purpose</a></li>
             <li><a href="#the-inputstructure-class">The InputStructure class</a></li>
             <li><a href="#the-inputexpression-class">The InputExpression class</a></li>
+            <li><a href="#the-dependency-class">The Dependency class</a></li>
             <li><a href="#the-inputmodifier-class">The InputModifier class</a></li>
             <li><a href="#the-basicinputmodifier-class">The BasicInputModifier class</a></li>
     </ul>
@@ -225,6 +226,19 @@ first.)</p>
    collisions or overwriting of data in expressions.  See the documentation
    in <a href="https://github.com/lurchmath/lde/blob/master/src/input-structure.litcoffee#convenience-functions-for-inputmodifiers">the relevant section of the source code</a>.</li>
 </ul>
+<h2 id="the-dependency-class">The <code>Dependency</code> class</h2>
+<p>The client may permit the user to write a document that begins by importing
+the meaning expressed in some other, saved document.  We call that other,
+saved document a "dependency" of the first.  To support this, we permit the
+embedding into the Input Tree of the first document the meaning already
+stored in the Output Tree of the dependency.  Interpretation can then just
+copy that information over to the Output Tree as if it had been there all
+along (which is the intent of importing a dependency in the first place).</p>
+<p>This class supports that by permitting the user to contsruct a <code>Dependency</code>
+in the Input Tree, passing it the list of <code>OutputStructure</code> instances that
+have been loaded from the Output Tree of the dependency document it
+represents.  Whenever it is interpreted, it just passes those same values
+along into the Output Tree.</p>
 <h2 id="the-inputmodifier-class">The <code>InputModifier</code> class</h2>
 <p>An <code>InputModifier</code> is the type of <code>InputStructure</code> that will modify
 <code>InputExpression</code>s, and thus impact how they are interpreted.  It does not
@@ -236,6 +250,7 @@ the interpretation of zero or more <code>InputExpression</code>s.</p>
    children to an <code>InputModifier</code> instance.</li>
 <li>Default (noop) implementations of <code>updateConnections()</code> and
    <code>updateDataIn()</code> that subclasses can override.</li>
+<li>An implementation of <code>interpret()</code> that always returns an empty array.</li>
 </ul>
 <p>The most common way to use this class will probably be to instead use the
 following simple subclass.</p>

@@ -81,6 +81,22 @@ first.)
    collisions or overwriting of data in expressions.  See the documentation
    in [the relevant section of the source code](https://github.com/lurchmath/lde/blob/master/src/input-structure.litcoffee#convenience-functions-for-inputmodifiers).
 
+## The `Dependency` class
+
+The client may permit the user to write a document that begins by importing
+the meaning expressed in some other, saved document.  We call that other,
+saved document a "dependency" of the first.  To support this, we permit the
+embedding into the Input Tree of the first document the meaning already
+stored in the Output Tree of the dependency.  Interpretation can then just
+copy that information over to the Output Tree as if it had been there all
+along (which is the intent of importing a dependency in the first place).
+
+This class supports that by permitting the user to contsruct a `Dependency`
+in the Input Tree, passing it the list of `OutputStructure` instances that
+have been loaded from the Output Tree of the dependency document it
+represents.  Whenever it is interpreted, it just passes those same values
+along into the Output Tree.
+
 ## The `InputModifier` class
 
 An `InputModifier` is the type of `InputStructure` that will modify
@@ -94,6 +110,7 @@ To support that, they have this functionality:
    children to an `InputModifier` instance.
  * Default (noop) implementations of `updateConnections()` and
    `updateDataIn()` that subclasses can override.
+ * An implementation of `interpret()` that always returns an empty array.
 
 The most common way to use this class will probably be to instead use the
 following simple subclass.
