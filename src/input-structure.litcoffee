@@ -68,14 +68,17 @@ conventions for assigning labels to `OutputStructure`s.  We place it here so
 that it is available to all subclasses of `InputStructure` as follows:
 
 The default implementation of `recursiveInterpret()` calls this function
-whenever an `InputStructure` returns its interpretation from its
-`interpret()` routine.  Thus subclasses of `InputStructure` do not even need
-to consider this function; it is called automatically on their behalf.
-Subclasses that do not wish to use it simply ensure that they do not use the
-attributes that it reads from (or redefine this routine or
-`recursiveInterpret()`).
+whenever an `InputStructure` has just computed its interpretation from its
+`interpret()` routine.  It should add labels to all the `OutputStructure`
+instances in its own `lastInterpretation` array.
 
-        addLabelsTo : ( targets ) ->
+Thus subclasses of `InputStructure` do not even need to consider this
+function; it is called automatically on their behalf. Subclasses that do not
+wish to use it simply ensure that they do not use the attributes that it
+reads from (or redefine this routine or `recursiveInterpret()`).
+
+        addLabels : ->
+            targets = @lastInterpretation
 
 First convention:  If this `InputStructure` has an attribute with key
 `"label targets"` then it is treated as an array of integers, and we only
@@ -98,6 +101,89 @@ expression.  Any flags in the `"label regex flags"` attribute apply.
                     target.hasLabel = ( label ) -> regex.test label
 
 Other conventions may be added here in the future.
+
+### Citations
+
+We provide the following convenience function that embodies a few
+conventions for copying citations to `OutputStructure`s.  We place it here
+so that it is available to all subclasses of `InputStructure` in the same
+manner that `addLabelsTo()` is, in the previous section.
+
+        copyCitations : ->
+            targets = @lastInterpretation
+
+First convention:  The value of the "premise citations" attribute should be
+a list of labels of the premises being cited.  If it is an array, it will be
+treated as an array of strings.  If it is not an array, it will be converted
+to a string and treated as a one-element array containing that string.  Such
+citations are copied directly into attributes of the target
+`OutputStructure`s.
+
+            if ( citations = @getAttribute 'premise citations' )?
+                citations = [ citations ] if citations not instanceof Array
+                for target in targets
+                    target.setAttribute 'premise citations',
+                        ( "#{citation}" for citation in citations )
+
+Second convention:  The "reason citations" behaves the same way
+
+            if ( citations = @getAttribute 'reason citations' )?
+                citations = [ citations ] if citations not instanceof Array
+                for target in targets
+                    target.setAttribute 'reason citations',
+                        ( "#{citation}" for citation in citations )
+
+Third convention:  Connections in or out whose type is "premise citation"
+should be copied over to the analogous nodes in the Output Tree.  Here we
+use the `citationSources()` and `citationTargets()` functions to ask which
+elements of our `lastInterpretation` should be the sources/targets of any
+citation connections.  These functions default to saying "everything," but
+can be overridden by subclasses as needed.
+
+            for connection in @getAllConnections()
+                data = @getConnectionData connection
+                if data.type in [ 'premise citation', 'reason citation' ]
+                    source = @getConnectionSource connection
+                    target = @getConnectionTarget connection
+
+We only form connections if both ends of the connection have run their
+interpretation routines, because it doesn't make sense to connect to
+elements to `lastInterpretation`s that are about to be replaced:
+
+                    if not source.alreadyStarted or \
+                       not target.alreadyStarted then continue
+                    counter = 0
+                    for s in source.citationSources connection
+                        for t in target.citationTargets connection
+                            copy = JSON.parse JSON.stringify data
+                            copy.id = "#{data.id}.#{counter++}"
+                            s.connectTo t, copy
+
+And here are the default implementations for `citationSources()` and
+`citationTargets()`.
+
+        citationSources : ( connection ) -> @lastInterpretation
+        citationTargets : ( connection ) -> @lastInterpretation
+
+Other conventions may be added here in the future.
+
+### Automatic ID assignment
+
+It is convenient for unique IDs of `OutputStructure`s in the Output Tree to
+correlate with the unique IDs of their originating nodes in the Input Tree.
+To that end, we provide the following function, which `recursiveInterpret()`
+always calls.  It can be used (and, by default, is) to assign unique IDs to
+the nodes in the Output Tree based on the unique ID of the structure whose
+interpretation created them.
+
+By the convention established here, an `InputStructure` with ID x that
+produced five `OutputStructures` would assign them IDs x.0, x.1, ..., x.4.
+
+Subclasses who do not wish this to happen can replace this method.
+
+        assignCorrespondingIDs : ->
+            for target, index in @lastInterpretation
+                target.attr id : "#{@id()}.#{index}" if not target.id()?
 
 ### Interpretation
 
@@ -169,7 +255,6 @@ the same meanings as documented above for the `interpret()` routine.  No
 do the recursion that produces the recursive results from children.
 
         recursiveInterpret : ( accessibles = [ ], scope = [ ] ) ->
-            # console.log 'recursiveInterpret for', @id()
             originalAccessiblesLength = accessibles.length
             allChildResults = [ ]
 
@@ -206,17 +291,25 @@ after.
             InputStructure::instancesBeingInterpreted.push @
             InputStructure::instancesAlreadyStarted.push @
             @alreadyStarted = yes
-            result = @interpret accessibles, allChildResults, scope
-            @addLabelsTo result
-            InputStructure::instancesBeingInterpreted.pop()
+            @lastInterpretation =
+                @interpret accessibles, allChildResults, scope
 
 As we build the tree, we need to track the IDs used in it, so that nodes
 that wish to form connections among descendants can do so.  Thus we must
-begin tracking IDs as soon as new nodes are formed.  We do so here.
+begin tracking IDs as soon as new nodes are formed.  We do so here, first
+assigning default IDs to any `OutputStructure` that doesn't have them.
 
-            structure.trackIDs() for structure in result
+            @assignCorrespondingIDs()
+            structure.trackIDs() for structure in @lastInterpretation
+
+We had to do that before labels and citations, in case any of those
+involves making connections.
+
+            @addLabels()
+            @copyCitations()
+            InputStructure::instancesBeingInterpreted.pop()
             @markDirty no
-            result
+            @lastInterpretation
 
 ### Feedback
 

@@ -185,6 +185,40 @@ that is a job for `recursiveInterpret()`, below.
             expect( result[0].hasOwnProperty 'hasLabel' ).toBeFalsy()
             expect( result[0].hasLabel ).toBe OutputStructure::hasLabel
 
+Verify that citations are not copied to the outputs of `interpret()`,
+because that is a job for `recursiveInterpret()`, below.
+
+        it 'does not copy citations to its outputs', ->
+            IS1 = new InputStructure().attr
+                id : 1
+                'premise citations' : [ 'foo', 'bar' ]
+                'reason citations' : 'some rule'
+            IS2 = new InputStructure().attr id : 2
+            IS1.trackIDs()
+            IS2.trackIDs()
+            IS2.connectTo IS1, id : 'C1', type : 'premise citation'
+            IS1.connectTo IS2, id : 'C2', type : 'reason citation'
+            result1 = IS1.interpret [ ], [ ], [ ]
+            result2 = IS2.interpret [ ], [ ], [ ]
+            expect( result1 instanceof Array ).toBeTruthy()
+            expect( result2 instanceof Array ).toBeTruthy()
+            expect( result1.length ).toBe 1
+            expect( result2.length ).toBe 1
+            expect( result1[0] instanceof OutputStructure ).toBeTruthy()
+            expect( result2[0] instanceof OutputStructure ).toBeTruthy()
+            expect( result1[0].getAttribute 'premise citations' )
+                .toBeUndefined()
+            expect( result1[0].getAttribute 'reason citations' )
+                .toBeUndefined()
+            expect( result2[0].getAttribute 'premise citations' )
+                .toBeUndefined()
+            expect( result2[0].getAttribute 'reason citations' )
+                .toBeUndefined()
+            expect( result1[0].getAllConnections() ).toEqual [ ]
+            expect( result2[0].getAllConnections() ).toEqual [ ]
+            IS1.untrackIDs()
+            IS2.untrackIDs()
+
 We now turn to tests of recursive interpretation, the framework that places
 calls to `interpret()` in individual nodes.
 
@@ -200,7 +234,7 @@ fact.
 
 This subclass records the sequence of calls and the arguments passed to
 them.  We will then make a hierarchy of such instances in order to run our
-test.
+test.  It also avoids assigning IDs to its outputs, to keep things simple.
 
             sequenceOfCalls = [ ]
             class ISRecorder extends InputStructure
@@ -213,6 +247,7 @@ test.
                         stack : \
                             InputStructure::instancesBeingInterpreted[...]
                     @interpretation = super accessibles, childResults, scope
+                assignCorrespondingIDs : ->
 
 Now build the hierarchy.
 
@@ -396,7 +431,8 @@ the nodes are more complex because they return more than one
 
 Set things up just like in the last test, but with a custom interpretation
 routine that adds one or more bonus `OutputStructure` nodes, just for
-testing.
+testing.  It also avoids assigning IDs to its outputs, to keep things
+simple.
 
             sequenceOfCalls = [ ]
             class ISMultiplier extends InputStructure
@@ -414,6 +450,7 @@ testing.
                         @interpretation.push \
                             new OutputStructure().attr idx : counter
                     @interpretation
+                assignCorrespondingIDs : ->
 
 Now build the hierarchy.
 
@@ -676,7 +713,7 @@ to those origins?
             resultTree.untrackIDs()
 
 Verify that labels are assigned to the outputs of `recursiveInterpret()`,
-because it should call `addLabelsTo()` as part of its work.
+because it should call `addLabels()` as part of its work.
 
         it 'also adds labels to its outputs', ->
             IS = new InputStructure().attr
@@ -693,3 +730,48 @@ because it should call `addLabelsTo()` as part of its work.
             expect( result[0].hasLabel 'Modus Ponens' ).toBeTruthy()
             expect( result[0].hasLabel 'modusponens' ).toBeFalsy()
             expect( result[0].hasLabel ' modus ponens' ).toBeFalsy()
+
+Verify that citations are copied to the outputs of `recursiveInterpret()`,
+because it should call `copyCitations()` as part of its work.
+
+        it 'also copies citations to its outputs', ->
+            tree = new InputStructure(
+                IS1 = new InputStructure().attr
+                    id : 1
+                    'premise citations' : [ 'foo', 'bar' ]
+                    'reason citations' : 'some rule'
+                IS2 = new InputStructure().attr id : 2
+            ).attr id : 'tree'
+            tree.trackIDs()
+            IS2.connectTo IS1, id : 'C1', type : 'premise citation'
+            IS1.connectTo IS2, id : 'C2', type : 'reason citation'
+            Otree = tree.recursiveInterpret()
+            expect( Otree instanceof Array ).toBeTruthy()
+            expect( Otree.length ).toBe 1
+            expect( Otree[0] instanceof OutputStructure ).toBeTruthy()
+            expect( Otree[0].children().length ).toBe 2
+            [ child1, child2 ] = Otree[0].children()
+            expect( child1.getAttribute 'premise citations' )
+                .toEqual [ 'foo', 'bar' ]
+            expect( child1.getAttribute 'reason citations' )
+                .toEqual [ 'some rule' ]
+            expect( child2.getAttribute 'premise citations' )
+                .toBeUndefined()
+            expect( child2.getAttribute 'reason citations' ).toBeUndefined()
+            expect( child1.getConnectionsIn() ).toEqual [ 'C1.0' ]
+            expect( child2.getConnectionsOut() ).toEqual [ 'C1.0' ]
+            expect( child1.getConnectionSource 'C1.0' ).toBe child2
+            expect( child1.getConnectionTarget 'C1.0' ).toBe child1
+            expect( child1.getConnectionData 'C1.0' ).toEqual
+                id : 'C1.0'
+                type : 'premise citation'
+                _origin : 2 # the latter node always makes the connection
+            expect( child1.getConnectionsOut() ).toEqual [ 'C2.0' ]
+            expect( child2.getConnectionsIn() ).toEqual [ 'C2.0' ]
+            expect( child1.getConnectionSource 'C2.0' ).toBe child1
+            expect( child1.getConnectionTarget 'C2.0' ).toBe child2
+            expect( child1.getConnectionData 'C2.0' ).toEqual
+                id : 'C2.0'
+                type : 'reason citation'
+                _origin : 2 # the latter node always makes the connection
+            tree.untrackIDs()
