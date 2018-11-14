@@ -362,6 +362,12 @@ redefine the `insertChild()` routine to do nothing.
         constructor : -> super()
         insertChild : ->
 
+Another unique characteristic of modifiers is that they have no
+interpretation in the Output Tree.  Thus we define the interpretation here
+for all modifiers to be the empty array of results.
+
+        interpret : ( accessibles, childResults, scope ) -> [ ]
+
 ### Modifier-specific functionality
 
 The LDE guarantees that, before it interprets the Input Tree into the Output

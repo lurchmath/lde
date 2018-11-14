@@ -102,6 +102,15 @@ not appear to do anything.
             expect( -> myIM.updateDataIn target ).not.toThrow()
             expect( myIM.updateDataIn target ).toBeUndefined()
 
+Verify that modifiers have no interpretation (that is, they return an empty
+list of `OutputStructure`s as their interpretation in all cases).
+
+        it 'should have an empty interpretation', ->
+            myIM = new InputModifier()
+            expect( myIM.interpret [ ], [ ], [ ] ).toEqual [ ]
+            myIM2 = new InputModifier().attr id : 2
+            expect( myIM2.interpret [ ], [ ], [ ] ).toEqual [ ]
+
 ## The `BasicInputModifier` subclass
 
 This subclass is simple enough that it doesn't need its own test file.
@@ -159,3 +168,12 @@ Does a version with many arguments call all of the appropriate functions?
             expect( IE.getCameFromModifier 'x' ).toBeTruthy()
             expect( IE.getCameFromModifier 'L' ).toBeTruthy()
             expect( IE.getCameFromModifier 'S' ).toBeTruthy()
+
+Verify that this class, too, has no interpretation (that is, they return an
+empty list of `OutputStructure`s as their interpretation in all cases).
+
+        it 'should have an empty interpretation', ->
+            myIM = new BasicInputModifier 'x', 'y', 'z', 'w'
+            expect( myIM.interpret [ ], [ ], [ ] ).toEqual [ ]
+            myIM2 = new BasicInputModifier()
+            expect( myIM2.interpret [ ], [ ], [ ] ).toEqual [ ]
