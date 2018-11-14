@@ -201,6 +201,57 @@ containing the feedback you wish to send, and it will add <code>X.id()</code> as
 transmit <code>Y</code> to the client.</p>
 <p>This transmission takes different forms depending on the client.  See the
 <a href="../api-lde/#receiving-feedback">relevant section in the LDE API documentation</a>.</p>
+<h3 id="creating-default-ids">Creating Default IDs</h3>
+<p>Debugging and testing the Input and Output Trees is simplified if the IDs of
+<code>OutputStructure</code>s in the Output Tree somehow correlate with the IDs of
+their originating nodes in the Input Tree. It is also convenient if
+<code>OutputStructure</code>s have default IDs assigned, without each subclass of
+<code>InputStructure</code> having to specify how it assigns those IDs.</p>
+<p>The <code>assignCorrespondingIDs</code> function is called by <code>recursiveInterpret()</code> to
+do just that.  An <code>InputStructure</code> with ID x would have the
+<code>OutputStructures</code> in its interpretation automatically given IDs x.0, x.1,
+x.2, and so on.</p>
+<p>Clients do not need to call this function.  But subclasses that want to
+remove or change its behavior can override it.</p>
+<h3 id="labels">Labels</h3>
+<p>Each <code>OutputStructure</code> can be labeled as documented
+<a href="api-output-structure.md#labels">here</a>. Interpretation can attach labels by
+assigning a <code>hasLabel()</code> function into any <code>OutputStructure</code> it creates.
+Since this is very common and yet a bit annoying to code, we establish a few
+conventions that are respected by the built-in <code>InputStructure</code> function
+<code>addLabels()</code>, which is called by the default implementation of
+<code>recursiveInterpret()</code>.  They are:</p>
+<ul>
+<li>If an <code>InputStructure</code> <code>X</code> has an attribute with key <code>"label regex"</code> then
+   any <code>OutputStructure</code> in <code>X.lastInterpretation</code> will be assigned a
+   <code>hasLabel()</code> function that checks its argument against the value of that
+   attribute, after converting it to a <code>RegExp</code> object.</li>
+<li>If an <code>InputStructure</code> <code>X</code> has an attribute with key
+   <code>"label regex flags"</code> then that attribute's value will be used in the
+   construction of the <code>RegExp</code> mentioned above, as its flags.</li>
+<li>If an <code>InputStructure</code> has an attribute with key <code>"label targets"</code> with
+   value <code>[i_1,i_2,...,i_N]</code> then only the interpretation outputs whose
+   indices are <code>i_1</code> or <code>i_2</code> or ... or <code>i_N</code> are labeled.</li>
+</ul>
+<h3 id="citations">Citations</h3>
+<p>Similar to the previous section, we have some default conventions for
+copying citations from the Input Tree to the Output Tree during
+interpretation.  These conventions are implemented in a function called
+<code>copyCitations()</code> (the analogue of <code>addLabels()</code>), but any subclass that
+does not like these defaults can override that method to change them.</p>
+<ul>
+<li>If an <code>InputStructure</code> has a <code>"premise citations"</code> or
+   <code>"reason citations"</code> attribute then the value should be a list of
+   strings, labels of the premises being cited.  (Or it can be a single
+   string, which will be treated as a one-element array.)  Such an
+   attribute is copied directly into the <code>OutputStructure</code>s that are the
+   interpretation.  (Both attributes are permitted, or one, or none.)</li>
+<li>If an <code>InputStructure</code> has a connection coming in or going out, and the
+   connection's data has <code>type</code> equal to <code>"premise citation"</code> or
+   <code>"reason citation"</code>, then that connection should somehow be transferred
+   to the Output Tree.  This comes with a few fiddly details that are
+   documented in <a href="https://github.com/lurchmath/lde/blob/master/src/input-structure.litcoffee#citations">the comments on the source code</a>.</li>
+</ul>
 <h2 id="the-inputexpression-class">The <code>InputExpression</code> class</h2>
 <p>An <code>InputExpression</code> is the type of <code>InputStructure</code> that the LDE will
 interpret into meaningful content in its Output Tree.  This is the first of

@@ -194,7 +194,20 @@ provide an instance method called <code>feedback()</code>.  You can call
 containing the feedback you wish to send, and it will delegate the work to
 the <code>InputStructure</code> stored in <code>X.origin</code>, or do nothing if there is no such
 object.  See <a href="../api-input-structures/#feedback">the API documentation for Input Structures</a>
-for further details on what that means.</p></div>
+for further details on what that means.</p>
+<h3 id="labels">Labels</h3>
+<p><code>OutputStructure</code>s can have labels.  To make this as general as possible, we
+implement it by giving each such structure a <code>hasLabel(string)</code> function
+that returns true or false, whether the structure has <code>string</code> as a label.
+This lets us write label-checking functions that take into account whatever
+freedom (or lack thereof) we choose, such as whether whitespace,
+punctuation, case, etc. are relevant.</p>
+<p>From any given <code>OutputStructure</code> <code>S</code>, you can call <code>S.lookup(label)</code> and it
+will find the closest accessible structure in the Output Tree with that
+<code>label</code>.  To do the lookup in some other list, call
+<code>OutputStructure.lookup(label,accessibles)</code>; in that situation, it is
+presumed that the list should be searched in reverse, as if reading
+backwards up through a document.</p></div>
         </div>
 
         <footer class="col-md-12">

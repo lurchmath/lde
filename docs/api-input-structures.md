@@ -53,6 +53,63 @@ transmit `Y` to the client.
 This transmission takes different forms depending on the client.  See the
 [relevant section in the LDE API documentation](api-lde.md#receiving-feedback).
 
+### Creating Default IDs
+
+Debugging and testing the Input and Output Trees is simplified if the IDs of
+`OutputStructure`s in the Output Tree somehow correlate with the IDs of
+their originating nodes in the Input Tree. It is also convenient if
+`OutputStructure`s have default IDs assigned, without each subclass of
+`InputStructure` having to specify how it assigns those IDs.
+
+The `assignCorrespondingIDs` function is called by `recursiveInterpret()` to
+do just that.  An `InputStructure` with ID x would have the
+`OutputStructures` in its interpretation automatically given IDs x.0, x.1,
+x.2, and so on.
+
+Clients do not need to call this function.  But subclasses that want to
+remove or change its behavior can override it.
+
+### Labels
+
+Each `OutputStructure` can be labeled as documented
+[here](api-output-structure.md#labels). Interpretation can attach labels by
+assigning a `hasLabel()` function into any `OutputStructure` it creates.
+Since this is very common and yet a bit annoying to code, we establish a few
+conventions that are respected by the built-in `InputStructure` function
+`addLabels()`, which is called by the default implementation of
+`recursiveInterpret()`.  They are:
+
+ * If an `InputStructure` `X` has an attribute with key `"label regex"` then
+   any `OutputStructure` in `X.lastInterpretation` will be assigned a
+   `hasLabel()` function that checks its argument against the value of that
+   attribute, after converting it to a `RegExp` object.
+ * If an `InputStructure` `X` has an attribute with key
+   `"label regex flags"` then that attribute's value will be used in the
+   construction of the `RegExp` mentioned above, as its flags.
+ * If an `InputStructure` has an attribute with key `"label targets"` with
+   value `[i_1,i_2,...,i_N]` then only the interpretation outputs whose
+   indices are `i_1` or `i_2` or ... or `i_N` are labeled.
+
+### Citations
+
+Similar to the previous section, we have some default conventions for
+copying citations from the Input Tree to the Output Tree during
+interpretation.  These conventions are implemented in a function called
+`copyCitations()` (the analogue of `addLabels()`), but any subclass that
+does not like these defaults can override that method to change them.
+
+ * If an `InputStructure` has a `"premise citations"` or
+   `"reason citations"` attribute then the value should be a list of
+   strings, labels of the premises being cited.  (Or it can be a single
+   string, which will be treated as a one-element array.)  Such an
+   attribute is copied directly into the `OutputStructure`s that are the
+   interpretation.  (Both attributes are permitted, or one, or none.)
+ * If an `InputStructure` has a connection coming in or going out, and the
+   connection's data has `type` equal to `"premise citation"` or
+   `"reason citation"`, then that connection should somehow be transferred
+   to the Output Tree.  This comes with a few fiddly details that are
+   documented in [the comments on the source code](https://github.com/lurchmath/lde/blob/master/src/input-structure.litcoffee#citations).
+
 ## The `InputExpression` class
 
 An `InputExpression` is the type of `InputStructure` that the LDE will

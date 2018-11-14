@@ -105,9 +105,9 @@ This has not been implemented.  See the tasks below.
 
 ## API Documentation
 
- * [ ] Extend the `OutputStructure` page of the API Documentation to include
+ * [x] Extend the `OutputStructure` page of the API Documentation to include
    all the work done in this phase.
- * [ ] Rebuild docs and commit.
+ * [x] Rebuild docs and commit.
 
 ## Efficiency improvements
 

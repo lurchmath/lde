@@ -48,3 +48,19 @@ containing the feedback you wish to send, and it will delegate the work to
 the `InputStructure` stored in `X.origin`, or do nothing if there is no such
 object.  See [the API documentation for Input Structures](api-input-structures.md#feedback)
 for further details on what that means.
+
+### Labels
+
+`OutputStructure`s can have labels.  To make this as general as possible, we
+implement it by giving each such structure a `hasLabel(string)` function
+that returns true or false, whether the structure has `string` as a label.
+This lets us write label-checking functions that take into account whatever
+freedom (or lack thereof) we choose, such as whether whitespace,
+punctuation, case, etc. are relevant.
+
+From any given `OutputStructure` `S`, you can call `S.lookup(label)` and it
+will find the closest accessible structure in the Output Tree with that
+`label`.  To do the lookup in some other list, call
+`OutputStructure.lookup(label,accessibles)`; in that situation, it is
+presumed that the list should be searched in reverse, as if reading
+backwards up through a document.
