@@ -201,30 +201,30 @@ follows.
 
 ## Dependency support
 
- * [ ] Create a subclass of `InputExpression`, in the `InputStructure`
+ * [x] Create a subclass of `InputExpression`, in the `InputStructure`
    module, called `Dependency`.  It takes an array of `OutputStructure`
    instances at construction time, and stores them.  It provides a getter
    for that same array, which can be overridden in subclasses to filter the
    array in cases where it would be helpful to do so.
- * [ ] Make its `interpret()` routine simply call the getter, not even
+ * [x] Make its `interpret()` routine simply call the getter, not even
    bothering to make copies of the results; return the original array it was
    given at construction time.
- * [ ] Add documentation explaining what it is and does.
- * [ ] Ensure that the `Dependency` subclass registers itself with the
+ * [x] Add documentation explaining what it is and does.
+ * [x] Ensure that the `Dependency` subclass registers itself with the
    serialization code, as
    [the documentation here](https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names)
    describes.  (That is, use a line like
    `className : Structure.addSubclass 'Dependency', Dependency` in the
    `Dependency` class code.)
- * [ ] Create a new unit test file for `Dependency` instances that not only
+ * [x] Create a new unit test file for `Dependency` instances that not only
    ensures that the symbol `Dependency` is defined at the global scope and
    that its instances are also instances of the `InputStructure` class, but
    also that the `interpret()` routine behaves as intended, including in the
    context of recursive interpretation of the entire Input Tree.
- * [ ] Add documentation for that unit test file, following the pattern
+ * [x] Add documentation for that unit test file, following the pattern
    established in the documentation of other unit test files in this
    repository.
- * [ ] Once the unit tests pass, build everything and commit.
+ * [x] Once the unit tests pass, build everything and commit.
 
 ## API Documentation
 

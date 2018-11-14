@@ -4,8 +4,9 @@
 Here we import the module we're about to test.  `InputExpression`s are
 defined in the same module as `InputStructure`s.
 
-    { InputStructure, InputExpression, InputModifier } = \
+    { InputStructure, InputExpression, InputModifier, Dependency } = \
         require '../src/input-structure'
+    { OutputStructure } = require '../src/output-structure'
 
 This file does not test every component of that module.  It tests the
 `InputExpression` class, and other classes defined in the same module are
@@ -418,3 +419,61 @@ they are a set, and thus only two matter.
             expect( IE.getAttribute 'A' ).toEqual [ 'B', 'C' ]
             expect( IE.getCameFromModifier 'A' ).toBeTruthy()
             context.untrackIDs()
+
+## Dependency subclass
+
+The `Dependency` subclass of `InputExpression` takes a list of
+`OutputStructure` instances as its arguments and can yield them if asked by
+calling the appropriate getter or asking the instance to interpret itself.
+
+    describe 'The Dependency subclass of InputExpression', ->
+
+First verify that it is defined.
+
+        it 'should be defined', ->
+            expect( Dependency ).not.toBeUndefined()
+
+Next verify that you can construct instances of it, and that doing so keeps
+only the `OutputStructure` instances passed to the constructor, discarding
+everything else.
+
+        it 'should accept only OutputStructures as arguments', ->
+
+Make some example `OutputStructure`s and some things that aren't.
+
+            OS1 = new OutputStructure().attr id : 1
+            OS2 = new OutputStructure().attr id : 2
+            OS3 = new OutputStructure(
+                new OutputStructure()
+                new OutputStructure()
+            ).attr id : 3
+            nonOS1 = 5
+            nonOS2 = 'FIVE'
+            nonOS3 = { five : [ 5, 5, 5, 5, 5 ] }
+            nonOS4 = /11111/
+
+Use them in various ways in the constructor.
+
+            dep1 = new Dependency OS1, OS2, OS3
+            expect( dep1 instanceof Dependency ).toBeTruthy()
+            expect( dep1.getContents() ).toEqual [ OS1, OS2, OS3 ]
+            dep2 = new Dependency OS1, nonOS1, OS2, nonOS2
+            expect( dep2 instanceof Dependency ).toBeTruthy()
+            expect( dep2.getContents() ).toEqual [ OS1, OS2 ]
+            dep3 = new Dependency nonOS3, OS3, nonOS4
+            expect( dep3 instanceof Dependency ).toBeTruthy()
+            expect( dep3.getContents() ).toEqual [ OS3 ]
+            dep4 = new Dependency nonOS1, nonOS2, nonOS3, nonOS4
+            expect( dep4 instanceof Dependency ).toBeTruthy()
+            expect( dep4.getContents() ).toEqual [ ]
+            dep5 = new Dependency()
+            expect( dep5 instanceof Dependency ).toBeTruthy()
+            expect( dep5.getContents() ).toEqual [ ]
+
+Ensure that interpreting them yields the exact same results.
+
+            expect( dep1.interpret [ ], [ ], [ ] ).toEqual [ OS1, OS2, OS3 ]
+            expect( dep2.interpret [ ], [ ], [ ] ).toEqual [ OS1, OS2 ]
+            expect( dep3.interpret [ ], [ ], [ ] ).toEqual [ OS3 ]
+            expect( dep4.interpret [ ], [ ], [ ] ).toEqual [ ]
+            expect( dep5.interpret [ ], [ ], [ ] ).toEqual [ ]

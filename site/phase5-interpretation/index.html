@@ -363,30 +363,30 @@ follows.</p>
 </ul>
 <h2 id="dependency-support">Dependency support</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Create a subclass of <code>InputExpression</code>, in the <code>InputStructure</code>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Create a subclass of <code>InputExpression</code>, in the <code>InputStructure</code>
    module, called <code>Dependency</code>.  It takes an array of <code>OutputStructure</code>
    instances at construction time, and stores them.  It provides a getter
    for that same array, which can be overridden in subclasses to filter the
    array in cases where it would be helpful to do so.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Make its <code>interpret()</code> routine simply call the getter, not even
+<li class="task-list-item"><input type="checkbox" disabled checked/> Make its <code>interpret()</code> routine simply call the getter, not even
    bothering to make copies of the results; return the original array it was
    given at construction time.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation explaining what it is and does.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Ensure that the <code>Dependency</code> subclass registers itself with the
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation explaining what it is and does.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Ensure that the <code>Dependency</code> subclass registers itself with the
    serialization code, as
    <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
    describes.  (That is, use a line like
    <code>className : Structure.addSubclass 'Dependency', Dependency</code> in the
    <code>Dependency</code> class code.)</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Create a new unit test file for <code>Dependency</code> instances that not only
+<li class="task-list-item"><input type="checkbox" disabled checked/> Create a new unit test file for <code>Dependency</code> instances that not only
    ensures that the symbol <code>Dependency</code> is defined at the global scope and
    that its instances are also instances of the <code>InputStructure</code> class, but
    also that the <code>interpret()</code> routine behaves as intended, including in the
    context of recursive interpretation of the entire Input Tree.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation for that unit test file, following the pattern
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation for that unit test file, following the pattern
    established in the documentation of other unit test files in this
    repository.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Once the unit tests pass, build everything and commit.</li>
 </ul>
 <h2 id="api-documentation">API Documentation</h2>
 <ul class="task-list">

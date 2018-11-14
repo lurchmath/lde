@@ -301,6 +301,44 @@ course, duplicates are not added twice).
                 return if asString is JSON.stringify otherElement
             @setAttribute key, setSoFar.concat [ element ]
 
+## Define `Dependency` as a type of `InputExpression`
+
+This class implements a foundational type of `InputExpression`, one that is
+given a list of `OutputExpression` instances loaded from a dependency file
+and whose `interpret()` routine places those instances directly into the
+output tree.  It is used at the start of a document to represent all the
+data imported from other documents on which that one depends (its
+"dependencies").
+
+Its constructor takes a list of `OutputExpression` instances and its
+`getContents()` member returns that same list.  That getter is used in the
+`interpret()` routine.
+
+    class Dependency extends InputExpression
+
+The constructor stores the meaning loaded from dependency documents, which
+must be a list of `OutputStructure` instances.  Any other arguments are
+ignored.
+
+        constructor : ->
+            super()
+            @dependencyContents = \
+                ( a for a in arguments when a instanceof OutputStructure )
+
+The following method is just a getter for the data given to the constructor.
+
+        getContents : -> @dependencyContents
+
+Interpretation simply yields that list of contents.
+
+        interpret : ( accessibles, childResults, scope ) -> @getContents()
+
+In order for a hierarchy of structures to be able to be serialized and
+deserialized, we need to track the class of each structure in the hierarchy.
+We do so for this class with the following line of code.
+
+        className : Structure.addSubclass 'Dependency', Dependency
+
 ## Define `InputModifier`s as a type of `InputStructure`
 
 As documented in the previous section, `InputModifier`s are the subclass of
@@ -384,3 +422,4 @@ Now if this is being used in a Node.js context, export the class we defined.
         exports.InputExpression = InputExpression
         exports.InputModifier = InputModifier
         exports.BasicInputModifier = BasicInputModifier
+        exports.Dependency = Dependency
