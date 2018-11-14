@@ -178,9 +178,9 @@ established and implemented.</p>
 <p>This has not been implemented.  See the tasks below.</p>
 <h2 id="labeling-outputstructure-instances">Labeling <code>OutputStructure</code> instances</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Create in the <code>OutputStructure</code> base class a function called
+<li class="task-list-item"><input type="checkbox" disabled checked/> Create in the <code>OutputStructure</code> base class a function called
    <code>hasLabel(str)</code> that returns false always.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Create a function <code>addLabel(targets)</code> in the <code>InputStructure</code> class.
+<li class="task-list-item"><input type="checkbox" disabled checked/> Create a function <code>addLabel(targets)</code> in the <code>InputStructure</code> class.
    It should accept an array of <code>OutputStructure</code> instances, and should loop
    through all of them, obeying the following conventions.<ul>
 <li>If the <code>InputStructure</code> has an attribute with key "label regex", then
@@ -194,16 +194,16 @@ established and implemented.</p>
   targets whose indices are on the $V$, when $V$ is treated as an array.</li>
 </ul>
 </li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that file describing the changes just made.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests for the <code>InputStructure</code> module to include some
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation in that file describing the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Extend the unit tests for the <code>InputStructure</code> module to include some
    calls to this routine, passing it various example parameters and
    verifying that it does its job as specified.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend <code>recursiveInterpret()</code> so that it calls this function in an
+<li class="task-list-item"><input type="checkbox" disabled checked/> Extend <code>recursiveInterpret()</code> so that it calls this function in an
    <code>InputStructure</code> as soon as it has completed <code>interpret()</code> on that
    structure, passing in the set of interpretation results.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests to ensure that this is now a part of the
+<li class="task-list-item"><input type="checkbox" disabled checked/> Extend the unit tests to ensure that this is now a part of the
    Interpretation Phase.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Once the unit tests pass, build everything and commit.</li>
 </ul>
 <h2 id="citations">Citations</h2>
 <ul class="task-list">

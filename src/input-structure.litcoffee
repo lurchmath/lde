@@ -61,6 +61,44 @@ types of feedback, see [the API documentation page for the LDE](https://lurchmat
             @dirty = yesOrNo
             if yesOrNo then @parentNode?.markDirty()
 
+### Labels
+
+We provide the following convenience function that embodies a few
+conventions for assigning labels to `OutputStructure`s.  We place it here so
+that it is available to all subclasses of `InputStructure` as follows:
+
+The default implementation of `recursiveInterpret()` calls this function
+whenever an `InputStructure` returns its interpretation from its
+`interpret()` routine.  Thus subclasses of `InputStructure` do not even need
+to consider this function; it is called automatically on their behalf.
+Subclasses that do not wish to use it simply ensure that they do not use the
+attributes that it reads from (or redefine this routine or
+`recursiveInterpret()`).
+
+        addLabelsTo : ( targets ) ->
+
+First convention:  If this `InputStructure` has an attribute with key
+`"label targets"` then it is treated as an array of integers, and we only
+label those targets whose indices in the array passed as parameter are on
+that list.
+
+            if ( indices = @getAttribute 'label targets' )? and \
+               ( indices instanceof Array )
+                targets = ( t for t,index in targets when index in indices )
+
+Second convention:  If this `InputStructure` has an attribute with key
+`"label regex"` then its value is converted into a regular expression object
+and the target `OutputStructure`s will test labels against that regular
+expression.  Any flags in the `"label regex flags"` attribute apply.
+
+            if ( regex = @getAttribute 'label regex' )?
+                flags = ( @getAttribute 'label regex flags' ) ? ''
+                regex = new RegExp regex, flags
+                for target in targets
+                    target.hasLabel = ( label ) -> regex.test label
+
+Other conventions may be added here in the future.
+
 ### Interpretation
 
 The main purpose of `InputStructure`s is to be interpretable, converting the
@@ -169,6 +207,7 @@ after.
             InputStructure::instancesAlreadyStarted.push @
             @alreadyStarted = yes
             result = @interpret accessibles, allChildResults, scope
+            @addLabelsTo result
             InputStructure::instancesBeingInterpreted.pop()
 
 As we build the tree, we need to track the IDs used in it, so that nodes

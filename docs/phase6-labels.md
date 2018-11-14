@@ -24,9 +24,9 @@ This has not been implemented.  See the tasks below.
 
 ## Labeling `OutputStructure` instances
 
- * [ ] Create in the `OutputStructure` base class a function called
+ * [x] Create in the `OutputStructure` base class a function called
    `hasLabel(str)` that returns false always.
- * [ ] Create a function `addLabel(targets)` in the `InputStructure` class.
+ * [x] Create a function `addLabel(targets)` in the `InputStructure` class.
    It should accept an array of `OutputStructure` instances, and should loop
    through all of them, obeying the following conventions.
     * If the `InputStructure` has an attribute with key "label regex", then
@@ -38,16 +38,16 @@ This has not been implemented.  See the tasks below.
     * If the `InputStructure` has an attribute with key "label targets",
       then call its value $V$ and apply the above techniques to only those
       targets whose indices are on the $V$, when $V$ is treated as an array.
- * [ ] Add documentation in that file describing the changes just made.
- * [ ] Extend the unit tests for the `InputStructure` module to include some
+ * [x] Add documentation in that file describing the changes just made.
+ * [x] Extend the unit tests for the `InputStructure` module to include some
    calls to this routine, passing it various example parameters and
    verifying that it does its job as specified.
- * [ ] Extend `recursiveInterpret()` so that it calls this function in an
+ * [x] Extend `recursiveInterpret()` so that it calls this function in an
    `InputStructure` as soon as it has completed `interpret()` on that
    structure, passing in the set of interpretation results.
- * [ ] Extend the unit tests to ensure that this is now a part of the
+ * [x] Extend the unit tests to ensure that this is now a part of the
    Interpretation Phase.
- * [ ] Once the unit tests pass, build everything and commit.
+ * [x] Once the unit tests pass, build everything and commit.
 
 ## Citations
 

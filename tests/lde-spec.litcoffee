@@ -806,7 +806,7 @@ connection is replaced with a different node?
 But are connections transferred instead of severed if we ask for that
 explicitly?
 
-        it 'should automatically sever connections when replacing nodes', ->
+        it 'should transfer connections instead of severing, if asked', ->
             A = new InputStructure().attr id : 'A'
             expect(
                 -> LDE.insertStructure A.toJSON(), 'root', 0

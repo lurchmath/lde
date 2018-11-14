@@ -84,6 +84,17 @@ work further, but that is not our concern here.)
 
         feedback : ( feedbackData ) -> @origin?.feedback feedbackData
 
+## Labels
+
+`OutputStructure`s can be labeled.  This is implemented by a function that
+takes a string as input and returns true or false, whether the structure has
+that label.  This permits a lot of freedom in how we match labels to
+structures, including case sensitivity, punctuation sensitivity, multiple
+labels, and so on.  By default, however, everything is unlabeled, so the
+base implementation is as follows.
+
+        hasLabel : ( label ) -> no
+
 Now if this is being used in a Node.js context, export the class we defined.
 
     if exports? then exports.OutputStructure = OutputStructure

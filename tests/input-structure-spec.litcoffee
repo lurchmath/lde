@@ -170,6 +170,21 @@ out of them.
             expect( OS3.parentNode ).toBe result[0]
             expect( OS4.parentNode ).toBe OS3
 
+Verify that labels are not assigned to the outputs of `interpret()`, because
+that is a job for `recursiveInterpret()`, below.
+
+        it 'does not add labels to its outputs', ->
+            IS = new InputStructure().attr
+                'label regex' : '^modus ponens$'
+                'label regex flags' : 'i'
+            result = IS.interpret [ ], [ ], [ ]
+            expect( result instanceof Array ).toBeTruthy()
+            expect( result.length ).toBe 1
+            expect( result[0] instanceof OutputStructure ).toBeTruthy()
+            expect( result[0].children() ).toEqual [ ]
+            expect( result[0].hasOwnProperty 'hasLabel' ).toBeFalsy()
+            expect( result[0].hasLabel ).toBe OutputStructure::hasLabel
+
 We now turn to tests of recursive interpretation, the framework that places
 calls to `interpret()` in individual nodes.
 
@@ -659,3 +674,22 @@ to those origins?
             expect( child.feedback ).toHaveBeenCalled()
 
             resultTree.untrackIDs()
+
+Verify that labels are assigned to the outputs of `recursiveInterpret()`,
+because it should call `addLabelsTo()` as part of its work.
+
+        it 'also adds labels to its outputs', ->
+            IS = new InputStructure().attr
+                'label regex' : '^modus ponens$'
+                'label regex flags' : 'i'
+            result = IS.recursiveInterpret()
+            expect( result instanceof Array ).toBeTruthy()
+            expect( result.length ).toBe 1
+            expect( result[0] instanceof OutputStructure ).toBeTruthy()
+            expect( result[0].children() ).toEqual [ ]
+            expect( result[0].hasOwnProperty 'hasLabel' ).toBeTruthy()
+            expect( result[0].hasLabel ).not.toBe OutputStructure::hasLabel
+            expect( result[0].hasLabel 'modus ponens' ).toBeTruthy()
+            expect( result[0].hasLabel 'Modus Ponens' ).toBeTruthy()
+            expect( result[0].hasLabel 'modusponens' ).toBeFalsy()
+            expect( result[0].hasLabel ' modus ponens' ).toBeFalsy()
