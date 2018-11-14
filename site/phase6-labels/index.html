@@ -152,10 +152,6 @@
             <li><a href="#content">Content</a></li>
             <li><a href="#goal">Goal</a></li>
             <li><a href="#status">Status</a></li>
-            <li><a href="#labeling-outputstructure-instances">Labeling OutputStructure instances</a></li>
-            <li><a href="#lookup">Lookup</a></li>
-            <li><a href="#citations">Citations</a></li>
-            <li><a href="#api-documentation">API Documentation</a></li>
             <li><a href="#efficiency-improvements">Efficiency improvements</a></li>
     </ul>
 </div></div>
@@ -175,109 +171,13 @@ labeled.</p>
 attached to them, and we will have a convention for citing labels
 established and implemented.</p>
 <h2 id="status">Status</h2>
-<p>This has not been implemented.  See the tasks below.</p>
-<h2 id="labeling-outputstructure-instances">Labeling <code>OutputStructure</code> instances</h2>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create in the <code>OutputStructure</code> base class a function called
-   <code>hasLabel(str)</code> that returns false always.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create a function <code>addLabel(targets)</code> in the <code>InputStructure</code> class.
-   It should accept an array of <code>OutputStructure</code> instances, and should loop
-   through all of them, obeying the following conventions.<ul>
-<li>If the <code>InputStructure</code> has an attribute with key "label regex", then
-  place into the <code>OutputStructure</code>s a <code>hasLabel(str)</code> function that
-  tests the given string against the given regular expression.</li>
-<li>If the <code>InputStructure</code> has an attribute with key "label regex flags",
-  then apply those to the regular expression object you create in the
-  previous item.</li>
-<li>If the <code>InputStructure</code> has an attribute with key "label targets",
-  then call its value $V$ and apply the above techniques to only those
-  targets whose indices are on the $V$, when $V$ is treated as an array.</li>
-</ul>
-</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation in that file describing the changes just made.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Extend the unit tests for the <code>InputStructure</code> module to include some
-   calls to this routine, passing it various example parameters and
-   verifying that it does its job as specified.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Extend <code>recursiveInterpret()</code> so that it calls this function in an
-   <code>InputStructure</code> as soon as it has completed <code>interpret()</code> on that
-   structure, passing in the set of interpretation results.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Extend the unit tests to ensure that this is now a part of the
-   Interpretation Phase.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Once the unit tests pass, build everything and commit.</li>
-</ul>
-<h2 id="lookup">Lookup</h2>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create a class method <code>lookup(string,accessibles)</code> in the
-   <code>OutputStructure</code> class, which loops backwards through the list of
-   <code>accessibles</code>, trying to find one that <code>hasLabel()</code> the given <code>string</code>.
-   It returns the latest one found, or null if there is none.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create an instance method <code>lookup(string)</code> in the <code>OutputStructure</code>
-   class, which loops backwards through the list of structures accessible to
-   the one on which it was called, trying to find one that <code>hasLabel()</code> the
-   given <code>string</code>.  It returns the first one encountered, or null if there
-   is none.</li>
-</ul>
-<h2 id="citations">Citations</h2>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create a stub function <code>copyCitations(targets)</code> in the
-   <code>InputStructure</code> base class, but at first it should do nothing.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Establish a convention for use in the Input Tree for citing reasons
-   and premises and document that convention above the stub function just
-   created.  Possibilities include the following.<ul>
-<li>An attribute with key "premise citations" indicates that its value is
-  a list of premise citations by label (that should be looked up with
-  the labels feature described above).  If its value is an array, it
-  will be treated as an array of strings.  If its value is not an array,
-  it will be converted to a string and treated as a one-element array
-  containing that string.</li>
-<li>An attribute with key "reason citations" behaves the same way, but
-  with obviously different semantics.</li>
-<li>A connection of type "premise citation" indicates that the source
-  wants to cite the target as a premise.</li>
-<li>A connection of type "reason citation" behaves the same way, but with
-  obviously different semantics.</li>
-</ul>
-</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Implement the <code>copyCitations(targets)</code> function to copy all of the
-   data indicated by those document conventions from the <code>InputStructure</code> in
-   which it's called into all of the given targets, which will be an array
-   of <code>OutputStructure</code> instances just created from the given
-   <code>InputStructure</code>.<ul>
-<li>Note that <code>X.copyCitations(targets)</code> should copy all citations that go
-  to <em>or come from</em> nodes <code>Y</code> that are before (or equal to) <code>X</code> in the
-  Input Tree.</li>
-<li>It can make the connections in the Output Tree by looking up the last
-  interpretation of such nodes <code>Y</code>.</li>
-<li>If <code>X</code> has connections to or from nodes that appear after <code>X</code> in the
-  tree, then those nodes will create the connections later, when
-  recursive interpretation visits them.</li>
-</ul>
-</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Extend <code>recursiveInterpret()</code> so that it calls this function in an
-   <code>InputStructure</code> as soon as it has completed <code>interpret()</code> on that
-   structure, passing in the set of interpretation results.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Extend the unit tests to ensure that this is now a part of the
-   Interpretation Phase.  Be sure to test connections that go both
-   directions (forward and backward) in the Input Tree and ensure that they
-   are both correctly copied to the Output Tree.  Ensure that no connection
-   is copied redundantly.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Once the unit tests pass, build everything and commit.</li>
-</ul>
-<h2 id="api-documentation">API Documentation</h2>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled checked/> Extend the <code>OutputStructure</code> page of the API Documentation to include
-   all the work done in this phase.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Rebuild docs and commit.</li>
-</ul>
+<p>All essential work on this phase is complete.  What remains is optional
+efficiency improvements, documented in the following section.  These were
+not implemented at first because it is not clear that they are necessary,
+and it would be a waste of development time for no clear benefit.  But if
+later performance bottlenecks arise that could be solved by any of the ideas
+expressed below, the plans are written here for execution.</p>
 <h2 id="efficiency-improvements">Efficiency improvements</h2>
-<p>This section lists a potential efficiency improvement related to all the
-code written during this phase of development.  Because it is only an
-efficiency improvement (and thus not required to make the code work
-correctly), it can be deferred until later in the project.  It is not
-sensible to invest development time on an efficiency improvement if we do
-not even yet know whether its lack will be perceived.  If we notice any
-performance bottlenecks that this improvement could fix, we can return to it
-later and follow the steps below to implement it.</p>
 <ul class="task-list">
 <li class="task-list-item"><input type="checkbox" disabled/> Extend the <code>Dependency</code> subclass of IS so that it marks all of its
    interpretation results with an attribute, flagging them as having come
