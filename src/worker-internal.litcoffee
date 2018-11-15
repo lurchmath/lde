@@ -92,3 +92,4 @@ we initialize at the end of this file.  You can also uninstall data.
 Initialize the global data store used by the "install data" handler:
 
     self.globalData = { }
+    self.postMessage type : 'loaded'

@@ -22,7 +22,7 @@ This has not been implemented.  See the tasks below.
 
 ## Making background threads easy to use
 
- * [ ] Create a worker script that enables us to create instances of
+ * [x] Create a worker script that enables us to create instances of
    `WebWorker`s who are able to respond to a variety of functions for
    installing various routines and data in the workers, including:
     * [x] `worker.installScript(filename)`
@@ -30,12 +30,12 @@ This has not been implemented.  See the tasks below.
     * [x] `worker.installData(key,value)`
     * [x] `worker.uninstallData(key)`
     * [x] `worker.run(code,callback)`
-    * [ ] `worker.reboot(callback)` (which calls `terminate()` in the
+    * [x] `worker.reboot(callback)` (which calls `terminate()` in the
       internal `WebWorker` instance, then discards it and replaces it with
       a new one)
- * [ ] Create a new unit testing file for these advanced `WebWorker`s,
+ * [x] Create a new unit testing file for these advanced `WebWorker`s,
    documenting it in the same style as the rest of the test suite.
- * [ ] Once it is robust and all tests pass, commit the changes.
+ * [x] Once it is robust and all tests pass, commit the changes.
  * [ ] Create a global variable in the LDE that holds a pool of these
    workers, with a function that lets you specify the size of the pool.
    It should initialize itself, by default, to the number of threads the

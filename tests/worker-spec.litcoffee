@@ -35,63 +35,67 @@ the script was available for importing, and failure if it was not.
 Try a very simple computation first.
 
         it 'should work for basic arithmetic', ( done ) ->
-            ( new LDEWorker() ).run 'Math.pow(5,2)', ( response ) ->
-                expect( response.success ).toBe yes
-                expect( response.error ).toBeUndefined()
-                expect( response.result ).toBe 25
-                done()
+            W = new LDEWorker ->
+                W.run 'Math.pow(5,2)', ( response ) ->
+                    expect( response.success ).toBe yes
+                    expect( response.error ).toBeUndefined()
+                    expect( response.result ).toBe 25
+                    done()
 
 Try something that involves defining and calling a function.
 
         it 'should work for code containing some functions', ( done ) ->
-            ( new LDEWorker() ).run '''
-                function henry ( j ) {
-                    return j + ' --HENRY-- ' + j;
-                }
-                function prod () {
-                    var result = 1;
-                    for ( var i = 0 ; i < arguments.length ; i++ )
-                        result *= arguments[i];
-                    return result;
-                }
-                henry( prod( 2, 3, 5, 7 ) );
-            ''', ( response ) ->
-                expect( response.success ).toBe yes
-                expect( response.error ).toBeUndefined()
-                expect( response.result ).toBe '210 --HENRY-- 210'
-                done()
+            W = new LDEWorker ->
+                W.run '''
+                    function henry ( j ) {
+                        return j + ' --HENRY-- ' + j;
+                    }
+                    function prod () {
+                        var result = 1;
+                        for ( var i = 0 ; i < arguments.length ; i++ )
+                            result *= arguments[i];
+                        return result;
+                    }
+                    henry( prod( 2, 3, 5, 7 ) );
+                ''', ( response ) ->
+                    expect( response.success ).toBe yes
+                    expect( response.error ).toBeUndefined()
+                    expect( response.result ).toBe '210 --HENRY-- 210'
+                    done()
 
 Try something that causes an error and be sure it's reported.
 
         it 'should work for code with errors (reporting them)', ( done ) ->
-            ( new LDEWorker() ).run 'thisIsDefinitelyNotDefined',
-            ( response ) ->
-                expect( response.success ).toBeUndefined()
-                expect( response.result ).toBeUndefined()
-                expect( response.error ).not.toBeUndefined()
-                expect( response.error ).toMatch \
-                    /thisIsDefinitelyNotDefined/
-                done()
+            W = new LDEWorker ->
+                W.run 'thisIsDefinitelyNotDefined', ( response ) ->
+                    expect( response.success ).toBeUndefined()
+                    expect( response.result ).toBeUndefined()
+                    expect( response.error ).not.toBeUndefined()
+                    expect( response.error ).toMatch \
+                        /thisIsDefinitelyNotDefined/
+                    done()
 
 Try the variant of `run` that accepts a function instead of a code string.
 
         it 'should work when we hand it a function, too', ( done ) ->
-            ( new LDEWorker() ).run ->
-                recursiveSum = ( thing ) ->
-                    if typeof thing is 'number'
-                        thing
-                    else if thing instanceof Array
-                        total = 0
-                        total += recursiveSum subthing for subthing in thing
-                        total
-                    else
-                        0
-                recursiveSum [ 1, [ 2 ], [ [ 3, ':)', 4 ], 5 ], 6 ]
-            , ( response ) ->
-                expect( response.success ).toBe yes
-                expect( response.error ).toBeUndefined()
-                expect( response.result ).toBe 21
-                done()
+            W = new LDEWorker ->
+                W.run ->
+                    recursiveSum = ( thing ) ->
+                        if typeof thing is 'number'
+                            thing
+                        else if thing instanceof Array
+                            total = 0
+                            for subthing in thing
+                                total += recursiveSum subthing
+                            total
+                        else
+                            0
+                    recursiveSum [ 1, [ 2 ], [ [ 3, ':)', 4 ], 5 ], 6 ]
+                , ( response ) ->
+                    expect( response.success ).toBe yes
+                    expect( response.error ).toBeUndefined()
+                    expect( response.result ).toBe 21
+                    done()
 
 ## Installing scripts in workers
 
@@ -104,39 +108,39 @@ was available for importing, and failure if it was not.
 The successful case:
 
         it 'should work when the script to import exists', ( done ) ->
-            W = new LDEWorker()
-            W.installScript 'release/structure.js', ( response ) ->
-                expect( response.success ).toBe yes
-                expect( response.error ).toBeUndefined()
-                done()
+            W = new LDEWorker ->
+                W.installScript 'release/structure.js', ( response ) ->
+                    expect( response.success ).toBe yes
+                    expect( response.error ).toBeUndefined()
+                    done()
 
 The unsuccessful case:
 
         it 'should work when the script to import does not exist',
         ( done ) ->
-            W = new LDEWorker()
-            W.installScript 'release/this-does-not-exist.js',
-            ( response ) ->
-                expect( response.success ).toBeUndefined()
-                expect( response.error ).not.toBeUndefined()
-                expect( response.error ).toMatch \
-                    new RegExp 'no such file', 'i'
-                done()
+            W = new LDEWorker ->
+                W.installScript 'release/this-does-not-exist.js',
+                ( response ) ->
+                    expect( response.success ).toBeUndefined()
+                    expect( response.error ).not.toBeUndefined()
+                    expect( response.error ).toMatch \
+                        new RegExp 'no such file', 'i'
+                    done()
 
 Extending the successful case to actually verifying that the script was
 loaded, which we can tell by evaluating something depending on it:
 
         it 'should actually import the script contents', ( done ) ->
-            W = new LDEWorker()
-            W.installScript 'release/structure.js', ( response ) ->
-                expect( response.success ).toBe yes
-                expect( response.error ).toBeUndefined()
-                W.run ( -> Object.keys Structure::subclasses ),
-                ( response ) ->
+            W = new LDEWorker ->
+                W.installScript 'release/structure.js', ( response ) ->
                     expect( response.success ).toBe yes
                     expect( response.error ).toBeUndefined()
-                    expect( response.result ).toEqual [ 'Structure' ]
-                    done()
+                    W.run ( -> Object.keys Structure::subclasses ),
+                    ( response ) ->
+                        expect( response.success ).toBe yes
+                        expect( response.error ).toBeUndefined()
+                        expect( response.result ).toEqual [ 'Structure' ]
+                        done()
 
 ## Installing functions in workers
 
@@ -164,15 +168,16 @@ principle this verifies what we need.
                             break
                     if isPrime then counter++
                 lastNumberChecked
-            W = new LDEWorker()
-            W.installFunction 'findNthPrime', findNthPrime, ( response ) ->
-                expect( response.success ).toBe yes
-                expect( response.error ).toBeUndefined()
-                W.run ( -> findNthPrime 25 ), ( response ) ->
+            W = new LDEWorker ->
+                W.installFunction 'findNthPrime', findNthPrime,
+                ( response ) ->
                     expect( response.success ).toBe yes
                     expect( response.error ).toBeUndefined()
-                    expect( response.result ).toBe 97
-                    done()
+                    W.run ( -> findNthPrime 25 ), ( response ) ->
+                        expect( response.success ).toBe yes
+                        expect( response.error ).toBeUndefined()
+                        expect( response.result ).toBe 97
+                        done()
 
 ## Installing data in workers
 
@@ -185,42 +190,68 @@ as well.
 Verify that we can call the install data function without errors.
 
         it 'should let us install data', ( done ) ->
-            ( new LDEWorker() ).installData 'example', [ hello : 3 ],
-            ( response ) ->
-                expect( response.success ).toBe yes
-                expect( response.error ).toBeUndefined()
-                done()
+            W = new LDEWorker ->
+                W.installData 'example', [ hello : 3 ], ( response ) ->
+                    expect( response.success ).toBe yes
+                    expect( response.error ).toBeUndefined()
+                    done()
 
 Verify that we can use such data once we've installed it.
 
         it 'should let us use installed data', ( done ) ->
-            W = new LDEWorker()
-            W.installData 'example', [ hello : 3 ], ( response ) ->
-                expect( response.success ).toBe yes
-                expect( response.error ).toBeUndefined()
-                W.run 'globalData.example[0].hello', ( response ) ->
+            W = new LDEWorker ->
+                W.installData 'example', [ hello : 3 ], ( response ) ->
                     expect( response.success ).toBe yes
                     expect( response.error ).toBeUndefined()
-                    expect( response.result ).toBe 3
-                    done()
+                    W.run 'globalData.example[0].hello', ( response ) ->
+                        expect( response.success ).toBe yes
+                        expect( response.error ).toBeUndefined()
+                        expect( response.result ).toBe 3
+                        done()
 
 Verify that we can uninstall such data after installing it, and it's
 verifiably gone.
 
         it 'should let us uninstall installed data', ( done ) ->
-            W = new LDEWorker()
-            W.installData 'example', [ hello : 3 ], ( response ) ->
-                expect( response.success ).toBe yes
-                expect( response.error ).toBeUndefined()
-                W.uninstallData 'example', ( response ) ->
+            W = new LDEWorker ->
+                W.installData 'example', [ hello : 3 ], ( response ) ->
                     expect( response.success ).toBe yes
                     expect( response.error ).toBeUndefined()
-                    W.run 'globalData.example', ( response ) ->
+                    W.uninstallData 'example', ( response ) ->
                         expect( response.success ).toBe yes
                         expect( response.error ).toBeUndefined()
-                        expect( response.result ).toBeNull()
-                        done()
+                        W.run 'globalData.example', ( response ) ->
+                            expect( response.success ).toBe yes
+                            expect( response.error ).toBeUndefined()
+                            expect( response.result ).toBeNull()
+                            done()
 
 You might expect the `response.result` value to be undefined, but the data
 comes back from the worker as JSON, and thus `undefined` values are
 converted into `null` as part of the JSONification process.
+
+## Rebooting workers
+
+We now run a test to verify that we can terminate and restart ("reboot") a
+worker, which means that it will have forgotten everything that came
+before.
+
+    describe 'Rebooting LDEWorkers', ->
+
+Install some scripts, data, and functions.
+
+        it 'should let us reboot, which forgets scripts', ( done ) ->
+            W = new LDEWorker ->
+                W.installScript 'release/structure.js', ( response ) ->
+                    expect( response.success ).toBe yes
+                    expect( response.error ).toBeUndefined()
+                    W.run '!!self["Structure"]', ( response ) ->
+                        expect( response.success ).toBe yes
+                        expect( response.error ).toBeUndefined()
+                        expect( response.result ).toBeTruthy()
+                        W.reboot ->
+                            W.run 'self["Structure"]', ( response ) ->
+                                expect( response.success ).toBe yes
+                                expect( response.error ).toBeUndefined()
+                                expect( response.result ).toBeFalsy()
+                                done()

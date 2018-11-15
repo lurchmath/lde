@@ -53,21 +53,39 @@ when we're done with them.
             delete data.id
             callback? data
 
-Constructing one creates an inner instance of a `Worker` to which we will
-pass many of the tasks defined below, once it is correctly set up.
+We leverage the above two routines in the event handler for the internal
+`Worker` object, installed by the following routine.
 
-        constructor : ->
-            @callbacks = { }
+        setup : ( callback ) ->
             @worker = new Worker InnerScriptPath
+            @loadedCallback = callback
 
-We install an event handler for all messages coming out of the worker.  We
+This event handler is for all messages coming out of the worker.  We
 guarantee, in the worker's code, that every response message that comes back
 will contain the same ID that was given in the request for which it is the
 response.  This allows us to look up and call the correct callback, then
 uninstall that callback because the task is complete.
 
             @worker.addEventListener 'message', ( event ) =>
-                @runAndClearCallback event.data
+                if event.data.type is 'loaded'
+                    @loadedCallback?()
+                    delete @loadedCallback
+                else
+                    @runAndClearCallback event.data
+
+The parameter to the constructor is optional, and if provided, will be
+called when the worker has finished loading its internal scripts and is
+ready to receive commands.  We leverage the `setup` function defined above
+to do setup of the internal `Worker` object.
+
+        constructor : ( callback ) ->
+            @callbacks = { }
+            @setup callback
+
+Clients can tell whether the worker is ready to receive messages with the
+following function.
+
+        isReady : -> not @loadedCallback
 
 The following function abstracts the idea of sending a message to the worker
 and associating a callback with it.
@@ -162,6 +180,18 @@ You can also clear out such stored data using this:
 
         uninstallData : ( name, callback ) ->
             @dispatch type : 'uninstall data', name : name, callback
+
+### Support rebooting workers
+
+If you want to start with a fresh worker (perhaps because you don't want it
+to have any longer some of the scripts you loaded or because it's gone on
+too long computing something and you need to terminate it), use this
+function.  It terminates the internal Worker object and replaces it with a
+fresh one, calling the callback when this process is complete.
+
+        reboot : ( callback ) ->
+            @worker?.terminate()
+            @setup callback
 
 Now if this is being used in a Node.js context, export the class we defined.
 
