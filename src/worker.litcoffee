@@ -83,8 +83,15 @@ when it's done, and what the result was.  We provide the following API for
 doing so.  It is essentially a simple `eval` call in the worker, with all
 the appropriate caveats that come with that.
 
-        run : ( code, callback ) ->
-            @dispatch type : 'run', code : code, callback
+The first argument can be a string of code or a JavaScript function.  If it
+is the latter, realize that it will be converted to a string and transferred
+into the worker before being run, so global variables in it will be
+evaluated in the worker's context.
+
+        run : ( codeOrFunction, callback ) ->
+            if typeof codeOrFunction is 'function'
+                codeOrFunction = "(#{codeOrFunction})()"
+            @dispatch type : 'run', code : codeOrFunction, callback
 
 ### Support installing scripts
 

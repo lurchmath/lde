@@ -73,6 +73,26 @@ Try something that causes an error and be sure it's reported.
                     /thisIsDefinitelyNotDefined/
                 done()
 
+Try the variant of `run` that accepts a function instead of a code string.
+
+        it 'should work when we hand it a function, too', ( done ) ->
+            ( new LDEWorker() ).run ->
+                recursiveSum = ( thing ) ->
+                    if typeof thing is 'number'
+                        thing
+                    else if thing instanceof Array
+                        total = 0
+                        total += recursiveSum subthing for subthing in thing
+                        total
+                    else
+                        0
+                recursiveSum [ 1, [ 2 ], [ [ 3, ':)', 4 ], 5 ], 6 ]
+            , ( response ) ->
+                expect( response.success ).toBe yes
+                expect( response.error ).toBeUndefined()
+                expect( response.result ).toBe 21
+                done()
+
 ## Installing scripts in workers
 
 We now run a test to verify that a worker can install a script upon command,
@@ -111,7 +131,7 @@ loaded, which we can tell by evaluating something depending on it:
             W.installScript 'release/structure.js', ( response ) ->
                 expect( response.success ).toBe yes
                 expect( response.error ).toBeUndefined()
-                W.run 'Object.keys( Structure.prototype.subclasses )',
+                W.run ( -> Object.keys Structure::subclasses ),
                 ( response ) ->
                     expect( response.success ).toBe yes
                     expect( response.error ).toBeUndefined()
