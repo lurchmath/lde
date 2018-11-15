@@ -37,7 +37,6 @@ The successful case:
         it 'should work when the script to import exists', ( done ) ->
             W = new LDEWorker()
             W.installScript 'release/structure.js', ( result ) ->
-                console.log 'callback was called with', result
                 expect( result.type ).toBe 'installed'
                 expect( result.filename ).toBe 'release/structure.js'
                 expect( result.success ).toBe yes
