@@ -61,5 +61,18 @@ Hey, it's a sandbox, right?  Run whatever you want.  We don't care.
 If we receive a message asking us to install a script, we obey it, then call
 a callback saying that we did so.
 
-        if request.type is 'install'
+        if request.type is 'install script'
             justDoThis -> importScripts request.filename ; { }
+
+## Support installing functions
+
+If we receive a message asking us to install a function, we obey it, then
+call a callback saying that we did so.  We use here the `Function`
+constructor, knowing that the client has passed us a string containing the
+argument list and body, ready for handing directly to the `Function`
+constructor.
+
+        if request.type is 'install function'
+            justDoThis ->
+                self[request.name] =
+                    new Function request.arguments, request.body

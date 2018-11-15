@@ -102,7 +102,37 @@ The optional callback is called when the action completes, with an object
 containing a few fields describing the action taken.
 
         installScript : ( filename, callback ) ->
-            @dispatch type : 'install', filename : filename, callback
+            @dispatch
+                type : 'install script'
+                filename : filename
+            , callback
+
+### Support installing functions
+
+If you have your own function in the main thread, and want it installed in a
+worker, you can call this function to put it there.  But remember that it is
+going to be copied over based on its syntax, not as a closure.  Any global
+variables mentioned in the function will have meaning in the worker's
+context, not the main thread's.
+
+The first parameter is the global variable name to use for the function, in
+the worker's context.  The second parameter should be a function, which will
+be dissected into its argument list and body on this side, those transmitted
+to the worker, and the function contructor used on that side to reassemble
+it into a function.  This is faster and safer than `eval`.
+
+        installFunction : ( name, func, callback ) ->
+            func = "#{func}"
+            args = func.substring func.indexOf( '(' ) + 1,
+                                  func.indexOf( ')' )
+            body = func.substring func.indexOf( '{' ) + 1,
+                                  func.lastIndexOf( '}' )
+            @dispatch
+                type : 'install function'
+                name : name,
+                arguments : args
+                body : body
+            , callback
 
 Now if this is being used in a Node.js context, export the class we defined.
 

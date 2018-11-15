@@ -137,3 +137,39 @@ loaded, which we can tell by evaluating something depending on it:
                     expect( response.error ).toBeUndefined()
                     expect( response.result ).toEqual [ 'Structure' ]
                     done()
+
+## Installing functions in workers
+
+We now run a test to verify that a worker can install a function upon
+command, and furthermore that we can run such functions afterwards.
+
+    describe 'Installing functions into LDEWorkers', ->
+
+We install a single function that could be used to do a lengthy computation
+on the worker's side.  We use it only to do a small computation, so that the
+test suite is not bogged down finding prime numbers for no reason.  But in
+principle this verifies what we need.
+
+        it 'should let us push lengthy computations into the background',
+        ( done ) ->
+            findNthPrime = ( n ) ->
+                counter = 1
+                lastNumberChecked = 2
+                while counter < n
+                    lastNumberChecked++
+                    isPrime = yes
+                    for i in [2..Math.ceil Math.sqrt lastNumberChecked]
+                        if lastNumberChecked % i is 0
+                            isPrime = no
+                            break
+                    if isPrime then counter++
+                lastNumberChecked
+            W = new LDEWorker()
+            W.installFunction 'findNthPrime', findNthPrime, ( response ) ->
+                expect( response.success ).toBe yes
+                expect( response.error ).toBeUndefined()
+                W.run ( -> findNthPrime 25 ), ( response ) ->
+                    expect( response.success ).toBe yes
+                    expect( response.error ).toBeUndefined()
+                    expect( response.result ).toBe 97
+                    done()

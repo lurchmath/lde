@@ -26,7 +26,7 @@ This has not been implemented.  See the tasks below.
    `WebWorker`s who are able to respond to a variety of functions for
    installing various routines and data in the workers, including:
     * [x] `worker.installScript(filename)`
-    * [ ] `worker.installFunction(varname,func)`
+    * [x] `worker.installFunction(varname,func)`
     * [ ] `worker.installData(key,value)`
     * [ ] `worker.uninstallData(key)`
     * [x] `worker.run(code,callback)`
