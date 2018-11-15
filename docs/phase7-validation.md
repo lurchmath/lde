@@ -25,13 +25,14 @@ This has not been implemented.  See the tasks below.
  * [ ] Create a worker script that enables us to create instances of
    `WebWorker`s who are able to respond to a variety of functions for
    installing various routines and data in the workers, including:
-    * `worker.installScript(filename)`
-    * `worker.installFunction(varname,func)`
-    * `worker.installData(key,value)`
-    * `worker.uninstallData(key)`
-    * `worker.run(code,callback)`
-    * `worker.reboot(callback)` (which calls `terminate()` in the internal
-      `WebWorker` instance, then discards it and replaces it with a new one)
+    * [x] `worker.installScript(filename)`
+    * [ ] `worker.installFunction(varname,func)`
+    * [ ] `worker.installData(key,value)`
+    * [ ] `worker.uninstallData(key)`
+    * [ ] `worker.run(code,callback)`
+    * [ ] `worker.reboot(callback)` (which calls `terminate()` in the
+      internal `WebWorker` instance, then discards it and replaces it with
+      a new one)
  * [ ] Create a new unit testing file for these advanced `WebWorker`s,
    documenting it in the same style as the rest of the test suite.
  * [ ] Once it is robust and all tests pass, commit the changes.
