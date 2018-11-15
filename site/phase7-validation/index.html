@@ -174,21 +174,22 @@ Phase, giving semantic feedback about the validity of steps of work.</p>
 <p>This has not been implemented.  See the tasks below.</p>
 <h2 id="making-background-threads-easy-to-use">Making background threads easy to use</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Create a worker script that enables us to create instances of
+<li class="task-list-item"><input type="checkbox" disabled checked/> Create a worker script that enables us to create instances of
    <code>WebWorker</code>s who are able to respond to a variety of functions for
-   installing various routines and data in the workers, including:<ul>
-<li><code>worker.installScript(filename)</code></li>
-<li><code>worker.installFunction(varname,func)</code></li>
-<li><code>worker.installData(key,value)</code></li>
-<li><code>worker.uninstallData(key)</code></li>
-<li><code>worker.run(code,callback)</code></li>
-<li><code>worker.reboot(callback)</code> (which calls <code>terminate()</code> in the internal
-  <code>WebWorker</code> instance, then discards it and replaces it with a new one)</li>
+   installing various routines and data in the workers, including:<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled checked/> <code>worker.installScript(filename)</code></li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> <code>worker.installFunction(varname,func)</code></li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> <code>worker.installData(key,value)</code></li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> <code>worker.uninstallData(key)</code></li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> <code>worker.run(code,callback)</code></li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> <code>worker.reboot(callback)</code> (which calls <code>terminate()</code> in the
+  internal <code>WebWorker</code> instance, then discards it and replaces it with
+  a new one)</li>
 </ul>
 </li>
-<li class="task-list-item"><input type="checkbox" disabled/> Create a new unit testing file for these advanced <code>WebWorker</code>s,
+<li class="task-list-item"><input type="checkbox" disabled checked/> Create a new unit testing file for these advanced <code>WebWorker</code>s,
    documenting it in the same style as the rest of the test suite.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Once it is robust and all tests pass, commit the changes.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Once it is robust and all tests pass, commit the changes.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Create a global variable in the LDE that holds a pool of these
    workers, with a function that lets you specify the size of the pool.
    It should initialize itself, by default, to the number of threads the
