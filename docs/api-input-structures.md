@@ -72,7 +72,7 @@ remove or change its behavior can override it.
 ### Labels
 
 Each `OutputStructure` can be labeled as documented
-[here](api-output-structure.md#labels). Interpretation can attach labels by
+[here](api-output-structures.md#labels). Interpretation can attach labels by
 assigning a `hasLabel()` function into any `OutputStructure` it creates.
 Since this is very common and yet a bit annoying to code, we establish a few
 conventions that are respected by the built-in `InputStructure` function
