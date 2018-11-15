@@ -173,3 +173,54 @@ principle this verifies what we need.
                     expect( response.error ).toBeUndefined()
                     expect( response.result ).toBe 97
                     done()
+
+## Installing data in workers
+
+We now run a test to verify that a worker can install data and then run code
+that uses that data.  We also verify that it is possible to uninstall data
+as well.
+
+    describe 'Installing data into LDEWorkers', ->
+
+Verify that we can call the install data function without errors.
+
+        it 'should let us install data', ( done ) ->
+            ( new LDEWorker() ).installData 'example', [ hello : 3 ],
+            ( response ) ->
+                expect( response.success ).toBe yes
+                expect( response.error ).toBeUndefined()
+                done()
+
+Verify that we can use such data once we've installed it.
+
+        it 'should let us use installed data', ( done ) ->
+            W = new LDEWorker()
+            W.installData 'example', [ hello : 3 ], ( response ) ->
+                expect( response.success ).toBe yes
+                expect( response.error ).toBeUndefined()
+                W.run 'globalData.example[0].hello', ( response ) ->
+                    expect( response.success ).toBe yes
+                    expect( response.error ).toBeUndefined()
+                    expect( response.result ).toBe 3
+                    done()
+
+Verify that we can uninstall such data after installing it, and it's
+verifiably gone.
+
+        it 'should let us uninstall installed data', ( done ) ->
+            W = new LDEWorker()
+            W.installData 'example', [ hello : 3 ], ( response ) ->
+                expect( response.success ).toBe yes
+                expect( response.error ).toBeUndefined()
+                W.uninstallData 'example', ( response ) ->
+                    expect( response.success ).toBe yes
+                    expect( response.error ).toBeUndefined()
+                    W.run 'globalData.example', ( response ) ->
+                        expect( response.success ).toBe yes
+                        expect( response.error ).toBeUndefined()
+                        expect( response.result ).toBeNull()
+                        done()
+
+You might expect the `response.result` value to be undefined, but the data
+comes back from the worker as JSON, and thus `undefined` values are
+converted into `null` as part of the JSONification process.

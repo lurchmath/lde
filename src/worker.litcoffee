@@ -134,6 +134,35 @@ it into a function.  This is faster and safer than `eval`.
                 body : body
             , callback
 
+### Support installing data
+
+Naturally, users of workers will want not only to install functions in the
+workers, but also sometimes pass nontrivial amounts of data to those
+functions.  Rather than pass it as literals inside code passed to the `run`
+function, it is better if we have a utility for copying chunks of JSON data
+into a global variable in the worker.  This is especially useful if the
+worker is to operate on the same data repeatedly, or to modify the data in
+phases.
+
+We thus provide the following function.  The data you provide must be JSON,
+hence the parameter name.  It will be stored in the global variable
+`globalData` in the worker, under the key you provide.  Essentially, a
+`globalData[yourKey] = yourJSONData` statement will be executed in the
+worker.  You can thus make calls later that look up this stored data using
+`globalData[yourKey]` in the code.
+
+        installData : ( name, jsonData, callback ) ->
+            @dispatch
+                type : 'install data'
+                name : name,
+                data : jsonData
+            , callback
+
+You can also clear out such stored data using this:
+
+        uninstallData : ( name, callback ) ->
+            @dispatch type : 'uninstall data', name : name, callback
+
 Now if this is being used in a Node.js context, export the class we defined.
 
     if exports? then exports.LDEWorker = LDEWorker

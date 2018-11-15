@@ -27,8 +27,8 @@ This has not been implemented.  See the tasks below.
    installing various routines and data in the workers, including:
     * [x] `worker.installScript(filename)`
     * [x] `worker.installFunction(varname,func)`
-    * [ ] `worker.installData(key,value)`
-    * [ ] `worker.uninstallData(key)`
+    * [x] `worker.installData(key,value)`
+    * [x] `worker.uninstallData(key)`
     * [x] `worker.run(code,callback)`
     * [ ] `worker.reboot(callback)` (which calls `terminate()` in the
       internal `WebWorker` instance, then discards it and replaces it with

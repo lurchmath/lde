@@ -76,3 +76,19 @@ constructor.
             justDoThis ->
                 self[request.name] =
                     new Function request.arguments, request.body
+                { }
+
+## Support installing data
+
+If we receive a message asking us to install or uninstall data, we obey it,
+then call a callback.  Data goes in the global variables `globalData`, which
+we initialize at the end of this file.  You can also uninstall data.
+
+        if request.type is 'install data'
+            justDoThis -> self.globalData[request.name] = request.data ; { }
+        if request.type is 'uninstall data'
+            justDoThis -> delete self.globalData[request.name] ; { }
+
+Initialize the global data store used by the "install data" handler:
+
+    self.globalData = { }
