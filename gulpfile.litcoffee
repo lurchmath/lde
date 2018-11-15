@@ -16,14 +16,13 @@ Load Gulp modules.
 
 Create a build task to compile CoffeeScript source into JavaScript.
 
-    gulp.task 'build', -> pump [
+    gulp.task 'build', ->
         gulp.src 'src/*.litcoffee'
-        sourcemaps.init()
-        coffee bare : yes
-        uglify()
-        sourcemaps.write '.'
-        gulp.dest 'release'
-    ]
+            .pipe sourcemaps.init()
+            .pipe coffee bare : yes
+            .pipe uglify()
+            .pipe sourcemaps.write '.'
+            .pipe gulp.dest 'release'
 
 Create "tests" task to run unit tests.
 
