@@ -37,35 +37,44 @@ course `Worker` is already taken in the browser namespace.
 
     class LDEWorker
 
+We need a simple method for associating callbacks with tasks we send to the
+worker, so we have the following functions that assign unique IDs to
+callbacks when asked, retrieve such callbacks by their ID, and delete them
+when we're done with them.
+
+        saveCallback : ( callback ) ->
+            @callbacks ?= { }
+            nextFreeId = 0
+            while @callbacks.hasOwnProperty nextFreeId then nextFreeId++
+            @callbacks[nextFreeId] = callback
+            nextFreeId
+        runAndClearCallback : ( data ) ->
+            @callbacks ?= { }
+            callback = @callbacks[data.id]
+            delete @callbacks[data.id]
+            delete data.id
+            callback? data
+
 Constructing one creates an inner instance of a `Worker` to which we will
 pass many of the tasks defined below, once it is correctly set up.
 
         constructor : ->
             @worker = new Worker InnerScriptPath
 
-We also build here our own event listening stack, because the one built into
-the `webworker-threads` module does not yet support removing event
-listeners.
+We install an event handler for all messages coming out of the worker.  We
+guarantee, in the worker's code, that every response message that comes back
+will contain the same ID that was given in the request for which it is the
+response.  This allows us to look up and call the correct callback, then
+uninstall that callback because the task is complete.
 
-            @filters = [ ]
             @worker.addEventListener 'message', ( event ) =>
-                for filter, index in @filters
-                    return @filters.splice index, 1 if filter event.data
+                @runAndClearCallback event.data
 
-When we ask the worker to do something, we will want to be able to wait for
-a message of a certain type to come back to tell us the job is complete, and
-then take some action.  This requires installing an event listener to wait
-for the message, then uninstalling it when the message has been received.
-We therefore factor this functionality out into a single method here.
+The following function abstracts the idea of sending a message to the worker
+and associating a callback with it.
 
-Call this message with the `message` you want to send to the worker.  As the
-second argument, give a function that will be called on each event coming
-out of the worker and should look for the one response you care about.
-Return true if you've found it, false if you haven't.  Your filter will be
-uninstalled as soon as it returns true once.
-
-        postThenWait : ( message, filter ) ->
-            @filters.push filter
+        runTaskThenCallback : ( message, callback ) ->
+            message.id = @saveCallback callback
             @worker.postMessage message
 
 ### Support installing scripts
@@ -77,10 +86,10 @@ The optional callback is called when the action completes, with an object
 containing a few fields describing the action taken.
 
         installScript : ( filename, callback ) ->
-            @postThenWait install : filename, ( data, done ) ->
-                if data.type is 'installed' and data.filename is filename
-                    callback? data
-                    yes
+            @runTaskThenCallback
+                type : 'install'
+                filename : filename
+            , callback
 
 Now if this is being used in a Node.js context, export the class we defined.
 

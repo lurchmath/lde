@@ -1,2 +1,2 @@
-self.addEventListener("message",function(t){var a,e;if(t.data.hasOwnProperty("install")){e={type:"installed",filename:t.data.install};try{importScripts(t.data.install),e.success=!0}catch(t){a=t,e.error=a}return self.postMessage(e)}});
+var hasProp={}.hasOwnProperty;self.addEventListener("message",function(r){var e,n,t,s,a;if(s=r.data,t=function(r){var e,n,t;null==r&&(r={}),n={id:s.id};for(e in r)hasProp.call(r,e)&&(t=r[e],n[e]=t);return self.postMessage(n)},a=function(r){return null==r&&(r={}),r.success=!0,t(r)},n=function(r,e){return null==e&&(e={}),e.error=r,t(e)},"install"===s.type)try{return importScripts(s.filename),a()}catch(r){return e=r,n(e.message)}});
 //# sourceMappingURL=worker-internal.js.map
