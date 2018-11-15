@@ -43,13 +43,11 @@ callbacks when asked, retrieve such callbacks by their ID, and delete them
 when we're done with them.
 
         saveCallback : ( callback ) ->
-            @callbacks ?= { }
             nextFreeId = 0
             while @callbacks.hasOwnProperty nextFreeId then nextFreeId++
             @callbacks[nextFreeId] = callback
             nextFreeId
         runAndClearCallback : ( data ) ->
-            @callbacks ?= { }
             callback = @callbacks[data.id]
             delete @callbacks[data.id]
             delete data.id
@@ -59,6 +57,7 @@ Constructing one creates an inner instance of a `Worker` to which we will
 pass many of the tasks defined below, once it is correctly set up.
 
         constructor : ->
+            @callbacks = { }
             @worker = new Worker InnerScriptPath
 
 We install an event handler for all messages coming out of the worker.  We
@@ -73,9 +72,19 @@ uninstall that callback because the task is complete.
 The following function abstracts the idea of sending a message to the worker
 and associating a callback with it.
 
-        runTaskThenCallback : ( message, callback ) ->
+        dispatch : ( message, callback ) ->
             message.id = @saveCallback callback
             @worker.postMessage message
+
+### Running code in a worker
+
+The chief purpose of background threads is to run code and then notify you
+when it's done, and what the result was.  We provide the following API for
+doing so.  It is essentially a simple `eval` call in the worker, with all
+the appropriate caveats that come with that.
+
+        run : ( code, callback ) ->
+            @dispatch type : 'run', code : code, callback
 
 ### Support installing scripts
 
@@ -86,10 +95,7 @@ The optional callback is called when the action completes, with an object
 containing a few fields describing the action taken.
 
         installScript : ( filename, callback ) ->
-            @runTaskThenCallback
-                type : 'install'
-                filename : filename
-            , callback
+            @dispatch type : 'install', filename : filename, callback
 
 Now if this is being used in a Node.js context, export the class we defined.
 

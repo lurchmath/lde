@@ -29,7 +29,7 @@ This has not been implemented.  See the tasks below.
     * [ ] `worker.installFunction(varname,func)`
     * [ ] `worker.installData(key,value)`
     * [ ] `worker.uninstallData(key)`
-    * [ ] `worker.run(code,callback)`
+    * [x] `worker.run(code,callback)`
     * [ ] `worker.reboot(callback)` (which calls `terminate()` in the
       internal `WebWorker` instance, then discards it and replaces it with
       a new one)

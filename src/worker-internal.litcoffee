@@ -38,14 +38,28 @@ required, depending on the request made.
             info.error = error
             finish info
 
+Even simpler, you can just say what function should compute the object to
+pass to `succeed` (undefined being acceptable, as the signature for
+`succeed` indcates) but `fail` will be called if an error is thrown, with
+that error's message.
+
+        justDoThis = ( func ) ->
+            try
+                succeed func()
+            catch error
+                fail error.message
+
+## Support running arbitrary code
+
+Hey, it's a sandbox, right?  Run whatever you want.  We don't care.
+
+        if request.type is 'run'
+            justDoThis -> result : eval request.code
+
 ## Support installing scripts
 
 If we receive a message asking us to install a script, we obey it, then call
 a callback saying that we did so.
 
         if request.type is 'install'
-            try
-                importScripts request.filename
-                succeed()
-            catch error
-                fail error.message
+            justDoThis -> importScripts request.filename ; { }
