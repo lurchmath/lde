@@ -12,17 +12,21 @@ being used in Node.js or a WebWorker, or a WebWorker-like background thread
 within Node.js, and do the right thing in any case.
 
     if require?
+        os = require 'os'
         { Structure } = require './structure'
         { InputStructure, InputModifier } = require './input-structure'
         { OutputStructure } = require './output-structure'
+        { LDEWorker } = require './worker'
     else if WorkerGlobalScope?
         importScripts 'structure.js'
         importScripts 'input-structure.js'
         importScripts 'output-structure.js'
+        importScripts 'worker.js'
     else if self?.importScripts?
         importScripts 'release/structure.js'
         importScripts 'release/input-structure.js'
         importScripts 'release/output-structure.js'
+        importScripts 'release/worker.js'
 
 ## The Input Tree
 
@@ -498,9 +502,51 @@ method that module installs in itself.
 
     Structure.feedback = feedback
 
-And export anything else that needs exporting.
+## Validation workers
+
+The LDE keeps a global pool of `LDEWorker` instances that wait to be used
+for validating the Output Tree.  These are classified as available or
+unavailable, and one can ask the pool to give it an available worker, thus
+marking it unavailable, and return it when done, thus marking it available
+again.  One can also set the size of the pool.
+
+Note that none of these functions verify that the worker is or is not
+running.  We require that clients only return a worker to the pool if it is
+done running.  If they wish to terminate its work and return it once it has
+reset itself, they can call `myWorker.reboot` and pass a callback that
+applies `returnAvailableWorker`, because the reboot guarantees that the
+worker is ready for use when its callback is called.
+
+    WorkerPool = [ ]
+    WorkerPool.setSize = ( size ) ->
+        size = Math.max size, 1
+        while WorkerPool.length < size
+            worker = new LDEWorker()
+            worker.available = yes
+            WorkerPool.push worker
+        # WorkerPool = WorkerPool[...size] would discard inner funcs., so:
+        while WorkerPool.length > size then WorkerPool.pop()
+    WorkerPool.getAvailableWorker = ->
+        for worker in WorkerPool
+            if worker.available
+                worker.available = no
+                return worker
+    WorkerPool.giveWorkerBack = ( worker ) -> worker.available = yes
+
+We write a function to compute the number of cores available on the user's
+machine, either in Node.js or the browser, then set the pool size to be one
+less than the number of cores (so that we leave one core for the UI thread).
+
+    numberOfCores = ->
+        navigator?.hardwareConcurrency ? os?.cpus?()?.length ? 1
+    WorkerPool.setSize numberOfCores() - 1 # setSize caps this below at 1
+
+## Module exports
+
+Expose those functions and classes that clients may access.
 
     if exports?
         for own className, classObj of Structure::subclasses
             exports[className] = classObj
         exports[key] = functions[key] for own key, value of functions
+        exports.WorkerPool = WorkerPool

@@ -36,15 +36,15 @@ This has not been implemented.  See the tasks below.
  * [x] Create a new unit testing file for these advanced `WebWorker`s,
    documenting it in the same style as the rest of the test suite.
  * [x] Once it is robust and all tests pass, commit the changes.
- * [ ] Create a global variable in the LDE that holds a pool of these
+ * [x] Create a global variable in the LDE that holds a pool of these
    workers, with a function that lets you specify the size of the pool.
    It should initialize itself, by default, to the number of threads the
    CPU supports, minus 1 for the main thread.  (The minimum value is 1.)
- * [ ] Create a function in each worker for marking it available or
+ * [x] Create a function in each worker for marking it available or
    unavailable.
- * [ ] Create a function in the worker pool for getting the next available
+ * [x] Create a function in the worker pool for getting the next available
    worker, or null if there isn't one.
- * [ ] Add and document tests for these new features.
+ * [x] Add and document tests for these new features.
 
 ## The Validation Phase
 

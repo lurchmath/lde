@@ -190,15 +190,15 @@ Phase, giving semantic feedback about the validity of steps of work.</p>
 <li class="task-list-item"><input type="checkbox" disabled checked/> Create a new unit testing file for these advanced <code>WebWorker</code>s,
    documenting it in the same style as the rest of the test suite.</li>
 <li class="task-list-item"><input type="checkbox" disabled checked/> Once it is robust and all tests pass, commit the changes.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Create a global variable in the LDE that holds a pool of these
+<li class="task-list-item"><input type="checkbox" disabled checked/> Create a global variable in the LDE that holds a pool of these
    workers, with a function that lets you specify the size of the pool.
    It should initialize itself, by default, to the number of threads the
    CPU supports, minus 1 for the main thread.  (The minimum value is 1.)</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Create a function in each worker for marking it available or
+<li class="task-list-item"><input type="checkbox" disabled checked/> Create a function in each worker for marking it available or
    unavailable.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Create a function in the worker pool for getting the next available
+<li class="task-list-item"><input type="checkbox" disabled checked/> Create a function in the worker pool for getting the next available
    worker, or null if there isn't one.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add and document tests for these new features.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add and document tests for these new features.</li>
 </ul>
 <h2 id="the-validation-phase">The Validation Phase</h2>
 <ul class="task-list">

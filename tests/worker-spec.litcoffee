@@ -1,9 +1,12 @@
 
 # Tests of the LDE Workers
 
-Here we import the module we're about to test.
+Here we import the module we're about to test, plus the LDE because that
+contains some Worker-related functionality that we will also be testing in
+this file.
 
     { LDEWorker } = require '../src/worker.litcoffee'
+    LDE = require '../src/lde.litcoffee'
 
 ## Worker module members
 
@@ -255,3 +258,112 @@ Install some scripts, data, and functions.
                                 expect( response.error ).toBeUndefined()
                                 expect( response.result ).toBeFalsy()
                                 done()
+
+## Pool of Workers in the LDE
+
+The LDE keeps a pool of workers and exposes them to us, letting us claim
+them for tasks, then return them when we're done.  We test its various
+functions and properties here.
+
+    describe 'The LDE\'s global pool of workers', ->
+
+Begin with simple sanity checks that it exists and exposes the right
+functions to us (before we start testing them).
+
+        it 'exposes the correct objects and functions', ->
+            expect( LDE.WorkerPool instanceof Object ).toBeTruthy()
+            expect( LDE.WorkerPool.setSize ).not.toBeUndefined()
+            expect( LDE.WorkerPool.getAvailableWorker ).not.toBeUndefined()
+            expect( LDE.WorkerPool.giveWorkerBack ).not.toBeUndefined()
+
+*WARNING:* The following test assumes that it is being run on a machine with
+at least 3 CPU cores.  This is the case for the development environment and
+most modern computers, but others running this test suite should be aware
+that it will fail on simpler hardware.  (The pool contains a number of
+workers equal to the number of cores minus 1, and we test that such a number
+is greater than 1.)
+
+        it 'creates (almost) one worker per CPU core, which is >1', ->
+            expect( LDE.WorkerPool.length ).toBeGreaterThan 1
+
+We should be able to resize the pool to have more or fewer workers, and that
+should work.
+
+        it 'lets us resize the pool', ->
+            originalSize = LDE.WorkerPool.length
+
+Try length 4.
+
+            LDE.WorkerPool.setSize 4
+            expect( LDE.WorkerPool.length ).toBe 4
+            expect( LDE.WorkerPool[0] instanceof LDEWorker ).toBeTruthy()
+            expect( LDE.WorkerPool[1] instanceof LDEWorker ).toBeTruthy()
+            expect( LDE.WorkerPool[2] instanceof LDEWorker ).toBeTruthy()
+            expect( LDE.WorkerPool[3] instanceof LDEWorker ).toBeTruthy()
+            expect( LDE.WorkerPool[4] ).toBeUndefined()
+
+Try decreasing the length.
+
+            LDE.WorkerPool.setSize 2
+            expect( LDE.WorkerPool.length ).toBe 2
+            expect( LDE.WorkerPool[0] instanceof LDEWorker ).toBeTruthy()
+            expect( LDE.WorkerPool[1] instanceof LDEWorker ).toBeTruthy()
+            expect( LDE.WorkerPool[2] ).toBeUndefined()
+
+Try increasing the length.
+
+            LDE.WorkerPool.setSize 5
+            expect( LDE.WorkerPool.length ).toBe 5
+            expect( LDE.WorkerPool[0] instanceof LDEWorker ).toBeTruthy()
+            expect( LDE.WorkerPool[1] instanceof LDEWorker ).toBeTruthy()
+            expect( LDE.WorkerPool[2] instanceof LDEWorker ).toBeTruthy()
+            expect( LDE.WorkerPool[3] instanceof LDEWorker ).toBeTruthy()
+            expect( LDE.WorkerPool[4] instanceof LDEWorker ).toBeTruthy()
+            expect( LDE.WorkerPool[5] ).toBeUndefined()
+
+We should be able to take available workers from the pool until the pool is
+empty, at which point we should not be able to get any more workers.  But
+we can also put workers back into the pool when we're done with them.
+
+        it 'should correctly track available workers as we take/return', ->
+
+If we have three workers...
+
+            LDE.WorkerPool.setSize 3
+
+Then we can fetch three, and they're all different, and they're all workers.
+
+            worker1 = LDE.WorkerPool.getAvailableWorker()
+            expect( worker1 instanceof LDEWorker ).toBeTruthy()
+            worker2 = LDE.WorkerPool.getAvailableWorker()
+            expect( worker2 instanceof LDEWorker ).toBeTruthy()
+            expect( worker2 ).not.toBe worker1
+            worker3 = LDE.WorkerPool.getAvailableWorker()
+            expect( worker3 instanceof LDEWorker ).toBeTruthy()
+            expect( worker3 ).not.toBe worker1
+            expect( worker3 ).not.toBe worker2
+
+But if we try to fetch a fourth, it doesn't work.
+
+            shouldNotWork = LDE.WorkerPool.getAvailableWorker()
+            expect( shouldNotWork ).toBeUndefined()
+
+Now let's put some back and be sure they go back on the queue.  First just
+one:
+
+            LDE.WorkerPool.giveWorkerBack worker2
+            shouldBeWorker2 = LDE.WorkerPool.getAvailableWorker()
+            expect( shouldBeWorker2 ).toBe worker2
+            shouldNotWork = LDE.WorkerPool.getAvailableWorker()
+            expect( shouldNotWork ).toBeUndefined()
+
+Then two:
+
+            LDE.WorkerPool.giveWorkerBack worker1
+            LDE.WorkerPool.giveWorkerBack worker3
+            shouldBeWorker1 = LDE.WorkerPool.getAvailableWorker()
+            expect( shouldBeWorker1 ).toBe worker1
+            shouldBeWorker3 = LDE.WorkerPool.getAvailableWorker()
+            expect( shouldBeWorker3 ).toBe worker3
+            shouldNotWork = LDE.WorkerPool.getAvailableWorker()
+            expect( shouldNotWork ).toBeUndefined()
