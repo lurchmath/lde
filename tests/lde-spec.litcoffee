@@ -1522,6 +1522,8 @@ child dirty during the second child's interpretation.
                 expect( markResult ).toBe no
                 done()
 
+### Ensuring connection closure
+
 Next, we run a test to be sure that the LDE also polices the Output Tree to
 ensure that interpretation does not place into it any connections from one
 of its nodes to or from a `Structure` outside the Output Tree.
