@@ -204,28 +204,35 @@ Phase, giving semantic feedback about the validity of steps of work.</p>
 <ul class="task-list">
 <li class="task-list-item"><input type="checkbox" disabled/> Create a global validation pool in the LDE, which is a priority queue
    that comes with a routine for adding an <code>OutputStructure</code> instance to the
-   queue, after first verifying that it has a <code>validate()</code> routine.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Create a routine that, if a worker is available, dequeues a structure
-   from the validation pool and calls its validation routine, passing it the
-   available worker.  If one is not available, this routine does nothing.
-   In the callback that routine passes the validation routine, place the
-   worker back on the list of available workers.  Also, the routine does
-   nothing in the case where modification or interpretation is currently
-   running.  We expect to define validation routines somewhat like this:</li>
+   queue, together with a priority.  This routine does nothing if the
+   structure in question does not have a <code>validate()</code> routine.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Create a dequeueing routine from that global validation pool that
+   behaves as follows:<ul>
+<li>If modification or interpretation is currently running, quit (do
+  nothing).</li>
+<li>If no worker is available, quit (do nothing).</li>
+<li>If the global validation pool is empty, quit (do nothing).</li>
+<li>Dequeue a structure from the validation pool and call its validation
+  routine, passing it the next available worker and a callback that
+  places the worker back on the list of available workers.
+   We expect to define validation routines somewhat like this:</li>
 </ul>
-<pre><code>MyOutputStructure.validate = function ( callback, worker ) {
+</li>
+</ul>
+<pre><code>MyOutputStructure.validate = function ( worker, callback ) {
     worker.installScript( &quot;some script file&quot; );
     worker.installFunction( &quot;foo&quot;, foo );
     worker.installData( &quot;key&quot;, value );
-    worker.run( &quot;some code&quot;, function ( result, error ) {
-        // here, generate feedback from result and/or error
+    worker.run( &quot;some code&quot;, function ( response ) {
+        // here, generate feedback from response.result or response.error
         callback();
     } );
 };
 </code></pre>
 
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Call that dequeueing routine whenever a worker becomes available.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Call that dequeueing routine whenever a worker becomes available and
+   whenever a new structure is added to the validation priority queue.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Make unit tests for this much functionality, in a new unit testing
    file for validation specifically.  Document such tests the usual way.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Extend the enqueue process so that if a structure is already
@@ -234,24 +241,39 @@ Phase, giving semantic feedback about the validity of steps of work.</p>
    while not currently on the queue, has its validation routine still
    running in a worker, then we find and reboot that worker, mark the
    structure as no longer being validated, and <em>then</em> enqueue it as usual.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Create unit tests that ensure these behaviors work.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Create unit tests that ensure these two new behaviors work.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Define a function in the <code>OutputStructure</code> class that uses citation
+   lookup to find all the reasons and premises that the object cites, and
+   return them as a dictionary.  Call this <code>lookUpAllCitations()</code>.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Create a default implementation of <code>justChanged()</code> in the
    <code>OutputStructure</code> class that does the following things.<ul>
-<li>If the OS has a validate routine, add it to the global pool.  If its
-  origin IS has a validation priority, use that, otherwise use zero.  If
-  its origin has a validation priority of null, skip this step (no
-  enqueueing).  If you enqueue the OS, emit feedback saying its
-  validation is being recomputed.  If it had null priority, emit
-  feedback saying that its validation is being skipped.</li>
-<li>If any OS in the scope of this one cites this one, then add that other
-  OS to the validation pool.  Set priorities and emit feedback in the
-  same way.</li>
+<li>If the OS has no validation routine, quit (do nothing).</li>
+<li>If its origin IS has a validation priority of null, send feedback from
+  it saying that its validation is being skipped, then quit (do no
+  more).</li>
+<li>Add the OS to the global pool, using the priority in its origin IS,
+  or zero if there was none.</li>
+<li>Send feedback about the OS saying its validation is being recomputed.</li>
+<li>Call <code>lookUpAllCitations()</code> and store its result in a field of the
+  <code>OutputStructure</code> instance.</li>
 </ul>
 </li>
-<li class="task-list-item"><input type="checkbox" disabled/> Call the dequeueing routine whenever interpretation ends.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> When interpretation ends, loop through all nodes of the Output Tree
+   and do this:<ul>
+<li>If it is marked dirty, call <code>justChanged()</code> and stop.  Otherwise:</li>
+<li>Recompute its <code>lookUpAllCitations()</code> dictionary, and if any part of it
+  changed (in key or value) or any structure referenced by it is marked
+  dirty, call <code>justChanged()</code>.</li>
+</ul>
+</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Write unit tests to ensure that the already-tested validation
    features still function when they are automatically triggered at the end
    of the implementation phase.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Write a new file of integration tests that test the full LDE stack of
+   modification-interpretation-validation, including all the subtle types of
+   situations that may arise, including changes to a premise impacting a
+   conclusion's validation, changes to a label impacting whether something
+   is cited, and on and on through many possibilities.</li>
 </ul>
 <h2 id="api-documentation">API Documentation</h2>
 <ul class="task-list">

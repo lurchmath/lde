@@ -50,26 +50,31 @@ This has not been implemented.  See the tasks below.
 
  * [ ] Create a global validation pool in the LDE, which is a priority queue
    that comes with a routine for adding an `OutputStructure` instance to the
-   queue, after first verifying that it has a `validate()` routine.
- * [ ] Create a routine that, if a worker is available, dequeues a structure
-   from the validation pool and calls its validation routine, passing it the
-   available worker.  If one is not available, this routine does nothing.
-   In the callback that routine passes the validation routine, place the
-   worker back on the list of available workers.  Also, the routine does
-   nothing in the case where modification or interpretation is currently
-   running.  We expect to define validation routines somewhat like this:
+   queue, together with a priority.  This routine does nothing if the
+   structure in question does not have a `validate()` routine.
+ * [ ] Create a dequeueing routine from that global validation pool that
+   behaves as follows:
+    * If modification or interpretation is currently running, quit (do
+      nothing).
+    * If no worker is available, quit (do nothing).
+    * If the global validation pool is empty, quit (do nothing).
+    * Dequeue a structure from the validation pool and call its validation
+      routine, passing it the next available worker and a callback that
+      places the worker back on the list of available workers.
+   We expect to define validation routines somewhat like this:
 ```
-MyOutputStructure.validate = function ( callback, worker ) {
+MyOutputStructure.validate = function ( worker, callback ) {
     worker.installScript( "some script file" );
     worker.installFunction( "foo", foo );
     worker.installData( "key", value );
-    worker.run( "some code", function ( result, error ) {
-        // here, generate feedback from result and/or error
+    worker.run( "some code", function ( response ) {
+        // here, generate feedback from response.result or response.error
         callback();
     } );
 };
 ```
- * [ ] Call that dequeueing routine whenever a worker becomes available.
+ * [ ] Call that dequeueing routine whenever a worker becomes available and
+   whenever a new structure is added to the validation priority queue.
  * [ ] Make unit tests for this much functionality, in a new unit testing
    file for validation specifically.  Document such tests the usual way.
  * [ ] Extend the enqueue process so that if a structure is already
@@ -78,22 +83,35 @@ MyOutputStructure.validate = function ( callback, worker ) {
    while not currently on the queue, has its validation routine still
    running in a worker, then we find and reboot that worker, mark the
    structure as no longer being validated, and *then* enqueue it as usual.
- * [ ] Create unit tests that ensure these behaviors work.
+ * [ ] Create unit tests that ensure these two new behaviors work.
+ * [ ] Define a function in the `OutputStructure` class that uses citation
+   lookup to find all the reasons and premises that the object cites, and
+   return them as a dictionary.  Call this `lookUpAllCitations()`.
  * [ ] Create a default implementation of `justChanged()` in the
    `OutputStructure` class that does the following things.
-    * If the OS has a validate routine, add it to the global pool.  If its
-      origin IS has a validation priority, use that, otherwise use zero.  If
-      its origin has a validation priority of null, skip this step (no
-      enqueueing).  If you enqueue the OS, emit feedback saying its
-      validation is being recomputed.  If it had null priority, emit
-      feedback saying that its validation is being skipped.
-    * If any OS in the scope of this one cites this one, then add that other
-      OS to the validation pool.  Set priorities and emit feedback in the
-      same way.
- * [ ] Call the dequeueing routine whenever interpretation ends.
+    * If the OS has no validation routine, quit (do nothing).
+    * If its origin IS has a validation priority of null, send feedback from
+      it saying that its validation is being skipped, then quit (do no
+      more).
+    * Add the OS to the global pool, using the priority in its origin IS,
+      or zero if there was none.
+    * Send feedback about the OS saying its validation is being recomputed.
+    * Call `lookUpAllCitations()` and store its result in a field of the
+      `OutputStructure` instance.
+ * [ ] When interpretation ends, loop through all nodes of the Output Tree
+   and do this:
+    * If it is marked dirty, call `justChanged()` and stop.  Otherwise:
+    * Recompute its `lookUpAllCitations()` dictionary, and if any part of it
+      changed (in key or value) or any structure referenced by it is marked
+      dirty, call `justChanged()`.
  * [ ] Write unit tests to ensure that the already-tested validation
    features still function when they are automatically triggered at the end
    of the implementation phase.
+ * [ ] Write a new file of integration tests that test the full LDE stack of
+   modification-interpretation-validation, including all the subtle types of
+   situations that may arise, including changes to a premise impacting a
+   conclusion's validation, changes to a label impacting whether something
+   is cited, and on and on through many possibilities.
 
 ## API Documentation
 
