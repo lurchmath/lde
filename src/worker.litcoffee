@@ -58,7 +58,7 @@ We leverage the above two routines in the event handler for the internal
 
         setup : ( callback ) ->
             @worker = new Worker InnerScriptPath
-            @loadedCallback = callback
+            @whenReady callback
 
 This event handler is for all messages coming out of the worker.  We
 guarantee, in the worker's code, that every response message that comes back
@@ -68,8 +68,8 @@ uninstall that callback because the task is complete.
 
             @worker.addEventListener 'message', ( event ) =>
                 if event.data.type is 'loaded'
-                    @loadedCallback?()
-                    delete @loadedCallback
+                    callback() for callback in @loadedCallbacks
+                    @loadedCallbacks = [ ]
                 else
                     @runAndClearCallback event.data
 
@@ -80,12 +80,14 @@ to do setup of the internal `Worker` object.
 
         constructor : ( callback ) ->
             @callbacks = { }
+            @loadedCallbacks = [ ]
             @setup callback
 
 Clients can tell whether the worker is ready to receive messages with the
 following function.
 
-        isReady : -> not @loadedCallback
+        isReady : -> @loadedCallbacks.length > 0
+        whenReady : ( callback ) -> @loadedCallbacks.push callback
 
 The following function abstracts the idea of sending a message to the worker
 and associating a callback with it.
