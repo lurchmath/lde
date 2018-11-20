@@ -48,11 +48,11 @@ This has not been implemented.  See the tasks below.
 
 ## The Validation Phase
 
- * [ ] Create a global validation pool in the LDE, which is a priority queue
+ * [x] Create a global validation pool in the LDE, which is a priority queue
    that comes with a routine for adding an `OutputStructure` instance to the
    queue, together with a priority.  This routine does nothing if the
    structure in question does not have a `validate()` routine.
- * [ ] Create a dequeueing routine from that global validation pool that
+ * [x] Create a dequeueing routine from that global validation pool that
    behaves as follows:
     * If modification or interpretation is currently running, quit (do
       nothing).
@@ -73,10 +73,14 @@ MyOutputStructure.validate = function ( worker, callback ) {
     } );
 };
 ```
- * [ ] Call that dequeueing routine whenever a worker becomes available and
+ * [x] Call that dequeueing routine whenever a worker becomes available and
    whenever a new structure is added to the validation priority queue.
- * [ ] Make unit tests for this much functionality, in a new unit testing
-   file for validation specifically.  Document such tests the usual way.
+ * [ ] Extend the LDE's `reset()` function so that, in addition to what it
+   does now, it empties the validation queue, reboots all ongoing workers,
+   and returns them all as available again.
+ * [ ] Make unit tests for this much functionality, in a new integration
+   testing file for validation specifically.  Document such tests the way we
+   document unit tests.
  * [ ] Extend the enqueue process so that if a structure is already
    enqueued, then enqueueing again does nothing.
  * [ ] Extend the enqueue process so that if the structure being enqueued,

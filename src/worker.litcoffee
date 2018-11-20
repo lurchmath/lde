@@ -87,7 +87,11 @@ Clients can tell whether the worker is ready to receive messages with the
 following function.
 
         isReady : -> @loadedCallbacks.length > 0
-        whenReady : ( callback ) -> @loadedCallbacks.push callback
+        whenReady : ( callback ) ->
+            if @isReady()
+                callback()
+            else
+                @loadedCallbacks.push callback
 
 The following function abstracts the idea of sending a message to the worker
 and associating a callback with it.

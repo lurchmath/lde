@@ -292,6 +292,15 @@ satisfied, the function does nothing.
             ( isInTheInputTree Structure.getConnectionTarget id )
         Structure.setConnectionData id, key, value
 
+### Phases of computation
+
+The following sections define the modification, interpretation, and
+validation phases of LDE computation.  To track which one is currently
+happening, we introduce the following global variable.  It defaults to null,
+meaning none of those phases of computation are currently happening.
+
+    CurrentPhase = null
+
 ### The Modification Phase
 
 In the Modification Phase, the LDE runs the `updateConnections()` function
@@ -307,10 +316,12 @@ asynchronous later if we need to make it more efficient, and clients will
 not need to change their use of it.
 
     functions.runModification = ( callback ) ->
+        CurrentPhase = 'modification'
         updateAllConnections = ( node ) ->
             node.updateConnections() if node instanceof InputModifier
             updateAllConnections child for child in node.children()
         updateAllConnections InputTree
+        CurrentPhase = null
         functions.runInterpretation callback
 
 ### The Interpretation Phase
@@ -328,6 +339,7 @@ For the type of feedback this sends, see
 [the API documentation page for the LDE](https://lurchmath.github.io/lde/site/api-lde/).
 
     functions.runInterpretation = ( callback ) ->
+        CurrentPhase = 'interpretation'
 
 First, define the function that ensures the Output Tree does not have
 connections that lead outside of itself.  We will use this later if needed.
@@ -375,6 +387,7 @@ if and when needed.
                 type : 'interpretation error'
                 details : e
         InputStructure.clearAlreadyStarted()
+        CurrentPhase = null
         callback()
 
 ### Event Listeners
@@ -531,7 +544,17 @@ worker is ready for use when its callback is called.
             if worker.available
                 worker.available = no
                 return worker
-    WorkerPool.giveWorkerBack = ( worker ) -> worker.available = yes
+        undefined
+    WorkerPool.numberAvailable = ->
+        ( w for w in WorkerPool when w.available ).length
+
+Whenever a worker becomes available, we call the dequeueing function defined
+in the next section, below, in case it has work that it wants to assign to
+that worker.
+
+    WorkerPool.giveWorkerBack = ( worker ) ->
+        worker.available = yes
+        ValidationQueue.dequeue()
 
 We write a function to compute the number of cores available on the user's
 machine, either in Node.js or the browser, then set the pool size to be one
@@ -540,6 +563,67 @@ less than the number of cores (so that we leave one core for the UI thread).
     numberOfCores = ->
         navigator?.hardwareConcurrency ? os?.cpus?()?.length ? 1
     WorkerPool.setSize numberOfCores() - 1 # setSize caps this below at 1
+
+## Validation priority queue
+
+This module tracks a list of the `OutputStructure` instances that are
+awaiting validation.  Validation will be run on these using the workers from
+the pool just defined.  We let clients enqueue structures to be validated,
+together with priorities, which should be numbers (and default to zero).
+This feature permits clients to prioritize things the users care about (such
+as the work that's currently visible on the user's screen) above other
+things (such as work on which the user is not currently focusing).
+
+    ValidationQueue = [ ]
+
+Clients may enqueue any `OutputStructure` with a validate routine.  We keep
+the queue in order from lowest-priority items at the beginning of the array
+to highest-priority items at the end of the array.  Each item is simply an
+object with `structure` and `priority` fields.
+
+    ValidationQueue.enqueue = ( structure, priority = 0 ) ->
+        return unless \
+            ( structure instanceof OutputStructure ) and \
+            ( typeof structure.validate is 'function' )
+        insertionIndex = 0
+        while ( insertionIndex < ValidationQueue.length ) and \
+              ( ValidationQueue[insertionIndex].priority < priority )
+            insertionIndex++
+        ValidationQueue.splice insertionIndex, 0,
+            structure : structure
+            priority : priority
+
+Whenever we add an item to the queue, we also immediately attempt to
+dequeue, because it may be the case that there is a worker available to
+handle the processing of the structure we just added to the queue.  (More
+importantly, it may be the case that no validation is currently running, and
+the dequeue function will start it up.)
+
+        ValidationQueue.dequeue()
+
+Clients may dequeue the highest-priority structure for processing provided
+that (a) there is an item on the queue to dequeue, (b) we are not in the
+middle of interpretation or validation, and (c) there is a free worker in
+the worker pool to which we can assign the job of validating the structure
+that would be dequeued.
+
+This function automatically dequeues the structure, runs its validation
+routine, passes that validation routine the worker that can be used in
+background processing, and sets the validation routine's callback to be one
+that puts the worker back on the pool of available workers.
+
+Thus validation routines will typically assign a job to the worker, get the
+result, and then call the callback.  Very quick validation routines can just
+do their work and call the callback, ignoring the worker.
+
+    ValidationQueue.dequeue = ->
+        return unless \
+            ( CurrentPhase is null ) and \
+            ( ValidationQueue.length > 0 ) and \
+            ( worker = WorkerPool.getAvailableWorker() )?
+        structure = ValidationQueue.pop().structure
+        worker.whenReady ->
+            structure.validate worker, -> WorkerPool.giveWorkerBack worker
 
 ## Module exports
 
@@ -550,3 +634,5 @@ Expose those functions and classes that clients may access.
             exports[className] = classObj
         exports[key] = functions[key] for own key, value of functions
         exports.WorkerPool = WorkerPool
+        exports.ValidationQueue = ValidationQueue
+        exports.Worker = LDEWorker
