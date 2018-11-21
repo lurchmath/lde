@@ -103,21 +103,113 @@ use by instances below.  Here we assume that the accessibles array is given
 in the order in which the nodes appear in the tree
 (`Structure.isEarlierThan()`).
 
-        @lookupIn : ( label, accessibles ) ->
+        @lookUpIn : ( label, accessibles ) ->
             for candidate in accessibles[...].reverse()
                 return candidate if candidate.hasLabel label
-            null
+            undefined
 
 When an instance asks to look up the nearest accessible thing with a given
 label, what it means is among those things accessible to that instance.
 
-        lookup : ( label ) ->
+        lookUp : ( label ) ->
             @firstAccessible ( candidate ) -> candidate.hasLabel label
+
+When an instance asks to look up all accessible things with a given label,
+they are still returned in the order in which they are encountered when
+traversing the list of accessibles.
+
+        lookUpAll : ( label ) ->
+            @allAccessibles ( candidate ) -> candidate.hasLabel label
+
+## Citations
+
+Obeying the conventions set down by interpretation, as defined in
+[the InputStructure class](input-structure.litcoffee#citations), we provide
+the following function to look up all structures cited by this one.  The
+notion of "looking them up" here means finding the targets that are cited by
+the data stored in this object and creating a dictionary mapping the means
+of citation to the structures cited.
+
+We respect the following citation conventions set down by the
+`InputStructure` class linked to in the previous paragraph:
+ * The "premise citations" and "reason citations" attributes will each map
+   to a list of strings, each of which attempts to cite something by label.
+ * Connections out of this node whose JSON data contains the key-value pair
+   ("type","premise citation") or ("type","reason citation") are each
+   interpreted as a citation.
+
+This routine does not actually call `lookUp()`, defined above, because to do
+so repeatedly would be inefficient, traversing the accessibles list
+potentially many times.  Rather, we traverse it just once, asking about
+multiple label matches at each stop.
+
+The form of the result will be a JSON structure with this format:
+```javascript
+{
+    premises : { // citations of premises go in here
+        connections : [ // citations by connection go in here
+            {
+                cited : "id of target structure",
+                id : "id of connection, so you can get its data later"
+            }
+            // zero or more such objects in this array
+        ],
+        labels : [ // citations by label go in here
+            {
+                cited : "id of cited structure",
+                label : "text of label by which it was cited"
+            }
+            // zero or more such objects in this array
+        ]
+    },
+    reasons : {
+        // same structure as premises object above
+    }
+}
+```
+
+        lookUpAllCitations : ->
+
+Initialize the data structure we will return, empty at first.
+
+            result =
+                premises :
+                    connections : [ ]
+                    labels : [ ]
+                reasons :
+                    connections : [ ]
+                    labels : [ ]
+
+Fill both connections arrays by examining all connections out of this
+structure for their types.
+
+            for connection in @getConnectionsOut()
+                data = @getConnectionData connection
+                for type in [ 'premise', 'reason' ]
+                    if data.type is "#{type} citation" and
+                       ( target = @getConnectionTarget connection )?
+                        result["#{type}s"].connections.push
+                            cited : target.id()
+                            id : connection
+
+Fill both labels arrays by examining the relevant attributes of this
+structure.
+
+            for type in [ 'premise', 'reason' ]
+                if ( labels = @getAttribute "#{type} citations" ) and \
+                   labels instanceof Array
+                    for label in labels
+                        if ( cited = @lookUp label )?
+                            result["#{type}s"].labels.push
+                                cited : cited.id()
+                                label : label
+
+Return the result.
+
+            result
+
+## Exports
 
 Now if this is being used in a Node.js context, export the class we defined.
 
     if exports? then exports.OutputStructure = OutputStructure
-
-## Other `OutputStructure` Subclasses
-
-None yet.  More to come.

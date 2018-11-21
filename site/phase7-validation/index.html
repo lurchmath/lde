@@ -246,9 +246,12 @@ Phase, giving semantic feedback about the validity of steps of work.</p>
    running in a worker, then we find and reboot that worker, mark the
    structure as no longer being validated, and <em>then</em> enqueue it as usual.</li>
 <li class="task-list-item"><input type="checkbox" disabled checked/> Create unit tests that ensure these two new behaviors work.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Define a function in the <code>OutputStructure</code> class that uses citation
+<li class="task-list-item"><input type="checkbox" disabled checked/> Define a function in the <code>OutputStructure</code> class that uses citation
    lookup to find all the reasons and premises that the object cites, and
    return them as a dictionary.  Call this <code>lookUpAllCitations()</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Write unit tests for <code>OutputStructure::lookUpIn(label,accessibles)</code>
+   and <code>Structure.lookUp(label)</code>, which accidentally escaped untested.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add unit tests for <code>Structure.lookUpAllCitations()</code>.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Create a default implementation of <code>justChanged()</code> in the
    <code>OutputStructure</code> class that does the following things.<ul>
 <li>If the OS has no validation routine, quit (do nothing).</li>

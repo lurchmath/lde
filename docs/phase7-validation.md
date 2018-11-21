@@ -88,9 +88,12 @@ MyOutputStructure.validate = function ( worker, callback ) {
    running in a worker, then we find and reboot that worker, mark the
    structure as no longer being validated, and *then* enqueue it as usual.
  * [x] Create unit tests that ensure these two new behaviors work.
- * [ ] Define a function in the `OutputStructure` class that uses citation
+ * [x] Define a function in the `OutputStructure` class that uses citation
    lookup to find all the reasons and premises that the object cites, and
    return them as a dictionary.  Call this `lookUpAllCitations()`.
+ * [x] Write unit tests for `OutputStructure::lookUpIn(label,accessibles)`
+   and `Structure.lookUp(label)`, which accidentally escaped untested.
+ * [x] Add unit tests for `Structure.lookUpAllCitations()`.
  * [ ] Create a default implementation of `justChanged()` in the
    `OutputStructure` class that does the following things.
     * If the OS has no validation routine, quit (do nothing).
