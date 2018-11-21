@@ -81,13 +81,13 @@ MyOutputStructure.validate = function ( worker, callback ) {
  * [x] Make unit tests for this much functionality, in a new integration
    testing file for validation specifically.  Document such tests the way we
    document unit tests.
- * [ ] Extend the enqueue process so that if a structure is already
+ * [x] Extend the enqueue process so that if a structure is already
    enqueued, then enqueueing again does nothing.
- * [ ] Extend the enqueue process so that if the structure being enqueued,
+ * [x] Extend the enqueue process so that if the structure being enqueued,
    while not currently on the queue, has its validation routine still
    running in a worker, then we find and reboot that worker, mark the
    structure as no longer being validated, and *then* enqueue it as usual.
- * [ ] Create unit tests that ensure these two new behaviors work.
+ * [x] Create unit tests that ensure these two new behaviors work.
  * [ ] Define a function in the `OutputStructure` class that uses citation
    lookup to find all the reasons and premises that the object cites, and
    return them as a dictionary.  Call this `lookUpAllCitations()`.

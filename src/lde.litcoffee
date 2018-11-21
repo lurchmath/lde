@@ -618,6 +618,23 @@ object with `structure` and `priority` fields.
         return unless \
             ( structure instanceof OutputStructure ) and \
             ( typeof structure.validate is 'function' )
+
+If the structure is already enqueued for processing, this function should do
+nothing.  We loop here to check that.
+
+        for record in @ then if record.structure is structure then return
+
+If the structure is currently being processed by a worker, we must first
+reboot that worker before re-enqueueing this worker for validation.
+
+        for worker in WorkerPool
+            if worker.structureBeingValidated is structure
+                delete worker.structureBeingValidated
+                worker.reboot()
+                WorkerPool.giveWorkerBack worker
+
+We can safely insert.
+
         insertionIndex = 0
         while ( insertionIndex < ValidationQueue.length ) and \
               ( ValidationQueue[insertionIndex].priority < priority )
@@ -656,7 +673,10 @@ do their work and call the callback, ignoring the worker.
             ( worker = WorkerPool.getAvailableWorker() )?
         structure = ValidationQueue.pop().structure
         worker.whenReady ->
-            structure.validate worker, -> WorkerPool.giveWorkerBack worker
+            worker.structureBeingValidated = structure
+            structure.validate worker, ->
+                delete worker.structureBeingValidated
+                WorkerPool.giveWorkerBack worker
 
 As stated in the previous section, resetting the validation phase means all
 validation should stop and the queue be emptied without any further work

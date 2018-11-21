@@ -165,6 +165,42 @@ they will try to operate on the contents of the queue.
 
             LDE.ValidationQueue.reset()
 
+Enqueueing is supposed to prevent the same structure from being enqueued
+twice for validation.  (If it's already awaiting validation, and you ask for
+it to be validated again, it doesn't move it out of its old place in line,
+nor does it add it a second time.)
+
+        it 'does not enqueue the same structure twice simultaneously', ->
+
+Create some objects.
+
+            OS1 = new LDE.OutputStructure().attr id : 1
+            OS2 = new LDE.OutputStructure().attr id : 2
+            OS1.validate = ( worker, callback ) -> callback()
+            OS2.validate = ( worker, callback ) -> callback()
+
+Enqueue both for validation.
+
+            expect( LDE.ValidationQueue.length ).toBe 0
+            expect( -> LDE.ValidationQueue.enqueue OS1 ).not.toThrow()
+            expect( -> LDE.ValidationQueue.enqueue OS2 ).not.toThrow()
+            expect( LDE.ValidationQueue.length ).toBe 2
+            expect( LDE.ValidationQueue[0].structure ).toBe OS2
+            expect( LDE.ValidationQueue[1].structure ).toBe OS1
+            expect( LDE.ValidationQueue[0].priority ).toBe 0
+            expect( LDE.ValidationQueue[1].priority ).toBe 0
+
+Try enqueueing each one again and ensure nothing changes.
+
+            expect( -> LDE.ValidationQueue.enqueue OS1 ).not.toThrow()
+            expect( -> LDE.ValidationQueue.enqueue OS2 ).not.toThrow()
+            expect( LDE.ValidationQueue.length ).toBe 2
+            expect( LDE.ValidationQueue[0].structure ).toBe OS2
+            expect( LDE.ValidationQueue[1].structure ).toBe OS1
+            expect( LDE.ValidationQueue[0].priority ).toBe 0
+            expect( LDE.ValidationQueue[1].priority ).toBe 0
+            LDE.ValidationQueue.reset()
+
 When we're done, put all the workers back.
 
         it 'can clear the worker pool with its reset function', ->
@@ -172,6 +208,60 @@ When we're done, put all the workers back.
             expect( -> LDE.WorkerPool.reset() ).not.toThrow()
             expect( LDE.WorkerPool.numberAvailable() )
                 .toBe LDE.WorkerPool.length
+
+If we try to enqueue for validation a structure that is currently being
+validated (that is, it is not on the validation queue, but has been dequeued
+and is in the process of being validated by a worker that has not yet
+completed its work) then we should terminate that work (since it is no
+longer relevant), return the worker to the worker pool, and then enqueue the
+structure for validation.
+
+        it 'reboots workers if their structures are re-enqueued',
+        ( done ) ->
+
+Create a structure whose validation routine lasts forever (and thus it will
+still be running when we go to reboot it).  Enqueue it.
+
+            neverStops = new LDE.OutputStructure().attr id : '3.14159'
+            whichWorkerDidIGet = null
+            neverStops.validate = ( worker, callback ) ->
+                whichWorkerDidIGet = worker
+                "I just don't call the callback.  So depressing."
+            expect( LDE.ValidationQueue.length ).toBe 0
+            expect( whichWorkerDidIGet ).toBeNull()
+            expect( -> LDE.ValidationQueue.enqueue neverStops )
+                .not.toThrow()
+
+The structure should not show up on the validation queue, because it was
+immediately dequeued and assigned to an available worker.  That worker is
+still working on it, because the callback hasn't been called to signify
+completion.
+
+            expect( LDE.ValidationQueue.length ).toBe 0
+            expect( whichWorkerDidIGet ).not.toBeNull()
+            expect( whichWorkerDidIGet.available ).toBeFalsy()
+
+Before re-enqueueing it, let's give it a validate routine that does stop.
+
+            newValidateRoutineGotCalled = no
+            neverStops.validate = ( worker, callback ) ->
+                "I've reformed my ways."
+                newValidateRoutineGotCalled = yes
+                callback()
+                setTimeout done, 10
+
+Now re-enqueueing the structure should reboot the old worker and put it back
+in the pool before re-enqueueing the structure for validation.  That should
+immediately dequeue it and assign it a worker (probably the same one it just
+had), which should then complete right away because of the change we just
+made.
+
+            expect( -> LDE.ValidationQueue.enqueue neverStops )
+                .not.toThrow()
+            expect( newValidateRoutineGotCalled ).toBeTruthy()
+
+We do not call `done()` here.  It will be called momentarily by the new
+validate routine, above.  If not, this test will fail with a timeout error.
 
 ## Dequeueing tests
 

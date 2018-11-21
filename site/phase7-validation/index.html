@@ -239,13 +239,13 @@ Phase, giving semantic feedback about the validity of steps of work.</p>
 <li class="task-list-item"><input type="checkbox" disabled checked/> Make unit tests for this much functionality, in a new integration
    testing file for validation specifically.  Document such tests the way we
    document unit tests.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the enqueue process so that if a structure is already
+<li class="task-list-item"><input type="checkbox" disabled checked/> Extend the enqueue process so that if a structure is already
    enqueued, then enqueueing again does nothing.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the enqueue process so that if the structure being enqueued,
+<li class="task-list-item"><input type="checkbox" disabled checked/> Extend the enqueue process so that if the structure being enqueued,
    while not currently on the queue, has its validation routine still
    running in a worker, then we find and reboot that worker, mark the
    structure as no longer being validated, and <em>then</em> enqueue it as usual.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Create unit tests that ensure these two new behaviors work.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Create unit tests that ensure these two new behaviors work.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Define a function in the <code>OutputStructure</code> class that uses citation
    lookup to find all the reasons and premises that the object cites, and
    return them as a dictionary.  Call this <code>lookUpAllCitations()</code>.</li>
