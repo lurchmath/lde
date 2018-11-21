@@ -680,3 +680,10 @@ Expose those functions and classes that clients may access.
         exports.WorkerPool = WorkerPool
         exports.ValidationQueue = ValidationQueue
         exports.Worker = LDEWorker
+
+We also expose the following function only for testing purposes.  It lets
+the client set the current phase (modification, interpretation, validation)
+of the LDE, which ordinarily clients should never touch.  This is here only
+for use in the testing suite.
+
+        exports.setPhase = ( phase ) -> CurrentPhase = phase

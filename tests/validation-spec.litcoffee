@@ -51,9 +51,9 @@ each a `validate` routine, or they wouldn't be accepted.
 
         it 'accepts only OutputStructures with validate routines', ->
             OS1 = new LDE.OutputStructure().attr id : 1
-            OS1.validate = ( callback ) -> callback()
+            OS1.validate = ( worker, callback ) -> callback()
             OS2 = new LDE.OutputStructure().attr id : 2
-            OS2.validate = ( callback ) -> callback()
+            OS2.validate = ( worker, callback ) -> callback()
             OS3 = new LDE.OutputStructure().attr id : 3
             nonOS1 = 5
             nonOS2 = 'five'
@@ -130,7 +130,7 @@ Create the objects.
             OS4 = new LDE.OutputStructure().attr id : 4
             OS5 = new LDE.OutputStructure().attr id : 5
             for os in [ OS1, OS2, OS3, OS4, OS5 ]
-                os.validate = ( callback ) -> callback()
+                os.validate = ( worker, callback ) -> callback()
 
 Enqueue them and make sure the queue grows.
 
@@ -175,12 +175,152 @@ When we're done, put all the workers back.
 
 ## Dequeueing tests
 
-These tests have not yet been written.  They should include:
+This section tests the validation queue from the point of view of removing
+elements from it.  Each such element should be an `OutputStructure`.
 
- * When workers are available, dequeue is called the instant something is
-   enqueued
- * Dequeue happens from the high-priority end of the queue
- * Dequeue does nothing if the queue is empty
- * Dequeue does nothing if in the Modification/Interpretation phase
- * Dequeue does nothing if it can't get an available worker
- * Dequeue starts a worker validating the dequeued thing
+    describe 'Dequeueing OutputStructure instances for validation', ->
+
+Create a structure to be validated, enqueue it, and ensure that dequeue is
+called on it immediately, executing its validate routine.
+
+        it 'dequeues whenever something is enqueued if a worker is free',
+        ( done ) ->
+
+First, note that everything we've been doing with workers in the previous
+tests probably leads to some of them still in the process of being rebooted.
+So let's wait for the first worker in the pool (which is the one that will
+be allocated in this test) to be ready before we proceed with the test.
+
+(If we did not do this, we would need to be simultaneously testing a signal
+that the LDE will send when all validation completes, and leveraging that.)
+
+            LDE.WorkerPool[0].whenReady ->
+                OS = new LDE.OutputStructure().attr id : 0
+                wasCalled = no
+                OS.validate = ( worker, callback ) ->
+                    wasCalled = yes
+                    callback()
+                expect( LDE.WorkerPool.numberAvailable() )
+                    .toBe LDE.WorkerPool.length
+                expect( LDE.ValidationQueue.length ).toBe 0
+                expect( wasCalled ).toBeFalsy()
+                LDE.ValidationQueue.enqueue OS
+                expect( wasCalled ).toBeTruthy()
+                expect( LDE.ValidationQueue.length ).toBe 0
+                expect( LDE.WorkerPool.numberAvailable() )
+                    .toBe LDE.WorkerPool.length
+                done()
+
+Dequeue should do nothing if the queue is empty.  This is hard to test, but
+here goes.
+
+        it 'does nothing if the queue is empty', ->
+            expect( LDE.ValidationQueue.length ).toBe 0
+            expect( -> LDE.ValidationQueue.dequeue() ).not.toThrow()
+            expect( LDE.ValidationQueue.length ).toBe 0
+
+Dequeue does nothing if the modification or interpretation phase is running.
+We track the phase with the `CurrentPhase` member of the LDE, which is
+normally hidden and not for clients to inspect or alter.  But we expose it
+for use in testing only, with the `setPhase` function of the LDE.
+
+        it 'does nothing if modification/interpretation is running', ->
+            expect( -> LDE.setPhase 'modification' ).not.toThrow()
+
+We add two `OutputStructure`s to the Validation Queue.  An earlier test in
+this section demonstrates that ordinarily they would be immediately dequeued
+and processed by workers.  Instead we see here that they are not dequeued
+nor are any workers assigned to them, because we have set the phase to be
+"modification."
+
+            OS1 = new LDE.OutputStructure().attr id : 1
+            OS2 = new LDE.OutputStructure().attr id : 2
+            OS1.validate = ( worker, callback ) -> callback()
+            OS2.validate = ( worker, callback ) -> callback()
+            expect( LDE.ValidationQueue.length ).toBe 0
+            expect( LDE.WorkerPool.numberAvailable() )
+                .toBe LDE.WorkerPool.length
+            LDE.ValidationQueue.enqueue OS1
+            LDE.ValidationQueue.enqueue OS2
+            expect( LDE.ValidationQueue.length ).toBe 2
+            expect( LDE.WorkerPool.numberAvailable() )
+                .toBe LDE.WorkerPool.length
+
+Clean up after ourselves.
+
+            LDE.ValidationQueue.reset()
+            LDE.setPhase null
+
+Dequeue does nothing if it cannot get an available worker. We claim all
+available workers, then add some structures to the queue, and see that they
+are not dequeued.
+
+        it 'does nothing if modification/interpretation is running', ->
+
+Claim all available workers, making them unavailable.
+
+            expect( LDE.WorkerPool.length ).toBeGreaterThan 0
+            while LDE.WorkerPool.numberAvailable() > 0
+                expect( LDE.WorkerPool.getAvailableWorker() ).toBeTruthy()
+            expect( LDE.WorkerPool.numberAvailable() ).toBe 0
+            expect( LDE.WorkerPool.getAvailableWorker() ).toBeUndefined()
+
+Verify that adding structures to the queue does not process them.
+
+            OS1 = new LDE.OutputStructure().attr id : 1
+            OS2 = new LDE.OutputStructure().attr id : 2
+            OS1.validate = ( worker, callback ) -> callback()
+            OS2.validate = ( worker, callback ) -> callback()
+            expect( LDE.ValidationQueue.length ).toBe 0
+            LDE.ValidationQueue.enqueue OS1
+            LDE.ValidationQueue.enqueue OS2
+            expect( LDE.ValidationQueue.length ).toBe 2
+
+Clean up after ourselves.
+
+            LDE.ValidationQueue.reset()
+            LDE.WorkerPool.reset()
+
+Dequeue should take things from the high-priority end of the queue first.
+We lie to the LDE, saying that it is in the modification phase, so that it
+doesn't automatically dequeue things as we enqueue them.  Then we turn that
+off and begin manually dequeueing and verify that the order is correct.
+
+        it 'dequeues in order of highest priority first', ( done ) ->
+
+Disable dequeueing by saying we're in the modification phase.
+
+            expect( -> LDE.setPhase 'modification' ).not.toThrow()
+
+Enqueue three structures not in priority order.  Give them a `validate()`
+routine that will record the order in which they were processed.
+
+            processedOrder = [ ]
+            OS1 = new LDE.OutputStructure().attr id : 1
+            OS2 = new LDE.OutputStructure().attr id : 2
+            OS3 = new LDE.OutputStructure().attr id : 3
+            OS1.validate = OS2.validate = OS3.validate =
+            ( worker, callback ) ->
+                processedOrder.push @id()
+                callback()
+            expect( LDE.ValidationQueue.length ).toBe 0
+            LDE.ValidationQueue.enqueue OS1, 5
+            LDE.ValidationQueue.enqueue OS2, 0
+            LDE.ValidationQueue.enqueue OS3, 2
+            expect( LDE.ValidationQueue.length ).toBe 3
+
+Re-enable dequeueing by setting the LDE's phase to null, then manually
+dequeue three times.
+
+            expect( -> LDE.setPhase null ).not.toThrow()
+            expect( -> LDE.ValidationQueue.dequeue() ).not.toThrow()
+            expect( -> LDE.ValidationQueue.dequeue() ).not.toThrow()
+            expect( -> LDE.ValidationQueue.dequeue() ).not.toThrow()
+
+Verify that things were dequeued in the correct order, then call the test
+callback.
+
+            expect( processedOrder ).toEqual [ 1, 3, 2 ]
+            expect( LDE.WorkerPool.numberAvailable() )
+                .toBe LDE.WorkerPool.length
+            done()

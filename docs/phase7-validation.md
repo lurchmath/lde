@@ -75,10 +75,10 @@ MyOutputStructure.validate = function ( worker, callback ) {
 ```
  * [x] Call that dequeueing routine whenever a worker becomes available and
    whenever a new structure is added to the validation priority queue.
- * [ ] Extend the LDE's `reset()` function so that, in addition to what it
+ * [x] Extend the LDE's `reset()` function so that, in addition to what it
    does now, it empties the validation queue, reboots all ongoing workers,
    and returns them all as available again.
- * [ ] Make unit tests for this much functionality, in a new integration
+ * [x] Make unit tests for this much functionality, in a new integration
    testing file for validation specifically.  Document such tests the way we
    document unit tests.
  * [ ] Extend the enqueue process so that if a structure is already
