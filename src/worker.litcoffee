@@ -117,6 +117,19 @@ evaluated in the worker's context.
                 codeOrFunction = "(#{codeOrFunction})()"
             @dispatch type : 'run', code : codeOrFunction, callback
 
+But if you wish to run an asynchronous function, use the following instead.
+Provide either a function that takes as parameter a callback with the
+standard result-and-error signature (which it calls upon completing its work
+or encountering an error, making only one of the parameters non-null) or a
+string of code that defines such a function.  As with the previous, your
+callback will be called with a message of the same format when the work is
+complete.
+
+        runAsync : ( codeOrFunction, callback ) ->
+            if typeof codeOrFunction is 'function'
+                codeOrFunction = "(#{codeOrFunction})"
+            @dispatch type : 'runAsync', function : codeOrFunction, callback
+
 ### Support installing scripts
 
 `Worker` instances support installing scripts in the worker.  Simply call

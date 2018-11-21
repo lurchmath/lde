@@ -182,6 +182,49 @@ principle this verifies what we need.
                         expect( response.result ).toBe 97
                         done()
 
+But what if the code run in the background throws an error?  The worker
+should catch it and report that to us.
+
+        it 'should report errors in synchronous code', ( done ) ->
+            W = new LDEWorker ->
+                W.run ( -> thisWontBeDefined() ), ( response ) ->
+                    expect( response.success ).toBeUndefined()
+                    expect( response.error ).toMatch /thisWontBeDefined/
+                    expect( response.result ).toBeUndefined()
+                    done()
+
+We repeat a similar test to the previous, but this time with an asynchronous
+function, to ensure that it works fine that way as well.  We do not actually
+use an artificial delay to simulate background work because currently the
+Node.js WebWorker replacement does not support `setTimeout()`, but we use
+`thread.nextTick` as a close cousin.
+
+        it 'should work when the background work is asynchronous',
+        ( done ) ->
+            W = new LDEWorker ->
+                toRun = ( callback ) ->
+                    thread.nextTick -> callback 'Success!'
+                W.runAsync toRun, ( response ) ->
+                    expect( response.success ).toBe yes
+                    expect( response.error ).toBeUndefined()
+                    expect( response.result ).toBe 'Success!'
+                    done()
+
+We repeat a similar test to the previous, but this time the asynchronous
+code pretends it encountered an error, and we verify that it can send that
+information back in the way we expect.
+
+        it 'should work when the background work encounters an error',
+        ( done ) ->
+            W = new LDEWorker ->
+                toRun = ( callback ) ->
+                    thread.nextTick -> callback null, 'example error'
+                W.runAsync toRun, ( response ) ->
+                    expect( response.success ).toBeUndefined()
+                    expect( response.error ).toBe 'example error'
+                    expect( response.result ).toBeUndefined()
+                    done()
+
 ## Installing data in workers
 
 We now run a test to verify that a worker can install data and then run code
@@ -248,10 +291,16 @@ Install some scripts, data, and functions.
                 W.installScript 'release/structure.js', ( response ) ->
                     expect( response.success ).toBe yes
                     expect( response.error ).toBeUndefined()
+
+Verify that a big, global object is indeed defined in the worker.
+
                     W.run '!!self["Structure"]', ( response ) ->
                         expect( response.success ).toBe yes
                         expect( response.error ).toBeUndefined()
                         expect( response.result ).toBeTruthy()
+
+Reboot the worker, then verify that it's no longer defined.
+
                         W.reboot ->
                             W.run 'self["Structure"]', ( response ) ->
                                 expect( response.success ).toBe yes

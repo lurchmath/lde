@@ -53,8 +53,24 @@ that error's message.
 
 Hey, it's a sandbox, right?  Run whatever you want.  We don't care.
 
+For synchronous code, it is simpler:
+
         if request.type is 'run'
             justDoThis -> result : eval request.code
+
+For asynchronous code, we expect `request.function` to be an asynchronous
+function that takes a single callback as its parameter.  That callback will
+has the standard result-and-error pair of arguments, only one of which
+should be non-null.  The function should respect this and call the callback
+in one of those two ways upon completion or encountering an error.
+
+        if request.type is 'runAsync'
+            try
+                func = eval request.function
+                func ( result, error ) ->
+                    if error then fail error else succeed result : result
+            catch error
+                fail error.message
 
 ## Support installing scripts
 
