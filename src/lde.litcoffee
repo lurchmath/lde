@@ -106,6 +106,14 @@ distinguish `Structure` instances, including those in both the Input Tree
 and the Output Tree.  Thus node IDs must be globally unique across both
 trees.
 
+Later this module defines a pool of background thread workers and a queue of
+validation tasks for them to process.  This reset function also calls the
+reset function in both of those objects, to terminate all running work and
+clear out the queue of pending work, thus making the LDE at a completely
+fresh start.  We call them here with CoffeeScript's `?` syntax because the
+first time this routine is run, those objects are not fully set up, but all
+future times, they will be.
+
     functions.reset = ->
         functions.setInternalState
             inputTree :
@@ -116,6 +124,8 @@ trees.
                 className : 'OutputStructure'
                 children : [ ]
                 attributes : id : 'OT root'
+        WorkerPool?.reset?()
+        ValidationQueue?.reset?()
 
 Use the `reset()` function to initialize our internal state.
 
@@ -564,6 +574,29 @@ less than the number of cores (so that we leave one core for the UI thread).
         navigator?.hardwareConcurrency ? os?.cpus?()?.length ? 1
     WorkerPool.setSize numberOfCores() - 1 # setSize caps this below at 1
 
+We will also want to be able to reset the validation phase, meaning that all
+validation should stop and the queue be emptied without any further work
+being assigned to workers.  This is useful if the user discards all their
+work in the client and wishes to start a new document, for example.
+
+We split this task into two parts: stopping all workers and emptying the
+queue.  Stopping all workers happens with the following function; emptying
+the queue happens with a function defined in the next section.
+
+Note that this function does *not* call `giveWorkerBack()`, so that one
+might call `reset()` here and then in the validation queue, in either order.
+If we used `giveWorkerBack()` it would start validating the next job
+immediately, which is not the intended result.  But calling this function
+without emptying the validation queue will result in pausing all work
+without emptying that queue.
+
+    WorkerPool.reset = ->
+        working =
+            ( worker for worker in WorkerPool when not worker.available )
+        for worker in working
+            worker.reboot()
+            worker.available = yes
+
 ## Validation priority queue
 
 This module tracks a list of the `OutputStructure` instances that are
@@ -624,6 +657,17 @@ do their work and call the callback, ignoring the worker.
         structure = ValidationQueue.pop().structure
         worker.whenReady ->
             structure.validate worker, -> WorkerPool.giveWorkerBack worker
+
+As stated in the previous section, resetting the validation phase means all
+validation should stop and the queue be emptied without any further work
+being assigned to workers.
+
+We split this task into two parts: stopping all workers and emptying the
+queue.  Stopping all workers happens with the `reset()` function in the
+`WorkerPool` object.  Emptying the queue happens here.
+
+    ValidationQueue.reset = ->
+        ValidationQueue.splice 0, ValidationQueue.length
 
 ## Module exports
 

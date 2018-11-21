@@ -104,10 +104,9 @@ We cannot add `OutputStructure`s that don't have `validate` routines.
 
 Clear out the validation queue before the next tests.
 
-        it 'lets us clear out the queue manually during testing', ->
+        it 'can clear the validation queue with its reset function', ->
             expect( LDE.ValidationQueue.length ).toBeGreaterThan 0
-            while LDE.ValidationQueue.length > 0
-                expect( -> LDE.ValidationQueue.pop() ).not.toThrow()
+            expect( -> LDE.ValidationQueue.reset() ).not.toThrow()
             expect( LDE.ValidationQueue.length ).toBe 0
 
 Adding structures to the queue happens in priority order.  Here we create
@@ -164,26 +163,15 @@ priorities.
 Clear out the validation queue before you start putting workers back, or
 they will try to operate on the contents of the queue.
 
-        it 'lets us clear out the queue manually when cleaning up', ->
-            expect( LDE.ValidationQueue.length ).toBeGreaterThan 0
-            while LDE.ValidationQueue.length > 0
-                expect( -> LDE.ValidationQueue.pop() ).not.toThrow()
-            expect( LDE.ValidationQueue.length ).toBe 0
+            LDE.ValidationQueue.reset()
 
 When we're done, put all the workers back.
 
-        it 'lets us put all workers back when done testing', ->
-            for worker in LDE.WorkerPool
-                expect( -> LDE.WorkerPool.giveWorkerBack worker )
-                    .not.toThrow()
+        it 'can clear the worker pool with its reset function', ->
+            expect( LDE.WorkerPool.numberAvailable() ).toBe 0
+            expect( -> LDE.WorkerPool.reset() ).not.toThrow()
             expect( LDE.WorkerPool.numberAvailable() )
                 .toBe LDE.WorkerPool.length
-
-Tests that remain:
-
- * Resetting the LDE clears the queue without validating anything
-   (This has not yet been implemented, so build that first.)
- * That same reset also makes all workers available again
 
 ## Dequeueing tests
 

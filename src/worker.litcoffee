@@ -89,9 +89,9 @@ following function.
         isReady : -> @loadedCallbacks.length > 0
         whenReady : ( callback ) ->
             if @isReady()
-                callback()
+                callback?()
             else
-                @loadedCallbacks.push callback
+                if callback then @loadedCallbacks.push callback
 
 The following function abstracts the idea of sending a message to the worker
 and associating a callback with it.
