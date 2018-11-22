@@ -216,6 +216,11 @@ completed its work) then we should terminate that work (since it is no
 longer relevant), return the worker to the worker pool, and then enqueue the
 structure for validation.
 
+The `CurrentPhase` member of the LDE is normally hidden and not for clients
+to inspect or alter.  But we expose it for use in testing only, because
+unless the phase is "validation" then no validation routine would ever get
+run (as we will later test).
+
         it 'reboots workers if their structures are re-enqueued',
         ( done ) ->
 
@@ -464,8 +469,17 @@ verify that it got there.
 
 Start the whole LDE modification process and verify that this puts something
 in the Output Tree and that the validation routine defined above gets run.
+We do not stop the test until we hear from the LDE that it has completed the
+validation phase, which also tests that we correctly receive that feedback
+message.  (If we never do, this test will fail with a timeout error.)
 
+            modificationFinished = no
+            LDE.Feedback.addEventListener 'feedback', ( event ) ->
+                if event.subject is 'OT root' and \
+                   event.type is 'validation complete'
+                    expect( modificationFinished ).toBeTruthy()
+                    expect( didValidation ).toBeTruthy()
+                    done()
             LDE.runModification ->
                 expect( LDE.getOutputTree().children() ).not.toEqual [ ]
-                expect( didValidation ).toBeTruthy()
-                done()
+                modificationFinished = yes

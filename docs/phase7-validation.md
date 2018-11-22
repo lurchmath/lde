@@ -114,11 +114,7 @@ MyOutputStructure.validate = function ( worker, callback ) {
  * [x] Write unit tests to ensure that the already-tested validation
    features still function when they are automatically triggered at the end
    of the implementation phase.
- * [ ] Correct the interpretation phase to switch the `CurrentPhase`
-   variable to "validation" as it finishes.  Update the dequeue function so
-   that it does not compare `CurrentPhase` to null, but rather to
-   "validation".  Ensure all unit tests still pass.
- * [ ] Add to the validation queue the feature of emitting feedback when the
+ * [x] Add to the validation queue the feature of emitting feedback when the
    final worker is returned to be available again and there's nothing to
    dequeue and process.  Add tests or tweak old ones to listen for this
    signal at the end of validation and be sure it's emitted precisely once,

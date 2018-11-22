@@ -217,3 +217,6 @@ of data it transmits.)
  * `"validation queued"` - feedback of this type means that the LDE has just
    enqueued for validation an `OutputStructure` instance.  The `subject`
    will be its corresponding origin `InputStructure`.
+ * `"validation complete"` - feedback of this type means that the LDE has
+   completed the entire validation phase.  No validation for any structure
+   is still running.  The `subject` field will be "OT root".

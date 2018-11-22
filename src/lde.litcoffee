@@ -397,17 +397,19 @@ if and when needed.
                 type : 'interpretation error'
                 details : e
         InputStructure.clearAlreadyStarted()
+
+First, we mark the interpretation phase as complete and call its callback.
+Then we go ahead and trigger any subsequent validation by visiting every
+node of the Output Tree that is marked dirty and calling its `justChanged()`
+function.  This will often do nothing, but every node that is dirty for
+validation has to have a chance to react to that.
+
         CurrentPhase = null
-
-In every node of the Output Tree that is marked dirty, call its
-`justChanged()` function.  This will often do nothing, but every node that
-is dirty for validation has to have a chance to react to that.
-
+        callback?()
         callJustChanged = ( node ) ->
             callJustChanged child for child in node.children()
             node.justChanged?()
         callJustChanged OutputTree
-        callback?()
 
 ### Event Listeners
 
@@ -569,11 +571,19 @@ worker is ready for use when its callback is called.
 
 Whenever a worker becomes available, we call the dequeueing function defined
 in the next section, below, in case it has work that it wants to assign to
-that worker.
+that worker.  Also, if this is the final worker to be given back, and the
+validation queue has nothing left to be done in it, we emit feedback saying
+that validation is complete.
 
     WorkerPool.giveWorkerBack = ( worker ) ->
         worker.available = yes
-        ValidationQueue.dequeue()
+        if ValidationQueue.length > 0
+            ValidationQueue.dequeue()
+        else if WorkerPool.numberAvailable() is WorkerPool.length
+            feedback
+                subject : 'OT root'
+                type : 'validation complete'
+                details : 'The validation phase just completed.'
 
 We write a function to compute the number of cores available on the user's
 machine, either in Node.js or the browser, then set the pool size to be one

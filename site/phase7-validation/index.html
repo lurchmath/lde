@@ -276,11 +276,7 @@ Phase, giving semantic feedback about the validity of steps of work.</p>
 <li class="task-list-item"><input type="checkbox" disabled checked/> Write unit tests to ensure that the already-tested validation
    features still function when they are automatically triggered at the end
    of the implementation phase.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Correct the interpretation phase to switch the <code>CurrentPhase</code>
-   variable to "validation" as it finishes.  Update the dequeue function so
-   that it does not compare <code>CurrentPhase</code> to null, but rather to
-   "validation".  Ensure all unit tests still pass.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add to the validation queue the feature of emitting feedback when the
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add to the validation queue the feature of emitting feedback when the
    final worker is returned to be available again and there's nothing to
    dequeue and process.  Add tests or tweak old ones to listen for this
    signal at the end of validation and be sure it's emitted precisely once,
