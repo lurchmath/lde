@@ -414,3 +414,58 @@ callback.
             expect( LDE.WorkerPool.numberAvailable() )
                 .toBe LDE.WorkerPool.length
             done()
+
+## Full sequence tests
+
+This section tests whether validation is triggered at the end of the
+interpretation phase and if it still works in that context.
+
+    describe 'Running validation automatically after interpretation', ->
+
+Create the simplest test of this pipeline: one `InputStructure` class and
+instance, one `OutputStructure` class and instance.
+
+        it 'happens and works for a simple example', ( done ) ->
+
+Declare two classes we will use for this test.  First, an `OutputStructure`
+subclass that, when validated, records that it was, so that we can confirm
+later that validation actually happened.
+
+            didValidation = no
+            class TinyOSClass1 extends LDE.OutputStructure
+                validate : ( worker, callback ) ->
+                    didValidation = yes
+                    callback()
+                className : LDE.Structure.addSubclass 'TinyOSClass1',
+                    TinyOSClass1
+
+Second, an `InputStructure` subclass that puts into the Output Tree a single
+instance of the class just defined above.
+
+            class TinyISClass1 extends LDE.InputStructure
+                interpret : ( accessibles, childResults, scope ) ->
+                    [ new TinyOSClass1() ]
+                className : LDE.Structure.addSubclass 'TinyISClass1',
+                    TinyISClass1
+
+Ensure the LDE contains no Input Tree nor Output Tree.
+
+            expect( -> LDE.reset() ).not.toThrow()
+            expect( LDE.getInputTree().children() ).toEqual [ ]
+            expect( LDE.getOutputTree().children() ).toEqual [ ]
+
+Add one instance of the tiny `InputStructure` class to the Input Tree and
+verify that it got there.
+
+            toInsert = new TinyISClass1().attr id : 1
+            expect( -> LDE.insertStructure toInsert, 'root', 0 )
+                .not.toThrow()
+            expect( LDE.getInputTree().children() ).not.toEqual [ ]
+
+Start the whole LDE modification process and verify that this puts something
+in the Output Tree and that the validation routine defined above gets run.
+
+            LDE.runModification ->
+                expect( LDE.getOutputTree().children() ).not.toEqual [ ]
+                expect( didValidation ).toBeTruthy()
+                done()

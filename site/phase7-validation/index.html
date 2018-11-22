@@ -252,7 +252,7 @@ Phase, giving semantic feedback about the validity of steps of work.</p>
 <li class="task-list-item"><input type="checkbox" disabled checked/> Write unit tests for <code>OutputStructure::lookUpIn(label,accessibles)</code>
    and <code>Structure.lookUp(label)</code>, which accidentally escaped untested.</li>
 <li class="task-list-item"><input type="checkbox" disabled checked/> Add unit tests for <code>Structure.lookUpAllCitations()</code>.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Create a default implementation of <code>justChanged()</code> in the
+<li class="task-list-item"><input type="checkbox" disabled checked/> Create a default implementation of <code>justChanged()</code> in the
    <code>OutputStructure</code> class that does the following things.<ul>
 <li>If the OS has no validation routine, quit (do nothing).</li>
 <li>If its origin IS has a validation priority of null, send feedback from
@@ -265,7 +265,7 @@ Phase, giving semantic feedback about the validity of steps of work.</p>
   <code>OutputStructure</code> instance.</li>
 </ul>
 </li>
-<li class="task-list-item"><input type="checkbox" disabled/> When interpretation ends, loop through all nodes of the Output Tree
+<li class="task-list-item"><input type="checkbox" disabled checked/> When interpretation ends, loop through all nodes of the Output Tree
    and do this:<ul>
 <li>If it is marked dirty, call <code>justChanged()</code> and stop.  Otherwise:</li>
 <li>Recompute its <code>lookUpAllCitations()</code> dictionary, and if any part of it
@@ -273,9 +273,23 @@ Phase, giving semantic feedback about the validity of steps of work.</p>
   dirty, call <code>justChanged()</code>.</li>
 </ul>
 </li>
-<li class="task-list-item"><input type="checkbox" disabled/> Write unit tests to ensure that the already-tested validation
+<li class="task-list-item"><input type="checkbox" disabled checked/> Write unit tests to ensure that the already-tested validation
    features still function when they are automatically triggered at the end
    of the implementation phase.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Correct the interpretation phase to switch the <code>CurrentPhase</code>
+   variable to "validation" as it finishes.  Update the dequeue function so
+   that it does not compare <code>CurrentPhase</code> to null, but rather to
+   "validation".  Ensure all unit tests still pass.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add to the validation queue the feature of emitting feedback when the
+   final worker is returned to be available again and there's nothing to
+   dequeue and process.  Add tests or tweak old ones to listen for this
+   signal at the end of validation and be sure it's emitted precisely once,
+   at the correct time.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add to the LDE the feature that it automatically triggers
+   modification a short while after any change to the Input Tree, unless a
+   new change comes in during that same "short while" and unless
+   modification is manually run during that same "short while."  Add
+   appropriate tests.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Write a new file of integration tests that test the full LDE stack of
    modification-interpretation-validation, including all the subtle types of
    situations that may arise, including changes to a premise impacting a

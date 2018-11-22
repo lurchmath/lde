@@ -398,7 +398,16 @@ if and when needed.
                 details : e
         InputStructure.clearAlreadyStarted()
         CurrentPhase = null
-        callback()
+
+In every node of the Output Tree that is marked dirty, call its
+`justChanged()` function.  This will often do nothing, but every node that
+is dirty for validation has to have a chance to react to that.
+
+        callJustChanged = ( node ) ->
+            callJustChanged child for child in node.children()
+            node.justChanged?()
+        callJustChanged OutputTree
+        callback?()
 
 ### Event Listeners
 
@@ -688,6 +697,31 @@ queue.  Stopping all workers happens with the `reset()` function in the
 
     ValidationQueue.reset = ->
         ValidationQueue.splice 0, ValidationQueue.length
+
+## Handling Output Tree changes
+
+The interpretation phase completes by calling `justChanged()` in all nodes
+of the Output Tree that were changed.  The default implementation just
+defers computation to a non-existant class method `instanceJustChanged()`,
+which we can override here to use the validation queue we just defined.
+
+If the structure has no validation routine, do nothing.  If its origin
+`InputStructure` has validation priority null, do nothing (because that
+means "skip this").  Othwerise, enqueue it for validation with the
+appropriate priority obtained from its origin (defaulting to zero).  But
+before enqueueing for validation, look up and store all its citations for
+later reference and comparison.  (We do this before enqueueing in case its
+validation routine is synchronous and might be called immediately upon
+enqueueing.)
+
+    OutputStructure::instanceJustChanged = ( instance ) ->
+        return unless typeof instance.validate is 'function'
+        priority = @origin?.getAttribute 'validation priority'
+        return if priority is null
+        if typeof priority isnt 'number' then priority = 0
+        instance.lastCitationLookup = instance.lookUpAllCitations()
+        ValidationQueue.enqueue instance, priority
+        instance.feedback type : 'validation queued'
 
 ## Module exports
 

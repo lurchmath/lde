@@ -208,6 +208,24 @@ Return the result.
 
             result
 
+## Handling change events
+
+When interpretation has completed, the `justChanged()` function will be
+called in every structure in the Output Tree has been updated during that
+interpretation phase.  We provide the following default implementation for
+`justChanged()` that will defer the work to the class method
+`instanceJustChanged` if and only if that class method exists.  It doesn't
+yet exist, so this is ineffective unless some later code installs just such
+a class method.
+
+The reason for this is that the actual implementation we want to provide
+depends upon some global data structures in the LDE to which this module
+does not have access.  When the LDE loads this module, it can fill in the
+missing class method with the appropriate implementation, which accesses its
+own internals.
+
+        justChanged : -> OutputStructure::instanceJustChanged? @
+
 ## Exports
 
 Now if this is being used in a Node.js context, export the class we defined.

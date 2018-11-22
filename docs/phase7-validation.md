@@ -94,7 +94,7 @@ MyOutputStructure.validate = function ( worker, callback ) {
  * [x] Write unit tests for `OutputStructure::lookUpIn(label,accessibles)`
    and `Structure.lookUp(label)`, which accidentally escaped untested.
  * [x] Add unit tests for `Structure.lookUpAllCitations()`.
- * [ ] Create a default implementation of `justChanged()` in the
+ * [x] Create a default implementation of `justChanged()` in the
    `OutputStructure` class that does the following things.
     * If the OS has no validation routine, quit (do nothing).
     * If its origin IS has a validation priority of null, send feedback from
@@ -105,15 +105,29 @@ MyOutputStructure.validate = function ( worker, callback ) {
     * Send feedback about the OS saying its validation is being recomputed.
     * Call `lookUpAllCitations()` and store its result in a field of the
       `OutputStructure` instance.
- * [ ] When interpretation ends, loop through all nodes of the Output Tree
+ * [x] When interpretation ends, loop through all nodes of the Output Tree
    and do this:
     * If it is marked dirty, call `justChanged()` and stop.  Otherwise:
     * Recompute its `lookUpAllCitations()` dictionary, and if any part of it
       changed (in key or value) or any structure referenced by it is marked
       dirty, call `justChanged()`.
- * [ ] Write unit tests to ensure that the already-tested validation
+ * [x] Write unit tests to ensure that the already-tested validation
    features still function when they are automatically triggered at the end
    of the implementation phase.
+ * [ ] Correct the interpretation phase to switch the `CurrentPhase`
+   variable to "validation" as it finishes.  Update the dequeue function so
+   that it does not compare `CurrentPhase` to null, but rather to
+   "validation".  Ensure all unit tests still pass.
+ * [ ] Add to the validation queue the feature of emitting feedback when the
+   final worker is returned to be available again and there's nothing to
+   dequeue and process.  Add tests or tweak old ones to listen for this
+   signal at the end of validation and be sure it's emitted precisely once,
+   at the correct time.
+ * [ ] Add to the LDE the feature that it automatically triggers
+   modification a short while after any change to the Input Tree, unless a
+   new change comes in during that same "short while" and unless
+   modification is manually run during that same "short while."  Add
+   appropriate tests.
  * [ ] Write a new file of integration tests that test the full LDE stack of
    modification-interpretation-validation, including all the subtle types of
    situations that may arise, including changes to a premise impacting a

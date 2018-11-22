@@ -214,3 +214,6 @@ of data it transmits.)
    the Output Tree to some `Structure` not in the Output Tree.  The feedback
    will also contain an `id` field containing the unique ID of the
    connection that was severed.
+ * `"validation queued"` - feedback of this type means that the LDE has just
+   enqueued for validation an `OutputStructure` instance.  The `subject`
+   will be its corresponding origin `InputStructure`.
