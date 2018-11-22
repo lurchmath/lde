@@ -164,6 +164,10 @@ doing nothing, and in the second case by attempting to deserialize it.
 This module presents to clients a seven-function API defined in this
 section.  Each of these functions manipulates the global Input Tree.
 
+Every one of these functions, after manipulating the tree, also calls
+`startModificationSoon()`.  That function is documented in
+[the Modification Phase section below](#the-modification-phase).
+
 ### Editing Structures in the Input Tree
 
 The following insertion function deserializes the given structure from JSON,
@@ -197,6 +201,7 @@ tracked.
                 newInstance.clearAttributes disallowed...
             parent.insertChild newInstance, insertionIndex
             newInstance.trackIDs()
+            startModificationSoon()
 
 The following function finds the descendant of the global Input Tree that
 has the given ID and, assuming such a structure exists, removes it from its
@@ -207,6 +212,7 @@ parent and stops tracking all IDs within it.
            ( isInTheInputTree subtree ) and subtree isnt InputTree
             subtree.removeFromParent()
             subtree.untrackIDs()
+            startModificationSoon()
 
 The following function finds the descendant of the global Input Tree that
 has the given ID and, assuming such a structure exists, deserializes the
@@ -237,6 +243,7 @@ the second argument, rather than a serialized version.
                 subtree.transferConnectionsTo newInstance
             subtree.untrackIDs()
             newInstance.trackIDs()
+            startModificationSoon()
 
 The following function finds the descendant of the global Input Tree that
 has the given ID and, assuming such a structure exists, calls its member
@@ -258,6 +265,7 @@ function does nothing.
             else
                 subtree.setAttribute key, value
             if key is 'id' then subtree.trackIDs no
+            startModificationSoon()
 
 ### Editing Connections in the Input Tree
 
@@ -273,7 +281,8 @@ function does nothing.  Otherwise, it creates the connection.
             ( source = Structure.instanceWithID sourceID ) and \
             ( target = Structure.instanceWithID targetID ) and \
             ( isInTheInputTree source ) and ( isInTheInputTree target )
-        Structure.connect source, target, data
+        if Structure.connect source, target, data
+            startModificationSoon()
 
 The following function removes a connection between two nodes in the Input
 Tree.  It takes just one parameter, the unique ID of the connection to
@@ -285,7 +294,8 @@ nothing.
         return no unless \
             ( isInTheInputTree Structure.getConnectionSource id ) and \
             ( isInTheInputTree Structure.getConnectionTarget id )
-        Structure.disconnect id
+        if Structure.disconnect id
+            startModificationSoon()
 
 The following function permits editing the attributes of a connection in the
 Input Tree.  It takes three parameters, a connection ID, a key, and a value.
@@ -300,7 +310,8 @@ satisfied, the function does nothing.
         return no unless \
             ( isInTheInputTree Structure.getConnectionSource id ) and \
             ( isInTheInputTree Structure.getConnectionTarget id )
-        Structure.setConnectionData id, key, value
+        if Structure.setConnectionData id, key, value
+            startModificationSoon()
 
 ### Phases of computation
 
@@ -325,7 +336,11 @@ implementation, we write its signature that way so that it can be made
 asynchronous later if we need to make it more efficient, and clients will
 not need to change their use of it.
 
+For the explanation of the `clearModificationTimer()` function, see further
+down in this section.
+
     functions.runModification = ( callback ) ->
+        clearModificationTimer()
         CurrentPhase = 'modification'
         updateAllConnections = ( node ) ->
             node.updateConnections() if node instanceof InputModifier
@@ -333,6 +348,30 @@ not need to change their use of it.
         updateAllConnections InputTree
         CurrentPhase = null
         functions.runInterpretation callback
+
+We will want to trigger the modification phase after any change to the Input
+Tree.  But we won't want to do so instantaneously, because the modification
+phase sets off the interpretation phase, which then sets off validation, all
+of which amounts to a lot of work.  We wouldn't want that much work to be
+triggered after every small change to the Input Tree.  So instead we adopt
+the following strategy.
+
+When a change comes in to the Input Tree, we take note of it and plan to
+start the modification phase in a short while (using the delay given below).
+If, while we're waiting for that delay to elapse, we get another change to
+the Input Tree, then we cancel the old timer and start a new one afresh
+instead.  Also, while we're waiting, if a client starts the modification
+phase manually, we cancel our timer, of course.
+
+    modificationStartDelay = 200 # ms
+    modificationTimer = null
+    setModificationTimer = ( callback ) ->
+        modificationTimer = setTimeout callback, modificationStartDelay
+    clearModificationTimer = ->
+        if modificationTimer then clearTimeout modificationTimer
+    startModificationSoon = ->
+        clearModificationTimer()
+        setModificationTimer -> functions.runModification()
 
 ### The Interpretation Phase
 
@@ -512,6 +551,7 @@ depending on whether this is node.js or the browser.
         EventEmitter = require 'events'
         Feedback = exports.Feedback = new EventEmitter() # node
         Feedback.addEventListener = Feedback.addListener # make API same
+        Feedback.removeEventListener = Feedback.removeListener # ditto
 
 We also create a function global to this module that implements the sending
 of feedback to our context.  In node.js or the browser, we emit an event
@@ -730,8 +770,8 @@ enqueueing.)
         return if priority is null
         if typeof priority isnt 'number' then priority = 0
         instance.lastCitationLookup = instance.lookUpAllCitations()
+        instance.feedback type : 'validation queueing'
         ValidationQueue.enqueue instance, priority
-        instance.feedback type : 'validation queued'
 
 ## Module exports
 

@@ -214,9 +214,11 @@ of data it transmits.)
    the Output Tree to some `Structure` not in the Output Tree.  The feedback
    will also contain an `id` field containing the unique ID of the
    connection that was severed.
- * `"validation queued"` - feedback of this type means that the LDE has just
-   enqueued for validation an `OutputStructure` instance.  The `subject`
-   will be its corresponding origin `InputStructure`.
+ * `"validation queueing"` - feedback of this type means that the LDE is
+   just about to enqueue for validation an `OutputStructure` instance.  The
+   `subject` will be its corresponding origin `InputStructure`.  We call
+   this just before enqueueing in case the structure has a synchronous
+   validation routine that will return immediately after enqueueing.
  * `"validation complete"` - feedback of this type means that the LDE has
    completed the entire validation phase.  No validation for any structure
    is still running.  The `subject` field will be "OT root".

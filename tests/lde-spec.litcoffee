@@ -1200,8 +1200,8 @@ Verify that there is a feedback `EventEmitter` to listen to, then attach a
 listener to it that will fill `F` with any feedback data received.
 
             expect( LDE.Feedback ).toBeTruthy()
-            LDE.Feedback.addEventListener 'feedback', ( event ) ->
-                F = event
+            listener = ( event ) -> F = event
+            LDE.Feedback.addEventListener 'feedback', listener
 
 Send feedback and be sure we heard it, with the right contents.
 
@@ -1209,6 +1209,10 @@ Send feedback and be sure we heard it, with the right contents.
             expect( F ).not.toBe null
             expect( F.subject ).toBe A.getAttribute 'id'
             expect( F.bar ).toBe 'baz'
+
+Clean up.
+
+            LDE.Feedback.removeEventListener 'feedback', listener
 
 Now repeat the same test, but asynchronously, in a worker.
 
@@ -1375,8 +1379,8 @@ Install an event handler that will notice when we receive feedback from the
 LDE about interpretation being complete.
 
             feedbackReceived = null
-            LDE.Feedback.addEventListener 'feedback', ( feedbackData ) ->
-                feedbackReceived = feedbackData
+            listener = ( feedbackData ) -> feedbackReceived = feedbackData
+            LDE.Feedback.addEventListener 'feedback', listener
 
 Install a few empty `InputStructure`s into the Input Tree.
 
@@ -1400,6 +1404,10 @@ the LDE does indeed call the callback of the `runInterpretation()` routine.
                 expect( feedbackReceived ).not.toBeNull()
                 expect( feedbackReceived.subject ).toBe 'root'
                 expect( feedbackReceived.type ).toBe 'updated LDE state'
+
+Clean up as we finish.
+
+                LDE.Feedback.removeEventListener 'feedback', listener
                 done()
 
 Is it also automatically triggered by the end of the Modification Phase?
@@ -1410,8 +1418,9 @@ Repeat the previous test exactly, but this time trigger it with the
 modification phase, to prove that modification leads to interpretation.
 
             feedbackReceived = [ ]
-            LDE.Feedback.addEventListener 'feedback', ( feedbackData ) ->
+            listener = ( feedbackData ) ->
                 feedbackReceived.push feedbackData
+            LDE.Feedback.addEventListener 'feedback', listener
             LDE.reset()
             LDE.insertStructure ( new InputStructure().attr id : 'isr1' ),
                 'root', 0
@@ -1424,6 +1433,7 @@ modification phase, to prove that modification leads to interpretation.
                 expect( feedbackReceived.length ).toBe 1
                 expect( feedbackReceived[0].subject ).toBe 'root'
                 expect( feedbackReceived[0].type ).toBe 'updated LDE state'
+                LDE.Feedback.removeEventListener 'feedback', listener
                 done()
 
 ## Policing
@@ -1447,8 +1457,9 @@ interpretation completes; we expect *not* to hear complaints about illegal
 marking of things as dirty.
 
             feedbackReceived = [ ]
-            LDE.Feedback.addEventListener 'feedback', ( feedbackData ) ->
+            listener = ( feedbackData ) ->
                 feedbackReceived.push feedbackData
+            LDE.Feedback.addEventListener 'feedback', listener
 
 Make an Input Tree with two children of the root; the first will mark the
 second dirty, then record whether that worked.
@@ -1476,6 +1487,7 @@ interpretation.
                     type : 'updated LDE state'
                     subject : 'root'
                 expect( markResult ).toBe yes
+                LDE.Feedback.removeEventListener 'feedback', listener
                 done()
 
 Next, we check that it's not OK for an `InputStructure` to mark an *earlier*
@@ -1488,8 +1500,9 @@ Listen for any feedback coming out of the LDE.  We expect to hear when
 interpretation completes and when the illegal dirty loop is prevented.
 
             feedbackReceived = [ ]
-            LDE.Feedback.addEventListener 'feedback', ( feedbackData ) ->
+            listener = ( feedbackData ) ->
                 feedbackReceived.push feedbackData
+            LDE.Feedback.addEventListener 'feedback', listener
 
 Setup is exactly as in the previous test, but with the nodes in the other
 order.
@@ -1520,6 +1533,7 @@ child dirty during the second child's interpretation.
                     type : 'updated LDE state'
                     subject : 'root'
                 expect( markResult ).toBe no
+                LDE.Feedback.removeEventListener 'feedback', listener
                 done()
 
 ### Ensuring connection closure
@@ -1534,8 +1548,9 @@ Listen for any feedback coming out of the LDE.  We expect to hear when
 interpretation completes and when the illegal connections are removed.
 
             feedbackReceived = [ ]
-            LDE.Feedback.addEventListener 'feedback', ( feedbackData ) ->
+            listener = ( feedbackData ) ->
                 feedbackReceived.push feedbackData
+            LDE.Feedback.addEventListener 'feedback', listener
 
 We create an LDE tree that will form four connections, two permissible and
 two illegal.
@@ -1607,4 +1622,5 @@ remain while the illegal ones were indeed removed.
                 expect( output2.getAllConnections() )
                     .toEqual [ 'legal-1', 'legal-2' ]
                 expect( output3.getAllConnections() ).toEqual [ 'legal-2' ]
+                LDE.Feedback.removeEventListener 'feedback', listener
                 done()

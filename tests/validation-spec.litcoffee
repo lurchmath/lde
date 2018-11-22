@@ -436,10 +436,9 @@ Declare two classes we will use for this test.  First, an `OutputStructure`
 subclass that, when validated, records that it was, so that we can confirm
 later that validation actually happened.
 
-            didValidation = no
             class TinyOSClass1 extends LDE.OutputStructure
                 validate : ( worker, callback ) ->
-                    didValidation = yes
+                    @didValidation = yes
                     callback()
                 className : LDE.Structure.addSubclass 'TinyOSClass1',
                     TinyOSClass1
@@ -474,12 +473,51 @@ validation phase, which also tests that we correctly receive that feedback
 message.  (If we never do, this test will fail with a timeout error.)
 
             modificationFinished = no
-            LDE.Feedback.addEventListener 'feedback', ( event ) ->
+            listener = ( event ) ->
                 if event.subject is 'OT root' and \
                    event.type is 'validation complete'
                     expect( modificationFinished ).toBeTruthy()
-                    expect( didValidation ).toBeTruthy()
+                    expect( LDE.getOutputTree().children().length ).toBe 1
+                    child = LDE.getOutputTree().children()[0]
+                    expect( child.didValidation ).toBeTruthy()
+                    LDE.reset()
+                    LDE.Feedback.removeEventListener 'feedback', listener
                     done()
+            LDE.Feedback.addEventListener 'feedback', listener
             LDE.runModification ->
                 expect( LDE.getOutputTree().children() ).not.toEqual [ ]
                 modificationFinished = yes
+
+Repeat the previous test but don't even start validation manually.  Just
+let it happen naturally because you modified the Input Tree.
+
+        it 'happens automatically in response to IT changes', ( done ) ->
+
+Reload the two classes from the last test.
+
+            TinyISClass1 = LDE.Structure::subclasses.TinyISClass1
+            TinyOSClass1 = LDE.Structure::subclasses.TinyOSClass1
+
+Do all the same stuff as last time...
+
+            expect( -> LDE.reset() ).not.toThrow()
+            expect( LDE.getInputTree().children() ).toEqual [ ]
+            expect( LDE.getOutputTree().children() ).toEqual [ ]
+            toInsert = new TinyISClass1().attr id : 1
+            expect( -> LDE.insertStructure toInsert, 'root', 0 )
+                .not.toThrow()
+            expect( LDE.getInputTree().children() ).not.toEqual [ ]
+
+...except here things are different.  We now do not run the modification
+phase ourselves, but just let it self-trigger because we modified the Input
+Tree.
+
+            listener = ( event ) ->
+                if event.subject is 'OT root' and \
+                   event.type is 'validation complete'
+                    expect( LDE.getOutputTree().children().length ).toBe 1
+                    child = LDE.getOutputTree().children()[0]
+                    expect( child.didValidation ).toBeTruthy()
+                    LDE.Feedback.removeEventListener 'feedback', listener
+                    done()
+            LDE.Feedback.addEventListener 'feedback', listener

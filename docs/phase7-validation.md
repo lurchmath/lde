@@ -119,16 +119,16 @@ MyOutputStructure.validate = function ( worker, callback ) {
    dequeue and process.  Add tests or tweak old ones to listen for this
    signal at the end of validation and be sure it's emitted precisely once,
    at the correct time.
- * [ ] Add to the LDE the feature that it automatically triggers
+ * [x] Add to the LDE the feature that it automatically triggers
    modification a short while after any change to the Input Tree, unless a
    new change comes in during that same "short while" and unless
    modification is manually run during that same "short while."  Add
    appropriate tests.
- * [ ] Write a new file of integration tests that test the full LDE stack of
-   modification-interpretation-validation, including all the subtle types of
-   situations that may arise, including changes to a premise impacting a
-   conclusion's validation, changes to a label impacting whether something
-   is cited, and on and on through many possibilities.
+ * [ ] Add to the `validation-spec` file more tests, including all the
+   subtle types of situations that may arise, including changes to a
+   premise impacting a conclusion's validation, changes to a label
+   impacting whether something is cited, and on and on through many
+   possibilities.
 
 ## API Documentation
 
