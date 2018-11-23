@@ -1624,3 +1624,402 @@ remain while the illegal ones were indeed removed.
                 expect( output3.getAllConnections() ).toEqual [ 'legal-2' ]
                 LDE.Feedback.removeEventListener 'feedback', listener
                 done()
+
+## Just changed events
+
+After interpretation, the LDE is supposed to call `justChanged()` in just
+that subset of the Output Tree that changed.
+
+Note that as of this writing, interpretation is in its least efficient
+state; it always replaces the entirety of the Output Tree with a new one,
+which is therefore entirely dirty.  So the entire Output Tree will be
+revalidated after every run of interpretation.  But when greater
+efficiencies are added to interpretation later, we will want `justChanged()`
+to be called at precisely the right times.
+
+So here we artificially create certain configurations of the Output Tree
+that can't *yet* come about through interpretation, and verify that the
+correct behavior is observed.
+
+    describe 'Calling change events in OT nodes', ->
+
+We begin by creating an `OutputStructure` class that records when its
+`justChanged()` event handler was called and an `InputStructure` subclass
+that interprets to instances of that `OutputStructure` subclass.
+
+        orderOfCalls = [ ]
+        clearOrder = -> orderOfCalls = [ ]
+        class RecordsJustCalled extends OutputStructure
+            validate : ( worker, callback ) ->
+                orderOfCalls.push @id()
+                callback()
+            className : Structure.addSubclass 'RecordsJustCalled',
+                RecordsJustCalled
+        class MakesRecorder extends InputStructure
+            interpret : ( accessibles, childResults, scope ) ->
+                result = new RecordsJustCalled()
+                for childResult in childResults
+                    for child in childResult
+                        result.insertChild child, result.children().length
+                [ result ]
+            className : Structure.addSubclass 'MakesRecorder', MakesRecorder
+
+We will also listen, in each case, for the feedback message that signals the
+end of validation, just to double-check that it comes in each time.
+
+        gotValidationEndMessage = 0
+        listener = ( feedback ) ->
+            if feedback.type is 'validation complete'
+                gotValidationEndMessage++
+
+Keep things clean:
+
+        beforeEach ->
+            clearOrder()
+            gotValidationEndMessage = 0
+            LDE.Feedback.addEventListener 'feedback', listener
+        afterEach ->
+            LDE.reset()
+            LDE.Feedback.removeEventListener 'feedback', listener
+
+The first test is that if the entire Output Tree is dirty (the default) then
+all nodes have their `justChanged()` event handlers called.
+
+        it 'calls justChanged() in the whole OT by default', ( done ) ->
+
+Ensure the LDE is empty before we begin the first test.
+
+            LDE.reset()
+            expect( LDE.getInputTree().children() ).toEqual [ ]
+            expect( LDE.getOutputTree().children() ).toEqual [ ]
+
+Fill the Input Tree.
+
+            child1 = new MakesRecorder().attr id : 1
+            child2 = new MakesRecorder().attr id : 2
+            child3 = new MakesRecorder(
+                grand1 = new MakesRecorder().attr id : 4
+                grand2 = new MakesRecorder().attr id : 5
+            ).attr id : 3
+            LDE.insertStructure child1, 'root', 0
+            LDE.insertStructure child2, 'root', 1
+            LDE.insertStructure child3, 'root', 2
+
+Verify that the Output Tree is empty but the Input Tree is not and that no
+interpretation routine has been called.
+
+            expect( LDE.getOutputTree().children() ).toEqual [ ]
+            expect( LDE.getInputTree().children() ).not.toEqual [ ]
+            expect( orderOfCalls ).toEqual [ ]
+
+Run modification and interpretation.
+
+            expect( gotValidationEndMessage ).toBe 0
+            LDE.runModification ->
+
+Because the modification callback is called before validation begins, we now
+expect the Output Tree to have contents, but no validation routines to have
+yet been run.
+
+                expect( LDE.getOutputTree().children() ).not.toEqual [ ]
+                expect( orderOfCalls ).toEqual [ ]
+
+Wait just a moment and all the validation will have been run.  We don't care
+about the order, even though it was recorded.  We just care what got
+validated.
+
+                setTimeout ->
+                    expect( gotValidationEndMessage ).toBe 1
+                    expect( orderOfCalls.length ).toBe 5
+                    expect( '1.0' in orderOfCalls ).toBeTruthy()
+                    expect( '2.0' in orderOfCalls ).toBeTruthy()
+                    expect( '3.0' in orderOfCalls ).toBeTruthy()
+                    expect( '4.0' in orderOfCalls ).toBeTruthy()
+                    expect( '5.0' in orderOfCalls ).toBeTruthy()
+                    done()
+                , 100
+
+The second test is that even if we mark the entire Output Tree clean, all
+nodes will still have their `justChanged()` event handlers called because
+they have no archived `lastCitationLookup` results.
+
+        it 'calls justChanged() in the whole OT if lookup data missing',
+        ( done ) ->
+
+Exact same setup as in the previous test.
+
+            LDE.reset()
+            expect( LDE.getInputTree().children() ).toEqual [ ]
+            expect( LDE.getOutputTree().children() ).toEqual [ ]
+            child1 = new MakesRecorder().attr id : 1
+            child2 = new MakesRecorder().attr id : 2
+            child3 = new MakesRecorder(
+                grand1 = new MakesRecorder().attr id : 4
+                grand2 = new MakesRecorder().attr id : 5
+            ).attr id : 3
+            LDE.insertStructure child1, 'root', 0
+            LDE.insertStructure child2, 'root', 1
+            LDE.insertStructure child3, 'root', 2
+            expect( LDE.getOutputTree().children() ).toEqual [ ]
+            expect( LDE.getInputTree().children() ).not.toEqual [ ]
+            expect( orderOfCalls ).toEqual [ ]
+            expect( gotValidationEndMessage ).toBe 0
+            LDE.runModification ->
+                expect( LDE.getOutputTree().children() ).not.toEqual [ ]
+                expect( orderOfCalls ).toEqual [ ]
+
+But now after we run modification, we'll clean the whole Output Tree so that
+its dirtiness isn't what's triggering the `justChanged()` events.  The only
+other thing that could cause it should be old or missing
+`lastCitationLookup` data.
+
+                cleanse = ( node ) ->
+                    node.markDirty no
+                    cleanse child for child in node.children()
+                cleanse LDE.getOutputTree()
+
+Same test as last time.
+
+                setTimeout ->
+                    expect( gotValidationEndMessage ).toBe 1
+                    expect( orderOfCalls.length ).toBe 5
+                    expect( '1.0' in orderOfCalls ).toBeTruthy()
+                    expect( '2.0' in orderOfCalls ).toBeTruthy()
+                    expect( '3.0' in orderOfCalls ).toBeTruthy()
+                    expect( '4.0' in orderOfCalls ).toBeTruthy()
+                    expect( '5.0' in orderOfCalls ).toBeTruthy()
+                    done()
+                , 100
+
+So then one might wonder whether the `justChanged()` event handlers are
+actually called when an item is dirty but its citations are not.  We verify
+that with the following test, which is exactly like the previous, but
+instead of marking nodes clean, it gives them an up-to-date cache of their
+citation lookup dictionary.
+
+        it 'calls justChanged() in the whole OT if dirty', ( done ) ->
+
+Exact same setup as in the previous test.
+
+            LDE.reset()
+            expect( LDE.getInputTree().children() ).toEqual [ ]
+            expect( LDE.getOutputTree().children() ).toEqual [ ]
+            child1 = new MakesRecorder().attr id : 1
+            child2 = new MakesRecorder().attr id : 2
+            child3 = new MakesRecorder(
+                grand1 = new MakesRecorder().attr id : 4
+                grand2 = new MakesRecorder().attr id : 5
+            ).attr id : 3
+            LDE.insertStructure child1, 'root', 0
+            LDE.insertStructure child2, 'root', 1
+            LDE.insertStructure child3, 'root', 2
+            expect( LDE.getOutputTree().children() ).toEqual [ ]
+            expect( LDE.getInputTree().children() ).not.toEqual [ ]
+            expect( orderOfCalls ).toEqual [ ]
+            expect( gotValidationEndMessage ).toBe 0
+            LDE.runModification ->
+                expect( LDE.getOutputTree().children() ).not.toEqual [ ]
+                expect( orderOfCalls ).toEqual [ ]
+
+But now after we run modification, we'll clean the whole Output Tree so that
+its dirtiness isn't what's triggering the `justChanged()` events.  The only
+other thing that could cause it should be old or missing
+`lastCitationLookup` data.
+
+                cacheLookup = ( node ) ->
+                    node.lastCitationLookup = node.lookUpAllCitations()
+                    cacheLookup child for child in node.children()
+                cacheLookup LDE.getOutputTree()
+
+Same test as last time.
+
+                setTimeout ->
+                    expect( gotValidationEndMessage ).toBe 1
+                    expect( orderOfCalls.length ).toBe 5
+                    expect( '1.0' in orderOfCalls ).toBeTruthy()
+                    expect( '2.0' in orderOfCalls ).toBeTruthy()
+                    expect( '3.0' in orderOfCalls ).toBeTruthy()
+                    expect( '4.0' in orderOfCalls ).toBeTruthy()
+                    expect( '5.0' in orderOfCalls ).toBeTruthy()
+                    done()
+                , 100
+
+Naturally, we expect that if the nodes are neither marked dirty nor do they
+have outdated citation lookup dictionaries, then `justChanged()` should not
+be called in them.  The following test verifies this.
+
+        it 'doesn\'t call justChanged() when not needed', ( done ) ->
+
+Exact same setup as in the previous test.
+
+            LDE.reset()
+            expect( LDE.getInputTree().children() ).toEqual [ ]
+            expect( LDE.getOutputTree().children() ).toEqual [ ]
+            child1 = new MakesRecorder().attr id : 1
+            child2 = new MakesRecorder().attr id : 2
+            child3 = new MakesRecorder(
+                grand1 = new MakesRecorder().attr id : 4
+                grand2 = new MakesRecorder().attr id : 5
+            ).attr id : 3
+            LDE.insertStructure child1, 'root', 0
+            LDE.insertStructure child2, 'root', 1
+            LDE.insertStructure child3, 'root', 2
+            expect( LDE.getOutputTree().children() ).toEqual [ ]
+            expect( LDE.getInputTree().children() ).not.toEqual [ ]
+            expect( orderOfCalls ).toEqual [ ]
+            expect( gotValidationEndMessage ).toBe 0
+            LDE.runModification ->
+                expect( LDE.getOutputTree().children() ).not.toEqual [ ]
+                expect( orderOfCalls ).toEqual [ ]
+
+Here we do both types of Output Tree cleansing from the previous two tests
+combined.
+
+                fullCleanse = ( node ) ->
+                    node.lastCitationLookup = node.lookUpAllCitations()
+                    node.markDirty no
+                    fullCleanse child for child in node.children()
+                fullCleanse LDE.getOutputTree()
+
+Same test as last time.
+
+                setTimeout ->
+                    expect( gotValidationEndMessage ).toBe 1
+                    expect( orderOfCalls ).toEqual [ ]
+                    done()
+                , 100
+
+Next, we mix all the four previous tests into a single test in which the
+various nodes in the Output Tree have various combinations of dirty/not and
+old/new citation cache data.  We verify that the correct subset of Output
+Tree nodes has their `justChanged()` event called.
+
+        it 'calls justChanged() on the currect subset of the OT',
+        ( done ) ->
+
+Exact same setup as in the previous test.
+
+            LDE.reset()
+            expect( LDE.getInputTree().children() ).toEqual [ ]
+            expect( LDE.getOutputTree().children() ).toEqual [ ]
+            child1 = new MakesRecorder().attr id : 1
+            child2 = new MakesRecorder().attr id : 2
+            child3 = new MakesRecorder(
+                grand1 = new MakesRecorder().attr id : 4
+                grand2 = new MakesRecorder().attr id : 5
+            ).attr id : 3
+            LDE.insertStructure child1, 'root', 0
+            LDE.insertStructure child2, 'root', 1
+            LDE.insertStructure child3, 'root', 2
+            expect( LDE.getOutputTree().children() ).toEqual [ ]
+            expect( LDE.getInputTree().children() ).not.toEqual [ ]
+            expect( orderOfCalls ).toEqual [ ]
+            expect( gotValidationEndMessage ).toBe 0
+            LDE.runModification ->
+                expect( LDE.getOutputTree().children() ).not.toEqual [ ]
+                expect( orderOfCalls ).toEqual [ ]
+
+But now we mark some nodes dirty, some clean, some with no cache, and some
+with new cache.  Here is what we do:
+ * `child1` - clean and updated cache, validation should *not* run
+ * `child2` - clean but no cache, validation *should* run
+ * `child3` - clean but old cache, validation *should* run
+ * `grand1` - dirty and updated cache, validation *should* run
+ * `grand2` - dirty and old cache, validation *should* run
+
+                OTchild1 = LDE.getOutputTree().children()[0]
+                OTchild1.markDirty no
+                OTchild1.lastCitationLookup = OTchild1.lookUpAllCitations()
+                OTchild2 = LDE.getOutputTree().children()[1]
+                OTchild2.markDirty no
+                OTchild3 = LDE.getOutputTree().children()[2]
+                OTchild3.markDirty no
+                OTchild3.lastCitationLookup =
+                    premises :
+                        connections : [ ]
+                        labels : [ ]
+                    reasons :
+                        connections : [
+                            cited : 'example'
+                            id : 'example'
+                        ]
+                        labels : [ ]
+                OTgrand1 = LDE.getOutputTree().children()[2].children()[0]
+                OTgrand1.lastCitationLookup = OTgrand1.lookUpAllCitations()
+                OTgrand2 = LDE.getOutputTree().children()[2].children()[1]
+                OTgrand2.lastCitationLookup =
+                    premises :
+                        connections : [ ]
+                        labels : [
+                            cited : 'example'
+                            label : 'example'
+                        ]
+                    reasons :
+                        connections : [ ]
+                        labels : [ ]
+
+Same test as last time.
+
+                setTimeout ->
+                    expect( gotValidationEndMessage ).toBe 1
+                    expect( orderOfCalls.length ).toBe 4
+                    expect( '2.0' in orderOfCalls ).toBeTruthy()
+                    expect( '3.0' in orderOfCalls ).toBeTruthy()
+                    expect( '4.0' in orderOfCalls ).toBeTruthy()
+                    expect( '5.0' in orderOfCalls ).toBeTruthy()
+                    done()
+                , 100
+
+Finally, we check the most subtle possibility:  That a node is neither dirty
+nor is its citation dictionary out-of-date, but one of the things that it
+cites is dirty.  In this case, the node should also have its `justChanged()`
+event called, to trigger re-validation.
+
+        it 'calls justChanged() when cited nodes are dirty', ( done ) ->
+
+Exact same setup as in the previous test.
+
+            LDE.reset()
+            expect( LDE.getInputTree().children() ).toEqual [ ]
+            expect( LDE.getOutputTree().children() ).toEqual [ ]
+            child1 = new MakesRecorder().attr id : 1
+            child2 = new MakesRecorder().attr id : 2
+            child3 = new MakesRecorder(
+                grand1 = new MakesRecorder().attr id : 4
+                grand2 = new MakesRecorder().attr id : 5
+            ).attr id : 3
+            LDE.insertStructure child1, 'root', 0
+            LDE.insertStructure child2, 'root', 1
+            LDE.insertStructure child3, 'root', 2
+            expect( LDE.getOutputTree().children() ).toEqual [ ]
+            expect( LDE.getInputTree().children() ).not.toEqual [ ]
+            expect( orderOfCalls ).toEqual [ ]
+            expect( gotValidationEndMessage ).toBe 0
+            LDE.runModification ->
+                expect( LDE.getOutputTree().children() ).not.toEqual [ ]
+                expect( orderOfCalls ).toEqual [ ]
+
+But now we mark `child1` dirty, everything else clean, everyone's citation
+data up-to-date, but `grand1` should cite `child1`.  This should make two
+nodes revalidate: `child1` and `grand1`.
+
+                OTchild1 = LDE.getOutputTree().children()[0]
+                OTchild1.hasLabel = ( text ) -> text is 'foo'
+                OTgrand1 = LDE.getOutputTree().children()[2].children()[0]
+                OTgrand1.setAttribute 'reason citations', [ 'foo' ]
+                fullCleanse = ( node ) ->
+                    node.lastCitationLookup = node.lookUpAllCitations()
+                    node.markDirty no
+                    fullCleanse child for child in node.children()
+                fullCleanse LDE.getOutputTree()
+                OTchild1.markDirty yes
+
+Same test as last time.
+
+                setTimeout ->
+                    expect( gotValidationEndMessage ).toBe 1
+                    expect( orderOfCalls.length ).toBe 2
+                    expect( '1.0' in orderOfCalls ).toBeTruthy()
+                    expect( '4.0' in orderOfCalls ).toBeTruthy()
+                    done()
+                , 100

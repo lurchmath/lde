@@ -440,15 +440,50 @@ if and when needed.
 First, we mark the interpretation phase as complete and call its callback.
 Then we go ahead and trigger any subsequent validation by visiting every
 node of the Output Tree that is marked dirty and calling its `justChanged()`
-function.  This will often do nothing, but every node that is dirty for
-validation has to have a chance to react to that.
+function.  We also call `justChanged()` in any node whose citation
+dictionary (as computed by `lookUpAllCitations()`) has changed since the
+last time it was computed.
 
-        CurrentPhase = null
+Note that as of this writing, interpretation is in its least efficient
+state; it always replaces the entirety of the Output Tree with a new one,
+which is therefore entirely dirty.  Consequently, these checks are not yet
+relevant.  The entire Output Tree will be revalidated after every run of
+interpretation.  But when greater efficiencies are added to interpretation
+later, these will matter.
+
+We also track whether the traversal of the Output Tree enqueues any
+validation tasks or not.  If it doesn't, we sent the "validation complete"
+feedback message immediately.  This requires paying attention to two
+possibilities.  It may be that tasks are still running in workers, in which
+case validation is not complete and we should avoid signalling so.  Or it
+may be that tasks were run but were instantaneous, in which case validation
+completion was signalled automatically when those tasks completed, and thus
+we should not signal it again.  In every other case, we should signal it.
+
+        CurrentPhase = 'starting validation'
         callback?()
+        toBeValidated = [ ]
         callJustChanged = ( node ) ->
             callJustChanged child for child in node.children()
-            node.justChanged?()
+            if node.isDirty() then return toBeValidated.push node
+            newCitations = node.lookUpAllCitations()
+            if JSON.stringify( newCitations ) isnt \
+               JSON.stringify( node.lastCitationLookup )
+                node.lastCitationLookup = newCitations
+                return toBeValidated.push node
+            for type in [ 'premises', 'reasons' ]
+                for method in [ 'connections', 'labels' ]
+                    for citation in node.lastCitationLookup[type][method]
+                        cited = Structure.instanceWithID citation.cited
+                        if cited?.isDirty()
+                            return toBeValidated.push node
+        validationCompletionSent = no
         callJustChanged OutputTree
+        node.justChanged?() for node in toBeValidated
+        if not validationCompletionSent and \
+           WorkerPool.numberAvailable() is WorkerPool.length
+            signalValidationPhaseComplete()
+        CurrentPhase = null
 
 ### Event Listeners
 
@@ -576,6 +611,19 @@ method that module installs in itself.
 
     Structure.feedback = feedback
 
+We also have the following handy function for signalling when validation
+feedback is complete.  It marks when it has done so, because this is useful
+to the final block of code in the `runInterpretation()` function defined
+above; see comments there for details.
+
+    validationCompletionSent = no
+    signalValidationPhaseComplete = ->
+        feedback
+            subject : 'OT root'
+            type : 'validation complete'
+            details : 'The validation phase just completed.'
+        validationCompletionSent = yes
+
 ## Validation workers
 
 The LDE keeps a global pool of `LDEWorker` instances that wait to be used
@@ -615,15 +663,18 @@ that worker.  Also, if this is the final worker to be given back, and the
 validation queue has nothing left to be done in it, we emit feedback saying
 that validation is complete.
 
+Note that we verify that we're not in the phase of starting validation, but
+coincidentally at a moment in which the worker queue is empty, because we
+can't signal validation complete until all potential validation tasks have
+at least had a chance to start.
+
     WorkerPool.giveWorkerBack = ( worker ) ->
         worker.available = yes
         if ValidationQueue.length > 0
             ValidationQueue.dequeue()
-        else if WorkerPool.numberAvailable() is WorkerPool.length
-            feedback
-                subject : 'OT root'
-                type : 'validation complete'
-                details : 'The validation phase just completed.'
+        else if CurrentPhase is null and \
+                WorkerPool.numberAvailable() is WorkerPool.length
+            signalValidationPhaseComplete()
 
 We write a function to compute the number of cores available on the user's
 machine, either in Node.js or the browser, then set the pool size to be one
@@ -727,7 +778,8 @@ do their work and call the callback, ignoring the worker.
 
     ValidationQueue.dequeue = ->
         return unless \
-            ( CurrentPhase is null ) and \
+            ( CurrentPhase isnt 'modification' ) and \
+            ( CurrentPhase isnt 'interpretation' ) and \
             ( ValidationQueue.length > 0 ) and \
             ( worker = WorkerPool.getAvailableWorker() )?
         structure = ValidationQueue.pop().structure
@@ -735,6 +787,7 @@ do their work and call the callback, ignoring the worker.
             worker.structureBeingValidated = structure
             structure.validate worker, ->
                 delete worker.structureBeingValidated
+                structure.markDirty no
                 WorkerPool.giveWorkerBack worker
 
 As stated in the previous section, resetting the validation phase means all
