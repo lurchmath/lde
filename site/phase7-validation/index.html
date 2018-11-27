@@ -152,9 +152,7 @@
             <li><a href="#content">Content</a></li>
             <li><a href="#goal">Goal</a></li>
             <li><a href="#status">Status</a></li>
-            <li><a href="#making-background-threads-easy-to-use">Making background threads easy to use</a></li>
-            <li><a href="#the-validation-phase">The Validation Phase</a></li>
-            <li><a href="#api-documentation">API Documentation</a></li>
+            <li><a href="#more-robust-unit-tests-for-interpretation">More robust unit tests for interpretation</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
@@ -171,132 +169,18 @@ robust and useful product.</p>
 <p>The LDE will be able to follow the Interpretation Phase with the Validation
 Phase, giving semantic feedback about the validity of steps of work.</p>
 <h2 id="status">Status</h2>
-<p>This has not been implemented.  See the tasks below.</p>
-<h2 id="making-background-threads-easy-to-use">Making background threads easy to use</h2>
+<p>All essential work on this phase is complete.  What remains are a more
+robust set of tests for interpretation and some optional efficiency
+improvements, both of which are documented below.</p>
+<h2 id="more-robust-unit-tests-for-interpretation">More robust unit tests for interpretation</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create a worker script that enables us to create instances of
-   <code>WebWorker</code>s who are able to respond to a variety of functions for
-   installing various routines and data in the workers, including:<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled checked/> <code>worker.installScript(filename)</code></li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> <code>worker.installFunction(varname,func)</code></li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> <code>worker.installData(key,value)</code></li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> <code>worker.uninstallData(key)</code></li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> <code>worker.run(code,callback)</code></li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> <code>worker.reboot(callback)</code> (which calls <code>terminate()</code> in the
-  internal <code>WebWorker</code> instance, then discards it and replaces it with
-  a new one)</li>
-</ul>
-</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create a new unit testing file for these advanced <code>WebWorker</code>s,
-   documenting it in the same style as the rest of the test suite.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Once it is robust and all tests pass, commit the changes.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create a global variable in the LDE that holds a pool of these
-   workers, with a function that lets you specify the size of the pool.
-   It should initialize itself, by default, to the number of threads the
-   CPU supports, minus 1 for the main thread.  (The minimum value is 1.)</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create a function in each worker for marking it available or
-   unavailable.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create a function in the worker pool for getting the next available
-   worker, or null if there isn't one.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add and document tests for these new features.</li>
-</ul>
-<h2 id="the-validation-phase">The Validation Phase</h2>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create a global validation pool in the LDE, which is a priority queue
-   that comes with a routine for adding an <code>OutputStructure</code> instance to the
-   queue, together with a priority.  This routine does nothing if the
-   structure in question does not have a <code>validate()</code> routine.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create a dequeueing routine from that global validation pool that
-   behaves as follows:<ul>
-<li>If modification or interpretation is currently running, quit (do
-  nothing).</li>
-<li>If no worker is available, quit (do nothing).</li>
-<li>If the global validation pool is empty, quit (do nothing).</li>
-<li>Dequeue a structure from the validation pool and call its validation
-  routine, passing it the next available worker and a callback that
-  places the worker back on the list of available workers.
-   We expect to define validation routines somewhat like this:</li>
-</ul>
-</li>
-</ul>
-<pre><code>MyOutputStructure.validate = function ( worker, callback ) {
-    worker.installScript( &quot;some script file&quot; );
-    worker.installFunction( &quot;foo&quot;, foo );
-    worker.installData( &quot;key&quot;, value );
-    worker.run( &quot;some code&quot;, function ( response ) {
-        // here, generate feedback from response.result or response.error
-        callback();
-    } );
-};
-</code></pre>
-
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled checked/> Call that dequeueing routine whenever a worker becomes available and
-   whenever a new structure is added to the validation priority queue.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Extend the LDE's <code>reset()</code> function so that, in addition to what it
-   does now, it empties the validation queue, reboots all ongoing workers,
-   and returns them all as available again.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Make unit tests for this much functionality, in a new integration
-   testing file for validation specifically.  Document such tests the way we
-   document unit tests.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Extend the enqueue process so that if a structure is already
-   enqueued, then enqueueing again does nothing.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Extend the enqueue process so that if the structure being enqueued,
-   while not currently on the queue, has its validation routine still
-   running in a worker, then we find and reboot that worker, mark the
-   structure as no longer being validated, and <em>then</em> enqueue it as usual.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create unit tests that ensure these two new behaviors work.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Define a function in the <code>OutputStructure</code> class that uses citation
-   lookup to find all the reasons and premises that the object cites, and
-   return them as a dictionary.  Call this <code>lookUpAllCitations()</code>.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Write unit tests for <code>OutputStructure::lookUpIn(label,accessibles)</code>
-   and <code>Structure.lookUp(label)</code>, which accidentally escaped untested.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add unit tests for <code>Structure.lookUpAllCitations()</code>.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create a default implementation of <code>justChanged()</code> in the
-   <code>OutputStructure</code> class that does the following things.<ul>
-<li>If the OS has no validation routine, quit (do nothing).</li>
-<li>If its origin IS has a validation priority of null, send feedback from
-  it saying that its validation is being skipped, then quit (do no
-  more).</li>
-<li>Add the OS to the global pool, using the priority in its origin IS,
-  or zero if there was none.</li>
-<li>Send feedback about the OS saying its validation is being recomputed.</li>
-<li>Call <code>lookUpAllCitations()</code> and store its result in a field of the
-  <code>OutputStructure</code> instance.</li>
-</ul>
-</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> When interpretation ends, loop through all nodes of the Output Tree
-   and do this:<ul>
-<li>If it is marked dirty, call <code>justChanged()</code> and stop.  Otherwise:</li>
-<li>Recompute its <code>lookUpAllCitations()</code> dictionary, and if any part of it
-  changed (in key or value) or any structure referenced by it is marked
-  dirty, call <code>justChanged()</code>.</li>
-</ul>
-</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Write unit tests to ensure that the already-tested validation
-   features still function when they are automatically triggered at the end
-   of the implementation phase.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add to the validation queue the feature of emitting feedback when the
-   final worker is returned to be available again and there's nothing to
-   dequeue and process.  Add tests or tweak old ones to listen for this
-   signal at the end of validation and be sure it's emitted precisely once,
-   at the correct time.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add to the LDE the feature that it automatically triggers
-   modification a short while after any change to the Input Tree, unless a
-   new change comes in during that same "short while" and unless
-   modification is manually run during that same "short while."  Add
-   appropriate tests.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Add to the <code>validation-spec</code> file more tests, including all the
    subtle types of situations that may arise, including changes to a
    premise impacting a conclusion's validation, changes to a label
    impacting whether something is cited, and on and on through many
    possibilities.</li>
-</ul>
-<h2 id="api-documentation">API Documentation</h2>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled checked/> Extend the processing phases page of the API Documentation to include
-   all the work done in this phase, including validation.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Rebuild docs and commit.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Add documentation in that test file describing the changes just made.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
 </ul></div>
         </div>
 
