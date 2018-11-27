@@ -132,6 +132,6 @@ MyOutputStructure.validate = function ( worker, callback ) {
 
 ## API Documentation
 
- * [ ] Extend the processing phases page of the API Documentation to include
+ * [x] Extend the processing phases page of the API Documentation to include
    all the work done in this phase, including validation.
- * [ ] Rebuild docs and commit.
+ * [x] Rebuild docs and commit.

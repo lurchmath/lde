@@ -196,7 +196,29 @@ function at each node, and assembles their results into the new Output Tree.</p>
 subclasses not yet written.  For more information, see the errors that may
 be generated as feedback, <a href="../api-lde/#types-of-feedback">documented here</a>.</p>
 <h2 id="validation">Validation</h2>
-<p>This phase is not yet implemented nor documented.</p></div>
+<p>The validation phase follows immediately after the interpretation phase;
+indeed, the interpretation phase terminates by calling its callback and then
+enqueueing for validation any <code>OutputStructure</code> that it detects needs to be
+validated.</p>
+<p>This uses a validation priority queue built into the LDE, which leverages a
+pool of workers in background threads to do the validation in parallel,
+using as many simultaneously as possible (at least one worker, but no more
+than the number of cores on the machine minus one, to leave one thread free
+for the user interface).</p>
+<ul>
+<li>For details on the pool of workers, see
+   <a href="https://github.com/lurchmath/lde/blob/master/src/lde.litcoffee#validation-workers">this section of the source code</a>.</li>
+<li>For details on each individual worker in the pool, see
+   <a href="https://github.com/lurchmath/lde/blob/master/src/worker.litcoffee">the source for the <code>LDEWorker</code> class</a>
+   or
+   <a href="https://github.com/lurchmath/lde/blob/master/src/worker-internal.litcoffee">the source code run in each worker</a>,
+   which work hand-in-hand.</li>
+<li>For details on the priority queue, see
+   <a href="https://github.com/lurchmath/lde/blob/master/src/lde.litcoffee#validation-priority-queue">this section of the source code</a>.</li>
+</ul>
+<p>When the last <code>OutputStructure</code> that needed validation finishes it, feedback
+of type "validation complete" is emitted by the LDE.
+<a href="../api-lde/#types-of-feedback">More details on types of feedback appear here.</a></p></div>
         </div>
 
         <footer class="col-md-12">

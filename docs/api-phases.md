@@ -52,4 +52,27 @@ be generated as feedback, [documented here](api-lde.md#types-of-feedback).
 
 ## Validation
 
-This phase is not yet implemented nor documented.
+The validation phase follows immediately after the interpretation phase;
+indeed, the interpretation phase terminates by calling its callback and then
+enqueueing for validation any `OutputStructure` that it detects needs to be
+validated.
+
+This uses a validation priority queue built into the LDE, which leverages a
+pool of workers in background threads to do the validation in parallel,
+using as many simultaneously as possible (at least one worker, but no more
+than the number of cores on the machine minus one, to leave one thread free
+for the user interface).
+
+ * For details on the pool of workers, see
+   [this section of the source code](https://github.com/lurchmath/lde/blob/master/src/lde.litcoffee#validation-workers).
+ * For details on each individual worker in the pool, see
+   [the source for the `LDEWorker` class](https://github.com/lurchmath/lde/blob/master/src/worker.litcoffee)
+   or
+   [the source code run in each worker](https://github.com/lurchmath/lde/blob/master/src/worker-internal.litcoffee),
+   which work hand-in-hand.
+ * For details on the priority queue, see
+   [this section of the source code](https://github.com/lurchmath/lde/blob/master/src/lde.litcoffee#validation-priority-queue).
+
+When the last `OutputStructure` that needed validation finishes it, feedback
+of type "validation complete" is emitted by the LDE.
+[More details on types of feedback appear here.](api-lde.md#types-of-feedback)
