@@ -73,6 +73,16 @@ for the user interface).
  * For details on the priority queue, see
    [this section of the source code](https://github.com/lurchmath/lde/blob/master/src/lde.litcoffee#validation-priority-queue).
 
+An `OutputStructure` `S` is validated by calling
+`S.validate(worker,callback)`, with the first parameter being an `LDEWorker`
+instance available for use (see documentation link above) and the second
+parameter being the function to call when the work is complete (passing no
+parameters).  That validation function should generate feedback about `S`
+but does not need to mark `S` clean nor actively return its worker to the
+queue; those things happen automatically. It can feel free to use the entire
+API for the `LDEWorker` class, including installing scripts, functions, or
+data as needed.
+
 When the last `OutputStructure` that needed validation finishes it, feedback
 of type "validation complete" is emitted by the LDE.
 [More details on types of feedback appear here.](api-lde.md#types-of-feedback)
