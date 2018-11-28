@@ -522,3 +522,430 @@ Tree.
                     LDE.reset()
                     done()
             LDE.Feedback.addEventListener 'feedback', listener
+
+Now we'll test a situation in which we create several new subclasses of
+`InputStructure` and `OutputStructure` and then place them, one at a time,
+into a document, and verify that the LDE responds with correct validations
+each time.
+
+We do not clear out the Input or Output Tree after each test below, because
+the tests form a sequence that are intended to happen one after the other.
+
+    describe 'Lengthier full-sequence test with steps and reasons', ->
+
+Before beginning any tests, define the subclasses in question.
+
+A class to represent premises:
+
+        class TestPrem extends LDE.OutputStructure
+            className : LDE.Structure.addSubclass 'TestPrem', TestPrem
+
+A class to represent rules:
+
+        class TestRule extends LDE.OutputStructure
+            className : LDE.Structure.addSubclass 'TestRule', TestRule
+
+A class to represent a step of work that judges itself valid iff it cites
+one reason, zero premises, and the reason's "number" attribute is less than
+the step's "number" attribute:
+
+        class LessStep extends LDE.OutputStructure
+            validate : ( worker, callback ) ->
+                prems = @lastCitationLookup.premises
+                reass = @lastCitationLookup.reasons
+                prems = prems.connections.concat prems.labels
+                reass = reass.connections.concat reass.labels
+                validity = 'invalid'
+                message = undefined
+                if prems.length > 0
+                    message = 'Too many premises'
+                else if reass.length isnt 1
+                    message = 'Need exactly one reason'
+                else if not \
+                    ( reas = LDE.Structure.instanceWithID reass[0].cited )?
+                    message = 'Could not find cited reason'
+                else if reas not instanceof TestRule
+                    message = "Cannot cite a #{reas.className} as a reason"
+                else if not ( rn = reas.getAttribute 'n' )?
+                    message = 'Reason had no attribute n'
+                else if not ( n = @getAttribute 'n' )?
+                    message = 'Step had no attribute n'
+                else if rn < n
+                    validity = 'valid'
+                else
+                    message = "Reason number #{rn} not less than #{n}"
+                @feedback
+                    type : 'validation result'
+                    validity : validity
+                    message : message
+                callback()
+            className : LDE.Structure.addSubclass 'LessStep', LessStep
+
+A class to represent a step of work that judges itself valid iff it cites
+one reason, any number of premises (including zero), and the sum of the
+premises' "number" attributes minus the one reason's "number" attribute is
+equal to the step's "number" attribute:
+
+        class SumStep extends LDE.OutputStructure
+            validate : ( worker, callback ) ->
+                prems = @lastCitationLookup.premises
+                reass = @lastCitationLookup.reasons
+                prems = prems.connections.concat prems.labels
+                reass = reass.connections.concat reass.labels
+                validity = 'invalid'
+                message = undefined
+                if reass.length isnt 1
+                    message = 'Need exactly one reason'
+                else if not \
+                    ( reas = LDE.Structure.instanceWithID reass[0].cited )?
+                    message = 'Could not find cited reason'
+                else if reas not instanceof TestRule
+                    message = "Cannot cite a #{reas.className} as a reason"
+                else if not ( rn = reas.getAttribute 'n' )?
+                    message = 'Reason had no attribute n'
+                else if not ( n = @getAttribute 'n' )?
+                    message = 'Step had no attribute n'
+                else
+                    premTotal = 0
+                    for prem in prems
+                        if not ( obj = \
+                                LDE.Structure.instanceWithID prem.cited )?
+                            message = "Cannot find premise #{prem.cited}"
+                            break
+                        if obj not instanceof TestPrem
+                            message = "Cannot cite a #{obj.className}
+                                as a premise"
+                            break
+                        if not ( pn = obj.getAttribute 'n' )?
+                            message = 'Premise had no attribute n'
+                            break
+                        premTotal += parseInt pn
+                    if not message?
+                        if premTotal - rn is n
+                            validity = 'valid'
+                        else
+                            message = "#{premTotal} - #{rn} is not #{n}"
+                @feedback
+                    type : 'validation result'
+                    validity : validity
+                    message : message
+                callback()
+            className : LDE.Structure.addSubclass 'SumStep', SumStep
+
+An `InputStructure` subclass that will construct any single
+`OutputStructure`, as long as it is defined solely by its class and
+attributes.  All attributes are copied from the `InputStructure` except the
+"class" and "id" attributes.  The former is used to choose which class of
+`OutputStructure` to create and the latter is ignored.
+
+        class MakeAnything extends LDE.InputStructure
+            interpret : ( accessibles, childResults, scope ) ->
+                whichClass = @getAttribute 'class'
+                whichClass = LDE.Structure::subclasses[whichClass]
+                if not whichClass? then return [ ]
+                result = new whichClass()
+                for own key, value of @attributes
+                    if key not in [ 'class', 'id' ] and key[0] isnt '_'
+                        result.setAttribute key, value
+                [ result ]
+            className : LDE.Structure.addSubclass 'MakeAnything',
+                MakeAnything
+
+In order to listen for all kinds of feedback from the LDE, we use the
+following tools for recording messages from the LDE.
+
+        LDEmessages = [ ]
+        completionCallback = null
+        listener = ( event ) ->
+            LDEmessages.push event
+            if event.type is 'validation complete'
+                completionCallback?()
+        beforeEach ->
+            LDE.Feedback.addEventListener 'feedback', listener
+        afterEach ->
+            LDE.Feedback.removeEventListener 'feedback', listener
+            LDEmessages = [ ]
+        setupThenTest = ( setup, test ) ->
+            completionCallback = -> test() ; completionCallback = null
+            setup()
+
+Test 1:  The LDE should start out with both trees empty.
+
+        it 'should start with IT and OT empty', ->
+            expect( LDE.getInputTree().children() ).toEqual [ ]
+            expect( LDE.getOutputTree().children() ).toEqual [ ]
+
+Test 2: If we insert a premise, it should propagate correctly to the Output
+Tree but not generate any validation feedback.
+
+        it 'should permit premise insertion without validation feedback',
+        ( done ) ->
+            setupThenTest ->
+                P = new MakeAnything()
+                    .attr n : 5, id : 1, class : 'TestPrem'
+                LDE.insertStructure P, 'root', 0
+            , ->
+                expect( m.type for m in LDEmessages )
+                    .toEqual [ 'updated LDE state', 'validation complete' ]
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 1
+                expect( OT.children()[0].className ).toBe 'TestPrem'
+                expect( OT.children()[0].getAttribute 'n' ).toBe 5
+                done()
+
+Test 3: If we insert a `LessStep`, it should propagate correctly to the
+Output Tree and generate validation feedback saying it must cite a reason.
+
+        it 'should permit step insertion and send feedback', ( done ) ->
+            setupThenTest ->
+                SL = new MakeAnything()
+                    .attr n : 4, id : 2, class : 'LessStep'
+                LDE.insertStructure SL, 'root', 1
+            , ->
+                expect( m.type for m in LDEmessages ).toEqual [
+                    'updated LDE state'
+                    'validation queueing'
+                    'validation result'
+                    'validation complete'
+                ]
+                expect( LDEmessages[1].subject ).toBe 2
+                expect( LDEmessages[2].subject ).toBe 2
+                expect( LDEmessages[2].validity ).toBe 'invalid'
+                expect( LDEmessages[2].message )
+                    .toMatch /Need exactly one reason/
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 2
+                expect( OT.children()[1].className ).toBe 'LessStep'
+                expect( OT.children()[1].getAttribute 'n' ).toBe 4
+                done()
+
+Test 4: If we connect the step to the premise as a reason, it should
+propagate correctly to the Output Tree and generate validation feedback
+saying it is treating a premise like a reason.
+
+        it 'should permit connection insertion and send feedback',
+        ( done ) ->
+            setupThenTest ->
+                LDE.insertConnection 2, 1,
+                    id : 'c1', type : 'reason citation'
+            , ->
+                expect( m.type for m in LDEmessages ).toEqual [
+                    'updated LDE state'
+                    'validation queueing'
+                    'validation result'
+                    'validation complete'
+                ]
+                expect( LDEmessages[1].subject ).toBe 2
+                expect( LDEmessages[2].subject ).toBe 2
+                expect( LDEmessages[2].validity ).toBe 'invalid'
+                expect( LDEmessages[2].message )
+                    .toMatch /Cannot cite a TestPrem as a reason/
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 2
+                done()
+
+Test 5: If we replace the premise with a reason, it should propagate
+correctly to the Output Tree and generate validation feedback saying it is
+invalid because 5 is not less than 4.
+
+        it 'should permit premise replacement and send feedback',
+        ( done ) ->
+            setupThenTest ->
+                R = new MakeAnything()
+                    .attr id : 1, n : 5, class : 'TestRule'
+                LDE.replaceStructure 1, R, yes
+            , ->
+                expect( m.type for m in LDEmessages ).toEqual [
+                    'updated LDE state'
+                    'validation queueing'
+                    'validation result'
+                    'validation complete'
+                ]
+                expect( LDEmessages[1].subject ).toBe 2
+                expect( LDEmessages[2].subject ).toBe 2
+                expect( LDEmessages[2].validity ).toBe 'invalid'
+                expect( LDEmessages[2].message )
+                    .toMatch /Reason number 5 not less than 4/
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 2
+                done()
+
+Test 6: If we modify the reason's number to 3, it should propagate
+correctly to the Output Tree and generate positive validation feedback.
+
+        it 'should permit a rule attribute change and send feedback',
+        ( done ) ->
+            setupThenTest ->
+                LDE.setStructureAttribute 1, 'n', 3
+            , ->
+                expect( m.type for m in LDEmessages ).toEqual [
+                    'updated LDE state'
+                    'validation queueing'
+                    'validation result'
+                    'validation complete'
+                ]
+                expect( LDEmessages[1].subject ).toBe 2
+                expect( LDEmessages[2].subject ).toBe 2
+                expect( LDEmessages[2].validity ).toBe 'valid'
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 2
+                done()
+
+Test 7: If we replace insert a premise after the reason, it should propagate
+correctly to the Output Tree and the validation feedback should not change.
+
+        it 'should permit inserting unused premises and send feedback',
+        ( done ) ->
+            setupThenTest ->
+                P = new MakeAnything()
+                    .attr n : 2, id : 3, class : 'TestPrem'
+                LDE.insertStructure P, 'root', 1
+            , ->
+                expect( m.type for m in LDEmessages ).toEqual [
+                    'updated LDE state'
+                    'validation queueing'
+                    'validation result'
+                    'validation complete'
+                ]
+                expect( LDEmessages[1].subject ).toBe 2
+                expect( LDEmessages[2].subject ).toBe 2
+                expect( LDEmessages[2].validity ).toBe 'valid'
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 3
+                done()
+
+Test 8: If we cite the new premise as a premise of the `LessStep` instance,
+it should give us an error because such steps are not supposed to cite any
+premises.
+
+        it 'should permit citing a premise and send negative feedback',
+        ( done ) ->
+            setupThenTest ->
+                LDE.insertConnection 2, 3,
+                    id : 'c2', type : 'premise citation'
+            , ->
+                expect( m.type for m in LDEmessages ).toEqual [
+                    'updated LDE state'
+                    'validation queueing'
+                    'validation result'
+                    'validation complete'
+                ]
+                expect( LDEmessages[1].subject ).toBe 2
+                expect( LDEmessages[2].subject ).toBe 2
+                expect( LDEmessages[2].validity ).toBe 'invalid'
+                expect( LDEmessages[2].message )
+                    .toMatch /Too many premises/
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 3
+                done()
+
+Test 9: If we change the type of the step to `SumStep` instead, then the
+error should change to say that -1 is not equal to 4.
+
+        it 'should permit changing step type and update the feedback',
+        ( done ) ->
+            setupThenTest ->
+                SS = new MakeAnything()
+                    .attr id : 2, n : 4, class : 'SumStep'
+                LDE.replaceStructure 2, SS, yes
+            , ->
+                expect( m.type for m in LDEmessages ).toEqual [
+                    'updated LDE state'
+                    'validation queueing'
+                    'validation result'
+                    'validation complete'
+                ]
+                expect( LDEmessages[1].subject ).toBe 2
+                expect( LDEmessages[2].subject ).toBe 2
+                expect( LDEmessages[2].validity ).toBe 'invalid'
+                expect( LDEmessages[2].message ).toMatch /2 - 3 is not 4/
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 3
+                done()
+
+Test 10: If we update the number of the sum step to -1, then it should
+propagate to the Output Tree and update the feedback to positive.
+
+        it 'should permit changing step number and switching the feedback',
+        ( done ) ->
+            setupThenTest ->
+                LDE.setStructureAttribute 2, 'n', -1
+            , ->
+                expect( m.type for m in LDEmessages ).toEqual [
+                    'updated LDE state'
+                    'validation queueing'
+                    'validation result'
+                    'validation complete'
+                ]
+                expect( LDEmessages[1].subject ).toBe 2
+                expect( LDEmessages[2].subject ).toBe 2
+                expect( LDEmessages[2].validity ).toBe 'valid'
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 3
+                done()
+
+Test 11: If we update the number of the reason to 8, then it should
+propagate to the Output Tree and put the feedback back to negative, saying
+that -6 is not -1.
+
+        it 'should permit changing reason number with opposite results',
+        ( done ) ->
+            setupThenTest ->
+                LDE.setStructureAttribute 1, 'n', 8
+            , ->
+                expect( m.type for m in LDEmessages ).toEqual [
+                    'updated LDE state'
+                    'validation queueing'
+                    'validation result'
+                    'validation complete'
+                ]
+                expect( LDEmessages[1].subject ).toBe 2
+                expect( LDEmessages[2].subject ).toBe 2
+                expect( LDEmessages[2].validity ).toBe 'invalid'
+                expect( LDEmessages[2].message ).toMatch /2 - 8 is not -1/
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 3
+                done()
+
+Test 12: If we update the number of the premise to 7, then it should
+propagate to the Output Tree and put the feedback back to positive.
+
+        it 'should let us change premise number w/feedback positive again',
+        ( done ) ->
+            setupThenTest ->
+                LDE.setStructureAttribute 3, 'n', 7
+            , ->
+                expect( m.type for m in LDEmessages ).toEqual [
+                    'updated LDE state'
+                    'validation queueing'
+                    'validation result'
+                    'validation complete'
+                ]
+                expect( LDEmessages[1].subject ).toBe 2
+                expect( LDEmessages[2].subject ).toBe 2
+                expect( LDEmessages[2].validity ).toBe 'valid'
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 3
+                done()
+
+Test 13: If we change the ID of the step, this should trigger revalidation,
+but the feedback will have changed only in that it is now reported about a
+different `InputStructure`'s ID.
+
+        it 'should let us change IDs and the feedback moves to the new ID',
+        ( done ) ->
+            setupThenTest ->
+                LDE.setStructureAttribute 2, 'id', 4
+            , ->
+                expect( m.type for m in LDEmessages ).toEqual [
+                    'updated LDE state'
+                    'validation queueing'
+                    'validation result'
+                    'validation complete'
+                ]
+                expect( LDEmessages[1].subject ).toBe 4
+                expect( LDEmessages[2].subject ).toBe 4
+                expect( LDEmessages[2].validity ).toBe 'valid'
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 3
+                done()

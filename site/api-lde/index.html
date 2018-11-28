@@ -373,6 +373,11 @@ of data it transmits.)</p>
 <li><code>"validation complete"</code> - feedback of this type means that the LDE has
    completed the entire validation phase.  No validation for any structure
    is still running.  The <code>subject</code> field will be "OT root".</li>
+<li><code>"validation result"</code> - feedback of this type will be about one
+   particular node in the Input Tree (as its subject) and will contain the
+   validation computed for that node.  It will contain at least a <code>validity</code>
+   field which will be one of three strings: "valid", "invalid", or
+   "indeterminate".</li>
 </ul></div>
         </div>
 
