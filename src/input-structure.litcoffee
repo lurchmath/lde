@@ -148,15 +148,28 @@ can be overridden by subclasses as needed.
 
 We only form connections if both ends of the connection have run their
 interpretation routines, because it doesn't make sense to connect to
-elements to `lastInterpretation`s that are about to be replaced:
+elements to `lastInterpretation`s that are about to be replaced.
+
+We define the `counterId` and `increment` functions because there may be
+connections lingering from the old Output Tree that we don't know about,
+which will be discarded as soon as the old Output Tree is replaced by the
+new one, but that won't happen until all interpretation has completed.  Thus
+for now, when we don't even know yet whether interpretation will complete
+without errors, we must permit such connections to continue to exist, and
+work around them by creating our own unique IDs.
 
                     if not source.alreadyStarted or \
                        not target.alreadyStarted then continue
                     counter = 0
+                    counterId = -> "#{data.id}.#{counter}"
+                    increment = =>
+                        while ( @getConnectionSource counterId() )?
+                            counter++
                     for s in source.citationSources connection
                         for t in target.citationTargets connection
                             copy = JSON.parse JSON.stringify data
-                            copy.id = "#{data.id}.#{counter++}"
+                            increment()
+                            copy.id = counterId()
                             s.connectTo t, copy
 
 And here are the default implementations for `citationSources()` and
