@@ -463,8 +463,8 @@ we should not signal it again.  In every other case, we should signal it.
         CurrentPhase = 'starting validation'
         callback?()
         toBeValidated = [ ]
-        callJustChanged = ( node ) ->
-            callJustChanged child for child in node.children()
+        whereToCallJustChanged = ( node ) ->
+            whereToCallJustChanged child for child in node.children()
             if node.isDirty() then return toBeValidated.push node
             newCitations = node.lookUpAllCitations()
             if JSON.stringify( newCitations ) isnt \
@@ -478,7 +478,7 @@ we should not signal it again.  In every other case, we should signal it.
                         if cited?.isDirty()
                             return toBeValidated.push node
         validationCompletionSent = no
-        callJustChanged OutputTree
+        whereToCallJustChanged OutputTree
         node.justChanged?() for node in toBeValidated
         if not validationCompletionSent and \
            WorkerPool.numberAvailable() is WorkerPool.length
