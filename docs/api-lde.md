@@ -222,3 +222,8 @@ of data it transmits.)
  * `"validation complete"` - feedback of this type means that the LDE has
    completed the entire validation phase.  No validation for any structure
    is still running.  The `subject` field will be "OT root".
+ * `"validation result"` - feedback of this type will be about one
+   particular node in the Input Tree (as its subject) and will contain the
+   validation computed for that node.  It will contain at least a `validity`
+   field which will be one of three strings: "valid", "invalid", or
+   "indeterminate".
