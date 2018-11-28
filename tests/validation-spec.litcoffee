@@ -422,6 +422,8 @@ callback.
 
 ## Full sequence tests
 
+### Small-size full-sequence test
+
 This section tests whether validation is triggered at the end of the
 interpretation phase and if it still works in that context.
 
@@ -522,6 +524,8 @@ Tree.
                     LDE.reset()
                     done()
             LDE.Feedback.addEventListener 'feedback', listener
+
+### Full-sequence test with several subclasses
 
 Now we'll test a situation in which we create several new subclasses of
 `InputStructure` and `OutputStructure` and then place them, one at a time,
