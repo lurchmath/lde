@@ -259,12 +259,12 @@ function does nothing.
         if key[0] is '_' then return
         if ( subtree = Structure.instanceWithID subtreeID )? and \
            isInTheInputTree subtree
-            if key is 'id' then subtree.untrackIDs no
-            if typeof value is 'undefined'
+            if key is 'id'
+                subtree.changeID value
+            else if typeof value is 'undefined'
                 subtree.clearAttributes key
             else
                 subtree.setAttribute key, value
-            if key is 'id' then subtree.trackIDs no
             startModificationSoon()
 
 ### Editing Connections in the Input Tree

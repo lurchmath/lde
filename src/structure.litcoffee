@@ -337,6 +337,41 @@ connections involving this structure.
             @clearAttributes 'id'
             if recursive then child.clearIDs() for child in @children()
 
+If a structure wishes to change its ID (which can happen if the LDE client
+requests it) then we have a lot of internal bookkeeping to update.  The
+following function encapsulates all of that so that clients don't need to
+know about our internals, but can just call this function to request an ID
+change.  It returns true if the change is possible, and false if the change
+was not possible (because the newly requested ID was already in use or
+because this structure wasn't currently tracked in the system).  In such a
+situation, no action is taken.
+
+        changeID : ( newID ) ->
+            return no unless \
+                not ( Structure.instanceWithID newID )? and \
+                this is Structure.instanceWithID @id()
+
+First we update every connection we have stored in us to use the new ID
+we're about to get.  We do this first because updating our ID triggers event
+handlers, and we want the work complete before we trigger them. This code
+will make sense only after you have read the documentation about how
+connections are stored, which is given in the next section of this file,
+below.
+
+            for id in @getAllConnections()
+                if ( targetID = @getAttribute( "_conn #{id} to" ) ) and \
+                   target = Structure.instanceWithID targetID
+                    target.setAttribute "_conn #{id} from", newID
+                if ( sourceID = @getAttribute( "_conn #{id} from" ) ) and \
+                   source = Structure.instanceWithID sourceID
+                    source.setAttribute "_conn #{id} to", newID
+
+Then we update the id-to-instance mapping and our own ID attribute.
+
+            Structure::IDs[newID] = @
+            delete Structure::IDs[@id()]
+            @setAttribute 'id', newID
+
 ## Connections
 
 Structures may have connections among them, specified using attributes.  The
