@@ -133,12 +133,12 @@ Second convention:  The "reason citations" behaves the same way
                     target.setAttribute 'reason citations',
                         ( "#{citation}" for citation in citations )
 
-Third convention:  Connections in or out whose type is "premise citation"
-should be copied over to the analogous nodes in the Output Tree.  Here we
-use the `citationSources()` and `citationTargets()` functions to ask which
-elements of our `lastInterpretation` should be the sources/targets of any
-citation connections.  These functions default to saying "everything," but
-can be overridden by subclasses as needed.
+Third convention:  Connections in or out whose type is "premise citation" or
+"reason citation" should be copied over to the analogous nodes in the Output
+Tree.  Here we use the `citationSources()` and `citationTargets()` functions
+to ask which elements of our `lastInterpretation` should be the
+sources/targets of any citation connections.  These functions default to
+saying "everything," but can be overridden by subclasses as needed.
 
             for connection in @getAllConnections()
                 data = @getConnectionData connection
