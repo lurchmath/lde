@@ -574,6 +574,7 @@ success.
                     data = @getAttribute "_conn #{id} data"
                     @clearAttributes "_conn #{id} data"
                     recipient.setAttribute "_conn #{id} data", data
+                    Structure::connectionIDs[id] = recipient
                 if ( sourceID = @getAttribute( "_conn #{id} from" ) ) and \
                    source = Structure.instanceWithID sourceID
                     @clearAttributes "_conn #{id} from"
