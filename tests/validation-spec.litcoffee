@@ -519,5 +519,6 @@ Tree.
                     child = LDE.getOutputTree().children()[0]
                     expect( child.didValidation ).toBeTruthy()
                     LDE.Feedback.removeEventListener 'feedback', listener
+                    LDE.reset()
                     done()
             LDE.Feedback.addEventListener 'feedback', listener

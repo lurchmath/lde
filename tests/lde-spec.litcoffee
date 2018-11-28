@@ -1623,6 +1623,8 @@ remain while the illegal ones were indeed removed.
                     .toEqual [ 'legal-1', 'legal-2' ]
                 expect( output3.getAllConnections() ).toEqual [ 'legal-2' ]
                 LDE.Feedback.removeEventListener 'feedback', listener
+                extra1.untrackIDs()
+                extra2.untrackIDs()
                 done()
 
 ## Just changed events

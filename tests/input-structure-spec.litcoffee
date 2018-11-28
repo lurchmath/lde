@@ -730,6 +730,7 @@ because it should call `addLabels()` as part of its work.
             expect( result[0].hasLabel 'Modus Ponens' ).toBeTruthy()
             expect( result[0].hasLabel 'modusponens' ).toBeFalsy()
             expect( result[0].hasLabel ' modus ponens' ).toBeFalsy()
+            result[0].untrackIDs()
 
 Verify that citations are copied to the outputs of `recursiveInterpret()`,
 because it should call `copyCitations()` as part of its work.
@@ -775,3 +776,4 @@ because it should call `copyCitations()` as part of its work.
                 type : 'reason citation'
                 _origin : 2 # the latter node always makes the connection
             tree.untrackIDs()
+            ot.untrackIDs() for ot in Otree

@@ -1399,6 +1399,7 @@ Verify that all connections were noticed.
             expect( C.getConnectionsIn() ).toEqual [ 'two' ]
             expect( C.getConnectionsOut() ).toEqual [ ]
             expect( C.getAllConnections() ).toEqual [ 'two' ]
+            A.untrackIDs()
 
 Let's verify that the functions for querying connection data work as they
 claim in their documentation.
@@ -1687,6 +1688,7 @@ in the tree.
                 id : 'other', str : 'foo'
             expect( Structure.getConnectionData '1' ).toEqual
                 id : '1', mom : 'Edna'
+            A.untrackIDs()
 
 All the other cases of possible invalidity occur only if the tree has
 inconsistent data, so we don't try to construct such a tree here.  One could
