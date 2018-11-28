@@ -142,7 +142,7 @@ can be overridden by subclasses as needed.
 
             for connection in @getAllConnections()
                 data = @getConnectionData connection
-                if data.type in [ 'premise citation', 'reason citation' ]
+                if data?.type in [ 'premise citation', 'reason citation' ]
                     source = @getConnectionSource connection
                     target = @getConnectionTarget connection
 

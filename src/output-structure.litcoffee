@@ -186,7 +186,7 @@ structure for their types.
             for connection in @getConnectionsOut()
                 data = @getConnectionData connection
                 for type in [ 'premise', 'reason' ]
-                    if data.type is "#{type} citation" and
+                    if data?.type is "#{type} citation" and
                        ( target = @getConnectionTarget connection )?
                         result["#{type}s"].connections.push
                             cited : target.id()
