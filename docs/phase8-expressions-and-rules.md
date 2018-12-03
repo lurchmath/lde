@@ -60,8 +60,8 @@ This has not been implemented.  See the tasks below.
    parser on the "text" attribute of the `InputExpression`, returning the
    result.
  * [ ] Add documentation for that new subclass.
- * [ ] Ensure that the `ParsableExpression` subclass registers itself with the
-   serialization code, as
+ * [ ] Ensure that the `ParsableExpression` subclass registers itself with
+   the serialization code, as
    [the documentation here](https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names)
    describes.  (That is, use a line like
    `className : Structure.addSubclass 'ParsableExpression', ParsableExpression`
@@ -69,7 +69,8 @@ This has not been implemented.  See the tasks below.
  * [ ] Define a global function in the LDE that uses the simple notation in
    the OpenMath package (e.g., `f(x,y,2)`) to create OpenMath instances and
    then converts them to `OutputExpression` trees.
- * [ ] Write unit tests that interpretation can use this global function.
+ * [ ] Write unit tests that interpretation of `ParseableExpression`
+   instances can use this global function as their `parse` method.
  * [ ] Repeat the previous two steps for OpenMath XML as well.
  * [ ] Extend the unit tests for interpretation to verify that parsable
    nodes can exist on their own or within corresponding nodes in the Input
@@ -79,7 +80,7 @@ This has not been implemented.  See the tasks below.
 ## Rules of inference
 
  * [ ] Create a subclass `OutputRule` of `OutputStructure` that has
-   a member `validateStep(step,callback,worker)` that can validate other
+   a member `validateStep(step,worker,callback)` that can validate other
    `OutputStructure` instances.  The default implementation just calls the
    callback object with a feedback object expressing that it didn't
    actually validate anything.
@@ -90,11 +91,15 @@ This has not been implemented.  See the tasks below.
    describes.  (That is, use a line like
    `className : Structure.addSubclass 'OutputRule', OutputRule` in the
    `OutputRule` class code.)
- * [ ] Define in the LDE a `basicValidate(callback,worker)` function that
+ * [ ] Define in the LDE a `basicValidate(worker,callback)` function that
    can be installed in `OutputStructure` instances as their `validate`
    field, and that finds the rule of inference cited by the
    `OutputStructure` instance and defers validation to that rule's
-   `validateStep()` routine, passing both parameters along.
+   `validateStep()` routine, passing both parameters along.  It is not
+   intended that this routine should be the property of any specific
+   subclass.  Rather, it is more like an interface (in the Java sense),
+   which can be installed (by a single assignment statement) into any
+   instance that needs it.
  * [ ] Test that `OutputStructures` can cite rules that will do the
    validation for the structure.  Ensure that validation continues to work
    even when delegated (athough so far all feedback will say no work was
@@ -118,7 +123,35 @@ This has not been implemented.  See the tasks below.
  * [ ] Extend `TemplateRule` with the option to be iff rather than just if.
  * [ ] Add unit tests for this new feature.
  * [ ] Extend `TemplateRule` with the option to use string-based matching
-   rather than just tree-based matching.
+   rather than just tree-based matching.  String-based matching will use an
+   algorithm like the following.
+```
+matchPlus = ( match, key, value ) ->
+    result = { }
+    for own k, v of match then result[k] = v
+    result[key] = value
+    result
+matches = ( patterns, string, soFar = { } ) ->
+    if patterns.length is 0
+        return if string.length is 0 then [ { } ] else [ ]
+    pattern = patterns[0]
+    if pattern.type is 'string'
+        t = pattern.text
+        return if string[...t.length] is t
+            matches patterns[1..], string[t.length..]
+        else
+            [ ]
+    if soFar.hasOwnProperty t
+        return if string[...soFar[t].length] is t
+            matches patterns[1..], sting[soFar[t].length..]
+        else
+            [ ]
+    results = [ ]
+    for i in [1..string.length]
+        results = results.concat matches patterns[1..], string[i+1..],
+            matchPlus soFar, t, string[..i]
+    results
+```
  * [ ] Add unit tests for this new feature.
  * [ ] Create a subclass `InputRule` of `InputStructure`.
  * [ ] Ensure that the `InputRule` subclass registers itself with the
