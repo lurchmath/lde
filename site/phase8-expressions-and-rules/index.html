@@ -269,7 +269,13 @@ for, without yet permitting customizable mathematical notation.</p>
    to do validation.  For now, assume tree-based matching and if-style
    inference.  You will need to use
    <a href="https://github.com/lurchmath/first-order-matching">the Matching Package</a>,
-   probably loaded into background workers.</li>
+   probably loaded into background workers.  To create a <code>gulp</code> task that
+   will import the latest matching package script into a location where the
+   workers can load it, see the following two resources.<ol>
+<li><a href="https://github.com/gulpjs/plugins/issues/88#issuecomment-42171336">gulp task to download a file</a></li>
+<li><a href="https://stackoverflow.com/questions/5922842/getting-http-headers-with-node-js">checking last modified date of an URL</a></li>
+</ol>
+</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Add documentation for that new subclass.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Test that <code>OutputStructures</code> can cite rules that will do the
    template-based validation, which is a huge step!</li>

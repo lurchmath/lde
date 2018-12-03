@@ -116,7 +116,11 @@ This has not been implemented.  See the tasks below.
    to do validation.  For now, assume tree-based matching and if-style
    inference.  You will need to use
    [the Matching Package](https://github.com/lurchmath/first-order-matching),
-   probably loaded into background workers.
+   probably loaded into background workers.  To create a `gulp` task that
+   will import the latest matching package script into a location where the
+   workers can load it, see the following two resources.
+    1. [gulp task to download a file](https://github.com/gulpjs/plugins/issues/88#issuecomment-42171336)
+    1. [checking last modified date of an URL](https://stackoverflow.com/questions/5922842/getting-http-headers-with-node-js)
  * [ ] Add documentation for that new subclass.
  * [ ] Test that `OutputStructures` can cite rules that will do the
    template-based validation, which is a huge step!
