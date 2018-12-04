@@ -26,14 +26,17 @@ errors manifest at runtime, hence the checks below.
     if require?
         { Structure } = require './structure'
         { InputStructure } = require './input-structure'
+        { OM } = require 'openmath-js'
     else if WorkerGlobalScope?
         if not WorkerGlobalScope.Structure?
             importScripts 'structure.js'
             importScripts 'input-structure.js'
+            importScripts 'openmath.js'
     else if self?.importScripts?
         if not self.Structure?
             importScripts 'release/structure.js'
             importScripts 'release/input-structure.js'
+            importScripts 'node_modules/openmath-js/openmath.js'
 
 ## Define the `OutputStructure` class
 
@@ -225,6 +228,136 @@ missing class method with the appropriate implementation, which accesses its
 own internals.
 
         justChanged : -> OutputStructure::instanceJustChanged? @
+
+## Define `OutputExpression` as a type of `OutputStructure`
+
+An `OutputExpression` is the most common type of mathematics we think of
+when doing mathematics on a computer.  It may be a mathematical noun, such
+as 3x, or a mathematical statement, such as "not every number is even."
+These are what typically appear inside dollar signs in LaTeX documents, and
+form the majority of the content of any proof in a formal system.
+
+In the LDE, we use OpenMath data types to store expressions.  In particular,
+we rely on a JavaScript implementation of part of the OpenMath Standard,
+[published here](https://github.com/lurchmath/openmath-js).  Each expression
+is a tree made up of instances of the following class, each of which
+corresponds to a node in an OpenMath tree, and there are conversion
+functions between the two data structures.
+
+    class OutputExpression extends OutputStructure
+
+In order for a hierarchy of structures to be able to be serialized and
+deserialized, we need to track the class of each structure in the hierarchy.
+We do so for this class with the following line of code.
+
+        className : Structure.addSubclass 'OutputExpression',
+            OutputExpression
+
+The constructor takes an arbitrary number of parameters.  The first is
+always the OpenMath type that this object represents (e.g., string, integer,
+function application, etc.).  That type should be expressed in the
+three-letter form used in the OpenMath module's code (e.g., "int", "flo",
+"str", etc., as a JavaScript string).
+
+The remaining parameters depend on the first.
+
+ * If the first parameter gives this object an OpenMath atomic type, then
+   the next should contain the atomic content (e.g., string data if this is
+   a string).  In one case (OpenMath symbol) this atomic content is spread
+   over two or three parameters: name, CD, and optional URI.
+ * If the first parameter gives this object an OpenMath binding type, then
+   the second parameter should be an array of the indices of bound
+   variables, and then the third and further parameters are its children,
+   which must be `OutputExpression` instances, and will be passed to the
+   superclass's constructor.
+ * In all other cases, the second and further parameters are the children,
+   and are passed on as in the previous case.
+
+If an invalid type is passed as first parameter, we construct an OpenMath
+error object instead, with no children and no attributes.  Any other
+configuration of invalid parametrs (e.g., bad binding indices) will be
+accepted, but may not convert to an OpenMath object in `toOpenMath()`.
+
+Currently there is not any supported way to decorate an `OutputExpression`
+instance with OpenMath attributes, though that could be added later if the
+need arises.
+
+        constructor : ( type, rest... ) ->
+            if type in 'int flo str byt sym var'.split ' '
+                super()
+                @type = type
+                @atomicData = rest
+            else if type is 'bin'
+                [ varIndices, children... ] = rest
+                super children...
+                @type = type
+                @boundVariables = varIndices
+            else if type in 'app att err'.split ' '
+                super rest...
+                @type = type
+            else
+                super()
+                @type = 'err'
+
+We wish to be able to extract from any `OutputExpression` instance the
+OpenMath object that it represents.  We do so with the following conversion
+function.  If conversion to an OpenMath object fails from an error in the
+OpenMath package, that error is not caught; clients should take care to
+form their `OutputExpression` instances correctly or use `try`/`catch`.
+
+As stated above, attributes are not yet supported, though such support
+could be added later.
+
+        toOpenMath : ->
+            childResults = ( child.toOpenMath() for child in @children )
+            switch @type
+                when 'int', 'flo', 'str', 'byt', 'sym', 'var'
+                    new OM[@type] @atomicData...
+                when 'app', 'att', 'err'
+                    new OM[@type] childResults...
+                when 'bin'
+                    vars = ( childResults[i] for i in @boundVariables )
+                    notVarIndices =
+                        ( i for i in [0...childResults.length] \
+                            when i not in @boundVariables )
+                    head = childResults[notVarIndices[0]]
+                    body = childResults[notVarIndices[1]]
+                    new OM.bin head, vars..., body
+                else
+                    throw "Not a valid OpenMath type: #{@type}"
+
+We also want the inverse conversion function, from `OMNode` instances (from
+the OpenMath package) to instances of this type.  We provide that function
+as a class method here, and one should call it on an instance of the
+`OMNode` class; it will yield an instance of this class in every case,
+because `OMNode` instances cannot be incorrectly formed.
+
+As stated above, attributes are not yet supported, though such support
+could be added later.
+
+        @fromOpenMath : ( node ) ->
+            childResults = ( OutputExpression.fromOpenMath child \
+                for child in node.children )
+            switch node.type
+                when 'i' then new OutputExpression 'int', node.value
+                when 'f' then new OutputExpression 'flo', node.value
+                when 'st' then new OutputExpression 'str', node.value
+                when 'ba' then new OutputExpression 'byt', node.value
+                when 'sy' then new OutputExpression 'sym', node.name,
+                    node.cd, node.uri
+                when 'v' then new OutputExpression 'var', node.name
+                when 'a' then new OutputExpression 'app', childResults...
+                when 'bi' then new OutputExpression 'bin',
+                    [1...childResults.length-1], childResults
+                when 'e' then new OutputExpression 'err', childResults...
+                else throw "This should never happen - how did an
+                    OMNode instance get type #{node.type}?"
+
+For convenience, we install in the `OMNode` class a method for converting
+instances to `OutputExpression` types by simply deferring the work to the
+above function.
+
+    # OM::toOutputExpression = -> OutputExpression.fromOpenMath @
 
 ## Exports
 

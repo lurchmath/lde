@@ -22,24 +22,24 @@ This has not been implemented.  See the tasks below.
 
 ## Expressions
 
- * [ ] Create a subclass of `OutputStructure`, in the `OutputStructure`
+ * [x] Create a subclass of `OutputStructure`, in the `OutputStructure`
    module, called `OutputExpression`.
- * [ ] Add documentation explaining what it is and will do.
- * [ ] Ensure that the `OutputExpression` subclass registers itself with the
+ * [x] Add documentation explaining what it is and will do.
+ * [x] Ensure that the `OutputExpression` subclass registers itself with the
    serialization code, as
    [the documentation here](https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names)
    describes.  (That is, use a line like
    `className : Structure.addSubclass 'OutputExpression', OutputExpression`
    in the `OutputExpression` class code.)
- * [ ] Add a constructor that takes three fields: OpenMath type (`OMS`,
+ * [x] Add a constructor that takes three fields: OpenMath type (`OMS`,
    `OMI`, etc.), atomic content (if any), and indices of bound variables (if
    any).
- * [ ] Add an instance method `toOpenMath()` that converts instances of
+ * [x] Add an instance method `toOpenMath()` that converts instances of
    the class to OpenMath expressions, using
    [the OpenMath package](https://github.com/lurchmath/openmath-js).
- * [ ] Add a class method `fromOpenMath()` that converts instances of
+ * [x] Add a class method `fromOpenMath()` that converts instances of
    OpenMath expressions into `OutputExpression` trees.
- * [ ] Extend the OpenMath class with a `toOutputExpression()` function that
+ * [x] Extend the OpenMath class with a `toOutputExpression()` function that
    just defers the task to `fromOpenMath()` in the `OutputExpression` class.
  * [ ] Write and document unit tests.
 
