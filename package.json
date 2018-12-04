@@ -6,7 +6,9 @@
     "doc": "docs",
     "test": "tests"
   },
-  "dependencies": {},
+  "dependencies": {
+    "openmath-js": "^1.1.0"
+  },
   "devDependencies": {
     "coffeescript": "^2.3.1",
     "gulp": "^4.0.0",
