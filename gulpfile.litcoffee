@@ -12,6 +12,17 @@ Load Gulp modules.
     pump = require 'pump' # good error handling of gulp pipes
     shell = require 'gulp-shell' # run external commands
 
+## Record command-line arguments
+
+Some tasks may wish to customize their behavior based on command-line
+arguments the user passes.  We therefore record all such switches here into
+a single global object from which any task can do a lookup.
+
+    switches = { }
+    for piece, index in process.argv
+        if piece[0] is '-' then switches[piece.replace /^\-+/, ''] = \
+            process.argv[index+1][0] is '-' or process.argv[index+1]
+
 ## Build tasks
 
 Create a build task to compile CoffeeScript source into JavaScript.
@@ -24,13 +35,17 @@ Create a build task to compile CoffeeScript source into JavaScript.
             .pipe sourcemaps.write '.'
             .pipe gulp.dest 'release'
 
-Create "tests" task to run unit tests.
+Create "test" task to run unit tests.  If the user calls this with the
+syntax `gulp test --only <prefix>` then we will run only test files that
+begin with that prefix.  Omitting the `--only` switch means all tests will
+be run.
 
+    switches.only ?= ''
     gulp.task 'test', shell.task [
         'node'
         './node_modules/jasmine-node/lib/jasmine-node/cli.js'
         '--verbose --coffee --forceexit'
-        'tests/*.litcoffee'
+        "tests/#{switches.only}*.litcoffee"
     ].join ' '
 
 Create "docs" task to build the documentation using
