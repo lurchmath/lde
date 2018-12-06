@@ -219,39 +219,6 @@ because that is a job for `recursiveInterpret()`, below.
             IS1.untrackIDs()
             IS2.untrackIDs()
 
-Verify that the `class` attribute is respected.  To do so, we create two
-dummy subclasses of `OutputExpression` so that we can nest instances of
-various classes.
-
-        it 'respects the class attribute of the IS', ->
-            class DummyClass1 extends OutputStructure
-                className : Structure.addSubclass 'DummyClass1', DummyClass1
-            class DummyClass2 extends OutputStructure
-                className : Structure.addSubclass 'DummyClass2', DummyClass2
-            IS = new InputStructure(
-                new InputStructure().attr class : 'DummyClass2'
-                new InputStructure().attr class : 'OutputStructure'
-            ).attr class : 'DummyClass1'
-            result = IS.recursiveInterpret()
-            expect( result instanceof Array ).toBeTruthy()
-            expect( result.length ).toBe 1
-            expect( result[0] instanceof DummyClass1 ).toBeTruthy()
-            expect( result[0] instanceof DummyClass2 ).toBeFalsy()
-            expect( result[0] instanceof OutputStructure ).toBeTruthy()
-            expect( result[0].children().length ).toBe 2
-            expect( result[0].children()[0] instanceof DummyClass1 )
-                .toBeFalsy()
-            expect( result[0].children()[0] instanceof DummyClass2 )
-                .toBeTruthy()
-            expect( result[0].children()[0] instanceof OutputStructure )
-                .toBeTruthy()
-            expect( result[0].children()[1] instanceof OutputStructure )
-                .toBeTruthy()
-            expect( result[0].children()[1] instanceof DummyClass1 )
-                .toBeFalsy()
-            expect( result[0].children()[1] instanceof DummyClass1 )
-                .toBeFalsy()
-
 We now turn to tests of recursive interpretation, the framework that places
 calls to `interpret()` in individual nodes.
 
@@ -810,3 +777,36 @@ because it should call `copyCitations()` as part of its work.
                 _origin : 2 # the latter node always makes the connection
             tree.untrackIDs()
             ot.untrackIDs() for ot in Otree
+
+Verify that the `class` attribute is respected.  To do so, we create two
+dummy subclasses of `OutputExpression` so that we can nest instances of
+various classes.
+
+        it 'respects the class attribute of the IS', ->
+            class DummyClass1 extends OutputStructure
+                className : Structure.addSubclass 'DummyClass1', DummyClass1
+            class DummyClass2 extends OutputStructure
+                className : Structure.addSubclass 'DummyClass2', DummyClass2
+            IS = new InputStructure(
+                new InputStructure().attr class : 'DummyClass2'
+                new InputStructure().attr class : 'OutputStructure'
+            ).attr class : 'DummyClass1'
+            result = IS.recursiveInterpret()
+            expect( result instanceof Array ).toBeTruthy()
+            expect( result.length ).toBe 1
+            expect( result[0] instanceof DummyClass1 ).toBeTruthy()
+            expect( result[0] instanceof DummyClass2 ).toBeFalsy()
+            expect( result[0] instanceof OutputStructure ).toBeTruthy()
+            expect( result[0].children().length ).toBe 2
+            expect( result[0].children()[0] instanceof DummyClass1 )
+                .toBeFalsy()
+            expect( result[0].children()[0] instanceof DummyClass2 )
+                .toBeTruthy()
+            expect( result[0].children()[0] instanceof OutputStructure )
+                .toBeTruthy()
+            expect( result[0].children()[1] instanceof OutputStructure )
+                .toBeTruthy()
+            expect( result[0].children()[1] instanceof DummyClass1 )
+                .toBeFalsy()
+            expect( result[0].children()[1] instanceof DummyClass1 )
+                .toBeFalsy()
