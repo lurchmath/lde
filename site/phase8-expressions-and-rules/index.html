@@ -175,26 +175,26 @@ for, without yet permitting customizable mathematical notation.</p>
 <p>This has not been implemented.  See the tasks below.</p>
 <h2 id="expressions">Expressions</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Create a subclass of <code>OutputStructure</code>, in the <code>OutputStructure</code>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Create a subclass of <code>OutputStructure</code>, in the <code>OutputStructure</code>
    module, called <code>OutputExpression</code>.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation explaining what it is and will do.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Ensure that the <code>OutputExpression</code> subclass registers itself with the
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation explaining what it is and will do.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Ensure that the <code>OutputExpression</code> subclass registers itself with the
    serialization code, as
    <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
    describes.  (That is, use a line like
    <code>className : Structure.addSubclass 'OutputExpression', OutputExpression</code>
    in the <code>OutputExpression</code> class code.)</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add a constructor that takes three fields: OpenMath type (<code>OMS</code>,
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add a constructor that takes three fields: OpenMath type (<code>OMS</code>,
    <code>OMI</code>, etc.), atomic content (if any), and indices of bound variables (if
    any).</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add an instance method <code>toOpenMath()</code> that converts instances of
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add an instance method <code>toOpenMath()</code> that converts instances of
    the class to OpenMath expressions, using
    <a href="https://github.com/lurchmath/openmath-js">the OpenMath package</a>.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add a class method <code>fromOpenMath()</code> that converts instances of
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add a class method <code>fromOpenMath()</code> that converts instances of
    OpenMath expressions into <code>OutputExpression</code> trees.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the OpenMath class with a <code>toOutputExpression()</code> function that
+<li class="task-list-item"><input type="checkbox" disabled checked/> Extend the OpenMath class with a <code>toOutputExpression()</code> function that
    just defers the task to <code>fromOpenMath()</code> in the <code>OutputExpression</code> class.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Write and document unit tests.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Write and document unit tests.</li>
 </ul>
 <h2 id="common-types-of-interpretation">Common types of interpretation</h2>
 <ul class="task-list">
@@ -269,9 +269,12 @@ for, without yet permitting customizable mathematical notation.</p>
    to do validation.  For now, assume tree-based matching and if-style
    inference.  You will need to use
    <a href="https://github.com/lurchmath/first-order-matching">the Matching Package</a>,
-   probably loaded into background workers.  To create a <code>gulp</code> task that
-   will import the latest matching package script into a location where the
-   workers can load it, see the following two resources.<ol>
+   probably loaded into background workers.  Add this as an <code>npm</code>
+   dependency, but when you create a single <code>.js</code> file that can import the
+   entire LDE, you will need to include both the OpenMath package and the
+   Matching package in that file.  To do so, create a <code>gulp</code> task that
+   imports the latest matching package script into a location where the
+   workers can load it; see the following two resources.<ol>
 <li><a href="https://github.com/gulpjs/plugins/issues/88#issuecomment-42171336">gulp task to download a file</a></li>
 <li><a href="https://stackoverflow.com/questions/5922842/getting-http-headers-with-node-js">checking last modified date of an URL</a></li>
 </ol>

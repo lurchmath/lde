@@ -41,7 +41,7 @@ This has not been implemented.  See the tasks below.
    OpenMath expressions into `OutputExpression` trees.
  * [x] Extend the OpenMath class with a `toOutputExpression()` function that
    just defers the task to `fromOpenMath()` in the `OutputExpression` class.
- * [ ] Write and document unit tests.
+ * [x] Write and document unit tests.
 
 ## Common types of interpretation
 
