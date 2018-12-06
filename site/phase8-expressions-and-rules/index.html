@@ -198,37 +198,21 @@ for, without yet permitting customizable mathematical notation.</p>
 </ul>
 <h2 id="common-types-of-interpretation">Common types of interpretation</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the default implementation of <code>interpret()</code> so that, if the
+<li class="task-list-item"><input type="checkbox" disabled checked/> Extend the default implementation of <code>interpret()</code> so that, if the
    instance has a property called <code>correspondingClass</code>, then that property
    is used to instantiate an <code>OutputStructure</code> instance rather than using
    the base <code>OutputStructure</code> class.  This should be sufficient to implement
    corresponding input and output expressions.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests for interpretation to verify that this can be
+<li class="task-list-item"><input type="checkbox" disabled checked/> Extend the unit tests for interpretation to verify that this can be
    used to create arbitrary-sized trees that are nested combinations of the
    correct subclasses of <code>OutputStructure</code>.  This will require creating some
    dummy subclasses for testing purposes.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Create a subclass <code>ParsableExpression</code> of <code>InputExpression</code> that has
-   a property <code>parse</code> that maps strings to <code>OutputStructure</code> instances.  The
-   <code>interpret()</code> routine in the <code>ParsableExpression</code> class should call the
-   parser on the "text" attribute of the <code>InputExpression</code>, returning the
-   result.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation for that new subclass.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Ensure that the <code>ParsableExpression</code> subclass registers itself with
-   the serialization code, as
-   <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
-   describes.  (That is, use a line like
-   <code>className : Structure.addSubclass 'ParsableExpression', ParsableExpression</code>
-   in the <code>ParsableExpression</code> class code.)</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Define a global function in the LDE that uses the simple notation in
-   the OpenMath package (e.g., <code>f(x,y,2)</code>) to create OpenMath instances and
-   then converts them to <code>OutputExpression</code> trees.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Write unit tests that interpretation of <code>ParseableExpression</code>
-   instances can use this global function as their <code>parse</code> method.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Repeat the previous two steps for OpenMath XML as well.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the unit tests for interpretation to verify that parsable
-   nodes can exist on their own or within corresponding nodes in the Input
-   Tree, and the correct hierarchies will be produced in any case.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Once the unit tests pass, build everything and commit.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Extend the unit tests for interpretation to verify that <code>interpret()</code>
+   routines can be built from parsers such as the OpenMath <code>simple</code>
+   function, and that it is possible to put structures that interpret
+   themselves that way inside other structures, and the correct hierarchies
+   are constructed.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Once the unit tests pass, build everything and commit.</li>
 </ul>
 <h2 id="rules-of-inference">Rules of inference</h2>
 <ul class="task-list">
