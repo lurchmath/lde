@@ -54,27 +54,11 @@ This has not been implemented.  See the tasks below.
    used to create arbitrary-sized trees that are nested combinations of the
    correct subclasses of `OutputStructure`.  This will require creating some
    dummy subclasses for testing purposes.
- * [ ] Create a subclass `ParsableExpression` of `InputExpression` that has
-   a property `parse` that maps strings to `OutputStructure` instances.  The
-   `interpret()` routine in the `ParsableExpression` class should call the
-   parser on the "text" attribute of the `InputExpression`, returning the
-   result.
- * [ ] Add documentation for that new subclass.
- * [ ] Ensure that the `ParsableExpression` subclass registers itself with
-   the serialization code, as
-   [the documentation here](https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names)
-   describes.  (That is, use a line like
-   `className : Structure.addSubclass 'ParsableExpression', ParsableExpression`
-   in the `ParsableExpression` class code.)
- * [ ] Define a global function in the LDE that uses the simple notation in
-   the OpenMath package (e.g., `f(x,y,2)`) to create OpenMath instances and
-   then converts them to `OutputExpression` trees.
- * [ ] Write unit tests that interpretation of `ParseableExpression`
-   instances can use this global function as their `parse` method.
- * [ ] Repeat the previous two steps for OpenMath XML as well.
- * [ ] Extend the unit tests for interpretation to verify that parsable
-   nodes can exist on their own or within corresponding nodes in the Input
-   Tree, and the correct hierarchies will be produced in any case.
+ * [ ] Extend the unit tests for interpretation to verify that `interpret()`
+   routines can be built from parsers such as the OpenMath `simple`
+   function, and that it is possible to put structures that interpret
+   themselves that way inside other structures, and the correct hierarchies
+   are constructed.
  * [ ] Once the unit tests pass, build everything and commit.
 
 ## Rules of inference
