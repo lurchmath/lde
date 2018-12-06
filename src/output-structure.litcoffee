@@ -31,11 +31,13 @@ errors manifest at runtime, hence the checks below.
         if not WorkerGlobalScope.Structure?
             importScripts 'structure.js'
             importScripts 'input-structure.js'
+        if not WorkerGlobalScope.OM?
             importScripts 'openmath.js'
     else if self?.importScripts?
         if not self.Structure?
             importScripts 'release/structure.js'
             importScripts 'release/input-structure.js'
+        if not self.OM?
             importScripts 'node_modules/openmath-js/openmath.js'
 
 ## Define the `OutputStructure` class
@@ -277,27 +279,33 @@ If an invalid type is passed as first parameter, we construct an OpenMath
 error object instead, with no children and no attributes.  Any other
 configuration of invalid parametrs (e.g., bad binding indices) will be
 accepted, but may not convert to an OpenMath object in `toOpenMath()`.
+Note that an error object constructed that way will not correctly convert
+to an OpenMath object, because it has not head symbol.
 
 Currently there is not any supported way to decorate an `OutputExpression`
 instance with OpenMath attributes, though that could be added later if the
 need arises.
 
         constructor : ( type, rest... ) ->
-            if type in 'int flo str byt sym var'.split ' '
-                super()
-                @type = type
-                @atomicData = rest
-            else if type is 'bin'
-                [ varIndices, children... ] = rest
-                super children...
-                @type = type
-                @boundVariables = varIndices
-            else if type in 'app att err'.split ' '
-                super rest...
-                @type = type
-            else
-                super()
-                @type = 'err'
+            switch type
+                when 'int', 'flo', 'str', 'byt', 'var'
+                    super()
+                    @setAttribute 'OM type', type
+                    @setAttribute 'OM atomic value', rest[0]
+                when 'sym'
+                    super()
+                    @setAttribute 'OM type', type
+                    @setAttribute 'OM atomic value', rest
+                when 'bin'
+                    super rest[1..]...
+                    @setAttribute 'OM type', type
+                    @setAttribute 'OM bound indices', rest[0]
+                when 'app', 'err'
+                    super rest...
+                    @setAttribute 'OM type', type
+                else
+                    super()
+                    @setAttribute 'OM type', 'err'
 
 We wish to be able to extract from any `OutputExpression` instance the
 OpenMath object that it represents.  We do so with the following conversion
@@ -309,22 +317,26 @@ As stated above, attributes are not yet supported, though such support
 could be added later.
 
         toOpenMath : ->
-            childResults = ( child.toOpenMath() for child in @children )
-            switch @type
-                when 'int', 'flo', 'str', 'byt', 'sym', 'var'
-                    new OM[@type] @atomicData...
-                when 'app', 'att', 'err'
-                    new OM[@type] childResults...
+            switch type = @getAttribute 'OM type'
+                when 'int', 'flo', 'str', 'byt', 'var'
+                    new OM[type] @getAttribute 'OM atomic value'
+                when 'sym'
+                    new OM[type] @getAttribute( 'OM atomic value' )...
+                when 'app', 'err'
+                    childResults =
+                        ( child.toOpenMath() for child in @children() )
+                    new OM[type] childResults...
                 when 'bin'
-                    vars = ( childResults[i] for i in @boundVariables )
-                    notVarIndices =
-                        ( i for i in [0...childResults.length] \
-                            when i not in @boundVariables )
-                    head = childResults[notVarIndices[0]]
-                    body = childResults[notVarIndices[1]]
+                    indices = @getAttribute 'OM bound indices'
+                    vars = for i in indices
+                        OM.var @children()[i].getAttribute 'OM atomic value'
+                    notVarIndices = ( i for i in [0...@children().length] \
+                        when i not in indices )
+                    head = @children()[notVarIndices[0]].toOpenMath()
+                    body = @children()[notVarIndices[1]].toOpenMath()
                     new OM.bin head, vars..., body
                 else
-                    throw "Not a valid OpenMath type: #{@type}"
+                    throw "Not a valid OpenMath type: #{type}"
 
 We also want the inverse conversion function, from `OMNode` instances (from
 the OpenMath package) to instances of this type.  We provide that function
@@ -347,9 +359,16 @@ could be added later.
                     node.cd, node.uri
                 when 'v' then new OutputExpression 'var', node.name
                 when 'a' then new OutputExpression 'app', childResults...
-                when 'bi' then new OutputExpression 'bin',
-                    [1...childResults.length-1], childResults
-                when 'e' then new OutputExpression 'err', childResults...
+                when 'bi'
+                    vars = ( new OutputExpression 'var', v.name \
+                        for v in node.variables )
+                    head = OutputExpression.fromOpenMath node.symbol
+                    body = OutputExpression.fromOpenMath node.body
+                    new OutputExpression 'bin', [1...childResults.length],
+                        head, vars..., body
+                when 'e' then new OutputExpression 'err',
+                    OutputExpression.fromOpenMath( node.symbol ),
+                    childResults...
                 else throw "This should never happen - how did an
                     OMNode instance get type #{node.type}?"
 
@@ -357,10 +376,13 @@ For convenience, we install in the `OMNode` class a method for converting
 instances to `OutputExpression` types by simply deferring the work to the
 above function.
 
-    # OM::toOutputExpression = -> OutputExpression.fromOpenMath @
+    OM::toOutputExpression = -> OutputExpression.fromOpenMath @
 
 ## Exports
 
 Now if this is being used in a Node.js context, export the class we defined.
 
-    if exports? then exports.OutputStructure = OutputStructure
+    if exports?
+        exports.OutputStructure = OutputStructure
+        exports.OutputExpression = OutputExpression
+        exports.OM = exports.OMNode = OM
