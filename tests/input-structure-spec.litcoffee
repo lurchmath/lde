@@ -6,8 +6,10 @@ Here we import the module we're about to test.  We also need to import the
 function.
 
     { Structure } = require '../src/structure'
-    { InputStructure } = require '../src/input-structure'
-    { OutputStructure } = require '../src/output-structure'
+    { InputStructure, InputExpression } = require '../src/input-structure'
+    { OutputStructure, OutputExpression } = \
+        require '../src/output-structure'
+    { OM } = require 'openmath-js'
 
 This file does not test every component of that module.  It tests the
 `InputStructure` class, and other classes defined in the same module are
@@ -791,7 +793,8 @@ various classes.
                 new InputStructure().attr class : 'DummyClass2'
                 new InputStructure().attr class : 'OutputStructure'
             ).attr class : 'DummyClass1'
-            result = IS.recursiveInterpret()
+            result = null
+            expect( -> result = IS.recursiveInterpret() ).not.toThrow()
             expect( result instanceof Array ).toBeTruthy()
             expect( result.length ).toBe 1
             expect( result[0] instanceof DummyClass1 ).toBeTruthy()
@@ -810,3 +813,64 @@ various classes.
                 .toBeFalsy()
             expect( result[0].children()[1] instanceof DummyClass1 )
                 .toBeFalsy()
+
+Verify that we can define classes that interpret themselves using parsers,
+and that this plays nicely with other classes in the same hierarchy.
+
+        it 'works fine with interpretation defined based on parsing', ->
+            DummyClass1 = Structure::subclasses.DummyClass1 # defined above
+            class OMSimpleClass extends InputExpression
+                className : Structure.addSubclass 'OMSimpleClass',
+                    OMSimpleClass
+                interpret : ( accessibles, childResults, scope ) ->
+                    if ( OMObj = OM.simple @getAttribute 'text' )? and \
+                       ( OE = OMObj.toOutputExpression() )? then \
+                        [ OE ] else [ ]
+            IS = new InputExpression(
+                new OMSimpleClass().attr text : 'arith1.plus(5,2)'
+                new OMSimpleClass().attr text : 'logic.forall[x,P(x,"!")]'
+            ).attr class : 'DummyClass1'
+            result = null
+            expect( -> result = IS.recursiveInterpret() ).not.toThrow()
+            expect( result instanceof Array ).toBeTruthy()
+            expect( result.length ).toBe 1
+            outRoot = result[0]
+            expect( outRoot.children().length ).toBe 2
+            expect( outRoot instanceof DummyClass1 ).toBeTruthy()
+            oe1 = outRoot.children()[0]
+            oe2 = outRoot.children()[1]
+            expect( oe1 instanceof OutputExpression ).toBeTruthy()
+            expect( oe1.getAttribute 'OM type' ).toBe 'app'
+            expect( oe1.children().length ).toBe 3
+            expect( oe1.children()[0].getAttribute 'OM type' ).toBe 'sym'
+            expect( oe1.children()[0].getAttribute 'OM atomic value' )
+                .toEqual [ 'plus', 'arith1', undefined ]
+            expect( oe1.children()[1].getAttribute 'OM type' ).toBe 'int'
+            expect( oe1.children()[1].getAttribute 'OM atomic value' )
+                .toBe 5
+            expect( oe1.children()[2].getAttribute 'OM type' ).toBe 'int'
+            expect( oe1.children()[2].getAttribute 'OM atomic value' )
+                .toBe 2
+            expect( oe2 instanceof OutputExpression ).toBeTruthy()
+            expect( oe2.getAttribute 'OM type' ).toBe 'bin'
+            expect( oe2.children().length ).toBe 3
+            expect( oe2.children()[0].getAttribute 'OM type' ).toBe 'sym'
+            expect( oe2.children()[0].getAttribute 'OM atomic value' )
+                .toEqual [ 'forall', 'logic', undefined ]
+            expect( oe2.children()[1].getAttribute 'OM type' ).toBe 'var'
+            expect( oe2.children()[1].getAttribute 'OM atomic value' )
+                .toBe 'x'
+            expect( oe2.children()[2].getAttribute 'OM type' ).toBe 'app'
+            expect( oe2.children()[2].children().length ).toBe 3
+            expect( oe2.children()[2].children()[0].getAttribute 'OM type' )
+                .toBe 'var'
+            expect( oe2.children()[2].children()[0].getAttribute \
+                'OM atomic value' ).toBe 'P'
+            expect( oe2.children()[2].children()[1].getAttribute 'OM type' )
+                .toBe 'var'
+            expect( oe2.children()[2].children()[1].getAttribute \
+                'OM atomic value' ).toBe 'x'
+            expect( oe2.children()[2].children()[2].getAttribute 'OM type' )
+                .toBe 'str'
+            expect( oe2.children()[2].children()[2].getAttribute \
+                'OM atomic value' ).toBe '!'

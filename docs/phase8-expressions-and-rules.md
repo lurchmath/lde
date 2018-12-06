@@ -54,12 +54,12 @@ This has not been implemented.  See the tasks below.
    used to create arbitrary-sized trees that are nested combinations of the
    correct subclasses of `OutputStructure`.  This will require creating some
    dummy subclasses for testing purposes.
- * [ ] Extend the unit tests for interpretation to verify that `interpret()`
+ * [x] Extend the unit tests for interpretation to verify that `interpret()`
    routines can be built from parsers such as the OpenMath `simple`
    function, and that it is possible to put structures that interpret
    themselves that way inside other structures, and the correct hierarchies
    are constructed.
- * [ ] Once the unit tests pass, build everything and commit.
+ * [x] Once the unit tests pass, build everything and commit.
 
 ## Rules of inference
 
