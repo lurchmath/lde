@@ -252,7 +252,9 @@ properties.
 
 
         interpret : ( accessibles, childResults, scope ) ->
-            result = new OutputStructure() # plain vanilla wrapper node
+            whichClass = Structure::subclasses[@getAttribute 'class'] ? \
+                OutputStructure
+            result = new whichClass()
             count = 0
             for childArray in childResults
                 result.insertChild node, count++ for node in childArray

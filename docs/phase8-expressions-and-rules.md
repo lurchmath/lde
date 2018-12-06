@@ -45,12 +45,12 @@ This has not been implemented.  See the tasks below.
 
 ## Common types of interpretation
 
- * [ ] Extend the default implementation of `interpret()` so that, if the
+ * [x] Extend the default implementation of `interpret()` so that, if the
    instance has a property called `correspondingClass`, then that property
    is used to instantiate an `OutputStructure` instance rather than using
    the base `OutputStructure` class.  This should be sufficient to implement
    corresponding input and output expressions.
- * [ ] Extend the unit tests for interpretation to verify that this can be
+ * [x] Extend the unit tests for interpretation to verify that this can be
    used to create arbitrary-sized trees that are nested combinations of the
    correct subclasses of `OutputStructure`.  This will require creating some
    dummy subclasses for testing purposes.
