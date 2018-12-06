@@ -7,7 +7,7 @@
     "test": "tests"
   },
   "dependencies": {
-    "openmath-js": "^1.1.0"
+    "openmath-js": "^1.2.0"
   },
   "devDependencies": {
     "coffeescript": "^2.3.1",
