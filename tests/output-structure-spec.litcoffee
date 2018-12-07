@@ -932,3 +932,72 @@ Error objects:
                 .toBeTruthy()
             expect( myOE.children()[1].toOpenMath()
                 .equals OM.simple '"msg"' ).toBeTruthy()
+
+## Sending feedback
+
+Each `OutputExpression` is supposed to delegate its feedback to its origin
+`InputExpression`.  But it is possible to pause and resume the emission of
+feedback, and resuming can be with or without the emission of the queued
+(not emitted during the pause) feedback objects.
+
+We ensure in the following tests that all these features work.
+
+    describe 'Feedback from OutputStructures', ->
+
+Do `OutputStructure`s send feedback to their origin `InputStructure`s?
+We create fake `InputStructure` instances here that just verify that they
+hear the feedback message, but don't do anything with it.
+
+        it 'should delegate the work to the OS\'s origin', ->
+            fakeIS = jasmine.createSpyObj 'feedback', [ 'feedback' ]
+            myOS = new OutputStructure()
+            myOS.origin = fakeIS
+            expect( fakeIS.feedback.calls.length ).toBe 0
+            feedbackObj = type : 'test', value : 'bleh'
+            myOS.feedback feedbackObj
+            expect( fakeIS.feedback.calls.length ).toBe 1
+            expect( fakeIS.feedback.calls[0].args[0] ).toBe feedbackObj
+
+Can we pause the feedback and then later unpause, seeing all the objects
+that were sent while things were paused?  Furthermore, while they're paused,
+can we inspect the queue and verify that the right objects are being added
+to it?
+
+        it 'can disable feedback but send all when restarting', ->
+            fakeIS = jasmine.createSpyObj 'feedback', [ 'feedback' ]
+            myOS = new OutputStructure()
+            myOS.origin = fakeIS
+            expect( fakeIS.feedback.calls.length ).toBe 0
+            feedback1 = type : 'test', value : 'bleh'
+            feedback2 = type : 'large', value : '42'
+            myOS.enableFeedback no
+            myOS.feedback feedback1
+            myOS.feedback feedback2
+            expect( fakeIS.feedback.calls.length ).toBe 0
+            expect( myOS.feedbackStore[0] ).toBe feedback1
+            expect( myOS.feedbackStore[1] ).toBe feedback2
+            myOS.enableFeedback yes, yes
+            expect( fakeIS.feedback.calls.length ).toBe 2
+            expect( fakeIS.feedback.calls[0].args[0] ).toBe feedback1
+            expect( fakeIS.feedback.calls[1].args[0] ).toBe feedback2
+
+Can we pause the feedback and then later unpause, but ask not to see all the
+objects that were sent while things were paused?  Furthermore, while they're
+paused, can we inspect the queue and verify that the right objects are being
+added to it?
+
+        it 'can disable feedback and ignore all when restarting', ->
+            fakeIS = jasmine.createSpyObj 'feedback', [ 'feedback' ]
+            myOS = new OutputStructure()
+            myOS.origin = fakeIS
+            expect( fakeIS.feedback.calls.length ).toBe 0
+            feedback1 = type : 'test', value : 'bleh'
+            feedback2 = type : 'large', value : '42'
+            myOS.enableFeedback no
+            myOS.feedback feedback1
+            myOS.feedback feedback2
+            expect( fakeIS.feedback.calls.length ).toBe 0
+            expect( myOS.feedbackStore[0] ).toBe feedback1
+            expect( myOS.feedbackStore[1] ).toBe feedback2
+            myOS.enableFeedback yes, no
+            expect( fakeIS.feedback.calls.length ).toBe 0

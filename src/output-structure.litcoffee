@@ -68,6 +68,7 @@ happend as part of interpretation.
             IS = Structure::subclasses.InputStructure
             if len = IS::instancesBeingInterpreted?.length
                 @origin = IS::instancesBeingInterpreted[len-1]
+            @enableFeedback yes, no
 
 Similar to tracking origins for `OutputStructure` nodes, if a connection is
 formed between `OutputStructure` instances, we will want to track its origin
@@ -82,12 +83,33 @@ connection was formed.
 
 ## Feedback
 
-To give feedback about a particular `OutputStructure` instance, find the
-`InputStructure` instance that created this `OutputStructure` and if there
-is such a thing, call the `feedback` method in it.  (That will delegate the
-work further, but that is not our concern here.)
+Feedback on this structure can be given by calling a single function,
+`feedback`, and passing an object with a feedback `type` field and optional
+other fields.  By default, that method finds the `InputStructure` instance
+that created this `OutputStructure` and if there is such a thing, calls the
+`feedback` method in it.  (That will delegate the work further, but that is
+not our concern here.)
 
-        feedback : ( feedbackData ) -> @origin?.feedback feedbackData
+But it is sometimes the case that we do not wish generated feedback to be
+immediately emitted to the client.  For instance, if several different
+methods to validate this `Structure` are being attempted in sequence, we
+might wish to inspect all the generated feedback before deciding which
+subset of it to emit to the client.
+
+Thus we provide a function for enabling or disabling the storing of
+feedback.  When enabled, no feedback is emitted, but it is all stored in a
+`feedbackQueue`.  At any point, that queue can be cleared, optionally
+emitting all of its contents first, using the methods below.
+
+        feedback : ( feedbackData ) ->
+            if @sendingFeedback
+                @origin?.feedback feedbackData
+            else
+                @feedbackStore.push feedbackData
+        enableFeedback : ( enable = yes, emitAll = no ) ->
+            if ( @sendingFeedback = enable ) and emitAll
+                @feedback feedbackData for feedbackData in @feedbackStore
+            @feedbackStore = [ ]
 
 ## Labels
 
