@@ -63,19 +63,19 @@ This has not been implemented.  See the tasks below.
 
 ## Rules of inference
 
- * [ ] Create a subclass `OutputRule` of `OutputStructure` that has
+ * [x] Create a subclass `OutputRule` of `OutputStructure` that has
    a member `validateStep(step,worker,callback)` that can validate other
    `OutputStructure` instances.  The default implementation just calls the
    callback object with a feedback object expressing that it didn't
    actually validate anything.
- * [ ] Add documentation for that new subclass.
- * [ ] Ensure that the `OutputRule` subclass registers itself with the
+ * [x] Add documentation for that new subclass.
+ * [x] Ensure that the `OutputRule` subclass registers itself with the
    serialization code, as
    [the documentation here](https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names)
    describes.  (That is, use a line like
    `className : Structure.addSubclass 'OutputRule', OutputRule` in the
    `OutputRule` class code.)
- * [ ] Define in the LDE a `basicValidate(worker,callback)` function that
+ * [x] Define in the LDE a `basicValidate(worker,callback)` function that
    can be installed in `OutputStructure` instances as their `validate`
    field, and that finds the rule of inference cited by the
    `OutputStructure` instance and defers validation to that rule's
@@ -84,7 +84,7 @@ This has not been implemented.  See the tasks below.
    subclass.  Rather, it is more like an interface (in the Java sense),
    which can be installed (by a single assignment statement) into any
    instance that needs it.
- * [ ] Test that `OutputStructures` can cite rules that will do the
+ * [x] Test that `OutputStructures` can cite rules that will do the
    validation for the structure.  Ensure that validation continues to work
    even when delegated (athough so far all feedback will say no work was
    done).

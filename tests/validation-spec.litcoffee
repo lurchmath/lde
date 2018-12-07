@@ -953,3 +953,158 @@ different `InputStructure`'s ID.
                 OT = LDE.getOutputTree()
                 expect( OT.children().length ).toBe 3
                 done()
+
+## The `basicValidate()` routine
+
+Explain here.
+
+    describe 'The basicValidate() routine of the OutputStructure class', ->
+
+Explain here.
+
+        class RegExpRule extends LDE.OutputRule
+            className : LDE.Structure.addSubclass 'RegExpRule', RegExpRule
+            validateStep : ( step, worker, callback ) ->
+                return callback() unless step instanceof LDE.OutputStructure
+                step.feedback if not ( text = step.getAttribute 'text' )?
+                    type : 'validation result'
+                    validity : 'invalid'
+                    message : 'The step needs a text attribute.'
+                else if not ( re = @getAttribute 're' )?
+                    type : 'validation result'
+                    validity : 'invalid'
+                    message : 'The rule needs an re attribute.'
+                else if RegExp( re ).test text
+                    type : 'validation result'
+                    validity : 'valid'
+                else
+                    type : 'validation result'
+                    validity : 'invalid'
+                    message : "#{text} does not match #{re}."
+                callback()
+            hasLabel : ( label ) ->
+                ( labelPattern = @getAttribute 'lpat' )? and \
+                RegExp( labelPattern ).test label
+        class SimpleStep extends LDE.OutputStructure
+            className : LDE.Structure.addSubclass 'SimpleStep', SimpleStep
+            validate : LDE.OutputRule.basicValidate
+        MakeAnything = LDE.Structure::subclasses.MakeAnything
+
+As above.
+
+        LDEmessages = [ ]
+        completionCallback = null
+        listener = ( event ) ->
+            LDEmessages.push event
+            if event.type is 'validation complete'
+                completionCallback?()
+        beforeEach ->
+            LDE.Feedback.addEventListener 'feedback', listener
+        afterEach ->
+            LDE.Feedback.removeEventListener 'feedback', listener
+            LDEmessages = [ ]
+        setupThenTest = ( setup, test ) ->
+            completionCallback = -> test() ; completionCallback = null
+            setup()
+
+Explain each.
+
+        it 'should start with IT and OT empty', ->
+            LDE.reset()
+            expect( LDE.getInputTree().children() ).toEqual [ ]
+            expect( LDE.getOutputTree().children() ).toEqual [ ]
+        it 'should permit rule setup without feedback', ( done ) ->
+            setupThenTest ->
+                R1 = new MakeAnything().attr
+                    id : 1
+                    class : 'RegExpRule'
+                    re : '[0-9]+'
+                    lpat : '[rR]1|ANY'
+                LDE.insertStructure R1, 'root', 0
+                R2 = new MakeAnything().attr
+                    id : 2
+                    class : 'RegExpRule'
+                    re : '[abcABC]'
+                    lpat : '[rR]2|ANY'
+                LDE.insertStructure R2, 'root', 1
+            , ->
+                expect( m.type for m in LDEmessages )
+                    .toEqual [ 'updated LDE state', 'validation complete' ]
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 2
+                done()
+        it 'should give correct feedback if steps are inserted', ( done ) ->
+            setupThenTest ->
+                S1 = new MakeAnything().attr
+                    id : 3
+                    class : 'SimpleStep'
+                    text : '5'
+                    "reason citations": [ 'R1' ]
+                LDE.insertStructure S1, 'root', 2
+                S2 = new MakeAnything().attr
+                    id : 4
+                    class : 'SimpleStep'
+                    text : 'c'
+                    "reason citations": [ 'R2' ]
+                LDE.insertStructure S2, 'root', 3
+                S3 = new MakeAnything().attr
+                    id : 5
+                    class : 'SimpleStep'
+                    text : 'c'
+                    "reason citations": [ 'ANY' ]
+                LDE.insertStructure S3, 'root', 4
+                S4 = new MakeAnything().attr
+                    id : 6
+                    class : 'SimpleStep'
+                    text : 'd'
+                    "reason citations": [ 'ANY' ]
+                LDE.insertStructure S4, 'root', 5
+            , ->
+                expect( LDEmessages ).toEqual [
+                    type : 'updated LDE state'
+                    subject : 'root'
+                ,
+                    type : 'validation queueing'
+                    subject : 3
+                ,
+                    type : 'validation result'
+                    validity : 'valid'
+                    subject : 3
+                ,
+                    type : 'validation queueing'
+                    subject : 4
+                ,
+                    type : 'validation result'
+                    validity : 'valid'
+                    subject : 4
+                ,
+                    type : 'validation queueing'
+                    subject : 5
+                ,
+                    type : 'validation result'
+                    validity : 'valid'
+                    subject : 5
+                ,
+                    type : 'validation queueing'
+                    subject : 6
+                ,
+                    type : 'validation result'
+                    validity : 'invalid'
+                    subject : 6
+                    components : [
+                        type : 'validation result'
+                        validity : 'invalid'
+                        message : 'd does not match [0-9]+.'
+                    ,
+                        type : 'validation result'
+                        validity : 'invalid'
+                        message : 'd does not match [abcABC].'
+                    ]
+                ,
+                    type : 'validation complete'
+                    subject : 'OT root'
+                    details : 'The validation phase just completed.'
+                ]
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 6
+                done()

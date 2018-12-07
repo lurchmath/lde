@@ -216,19 +216,19 @@ for, without yet permitting customizable mathematical notation.</p>
 </ul>
 <h2 id="rules-of-inference">Rules of inference</h2>
 <ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Create a subclass <code>OutputRule</code> of <code>OutputStructure</code> that has
+<li class="task-list-item"><input type="checkbox" disabled checked/> Create a subclass <code>OutputRule</code> of <code>OutputStructure</code> that has
    a member <code>validateStep(step,worker,callback)</code> that can validate other
    <code>OutputStructure</code> instances.  The default implementation just calls the
    callback object with a feedback object expressing that it didn't
    actually validate anything.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation for that new subclass.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Ensure that the <code>OutputRule</code> subclass registers itself with the
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation for that new subclass.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Ensure that the <code>OutputRule</code> subclass registers itself with the
    serialization code, as
    <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
    describes.  (That is, use a line like
    <code>className : Structure.addSubclass 'OutputRule', OutputRule</code> in the
    <code>OutputRule</code> class code.)</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Define in the LDE a <code>basicValidate(worker,callback)</code> function that
+<li class="task-list-item"><input type="checkbox" disabled checked/> Define in the LDE a <code>basicValidate(worker,callback)</code> function that
    can be installed in <code>OutputStructure</code> instances as their <code>validate</code>
    field, and that finds the rule of inference cited by the
    <code>OutputStructure</code> instance and defers validation to that rule's
@@ -237,7 +237,7 @@ for, without yet permitting customizable mathematical notation.</p>
    subclass.  Rather, it is more like an interface (in the Java sense),
    which can be installed (by a single assignment statement) into any
    instance that needs it.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Test that <code>OutputStructures</code> can cite rules that will do the
+<li class="task-list-item"><input type="checkbox" disabled checked/> Test that <code>OutputStructures</code> can cite rules that will do the
    validation for the structure.  Ensure that validation continues to work
    even when delegated (athough so far all feedback will say no work was
    done).</li>
