@@ -956,11 +956,17 @@ different `InputStructure`'s ID.
 
 ## The `basicValidate()` routine
 
-Explain here.
+The `basicValidate()` routine is defined as a class method of the
+`OutputRule` class, with the intention that it is available for installation
+in any step of work that wants to use it to defer validation to its cited
+rule(s).  This test verifies that the `basicValidate()` function behaves
+correctly when used in that way.
 
     describe 'The basicValidate() routine of the OutputStructure class', ->
 
-Explain here.
+We make a simple subclass of `OutputRule` that just verifies that the step's
+"text" attribute matches the regular expression in the rule's "re"
+attribute.
 
         class RegExpRule extends LDE.OutputRule
             className : LDE.Structure.addSubclass 'RegExpRule', RegExpRule
@@ -985,12 +991,20 @@ Explain here.
             hasLabel : ( label ) ->
                 ( labelPattern = @getAttribute 'lpat' )? and \
                 RegExp( labelPattern ).test label
+
+We make a simple subclass of `OutputStructure` that just defers validation
+to cited rule(s) using the `basicValidate()` function, which is what we are
+testing.
+
         class SimpleStep extends LDE.OutputStructure
             className : LDE.Structure.addSubclass 'SimpleStep', SimpleStep
             validate : LDE.OutputRule.basicValidate
+
+Re-use the handy tool from a previous test.
+
         MakeAnything = LDE.Structure::subclasses.MakeAnything
 
-As above.
+Re-use the handy feedback event listening mechanism from a previous test.
 
         LDEmessages = [ ]
         completionCallback = null
@@ -1007,12 +1021,17 @@ As above.
             completionCallback = -> test() ; completionCallback = null
             setup()
 
-Explain each.
+Verify that the Input and Output Trees are successfully cleared before we
+begin.
 
         it 'should start with IT and OT empty', ->
             LDE.reset()
             expect( LDE.getInputTree().children() ).toEqual [ ]
             expect( LDE.getOutputTree().children() ).toEqual [ ]
+
+Insert two rules, be sure we received no "validation result" feedback, and
+that the rules interpreted into the Output Tree successfully.
+
         it 'should permit rule setup without feedback', ( done ) ->
             setupThenTest ->
                 R1 = new MakeAnything().attr
@@ -1033,6 +1052,11 @@ Explain each.
                 OT = LDE.getOutputTree()
                 expect( OT.children().length ).toBe 2
                 done()
+
+Insert four steps citing those rules in various ways, and ensure that all
+the correct "validation queueing" and "validation result" messages come out
+of the LDE.
+
         it 'should give correct feedback if steps are inserted', ( done ) ->
             setupThenTest ->
                 S1 = new MakeAnything().attr
