@@ -103,11 +103,9 @@ This has not been implemented.  See the tasks below.
    probably loaded into background workers.  Add this as an `npm`
    dependency, but when you create a single `.js` file that can import the
    entire LDE, you will need to include both the OpenMath package and the
-   Matching package in that file.  To do so, create a `gulp` task that
-   imports the latest matching package script into a location where the
-   workers can load it; see the following two resources.
-    1. [gulp task to download a file](https://github.com/gulpjs/plugins/issues/88#issuecomment-42171336)
-    1. [checking last modified date of an URL](https://stackoverflow.com/questions/5922842/getting-http-headers-with-node-js)
+   Matching package in that file.  To do so, just copy the essential files
+   from the `node_modules` subfolder into the `release/` folder before
+   uniting all the scripts in that folder.
  * [ ] Add documentation for that new subclass.
  * [ ] Test that `OutputStructures` can cite rules that will do the
    template-based validation, which is a huge step!
