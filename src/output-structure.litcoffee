@@ -515,6 +515,23 @@ be done.  If it's anything else, keep looking, via a recursive call.
                     else
                         processNext()
 
+## Define `TemplateRule` as a type of `OutputRule`
+
+A `TemplateRule` is an `OutputRule` that validates steps based on a template
+of zero or more premises and one or more conclusion.  They can be
+tree-based (meaning that they perform pattern matching based on expression
+trees) or string-based (meaning that they perform pattern matching based on
+strings) and they can be uni-directional (if premises then conclusion) or
+bi-directional (premises if and only if conclusions).
+
+    class TemplateRule extends OutputRule
+
+In order for a hierarchy of structures to be able to be serialized and
+deserialized, we need to track the class of each structure in the hierarchy.
+We do so for this class with the following line of code.
+
+        className : Structure.addSubclass 'TemplateRule', TemplateRule
+
 ## Exports
 
 Now if this is being used in a Node.js context, export the class we defined.

@@ -88,8 +88,8 @@ This has not been implemented.  See the tasks below.
    validation for the structure.  Ensure that validation continues to work
    even when delegated (athough so far all feedback will say no work was
    done).
- * [ ] Create a subclass `TemplateRule` of `OutputRule`.
- * [ ] Ensure that the `TemplateRule` subclass registers itself with the
+ * [x] Create a subclass `TemplateRule` of `OutputRule`.
+ * [x] Ensure that the `TemplateRule` subclass registers itself with the
    serialization code, as
    [the documentation here](https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names)
    describes.  (That is, use a line like
