@@ -145,6 +145,32 @@ loaded, which we can tell by evaluating something depending on it:
                         expect( response.result ).toEqual [ 'Structure' ]
                         done()
 
+Now verify that we can import the two modules imported from other git
+repositories into this one via `npm`: OpenMath and matching.
+
+        it 'should import the OpenMath package', ( done ) ->
+            new LDEWorker ( W ) ->
+                W.installScript 'release/openmath.js', ( response ) ->
+                    expect( response.success ).toBe yes
+                    expect( response.error ).toBeUndefined()
+                    W.run ( -> OM.int( 5 ).evaluate().value.valueOf() ),
+                    ( response ) ->
+                        expect( response.success ).toBe yes
+                        expect( response.error ).toBeUndefined()
+                        expect( response.result ).toBe 5
+                        done()
+        it 'should import the matching package', ( done ) ->
+            new LDEWorker ( W ) ->
+                W.installScript 'release/first-order-matching.js',
+                ( response ) ->
+                    expect( response.success ).toBe yes
+                    expect( response.error ).toBeUndefined()
+                    W.run ( -> typeof isMetavariable ), ( response ) ->
+                        expect( response.success ).toBe yes
+                        expect( response.error ).toBeUndefined()
+                        expect( response.result ).toBe 'function'
+                        done()
+
 ## Installing functions in workers
 
 We now run a test to verify that a worker can install a function upon

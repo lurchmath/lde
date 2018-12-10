@@ -11,6 +11,7 @@ Load Gulp modules.
     sourcemaps = require 'gulp-sourcemaps' # create source maps
     pump = require 'pump' # good error handling of gulp pipes
     shell = require 'gulp-shell' # run external commands
+    newer = require 'gulp-newer' # to avoid unnecessary file copies
 
 ## Record command-line arguments
 
@@ -25,14 +26,32 @@ a single global object from which any task can do a lookup.
 
 ## Build tasks
 
-Create a build task to compile CoffeeScript source into JavaScript.
+Create a build task to populate the release folder with compiled JavaScript
+files.  This includes building CoffeeScript source files into JavaScript and
+copying some pre-compiled files from imported modules into the release
+folder.  (Normally that might be problematic from a release and authorship
+point of view, but we're copying files only from modules with the same
+authors, GitHub organization, and license.)
 
     gulp.task 'build', ->
+
+The compile phase:
+
         gulp.src 'src/*.litcoffee'
+            .pipe newer dest : 'release', ext : 'js'
             .pipe sourcemaps.init()
             .pipe coffee bare : yes
             .pipe uglify()
             .pipe sourcemaps.write '.'
+            .pipe gulp.dest 'release'
+
+The copy phase:
+
+        gulp.src [
+            'node_modules/openmath-js/openmath.js'
+            'node_modules/first-order-matching/first-order-matching.js'
+        ]
+            .pipe newer 'release'
             .pipe gulp.dest 'release'
 
 Create "test" task to run unit tests.  If the user calls this with the
