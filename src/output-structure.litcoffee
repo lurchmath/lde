@@ -27,18 +27,23 @@ errors manifest at runtime, hence the checks below.
         { Structure } = require './structure'
         { InputStructure } = require './input-structure'
         { OM } = require 'openmath-js'
+        FOM = require 'first-order-matching'
     else if WorkerGlobalScope?
         if not WorkerGlobalScope.Structure?
             importScripts 'structure.js'
             importScripts 'input-structure.js'
         if not WorkerGlobalScope.OM?
             importScripts 'openmath.js'
+        if not WorkerGlobalScope.metavariableSymbol?
+            importScripts 'first-order-matching.js'
     else if self?.importScripts?
         if not self.Structure?
             importScripts 'release/structure.js'
             importScripts 'release/input-structure.js'
         if not self.OM?
             importScripts 'node_modules/openmath-js/openmath.js'
+        if not self.metavariableSymbol?
+            importScripts 'node_modules/first-order-matching/first-order-matching.js'
 
 ## Define the `OutputStructure` class
 
@@ -467,11 +472,13 @@ feedback message, which we emit.
                 if reasons.length is 0
                     keptFeedback = @feedbackStore
                     @enableFeedback yes, no
-                    if keptFeedback.length > 0
+                    if keptFeedback.length > 1
                         @feedback
                             type : 'validation result'
                             validity : 'invalid'
                             components : keptFeedback
+                    else if keptFeedback.length is 1
+                        @feedback keptFeedback[0]
                     return callback()
 
 There remain reasons to process, so get the next one.  If we can't seem to
@@ -531,6 +538,177 @@ deserialized, we need to track the class of each structure in the hierarchy.
 We do so for this class with the following line of code.
 
         className : Structure.addSubclass 'TemplateRule', TemplateRule
+
+The `validateStep()` function of the this class assumes the class was
+constructed syntactically correctly, that is, with only children that are of
+the class `OutputExpression` and with some subset of them having the
+attribute "premise" set to true (the rest of them being conclusions).
+
+It assumes tree-based matching, but can be configured to use string-based
+matching if the attribute "matching type" is set to "string".  It assumes a
+one-way (if-then) rule, but can be configured to perform two-way (if and
+only if) checking if the attribute "iff" is set to true.
+
+*Right now, none of the options in the previous paragraph are implemented.
+At the moment, pattern-based matching of one-way rules is the only option.*
+
+        validateStep : ( step, worker, callback ) ->
+
+Compute the list of premises and conclusions in OpenMath form.  Compute all
+one-conclusion forms of this rule, one for each conclusion, using all the
+premises each time.
+
+            premises = ( child.toOpenMath() for child in @children() \
+                when child.getAttribute 'premise' )
+            forms = [ ]
+            for child in @children()
+                if not child.getAttribute 'premise'
+                    next = OM.app(
+                        OM.sym( 'Rule', 'Lurch' ),
+                        ( p.copy() for p in premises )...,
+                        child.toOpenMath()
+                    )
+                    FOM.setMetavariable v for v in \
+                        next.descendantsSatisfying ( d ) -> d.type is 'v'
+                    forms.push next
+
+Unite the step and its cited premises into the same structure, so that we
+might compare them.
+
+            premises = [ ]
+            if step not instanceof OutputExpression
+                step.feedback
+                    type : 'validation result'
+                    validity : 'invalid'
+                    message : 'Conclusion is not an expression'
+            for type in [ 'connections', 'labels' ]
+                for citation in step.lastCitationLookup.premises[type]
+                    premise = Structure.instanceWithID citation.cited
+                    if premise not instanceof OutputExpression
+                        step.feedback
+                            type : 'validation result'
+                            validity : 'invalid'
+                            message : 'Cited premise is not an expression'
+                            id : citation.cited
+                        return callback()
+                    premises.push premise
+            instance = OM.app(
+                OM.sym( 'Rule', 'Lurch' ),
+                ( p.toOpenMath() for p in premises )...,
+                step.toOpenMath()
+            )
+
+See if any of the forms of this rule matches the instance as claimed.  We do
+this asynchronously in background threads, but begin by installing the
+necessary script and step data into the worker we've been given.
+
+            @setupWorker worker, { step : instance.encode() }, callback, =>
+                index = 0
+                do processNext = =>
+
+First, if we've tried all the forms, then they've all failed, so we report
+that the rule does not justify the step.
+
+                    if index is forms.length
+                        step.feedback
+                            type : 'validation result'
+                            validity : 'invalid'
+                            message : 'Cited rule does not justify the
+                                step'
+                        return callback()
+
+Otherwise, we have another form to try, so let's queue it up for checking in
+the background worker.
+
+                    @setupWorker worker, { rule : forms[index].encode() },
+                        callback, ->
+                            worker.run ( ->
+                                rule = OM.decode globalData.rule
+                                step = OM.decode globalData.step
+                                myMatch = nextMatch new Constraint(
+                                    rule
+                                    step
+                                )
+                                if contents = myMatch?[0]?.contents
+                                    for { pattern, expression } in contents
+                                        # console.log pattern.simpleEncode(),
+                                        #     expression.simpleEncode()
+                                        pattern : pattern.encode()
+                                        expression : expression.encode()
+                                else
+                                    null
+                            ), ( response ) ->
+                                if response.error?
+                                    step.feedback
+                                        type : 'validation result'
+                                        validity : 'invalid'
+                                        message : 'Internal error in pattern
+                                            matching'
+                                        details : response.error
+                                    return callback()
+
+Here we've gotten past all the error checks, so we either have a match,
+which means the step is valid, or we have a non-match, which means we should
+move on to try the next form of the rule, with a recursive call to
+`processNext()`.
+
+                                if response.result?
+                                    step.feedback
+                                        type : 'validation result'
+                                        validity : 'valid'
+                                    return callback()
+                                index++
+                                processNext()
+
+The following utility function is used by `validateStep()` to set up a
+worker for use in matching.  It ensures that the Matching Package has been
+loaded (exactly once) in that worker, and ensures that all the given global
+data has been installed as well.  If an error occurs at any point, it calls
+the error callback after first sending negative validation feedback about an
+internal error.  If no error occurs, it calls the success callback.
+
+        setupWorker : ( worker, data, error, success ) ->
+
+Define a helper function for expressing internal errors, to simplify code
+below.
+
+            ie = ( message ) =>
+                @feedback
+                    type : 'validation result'
+                    validity : 'invalid'
+                    message : "Internal error setting up validation worker:
+                        could not #{message}"
+                return error()
+
+Create the list of keys in `data` that we need to install in the worker.
+
+            toInstall = ( k for own k, v of data )
+
+Create an asynchronous recursive function to install all those keys.
+
+            do nextStep = =>
+                if toInstall.length > 0
+                    key = toInstall.shift()
+                    worker.installData key, data[key], ( response ) =>
+                        if response.error? then return ie "install #{key}"
+                        nextStep()
+
+When they're all installed, the last step is to install the matching
+package if and only if it's needed, then call the `success` callback.
+
+                else
+                    worker.run ( -> typeof isMetavariable ), ( response ) =>
+                        if response.error?
+                            return ie 'check package status'
+                        if response.result is 'undefined'
+                            path = 'first-order-matching.js'
+                            if require? then path = "release/#{path}"
+                            worker.installScript path, ( response ) =>
+                                if response.error?
+                                    return ie 'install matching package'
+                                return success()
+                        else
+                            success()
 
 ## Exports
 

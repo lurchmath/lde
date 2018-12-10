@@ -5,6 +5,7 @@ Here we import the LDE module, because we require all of it in order to test
 validation.
 
     LDE = require '../src/lde.litcoffee'
+    { OM } = require 'openmath-js'
 
 ## Validation functions
 
@@ -1131,4 +1132,175 @@ of the LDE.
                 ]
                 OT = LDE.getOutputTree()
                 expect( OT.children().length ).toBe 6
+                done()
+
+## Template-based rules
+
+This test covers the `TemplateRule` subclass of `OutputRule`.
+
+    describe 'The TemplateRule class', ->
+
+Before running any tests, set up the same infrastructure we've used in all
+the tests above.
+
+        class MakeAnything2 extends LDE.Structure::subclasses.MakeAnything
+            className : LDE.Structure.addSubclass 'MakeAnything2',
+                MakeAnything2
+            interpret : ( accessibles, childResults, scope ) ->
+                result = LDE.Structure::subclasses
+                    .MakeAnything::interpret.apply @,
+                        [ accessibles, childResults, scope ]
+                for childArray in childResults
+                    for child in childArray
+                        result[0].insertChild child,
+                            result[0].children().length
+                result[0].hasLabel = ( label ) ->
+                    @id().indexOf( label ) > -1
+                result
+        LDEmessages = [ ]
+        completionCallback = null
+        listener = ( event ) ->
+            LDEmessages.push event
+            if event.type is 'validation complete'
+                completionCallback?()
+        beforeEach ->
+            LDE.Feedback.addEventListener 'feedback', listener
+        afterEach ->
+            LDE.Feedback.removeEventListener 'feedback', listener
+            LDEmessages = [ ]
+        setupThenTest = ( setup, test ) ->
+            completionCallback = -> test() ; completionCallback = null
+            setup()
+
+Make a class for creating OpenMath-based things in the Output Tree.
+
+        class MakeOM extends LDE.InputExpression
+            className : LDE.Structure.addSubclass 'MakeOM', MakeOM
+            interpret : ( accessibles, childResults, scope ) ->
+                if ( OMObj = OM.simple @getAttribute 'OM' )? and \
+                   ( OE = OMObj.toOutputExpression() )?
+                    for own key, value of @attributes
+                        if not /^_|^OM$|^id$|^step$/.test key
+                            OE.setAttribute key, value
+                    OE.hasLabel = ( label ) -> @id().indexOf( label ) > -1
+                    if @getAttribute 'step'
+                        OE.validate = LDE.OutputRule.basicValidate
+                    [ OE ]
+                else [ ]
+
+Be sure the slate is clean.
+
+        it 'should start with IT and OT empty', ->
+            LDE.reset()
+            expect( LDE.getInputTree().children() ).toEqual [ ]
+            expect( LDE.getOutputTree().children() ).toEqual [ ]
+
+Now set up a template-based rule.
+
+        it 'should permit rule setup without feedback', ( done ) ->
+            setupThenTest ->
+                MP = new MakeAnything2(
+                    new MakeOM().attr
+                        id : 'MP_1'
+                        OM : 'logic.ifthen(P,Q)'
+                        premise : yes
+                    new MakeOM().attr
+                        id : 'MP_2'
+                        OM : 'P'
+                        premise : yes
+                    new MakeOM().attr
+                        id : 'MP_3'
+                        OM : 'Q'
+                ).attr
+                    id : 'MP'
+                    class : 'TemplateRule'
+                LDE.insertStructure MP, 'root', 0
+            , ->
+                expect( m.type for m in LDEmessages )
+                    .toEqual [ 'updated LDE state', 'validation complete' ]
+                OT = LDE.getOutputTree()
+                expect( OT.children()[0].hasLabel 'MP' ).toBeTruthy()
+                expect( OT.children().length ).toBe 1
+                done()
+
+Insert a step citing that rule correctly and ensure that the correct
+"validation queueing" and "validation result" messages come out of the LDE.
+
+        it 'should give correct feedback on correct steps', ( done ) ->
+            setupThenTest ->
+                P1 = new MakeOM().attr
+                    id : 'P1'
+                    OM : 'logic.ifthen(greater(5,2),greater(5,0))'
+                P2 = new MakeOM().attr
+                    id : 'P2'
+                    OM : 'greater(5,2)'
+                S1 = new MakeOM().attr
+                    id : 'S1'
+                    OM : 'greater(5,0)'
+                    step : yes
+                    "reason citations" : [ 'MP' ]
+                    "premise citations" : [ 'P1', 'P2' ]
+                LDE.insertStructure P1, 'root', 1
+                LDE.insertStructure P2, 'root', 2
+                LDE.insertStructure S1, 'root', 3
+            , ->
+                expect( LDEmessages ).toEqual [
+                    type : 'updated LDE state'
+                    subject : 'root'
+                ,
+                    type : 'validation queueing'
+                    subject : 'S1'
+                ,
+                    type : 'validation result'
+                    validity : 'valid'
+                    subject : 'S1'
+                ,
+                    type : 'validation complete'
+                    subject : 'OT root'
+                    details : 'The validation phase just completed.'
+                ]
+                OT = LDE.getOutputTree()
+                expect( OT.children()[0].hasLabel 'MP' ).toBeTruthy()
+                expect( OT.children().length ).toBe 4
+                done()
+
+Insert a step citing that rule incorrectly and ensure that the correct
+"validation queueing" and "validation result" messages come out of the LDE.
+
+        it 'should give correct feedback on incorrect steps', ( done ) ->
+            setupThenTest ->
+                S2 = new MakeOM().attr
+                    id : 'S2'
+                    OM : 'greater(5,1)'
+                    step : yes
+                    "reason citations" : [ 'MP' ]
+                    "premise citations" : [ 'P1', 'P2' ]
+                LDE.insertStructure S2, 'root', 4
+            , ->
+                expect( LDEmessages ).toEqual [
+                    type : 'updated LDE state'
+                    subject : 'root'
+                ,
+                    type : 'validation queueing'
+                    subject : 'S1'
+                ,
+                    type : 'validation queueing'
+                    subject : 'S2'
+                ,
+                    type : 'validation result'
+                    validity : 'valid'
+                    subject : 'S1'
+                ,
+                    type : 'validation result'
+                    validity : 'invalid'
+                    subject : 'S2'
+                    message : 'Cited rule does not justify the step'
+                ,
+                    type : 'validation complete'
+                    subject : 'OT root'
+                    details : 'The validation phase just completed.'
+                ]
+                OT = LDE.getOutputTree()
+                expect( OT.children()[0].hasLabel 'MP' ).toBeTruthy()
+                expect( OT.children().length ).toBe 5
                 done()
