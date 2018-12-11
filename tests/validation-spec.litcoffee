@@ -1277,7 +1277,7 @@ Insert a step citing that rule incorrectly and ensure that the correct
                     "premise citations" : [ 'P1', 'P2' ]
                 LDE.insertStructure S2, 'root', 4
             , ->
-                expect( LDEmessages ).toEqual [
+                expect( LDEmessages[...3] ).toEqual [
                     type : 'updated LDE state'
                     subject : 'root'
                 ,
@@ -1286,16 +1286,23 @@ Insert a step citing that rule incorrectly and ensure that the correct
                 ,
                     type : 'validation queueing'
                     subject : 'S2'
-                ,
+                ]
+
+These two messages could come in either order, so we write flexible
+expectations.
+
+                whichIsS1 = if LDEmessages[3].subject is 'S1' then 3 else 4
+                whichIsS2 = if whichIsS1 is 3 then 4 else 3
+                expect( LDEmessages[whichIsS1] ).toEqual
                     type : 'validation result'
                     validity : 'valid'
                     subject : 'S1'
-                ,
+                expect( LDEmessages[whichIsS2] ).toEqual
                     type : 'validation result'
                     validity : 'invalid'
                     subject : 'S2'
                     message : 'Cited rule does not justify the step'
-                ,
+                expect( LDEmessages[5..] ).toEqual [
                     type : 'validation complete'
                     subject : 'OT root'
                     details : 'The validation phase just completed.'
