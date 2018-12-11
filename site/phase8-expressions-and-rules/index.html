@@ -152,10 +152,6 @@
             <li><a href="#content">Content</a></li>
             <li><a href="#goal">Goal</a></li>
             <li><a href="#status">Status</a></li>
-            <li><a href="#expressions">Expressions</a></li>
-            <li><a href="#common-types-of-interpretation">Common types of interpretation</a></li>
-            <li><a href="#rules-of-inference">Rules of inference</a></li>
-            <li><a href="#api-documentation">API Documentation</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
@@ -172,153 +168,9 @@ robust and useful product.</p>
 <p>The LDE will be able to validate much of the mathematics we expect to use it
 for, without yet permitting customizable mathematical notation.</p>
 <h2 id="status">Status</h2>
-<p>This has not been implemented.  See the tasks below.</p>
-<h2 id="expressions">Expressions</h2>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create a subclass of <code>OutputStructure</code>, in the <code>OutputStructure</code>
-   module, called <code>OutputExpression</code>.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation explaining what it is and will do.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Ensure that the <code>OutputExpression</code> subclass registers itself with the
-   serialization code, as
-   <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
-   describes.  (That is, use a line like
-   <code>className : Structure.addSubclass 'OutputExpression', OutputExpression</code>
-   in the <code>OutputExpression</code> class code.)</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add a constructor that takes three fields: OpenMath type (<code>OMS</code>,
-   <code>OMI</code>, etc.), atomic content (if any), and indices of bound variables (if
-   any).</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add an instance method <code>toOpenMath()</code> that converts instances of
-   the class to OpenMath expressions, using
-   <a href="https://github.com/lurchmath/openmath-js">the OpenMath package</a>.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add a class method <code>fromOpenMath()</code> that converts instances of
-   OpenMath expressions into <code>OutputExpression</code> trees.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Extend the OpenMath class with a <code>toOutputExpression()</code> function that
-   just defers the task to <code>fromOpenMath()</code> in the <code>OutputExpression</code> class.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Write and document unit tests.</li>
-</ul>
-<h2 id="common-types-of-interpretation">Common types of interpretation</h2>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled checked/> Extend the default implementation of <code>interpret()</code> so that, if the
-   instance has a property called <code>correspondingClass</code>, then that property
-   is used to instantiate an <code>OutputStructure</code> instance rather than using
-   the base <code>OutputStructure</code> class.  This should be sufficient to implement
-   corresponding input and output expressions.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Extend the unit tests for interpretation to verify that this can be
-   used to create arbitrary-sized trees that are nested combinations of the
-   correct subclasses of <code>OutputStructure</code>.  This will require creating some
-   dummy subclasses for testing purposes.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Extend the unit tests for interpretation to verify that <code>interpret()</code>
-   routines can be built from parsers such as the OpenMath <code>simple</code>
-   function, and that it is possible to put structures that interpret
-   themselves that way inside other structures, and the correct hierarchies
-   are constructed.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Once the unit tests pass, build everything and commit.</li>
-</ul>
-<h2 id="rules-of-inference">Rules of inference</h2>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create a subclass <code>OutputRule</code> of <code>OutputStructure</code> that has
-   a member <code>validateStep(step,worker,callback)</code> that can validate other
-   <code>OutputStructure</code> instances.  The default implementation just calls the
-   callback object with a feedback object expressing that it didn't
-   actually validate anything.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation for that new subclass.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Ensure that the <code>OutputRule</code> subclass registers itself with the
-   serialization code, as
-   <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
-   describes.  (That is, use a line like
-   <code>className : Structure.addSubclass 'OutputRule', OutputRule</code> in the
-   <code>OutputRule</code> class code.)</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Define in the LDE a <code>basicValidate(worker,callback)</code> function that
-   can be installed in <code>OutputStructure</code> instances as their <code>validate</code>
-   field, and that finds the rule of inference cited by the
-   <code>OutputStructure</code> instance and defers validation to that rule's
-   <code>validateStep()</code> routine, passing both parameters along.  It is not
-   intended that this routine should be the property of any specific
-   subclass.  Rather, it is more like an interface (in the Java sense),
-   which can be installed (by a single assignment statement) into any
-   instance that needs it.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Test that <code>OutputStructures</code> can cite rules that will do the
-   validation for the structure.  Ensure that validation continues to work
-   even when delegated (athough so far all feedback will say no work was
-   done).</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create a subclass <code>TemplateRule</code> of <code>OutputRule</code>.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Ensure that the <code>TemplateRule</code> subclass registers itself with the
-   serialization code, as
-   <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
-   describes.  (That is, use a line like
-   <code>className : Structure.addSubclass 'TemplateRule', TemplateRule</code> in the
-   <code>TemplateRule</code> class code.)</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> In <code>TemplateRule</code>, override <code>validateStep()</code> so that it reads the
-   appropriate attributes and children of the rule object to determine how
-   to do validation.  For now, assume tree-based matching and if-style
-   inference.  You will need to use
-   <a href="https://github.com/lurchmath/first-order-matching">the Matching Package</a>,
-   probably loaded into background workers.  Add this as an <code>npm</code>
-   dependency, but when you create a single <code>.js</code> file that can import the
-   entire LDE, you will need to include both the OpenMath package and the
-   Matching package in that file.  To do so, just copy the essential files
-   from the <code>node_modules</code> subfolder into the <code>release/</code> folder before
-   uniting all the scripts in that folder.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation for that new subclass.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Test that <code>OutputStructures</code> can cite rules that will do the
-   template-based validation, which is a huge step!</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Extend <code>TemplateRule</code> with the option to be iff rather than just if.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add unit tests for this new feature.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Extend <code>TemplateRule</code> with the option to use string-based matching
-   rather than just tree-based matching.  String-based matching will use an
-   algorithm like the following.</li>
-</ul>
-<pre><code>matchPlus = ( match, key, value ) -&gt;
-    result = { }
-    for own k, v of match then result[k] = v
-    result[key] = value
-    result
-matches = ( patterns, string, soFar = { } ) -&gt;
-    if patterns.length is 0
-        return if string.length is 0 then [ { } ] else [ ]
-    pattern = patterns[0]
-    if pattern.type is 'string'
-        t = pattern.text
-        return if string[...t.length] is t
-            matches patterns[1..], string[t.length..]
-        else
-            [ ]
-    if soFar.hasOwnProperty t
-        return if string[...soFar[t].length] is t
-            matches patterns[1..], sting[soFar[t].length..]
-        else
-            [ ]
-    results = [ ]
-    for i in [1..string.length]
-        results = results.concat matches patterns[1..], string[i+1..],
-            matchPlus soFar, t, string[..i]
-    results
-</code></pre>
-
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add unit tests for this new feature.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Create a subclass <code>InputRule</code> of <code>InputStructure</code>.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Ensure that the <code>InputRule</code> subclass registers itself with the
-   serialization code, as
-   <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
-   describes.  (That is, use a line like
-   <code>className : Structure.addSubclass 'InputRule', InputRule</code> in the
-   <code>InputRule</code> class code.)</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Override <code>interpret()</code> in <code>InputRule</code> to create generic <code>OutputRule</code>
-   instances if a generic validation procedure is present, or specifically
-   <code>TemplateRule</code> instances if that kind of data is present.</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> Add unit tests to show that the LDE can validate conclusions based on
-   rules defined earlier in the same document.</li>
-</ul>
-<h2 id="api-documentation">API Documentation</h2>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the <code>OutputStructure</code> page of the API Documentation to include
-   the <code>OutputExpression</code> class.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend the processing phases page of the API Documentation to include
-   the enhancements to interpretation and validation accomplished in this
-   phase.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Rebuild docs and commit.</li>
-</ul></div>
+<p>This phase has been implemented and documented in the API Documentation,
+and then was thoroughly overhauled to match a new and updated design.  That
+overhaul is complete, and this phase is ready to be used in later phases.</p></div>
         </div>
 
         <footer class="col-md-12">

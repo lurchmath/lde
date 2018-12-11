@@ -64,3 +64,14 @@ will find the closest accessible structure in the Output Tree with that
 `OutputStructure.lookup(label,accessibles)`; in that situation, it is
 presumed that the list should be searched in reverse, as if reading
 backwards up through a document.
+
+## The `OutputExpression` class
+
+An important subclass of `OutputStructure` is `OutputExpression`, which is
+used to represent mathematical expressions of all kinds.  We give them
+attributes that make it clear how they can be converted to OpenMath objects,
+and provide a `toOpenMath()` function in the `OutputExpression` class for
+doing so.  This makes it so that they can be used with tools like
+[the matching package](https://github.com/lurchmath/first-order-matching),
+which operate on OpenMath objects.  The reverse function can be called on
+OpenMath objects, `toOutputExpression()`.

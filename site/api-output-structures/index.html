@@ -152,6 +152,7 @@
             <li><a href="#source-code">Source Code</a></li>
             <li><a href="#purpose">Purpose</a></li>
             <li><a href="#the-outputstructure-class">The OutputStructure class</a></li>
+            <li><a href="#the-outputexpression-class">The OutputExpression class</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
@@ -207,7 +208,16 @@ will find the closest accessible structure in the Output Tree with that
 <code>label</code>.  To do the lookup in some other list, call
 <code>OutputStructure.lookup(label,accessibles)</code>; in that situation, it is
 presumed that the list should be searched in reverse, as if reading
-backwards up through a document.</p></div>
+backwards up through a document.</p>
+<h2 id="the-outputexpression-class">The <code>OutputExpression</code> class</h2>
+<p>An important subclass of <code>OutputStructure</code> is <code>OutputExpression</code>, which is
+used to represent mathematical expressions of all kinds.  We give them
+attributes that make it clear how they can be converted to OpenMath objects,
+and provide a <code>toOpenMath()</code> function in the <code>OutputExpression</code> class for
+doing so.  This makes it so that they can be used with tools like
+<a href="https://github.com/lurchmath/first-order-matching">the matching package</a>,
+which operate on OpenMath objects.  The reverse function can be called on
+OpenMath objects, <code>toOutputExpression()</code>.</p></div>
         </div>
 
         <footer class="col-md-12">

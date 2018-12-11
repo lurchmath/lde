@@ -216,6 +216,10 @@ for the user interface).</p>
 <li>For details on the priority queue, see
    <a href="https://github.com/lurchmath/lde/blob/master/src/lde.litcoffee#validation-priority-queue">this section of the source code</a>.</li>
 </ul>
+<p>When the last <code>OutputStructure</code> that needed validation finishes it, feedback
+of type "validation complete" is emitted by the LDE.
+<a href="../api-lde/#types-of-feedback">More details on types of feedback appear here.</a></p>
+<h3 id="default-validation">Default validation</h3>
 <p>An <code>OutputStructure</code> <code>S</code> is validated by calling
 <code>S.validate(worker,callback)</code>, with the first parameter being an <code>LDEWorker</code>
 instance available for use (see documentation link above) and the second
@@ -225,9 +229,48 @@ but does not need to mark <code>S</code> clean nor actively return its worker to
 queue; those things happen automatically. It can feel free to use the entire
 API for the <code>LDEWorker</code> class, including installing scripts, functions, or
 data as needed.</p>
-<p>When the last <code>OutputStructure</code> that needed validation finishes it, feedback
-of type "validation complete" is emitted by the LDE.
-<a href="../api-lde/#types-of-feedback">More details on types of feedback appear here.</a></p></div>
+<p>But this setup is hardly convenient, because it requires each step of work
+to include its own validation routine.  They would most often rather
+delegate their validation to the rules they cite.  Thus we provide a
+<code>basicValidate()</code> function in the <code>OutputRule</code> class that can be installed
+in any step of work to do exactly that, find the cited reason(s) and
+delegate the validation to their <code>validateStep()</code> routines.</p>
+<h3 id="rule-based-validation">Rule-based validation</h3>
+<p>Based on what was just said in the previous section, rules will need to
+provide <code>validateStep()</code> routines, and the default <code>OutputRule</code> class does
+so, but it is a validation routine that does nothing and reports that it has
+done nothing.  Thus it is essential to override this in subclasses.</p>
+<p>The most prominent such subclass is <code>TemplateRule</code>, which creates a
+<code>validateStep()</code> routine on your behalf if you provide it a list of children
+with some subset marked with the attribute "premise" set to true, and at
+least one without that attribute (that is, at least one conclusion).</p>
+<p>The default type of pattern matching for <code>TemplateRule</code>s is tree-based,
+using
+<a href="https://github.com/lurchmath/first-order-matching">the matching package</a>.
+In such a situation, the children should be <code>OutputExpression</code> instances so
+that they can be converted to OpenMath expressions.  All variables in them
+are considered metavariables.</p>
+<p>You can set the pattern matching to be string-based by setting the rule's
+attribute "matching type" to the string "string".  In such a situation, the
+children should each have an attribute with key "string pattern" whose
+value is an array of objects of one of the following two forms.</p>
+<ul>
+<li>For string constants:
+   <code>{ type : 'string', text : 'the string literal here' }</code></li>
+<li>For metavariables:
+   <code>{ type : 'metavariable', text : 'the variable name here'}</code></li>
+</ul>
+<p>For instance, if you want to match Hofstadter's pattern <code>xUUUy</code>, use this
+array of metavariables and strings.</p>
+<pre><code class="javascript">[ { type : 'metavariable', text : 'x' },
+  { type : 'string', text : 'UUU' },
+  { type : 'metavariable', text : 'y' } ]
+</code></pre>
+
+<p><code>TemplateRule</code>s can be one-way (if-then), which is the default, or two-way
+(if and only if), by setting their "iff" attribute to true.</p>
+<p>When a rule has multiple conclusions, if the step matches any of them, it is
+considered valid.</p></div>
         </div>
 
         <footer class="col-md-12">
