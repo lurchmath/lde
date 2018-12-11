@@ -554,33 +554,47 @@ At the moment, pattern-based matching of one-way rules is the only option.*
 
         validateStep : ( step, worker, callback ) ->
 
-Compute the list of premises and conclusions in OpenMath form.  Compute all
-one-conclusion forms of this rule, one for each conclusion, using all the
-premises each time.
+Compute the list of premises and conclusions in OpenMath form.  Then compute
+how many forms this rule has (one for each conclusion in one-way form, plus
+one for each premise if we're allowed to use it in two-way form as well).
+Write a function that can produce any of those forms, but don't compute them
+all up front, because we don't yet know if we need them.  We can call that
+function later to create them just in time.
 
-            premises = ( child.toOpenMath() for child in @children() \
+            rulePremises = ( child.toOpenMath() for child in @children() \
                 when child.getAttribute 'premise' )
-            forms = [ ]
-            for child in @children()
-                if not child.getAttribute 'premise'
-                    next = OM.app(
-                        OM.sym( 'Rule', 'Lurch' ),
-                        ( p.copy() for p in premises )...,
-                        child.toOpenMath()
-                    )
-                    FOM.setMetavariable v for v in \
-                        next.descendantsSatisfying ( d ) -> d.type is 'v'
-                    forms.push next
+            ruleConclusions = ( child.toOpenMath() \
+                for child in @children() \
+                when not child.getAttribute 'premise' )
+            numRuleForms = ruleConclusions.length
+            if @getAttribute 'iff' then numRuleForms += rulePremises.length
+            buildRuleForm = ( prems, concl ) ->
+                OM.app(
+                    OM.sym( 'Rule', 'Lurch' ),
+                    ( p.copy() for p in prems )...,
+                    concl.copy()
+                )
+            getRuleForm = ( index ) ->
+                if index < ruleConclusions.length
+                    prems = rulePremises
+                    concl = ruleConclusions[index]
+                else
+                    prems = ruleConclusions
+                    concl = rulePremises[index-ruleConclusions.length]
+                result = buildRuleForm prems, concl
+                vars = result.descendantsSatisfying ( d ) -> d.type is 'v'
+                FOM.setMetavariable v for v in vars
+                result
 
 Unite the step and its cited premises into the same structure, so that we
 might compare them.
 
-            premises = [ ]
             if step not instanceof OutputExpression
                 step.feedback
                     type : 'validation result'
                     validity : 'invalid'
                     message : 'Conclusion is not an expression'
+            premises = [ ]
             for type in [ 'connections', 'labels' ]
                 for citation in step.lastCitationLookup.premises[type]
                     premise = Structure.instanceWithID citation.cited
@@ -591,12 +605,8 @@ might compare them.
                             message : 'Cited premise is not an expression'
                             id : citation.cited
                         return callback()
-                    premises.push premise
-            instance = OM.app(
-                OM.sym( 'Rule', 'Lurch' ),
-                ( p.toOpenMath() for p in premises )...,
-                step.toOpenMath()
-            )
+                    premises.push premise.toOpenMath()
+            instance = buildRuleForm premises, step.toOpenMath()
 
 See if any of the forms of this rule matches the instance as claimed.  We do
 this asynchronously in background threads, but begin by installing the
@@ -609,7 +619,7 @@ necessary script and step data into the worker we've been given.
 First, if we've tried all the forms, then they've all failed, so we report
 that the rule does not justify the step.
 
-                    if index is forms.length
+                    if index is numRuleForms
                         step.feedback
                             type : 'validation result'
                             validity : 'invalid'
@@ -620,7 +630,8 @@ that the rule does not justify the step.
 Otherwise, we have another form to try, so let's queue it up for checking in
 the background worker.
 
-                    @setupWorker worker, { rule : forms[index].encode() },
+                    @setupWorker worker,
+                        { rule : getRuleForm( index ).encode() },
                         callback, ->
                             worker.run ( ->
                                 rule = OM.decode globalData.rule
