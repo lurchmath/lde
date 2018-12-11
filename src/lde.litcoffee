@@ -434,7 +434,7 @@ if and when needed.
             feedback
                 subject : 'root'
                 type : 'interpretation error'
-                details : e
+                details : e.stack
         InputStructure.clearAlreadyStarted()
 
 First, we mark the interpretation phase as complete and call its callback.
