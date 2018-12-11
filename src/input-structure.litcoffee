@@ -24,7 +24,8 @@ errors manifest at runtime, hence the checks below.
 
     if require?
         { Structure } = require './structure'
-        { OutputStructure } = require './output-structure'
+        { OutputStructure, OutputRule, TemplateRule } =
+            require './output-structure'
     else if WorkerGlobalScope?
         if not WorkerGlobalScope.Structure?
             importScripts 'structure.js'
@@ -485,6 +486,48 @@ deserialized, we need to track the class of each structure in the hierarchy.
 We do so for this class with the following line of code.
 
         className : Structure.addSubclass 'Dependency', Dependency
+
+## Define `InputRule` as a type of `InputExpression`
+
+This class implements the generic notion of a rule of inference.  It creates
+a single `OutputRule` instance when it is interpreted.  See the
+documentation of `interpret`, below, for more details.
+
+    class InputRule extends InputExpression
+
+In order for a hierarchy of structures to be able to be serialized and
+deserialized, we need to track the class of each structure in the hierarchy.
+We do so for this class with the following line of code.
+
+        className : Structure.addSubclass 'InputRule', InputRule
+
+If the instance of `InputRule` has an attribute named `validateStep` then
+its value will be copied to the `validateStep` attribute of the `OutputRule`
+created.  Thus subclasses of `InputRule` can just implement a `validateStep`
+routine.
+
+If there is no such attribute, then interpretation will create a
+`TemplateRule` instance with all the interpretations of all the children of
+the `InputRule`, and the attributes "iff" and "matching type" will be
+copied over if they exist.
+
+Actually, in either case, all children's interpretations are transferred
+intact as children of the resulting `OutputRule` instance.
+
+        interpret : ( accessibles, childResults, scope ) ->
+            if @validateStep?
+                result = new OutputRule()
+                result.validateStep = @validateStep
+            else
+                result = new TemplateRule()
+                if value = @getAttribute( 'iff' )?
+                    result.setAttribute 'iff', value
+                if value = @getAttribute( 'matching type' )?
+                    result.setAttribute 'matching type', value
+            for childArray in childResults
+                for child in childArray
+                    result.insertChild child, result.children().length
+            [ result ]
 
 ## Define `InputModifier`s as a type of `InputStructure`
 

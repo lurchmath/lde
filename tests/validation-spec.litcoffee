@@ -1587,3 +1587,179 @@ validation messages come out.
                 OT = LDE.getOutputTree()
                 expect( OT.children().length ).toBe 3
                 done()
+
+## The `InputRule` class
+
+This test covers the `InputRule` class, which can create `OutputRule`
+instances more easily than the techniques used above.
+
+    describe 'The InputRule class', ->
+
+Before running any tests, set up the same infrastructure we've used in all
+the tests above.
+
+        LDEmessages = [ ]
+        completionCallback = null
+        listener = ( event ) ->
+            LDEmessages.push event
+            if event.type is 'validation complete'
+                completionCallback?()
+        beforeEach ->
+            LDE.Feedback.addEventListener 'feedback', listener
+        afterEach ->
+            LDE.Feedback.removeEventListener 'feedback', listener
+            LDEmessages = [ ]
+        setupThenTest = ( setup, test ) ->
+            completionCallback = -> test() ; completionCallback = null
+            setup()
+        MakeOM = LDE.Structure::subclasses.MakeOM
+
+Create a test subclas of `InputRule`.
+
+        class TestIR extends LDE.InputRule
+            className : LDE.Structure.addSubclass 'TestIR', TestIR
+            validateStep : ( step, worker, callback ) ->
+                if parseInt( step.id() ) > 10
+                    step.feedback
+                        type : 'validation result'
+                        validity : 'valid'
+                else
+                    step.feedback
+                        type : 'validation result'
+                        validity : 'invalid'
+                        message : 'ID is too low.  Haha.'
+                callback()
+            interpret : ( accessibles, childResults, scope ) ->
+                result =
+                    LDE.Structure::subclasses.InputRule::interpret.apply @,
+                        [ accessibles, childResults, scope ]
+                result[0].hasLabel = ( label ) -> label is @id()
+                result
+
+Be sure the slate is clean.
+
+        it 'should start with IT and OT empty', ->
+            LDE.reset()
+            expect( LDE.getInputTree().children() ).toEqual [ ]
+            expect( LDE.getOutputTree().children() ).toEqual [ ]
+
+Now set up a very simple rule based on `validateStep()`.
+
+        it 'should create working OutputRule instances', ( done ) ->
+            setupThenTest ->
+                TIR = new TestIR().attr id : 1
+                LDE.insertStructure TIR, 'root', 0
+            , ->
+                expect( m.type for m in LDEmessages )
+                    .toEqual [ 'updated LDE state', 'validation complete' ]
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 1
+                done()
+
+Insert a step citing that rule correctly and ensure that the correct
+"validation queueing" and "validation result" messages come out of the LDE.
+Because the basic `TemplateRule` class doesn't provide any `hasLabel`
+functionality, we directly connect the step to the rule.
+
+        it 'should give correct feedback on correct OR steps', ( done ) ->
+            setupThenTest ->
+                S1 = new MakeOM().attr
+                    id : '20'
+                    OM : '5'
+                    step : yes
+                LDE.insertStructure S1, 'root', 1
+                LDE.insertConnection '20', '1',
+                    id : 'c1', type : 'reason citation'
+            , ->
+                expect( LDEmessages ).toEqual [
+                    type : 'updated LDE state'
+                    subject : 'root'
+                ,
+                    type : 'validation queueing'
+                    subject : '20'
+                ,
+                    type : 'validation result'
+                    validity : 'valid'
+                    subject : '20'
+                ,
+                    type : 'validation complete'
+                    subject : 'OT root'
+                    details : 'The validation phase just completed.'
+                ]
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 2
+                done()
+
+Change the rule to a template-based one and ensure that the step no longer
+validates.
+
+        it 'should give correct feedback on incorrect TR steps', ( done ) ->
+            setupThenTest ->
+                TRule = new LDE.InputRule(
+                    new MakeOM().attr
+                        id : 'TR_1'
+                        OM : 'A'
+                        premise : yes
+                    new MakeOM().attr
+                        id : 'TR_2'
+                        OM : 'logic.and(A,logic.true)'
+                ).attr
+                    id : '1'
+                    class : 'TemplateRule'
+                LDE.replaceStructure '1', TRule, yes
+            , ->
+                expect( LDEmessages ).toEqual [
+                    type : 'updated LDE state'
+                    subject : 'root'
+                ,
+                    type : 'validation queueing'
+                    subject : '20'
+                ,
+                    type : 'validation result'
+                    validity : 'invalid'
+                    subject : '20'
+                    message : 'Cited rule does not justify the step'
+                ,
+                    type : 'validation complete'
+                    subject : 'OT root'
+                    details : 'The validation phase just completed.'
+                ]
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 2
+                done()
+
+Replace the step with one that would actually be justified by that
+`TemplateRule` and verify that it is.
+
+        it 'should give correct feedback on correct TR steps', ( done ) ->
+            setupThenTest ->
+                P1 = new MakeOM().attr
+                    id : '21'
+                    OM : 'foo.bar'
+                S1 = new MakeOM().attr
+                    id : '20'
+                    OM : 'logic.and(foo.bar,logic.true)'
+                    step : yes
+                LDE.replaceStructure '20', S1, yes
+                LDE.insertStructure P1, 'root', 1
+                LDE.insertConnection '20', '21',
+                    id : 'c2', type : 'premise citation'
+            , ->
+                expect( LDEmessages ).toEqual [
+                    type : 'updated LDE state'
+                    subject : 'root'
+                ,
+                    type : 'validation queueing'
+                    subject : '20'
+                ,
+                    type : 'validation result'
+                    validity : 'valid'
+                    subject : '20'
+                ,
+                    type : 'validation complete'
+                    subject : 'OT root'
+                    details : 'The validation phase just completed.'
+                ]
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 3
+                done()
