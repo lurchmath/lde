@@ -142,17 +142,17 @@ matches = ( patterns, string, soFar = { } ) ->
     results
 ```
  * [x] Add unit tests for this new feature.
- * [ ] Create a subclass `InputRule` of `InputStructure`.
- * [ ] Ensure that the `InputRule` subclass registers itself with the
+ * [x] Create a subclass `InputRule` of `InputStructure`.
+ * [x] Ensure that the `InputRule` subclass registers itself with the
    serialization code, as
    [the documentation here](https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names)
    describes.  (That is, use a line like
    `className : Structure.addSubclass 'InputRule', InputRule` in the
    `InputRule` class code.)
- * [ ] Override `interpret()` in `InputRule` to create generic `OutputRule`
+ * [x] Override `interpret()` in `InputRule` to create generic `OutputRule`
    instances if a generic validation procedure is present, or specifically
    `TemplateRule` instances if that kind of data is present.
- * [ ] Add unit tests to show that the LDE can validate conclusions based on
+ * [x] Add unit tests to show that the LDE can validate conclusions based on
    rules defined earlier in the same document.
 
 ## API Documentation

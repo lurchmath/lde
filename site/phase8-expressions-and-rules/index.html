@@ -297,17 +297,17 @@ matches = ( patterns, string, soFar = { } ) -&gt;
 
 <ul class="task-list">
 <li class="task-list-item"><input type="checkbox" disabled checked/> Add unit tests for this new feature.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Create a subclass <code>InputRule</code> of <code>InputStructure</code>.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Ensure that the <code>InputRule</code> subclass registers itself with the
+<li class="task-list-item"><input type="checkbox" disabled checked/> Create a subclass <code>InputRule</code> of <code>InputStructure</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Ensure that the <code>InputRule</code> subclass registers itself with the
    serialization code, as
    <a href="https://github.com/lurchmath/lde/blob/master/src/structure.litcoffee#registering-class-names">the documentation here</a>
    describes.  (That is, use a line like
    <code>className : Structure.addSubclass 'InputRule', InputRule</code> in the
    <code>InputRule</code> class code.)</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Override <code>interpret()</code> in <code>InputRule</code> to create generic <code>OutputRule</code>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Override <code>interpret()</code> in <code>InputRule</code> to create generic <code>OutputRule</code>
    instances if a generic validation procedure is present, or specifically
    <code>TemplateRule</code> instances if that kind of data is present.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add unit tests to show that the LDE can validate conclusions based on
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add unit tests to show that the LDE can validate conclusions based on
    rules defined earlier in the same document.</li>
 </ul>
 <h2 id="api-documentation">API Documentation</h2>
