@@ -304,10 +304,6 @@ accepted, but may not convert to an OpenMath object in `toOpenMath()`.
 Note that an error object constructed that way will not correctly convert
 to an OpenMath object, because it has not head symbol.
 
-Currently there is not any supported way to decorate an `OutputExpression`
-instance with OpenMath attributes, though that could be added later if the
-need arises.
-
         constructor : ( type, rest... ) ->
             switch type
                 when 'int', 'flo', 'str', 'byt', 'var'
@@ -335,18 +331,21 @@ function.  If conversion to an OpenMath object fails from an error in the
 OpenMath package, that error is not caught; clients should take care to
 form their `OutputExpression` instances correctly or use `try`/`catch`.
 
-As stated above, attributes are not yet supported, though such support
-could be added later.
+Attributes whose keys do not begin with an underscore, and are not "id" will
+be added to the resulting OpenMath object.  Because all OpenMath attributes
+must have values that are OpenMath objects, we convert the `Structure`
+attribute to JSON and embed it in an OpenMath string.  By default,
+attributes are not included; you can include them with the parameter.
 
-        toOpenMath : ->
-            switch type = @getAttribute 'OM type'
+        toOpenMath : ( withAttributes = no ) ->
+            result = switch type = @getAttribute 'OM type'
                 when 'int', 'flo', 'str', 'byt', 'var'
                     new OM[type] @getAttribute 'OM atomic value'
                 when 'sym'
                     new OM[type] @getAttribute( 'OM atomic value' )...
                 when 'app', 'err'
-                    childResults =
-                        ( child.toOpenMath() for child in @children() )
+                    childResults = ( child.toOpenMath withAttributes \
+                        for child in @children() )
                     new OM[type] childResults...
                 when 'bin'
                     indices = @getAttribute 'OM bound indices'
@@ -354,11 +353,20 @@ could be added later.
                         OM.var @children()[i].getAttribute 'OM atomic value'
                     notVarIndices = ( i for i in [0...@children().length] \
                         when i not in indices )
-                    head = @children()[notVarIndices[0]].toOpenMath()
-                    body = @children()[notVarIndices[1]].toOpenMath()
+                    head = @children()[notVarIndices[0]].toOpenMath \
+                        withAttributes
+                    body = @children()[notVarIndices[1]].toOpenMath \
+                        withAttributes
                     new OM.bin head, vars..., body
                 else
                     throw "Not a valid OpenMath type: #{type}"
+            if withAttributes
+                for own key, value of @attributes
+                    if key isnt 'id' and key[0] isnt '_'
+                        newKey = OM.encodeAsIdentifier key
+                        result.setAttribute OM.sym( newKey, 'Lurch' ),
+                            OM.str JSON.stringify [ value ]
+            result
 
 We also want the inverse conversion function, from `OMNode` instances (from
 the OpenMath package) to instances of this type.  We provide that function
@@ -366,13 +374,12 @@ as a class method here, and one should call it on an instance of the
 `OMNode` class; it will yield an instance of this class in every case,
 because `OMNode` instances cannot be incorrectly formed.
 
-As stated above, attributes are not yet supported, though such support
-could be added later.
+It inverts the attribute encoding described above the previous function.
 
-        @fromOpenMath : ( node ) ->
-            childResults = ( OutputExpression.fromOpenMath child \
-                for child in node.children )
-            switch node.type
+        @fromOpenMath : ( node, withAttributes = no ) ->
+            childResults = ( OutputExpression.fromOpenMath( child,
+                withAttributes ) for child in node.children )
+            result = switch node.type
                 when 'i' then new OutputExpression 'int', node.value
                 when 'f' then new OutputExpression 'flo', node.value
                 when 'st' then new OutputExpression 'str', node.value
@@ -384,21 +391,32 @@ could be added later.
                 when 'bi'
                     vars = ( new OutputExpression 'var', v.name \
                         for v in node.variables )
-                    head = OutputExpression.fromOpenMath node.symbol
-                    body = OutputExpression.fromOpenMath node.body
+                    head = OutputExpression.fromOpenMath node.symbol,
+                        withAttributes
+                    body = OutputExpression.fromOpenMath node.body,
+                        withAttributes
                     new OutputExpression 'bin', [1...childResults.length],
                         head, vars..., body
                 when 'e' then new OutputExpression 'err',
-                    OutputExpression.fromOpenMath( node.symbol ),
-                    childResults...
+                    OutputExpression.fromOpenMath( node.symbol,
+                        withAttributes ), childResults...
                 else throw "This should never happen - how did an
                     OMNode instance get type #{node.type}?"
+            if withAttributes
+                for own key, value of node.tree.a
+                    try
+                        decodedKey = OM.decodeIdentifier \
+                            OM.decode( key ).name
+                        result.setAttribute decodedKey,
+                            JSON.parse( value.v )[0]
+            result
 
 For convenience, we install in the `OMNode` class a method for converting
 instances to `OutputExpression` types by simply deferring the work to the
 above function.
 
-    OM::toOutputExpression = -> OutputExpression.fromOpenMath @
+    OM::toOutputExpression = ( withAttributes ) ->
+        OutputExpression.fromOpenMath @, withAttributes
 
 ## Define `OutputRule` as a type of `OutputStructure`
 
@@ -539,6 +557,8 @@ We do so for this class with the following line of code.
 
         className : Structure.addSubclass 'TemplateRule', TemplateRule
 
+### Main `TemplateRule` functions
+
 The `validateStep()` function of the this class assumes the class was
 constructed syntactically correctly, that is, with only children that are of
 the class `OutputExpression` and with some subset of them having the
@@ -549,9 +569,6 @@ matching if the attribute "matching type" is set to "string".  It assumes a
 one-way (if-then) rule, but can be configured to perform two-way (if and
 only if) checking if the attribute "iff" is set to true.
 
-*Right now, none of the options in the previous paragraph are implemented.
-At the moment, pattern-based matching of one-way rules is the only option.*
-
         validateStep : ( step, worker, callback ) ->
 
 Compute the list of premises and conclusions in OpenMath form.  Then compute
@@ -561,9 +578,9 @@ Write a function that can produce any of those forms, but don't compute them
 all up front, because we don't yet know if we need them.  We can call that
 function later to create them just in time.
 
-            rulePremises = ( child.toOpenMath() for child in @children() \
+            rulePremises = ( child.toOpenMath yes for child in @children() \
                 when child.getAttribute 'premise' )
-            ruleConclusions = ( child.toOpenMath() \
+            ruleConclusions = ( child.toOpenMath yes \
                 for child in @children() \
                 when not child.getAttribute 'premise' )
             numRuleForms = ruleConclusions.length
@@ -605,14 +622,22 @@ might compare them.
                             message : 'Cited premise is not an expression'
                             id : citation.cited
                         return callback()
-                    premises.push premise.toOpenMath()
-            instance = buildRuleForm premises, step.toOpenMath()
+                    premises.push premise.toOpenMath yes
+            instance = buildRuleForm premises, step.toOpenMath yes
+
+From here on out, we need to know whether we're doing string-based pattern
+matching or tree-based pattern matching, so we compute that here.
+
+            ruleType = if @getAttribute( 'matching type' ) is 'string' \
+                then 'string' else 'tree'
 
 See if any of the forms of this rule matches the instance as claimed.  We do
 this asynchronously in background threads, but begin by installing the
 necessary script and step data into the worker we've been given.
 
-            @setupWorker worker, { step : instance.encode() }, callback, =>
+            stepToInstall = if ruleType is 'tree' then instance.encode() \
+                else ( x.value for x in instance.children[1..] )
+            @setupWorker worker, { step : stepToInstall }, callback, =>
                 index = 0
                 do processNext = =>
 
@@ -630,46 +655,40 @@ that the rule does not justify the step.
 Otherwise, we have another form to try, so let's queue it up for checking in
 the background worker.
 
-                    @setupWorker worker,
-                        { rule : getRuleForm( index ).encode() },
-                        callback, ->
-                            worker.run ( ->
-                                rule = OM.decode globalData.rule
-                                step = OM.decode globalData.step
-                                myMatch = nextMatch new Constraint(
-                                    rule
-                                    step
-                                )
-                                if contents = myMatch?[0]?.contents
-                                    for { pattern, expression } in contents
-                                        # console.log pattern.simpleEncode(),
-                                        #     expression.simpleEncode()
-                                        pattern : pattern.encode()
-                                        expression : expression.encode()
-                                else
-                                    null
-                            ), ( response ) ->
-                                if response.error?
-                                    step.feedback
-                                        type : 'validation result'
-                                        validity : 'invalid'
-                                        message : 'Internal error in pattern
-                                            matching'
-                                        details : response.error
-                                    return callback()
+                    validator =
+                        TemplateRule["#{ruleType}BasedPatternMatching"]
+                    ruleToInstall = if ruleType is 'tree'
+                        getRuleForm( index ).encode()
+                    else
+                        for child in getRuleForm( index ).children[1..]
+                            child.toOutputExpression( yes )
+                                 .getAttribute 'string pattern'
+                    @setupWorker worker, { rule : ruleToInstall },
+                    callback, ->
+                        worker.run validator, ( response ) ->
+                            if response.error?
+                                step.feedback
+                                    type : 'validation result'
+                                    validity : 'invalid'
+                                    message : 'Internal error in pattern
+                                        matching'
+                                    details : response.error
+                                return callback()
 
 Here we've gotten past all the error checks, so we either have a match,
 which means the step is valid, or we have a non-match, which means we should
 move on to try the next form of the rule, with a recursive call to
 `processNext()`.
 
-                                if response.result?
-                                    step.feedback
-                                        type : 'validation result'
-                                        validity : 'valid'
-                                    return callback()
-                                index++
-                                processNext()
+                            if response.result?
+                                step.feedback
+                                    type : 'validation result'
+                                    validity : 'valid'
+                                return callback()
+                            index++
+                            processNext()
+
+### Utility functions for `TemplateRule`s
 
 The following utility function is used by `validateStep()` to set up a
 worker for use in matching.  It ensures that the Matching Package has been
@@ -683,12 +702,14 @@ internal error.  If no error occurs, it calls the success callback.
 Define a helper function for expressing internal errors, to simplify code
 below.
 
-            ie = ( message ) =>
-                @feedback
+            ie = ( message, details ) =>
+                feedbackObj =
                     type : 'validation result'
                     validity : 'invalid'
                     message : "Internal error setting up validation worker:
                         could not #{message}"
+                if details? then feedbackObj.details = details
+                @feedback feedbackObj
                 return error()
 
 Create the list of keys in `data` that we need to install in the worker.
@@ -707,19 +728,154 @@ Create an asynchronous recursive function to install all those keys.
 When they're all installed, the last step is to install the matching
 package if and only if it's needed, then call the `success` callback.
 
+                else if @getAttribute( 'matching type' ) is 'string'
+                    worker.run ( -> typeof stringMatches ), ( response ) =>
+                        if response.error?
+                            return ie 'check string matching installation',
+                                response.error
+                        if response.result is 'undefined'
+                            worker.installFunction 'stringMatches',
+                            TemplateRule.stringMatches, ( response ) =>
+                                if response.error?
+                                    return ie 'install string matcher',
+                                        response.error
+                                worker.installFunction 'stringListMatches',
+                                TemplateRule.stringListMatches,
+                                ( response ) =>
+                                    if response.error?
+                                        return ie 'install string list
+                                            matcher', response.error
+                                    success()
+                        else
+                            success()
                 else
                     worker.run ( -> typeof isMetavariable ), ( response ) =>
                         if response.error?
-                            return ie 'check package status'
+                            return ie 'check package status',
+                                response.error
                         if response.result is 'undefined'
                             path = 'first-order-matching.js'
                             if require? then path = "release/#{path}"
                             worker.installScript path, ( response ) =>
                                 if response.error?
-                                    return ie 'install matching package'
-                                return success()
+                                    return ie 'install matching package',
+                                        response.error
+                                success()
                         else
                             success()
+
+We also need a function that will do string-based pattern matching so that
+the LDE can support
+[string-rewriting systems](https://en.wikipedia.org/wiki/Semi-Thue_system)
+such as [Hofstadter's MU puzzle](https://en.wikipedia.org/wiki/MU_puzzle)
+rather than just the standard interpretation of syntax as representing
+trees of meaning.  The following function is that pattern-matcher.  We
+define it as a class method so that it can be easily installed in workers.
+
+It expects the first parameter to be a list of objects, each of which has
+either `type : "string"` or `type : "metavariable"` and has the contents of
+the string (or the name of the metavariable) as its `text` field.  The
+second parameter should be the string against which to attempt to find
+matches, and the third parameter should be omitted; it is for internal use.
+
+This is an inefficient implementation that could be improved later if
+needed.
+
+        @stringMatches = ( patterns, string, soFar ) ->
+
+Must initialize default parameter values inside, so that this function can
+be converted to a list of arguments and a body correctly when being sent to
+a worker for use in a `Function` constructor.
+
+            soFar ?= { }
+
+Base case: If we've consumed all patterns, then there exists a solution iff
+we've also consumed the entire string.
+
+            if patterns.length is 0
+                return if string.length is 0
+                    [ JSON.parse JSON.stringify soFar ] # deep copy
+                else
+                    [ ]
+
+Inductive step: Pop one pattern off and consider it next.  If it is a string
+literal, then it must match the beginning of the string exactly.
+
+            pattern = patterns[0]
+            t = pattern.text
+            if pattern.type is 'string'
+                return if string[...t.length] is t
+                    stringMatches patterns[1..], string[t.length..], soFar
+                else
+                    [ ]
+
+Since it is not a string literal, it must be a metavariable.  If we've seen
+it already, then its meaning is treated like a string literal.
+
+            if soFar.hasOwnProperty t
+                return if string[...soFar[t].length] is soFar[t]
+                    stringMatches patterns[1..], string[soFar[t].length..],
+                        soFar
+                else
+                    [ ]
+
+Otherwise it is a metavariable we must consider how to instantiate.  Here is
+where the inefficient part of this implementation comes in:  We just
+consider each of the possibilities it could be, from the first character of
+the string alone up through the entire rest of the string, and check each
+one by instantiating it that way and then recurring.  Unite all solutions
+into one big array and return them.
+
+            results = [ ]
+            for i in [1..string.length]
+                soFar[t] = string[...i]
+                results = results.concat stringMatches patterns[1..],
+                    string[i..], soFar
+            delete soFar[t] # clean the object up before we un-recur
+            results
+
+We also define a function that applies the string matching function to two
+lists, one of patterns and one of strings, which typically represent a rule
+and a purported use of the rule.  It returns the set of matches that work
+for the entire list of (pattern,string) pairs that can be formed from
+corresponding elements of those lists.
+
+See documentation in `stringMatches()`, above, for why we initialize `soFar`
+inside the function body.
+
+        @stringListMatches = ( patterns, strings, soFar ) ->
+            soFar ?= { }
+            if patterns.length is 0
+                return if strings.length is 0 then [ soFar ] else [ ]
+            if strings.length is 0 then return [ ]
+            results = [ ]
+            for next in stringMatches patterns[0], strings[0], soFar
+                for result in stringListMatches patterns[1..], \
+                                                strings[1..], next
+                    results.push result
+            results
+
+The following utility function will be installed in workers, and extracts
+rule and step data from the `globalData` object, calls the matching package
+on it, and returns the results.
+
+        @treeBasedPatternMatching = ->
+            rule = OM.decode globalData.rule
+            step = OM.decode globalData.step
+            myMatch = nextMatch new Constraint rule, step
+            if contents = myMatch?[0]?.contents
+                for { pattern, expression } in contents
+                    pattern : pattern.encode()
+                    expression : expression.encode()
+            else
+                null
+
+The following utility function is just like the previous, but does
+string-based pattern matching instead.
+
+        @stringBasedPatternMatching = ->
+            myMatch = stringListMatches globalData.rule, globalData.step
+            if myMatch.length then myMatch[0] else null
 
 ## Exports
 

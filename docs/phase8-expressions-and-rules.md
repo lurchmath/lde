@@ -111,7 +111,7 @@ This has not been implemented.  See the tasks below.
    template-based validation, which is a huge step!
  * [x] Extend `TemplateRule` with the option to be iff rather than just if.
  * [x] Add unit tests for this new feature.
- * [ ] Extend `TemplateRule` with the option to use string-based matching
+ * [x] Extend `TemplateRule` with the option to use string-based matching
    rather than just tree-based matching.  String-based matching will use an
    algorithm like the following.
 ```
@@ -141,7 +141,7 @@ matches = ( patterns, string, soFar = { } ) ->
             matchPlus soFar, t, string[..i]
     results
 ```
- * [ ] Add unit tests for this new feature.
+ * [x] Add unit tests for this new feature.
  * [ ] Create a subclass `InputRule` of `InputStructure`.
  * [ ] Ensure that the `InputRule` subclass registers itself with the
    serialization code, as

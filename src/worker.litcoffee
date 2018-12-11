@@ -115,8 +115,20 @@ evaluated in the worker's context.
 
         run : ( codeOrFunction, callback ) ->
             if typeof codeOrFunction is 'function'
-                codeOrFunction = "(#{codeOrFunction})()"
+                codeOrFunction =
+                    "(#{LDEWorker.functionToCode codeOrFunction})()"
             @dispatch type : 'run', code : codeOrFunction, callback
+
+This utility converts functions to code.  It is necessary because anonymous
+functions convert correctly (i.e., as `function(...){...}`) but named
+functions do not conver the same way (e.g., as `myFunction(...){...}`).
+
+        @functionToCode : ( func ) ->
+            result = "#{func}"
+            if func.name? and func.name.length > 0 and \
+               result[...func.name.length] is func.name
+                result = "function #{result[func.name.length..]}"
+            result
 
 But if you wish to run an asynchronous function, use the following instead.
 Provide either a function that takes as parameter a callback with the
@@ -128,7 +140,8 @@ complete.
 
         runAsync : ( codeOrFunction, callback ) ->
             if typeof codeOrFunction is 'function'
-                codeOrFunction = "(#{codeOrFunction})"
+                codeOrFunction =
+                    "(#{LDEWorker.functionToCode codeOrFunction})"
             @dispatch type : 'runAsync', function : codeOrFunction, callback
 
 ### Support installing scripts

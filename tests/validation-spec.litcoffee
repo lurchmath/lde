@@ -1327,7 +1327,7 @@ delete the existing steps so as not to create tons of feedback messages.
                 expect( OT.children().length ).toBe 3
                 done()
 
-Replace the existing MP step with one that just lets us infer `and(x,true)`
+Replace the existing MP rule with one that just lets us infer `and(x,true)`
 from any `x`.  We will conver this to an iff rule in a moment, but for now
 we verify that it works in only one direction.
 
@@ -1459,4 +1459,131 @@ direction, which is now permitted.
                 ]
                 OT = LDE.getOutputTree()
                 expect( OT.children().length ).toBe 4
+                done()
+
+We will replace the existing rule and steps with a string-based rule, and
+verify that the string-based matching feature of `TemplateRule`s works as
+expected.  First, we delete the existing steps so as not to create new
+feedback messages.
+
+        it 'should permit iff step removal without feedback', ( done ) ->
+            setupThenTest ->
+                LDE.deleteStructure 'S1'
+            , ->
+                expect( m.type for m in LDEmessages )
+                    .toEqual [ 'updated LDE state', 'validation complete' ]
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 3
+                done()
+
+Replace the existing SR rule with one that just lets us infer `and(x,true)`
+from any `x`.  We will conver this to an iff rule in a moment, but for now
+we verify that it works in only one direction.
+
+        it 'should permit iff rule replacement w/o feedback', ( done ) ->
+            setupThenTest ->
+                HofRule = new MakeAnything2(
+                    new MakeOM().attr
+                        id : 'HR_1'
+                        OM : '"xUUy"'
+                        premise : yes
+                        "string pattern" : [
+                            type : 'metavariable'
+                            text : 'x'
+                        ,
+                            type : 'string'
+                            text : 'UU'
+                        ,
+                            type : 'metavariable'
+                            text : 'y'
+                        ]
+                    new MakeOM().attr
+                        id : 'HR_2'
+                        OM : '"xy"'
+                        "string pattern" : [
+                            type : 'metavariable'
+                            text : 'x'
+                        ,
+                            type : 'metavariable'
+                            text : 'y'
+                        ]
+                ).attr
+                    id : 'HR'
+                    class : 'TemplateRule'
+                    "matching type" : 'string'
+                LDE.replaceStructure 'SR', HofRule
+            , ->
+                expect( m.type for m in LDEmessages )
+                    .toEqual [ 'updated LDE state', 'validation complete' ]
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 3
+                done()
+
+Insert a step citing that rule correctly and verify that all the right
+validation messages come out.
+
+        it 'should permit valid use of a string-based rule', ( done ) ->
+            setupThenTest ->
+                P1 = new MakeOM().attr
+                    id : 'P1'
+                    OM : '"SFKLSDUUUFDSJKL"'
+                S1 = new MakeOM().attr
+                    id : 'S1'
+                    OM : '"SFKLSDUFDSJKL"'
+                    step : yes
+                    "reason citations" : [ 'HR' ]
+                    "premise citations" : [ 'P1' ]
+                LDE.replaceStructure 'P1', P1
+                LDE.replaceStructure 'P2', S1
+            , ->
+                expect( LDEmessages ).toEqual [
+                    type : 'updated LDE state'
+                    subject : 'root'
+                ,
+                    type : 'validation queueing'
+                    subject : 'S1'
+                ,
+                    type : 'validation result'
+                    validity : 'valid'
+                    subject : 'S1'
+                ,
+                    type : 'validation complete'
+                    subject : 'OT root'
+                    details : 'The validation phase just completed.'
+                ]
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 3
+                done()
+
+Insert a step citing that rule incorrectly and verify that all the right
+validation messages come out.
+
+        it 'should reject invalid use of a string-based rule', ( done ) ->
+            setupThenTest ->
+                S1 = new MakeOM().attr
+                    id : 'S1'
+                    OM : '"SFKLSDUFDSJKL"'
+                    step : yes
+                    "reason citations" : [ 'HR' ]
+                    "premise citations" : [ 'P1' ]
+                LDE.setStructureAttribute 'S1', 'OM', '"SFKLSDFDSJKL"'
+            , ->
+                expect( LDEmessages ).toEqual [
+                    type : 'updated LDE state'
+                    subject : 'root'
+                ,
+                    type : 'validation queueing'
+                    subject : 'S1'
+                ,
+                    type : 'validation result'
+                    validity : 'invalid'
+                    subject : 'S1'
+                    message : 'Cited rule does not justify the step'
+                ,
+                    type : 'validation complete'
+                    subject : 'OT root'
+                    details : 'The validation phase just completed.'
+                ]
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 3
                 done()
