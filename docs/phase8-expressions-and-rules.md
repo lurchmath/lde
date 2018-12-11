@@ -95,7 +95,7 @@ This has not been implemented.  See the tasks below.
    describes.  (That is, use a line like
    `className : Structure.addSubclass 'TemplateRule', TemplateRule` in the
    `TemplateRule` class code.)
- * [ ] In `TemplateRule`, override `validateStep()` so that it reads the
+ * [x] In `TemplateRule`, override `validateStep()` so that it reads the
    appropriate attributes and children of the rule object to determine how
    to do validation.  For now, assume tree-based matching and if-style
    inference.  You will need to use
@@ -106,11 +106,11 @@ This has not been implemented.  See the tasks below.
    Matching package in that file.  To do so, just copy the essential files
    from the `node_modules` subfolder into the `release/` folder before
    uniting all the scripts in that folder.
- * [ ] Add documentation for that new subclass.
- * [ ] Test that `OutputStructures` can cite rules that will do the
+ * [x] Add documentation for that new subclass.
+ * [x] Test that `OutputStructures` can cite rules that will do the
    template-based validation, which is a huge step!
- * [ ] Extend `TemplateRule` with the option to be iff rather than just if.
- * [ ] Add unit tests for this new feature.
+ * [x] Extend `TemplateRule` with the option to be iff rather than just if.
+ * [x] Add unit tests for this new feature.
  * [ ] Extend `TemplateRule` with the option to use string-based matching
    rather than just tree-based matching.  String-based matching will use an
    algorithm like the following.

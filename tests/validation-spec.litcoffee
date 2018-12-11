@@ -1311,3 +1311,152 @@ expectations.
                 expect( OT.children()[0].hasLabel 'MP' ).toBeTruthy()
                 expect( OT.children().length ).toBe 5
                 done()
+
+We will replace the existing rule and steps with an iff rule, and verify
+that the "iff" feature of `TemplateRule`s works as expected.  First, we
+delete the existing steps so as not to create tons of feedback messages.
+
+        it 'should permit step removal without feedback', ( done ) ->
+            setupThenTest ->
+                LDE.deleteStructure 'S1'
+                LDE.deleteStructure 'S2'
+            , ->
+                expect( m.type for m in LDEmessages )
+                    .toEqual [ 'updated LDE state', 'validation complete' ]
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 3
+                done()
+
+Replace the existing MP step with one that just lets us infer `and(x,true)`
+from any `x`.  We will conver this to an iff rule in a moment, but for now
+we verify that it works in only one direction.
+
+        it 'should permit rule replacement without feedback', ( done ) ->
+            setupThenTest ->
+                ShortcutRule = new MakeAnything2(
+                    new MakeOM().attr
+                        id : 'SR_1'
+                        OM : 'A'
+                        premise : yes
+                    new MakeOM().attr
+                        id : 'SR_2'
+                        OM : 'logic.and(A,logic.true)'
+                ).attr
+                    id : 'SR'
+                    class : 'TemplateRule'
+                LDE.replaceStructure 'MP', ShortcutRule
+            , ->
+                expect( m.type for m in LDEmessages )
+                    .toEqual [ 'updated LDE state', 'validation complete' ]
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 3
+                done()
+
+Insert a step citing that rule correctly in its forward direction, and
+verify that all the right validation messages come out.
+
+        it 'should permit use of forward if-then steps', ( done ) ->
+            setupThenTest ->
+                S1 = new MakeOM().attr
+                    id : 'S1'
+                    OM : 'logic.and(greater(5,2),logic.true)'
+                    step : yes
+                    "reason citations" : [ 'SR' ]
+                    "premise citations" : [ 'P2' ]
+                LDE.insertStructure S1, 'root', 3
+            , ->
+                expect( LDEmessages ).toEqual [
+                    type : 'updated LDE state'
+                    subject : 'root'
+                ,
+                    type : 'validation queueing'
+                    subject : 'S1'
+                ,
+                    type : 'validation result'
+                    validity : 'valid'
+                    subject : 'S1'
+                ,
+                    type : 'validation complete'
+                    subject : 'OT root'
+                    details : 'The validation phase just completed.'
+                ]
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 4
+                done()
+
+Insert a step citing that rule correctly in its reverse direction, and
+verify that it does not validate, because we have not yet made the rule a
+two-way rule.
+
+        it 'should not permit use of backward if-then steps', ( done ) ->
+            setupThenTest ->
+                P1 = new MakeOM().attr
+                    id : 'P1'
+                    OM : 'logic.and(greater(5,2),logic.true)'
+                S1 = new MakeOM().attr
+                    id : 'S1'
+                    OM : 'greater(5,2)'
+                    step : yes
+                    "reason citations" : [ 'SR' ]
+                    "premise citations" : [ 'P1' ]
+                LDE.replaceStructure 'P1', P1
+                LDE.replaceStructure 'S1', S1
+            , ->
+                expect( LDEmessages ).toEqual [
+                    type : 'updated LDE state'
+                    subject : 'root'
+                ,
+                    type : 'validation queueing'
+                    subject : 'S1'
+                ,
+                    type : 'validation result'
+                    validity : 'invalid'
+                    subject : 'S1'
+                    message : 'Cited rule does not justify the step'
+                ,
+                    type : 'validation complete'
+                    subject : 'OT root'
+                    details : 'The validation phase just completed.'
+                ]
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 4
+                done()
+
+Modify the one-way rule to become a two-way rule, and verify that the step
+now succeeds, because it was trying to use the rule in its reverse
+direction, which is now permitted.
+
+        it 'should permit use of backward iff steps', ( done ) ->
+            setupThenTest ->
+                ShortcutRule = new MakeAnything2(
+                    new MakeOM().attr
+                        id : 'SR_1'
+                        OM : 'A'
+                        premise : yes
+                    new MakeOM().attr
+                        id : 'SR_2'
+                        OM : 'logic.and(A,logic.true)'
+                ).attr
+                    id : 'SR'
+                    class : 'TemplateRule'
+                    iff : yes
+                LDE.replaceStructure 'SR', ShortcutRule
+            , ->
+                expect( LDEmessages ).toEqual [
+                    type : 'updated LDE state'
+                    subject : 'root'
+                ,
+                    type : 'validation queueing'
+                    subject : 'S1'
+                ,
+                    type : 'validation result'
+                    validity : 'valid'
+                    subject : 'S1'
+                ,
+                    type : 'validation complete'
+                    subject : 'OT root'
+                    details : 'The validation phase just completed.'
+                ]
+                OT = LDE.getOutputTree()
+                expect( OT.children().length ).toBe 4
+                done()

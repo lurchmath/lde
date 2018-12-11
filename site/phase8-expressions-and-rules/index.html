@@ -248,7 +248,7 @@ for, without yet permitting customizable mathematical notation.</p>
    describes.  (That is, use a line like
    <code>className : Structure.addSubclass 'TemplateRule', TemplateRule</code> in the
    <code>TemplateRule</code> class code.)</li>
-<li class="task-list-item"><input type="checkbox" disabled/> In <code>TemplateRule</code>, override <code>validateStep()</code> so that it reads the
+<li class="task-list-item"><input type="checkbox" disabled checked/> In <code>TemplateRule</code>, override <code>validateStep()</code> so that it reads the
    appropriate attributes and children of the rule object to determine how
    to do validation.  For now, assume tree-based matching and if-style
    inference.  You will need to use
@@ -259,11 +259,11 @@ for, without yet permitting customizable mathematical notation.</p>
    Matching package in that file.  To do so, just copy the essential files
    from the <code>node_modules</code> subfolder into the <code>release/</code> folder before
    uniting all the scripts in that folder.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add documentation for that new subclass.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Test that <code>OutputStructures</code> can cite rules that will do the
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add documentation for that new subclass.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Test that <code>OutputStructures</code> can cite rules that will do the
    template-based validation, which is a huge step!</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Extend <code>TemplateRule</code> with the option to be iff rather than just if.</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Add unit tests for this new feature.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Extend <code>TemplateRule</code> with the option to be iff rather than just if.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Add unit tests for this new feature.</li>
 <li class="task-list-item"><input type="checkbox" disabled/> Extend <code>TemplateRule</code> with the option to use string-based matching
    rather than just tree-based matching.  String-based matching will use an
    algorithm like the following.</li>
