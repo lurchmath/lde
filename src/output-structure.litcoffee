@@ -884,4 +884,6 @@ Now if this is being used in a Node.js context, export the class we defined.
     if exports?
         exports.OutputStructure = OutputStructure
         exports.OutputExpression = OutputExpression
+        exports.OutputRule = OutputRule
+        exports.TemplateRule = TemplateRule
         exports.OM = exports.OMNode = OM
