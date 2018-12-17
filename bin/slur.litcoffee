@@ -190,19 +190,35 @@ Define the parsing routine and helper functions.
                 ]
         return parse consume state, segLength
 
-Make sure they gave us an input file.
+Get options and an input file.
 
-    if process.argv.length < 3
-        console.error 'Usage: coffee slur.litcoffee <file.slur>'
+    filename = null
+    options = [ ]
+    optionConversion =
+        "-v" : '--verbose'
+        "-c" : '--commands'
+    for arg in process.argv[2..]
+        if arg[0] is '-'
+            if optionConversion.hasOwnProperty arg
+                arg = optionConversion[arg]
+            options.push arg[1..]
+        else if filename?
+            console.error 'Provide exactly one input filename.'
+            process.exit 1
+        else
+            filename = arg
+    if not filename?
+        console.error 'Usage: coffee slur.litcoffee [options] <file.slur>'
         process.exit 1
+    verbose = ( text ) ->
+        if '-verbose' in options then console.log text
 
 Load that file.
 
-    contents = String fs.readFileSync process.argv[2]
+    contents = String fs.readFileSync filename
     lines = contents.split '\n'
     contents = lines.join ' '
-    console.log "Read #{lines.length} lines from
-        #{process.argv[2]}."
+    verbose "Read #{lines.length} lines from #{filename}."
 
 Create a function to convert string positions to line:col pairs.
 
@@ -212,19 +228,22 @@ Create a function to convert string positions to line:col pairs.
             position -= lines[line++].length + 1
         "#{line}:#{position}"
 
-Parse it.
+Parse it and stop there if requested.
 
     try
         commands = parse contents
     catch e
         console.log 'Error:', e
         process.exit 1
+    if '-commands' in options
+        console.log JSON.stringify commands, null, 4
+        process.exit 0
 
 Prepare to listen to the LDE when it sends messages.
 
     LDE.Feedback.addEventListener 'feedback', ( event ) ->
         if event.type is 'updated LDE state'
-            console.log 'Interpretation complete.'
+            verbose 'Interpretation complete.'
         if event.type is 'validation result'
             console.log "Step at #{posToPair event.subject} is
                 #{event.validity}."
@@ -232,7 +251,7 @@ Prepare to listen to the LDE when it sends messages.
                 if key not in [ 'validity', 'subject', 'type' ]
                     console.log "\t#{key}: #{value}"
         if event.type is 'validation complete'
-            console.log 'Validation complete.'
+            verbose 'Validation complete.'
             process.exit 0
 
 Tell the LDE to do those things.
@@ -240,7 +259,7 @@ Tell the LDE to do those things.
     LDE.reset()
     for command in commands
         LDE[command.method] command.args...
-    console.log 'Input Tree populated.'
+    verbose 'Input Tree populated.'
 
 If you don't hear back soon, quit with an error.
 
