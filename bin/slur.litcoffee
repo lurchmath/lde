@@ -197,11 +197,12 @@ Get options and an input file.
     optionConversion =
         "-v" : '--verbose'
         "-c" : '--commands'
+        "-i" : '--input-tree'
     for arg in process.argv[2..]
         if arg[0] is '-'
             if optionConversion.hasOwnProperty arg
                 arg = optionConversion[arg]
-            options.push arg[1..]
+            options.push arg[2..]
         else if filename?
             console.error 'Provide exactly one input filename.'
             process.exit 1
@@ -211,7 +212,7 @@ Get options and an input file.
         console.error 'Usage: coffee slur.litcoffee [options] <file.slur>'
         process.exit 1
     verbose = ( text ) ->
-        if '-verbose' in options then console.log text
+        if 'verbose' in options then console.log text
 
 Load that file.
 
@@ -235,7 +236,7 @@ Parse it and stop there if requested.
     catch e
         console.log 'Error:', e
         process.exit 1
-    if '-commands' in options
+    if 'commands' in options
         console.log JSON.stringify commands, null, 4
         process.exit 0
 
@@ -259,6 +260,10 @@ Tell the LDE to do those things.
     LDE.reset()
     for command in commands
         LDE[command.method] command.args...
+    if 'input-tree' in options
+        console.log \
+            JSON.stringify LDE.getInputTree().toJSON(), null, 4
+        process.exit 0
     verbose 'Input Tree populated.'
 
 If you don't hear back soon, quit with an error.
