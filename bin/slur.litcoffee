@@ -1,11 +1,13 @@
 
 This files is a simple command-line client for the LDE.  It uses a
 proprietary text format that is not yet documented or fully tested.
-Tests and documentation will come in the future.
+Tests and documentation will come in the future.  Right now the
+command *must* be invoked from the root of this repository; that
+can be fixed later.
 
 Invoke as follows:
 ```
-coffee slur.litcoffee FILENAME.slur
+coffee bin/slur.litcoffee FILENAME.slur
 ```
 See examples of `.slur` files in this folder.
 
