@@ -217,7 +217,8 @@ Get options and an input file.
 Load that file.
 
     contents = String fs.readFileSync filename
-    lines = contents.split '\n'
+    allLines = contents.split '\n'
+    lines = allLines.filter (x) -> !(x.charAt(0)=='#')
     contents = lines.join ' '
     verbose "Read #{lines.length} lines from #{filename}."
 
@@ -274,4 +275,3 @@ If you don't hear back soon, quit with an error.
             #{maxWait}ms.  Force quitting now."
         process.exit 1
     , maxWait
-
