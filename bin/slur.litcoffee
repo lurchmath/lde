@@ -113,7 +113,6 @@ Define the parsing routine and helper functions.
             return parse consume state, 1
         if match = /^([a-zA-Z_][a-zA-Z0-9_]*)[{]/.exec state.text
             state.nextClass = match[1]
-            state.nextIndex.push 0
             return parse consume state, match[0].length-1
         if match = /^([a-zA-Z0-9_][a-zA-Z0-9_ ]*)[:.]\s/.exec state.text
             state.labels.push match[1]
