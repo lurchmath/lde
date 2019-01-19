@@ -197,6 +197,7 @@ Get options and an input file.
         "-v" : '--verbose'
         "-c" : '--commands'
         "-i" : '--input-tree'
+        "-o" : '--output-tree'
     for arg in process.argv[2..]
         if arg[0] is '-'
             if optionConversion.hasOwnProperty arg
@@ -245,6 +246,10 @@ Prepare to listen to the LDE when it sends messages.
     LDE.Feedback.addEventListener 'feedback', ( event ) ->
         if event.type is 'updated LDE state'
             verbose 'Interpretation complete.'
+            if 'output-tree' in options
+                console.log JSON.stringify \
+                    LDE.getOutputTree().toJSON(), null, 4
+                process.exit 0
         if event.type is 'validation result'
             console.log "Step at #{posToPair event.subject} is
                 #{event.validity}."
