@@ -362,7 +362,8 @@ attributes are not included; you can include them with the parameter.
                     throw "Not a valid OpenMath type: #{type}"
             if withAttributes
                 for own key, value of @attributes
-                    if key isnt 'id' and key[0] isnt '_'
+                    if key not in [ 'id', 'OM type', 'OM atomic value', \
+                            'OM bound indices' ] and key[0] isnt '_'
                         newKey = OM.encodeAsIdentifier key
                         result.setAttribute OM.sym( newKey, 'Lurch' ),
                             OM.str JSON.stringify [ value ]
