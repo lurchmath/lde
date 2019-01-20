@@ -241,6 +241,13 @@ Parse it and stop there if requested.
         console.log JSON.stringify commands, null, 4
         process.exit 0
 
+If there weren't any commands, stop now.  (Otherwise we'll be
+waiting for the LDE to send responses that will never come.)
+
+    if commands.length is 0
+        verbose 'No commands to execute.'
+        process.exit 0
+
 Prepare to listen to the LDE when it sends messages.
 
     LDE.Feedback.addEventListener 'feedback', ( event ) ->
