@@ -228,7 +228,7 @@ Create a function to convert string positions to line:col pairs.
         line = 0
         while position > lines[line].length
             position -= lines[line++].length + 1
-        "#{line}:#{position}"
+        "#{line+1}:#{position}"
 
 Parse it and stop there if requested.
 
