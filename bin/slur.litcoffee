@@ -18,7 +18,7 @@ For now, the command *must* be invoked from the root of this repository;
 that can be fixed later.
 
 Invoke as follows:
-```
+```sh
 coffee bin/slur.litcoffee FILENAME.slur
 ```
 
