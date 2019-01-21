@@ -1,0 +1,20 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+TO_RUN="cd $DIR/.. && coffee bin/slur.litcoffee"
+
+for ARG in $@
+do
+    FIRST=${ARG:0:1}
+    if [ $FIRST = "-" ]
+    then
+        TO_RUN="$TO_RUN $ARG"
+    else
+        FULL="$(cd "$(dirname "$ARG")"; pwd -P)/$(basename "$ARG")"
+        TO_RUN="$TO_RUN \"$FULL\""
+    fi
+done
+
+eval $TO_RUN
+
