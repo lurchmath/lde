@@ -218,7 +218,8 @@ Load that file.
 
     contents = String fs.readFileSync filename
     allLines = contents.split '\n'
-    lines = allLines.filter (x) -> !(x.charAt(0)=='#')
+    lines = allLines.map (x) -> if x.charAt(0)=='#' then "" else x
+    #lines = allLines.filter (x) -> !(x.charAt(0)=='#')
     contents = lines.join ' '
     verbose "Read #{lines.length} lines from #{filename}."
 
