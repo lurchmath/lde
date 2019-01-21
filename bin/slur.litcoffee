@@ -432,7 +432,7 @@ lines that begin with the comment character.
 
     contents = String fs.readFileSync filename
     allLines = contents.split '\n'
-    lines = allLines.filter ( x ) -> x[0] isnt '#'
+    lines = allLines.map ( x ) -> if x[0] is '#' then '' else x
     contents = lines.join ' '
     verbose "Read #{lines.length} lines from #{filename}."
 
