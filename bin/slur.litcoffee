@@ -335,6 +335,12 @@ string, we will form an `OpenMathIS` instance with all the correct
 attributes, and use that to create a new API call for inserting such a
 thing.
 
+        #KGM: Temporary hack to abbreviate constant.x as just .x
+        # and FirstOrderMatching.EFA as just Fof
+        segment = segment.replace /^\./, 'constant.'
+        segment = segment.replace /(\W)\./g, '$1constant.'
+        segment = segment.replace /Fof/g, 'FirstOrderMatching.EFA'
+
         maybeOM = OM.simple segment
         if typeof maybeOM isnt 'string'
             struct = new OpenMathIS().attr
@@ -461,7 +467,7 @@ generate the input tree and then quit, do exactly that right now.
         console.log JSON.stringify commands, null, 4
         process.exit 0
 
-If the commands list is empty, then the user's file was probabyl all
+If the commands list is empty, then the user's file was probably all
 comments or blank lines.  In such a case, it's important to stop here,
 because all the code below is contingent upon listening for feedback from
 the LDE, of which there will be none if we don't send it any commands.
@@ -490,8 +496,9 @@ of the details that came in the feedback event.  Note that we do this in
 verbose or non-verbose mode.
 
         if event.type is 'validation result'
+            # KGM: adding the timer report
             console.log "Step at #{posToPair event.subject} is
-                #{event.validity}."
+                #{event.validity} (#{(new Date).getTime()-start}ms)."
             for own key, value of event
                 if key not in [ 'validity', 'subject', 'type' ]
                     console.log "\t#{key}: #{value}"
@@ -509,6 +516,10 @@ transmit it all the commands for populating the Input Tree in accordance
 with the user's `.slur` file.
 
     LDE.reset()
+
+    #KGM: adding a timer to validation
+    start = (new Date).getTime()
+
     for command in commands
         LDE[command.method] command.args...
 
