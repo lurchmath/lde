@@ -73,7 +73,7 @@ See examples of `.slur` files in the folder containing this script.
     * `{ {"name":"Edwina"} f(x) f(y) }`
  * Label any `InputStructure` or OpenMath expression by placing the label
    before it, followed by a period or colon.  Examples:
-    * `Equality Introduction: InputRule{ relation1.eq(a,a) }`
+    * `EqualityIntroduction: InputRule{ relation1.eq(a,a) }`
     * `1. "my string"`
     * `2. My(Open,Math,Expression)`
  * To make a step of work cite a rule, suffix the step with a "by" clause,
@@ -271,11 +271,11 @@ and then let the earlier case that handles open curly brackets do its job.
             state.nextClass = match[1]
             return consume state, match[0].length-1
 
-If we have any kind of alphanumeric text (optionally with underscores and
-spaces) followed by a dot or colon, that's a label, so just record it so
-that we can attach it to the next structure we encounter.
+If we have any kind of alphanumeric text (optionally with underscores)
+followed by a dot or colon, that's a label, so just record it so that we can
+attach it to the next structure we encounter.
 
-        if match = /^([a-zA-Z0-9_][a-zA-Z0-9_ ]*)[:.]\s/.exec state.text
+        if match = /^([a-zA-Z0-9_]+)[:.]\s/.exec state.text
             state.labels.push match[1]
             return consume state, match[0].length
 
