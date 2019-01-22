@@ -335,8 +335,10 @@ string, we will form an `OpenMathIS` instance with all the correct
 attributes, and use that to create a new API call for inserting such a
 thing.
 
-        #KGM: Temporary hack to abbreviate constant.x as just .x
-        # and FirstOrderMatching.EFA as just Fof
+We first include a temporary hack for doing some convenient text
+replacements.  These will fail in some cases, which is why they are hacks,
+but we include them now until we build something better.
+
         segment = segment.replace /^\./, 'constant.'
         segment = segment.replace /(\W)\./g, '$1constant.'
         segment = segment.replace /Fof/g, 'FirstOrderMatching.EFA'
@@ -504,11 +506,11 @@ us to stop there, then stop there after printing the Output Tree.
                 process.exit 0
 
 If the LDE has just signalled the validation of a step of work, output all
-of the details that came in the feedback event.  Note that we do this in
-verbose or non-verbose mode.
+of the details that came in the feedback event, plus a note of how long
+validation has taken so far.  Note that we do this in verbose or non-verbose
+mode.
 
         if event.type is 'validation result'
-            # KGM: adding the timer report
             console.log "Step at #{posToPair event.subject} is
                 #{event.validity} (#{(new Date).getTime()-start}ms)."
             for own key, value of event
@@ -529,7 +531,8 @@ with the user's `.slur` file.
 
     LDE.reset()
 
-    #KGM: adding a timer to validation
+Start a timer so that we can watch how long validation takes.
+
     start = (new Date).getTime()
 
     for command in commands
