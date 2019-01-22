@@ -175,17 +175,17 @@ something like tokenizing, in the `parse` routine, below.
                 if char is '"' then inQuote = yes
         return position
 
-The parse routine proceeds to recursively consume the text in the given
-`state`, at the end doing one of two things:  If anything in the input text
-is malformed, an error is thrown.  Otherwise, it returns an array of calls
-that should be made to the LDE to form the Input Tree.
+The `parsingStep` routine consumes the next piece of text in the given
+`state`, at the end doing one of three things:
+ * If anything in the input text is malformed, an error is thrown.
+ * If parsing of the entire text is complete, it returns an array of calls
+   that should be made to the LDE to form the Input Tree.
+ * If parsing is not yet complete, the next state is returned for the next
+   iteration of parsing to process.  (We do not recursively call `parse`
+   within itself, because for large files this can exceed node's maximum
+   call stack size.)
 
-    parse = ( state ) ->
-
-If we were asked to parse text, convert it into a state object.
-
-        if typeof state is 'string'
-            return parse initialState state
+    parsingStep = ( state ) ->
 
 When developing, it is sometimes helpful to uncomment the following lines.
 
@@ -207,7 +207,7 @@ LDE API calls that we have accrued in the `state` parameter.
 If the next text to parse is just whitespace, skip over it.
 
         if /\s/.test state.text[0]
-            return parse consume state, 1
+            return consume state, 1
 
 If the next text to parse is an open curly bracket, then we should build a
 new parent structure and insert that into the Input Tree, and remember that
@@ -238,7 +238,7 @@ Create an API call that would construct a copy of that empty instance.
                 ]
 
 Increase our bracket depth counter and our list of indices at which we're
-inserting children, then recur.
+inserting children, then return a state for the next iteration.
 
             state.nextIndex[state.nextIndex.length-1]++
             state.bracketDepth++
@@ -246,7 +246,7 @@ inserting children, then recur.
             state.labels = [ ]
             state.lastInsertedId = state.position
             state.parentIds.push state.position
-            return parse consume state, 1
+            return consume state, 1
 
 If we find the close curly bracket for a parent, then one of two things
 happens.  If there was no parent to end, throw an error; malformed input.
@@ -261,7 +261,7 @@ Otherwise, decrease bracket depth and pop the appropriate stacks.
             state.parentIds.pop()
             state.nextIndex.pop()
             state.nextClass = null
-            return parse consume state, 1
+            return consume state, 1
 
 If we have an identifier followed by an open curly bracket, then we'll just
 record the class name in question, consume everything but the curly bracket,
@@ -269,7 +269,7 @@ and then let the earlier case that handles open curly brackets do its job.
 
         if match = /^([a-zA-Z_][a-zA-Z0-9_]*)[{]/.exec state.text
             state.nextClass = match[1]
-            return parse consume state, match[0].length-1
+            return consume state, match[0].length-1
 
 If we have any kind of alphanumeric text (optionally with underscores and
 spaces) followed by a dot or colon, that's a label, so just record it so
@@ -277,7 +277,7 @@ that we can attach it to the next structure we encounter.
 
         if match = /^([a-zA-Z0-9_][a-zA-Z0-9_ ]*)[:.]\s/.exec state.text
             state.labels.push match[1]
-            return parse consume state, match[0].length
+            return consume state, match[0].length
 
 If we encounter a "by" clause, one of two things happens, each of which is
 documented below.
@@ -319,7 +319,7 @@ attributes that a step of work should have to cite a reason and premises.
                         'premise citations'
                         premises
                     ]
-            return parse consume state, match[0].length
+            return consume state, match[0].length
 
 We are down to only two more possibilities:  Either the next text is an
 OpenMath structure or some JSON.  Let's fetch the next chunk of text that
@@ -359,7 +359,7 @@ thing.
                 ]
             state.nextIndex[state.nextIndex.length-1]++
             state.lastInsertedId = state.position
-            return parse consume state, segLength
+            return consume state, segLength
 
 Since parsing the next chunk as OpenMath failed, let us try to do it as
 JSON.  If this fails, throw an error because that's our last option, and
@@ -394,7 +394,19 @@ all the JSON's contents as attributes to the structure.
                     key
                     value
                 ]
-        return parse consume state, segLength
+        return consume state, segLength
+
+We then build a complete parsing process out of the above routine, by
+calling it as many times as needed to parse a whole file.  We know that the
+whole file has been parsed when we get back an array of commands to pass to
+the LDE.  If an error is ever thrown by `parsingStep`, we just let it bubble
+up.
+
+    parse = ( text ) ->
+        state = initialState text
+        while state not instanceof Array
+            state = parsingStep state
+        state
 
 ## Main script process
 
