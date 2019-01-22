@@ -335,19 +335,24 @@ string, we will form an `OpenMathIS` instance with all the correct
 attributes, and use that to create a new API call for inserting such a
 thing.
 
-We first include a temporary hack for doing some convenient text
-replacements.  These will fail in some cases, which is why they are hacks,
-but we include them now until we build something better.
-
-        segment = segment.replace /^\./, 'constant.'
-        segment = segment.replace /(\W)\./g, '$1constant.'
-        segment = segment.replace /Fof/g, 'FirstOrderMatching.EFA'
-
         maybeOM = OM.simple segment
         if typeof maybeOM isnt 'string'
+
+We also introduce a few shortcuts.  Variables beginning with an underscore
+are treated as constants.  The variable `Fof` is given the special meaning
+of the constant `FirstOrderMatching.EFA` used by the matching package to
+represent application of an expression function (syntactically).  These make
+it easier to write logical rules concisely.
+
+            varWithRE = ( re ) ->
+                ( omobj ) -> omobj.type is 'v' and re.test omobj.name
+            for d in maybeOM.descendantsSatisfying varWithRE /^_/
+                d.replaceWith OM.sym d.name[1..], 'slur'
+            for d in maybeOM.descendantsSatisfying varWithRE /^Fof$/
+                d.replaceWith OM.sym 'EFA', 'FirstOrderMatching'
             struct = new OpenMathIS().attr
                 id : state.position
-                OM : segment
+                OM : maybeOM.simpleEncode()
             if state.labels.length > 0
                 struct.setAttribute 'label regex',
                     "^(#{state.labels.join '|'})$"
