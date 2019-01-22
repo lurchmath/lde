@@ -65,7 +65,7 @@ See examples of `.slur` files in the folder containing this script.
    introduction rule:
     * `InputRule{ relation1.eq(a,a) }`
  * Curly brackets can be used without a preceding class name to form a
-   generic parent `Structure`, for scoping purposes.
+   generic parent `InputStructure`, for scoping purposes.
  * In a rule, all variables are treated as metavariables.
  * To add attributes to a parent structure, place the JSON immediately after
    the open curly bracket.  Example, a generic structure with a name and two
@@ -218,9 +218,9 @@ children.
 
 Build an empty instance of the class in question.  If there was a class
 name before the curly bracket, already recorded, use that, otherwise make a
-generic `Structure`.
+generic `InputStructure`.
 
-            className = state.nextClass or 'Structure'
+            className = state.nextClass or 'InputStructure'
             ctor = Structure::subclasses[className]
             struct = new ctor().attr id : state.position
             if state.labels.length > 0
