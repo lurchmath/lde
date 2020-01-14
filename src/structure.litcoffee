@@ -123,10 +123,12 @@ integrity of the hierarchy.
                 @parentNode.childList[index+1]
 
 Another possibly convenient utility is to make a copy of the Structure S
-(or equivalently the subtree with root S).
+(or equivalently the subtree with root S).  We use the same method from
+`fromJSON`, above, to ensure the copy has the same class as the original.
 
         copy : ->
-            S = new Structure
+            classObj = Structure::subclasses[@className]
+            S = new classObj
             S.attributes = JSON.parse JSON.stringify @attributes
             S.childList = ( C.copy() for C in @childList )
             child.parentNode = S for child in S.childList
