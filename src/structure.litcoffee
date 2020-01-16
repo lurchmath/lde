@@ -90,7 +90,7 @@ attributes were added or removed in an object.)
         equals : ( other ) ->
             orderedJSON = ( obj ) ->
                 orderedKeys = [ ]
-                JSON.stringify obj, ( k, v ) -> orderedKeys.push k
+                JSON.stringify obj, ( k, v ) -> orderedKeys.push k ; v
                 JSON.stringify obj, orderedKeys
             orderedJSON( @toJSON() ) is orderedJSON other.toJSON()
 
