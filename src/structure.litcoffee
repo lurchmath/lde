@@ -91,7 +91,7 @@ attributes were added or removed in an object.)
             orderedJSON = ( obj ) ->
                 orderedKeys = [ ]
                 JSON.stringify obj, ( k, v ) -> orderedKeys.push k ; v
-                JSON.stringify obj, orderedKeys
+                JSON.stringify obj, orderedKeys.sort()
             orderedJSON( @toJSON() ) is orderedJSON other.toJSON()
 
 ### Deserialization from JSON
