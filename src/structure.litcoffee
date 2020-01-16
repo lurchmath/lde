@@ -88,12 +88,10 @@ result of `JSON.stringify` can be contingent upon the history of when various
 attributes were added or removed in an object.)
 
         equals : ( other ) ->
-            orderedKeys = obj ->
-                result = [ ]
-                JSON.stringify obj, ( k, v ) -> result.push k
-                result
-            orderedJSON = obj ->
-                JSON.stringify obj, orderedKeys obj
+            orderedJSON = ( obj ) ->
+                orderedKeys = [ ]
+                JSON.stringify obj, ( k, v ) -> orderedKeys.push k
+                JSON.stringify obj, orderedKeys
             orderedJSON( @toJSON() ) is orderedJSON other.toJSON()
 
 ### Deserialization from JSON
