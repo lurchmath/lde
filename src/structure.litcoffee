@@ -82,8 +82,19 @@ The serialization tool lets us write a simple structural equality comparison
 function for two `Structure` hierarchies.  This is not an efficient
 comparison function, but it can be used in unit testing.
 
+We use `orderedKeys` and `orderedJSON` below to ensure that the result is
+deterministic, and thus suitable for equality comparison.  (Otherwise the
+result of `JSON.stringify` can be contingent upon the history of when various
+attributes were added or removed in an object.)
+
         equals : ( other ) ->
-            JSON.stringify( @toJSON() ) is JSON.stringify other.toJSON()
+            orderedKeys = obj ->
+                result = [ ]
+                JSON.stringify obj, ( k, v ) -> result.push k
+                result
+            orderedJSON = obj ->
+                JSON.stringify obj, orderedKeys obj
+            orderedJSON( @toJSON() ) is orderedJSON other.toJSON()
 
 ### Deserialization from JSON
 
