@@ -23,7 +23,7 @@
     "webworker-threads": "^0.7.16"
   },
   "scripts": {
-    "test": "gulp tests"
+    "test": "gulp test"
   },
   "repository": {
     "type": "git",
