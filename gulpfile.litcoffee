@@ -21,8 +21,9 @@ a single global object from which any task can do a lookup.
 
     switches = { }
     for piece, index in process.argv
-        if piece[0] is '-' then switches[piece.replace /^\-+/, ''] = \
-            process.argv[index+1][0] is '-' or process.argv[index+1]
+        if piece[0] is '-' and index < process.argv.length - 1
+            switches[piece.replace /^\-+/, ''] = \
+                process.argv[index+1][0] is '-' or process.argv[index+1]
 
 ## Build tasks
 
