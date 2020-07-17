@@ -1,8 +1,0 @@
-Shortcut: InputRule{
-    A {"premise":true}
-    logic.and(A,logic.true)
-}
-
-1. foo.bar
-2. logic.and(foo.bar,logic.true) by(Shortcut,1)
-

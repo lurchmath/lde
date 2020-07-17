@@ -1,27 +1,9 @@
 site_name: Lurch Deductive Engine Documentation
-pages:
+nav:
 - Home: index.md
-- Design Plans:
-    - Overview: design-overview.md
-    - Phase 1, Structures: phase1-structures.md
-    - Phase 2, The Input Tree: phase2-input-tree.md
-    - Phase 3, The Output Tree: phase3-output-tree.md
-    - Phase 4, Modification: phase4-modification.md
-    - Phase 5, Interpretation: phase5-interpretation.md
-    - Phase 6, Labels: phase6-labels.md
-    - Phase 7, Validation: phase7-validation.md
-    - Phase 8, Expressions and Rules: phase8-expressions-and-rules.md
-    - Enhancements for Later: enhancements.md
-- API Documentation:
-    - Overview: api-overview.md
-    - The LDE: api-lde.md
-    - Structures: api-structures.md
-    - Input Structures: api-input-structures.md
-    - Output Structures: api-output-structures.md
-    - Phases of processing: api-phases.md
 dev_addr: 127.0.0.1:8888
 extra_javascript:
     - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML
 markdown_extensions:
-    - mdx_math
+    - pymdownx.arithmatex
     - pymdownx.tasklist

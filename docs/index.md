@@ -1,12 +1,12 @@
 
 # The Lurch Deductive Engine (LDE)
 
-This documentation site contains the design of the LDE.
+This documentation site will contains the design of the LDE.
 
-We will implement that design, and as we do so, the various phases of
-development (accessible from the navigation menu above) will be converted
-from pages describing the plan into pages describing the completed API.
-
-Use the menu at the top of this site to find content.
+Right now, however, it's a placeholder because this branch of the
+repository is a reconstruction of most of our work, sort of from scratch.
+See the master branch for the old version, or check back later here for the
+new one.
 
 [See the source code repository here.](http://github.com/lurchmath/lde)
+

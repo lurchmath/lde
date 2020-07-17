@@ -1,6 +1,11 @@
 
 # The Lurch Deductive Engine (LDE)
 
+This branch is a rebooting of the entire LDE repository.  There's nothing to
+see here yet.  Once this branch has made greater progress, it will be usable.
+Right now, it's stripped to the studs.
+
+<!--
 [![Build Status](https://travis-ci.org/lurchmath/lde.svg?branch=master)](https://travis-ci.org/lurchmath/lde)
 
 [See documentation on the project website.](http://lurchmath.github.io/lde)
@@ -40,7 +45,9 @@ To control how the docs are built, edit [mkdocs.yml](mkdocs.yml).
 
 To control all build processes, edit
 [gulpfile.litcoffee](gulpfile.litcoffee).
+-->
 
 ## License
 
 [![LGPLv3](https://www.gnu.org/graphics/lgplv3-147x51.png)](https://www.gnu.org/licenses/lgpl-3.0.en.html)
+
