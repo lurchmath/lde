@@ -6,11 +6,14 @@
     "doc": "docs",
     "test": "tests"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
+    "esm": "^3.2.25",
+    "expect.js": "^0.3.1",
+    "mocha": "^8.0.1"
   },
   "scripts": {
+    "test": "mocha -r esm --full-trace --ui tdd tests/in-node/"
   },
   "repository": {
     "type": "git",
