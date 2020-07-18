@@ -15,7 +15,7 @@
   },
   "scripts": {
     "test": "mocha -r esm --full-trace --ui tdd tests/in-node/",
-    "docs": "jsdoc src/* -d docs"
+    "docs": "jsdoc src/* -d docs -R doc-main.md"
   },
   "repository": {
     "type": "git",
