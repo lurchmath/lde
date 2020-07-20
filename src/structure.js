@@ -1,6 +1,6 @@
 
 /**
- * The Structure class, an $n$-ary tree of Structure instances, using functions
+ * The Structure class, an n-ary tree of Structure instances, using functions
  * like parent() and children() to navigate the tree.
  */
 export class Structure {
@@ -38,7 +38,7 @@ export class Structure {
      * Get the child of this Structure at index i.
      * 
      * If the index is invalid (that is, it is anything other than one of
-     * $\{0,1,\ldots,n-1\}$ if there are $n$ children) then undefined will be
+     * {0,1,...,n-1\} if there are n children) then undefined will be
      * returned instead.
      * 
      * @param {number} i - The index of the child being fetched
