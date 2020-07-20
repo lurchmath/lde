@@ -1,3 +1,10 @@
 {
-    "plugins": ["plugins/markdown"]
+    "plugins": ["plugins/markdown"],
+    "opts": {
+        "template": "./node_modules/tidy-jsdoc",
+        "prism-theme": "prism-default"
+    },
+    "metadata": {
+        "title": "Lurch Deductive Engine"
+    }
 }

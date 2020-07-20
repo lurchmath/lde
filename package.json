@@ -11,7 +11,8 @@
     "esm": "^3.2.25",
     "expect.js": "^0.3.1",
     "jsdoc": "^3.6.4",
-    "mocha": "^8.0.1"
+    "mocha": "^8.0.1",
+    "tidy-jsdoc": "^1.4.0"
   },
   "scripts": {
     "test": "mocha -r esm --full-trace --ui tdd tests/in-node/",
