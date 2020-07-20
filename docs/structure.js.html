@@ -2,34 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: structure.js</title>
-
-    <script src="scripts/prettify/prettify.js"> </script>
-    <script src="scripts/prettify/lang-css.js"> </script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
-    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+    <title>Lurch Deductive Engine: structure.js</title>
+    
+      <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
+    
+    <link type="text/css" rel="stylesheet" href="styles/styles.css">
+    
 </head>
-
 <body>
 
-<div id="main">
+<header class="layout-header">
+  
+  <h1>
+    <a href="./index.html">
+      Lurch Deductive Engine
+    </a>
+  </h1>
+  <nav class="layout-nav">
+    <ul><li class="nav-heading">Classes</li><li class="nav-heading"><span class="nav-item-type type-class" title="class">C</span><span class="nav-item-name is-class"><a href="Declaration.html">Declaration</a></span></li><li class="nav-heading"><span class="nav-item-type type-class" title="class">C</span><span class="nav-item-name is-class"><a href="Environment.html">Environment</a></span></li><li class="nav-heading"><span class="nav-item-type type-class" title="class">C</span><span class="nav-item-name is-class"><a href="Expression.html">Expression</a></span></li><li class="nav-heading"><span class="nav-item-type type-class" title="class">C</span><span class="nav-item-name is-class"><a href="OutputStructure.html">OutputStructure</a></span></li><li class="nav-heading"><span class="nav-item-type type-class" title="class">C</span><span class="nav-item-name is-class"><a href="Structure.html">Structure</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#address">address</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#allButFirstChild">allButFirstChild</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#allButLastChild">allButLastChild</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#child">child</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#children">children</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#firstChild">firstChild</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#index">index</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#indexInParent">indexInParent</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#insertChild">insertChild</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#isAtomic">isAtomic</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#lastChild">lastChild</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#nextSibling">nextSibling</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#numChildren">numChildren</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#parent">parent</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#popChild">popChild</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#previousSibling">previousSibling</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#pushChild">pushChild</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#remove">remove</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#removeChild">removeChild</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#replaceWith">replaceWith</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#setChildren">setChildren</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#shiftChild">shiftChild</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#unshiftChild">unshiftChild</a></span></li></ul>
+  </nav>
+</header>
 
-    <h1 class="page-title">Source: structure.js</h1>
 
+<main class="layout-main  layout-content--source">
+  <div class="container">
+    <p class="page-kind">source</p>
+    <h1 class="page-title">structure.js</h1>
     
 
 
 
     
-    <section>
-        <article>
-            <pre class="prettyprint source linenums"><code>
+
+<section>
+    <article>
+        <pre id="source" class="source-page line-numbers"><code class="language-js">
 /**
  * The Structure class, an n-ary tree of Structure instances, using functions
- * like parent() and children() to navigate the tree.
+ * like {@link Structure#parent parent()} and {@link Structure#children children()}
+ * to navigate the tree.
  */
 export class Structure {
     
@@ -55,8 +66,8 @@ export class Structure {
     /**
      * An array containing this Structure's children, in the correct order.
      * 
-     * To get a specific child, it is more efficient to use the child()
-     * function instead.
+     * To get a specific child, it is more efficient to use the
+     * {@link Structure.child()} function instead.
      * 
      * @return {Structure[]} A shallow copy of the Structure's children array
      */
@@ -126,8 +137,8 @@ export class Structure {
     }
 
     /**
-     * Calls removeFromParent() on the child with index i.  Does nothing if the
-     * index is invalid.
+     * Calls {@link Structure#remove remove()} on the child with index `i`.
+     * Does nothing if the index is invalid.
      * 
      * @param {number} i - the index of the child to remove
      */
@@ -141,6 +152,8 @@ export class Structure {
      * provided that this Structure has a parent.
      * 
      * @return {number} The index of this Structure in its parent's children list
+     * @see {@link Structure#parent parent()}
+     * @see {@link Structure#child child()}
      */
     indexInParent () {
         if ( this._parent != null &amp;&amp; this._parent._children ) {
@@ -170,14 +183,6 @@ export class Structure {
         }
     }
 
-    // A convenient combination of the above methods is to replace a child with a
-    // new structure, deparenting the old child and putting the replacement at the
-    // same index in the same parent.
-    // 
-    // Because this calls `removeFromParent()` and `insertChild()`, it also
-    // generates calls to the four event handlers mentioned in those functions,
-    // above.
-
     /**
      * Replace this structure, exactly where it sits in its parent Structure,
      * with the given one, thus deparenting this one.
@@ -199,27 +204,190 @@ export class Structure {
         }
     }
 
+    /**
+     * A Structure is atomic if and only if it has no children.  Thus this is a
+     * shorthand for `S.numChildren() == 0`.
+     * @return {boolean} Whether the number of children is zero
+     * @see {@link Structure#numChildren numChildren()}
+     */
+    isAtomic () { return this.numChildren() == 0 }
+
+    /**
+     * Convenience function for fetching just the first child of this Structure
+     * @return {Structure} The first child of this Structure, or undefined if none
+     * @see {@link Structure#lastChild lastChild()}
+     * @see {@link Structure#allButFirstChild allButFirstChild()}
+     */
+    firstChild () { return this._children[0] }
+
+    /**
+     * Convenience function for fetching just the last child of this Structure
+     * @return {Structure} The last child of this Structure, or undefined if none
+     * @see {@link Structure#firstChild firstChild()}
+     * @see {@link Structure#allButLastChild allButLastChild()}
+     */
+    lastChild () { return this._children[this._children.length-1] }
+
+    /**
+     * Convenience function for fetching the array containing all children of
+     * this Structure except for the first
+     * @return {Structure[]} All but the first child of this structure, or an
+     *   empty array if there is one or fewer children
+     * @see {@link Structure#firstChild firstChild()}
+     * @see {@link Structure#allButLastChild allButLastChild()}
+     */
+    allButFirstChild () { return this._children.slice( 1 ) }
+
+    /**
+     * Convenience function for fetching the array containing all children of
+     * this Structure except for the last
+     * @return {Structure[]} All but the last child of this structure, or an
+     *   empty array if there is one or fewer children
+     * @see {@link Structure#lastChild lastChild()}
+     * @see {@link Structure#allButFirstChild allButFirstChild()}
+     */
+    allButLastChild () { return this._children.slice( 0, this._children.length-1 ) }
+
+    /**
+     * Remove the last child of this Structure and return it.  If there is no
+     * such child, take no action and return undefined.
+     * @return {Structure} The popped last child, or undefined if none
+     * @see {@link Structure#pushChild pushChild()}
+     * @see {@link Structure#shiftChild shiftChild()}
+     */
+    popChild () {
+        const child = this.lastChild()
+        if ( !child ) return
+        child.remove()
+        return child
+    }
+
+    /**
+     * Remove the first child of this Structure and return it.  If there is no
+     * such child, take no action and return undefined.
+     * @return {Structure} The popped first child, or undefined if none
+     * @see {@link Structure#popChild popChild()}
+     * @see {@link Structure#unshiftChild unshiftChild()}
+     */
+    shiftChild () {
+        const child = this.firstChild()
+        if ( !child ) return
+        child.remove()
+        return child
+    }
+
+    /**
+     * Append a new child to the end of this Structure's list of children.  This
+     * is equivalent to a call to `insertChild()` with the length of the current
+     * children array as the index at which to insert.
+     * 
+     * @param {Structure} child - The new Structure to append
+     * @see {@link Structure#popChild popChild()}
+     * @see {@link Structure#unshiftChild unshiftChild()}
+     */
+    pushChild ( child ) { this.insertChild( child, this._children.length ) }
+
+    /**
+     * Prepend a new child to the beginning of this Structure's list of children.
+     * This is equivalent to a call to `insertChild()` with the default second
+     * parameter (i.e., insert at index zero), and thus this function is here
+     * only for convenience, to fit with shiftChild().
+     * 
+     * @param {Structure} child - The new Structure to prepend
+     * @see {@link Structure#shiftChild shiftChild()}
+     * @see {@link Structure#pushChild pushChild()}
+     */
+    unshiftChild ( child ) { this.insertChild( child ) }
+
+    /**
+     * Replace the entire children array of this Structure with a new one.
+     * 
+     * This is equivalent to removing all the current children of this Structure
+     * in order from lowest index to highest, then inserting all the children in
+     * the given array, again from lowest index to highest.
+     * 
+     * The intent is not for any of the elements of the given array to be
+     * ancestors or descendants of one another, but even if they are, the action
+     * taken here still follows the explanation given in the previous paragraph.
+     * 
+     * @param {Structure[]} children - New list of children
+     * @see {@link Structure#children children()}
+     * @see {@link Structure#removeChild removeChild()}
+     * @see {@link Structure#insertChild insertChild()}
+     */
+    setChildren ( children ) {
+        while ( this._children.length > 0 ) {
+            this.firstChild().remove()
+        }
+        for ( const child of children ) {
+            this.pushChild( child )
+        }
+    }
+
+    /**
+     * My address within the given ancestor, as a sequence of indices
+     * `[i1,i2,...,in]` such that `ancestor.child(i1).child(i2)....child(in)` is
+     * this Structure.
+     * 
+     * This is a kind of inverse to {@link Structure#index index()}.
+     * 
+     * @param {Structure} [ancestor] - The ancestor in which to compute my
+     *   address, which defaults to my highest ancestor.  If this argument is
+     *   not actually an ancestor of this Structure, then we treat it as if it
+     *   had been omitted.
+     * @return {number[]} An array of numbers as described above, which will be
+     *   empty in the degenerate case where this Structure has no parent or this
+     *   structure is the given ancestor
+     * @see {@link Structure#child child()}
+     */
+    address ( ancestor ) {
+        if ( ancestor === this || !this.parent() ) return [ ]
+        const lastStep = this.indexInParent()
+        return this.parent().address( ancestor ).concat( [ lastStep ] )
+    }
+
+    /**
+     * Performs repeated child indexing to find a specific descendant.  If the
+     * address given as input is the array `[i1,i2,...,in]`, then this returns
+     * `this.child(i1).child(i2)....child(in)`.
+     * 
+     * If the given address is the empty array, the result is this Structure.
+     * 
+     * This is a kind of inverse to {@link Structure#address address()}.
+     * 
+     * @param {number[]} address - A sequence of nonnegative indices, as
+     *   described in the documentation for address()
+     * @return {Structure} A descendant structure, following the definition
+     *   above, or undefined if there is no such Structure
+     * @see {@link Structure#child child()}
+     */
+    index ( address ) {
+        if ( !( address instanceof Array ) ) return undefined
+        if ( address.length == 0 ) return this
+        const nextStep = this.child( address[0] )
+        if ( !( nextStep instanceof Structure ) ) return undefined
+        return nextStep.index( address.slice( 1 ) )
+    }
+
 }
 </code></pre>
-        </article>
-    </section>
+    </article>
+</section>
 
 
 
 
-</div>
+  </div>
+</main>
 
-<nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Declaration.html">Declaration</a></li><li><a href="Environment.html">Environment</a></li><li><a href="Expression.html">Expression</a></li><li><a href="OutputStructure.html">OutputStructure</a></li><li><a href="Structure.html">Structure</a></li></ul>
-</nav>
-
-<br class="clear">
-
-<footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Mon Jul 20 2020 11:35:47 GMT-0400 (Eastern Daylight Time)
+<footer class="layout-footer">
+  <div class="container">
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.4</a> on Mon Jul 20 2020 13:48:44 GMT-0400 (Eastern Daylight Time)
+  </div>
 </footer>
 
-<script> prettyPrint(); </script>
-<script src="scripts/linenumber.js"> </script>
+
+
+<script src="scripts/prism.dev.js"></script>
 </body>
 </html>

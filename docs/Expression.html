@@ -2,23 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: Expression</title>
-
-    <script src="scripts/prettify/prettify.js"> </script>
-    <script src="scripts/prettify/lang-css.js"> </script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
-    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+    <title>Lurch Deductive Engine: Expression</title>
+    
+      <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
+    
+    <link type="text/css" rel="stylesheet" href="styles/styles.css">
+    
 </head>
-
 <body>
 
-<div id="main">
+<header class="layout-header">
+  
+  <h1>
+    <a href="./index.html">
+      Lurch Deductive Engine
+    </a>
+  </h1>
+  <nav class="layout-nav">
+    <ul><li class="nav-heading">Classes</li><li class="nav-heading"><span class="nav-item-type type-class" title="class">C</span><span class="nav-item-name is-class"><a href="Declaration.html">Declaration</a></span></li><li class="nav-heading"><span class="nav-item-type type-class" title="class">C</span><span class="nav-item-name is-class"><a href="Environment.html">Environment</a></span></li><li class="nav-heading"><span class="nav-item-type type-class" title="class">C</span><span class="nav-item-name is-class"><a href="Expression.html">Expression</a></span></li><li class="nav-heading"><span class="nav-item-type type-class" title="class">C</span><span class="nav-item-name is-class"><a href="OutputStructure.html">OutputStructure</a></span></li><li class="nav-heading"><span class="nav-item-type type-class" title="class">C</span><span class="nav-item-name is-class"><a href="Structure.html">Structure</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#address">address</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#allButFirstChild">allButFirstChild</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#allButLastChild">allButLastChild</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#child">child</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#children">children</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#firstChild">firstChild</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#index">index</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#indexInParent">indexInParent</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#insertChild">insertChild</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#isAtomic">isAtomic</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#lastChild">lastChild</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#nextSibling">nextSibling</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#numChildren">numChildren</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#parent">parent</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#popChild">popChild</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#previousSibling">previousSibling</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#pushChild">pushChild</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#remove">remove</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#removeChild">removeChild</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#replaceWith">replaceWith</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#setChildren">setChildren</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#shiftChild">shiftChild</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Structure.html#unshiftChild">unshiftChild</a></span></li></ul>
+  </nav>
+</header>
 
-    <h1 class="page-title">Class: Expression</h1>
 
+<main class="layout-main ">
+  <div class="container">
+    <p class="page-kind">Class</p>
+    <h1 class="page-title">Expression</h1>
     
 
 
@@ -26,10 +35,20 @@
 
 <section>
 
-<header>
+
+<header class="class">
+
+
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>Expression<span class="signature">()</span><span class="type-signature"></span></h2>
         
+        <!-- <h2>Expression</h2> -->
+
+        
+
+        
+
+        
+            
             <div class="class-description"><p>The Expression class, still just a stub for now.</p></div>
         
     
@@ -37,47 +56,47 @@
 
 <article>
     <div class="container-overview">
+
+
+
     
         
 
-    
-    <h2>Constructor</h2>
-    
 
-    
-    <h4 class="name" id="Expression"><span class="type-signature"></span>new Expression<span class="signature">()</span><span class="type-signature"></span></h4>
-    
+
+
 
     
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
+    
+    <h3 class="subtitle">Constructor</h3>
     
 
+    <div class="method-type">
     
+    </div>
 
-    
+    <h4 class="method-name" id="Expression">new Expression<span class="signature">()</span><span class="return-type-signature"></span>
+    </h4>
 
-    
 
-    
 
-    
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
     
 
     
@@ -91,10 +110,13 @@
     
 
     
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="expression.js.html">expression.js</a>, <a href="expression.js.html#line5">line 5</a>
-    </li></ul></dd>
+
+    
+
+    
+
+    
+
     
 
     
@@ -102,7 +124,9 @@
     
 
     
-</dl>
+
+    
+</div>
 
 
 
@@ -120,6 +144,13 @@
 
 
 
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.5">, line 5</a>
+        </li>
+    </ul>
 
 
 
@@ -130,13 +161,12 @@
 
     
 
-    
+     
 
     
 
     
 
-    
 
     
 
@@ -152,19 +182,17 @@
 
 
 
-</div>
+  </div>
+</main>
 
-<nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Declaration.html">Declaration</a></li><li><a href="Environment.html">Environment</a></li><li><a href="Expression.html">Expression</a></li><li><a href="OutputStructure.html">OutputStructure</a></li><li><a href="Structure.html">Structure</a></li></ul>
-</nav>
-
-<br class="clear">
-
-<footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Mon Jul 20 2020 11:35:47 GMT-0400 (Eastern Daylight Time)
+<footer class="layout-footer">
+  <div class="container">
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.4</a> on Mon Jul 20 2020 13:48:44 GMT-0400 (Eastern Daylight Time)
+  </div>
 </footer>
 
-<script> prettyPrint(); </script>
-<script src="scripts/linenumber.js"> </script>
+
+
+<script src="scripts/prism.dev.js"></script>
 </body>
 </html>
