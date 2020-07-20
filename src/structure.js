@@ -120,4 +120,26 @@ export class Structure {
         }
     }
 
+    /**
+     * Find the previous sibling of this Structure in its parent, if any
+     * @return {Structure} The previous sibling, or undefined if there is none
+     */
+    previousSibling () {
+        let index = this.indexInParent()
+        if ( index != null) {
+            return this._parent._children[index-1]
+        }
+    }
+
+    /**
+     * Find the next sibling of this Structure in its parent, if any
+     * @return {Structure} The next sibling, or undefined if there is none
+     */
+    nextSibling () {
+        let index = this.indexInParent()
+        if ( index != null ) {
+            return this._parent._children[index+1]
+        }
+    }
+
 }

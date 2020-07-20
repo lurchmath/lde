@@ -38,6 +38,18 @@ suite( 'Structure trees', () => {
         expect( AA.children() ).to.eql( [ ] )
         expect( AB.children() ).to.eql( [ ] )
         expect( B.children() ).to.eql( [ ] )
+
+        // Ensure that previous and next sibling functions work as expected.
+        expect( root.previousSibling() ).to.be( undefined )
+        expect( root.nextSibling() ).to.be( undefined )
+        expect( A.previousSibling() ).to.be( undefined )
+        expect( A.nextSibling() ).to.be( B )
+        expect( AA.previousSibling() ).to.be( undefined )
+        expect( AA.nextSibling() ).to.be( AB )
+        expect( AB.previousSibling() ).to.be( AA )
+        expect( AB.nextSibling() ).to.be( undefined )
+        expect( B.previousSibling() ).to.be( A )
+        expect( B.nextSibling() ).to.be( undefined )
     } )
 
     test( 'Structure constructor ignores invalid child parameters', () => {
