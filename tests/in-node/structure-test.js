@@ -40,4 +40,34 @@ suite( 'Structure trees', () => {
         expect( B.children() ).to.eql( [ ] )
     } )
 
+    test( 'Structure constructor ignores invalid child parameters', () => {
+        // Make a similar small structure hierarchy to the one in the previous test,
+        // but add a few erroneous items.
+        let A, AA, AB, B
+        const root = new Structure(
+            7,
+            A = new Structure(
+                AA = new Structure,
+                AB = new Structure,
+                'This is not a Structure'
+            ),
+            /regular expression/,
+            B = new Structure
+        )
+
+        // Ensure that parent pointers and child arrays are exactly as they were in
+        // the previous test, because the erroneous new stuff has been ignored.
+        expect( root.parent() ).to.be( null )
+        expect( A.parent() ).to.be( root )
+        expect( AA.parent() ).to.be( A )
+        expect( AB.parent() ).to.be( A )
+        expect( B.parent() ).to.be( root )
+        expect( root.children() ).to.eql( [ A, B ] )
+        expect( A.children() ).to.eql( [ AA, AB ] )
+        expect( AA.children() ).to.eql( [ ] )
+        expect( AB.children() ).to.eql( [ ] )
+        expect( B.children() ).to.eql( [ ] )
+    } )
+    } )
+
 } )
