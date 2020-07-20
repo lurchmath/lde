@@ -163,4 +163,11 @@ export class Structure {
         }
     }
 
+    /**
+     * A Structure is atomic if and only if it has no children.  Thus this is a
+     * shorthand for `S.numChildren() == 0`.
+     * @return {boolean} Whether the number of children is zero
+     */
+    isAtomic () { return this.numChildren() == 0 }
+
 }

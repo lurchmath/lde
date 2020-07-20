@@ -39,6 +39,18 @@ suite( 'Structure trees', () => {
         expect( AB.children() ).to.eql( [ ] )
         expect( B.children() ).to.eql( [ ] )
 
+        // Ensure that numChildren() and isAtomic() give the right answer in each case
+        expect( root.numChildren() ).to.be( 2 )
+        expect( A.numChildren() ).to.be( 2 )
+        expect( AA.numChildren() ).to.be( 0 )
+        expect( AB.numChildren() ).to.be( 0 )
+        expect( B.numChildren() ).to.be( 0 )
+        expect( root.isAtomic() ).to.be( false )
+        expect( A.isAtomic() ).to.be( false )
+        expect( AA.isAtomic() ).to.be( true )
+        expect( AB.isAtomic() ).to.be( true )
+        expect( B.isAtomic() ).to.be( true )
+
         // Ensure that previous and next sibling functions work as expected.
         expect( root.previousSibling() ).to.be( undefined )
         expect( root.nextSibling() ).to.be( undefined )
@@ -79,6 +91,18 @@ suite( 'Structure trees', () => {
         expect( AA.children() ).to.eql( [ ] )
         expect( AB.children() ).to.eql( [ ] )
         expect( B.children() ).to.eql( [ ] )
+
+        // Ensure that numChildren() and isAtomic() give the right answer in each case
+        expect( root.numChildren() ).to.be( 2 )
+        expect( A.numChildren() ).to.be( 2 )
+        expect( AA.numChildren() ).to.be( 0 )
+        expect( AB.numChildren() ).to.be( 0 )
+        expect( B.numChildren() ).to.be( 0 )
+        expect( root.isAtomic() ).to.be( false )
+        expect( A.isAtomic() ).to.be( false )
+        expect( AA.isAtomic() ).to.be( true )
+        expect( AB.isAtomic() ).to.be( true )
+        expect( B.isAtomic() ).to.be( true )
     } )
 
     test( 'Structure constructor should prevent cyclic hierarchies', () => {
@@ -194,6 +218,18 @@ suite( 'Structure trees', () => {
         expect( AA.parent() ).to.be( null )
         expect( AB.parent() ).to.be( A )
         expect( B.parent() ).to.be( null )
+
+        // Ensure that numChildren() and isAtomic() still give the right answer in each case
+        expect( root.numChildren() ).to.be( 1 )
+        expect( A.numChildren() ).to.be( 1 )
+        expect( AA.numChildren() ).to.be( 0 )
+        expect( AB.numChildren() ).to.be( 0 )
+        expect( B.numChildren() ).to.be( 0 )
+        expect( root.isAtomic() ).to.be( false )
+        expect( A.isAtomic() ).to.be( false )
+        expect( AA.isAtomic() ).to.be( true )
+        expect( AB.isAtomic() ).to.be( true )
+        expect( B.isAtomic() ).to.be( true )
     } )
 
     test( 'Supports removing child structures', () => {
@@ -334,6 +370,18 @@ suite( 'Structure trees', () => {
         expect( D.parent() ).to.be( A )
         expect( C.parent() ).to.be( root )
         expect( B.parent() ).to.be( root )
+
+        // Ensure that numChildren() and isAtomic() still give the right answer in each case
+        expect( root.numChildren() ).to.be( 4 )
+        expect( A.numChildren() ).to.be( 2 )
+        expect( AA.numChildren() ).to.be( 0 )
+        expect( AB.numChildren() ).to.be( 0 )
+        expect( B.numChildren() ).to.be( 0 )
+        expect( root.isAtomic() ).to.be( false )
+        expect( A.isAtomic() ).to.be( false )
+        expect( AA.isAtomic() ).to.be( true )
+        expect( AB.isAtomic() ).to.be( true )
+        expect( B.isAtomic() ).to.be( true )
     } )
 
     test( 'Should support replacing structures', () => {
