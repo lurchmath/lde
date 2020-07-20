@@ -104,7 +104,7 @@ export class Structure {
      */
     removeChild ( i ) {
         if ( i < 0 || i >= this._children.length ) return
-        this._children[i].removeFromParent()
+        this._children[i].remove()
     }
 
     /**

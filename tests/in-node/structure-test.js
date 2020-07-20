@@ -131,4 +131,109 @@ suite( 'Structure trees', () => {
         expect( B.indexInParent() ).to.be( 1 )
     } )
 
+    test( 'Supports removing structures from parents', () => {
+        // Make the same small structure hierarchy as in the previous test.
+        let A, AA, AB, B
+        const root = new Structure(
+            A = new Structure(
+                AA = new Structure,
+                AB = new Structure
+            ),
+            B = new Structure
+        )
+
+        // Remove a child of the root and verify that the structure is as expected.
+        B.remove()
+        expect( root.children() ).to.eql( [ A ] )
+        expect( A.children() ).to.eql( [ AA, AB ] )
+        expect( AA.children() ).to.eql( [ ] )
+        expect( AB.children() ).to.eql( [ ] )
+        expect( B.children() ).to.eql( [ ] )
+        expect( root.parent() ).to.be( null )
+        expect( A.parent() ).to.be( root )
+        expect( AA.parent() ).to.be( A )
+        expect( AB.parent() ).to.be( A )
+        expect( B.parent() ).to.be( null )
+
+        // Remove a grandchild of the root and verify that the structure is as
+        // expected.
+        AA.remove()
+        expect( root.children() ).to.eql( [ A ] )
+        expect( A.children() ).to.eql( [ AB ] )
+        expect( AA.children() ).to.eql( [ ] )
+        expect( AB.children() ).to.eql( [ ] )
+        expect( B.children() ).to.eql( [ ] )
+        expect( root.parent() ).to.be( null )
+        expect( A.parent() ).to.be( root )
+        expect( AA.parent() ).to.be( null )
+        expect( AB.parent() ).to.be( A )
+        expect( B.parent() ).to.be( null )
+
+        // Remove something that has already been removed, and verify that nothing
+        // changes or causes an error.
+        AA.remove()
+        expect( root.children() ).to.eql( [ A ] )
+        expect( A.children() ).to.eql( [ AB ] )
+        expect( AA.children() ).to.eql( [ ] )
+        expect( AB.children() ).to.eql( [ ] )
+        expect( B.children() ).to.eql( [ ] )
+        expect( root.parent() ).to.be( null )
+        expect( A.parent() ).to.be( root )
+        expect( AA.parent() ).to.be( null )
+        expect( AB.parent() ).to.be( A )
+        expect( B.parent() ).to.be( null )
+    } )
+
+    test( 'Supports removing child structures', () => {
+        // Make the same small structure hierarchy as in the previous test.
+        let A, AA, AB, B
+        const root = new Structure(
+            A = new Structure(
+                AA = new Structure,
+                AB = new Structure
+            ),
+            B = new Structure
+        )
+
+        // Remove a child of the root and verify that the structure is as expected.
+        root.removeChild( 1 )
+        expect( root.children() ).to.eql( [ A ] )
+        expect( A.children() ).to.eql( [ AA, AB ] )
+        expect( AA.children() ).to.eql( [ ] )
+        expect( AB.children() ).to.eql( [ ] )
+        expect( B.children() ).to.eql( [ ] )
+        expect( root.parent() ).to.be( null )
+        expect( A.parent() ).to.be( root )
+        expect( AA.parent() ).to.be( A )
+        expect( AB.parent() ).to.be( A )
+        expect( B.parent() ).to.be( null )
+
+        // Remove a grandchild of the root and verify that the structure is as
+        // expected.
+        A.removeChild( 0 )
+        expect( root.children() ).to.eql( [ A ] )
+        expect( A.children() ).to.eql( [ AB ] )
+        expect( AA.children() ).to.eql( [ ] )
+        expect( AB.children() ).to.eql( [ ] )
+        expect( B.children() ).to.eql( [ ] )
+        expect( root.parent() ).to.be( null )
+        expect( A.parent() ).to.be( root )
+        expect( AA.parent() ).to.be( null )
+        expect( AB.parent() ).to.be( A )
+        expect( B.parent() ).to.be( null )
+
+        // Remove an invalid index, and verify that nothing changes or causes an error.
+        A.removeChild( 1 )
+        expect( root.children() ).to.eql( [ A ] )
+        expect( A.children() ).to.eql( [ AB ] )
+        expect( AA.children() ).to.eql( [ ] )
+        expect( AB.children() ).to.eql( [ ] )
+        expect( B.children() ).to.eql( [ ] )
+        expect( root.parent() ).to.be( null )
+        expect( A.parent() ).to.be( root )
+        expect( AA.parent() ).to.be( null )
+        expect( AB.parent() ).to.be( A )
+        expect( B.parent() ).to.be( null )
+    } )
+
 } )
