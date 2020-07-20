@@ -142,4 +142,33 @@ export class Structure {
         }
     }
 
+    // A convenient combination of the above methods is to replace a child with a
+    // new structure, deparenting the old child and putting the replacement at the
+    // same index in the same parent.
+    // 
+    // Because this calls `removeFromParent()` and `insertChild()`, it also
+    // generates calls to the four event handlers mentioned in those functions,
+    // above.
+
+    /**
+     * Replace this structure, exactly where it sits in its parent Structure,
+     * with the given one, thus deparenting this one.
+     * 
+     * For example, if `A` is a child of `B` and we call `B.replaceWith(C)`,
+     * then `C` will now be a child of `A` at the same index that `B` formerly
+     * occupied, and `B` will now have no parent.  If `C` had a parent before,
+     * it will have been removed from it (thus decreasing that parent's number
+     * of children by one).
+     * 
+     * @param {Structure} other - the Structure with which to replace this one
+     */
+    replaceWith ( other ) {
+        let originalParent = this._parent;
+        if ( originalParent != null ) {
+            const originalIndex = this.indexInParent()
+            this.remove()
+            originalParent.insertChild( other, originalIndex )
+        }
+    }
+
 }

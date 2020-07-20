@@ -336,4 +336,67 @@ suite( 'Structure trees', () => {
         expect( B.parent() ).to.be( root )
     } )
 
+    test( 'Should support replacing structures', () => {
+
+        // Make the same small structure hierarchy as in the previous test.
+        let A, AA, AB, B
+        const root = new Structure(
+            A = new Structure(
+                AA = new Structure,
+                AB = new Structure
+            ),
+            B = new Structure
+        )
+
+        // Replace one child of the root with a new structure and verify that all comes
+        // out as expected.
+        const C = new Structure
+        expect( C.parent() ).to.be( null )
+        expect( C.children() ).to.eql( [ ] )
+        B.replaceWith( C )
+        expect( root.children() ).to.eql( [ A, C ] )
+        expect( A.children() ).to.eql( [ AA, AB ] )
+        expect( AA.children() ).to.eql( [ ] )
+        expect( AB.children() ).to.eql( [ ] )
+        expect( C.children() ).to.eql( [ ] )
+        expect( B.children() ).to.eql( [ ] )
+        expect( root.parent() ).to.be( null )
+        expect( A.parent() ).to.be( root )
+        expect( AA.parent() ).to.be( A )
+        expect( AB.parent() ).to.be( A )
+        expect( C.parent() ).to.be( root )
+        expect( B.parent() ).to.be( null )
+
+        // Replace one grandchild of the root with the former child of the root, and
+        // verify that all comes out as expected.
+        AA.replaceWith( B )
+        expect( root.children() ).to.eql( [ A, C ] )
+        expect( A.children() ).to.eql( [ B, AB ] )
+        expect( AA.children() ).to.eql( [ ] )
+        expect( AB.children() ).to.eql( [ ] )
+        expect( C.children() ).to.eql( [ ] )
+        expect( B.children() ).to.eql( [ ] )
+        expect( root.parent() ).to.be( null )
+        expect( A.parent() ).to.be( root )
+        expect( AA.parent() ).to.be( null )
+        expect( AB.parent() ).to.be( A )
+        expect( C.parent() ).to.be( root )
+        expect( B.parent() ).to.be( A )
+
+        // Replace A with one of its own children, as a corner case test.
+        A.replaceWith( AB )
+        expect( root.children() ).to.eql( [ AB, C ] )
+        expect( A.children() ).to.eql( [ B ] )
+        expect( AA.children() ).to.eql( [ ] )
+        expect( AB.children() ).to.eql( [ ] )
+        expect( C.children() ).to.eql( [ ] )
+        expect( B.children() ).to.eql( [ ] )
+        expect( root.parent() ).to.be( null )
+        expect( A.parent() ).to.be( null )
+        expect( AA.parent() ).to.be( null )
+        expect( AB.parent() ).to.be( root )
+        expect( C.parent() ).to.be( root )
+        expect( B.parent() ).to.be( A )
+    } )
+        
 } )
