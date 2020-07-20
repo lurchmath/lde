@@ -142,14 +142,6 @@ export class Structure {
         }
     }
 
-    // A convenient combination of the above methods is to replace a child with a
-    // new structure, deparenting the old child and putting the replacement at the
-    // same index in the same parent.
-    // 
-    // Because this calls `removeFromParent()` and `insertChild()`, it also
-    // generates calls to the four event handlers mentioned in those functions,
-    // above.
-
     /**
      * Replace this structure, exactly where it sits in its parent Structure,
      * with the given one, thus deparenting this one.
