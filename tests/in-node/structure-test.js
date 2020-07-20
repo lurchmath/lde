@@ -488,5 +488,72 @@ suite( 'Structure trees', () => {
         expect( AB.allButLastChild() ).to.eql( [ ] )
         expect( B.allButLastChild() ).to.eql( [ ] )
     } )
+        
+    test( 'Should handle push/pop/shift/unshift of children correctly', () => {
+        // Make a set of structures that we will build into a hierarchy.
+        const root = new Structure
+        const A = new Structure
+        const AA = new Structure
+        const AB  = new Structure
+        const B = new Structure
+   
+        // Verify that at first no one has any parent/child.
+        expect( root.isAtomic() ).to.be( true )
+        expect( A.isAtomic() ).to.be( true )
+        expect( AA.isAtomic() ).to.be( true )
+        expect( AB.isAtomic() ).to.be( true )
+        expect( B.isAtomic() ).to.be( true )
+        expect( root.parent() ).to.be( null )
+        expect( A.parent() ).to.be( null )
+        expect( AA.parent() ).to.be( null )
+        expect( AB.parent() ).to.be( null )
+        expect( B.parent() ).to.be( null )
+
+        // Push a child of root and verify the results
+        root.pushChild( A )
+        expect( root.isAtomic() ).to.be( false )
+        expect( root.numChildren() ).to.be( 1 )
+        expect( root.children() ).to.eql( [ A ] )
+        expect( A.parent() ).to.be( root )
+
+        // Push another child of root and verify the results
+        root.pushChild( B )
+        expect( root.isAtomic() ).to.be( false )
+        expect( root.numChildren() ).to.be( 2 )
+        expect( root.children() ).to.eql( [ A, B ] )
+        expect( A.parent() ).to.be( root )
+        expect( B.parent() ).to.be( root )
+
+        // Unshift a child of A and verify the results
+        A.unshiftChild( AB )
+        expect( A.isAtomic() ).to.be( false )
+        expect( A.numChildren() ).to.be( 1 )
+        expect( A.children() ).to.eql( [ AB ] )
+        expect( AB.parent() ).to.be( A )
+
+        // Unshift another child of A and verify the results
+        A.unshiftChild( AA )
+        expect( A.isAtomic() ).to.be( false )
+        expect( A.numChildren() ).to.be( 2 )
+        expect( A.children() ).to.eql( [ AA, AB ] )
+        expect( AA.parent() ).to.be( A )
+        expect( AB.parent() ).to.be( A )
+
+        // Pop a child from A and verify the results
+        A.popChild()
+        expect( A.isAtomic() ).to.be( false )
+        expect( A.numChildren() ).to.be( 1 )
+        expect( A.children() ).to.eql( [ AA ] )
+        expect( AA.parent() ).to.be( A )
+        expect( AB.parent() ).to.be( null )
+
+        // Shift a child from root and verify the results
+        root.shiftChild()
+        expect( root.isAtomic() ).to.be( false )
+        expect( root.numChildren() ).to.be( 1 )
+        expect( root.children() ).to.eql( [ B ] )
+        expect( A.parent() ).to.be( null )
+        expect( B.parent() ).to.be( root )
+    } )
 
 } )

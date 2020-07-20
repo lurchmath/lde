@@ -198,4 +198,47 @@ export class Structure {
      */
     allButLastChild () { return this._children.slice( 0, this._children.length-1 ) }
 
+    /**
+     * Remove the last child of this Structure and return it.  If there is no
+     * such child, take no action and return undefined.
+     * @return {Structure} The popped last child, or undefined if none
+     */
+    popChild () {
+        const child = this.lastChild()
+        if ( !child ) return
+        child.remove()
+        return child
+    }
+
+    /**
+     * Remove the first child of this Structure and return it.  If there is no
+     * such child, take no action and return undefined.
+     * @return {Structure} The popped first child, or undefined if none
+     */
+    shiftChild () {
+        const child = this.firstChild()
+        if ( !child ) return
+        child.remove()
+        return child
+    }
+
+    /**
+     * Append a new child to the end of this Structure's list of children.  This
+     * is equivalent to a call to `insertChild()` with the length of the current
+     * children array as the index at which to insert.
+     * 
+     * @param {Structure} child - The new Structure to append
+     */
+    pushChild ( child ) { this.insertChild( child, this._children.length ) }
+
+    /**
+     * Prepend a new child to the beginning of this Structure's list of children.
+     * This is equivalent to a call to `insertChild()` with the default second
+     * parameter (i.e., insert at index zero), and thus this function is here
+     * only for convenience, to fit with shiftChild().
+     * 
+     * @param {Structure} child - The new Structure to prepend
+     */
+    unshiftChild ( child ) { this.insertChild( child ) }
+
 }
