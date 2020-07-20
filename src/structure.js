@@ -80,6 +80,7 @@ export class Structure {
                 break;
             }
         }
+        child.remove()
         this._children.splice( atIndex, 0, child )
         child._parent = this
     }

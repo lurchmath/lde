@@ -236,4 +236,92 @@ suite( 'Structure trees', () => {
         expect( B.parent() ).to.be( null )
     } )
 
+    test( 'should support inserting structures', () => {
+        // Make the same small structure hierarchy as in the previous test.
+        let A, AA, AB, B
+        const root = new Structure(
+            A = new Structure(
+                AA = new Structure,
+                AB = new Structure
+            ),
+            B = new Structure
+        )
+        
+        // Add a new child of the root and verify that the structure is as expected.
+        const C = new Structure
+        expect( C.parent() ).to.be( null )
+        expect( C.children() ).to.eql( [ ] )
+        root.insertChild( C, 1 )
+        expect( root.children() ).to.eql( [ A, C, B ] )
+        expect( A.children() ).to.eql( [ AA, AB ] )
+        expect( AA.children() ).to.eql( [ ] )
+        expect( AB.children() ).to.eql( [ ] )
+        expect( C.children() ).to.eql( [ ] )
+        expect( B.children() ).to.eql( [ ] )
+        expect( root.parent() ).to.be( null )
+        expect( A.parent() ).to.be( root )
+        expect( AA.parent() ).to.be( A )
+        expect( AB.parent() ).to.be( A )
+        expect( C.parent() ).to.be( root )
+        expect( B.parent() ).to.be( root )
+        
+        // Append a child to the end of the list of children of a child of the root and
+        // verify that the structure is as expected.
+        const D = new Structure
+        expect( D.parent() ).to.be( null )
+        expect( D.children() ).to.eql( [ ] )
+        A.insertChild( D, 2 )
+        expect( root.children() ).to.eql( [ A, C, B ] )
+        expect( A.children() ).to.eql( [ AA, AB, D ] )
+        expect( AA.children() ).to.eql( [ ] )
+        expect( AB.children() ).to.eql( [ ] )
+        expect( D.children() ).to.eql( [ ] )
+        expect( C.children() ).to.eql( [ ] )
+        expect( B.children() ).to.eql( [ ] )
+        expect( root.parent() ).to.be( null )
+        expect( A.parent() ).to.be( root )
+        expect( AA.parent() ).to.be( A )
+        expect( AB.parent() ).to.be( A )
+        expect( D.parent() ).to.be( A )
+        expect( C.parent() ).to.be( root )
+        expect( B.parent() ).to.be( root )
+        
+        // Insert as the first child of the root a child from elsewhere in the
+        // hierarchy, and verify that it is removed from one place and inserted in the
+        // other.
+        root.insertChild( AA, 0 )
+        expect( root.children() ).to.eql( [ AA, A, C, B ] )
+        expect( A.children() ).to.eql( [ AB, D ] )
+        expect( AA.children() ).to.eql( [ ] )
+        expect( AB.children() ).to.eql( [ ] )
+        expect( D.children() ).to.eql( [ ] )
+        expect( C.children() ).to.eql( [ ] )
+        expect( B.children() ).to.eql( [ ] )
+        expect( root.parent() ).to.be( null )
+        expect( A.parent() ).to.be( root )
+        expect( AA.parent() ).to.be( root )
+        expect( AB.parent() ).to.be( A )
+        expect( D.parent() ).to.be( A )
+        expect( C.parent() ).to.be( root )
+        expect( B.parent() ).to.be( root )
+        
+        // Do the same test again, but this time just moving something to be a later
+        // sibling within the same parent.
+        root.insertChild( A, 2 )
+        expect( root.children() ).to.eql( [ AA, C, A, B ] )
+        expect( A.children() ).to.eql( [ AB, D ] )
+        expect( AA.children() ).to.eql( [ ] )
+        expect( AB.children() ).to.eql( [ ] )
+        expect( D.children() ).to.eql( [ ] )
+        expect( C.children() ).to.eql( [ ] )
+        expect( B.children() ).to.eql( [ ] )
+        expect( root.parent() ).to.be( null )
+        expect( A.parent() ).to.be( root )
+        expect( AA.parent() ).to.be( root )
+        expect( AB.parent() ).to.be( A )
+        expect( D.parent() ).to.be( A )
+        expect( C.parent() ).to.be( root )
+        expect( B.parent() ).to.be( root )
+    } )
+
 } )
