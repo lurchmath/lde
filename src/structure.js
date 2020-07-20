@@ -331,4 +331,72 @@ export class Structure {
         return nextStep.index( address.slice( 1 ) )
     }
 
+    /**
+     * The list of children of this Structure that satisfy the given predicate,
+     * in the same order that they appear as children.  Obviously, not all
+     * children may be included in the result, depending on the predicate.
+     * 
+     * @param {function} predicate - A boolean function on Structures
+     * @return {Structure[]} The array of children satisfying the given predicate
+     * @see {@link Structure#descendantsSatisfying descendantsSatisfying()}
+     * @see {@link Structure#hasChildSatisfying hasChildSatisfying()}
+     */
+    childrenSatisfying ( predicate ) { return this._children.filter( predicate ) }
+
+    /**
+     * Whether this Structure has any children satisfying the given predicate.
+     * The predicate will be evaluated on each child in order until one passes
+     * or all fail; it may not be evaluated on all children, if not needed.
+     * 
+     * @param {function} predicate - A boolean function on Structures
+     * @return {boolean} True if and only if some child satisfies the given predicate
+     * @see {@link Structure#hasDescendantSatisfying hasDescendantSatisfying()}
+     * @see {@link Structure#childrenSatisfying childrenSatisfying()}
+     */
+    hasChildSatisfying ( predicate ) { return this._children.some( predicate ) }
+
+    /**
+     * An array of those descendants of this Structure that satisfy the given
+     * predicate.  These are not copies, but the actual descendants; if you
+     * alter one, it changes the hierarchy beneath this Structure.
+     * 
+     * Note that this Structure counts as a descendant of itself.  To ignore
+     * this structure, simply change the predicate to do so, as in
+     * `X.descendantsSatisfying( d => X != d && predicate(d) )`.
+     * 
+     * @param {function} predicate - A boolean function on Structures
+     * @return {Structure[]} A list of descendants of this Structure, precisely
+     *   those that satisfy the given predicate, listed in the order they would
+     *   be visited in a depth-first traversal of the tree
+     * @see {@link Structure#hasDescendantSatisfying hasDescendantSatisfying()}
+     * @see {@link Structure#childrenSatisfying childrenSatisfying()}
+     */
+    descendantsSatisfying ( predicate ) {
+        let result = [ ]
+        if ( predicate( this ) ) result.push( this )
+        return result.concat( this._children.flatMap(
+            child => child.descendantsSatisfying( predicate ) ) )
+    }
+
+    /**
+     * Whether this Structure has any descendant satisfying the given predicate.
+     * The predicate will be evaluated on each descendant in depth-first order
+     * until one passes or all fail; it may not be evaluated on all descendaants,
+     * if not needed.
+     * 
+     * Note that this Structure counts as a descendant of itself.  To ignore
+     * this structure, simply change the predicate to do so, as in
+     * `X.descendantsSatisfying( d => X != d && predicate(d) )`.
+     * 
+     * @param {function} predicate - A boolean function on Structures
+     * @return {boolean} True if and only if some descendant satisfies the given predicate
+     * @see {@link Structure#hasChildSatisfying hasChildSatisfying()}
+     * @see {@link Structure#descendantsSatisfying descendantsSatisfying()}
+     */
+    hasDescendantSatisfying ( predicate ) {
+        return predicate( this )
+            || this.hasChildSatisfying(
+                child => child.hasDescendantSatisfying( predicate ) )
+    }
+
 }

@@ -717,3 +717,82 @@ suite( 'Structure lookup', () => {
     } )
 
 } )
+
+suite( 'Structure predicate functions', () => {
+
+    test( 'Correctly computes which children satisfy a predicate', () => {
+        // Make a similar small structure hierarchy as in earlier tests,
+        // but then give each structure a name, to help with testing.
+        let A, AA, AAA, AB, B
+        const root = new Structure(
+            A = new Structure(
+                AA = new Structure(
+                    AAA = new Structure
+                ),
+                AB = new Structure
+            ),
+            B = new Structure
+        )
+        root.name = 'root'
+        A.name = 'A'
+        AA.name = 'AA'
+        AAA.name = 'AAA'
+        AB.name = 'AB'
+        B.name = 'B'
+
+        // Call childrenSatisfying() on several nodes with three different
+        // predicates, and verify the correct return value in each case.
+        const nameHasA = x => /A/.test( x.name )
+        const nameIsLong = x => x.name.length > 2
+        const nonAtomic = x => !x.isAtomic()
+        expect( root.childrenSatisfying( nameHasA ) ).to.eql( [ A ] )
+        expect( A.childrenSatisfying( nameHasA ) ).to.eql( [ AA, AB ] )
+        expect( AA.childrenSatisfying( nameHasA ) ).to.eql( [ AAA ] )
+        expect( B.childrenSatisfying( nameHasA ) ).to.eql( [ ] )
+        expect( root.childrenSatisfying( nameIsLong ) ).to.eql( [ ] )
+        expect( A.childrenSatisfying( nameIsLong ) ).to.eql( [ ] )
+        expect( AA.childrenSatisfying( nameIsLong ) ).to.eql( [ AAA ] )
+        expect( B.childrenSatisfying( nameIsLong ) ).to.eql( [ ] )
+        expect( root.childrenSatisfying( nonAtomic ) ).to.eql( [ A ] )
+        expect( A.childrenSatisfying( nonAtomic ) ).to.eql( [ AA ] )
+        expect( AA.childrenSatisfying( nonAtomic ) ).to.eql( [ ] )
+        expect( B.childrenSatisfying( nonAtomic ) ).to.eql( [ ] )
+
+        // In each case, hasChildSatisfying() should match the results of
+        // childrenSatisfying().
+        expect( root.hasChildSatisfying( nameHasA ) ).to.be( true )
+        expect( A.hasChildSatisfying( nameHasA ) ).to.be( true )
+        expect( AA.hasChildSatisfying( nameHasA ) ).to.be( true )
+        expect( B.hasChildSatisfying( nameHasA ) ).to.be( false )
+        expect( root.hasChildSatisfying( nameIsLong ) ).to.be( false )
+        expect( A.hasChildSatisfying( nameIsLong ) ).to.be( false )
+        expect( AA.hasChildSatisfying( nameIsLong ) ).to.be( true )
+        expect( B.hasChildSatisfying( nameIsLong ) ).to.be( false )
+        expect( root.hasChildSatisfying( nonAtomic ) ).to.be( true )
+        expect( A.hasChildSatisfying( nonAtomic ) ).to.be( true )
+        expect( AA.hasChildSatisfying( nonAtomic ) ).to.be( false )
+        expect( B.hasChildSatisfying( nonAtomic ) ).to.be( false )
+
+        // Call descendantsSatisfying() on several nodes with the same predicates,
+        // again verifying correct results in each case.
+        expect( root.hasDescendantSatisfying( nameHasA ) ).to.be( true )
+        expect( A.hasDescendantSatisfying( nameHasA ) ).to.be( true )
+        expect( AA.hasDescendantSatisfying( nameHasA ) ).to.be( true )
+        expect( AAA.hasDescendantSatisfying( nameHasA ) ).to.be( true )
+        expect( AB.hasDescendantSatisfying( nameHasA ) ).to.be( true )
+        expect( B.hasDescendantSatisfying( nameHasA ) ).to.be( false )
+        expect( root.hasDescendantSatisfying( nameIsLong ) ).to.be( true )
+        expect( A.hasDescendantSatisfying( nameIsLong ) ).to.be( true )
+        expect( AA.hasDescendantSatisfying( nameIsLong ) ).to.be( true )
+        expect( AAA.hasDescendantSatisfying( nameIsLong ) ).to.be( true )
+        expect( AB.hasDescendantSatisfying( nameIsLong ) ).to.be( false )
+        expect( B.hasDescendantSatisfying( nameIsLong ) ).to.be( false )
+        expect( root.hasDescendantSatisfying( nonAtomic ) ).to.be( true )
+        expect( A.hasDescendantSatisfying( nonAtomic ) ).to.be( true )
+        expect( AA.hasDescendantSatisfying( nonAtomic ) ).to.be( true )
+        expect( AAA.hasDescendantSatisfying( nonAtomic ) ).to.be( false )
+        expect( AB.hasDescendantSatisfying( nonAtomic ) ).to.be( false )
+        expect( B.hasDescendantSatisfying( nonAtomic ) ).to.be( false )
+    } )
+
+} )
