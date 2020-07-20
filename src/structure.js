@@ -263,4 +263,43 @@ export class Structure {
         }
     }
 
+    /**
+     * My address within the given ancestor, as a sequence of indices
+     * `[i1,i2,...,in]` such that `ancestor.child(i1).child(i2)....child(in)` is
+     * this Structure.
+     * 
+     * @param {Structure} [ancestor] - The ancestor in which to compute my
+     *   address, which defaults to my highest ancestor.  If this argument is
+     *   not actually an ancestor of this Structure, then we treat it as if it
+     *   had been omitted.
+     * @return {number[]} An array of numbers as described above, which will be
+     *   empty in the degenerate case where this Structure has no parent or this
+     *   structure is the given ancestor
+     */
+    address ( ancestor ) {
+        if ( ancestor === this || !this.parent() ) return [ ]
+        const lastStep = this.indexInParent()
+        return this.parent().address( ancestor ).concat( [ lastStep ] )
+    }
+
+    /**
+     * Performs repeated child indexing to find a specific descendant.  If the
+     * address given as input is the array `[i1,i2,...,in]`, then this returns
+     * `this.child(i1).child(i2)....child(in)`.
+     * 
+     * If the given address is the empty array, the result is this Structure.
+     * 
+     * @param {number[]} address - A sequence of nonnegative indices, as
+     *   described in the documentation for address()
+     * @return {Structure} A descendant structure, following the definition
+     *   above, or undefined if there is no such Structure
+     */
+    index ( address ) {
+        if ( !( address instanceof Array ) ) return undefined
+        if ( address.length == 0 ) return this
+        const nextStep = this.child( address[0] )
+        if ( !( nextStep instanceof Structure ) ) return undefined
+        return nextStep.index( address.slice( 1 ) )
+    }
+
 }

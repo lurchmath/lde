@@ -639,4 +639,81 @@ suite( 'Structure lookup', () => {
         expect( B.allButLastChild() ).to.eql( [ ] )
     } )
 
+    test( 'Should correctly compute addresses and indices', () => {
+        // Make a similar small structure hierarchy as in earlier tests.
+        let A, AA, AAA, AB, B
+        const root = new Structure(
+            A = new Structure(
+                AA = new Structure(
+                    AAA = new Structure
+                ),
+                AB = new Structure
+            ),
+            B = new Structure
+        )
+        
+        // Compute many addresses and verify that they're all correct
+        expect( root.address( root ) ).to.eql( [ ] )
+        expect( root.address() ).to.eql( [ ] )
+        expect( root.address( A ) ).to.eql( [ ] )
+        expect( A.address( root ) ).to.eql( [ 0 ] )
+        expect( A.address() ).to.eql( [ 0 ] )
+        expect( A.address( B ) ).to.eql( [ 0 ] )
+        expect( A.address( A ) ).to.eql( [ ] )
+        expect( AA.address( root ) ).to.eql( [ 0, 0 ] )
+        expect( AA.address() ).to.eql( [ 0, 0 ] )
+        expect( AA.address( B ) ).to.eql( [ 0, 0 ] )
+        expect( AA.address( A ) ).to.eql( [ 0 ] )
+        expect( AA.address( AA ) ).to.eql( [ ] )
+        expect( AB.address( root ) ).to.eql( [ 0, 1 ] )
+        expect( AB.address() ).to.eql( [ 0, 1 ] )
+        expect( AB.address( B ) ).to.eql( [ 0, 1 ] )
+        expect( AB.address( AA ) ).to.eql( [ 0, 1 ] )
+        expect( AB.address( A ) ).to.eql( [ 1 ] )
+        expect( AAA.address( root ) ).to.eql( [ 0, 0, 0 ] )
+        expect( AAA.address() ).to.eql( [ 0, 0, 0 ] )
+        expect( AAA.address( B ) ).to.eql( [ 0, 0, 0 ] )
+        expect( AAA.address( A ) ).to.eql( [ 0, 0 ] )
+        expect( AAA.address( AA ) ).to.eql( [ 0 ] )
+        expect( B.address( root ) ).to.eql( [ 1 ] )
+        expect( B.address() ).to.eql( [ 1 ] )
+        expect( B.address( A ) ).to.eql( [ 1 ] )
+        expect( B.address( B ) ).to.eql( [ ] )
+
+        // Request many possible indices and verify that they're all correct
+        expect( root.index( [ ] ) ).to.be( root )
+        expect( root.index( [ 0 ] ) ).to.be( A )
+        expect( root.index( [ 1 ] ) ).to.be( B )
+        expect( root.index( [ 0, 0 ] ) ).to.be( AA )
+        expect( root.index( [ 0, 1 ] ) ).to.be( AB )
+        expect( root.index( [ 0, 0, 0 ] ) ).to.be( AAA )
+        expect( root.index( [ 2 ] ) ).to.be( undefined )
+        expect( root.index( [ -1 ] ) ).to.be( undefined )
+        expect( root.index( [ 0, 2 ] ) ).to.be( undefined )
+        expect( root.index( [ 0, 0, 'hi' ] ) ).to.be( undefined )
+        expect( A.index( [ ] ) ).to.be( A )
+        expect( A.index( [ 0 ] ) ).to.be( AA )
+        expect( A.index( [ 1 ] ) ).to.be( AB )
+        expect( A.index( [ 0, 0 ] ) ).to.be( AAA )
+        expect( A.index( [ 2 ] ) ).to.be( undefined )
+        expect( A.index( [ 0, 1 ] ) ).to.be( undefined )
+        expect( A.index( [ 'x', 'y' ] ) ).to.be( undefined )
+        expect( AA.index( [ ] ) ).to.be( AA )
+        expect( AA.index( [ 0 ] ) ).to.be( AAA )
+        expect( AA.index( [ 1 ] ) ).to.be( undefined )
+        expect( AA.index( [ 0, 0 ] ) ).to.be( undefined )
+        expect( AAA.index( [ ] ) ).to.be( AAA )
+        expect( AAA.index( [ 0 ] ) ).to.be( undefined )
+        expect( AAA.index( [ 1 ] ) ).to.be( undefined )
+        expect( AAA.index( [ 0, 0 ] ) ).to.be( undefined )
+        expect( AB.index( [ ] ) ).to.be( AB )
+        expect( AB.index( [ 0 ] ) ).to.be( undefined )
+        expect( AB.index( [ 1 ] ) ).to.be( undefined )
+        expect( AB.index( [ 0, 0 ] ) ).to.be( undefined )
+        expect( B.index( [ ] ) ).to.be( B )
+        expect( B.index( [ 0 ] ) ).to.be( undefined )
+        expect( B.index( [ 1 ] ) ).to.be( undefined )
+        expect( B.index( [ 0, 0 ] ) ).to.be( undefined )
+    } )
+
 } )
