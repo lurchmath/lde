@@ -241,4 +241,26 @@ export class Structure {
      */
     unshiftChild ( child ) { this.insertChild( child ) }
 
+    /**
+     * Replace the entire children array of this Structure with a new one.
+     * 
+     * This is equivalent to removing all the current children of this Structure
+     * in order from lowest index to highest, then inserting all the children in
+     * the given array, again from lowest index to highest.
+     * 
+     * The intent is not for any of the elements of the given array to be
+     * ancestors or descendants of one another, but even if they are, the action
+     * taken here still follows the explanation given in the previous paragraph.
+     * 
+     * @param {Structure[]} children - New list of children
+     */
+    setChildren ( children ) {
+        while ( this._children.length > 0 ) {
+            this.firstChild().remove()
+        }
+        for ( const child of children ) {
+            this.pushChild( child )
+        }
+    }
+
 }
