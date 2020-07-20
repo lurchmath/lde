@@ -68,6 +68,48 @@ suite( 'Structure trees', () => {
         expect( AB.children() ).to.eql( [ ] )
         expect( B.children() ).to.eql( [ ] )
     } )
+
+    test( 'Structure constructor should prevent cyclic hierarchies', () => {
+        // Create a single Structure and try to make it a child of itself.  This should
+        // fail, leaving the Structure in its original state.
+        let C, D
+        let A = new Structure
+        A.insertChild( A )
+        expect( A.parent() ).to.be( null )
+        expect( A.children() ).to.eql( [ ] )
+
+        // Create another Structure B and insert it as a child of A.  Then try to insert A
+        // as a child of B.  This should succeed, but should have removed B from being
+        // a child of A, so that the structure remains acyclic.
+        let B = new Structure
+        A.insertChild( B )
+        expect( A.parent() ).to.be( null )
+        expect( A.children() ).to.eql( [ B ] )
+        expect( B.parent() ).to.be( A )
+        expect( B.children() ).to.eql( [ ] )
+        B.insertChild( A )
+        expect( A.parent() ).to.be( B )
+        expect( A.children() ).to.eql( [ ] )
+        expect( B.parent() ).to.be( null )
+        expect( B.children() ).to.eql( [ A ] )
+
+        // The same test should succeed if we do it with a structure with several nodes
+        // rather than just two.
+        A = new Structure(
+            B = new Structure,
+            C = new Structure(
+                D = new Structure
+            )
+        )
+        D.insertChild( A )
+        expect( A.parent() ).to.be( D )
+        expect( B.parent() ).to.be( A )
+        expect( C.parent() ).to.be( A )
+        expect( D.parent() ).to.be( null )
+        expect( A.children() ).to.eql( [ B, C ] )
+        expect( B.children() ).to.eql( [ ] )
+        expect( C.children() ).to.eql( [ ] )
+        expect( D.children() ).to.eql( [ A ] )
     } )
 
 } )

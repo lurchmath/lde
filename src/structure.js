@@ -106,4 +106,17 @@ export class Structure {
         if ( i < 0 || i >= this._children.length ) return
         this._children[i].removeFromParent()
     }
+
+    /**
+     * Returns the value `i` such that `this.parent().child(i)` is this object,
+     * provided that this Structure has a parent.
+     * 
+     * @return {number} The index of this Structure in its parent's children list
+     */
+    indexInParent () {
+        if ( this._parent != null && this._parent._children ) {
+            return this._parent._children.indexOf( this )
+        }
+    }
+
 }
