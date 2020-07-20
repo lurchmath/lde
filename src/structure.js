@@ -1,7 +1,8 @@
 
 /**
  * The Structure class, an n-ary tree of Structure instances, using functions
- * like parent() and children() to navigate the tree.
+ * like {@link Structure#parent parent()} and {@link Structure#children children()}
+ * to navigate the tree.
  */
 export class Structure {
     
@@ -27,8 +28,8 @@ export class Structure {
     /**
      * An array containing this Structure's children, in the correct order.
      * 
-     * To get a specific child, it is more efficient to use the child()
-     * function instead.
+     * To get a specific child, it is more efficient to use the
+     * {@link Structure.child()} function instead.
      * 
      * @return {Structure[]} A shallow copy of the Structure's children array
      */
@@ -98,8 +99,8 @@ export class Structure {
     }
 
     /**
-     * Calls removeFromParent() on the child with index i.  Does nothing if the
-     * index is invalid.
+     * Calls {@link Structure#remove remove()} on the child with index `i`.
+     * Does nothing if the index is invalid.
      * 
      * @param {number} i - the index of the child to remove
      */
@@ -113,6 +114,8 @@ export class Structure {
      * provided that this Structure has a parent.
      * 
      * @return {number} The index of this Structure in its parent's children list
+     * @see {@link Structure#parent parent()}
+     * @see {@link Structure#child child()}
      */
     indexInParent () {
         if ( this._parent != null && this._parent._children ) {
@@ -167,18 +170,23 @@ export class Structure {
      * A Structure is atomic if and only if it has no children.  Thus this is a
      * shorthand for `S.numChildren() == 0`.
      * @return {boolean} Whether the number of children is zero
+     * @see {@link Structure#numChildren numChildren()}
      */
     isAtomic () { return this.numChildren() == 0 }
 
     /**
      * Convenience function for fetching just the first child of this Structure
      * @return {Structure} The first child of this Structure, or undefined if none
+     * @see {@link Structure#lastChild lastChild()}
+     * @see {@link Structure#allButFirstChild allButFirstChild()}
      */
     firstChild () { return this._children[0] }
 
     /**
      * Convenience function for fetching just the last child of this Structure
      * @return {Structure} The last child of this Structure, or undefined if none
+     * @see {@link Structure#firstChild firstChild()}
+     * @see {@link Structure#allButLastChild allButLastChild()}
      */
     lastChild () { return this._children[this._children.length-1] }
 
@@ -187,6 +195,8 @@ export class Structure {
      * this Structure except for the first
      * @return {Structure[]} All but the first child of this structure, or an
      *   empty array if there is one or fewer children
+     * @see {@link Structure#firstChild firstChild()}
+     * @see {@link Structure#allButLastChild allButLastChild()}
      */
     allButFirstChild () { return this._children.slice( 1 ) }
 
@@ -195,6 +205,8 @@ export class Structure {
      * this Structure except for the last
      * @return {Structure[]} All but the last child of this structure, or an
      *   empty array if there is one or fewer children
+     * @see {@link Structure#lastChild lastChild()}
+     * @see {@link Structure#allButFirstChild allButFirstChild()}
      */
     allButLastChild () { return this._children.slice( 0, this._children.length-1 ) }
 
@@ -202,6 +214,8 @@ export class Structure {
      * Remove the last child of this Structure and return it.  If there is no
      * such child, take no action and return undefined.
      * @return {Structure} The popped last child, or undefined if none
+     * @see {@link Structure#pushChild pushChild()}
+     * @see {@link Structure#shiftChild shiftChild()}
      */
     popChild () {
         const child = this.lastChild()
@@ -214,6 +228,8 @@ export class Structure {
      * Remove the first child of this Structure and return it.  If there is no
      * such child, take no action and return undefined.
      * @return {Structure} The popped first child, or undefined if none
+     * @see {@link Structure#popChild popChild()}
+     * @see {@link Structure#unshiftChild unshiftChild()}
      */
     shiftChild () {
         const child = this.firstChild()
@@ -228,6 +244,8 @@ export class Structure {
      * children array as the index at which to insert.
      * 
      * @param {Structure} child - The new Structure to append
+     * @see {@link Structure#popChild popChild()}
+     * @see {@link Structure#unshiftChild unshiftChild()}
      */
     pushChild ( child ) { this.insertChild( child, this._children.length ) }
 
@@ -238,6 +256,8 @@ export class Structure {
      * only for convenience, to fit with shiftChild().
      * 
      * @param {Structure} child - The new Structure to prepend
+     * @see {@link Structure#shiftChild shiftChild()}
+     * @see {@link Structure#pushChild pushChild()}
      */
     unshiftChild ( child ) { this.insertChild( child ) }
 
@@ -253,6 +273,9 @@ export class Structure {
      * taken here still follows the explanation given in the previous paragraph.
      * 
      * @param {Structure[]} children - New list of children
+     * @see {@link Structure#children children()}
+     * @see {@link Structure#removeChild removeChild()}
+     * @see {@link Structure#insertChild insertChild()}
      */
     setChildren ( children ) {
         while ( this._children.length > 0 ) {
@@ -268,6 +291,8 @@ export class Structure {
      * `[i1,i2,...,in]` such that `ancestor.child(i1).child(i2)....child(in)` is
      * this Structure.
      * 
+     * This is a kind of inverse to {@link Structure#index index()}.
+     * 
      * @param {Structure} [ancestor] - The ancestor in which to compute my
      *   address, which defaults to my highest ancestor.  If this argument is
      *   not actually an ancestor of this Structure, then we treat it as if it
@@ -275,6 +300,7 @@ export class Structure {
      * @return {number[]} An array of numbers as described above, which will be
      *   empty in the degenerate case where this Structure has no parent or this
      *   structure is the given ancestor
+     * @see {@link Structure#child child()}
      */
     address ( ancestor ) {
         if ( ancestor === this || !this.parent() ) return [ ]
@@ -289,10 +315,13 @@ export class Structure {
      * 
      * If the given address is the empty array, the result is this Structure.
      * 
+     * This is a kind of inverse to {@link Structure#address address()}.
+     * 
      * @param {number[]} address - A sequence of nonnegative indices, as
      *   described in the documentation for address()
      * @return {Structure} A descendant structure, following the definition
      *   above, or undefined if there is no such Structure
+     * @see {@link Structure#child child()}
      */
     index ( address ) {
         if ( !( address instanceof Array ) ) return undefined
