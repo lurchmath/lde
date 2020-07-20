@@ -170,4 +170,32 @@ export class Structure {
      */
     isAtomic () { return this.numChildren() == 0 }
 
+    /**
+     * Convenience function for fetching just the first child of this Structure
+     * @return {Structure} The first child of this Structure, or undefined if none
+     */
+    firstChild () { return this._children[0] }
+
+    /**
+     * Convenience function for fetching just the last child of this Structure
+     * @return {Structure} The last child of this Structure, or undefined if none
+     */
+    lastChild () { return this._children[this._children.length-1] }
+
+    /**
+     * Convenience function for fetching the array containing all children of
+     * this Structure except for the first
+     * @return {Structure[]} All but the first child of this structure, or an
+     *   empty array if there is one or fewer children
+     */
+    allButFirstChild () { return this._children.slice( 1 ) }
+
+    /**
+     * Convenience function for fetching the array containing all children of
+     * this Structure except for the last
+     * @return {Structure[]} All but the last child of this structure, or an
+     *   empty array if there is one or fewer children
+     */
+    allButLastChild () { return this._children.slice( 0, this._children.length-1 ) }
+
 }
