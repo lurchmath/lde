@@ -10,7 +10,7 @@ suite( 'Structure module', () => {
 
 } )
 
-suite( 'Structure trees', () => {
+suite( 'Structure manipulation', () => {
 
     test( 'Structure objects can be built with constructors', () => {
         // Make a small structure and name each node.
@@ -146,25 +146,6 @@ suite( 'Structure trees', () => {
         expect( B.children() ).to.eql( [ ] )
         expect( C.children() ).to.eql( [ ] )
         expect( D.children() ).to.eql( [ A ] )
-    } )
-
-    test( 'Correct computation of indices in parent Structure', () => {
-        // Make the same small structure hierarchy as in an earlier test.
-        let A, AA, AB, B
-        const root = new Structure(
-            A = new Structure(
-                AA = new Structure,
-                AB = new Structure
-            ),
-            B = new Structure
-        )
-
-        // Check the index in parent of each node.
-        expect( root.indexInParent() ).to.be( undefined )
-        expect( A.indexInParent() ).to.be( 0 )
-        expect( AA.indexInParent() ).to.be( 0 )
-        expect( AB.indexInParent() ).to.be( 1 )
-        expect( B.indexInParent() ).to.be( 1 )
     } )
 
     test( 'Supports removing structures from parents', () => {
@@ -447,48 +428,6 @@ suite( 'Structure trees', () => {
         expect( B.parent() ).to.be( A )
     } )
         
-    test( 'Should correctly compute [all but] first/last child', () => {
-        // Make a similar small structure hierarchy as in earlier tests.
-        let A, AA, AAA, AB, B
-        const root = new Structure(
-            A = new Structure(
-                AA = new Structure(
-                    AAA = new Structure
-                ),
-                AB = new Structure
-            ),
-            B = new Structure
-        )
-        
-        // Verify that firstChild(), lastChild(), allButFirstChild(), and
-        // allButLastChild() give the correct results for all nodes in the
-        // hierarchy
-        expect( root.firstChild() ).to.be( A )
-        expect( A.firstChild() ).to.be( AA )
-        expect( AA.firstChild() ).to.be( AAA )
-        expect( AAA.firstChild() ).to.be( undefined )
-        expect( AB.firstChild() ).to.be( undefined )
-        expect( B.firstChild() ).to.be( undefined )
-        expect( root.lastChild() ).to.be( B )
-        expect( A.lastChild() ).to.be( AB )
-        expect( AA.lastChild() ).to.be( AAA )
-        expect( AAA.lastChild() ).to.be( undefined )
-        expect( AB.lastChild() ).to.be( undefined )
-        expect( B.lastChild() ).to.be( undefined )
-        expect( root.allButFirstChild() ).to.eql( [ B ] )
-        expect( A.allButFirstChild() ).to.eql( [ AB ] )
-        expect( AA.allButFirstChild() ).to.eql( [ ] )
-        expect( AAA.allButFirstChild() ).to.eql( [ ] )
-        expect( AB.allButFirstChild() ).to.eql( [ ] )
-        expect( B.allButFirstChild() ).to.eql( [ ] )
-        expect( root.allButLastChild() ).to.eql( [ A ] )
-        expect( A.allButLastChild() ).to.eql( [ AA ] )
-        expect( AA.allButLastChild() ).to.eql( [ ] )
-        expect( AAA.allButLastChild() ).to.eql( [ ] )
-        expect( AB.allButLastChild() ).to.eql( [ ] )
-        expect( B.allButLastChild() ).to.eql( [ ] )
-    } )
-        
     test( 'Should handle push/pop/shift/unshift of children correctly', () => {
         // Make a set of structures that we will build into a hierarchy.
         const root = new Structure
@@ -633,6 +572,71 @@ suite( 'Structure trees', () => {
         expect( B.isAtomic() ).to.be( true )
         expect( B.numChildren() ).to.be( 0 )
         expect( B.children() ).to.eql( [ ] )
+    } )
+
+} )
+
+suite( 'Structure lookup', () => {
+
+    test( 'Correct computation of indices in parent Structure', () => {
+        // Make the same small structure hierarchy as in an earlier test.
+        let A, AA, AB, B
+        const root = new Structure(
+            A = new Structure(
+                AA = new Structure,
+                AB = new Structure
+            ),
+            B = new Structure
+        )
+
+        // Check the index in parent of each node.
+        expect( root.indexInParent() ).to.be( undefined )
+        expect( A.indexInParent() ).to.be( 0 )
+        expect( AA.indexInParent() ).to.be( 0 )
+        expect( AB.indexInParent() ).to.be( 1 )
+        expect( B.indexInParent() ).to.be( 1 )
+    } )
+
+    test( 'Should correctly compute [all but] first/last child', () => {
+        // Make a similar small structure hierarchy as in earlier tests.
+        let A, AA, AAA, AB, B
+        const root = new Structure(
+            A = new Structure(
+                AA = new Structure(
+                    AAA = new Structure
+                ),
+                AB = new Structure
+            ),
+            B = new Structure
+        )
+        
+        // Verify that firstChild(), lastChild(), allButFirstChild(), and
+        // allButLastChild() give the correct results for all nodes in the
+        // hierarchy
+        expect( root.firstChild() ).to.be( A )
+        expect( A.firstChild() ).to.be( AA )
+        expect( AA.firstChild() ).to.be( AAA )
+        expect( AAA.firstChild() ).to.be( undefined )
+        expect( AB.firstChild() ).to.be( undefined )
+        expect( B.firstChild() ).to.be( undefined )
+        expect( root.lastChild() ).to.be( B )
+        expect( A.lastChild() ).to.be( AB )
+        expect( AA.lastChild() ).to.be( AAA )
+        expect( AAA.lastChild() ).to.be( undefined )
+        expect( AB.lastChild() ).to.be( undefined )
+        expect( B.lastChild() ).to.be( undefined )
+        expect( root.allButFirstChild() ).to.eql( [ B ] )
+        expect( A.allButFirstChild() ).to.eql( [ AB ] )
+        expect( AA.allButFirstChild() ).to.eql( [ ] )
+        expect( AAA.allButFirstChild() ).to.eql( [ ] )
+        expect( AB.allButFirstChild() ).to.eql( [ ] )
+        expect( B.allButFirstChild() ).to.eql( [ ] )
+        expect( root.allButLastChild() ).to.eql( [ A ] )
+        expect( A.allButLastChild() ).to.eql( [ AA ] )
+        expect( AA.allButLastChild() ).to.eql( [ ] )
+        expect( AAA.allButLastChild() ).to.eql( [ ] )
+        expect( AB.allButLastChild() ).to.eql( [ ] )
+        expect( B.allButLastChild() ).to.eql( [ ] )
     } )
 
 } )
