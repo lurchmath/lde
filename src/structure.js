@@ -336,7 +336,8 @@ export class Structure {
      * in the same order that they appear as children.  Obviously, not all
      * children may be included in the result, depending on the predicate.
      * 
-     * @param {function} predicate - A boolean function on Structures
+     * @param {function(Structure):boolean} predicate - The predicate to use for
+     *   testing children
      * @return {Structure[]} The array of children satisfying the given predicate
      * @see {@link Structure#descendantsSatisfying descendantsSatisfying()}
      * @see {@link Structure#hasChildSatisfying hasChildSatisfying()}
@@ -348,7 +349,8 @@ export class Structure {
      * The predicate will be evaluated on each child in order until one passes
      * or all fail; it may not be evaluated on all children, if not needed.
      * 
-     * @param {function} predicate - A boolean function on Structures
+     * @param {function(Structure):boolean} predicate - The predicate to use for
+     *   testing children
      * @return {boolean} True if and only if some child satisfies the given predicate
      * @see {@link Structure#hasDescendantSatisfying hasDescendantSatisfying()}
      * @see {@link Structure#childrenSatisfying childrenSatisfying()}
@@ -360,11 +362,12 @@ export class Structure {
      * predicate.  These are not copies, but the actual descendants; if you
      * alter one, it changes the hierarchy beneath this Structure.
      * 
-     * Note that this Structure counts as a descendant of itself.  To ignore
-     * this structure, simply change the predicate to do so, as in
+     * Note that this Structure counts as a descendant of itself.  To exclude
+     * this Structure from consideration, simply change your predicate, as in
      * `X.descendantsSatisfying( d => X != d && predicate(d) )`.
      * 
-     * @param {function} predicate - A boolean function on Structures
+     * @param {function(Structure):boolean} predicate - The predicate to use for
+     *   testing descendants
      * @return {Structure[]} A list of descendants of this Structure, precisely
      *   those that satisfy the given predicate, listed in the order they would
      *   be visited in a depth-first traversal of the tree
@@ -388,7 +391,8 @@ export class Structure {
      * this structure, simply change the predicate to do so, as in
      * `X.descendantsSatisfying( d => X != d && predicate(d) )`.
      * 
-     * @param {function} predicate - A boolean function on Structures
+     * @param {function(Structure):boolean} predicate - The predicate to use for
+     *   testing descendants
      * @return {boolean} True if and only if some descendant satisfies the given predicate
      * @see {@link Structure#hasChildSatisfying hasChildSatisfying()}
      * @see {@link Structure#descendantsSatisfying descendantsSatisfying()}
