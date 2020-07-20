@@ -112,4 +112,23 @@ suite( 'Structure trees', () => {
         expect( D.children() ).to.eql( [ A ] )
     } )
 
+    test( 'Correct computation of indices in parent Structure', () => {
+        // Make the same small structure hierarchy as in an earlier test.
+        let A, AA, AB, B
+        const root = new Structure(
+            A = new Structure(
+                AA = new Structure,
+                AB = new Structure
+            ),
+            B = new Structure
+        )
+
+        // Check the index in parent of each node.
+        expect( root.indexInParent() ).to.be( undefined )
+        expect( A.indexInParent() ).to.be( 0 )
+        expect( AA.indexInParent() ).to.be( 0 )
+        expect( AB.indexInParent() ).to.be( 1 )
+        expect( B.indexInParent() ).to.be( 1 )
+    } )
+
 } )
