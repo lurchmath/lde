@@ -15,7 +15,7 @@
     "tidy-jsdoc": "^1.4.0"
   },
   "scripts": {
-    "test": "mocha -r esm --full-trace --ui tdd tests/in-node/",
+    "test": "mocha -r esm --full-trace --ui tdd --file tests/in-browser/load-expect.js tests/in-node/",
     "docs": "jsdoc src/* -d docs -R doc-main.md -c jsdoc-conf.json"
   },
   "repository": {

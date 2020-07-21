@@ -1,5 +1,4 @@
 
-import expect from 'expect.js'
 import { Structure } from '../../src/structure.js'
 
 suite( 'Structure module', () => {

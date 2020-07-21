@@ -1,5 +1,4 @@
 
-import expect from 'expect.js'
 import { OutputStructure } from '../../src/output-structure.js'
 
 suite( 'OutputStructure', () => {

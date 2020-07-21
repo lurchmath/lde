@@ -1,5 +1,4 @@
 
-import expect from 'expect.js'
 import { Expression } from '../../src/expression.js'
 
 suite( 'Expression', () => {

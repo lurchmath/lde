@@ -1,5 +1,4 @@
 
-import expect from 'expect.js'
 import { Environment } from '../../src/environment.js'
 
 suite( 'Environment', () => {

@@ -1,5 +1,4 @@
 
-import expect from 'expect.js'
 import { Declaration } from '../../src/declaration.js'
 
 suite( 'Declaration', () => {
