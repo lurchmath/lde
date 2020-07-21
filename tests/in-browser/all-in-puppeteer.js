@@ -1,5 +1,11 @@
 
-// This code was taken from a StackOverflow question.
+// Run the entire unit testing suite in the browser through puppeteer,
+// extract the results, and dump them to the console with nice colors,
+// in a simple imitation of how Mocha actually looks on the command line.
+
+// ---
+
+// The first portion of this code was taken from a StackOverflow question.
 // https://stackoverflow.com/questions/16333790/node-js-quick-file-server-static-files-over-http
 // Thank you!
 
@@ -57,6 +63,8 @@ http.createServer( ( req, res ) => {
 
 } ).listen( port )
 
+// ---
+//
 // (end of borrowed code)
 
 // Now fire up an invisible Chromium to visit the test page and get its results:
