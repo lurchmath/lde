@@ -21,10 +21,10 @@
     <script src="../../node_modules/mocha/mocha.js"></script>
 
     <script class="mocha-init">
-      mocha.setup({
-          ui: 'tdd',
-          fullTrace: true
-      });
+      mocha.setup( {
+        ui: 'tdd',
+        fullTrace: true
+      } );
       mocha.checkLeaks();
     </script>
     <script type="module" src="../in-node/declaration-test.js"></script>
@@ -33,7 +33,26 @@
     <script type="module" src="../in-node/output-structure-test.js"></script>
     <script type="module" src="../in-node/structure-test.js"></script>
     <script type="module" class="mocha-exec">
-      mocha.run()
+      const runner = mocha.run();
+      // The following code stores test results in a global variable, so that if
+      // we open this page in a headless browser, we can extract the test results:
+      let allMochaResults = [ ];
+      runner.on( 'test end', ( test ) => {
+        allMochaResults.push( {
+          name : test.title,
+          suite : test.parent.title,
+          result : test.state,
+          duration : test.duration,
+          speed : test.speed,
+          timedOut : test.timedOut,
+          error : test.err ? {
+            message : test.err.message,
+            stack : test.err.stack
+          } : undefined
+        } )
+      } );
+      runner.on( 'end', () => { window.allMochaResults = allMochaResults } );
+      // End of test result storage code.
     </script>
   </body>
 </html>

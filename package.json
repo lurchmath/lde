@@ -12,10 +12,12 @@
     "expect.js": "^0.3.1",
     "jsdoc": "^3.6.4",
     "mocha": "^8.0.1",
+    "puppeteer": "^5.2.1",
     "tidy-jsdoc": "^1.4.0"
   },
   "scripts": {
     "test": "mocha -r esm --full-trace --ui tdd --file tests/in-browser/load-expect.js tests/in-node/",
+    "browser-test": "node tests/in-browser/all-in-puppeteer.js",
     "docs": "jsdoc src/* -d docs -R doc-main.md -c jsdoc-conf.json"
   },
   "repository": {
