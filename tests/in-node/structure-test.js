@@ -1,17 +1,17 @@
 
 import { Structure } from '../../src/structure.js'
 
-suite( 'Structure module', () => {
+describe( 'Structure module', () => {
 
-    test( 'Ensure all expected global identifiers are declared', () => {
+    it( 'Ensure all expected global identifiers are declared', () => {
         expect( Structure ).to.be.ok
     } )
 
 } )
 
-suite( 'Structure manipulation', () => {
+describe( 'Structure construction', () => {
 
-    test( 'Structure objects can be built with constructors', () => {
+    it( 'Structure objects can be built with constructors', () => {
         // Make a small structure and name each node.
         // This alsoo verifies that no error occurs.
         let A, AA, AB, B
@@ -63,7 +63,7 @@ suite( 'Structure manipulation', () => {
         expect( B.nextSibling() ).to.equal( undefined )
     } )
 
-    test( 'Structure constructor ignores invalid child parameters', () => {
+    it( 'Structure constructor ignores invalid child parameters', () => {
         // Make a similar small structure hierarchy to the one in the previous test,
         // but add a few erroneous items.
         let A, AA, AB, B
@@ -104,7 +104,7 @@ suite( 'Structure manipulation', () => {
         expect( B.isAtomic() ).to.equal( true )
     } )
 
-    test( 'Structure constructor should prevent cyclic hierarchies', () => {
+    it( 'Structure constructor should prevent cyclic hierarchies', () => {
         // Create a single Structure and try to make it a child of itself.  This should
         // fail, leaving the Structure in its original state.
         let C, D
@@ -147,7 +147,11 @@ suite( 'Structure manipulation', () => {
         expect( D.children() ).to.eql( [ A ] )
     } )
 
-    test( 'Supports removing structures from parents', () => {
+} )
+
+describe( 'Structure manipulation', () => {
+
+    it( 'Supports removing structures from parents', () => {
         // Make the same small structure hierarchy as in the previous test.
         let A, AA, AB, B
         const root = new Structure(
@@ -212,7 +216,7 @@ suite( 'Structure manipulation', () => {
         expect( B.isAtomic() ).to.equal( true )
     } )
 
-    test( 'Supports removing child structures', () => {
+    it( 'Supports removing child structures', () => {
         // Make the same small structure hierarchy as in the previous test.
         let A, AA, AB, B
         const root = new Structure(
@@ -264,7 +268,7 @@ suite( 'Structure manipulation', () => {
         expect( B.parent() ).to.equal( null )
     } )
 
-    test( 'should support inserting structures', () => {
+    it( 'Supports inserting structures', () => {
         // Make the same small structure hierarchy as in the previous test.
         let A, AA, AB, B
         const root = new Structure(
@@ -364,7 +368,7 @@ suite( 'Structure manipulation', () => {
         expect( B.isAtomic() ).to.equal( true )
     } )
 
-    test( 'Should support replacing structures', () => {
+    it( 'Ssupports replacing structures', () => {
 
         // Make the same small structure hierarchy as in the previous test.
         let A, AA, AB, B
@@ -427,7 +431,7 @@ suite( 'Structure manipulation', () => {
         expect( B.parent() ).to.equal( A )
     } )
         
-    test( 'Should handle push/pop/shift/unshift of children correctly', () => {
+    it( 'Handles push/pop/shift/unshift of children correctly', () => {
         // Make a set of structures that we will build into a hierarchy.
         const root = new Structure
         const A = new Structure
@@ -494,7 +498,7 @@ suite( 'Structure manipulation', () => {
         expect( B.parent() ).to.equal( root )
     } )
         
-    test( 'Should be able to replace all children at once', () => {
+    it( 'Can replace all children at once', () => {
         // Make a set of structures that we will build into a hierarchy.
         const root = new Structure
         const A = new Structure
@@ -575,9 +579,9 @@ suite( 'Structure manipulation', () => {
 
 } )
 
-suite( 'Structure lookup', () => {
+describe( 'Structure lookup', () => {
 
-    test( 'Correct computation of indices in parent Structure', () => {
+    it( 'Correctly computes indices in parent Structure', () => {
         // Make the same small structure hierarchy as in an earlier test.
         let A, AA, AB, B
         const root = new Structure(
@@ -596,7 +600,7 @@ suite( 'Structure lookup', () => {
         expect( B.indexInParent() ).to.equal( 1 )
     } )
 
-    test( 'Should correctly compute [all but] first/last child', () => {
+    it( 'Correctly computes [all but] first/last child', () => {
         // Make a similar small structure hierarchy as in earlier tests.
         let A, AA, AAA, AB, B
         const root = new Structure(
@@ -638,7 +642,7 @@ suite( 'Structure lookup', () => {
         expect( B.allButLastChild() ).to.eql( [ ] )
     } )
 
-    test( 'Should correctly compute addresses and indices', () => {
+    it( 'Correctly computes addresses and indices', () => {
         // Make a similar small structure hierarchy as in earlier tests.
         let A, AA, AAA, AB, B
         const root = new Structure(
@@ -717,9 +721,9 @@ suite( 'Structure lookup', () => {
 
 } )
 
-suite( 'Structure predicate functions', () => {
+describe( 'Structure predicate functions', () => {
 
-    test( 'Correctly computes which children satisfy a predicate', () => {
+    it( 'Correctly finds children/descendants satisfying a predicate', () => {
         // Make a similar small structure hierarchy as in earlier tests,
         // but then give each structure a name, to help with testing.
         let A, AA, AAA, AB, B

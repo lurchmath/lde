@@ -1,9 +1,9 @@
 
 import { Declaration } from '../../src/declaration.js'
 
-suite( 'Declaration', () => {
+describe( 'Declaration', () => {
 
-    test( 'Ensure all expected global identifiers are declared', () => {
+    it( 'Ensure all expected global identifiers are declared', () => {
         expect( Declaration ).to.be.ok
     } )
 

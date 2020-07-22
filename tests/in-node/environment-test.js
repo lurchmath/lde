@@ -1,9 +1,9 @@
 
 import { Environment } from '../../src/environment.js'
 
-suite( 'Environment', () => {
+describe( 'Environment', () => {
 
-    test( 'Ensure all expected global identifiers are declared', () => {
+    it( 'Ensure all expected global identifiers are declared', () => {
         expect( Environment ).to.be.ok
     } )
 

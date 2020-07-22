@@ -1,9 +1,9 @@
 
 import { Expression } from '../../src/expression.js'
 
-suite( 'Expression', () => {
+describe( 'Expression', () => {
 
-    test( 'Ensure all expected global identifiers are declared', () => {
+    it( 'Ensure all expected global identifiers are declared', () => {
         expect( Expression ).to.be.ok
     } )
 
