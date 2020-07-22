@@ -75,21 +75,23 @@ const puppeteer = require( 'puppeteer' )
 const clr = require( 'ansi-colors' )
 const color = ( type, text ) => {
     if ( typeof text == 'undefined' ) text = type
-    return type == 'passed' ? clr.bold.green( text ) :
-           type == 'failed' ? clr.bold.red( text ) : clr.bold.yellow( type )
+    return type == 'passed' ? clr.green( text ) :
+           type == 'failed' ? clr.red( text ) : clr.yellow( type )
 }
+const stateToSymbol = { 'passed' : '✓', 'failed' : '❌' }
 
 // print one test result, and log what type it was for a later summary:
 const results = { }
 let lastSuite = null
 const showTest = test => {
     if ( test.suite != lastSuite ) {
-        console.log( clr.bold( `\n${test.suite}` ) )
+        console.log( `\n  ${test.suite}` )
         lastSuite = test.suite
     }
     const timedOut = test.timedOut ? ', timed out' : ''
-    console.log( `  [${color( test.result )}] ${test.name} `
-               + `(${test.speed}: ${test.duration}ms${timedOut})` )
+    console.log( `    ${color( test.result, stateToSymbol[test.result] )} `
+               + clr.gray( test.name )
+               + clr.gray( ` (${test.speed}: ${test.duration}ms${timedOut})` ) )
     if ( test.hasOwnProperty( 'error' ) ) {
         console.log( test.error.message )
         console.log( test.error.stack )
@@ -102,11 +104,10 @@ const showTest = test => {
 
 // print the summary data in the results variable:
 const showSummary = () => {
-    console.log( clr.bold( '\nSummary:' ) )
+    console.log( '\n' )
     const types = Object.keys( results )
-    const allSame = types.length == 1 ? 'All ' : ''
     for ( const type of types ) {
-        console.log( color( type, `  ${allSame}${results[type]} ${type}` ) )
+        console.log( color( type, `  ${results[type]} ${type}` ) )
     }
     console.log()
 }
