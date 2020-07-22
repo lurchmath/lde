@@ -579,6 +579,112 @@ describe( 'Structure manipulation', () => {
 
 } )
 
+describe( 'Events for changes to Structure instances', () => {
+
+    // I'm rollying my own spy functions, because chai's are annoying to use in
+    // the browser.
+    const makeSpy = () => {
+        const result = ( ...args ) => result.callRecord.push( args )
+        result.callRecord = [ ]
+        return result
+    }
+
+    // Set up two Structures with lots of event listeners before each test.
+    let A = null
+    let B = null
+    let ALs = [ ]
+    let BLs = [ ]
+    beforeEach( () => {
+        A = new Structure
+        ALs = {
+            wasInserted : makeSpy(),
+            wasRemoved : makeSpy(),
+            willBeInserted : makeSpy(),
+            willBeRemoved : makeSpy()
+        }
+        A.addEventListener( 'wasInserted', ALs.wasInserted )
+        A.addEventListener( 'wasRemoved', ALs.wasRemoved )
+        A.addEventListener( 'willBeInserted', ALs.willBeInserted )
+        A.addEventListener( 'willBeRemoved', ALs.willBeRemoved )
+        B = new Structure
+        BLs = {
+            wasInserted : makeSpy(),
+            wasRemoved : makeSpy(),
+            willBeInserted : makeSpy(),
+            willBeRemoved : makeSpy()
+        }
+        B.addEventListener( 'wasInserted', BLs.wasInserted )
+        B.addEventListener( 'wasRemoved', BLs.wasRemoved )
+        B.addEventListener( 'willBeInserted', BLs.willBeInserted )
+        B.addEventListener( 'willBeRemoved', BLs.willBeRemoved )
+    } )
+
+    it( 'Should begin with no event listeners called', () => {
+        expect( ALs.wasInserted.callRecord ).to.eql( [ ] )
+        expect( ALs.wasRemoved.callRecord ).to.eql( [ ] )
+        expect( ALs.willBeInserted.callRecord ).to.eql( [ ] )
+        expect( ALs.willBeRemoved.callRecord ).to.eql( [ ] )
+        expect( BLs.wasInserted.callRecord ).to.eql( [ ] )
+        expect( BLs.wasRemoved.callRecord ).to.eql( [ ] )
+        expect( BLs.willBeInserted.callRecord ).to.eql( [ ] )
+        expect( BLs.willBeRemoved.callRecord ).to.eql( [ ] )
+    } )
+
+    it( 'Should send insertion and removal events', () => {
+        let args
+
+        // Insert one as a child of the other
+        B.insertChild( A )
+        // A.willBeInserted got called once, with correct parent, child, and index
+        expect( ALs.willBeInserted.callRecord.length ).to.equal( 1 )
+        args = ALs.willBeInserted.callRecord[0]
+        expect( args.length ).to.equal( 1 )
+        expect( args[0].parent ).to.equal( B )
+        expect( args[0].child ).to.equal( A )
+        expect( args[0].index ).to.equal( 0 )
+        // A.wasInserted got called once, with same data
+        expect( ALs.wasInserted.callRecord.length ).to.equal( 1 )
+        args = ALs.wasInserted.callRecord[0]
+        expect( args.length ).to.equal( 1 )
+        expect( args[0].parent ).to.equal( B )
+        expect( args[0].child ).to.equal( A )
+        expect( args[0].index ).to.equal( 0 )
+        // No other handlers got called
+        expect( ALs.willBeRemoved.callRecord.length ).to.equal( 0 )
+        expect( ALs.wasRemoved.callRecord.length ).to.equal( 0 )
+        expect( BLs.willBeInserted.callRecord.length ).to.equal( 0 )
+        expect( BLs.wasInserted.callRecord.length ).to.equal( 0 )
+        expect( BLs.willBeRemoved.callRecord.length ).to.equal( 0 )
+        expect( BLs.wasRemoved.callRecord.length ).to.equal( 0 )
+
+        // Remove the child
+        A.remove()
+        // A.willBeRemoved got called once, with correct parent, child, and index
+        expect( ALs.willBeRemoved.callRecord.length ).to.equal( 1 )
+        args = ALs.willBeRemoved.callRecord[0]
+        expect( args.length ).to.equal( 1 )
+        expect( args[0].parent ).to.equal( B )
+        expect( args[0].child ).to.equal( A )
+        expect( args[0].index ).to.equal( 0 )
+        // A.wasRemoved got called once, with same data
+        expect( ALs.wasRemoved.callRecord.length ).to.equal( 1 )
+        args = ALs.wasRemoved.callRecord[0]
+        expect( args.length ).to.equal( 1 )
+        expect( args[0].parent ).to.equal( B )
+        expect( args[0].child ).to.equal( A )
+        expect( args[0].index ).to.equal( 0 )
+        // The two insertion handlers still have been called only once, earlier
+        expect( ALs.willBeInserted.callRecord.length ).to.equal( 1 )
+        expect( ALs.wasInserted.callRecord.length ).to.equal( 1 )
+        // And all of B's events still haven't been called at all
+        expect( BLs.willBeInserted.callRecord.length ).to.equal( 0 )
+        expect( BLs.wasInserted.callRecord.length ).to.equal( 0 )
+        expect( BLs.willBeRemoved.callRecord.length ).to.equal( 0 )
+        expect( BLs.wasRemoved.callRecord.length ).to.equal( 0 )
+    } )
+
+} )
+
 describe( 'Structure lookup', () => {
 
     it( 'Correctly computes indices in parent Structure', () => {

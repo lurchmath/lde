@@ -22,7 +22,7 @@ if ( typeof EventTarget == 'undefined' ) {
  * like {@link Structure#parent parent()} and {@link Structure#children children()}
  * to navigate the tree.
  */
-export class Structure {
+export class Structure extends EventTarget {
     
     /**
      * Create a new Structure.  Any argument that is not a Structure is ignored.
@@ -30,6 +30,7 @@ export class Structure {
      * @param {...Structure} children - child structures to be added to this one
      */
     constructor ( ...children ) {
+        super()
         this._parent = null
         this._children = [ ]
         for ( const child of children ) {
@@ -87,6 +88,8 @@ export class Structure {
      * 
      * @param {Structure} child - the child to insert
      * @param {number} atIndex - the index at which the new child will be
+     * @fires Structure#willBeInserted
+     * @fires Structure#wasInserted
      */
     insertChild ( child, atIndex = 0 ) {
         if ( !( child instanceof Structure ) ) return
@@ -100,19 +103,99 @@ export class Structure {
             }
         }
         child.remove()
+        /**
+         * An event of this type is fired in a Structure immediately before that
+         * Structure is inserted as a child within a new parent.
+         * 
+         * @event Structure#willBeInserted
+         * @type {Object}
+         * @property {Structure} child - The Structure emitting the event, which
+         *   will soon be a child of a new parent Structure
+         * @property {Structure} parent - The new parent the child will have
+         *   after insertion
+         * @property {number} index - The new index the child will have after
+         *   insertion
+         */
+        child.emit( 'willBeInserted', {
+            child : child,
+            parent : this,
+            index : atIndex
+        } )
         this._children.splice( atIndex, 0, child )
         child._parent = this
+        /**
+         * An event of this type is fired in a Structure immediately after that
+         * Structure is inserted as a child within a new parent.
+         * 
+         * @event Structure#wasInserted
+         * @type {Object}
+         * @property {Structure} child - The Structure emitting the event, which
+         *   just became a child of a new parent Structure
+         * @property {Structure} parent - The new parent the child now has
+         * @property {number} index - The index the child now has in its new
+         *   parent
+         */
+        child.emit( 'wasInserted', {
+            child : child,
+            parent : this,
+            index : atIndex
+        } )
     }
 
     /**
      * If this Structure has a parent, remove this from its parent's child list
      * and set our parent pointer to null, thus severing the relationship.  If
      * this has no parent, do nothing.
+     * 
+     * @fires Structure#willBeRemoved
      */
     remove () {
         if ( this._parent != null ) {
+            const parent = this._parent
+            const index = this.indexInParent()
+            /**
+             * This event is fired in a Structure immediately before that
+             * Structure is removed from its parent Structure.  This could be
+             * from a simple removal, or it might be the first step in a
+             * re-parenting process that ends up with the Structure as the child
+             * of a new parent.
+             * 
+             * @event Structure#willBeRemoved
+             * @type {Object}
+             * @property {Structure} child - The Structure emitting the event,
+             *   which is about to be removed from its parent Structure
+             * @property {Structure} parent - The current parent Structure
+             * @property {number} index - The index the child has in its parent,
+             *   before the removal
+             */
+            this.emit( 'willBeRemoved', {
+                child : this,
+                parent : parent,
+                index : index
+            } )
             this._parent._children.splice( this.indexInParent(), 1 )
             this._parent = null
+            /**
+             * This event is fired in a Structure immediately after that
+             * Structure is removed from its parent Structure.  This could be
+             * from a simple removal, or it might be the first step in a
+             * re-parenting process that ends up with the Structure as the child
+             * of a new parent.
+             * 
+             * @event Structure#wasRemoved
+             * @type {Object}
+             * @property {Structure} child - The Structure emitting the event,
+             *   which was just removed from its parent Structure
+             * @property {Structure} parent - The old parent Structure from
+             *   which the child was just removed
+             * @property {number} index - The index the child had in its parent,
+             *   before the removal
+             */
+            this.emit( 'wasRemoved', {
+                child : this,
+                parent : parent,
+                index : index
+            } )
         }
     }
 
