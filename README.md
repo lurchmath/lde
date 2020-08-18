@@ -5,6 +5,15 @@ This branch is a rebooting of the entire LDE repository.  There's nothing to
 see here yet.  Once this branch has made greater progress, it will be usable.
 Right now, it's stripped to the studs.
 
+## Running the tests
+
+Tests run only in a browser, but you can launch them from the command line.
+
+ * To run a local web server and open the test suite in your default browser:
+   `npm run test-server`
+ * To run the tests in a headless Chromium and report the results in the
+   terminal, imitating mocha output: `npm test`
+
 <!--
 [![Build Status](https://travis-ci.org/lurchmath/lde.svg?branch=master)](https://travis-ci.org/lurchmath/lde)
 
