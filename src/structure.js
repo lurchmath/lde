@@ -1,20 +1,14 @@
 
-// This conditional lets us use a consistent event API in the browser and in
-// node.  See details inside.
-if ( typeof EventTarget == 'undefined' ) {
-    // We're in node, so there is no EventTarget class, as there is in the
-    // browser.  We need to import a module and use it as a close fill-in.
-    global.EventTarget = require( 'events' ).EventEmitter
-    global.EventTarget.prototype.addEventListener =
-        global.EventTarget.prototype.addListener
-    global.EventTarget.prototype.removeEventListener =
-        global.EventTarget.prototype.removeListener
-} else {
-    // We're in the browser, so there is no .emit() method, as there is in node.
-    // We fill it in by writing our own, which uses the similar dispatchEvent().
-    EventTarget.prototype.emit = function ( type, details = { } ) {
-        this.dispatchEvent( Object.assign( new Event( type ), details ) )
-    }
+/**
+ * Extend the EventTarget prototype with a convenience method for emitting new
+ * events.  Mimics the function of the same name from node.js, but here in the
+ * browser.
+ * 
+ * @param {string} type - The type of event being emitted, as a string name
+ * @param {object} details - Any additional fields to copy into the Event object
+ */
+EventTarget.prototype.emit = function ( type, details = { } ) {
+    this.dispatchEvent( Object.assign( new Event( type ), details ) )
 }
 
 /**
