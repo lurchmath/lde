@@ -884,6 +884,27 @@ describe( 'Structure predicate functions', () => {
 
         // Call descendantsSatisfying() on several nodes with the same predicates,
         // again verifying correct results in each case.
+        expect( root.descendantsSatisfying( nameHasA ) ).to.eql( [ A, AA, AAA, AB ] )
+        expect( A.descendantsSatisfying( nameHasA ) ).to.eql( [ A, AA, AAA, AB ] )
+        expect( AA.descendantsSatisfying( nameHasA ) ).to.eql( [ AA, AAA ] )
+        expect( AAA.descendantsSatisfying( nameHasA ) ).to.eql( [ AAA ] )
+        expect( AB.descendantsSatisfying( nameHasA ) ).to.eql( [ AB ] )
+        expect( B.descendantsSatisfying( nameHasA ) ).to.eql( [ ] )
+        expect( root.descendantsSatisfying( nameIsLong ) ).to.eql( [ root, AAA ] )
+        expect( A.descendantsSatisfying( nameIsLong ) ).to.eql( [ AAA ] )
+        expect( AA.descendantsSatisfying( nameIsLong ) ).to.eql( [ AAA ] )
+        expect( AAA.descendantsSatisfying( nameIsLong ) ).to.eql( [ AAA ] )
+        expect( AB.descendantsSatisfying( nameIsLong ) ).to.eql( [ ] )
+        expect( B.descendantsSatisfying( nameIsLong ) ).to.eql( [ ] )
+        expect( root.descendantsSatisfying( nonAtomic ) ).to.eql( [ root, A, AA ] )
+        expect( A.descendantsSatisfying( nonAtomic ) ).to.eql( [ A, AA ] )
+        expect( AA.descendantsSatisfying( nonAtomic ) ).to.eql( [ AA ] )
+        expect( AAA.descendantsSatisfying( nonAtomic ) ).to.eql( [ ] )
+        expect( AB.descendantsSatisfying( nonAtomic ) ).to.eql( [ ] )
+        expect( B.descendantsSatisfying( nonAtomic ) ).to.eql( [ ] )
+
+        // In each case, hasDescendantSatsifying() should match the results of
+        // descendantsSatisfying().
         expect( root.hasDescendantSatisfying( nameHasA ) ).to.equal( true )
         expect( A.hasDescendantSatisfying( nameHasA ) ).to.equal( true )
         expect( AA.hasDescendantSatisfying( nameHasA ) ).to.equal( true )
