@@ -453,6 +453,20 @@ export class Structure extends EventTarget {
     hasChildSatisfying ( predicate ) { return this._children.some( predicate ) }
 
     /**
+     * An iterator over all descendants of this Structure, in a pre-order tree
+     * traversal.
+     * 
+     * @yields {Structure} This structure, then its first child, and so on down
+     *   that branch of the tree, and onward in a pre-order traversal
+     * @see {@link Structure#descendantsSatisfying descendantsSatisfying()}
+     * @see {@link Structure#hasDescendantSatisfying hasDescendantSatisfying()}
+     */
+    *descendantsIterator () {
+        yield this
+        for ( let child of this._children ) yield* child.descendantsIterator()
+    }
+
+    /**
      * An array of those descendants of this Structure that satisfy the given
      * predicate.  These are not copies, but the actual descendants; if you
      * alter one, it changes the hierarchy beneath this Structure.
@@ -471,9 +485,9 @@ export class Structure extends EventTarget {
      */
     descendantsSatisfying ( predicate ) {
         let result = [ ]
-        if ( predicate( this ) ) result.push( this )
-        return result.concat( this._children.flatMap(
-            child => child.descendantsSatisfying( predicate ) ) )
+        for ( let descendant of this.descendantsIterator() )
+            if ( predicate( descendant ) ) result.push( descendant )
+        return result
     }
 
     /**
@@ -493,9 +507,9 @@ export class Structure extends EventTarget {
      * @see {@link Structure#descendantsSatisfying descendantsSatisfying()}
      */
     hasDescendantSatisfying ( predicate ) {
-        return predicate( this )
-            || this.hasChildSatisfying(
-                child => child.hasDescendantSatisfying( predicate ) )
+        for ( let descendant of this.descendantsIterator() )
+            if ( predicate( descendant ) ) return true
+        return false
     }
 
 }
