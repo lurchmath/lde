@@ -481,6 +481,7 @@ export class Structure extends EventTarget {
      *   those that satisfy the given predicate, listed in the order they would
      *   be visited in a depth-first traversal of the tree
      * @see {@link Structure#hasDescendantSatisfying hasDescendantSatisfying()}
+     * @see {@link Structure#ancestorsSatisfying ancestorsSatisfying()}
      * @see {@link Structure#childrenSatisfying childrenSatisfying()}
      */
     descendantsSatisfying ( predicate ) {
@@ -505,10 +506,73 @@ export class Structure extends EventTarget {
      * @return {boolean} True if and only if some descendant satisfies the given predicate
      * @see {@link Structure#hasChildSatisfying hasChildSatisfying()}
      * @see {@link Structure#descendantsSatisfying descendantsSatisfying()}
+     * @see {@link Structure#hasAncestorSatisfying hasAncestorSatisfying()}
      */
     hasDescendantSatisfying ( predicate ) {
         for ( let descendant of this.descendantsIterator() )
             if ( predicate( descendant ) ) return true
+        return false
+    }
+
+    /**
+     * An iterator through all the ancestors of this structure, starting with
+     * itself as the first (trivial) ancestor, and walking upwards from there.
+     * 
+     * @yields {Structure} This structure, then its parent, grandparent, etc.
+     * @see {@link Structure#ancestors ancestors()}
+     */
+    *ancestorsIterator () {
+        yield this
+        if ( this.parent() ) yield* this.parent().ancestorsIterator()
+    }
+
+    /**
+     * An array of all ancestors of this structure, starting with itself.  This
+     * array is the exact contents of
+     * {@link Structure#ancestorsIterator ancestorsIterator()}, but in array
+     * form rather than as an iterator.
+     * 
+     * @return {Structure[]} An array beginning with this structure, then its
+     *   parent, grandparent, etc.
+     * @see {@link Structure#ancestorsIterator ancestorsIterator()}
+     */
+    ancestors () { return Array.from( this.ancestorsIterator() ) }
+    
+    /**
+     * Find all ancestors of this Structure satisfying the given predicate.
+     * Note that this Structure counts as a trivial ancestor of itself, so if
+     * you don't want that, modify your predicate to exclude it.
+     * 
+     * @param {function(Structure):boolean} predicate - Predicate to evaluate on
+     *   each ancestor
+     * @return {Structure[]} The ancestors satisfying the predicate, which may
+     *   be an empty array
+     * @see {@link Structure#ancestorsIterator ancestorsIterator()}
+     * @see {@link Structure#hasAncestorSatisfying hasAncestorSatisfying()}
+     * @see {@link Structure#descendantsSatisfying descendantsSatisfying()}
+     */
+    ancestorsSatisfying ( predicate ) {
+        const result = [ ]
+        for ( let ancestor of this.ancestorsIterator() )
+            if ( predicate( ancestor ) ) result.push( ancestor )
+        return result
+    }
+
+    /**
+     * Whether this Structure has an ancestor (including itself) satisfying the
+     * given predicate.
+     * 
+     * @param {function(Structure):boolean} predicate - Predicate to evaluate on
+     *   each ancestor
+     * @return {boolean} Whether an ancestor satisfying the given predicate
+     *   exists
+     * @see {@link Structure#ancestorsIterator ancestorsIterator()}
+     * @see {@link Structure#ancestorsSatisfying ancestorsSatisfying()}
+     * @see {@link Structure#hasDescendantSatisfying hasDescendantSatisfying()}
+     */
+    hasAncestorSatisfying ( predicate ) {
+        for ( let ancestor of this.ancestorsIterator() )
+            if ( predicate( ancestor ) ) return true
         return false
     }
 

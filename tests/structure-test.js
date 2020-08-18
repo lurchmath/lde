@@ -825,6 +825,28 @@ describe( 'Structure lookup', () => {
         expect( B.index( [ 0, 0 ] ) ).to.equal( undefined )
     } )
 
+    it( 'Correctly computes ancestor chains', () => {
+        // Make a similar small structure hierarchy as in earlier tests.
+        let A, AA, AAA, AB, B
+        const root = new Structure(
+            A = new Structure(
+                AA = new Structure(
+                    AAA = new Structure
+                ),
+                AB = new Structure
+            ),
+            B = new Structure
+        )
+
+        // Compute ancestor chains of everything and verify they're correct.
+        expect( root.ancestors() ).to.eql( [ root ] )
+        expect( A.ancestors() ).to.eql( [ A, root ] )
+        expect( AA.ancestors() ).to.eql( [ AA, A, root ] )
+        expect( AAA.ancestors() ).to.eql( [ AAA, AA, A, root ] )
+        expect( AB.ancestors() ).to.eql( [ AB, A, root ] )
+        expect( B.ancestors() ).to.eql( [ B, root ] )
+    } )
+
 } )
 
 describe( 'Structure predicate functions', () => {
@@ -923,6 +945,60 @@ describe( 'Structure predicate functions', () => {
         expect( AAA.hasDescendantSatisfying( nonAtomic ) ).to.equal( false )
         expect( AB.hasDescendantSatisfying( nonAtomic ) ).to.equal( false )
         expect( B.hasDescendantSatisfying( nonAtomic ) ).to.equal( false )
+    } )
+
+    it( 'Correctly finds ancestors satisfying a predicate', () => {
+        // Make a similar small structure hierarchy as in earlier tests,
+        // but then give each structure a name, to help with testing.
+        let A, AA, AAA, AB, B
+        const root = new Structure(
+            A = new Structure(
+                AA = new Structure(
+                    AAA = new Structure
+                ),
+                AB = new Structure
+            ),
+            B = new Structure
+        )
+        root.name = 'root'
+        A.name = 'A'
+        AA.name = 'AA'
+        AAA.name = 'AAA'
+        AB.name = 'AB'
+        B.name = 'B'
+
+        // Call firstAncestorSatisfying() on several nodes with three different
+        // predicates, and verify the correct return value in each case.
+        const nameHasA = x => /A/.test( x.name )
+        const nameIsLong = x => x.name.length > 2
+        const nonAtomic = x => !x.isAtomic()
+        expect( root.ancestorsSatisfying( nameHasA ) ).to.eql( [ ] )
+        expect( A.ancestorsSatisfying( nameHasA ) ).to.eql( [ A ] )
+        expect( AA.ancestorsSatisfying( nameHasA ) ).to.eql( [ AA, A ] )
+        expect( B.ancestorsSatisfying( nameHasA ) ).to.eql( [ ] )
+        expect( root.ancestorsSatisfying( nameIsLong ) ).to.eql( [ root ] )
+        expect( A.ancestorsSatisfying( nameIsLong ) ).to.eql( [ root ] )
+        expect( AA.ancestorsSatisfying( nameIsLong ) ).to.eql( [ root ] )
+        expect( B.ancestorsSatisfying( nameIsLong ) ).to.eql( [ root ] )
+        expect( root.ancestorsSatisfying( nonAtomic ) ).to.eql( [ root ] )
+        expect( A.ancestorsSatisfying( nonAtomic ) ).to.eql( [ A, root ] )
+        expect( AA.ancestorsSatisfying( nonAtomic ) ).to.eql( [ AA, A, root ] )
+        expect( B.ancestorsSatisfying( nonAtomic ) ).to.eql( [ root ] )
+
+        // In each case, hasAncestorSatisfying() should match the results of
+        // ancestorsSatisfying().
+        expect( root.hasAncestorSatisfying( nameHasA ) ).to.equal( false )
+        expect( A.hasAncestorSatisfying( nameHasA ) ).to.equal( true )
+        expect( AA.hasAncestorSatisfying( nameHasA ) ).to.equal( true )
+        expect( B.hasAncestorSatisfying( nameHasA ) ).to.equal( false )
+        expect( root.hasAncestorSatisfying( nameIsLong ) ).to.equal( true )
+        expect( A.hasAncestorSatisfying( nameIsLong ) ).to.equal( true )
+        expect( AA.hasAncestorSatisfying( nameIsLong ) ).to.equal( true )
+        expect( B.hasAncestorSatisfying( nameIsLong ) ).to.equal( true )
+        expect( root.hasAncestorSatisfying( nonAtomic ) ).to.equal( true )
+        expect( A.hasAncestorSatisfying( nonAtomic ) ).to.equal( true )
+        expect( AA.hasAncestorSatisfying( nonAtomic ) ).to.equal( true )
+        expect( B.hasAncestorSatisfying( nonAtomic ) ).to.equal( true )
     } )
 
 } )
