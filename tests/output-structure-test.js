@@ -1,5 +1,5 @@
 
-import { OutputStructure } from '../../src/output-structure.js'
+import { OutputStructure } from '../src/output-structure.js'
 
 describe( 'OutputStructure', () => {
 

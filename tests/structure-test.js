@@ -1,5 +1,5 @@
 
-import { Structure } from '../../src/structure.js'
+import { Structure } from '../src/structure.js'
 
 describe( 'Structure module', () => {
 

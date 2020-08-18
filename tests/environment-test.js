@@ -1,5 +1,5 @@
 
-import { Environment } from '../../src/environment.js'
+import { Environment } from '../src/environment.js'
 
 describe( 'Environment', () => {
 

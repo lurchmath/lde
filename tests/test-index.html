@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <title>Mocha Tests of the LDE</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="../../node_modules/mocha/mocha.css" />
+    <link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
   </head>
   <body>
     <div id="mocha">
@@ -17,8 +17,8 @@
       <h2>Click any test description below to see its code.</h2>
     </div>
 
-    <script src="../../node_modules/chai/chai.js"></script>
-    <script src="../../node_modules/mocha/mocha.js"></script>
+    <script src="../node_modules/chai/chai.js"></script>
+    <script src="../node_modules/mocha/mocha.js"></script>
 
     <script class="mocha-init">
       mocha.setup( {
@@ -28,11 +28,11 @@
       window.expect = chai.expect;
       mocha.checkLeaks();
     </script>
-    <script type="module" src="../in-node/declaration-test.js"></script>
-    <script type="module" src="../in-node/environment-test.js"></script>
-    <script type="module" src="../in-node/expression-test.js"></script>
-    <script type="module" src="../in-node/output-structure-test.js"></script>
-    <script type="module" src="../in-node/structure-test.js"></script>
+    <script type="module" src="declaration-test.js"></script>
+    <script type="module" src="environment-test.js"></script>
+    <script type="module" src="expression-test.js"></script>
+    <script type="module" src="output-structure-test.js"></script>
+    <script type="module" src="structure-test.js"></script>
     <script type="module" class="mocha-exec">
       const runner = mocha.run();
       // The following code stores test results in a global variable, so that if

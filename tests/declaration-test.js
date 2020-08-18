@@ -1,5 +1,5 @@
 
-import { Declaration } from '../../src/declaration.js'
+import { Declaration } from '../src/declaration.js'
 
 describe( 'Declaration', () => {
 

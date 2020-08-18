@@ -1,5 +1,5 @@
 
-import { Expression } from '../../src/expression.js'
+import { Expression } from '../src/expression.js'
 
 describe( 'Expression', () => {
 
