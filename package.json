@@ -16,8 +16,9 @@
     "tidy-jsdoc": "^1.4.0"
   },
   "scripts": {
-    "docs": "rm -rf docs && jsdoc src/* -d docs -R doc-main.md -c jsdoc-conf.json"
     "test": "node --trace-warnings tests/all-in-puppeteer.js",
+    "docs": "rm -rf docs && jsdoc src/* -d docs -R doc-main.md -c jsdoc-conf.json",
+    "test-server": "node tests/test-server.js"
   },
   "repository": {
     "type": "git",
