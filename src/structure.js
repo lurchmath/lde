@@ -733,9 +733,11 @@ export class Structure extends EventTarget {
             return this._children[0]
         // if I have a next sibling, that's my next node.
         // otherwise, use my parent's next sibling, or my grandparent's, ...
-        for ( let ancestor of this.ancestorsIterator() )
-            if ( ancestor.nextSibling() )
+        for ( let ancestor of this.ancestorsIterator() ) {
+            if ( ancestor.nextSibling() ) {
                 return ancestor.nextSibling()
+            }
+        }
         // no nodes after me, so return undefined
     }
 
@@ -764,10 +766,10 @@ export class Structure extends EventTarget {
         // if I have a previous sibling, then its latest descendant is my
         // previous node
         let beforeMe = this.previousSibling()
-        while ( beforeMe && beforeMe._children.length > 0 )
+        while ( beforeMe && beforeMe._children.length > 0 ) {
             beforeMe = beforeMe.lastChild()
-        if ( beforeMe )
-            return beforeMe
+        }
+        if ( beforeMe ) return beforeMe
         // otherwise, my previous node is my parent (which may be null if
         // I'm the earliest node in my tree, which we convert to undefined)
         return this._parent || undefined
@@ -794,8 +796,9 @@ export class Structure extends EventTarget {
         // compute the last descendant of this tree (or undefined if they did
         // not limit us to traversing only this subtree)
         let stopHere = inThisTreeOnly ? this : undefined
-        while ( stopHere && stopHere._children.length > 0 )
+        while ( stopHere && stopHere._children.length > 0 ) {
             stopHere = stopHere.lastChild()
+        }
         // now iterate over all the nexts (stopping only if we encounter the
         // final descendant computed above, if any)
         let nextResult = this
