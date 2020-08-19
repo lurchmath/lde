@@ -896,6 +896,11 @@ export class Structure extends EventTarget {
      * For a definition of accessibility, refer to the documentation for the
      * {@link Structure#isAccessibleTo isAccessibleTo()} function.
      * 
+     * In short, the accessibles of a node are its previous siblings, the
+     * previous siblings of its parent, the previous siblings of its
+     * grandparent, and so on, where each node yielded
+     * {@link Structure#isLaterThan isLaterThan()} all nodes yielded thereafter.
+     * 
      * @param {boolean} reflexive - Functions analogously to the `reflexive`
      *   parameter for {@link Structure#isAccessibleTo isAccessibleTo()}; that
      *   is, do we include this Structure on its list of accessibles?  The
@@ -942,8 +947,9 @@ export class Structure extends EventTarget {
      * {@link Structure#isAccessibleTo isAccessibleTo()} function.
      * 
      * In short, the scope of a node is itself, all of its later siblings, and
-     * all their descendants, where each entry on the list
-     * {@link Structure#isEarlierThan isEarlierThan()} all later entries.
+     * all their descendants, where each node yielded by the iterator
+     * {@link Structure#isEarlierThan isEarlierThan()} all nodes yielded
+     * thereafter.
      * 
      * @param {boolean} reflexive - Functions analogously to the `reflexive`
      *   parameter for {@link Structure#isInTheScopeOf isInTheScopeOf()}; that
