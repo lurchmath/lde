@@ -14,6 +14,11 @@ Tests run only in a browser, but you can launch them from the command line.
  * To run the tests in a headless Chromium and report the results in the
    terminal, imitating mocha output: `npm test`
 
+## Building the documentation
+
+ * To run JSDoc to build the source code documentation, use `npm run docs`.
+ * To view the resulting documentation, use `npm run show-docs`.
+
 <!--
 [![Build Status](https://travis-ci.org/lurchmath/lde.svg?branch=master)](https://travis-ci.org/lurchmath/lde)
 
