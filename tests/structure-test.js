@@ -1002,3 +1002,146 @@ describe( 'Structure predicate functions', () => {
     } )
 
 } )
+
+describe( 'Structure order relations', () => {
+
+    it( 'correctly judges when one Structure is earlier than another', () => {
+        // Make some Structure hierarchies we can use for testing "earlier than"
+        let A, AA, AB, ABA, B, dA
+        const root = new Structure(
+            A = new Structure(
+                AA = new Structure,
+                AB = new Structure(
+                    ABA = new Structure
+                )
+            ),
+            B = new Structure
+        )
+        const disconnected = new Structure(
+            dA = new Structure
+        )
+        // Apply earlier-than to all possible pairs of nodes in these trees,
+        // and verify the correct answer in each case.
+        expect( root.isEarlierThan( root ) ).to.equal( false )
+        expect( root.isEarlierThan( A ) ).to.equal( true )
+        expect( root.isEarlierThan( AA ) ).to.equal( true )
+        expect( root.isEarlierThan( AB ) ).to.equal( true )
+        expect( root.isEarlierThan( ABA ) ).to.equal( true )
+        expect( root.isEarlierThan( B ) ).to.equal( true )
+        expect( root.isEarlierThan( disconnected ) ).to.equal( undefined )
+        expect( root.isEarlierThan( dA ) ).to.equal( undefined )
+        expect( A.isEarlierThan( root ) ).to.equal( false )
+        expect( A.isEarlierThan( A ) ).to.equal( false )
+        expect( A.isEarlierThan( AA ) ).to.equal( true )
+        expect( A.isEarlierThan( AB ) ).to.equal( true )
+        expect( A.isEarlierThan( ABA ) ).to.equal( true )
+        expect( A.isEarlierThan( B ) ).to.equal( true )
+        expect( A.isEarlierThan( disconnected ) ).to.equal( undefined )
+        expect( A.isEarlierThan( dA ) ).to.equal( undefined )
+        expect( AA.isEarlierThan( root ) ).to.equal( false )
+        expect( AA.isEarlierThan( A ) ).to.equal( false )
+        expect( AA.isEarlierThan( AA ) ).to.equal( false )
+        expect( AA.isEarlierThan( AB ) ).to.equal( true )
+        expect( AA.isEarlierThan( ABA ) ).to.equal( true )
+        expect( AA.isEarlierThan( B ) ).to.equal( true )
+        expect( AA.isEarlierThan( disconnected ) ).to.equal( undefined )
+        expect( AA.isEarlierThan( dA ) ).to.equal( undefined )
+        expect( AB.isEarlierThan( root ) ).to.equal( false )
+        expect( AB.isEarlierThan( A ) ).to.equal( false )
+        expect( AB.isEarlierThan( AA ) ).to.equal( false )
+        expect( AB.isEarlierThan( AB ) ).to.equal( false )
+        expect( AB.isEarlierThan( ABA ) ).to.equal( true )
+        expect( AB.isEarlierThan( B ) ).to.equal( true )
+        expect( AB.isEarlierThan( disconnected ) ).to.equal( undefined )
+        expect( AB.isEarlierThan( dA ) ).to.equal( undefined )
+        expect( ABA.isEarlierThan( root ) ).to.equal( false )
+        expect( ABA.isEarlierThan( A ) ).to.equal( false )
+        expect( ABA.isEarlierThan( AA ) ).to.equal( false )
+        expect( ABA.isEarlierThan( AB ) ).to.equal( false )
+        expect( ABA.isEarlierThan( ABA ) ).to.equal( false )
+        expect( ABA.isEarlierThan( B ) ).to.equal( true )
+        expect( ABA.isEarlierThan( disconnected ) ).to.equal( undefined )
+        expect( ABA.isEarlierThan( dA ) ).to.equal( undefined )
+        expect( B.isEarlierThan( root ) ).to.equal( false )
+        expect( B.isEarlierThan( A ) ).to.equal( false )
+        expect( B.isEarlierThan( AA ) ).to.equal( false )
+        expect( B.isEarlierThan( AB ) ).to.equal( false )
+        expect( B.isEarlierThan( ABA ) ).to.equal( false )
+        expect( B.isEarlierThan( B ) ).to.equal( false )
+        expect( B.isEarlierThan( disconnected ) ).to.equal( undefined )
+        expect( B.isEarlierThan( dA ) ).to.equal( undefined )
+        expect( disconnected.isEarlierThan( root ) ).to.equal( undefined )
+        expect( disconnected.isEarlierThan( A ) ).to.equal( undefined )
+        expect( disconnected.isEarlierThan( AA ) ).to.equal( undefined )
+        expect( disconnected.isEarlierThan( AB ) ).to.equal( undefined )
+        expect( disconnected.isEarlierThan( ABA ) ).to.equal( undefined )
+        expect( disconnected.isEarlierThan( B ) ).to.equal( undefined )
+        expect( disconnected.isEarlierThan( disconnected ) ).to.equal( false )
+        expect( disconnected.isEarlierThan( dA ) ).to.equal( true )
+        expect( dA.isEarlierThan( root ) ).to.equal( undefined )
+        expect( dA.isEarlierThan( A ) ).to.equal( undefined )
+        expect( dA.isEarlierThan( AA ) ).to.equal( undefined )
+        expect( dA.isEarlierThan( AB ) ).to.equal( undefined )
+        expect( dA.isEarlierThan( ABA ) ).to.equal( undefined )
+        expect( dA.isEarlierThan( B ) ).to.equal( undefined )
+        expect( dA.isEarlierThan( disconnected ) ).to.equal( false )
+        expect( dA.isEarlierThan( dA ) ).to.equal( false )
+        // isEarlierThan() returns undefined if passed a non-Structure
+        expect( A.isEarlierThan() ).to.equal( undefined )
+        expect( ABA.isEarlierThan( root.parent() ) ).to.equal( undefined )
+        expect( dA.isEarlierThan( { } ) ).to.equal( undefined )
+        // isLaterThan() just does the same as isEarlierThan(), with the
+        // "arguments" in reverse order
+        for ( let left of [ root, A, AA, AB, ABA, B, disconnected, dA ] )
+            for ( let right of [ root, A, AA, AB, ABA, B, disconnected, dA ] )
+                expect( left.isEarlierThan( right ) ).to.equal(
+                    right.isLaterThan( left ) )
+    } )
+
+    it( 'creates correct pre-order tree traversal iterators', () => {
+        // Re-use the structure hierarchies from the previous test
+        let A, AA, AB, ABA, B, dA
+        const root = new Structure(
+            A = new Structure(
+                AA = new Structure,
+                AB = new Structure(
+                    ABA = new Structure
+                )
+            ),
+            B = new Structure
+        )
+        const disconnected = new Structure(
+            dA = new Structure
+        )
+        // Compute nextInTree() and previousInTree() for each node, verifying
+        // correctness.
+        expect( root.nextInTree() ).to.equal( A )
+        expect( A.nextInTree() ).to.equal( AA )
+        expect( AA.nextInTree() ).to.equal( AB )
+        expect( AB.nextInTree() ).to.equal( ABA )
+        expect( ABA.nextInTree() ).to.equal( B )
+        expect( B.nextInTree() ).to.equal( undefined )
+        expect( disconnected.nextInTree() ).to.equal( dA )
+        expect( dA.nextInTree() ).to.equal( undefined )
+        expect( root.previousInTree() ).to.equal( undefined )
+        expect( A.previousInTree() ).to.equal( root )
+        expect( AA.previousInTree() ).to.equal( A )
+        expect( AB.previousInTree() ).to.equal( AA )
+        expect( ABA.previousInTree() ).to.equal( AB )
+        expect( B.previousInTree() ).to.equal( ABA )
+        expect( disconnected.previousInTree() ).to.equal( undefined )
+        expect( dA.previousInTree() ).to.equal( disconnected )
+        // Do a pre-order traversal of both structures and verify it's the same
+        // order as shown above.  Then try this on some subtrees, varying the
+        // value of the parameter to stay within that subtree, or not.
+        expect( root.preOrderTraversal() ).to.eql( [ root, A, AA, AB, ABA, B ] )
+        expect( disconnected.preOrderTraversal() ).to.eql( [ disconnected, dA ] )
+        expect( AB.preOrderTraversal() ).to.eql( [ AB, ABA ] )
+        expect( AB.preOrderTraversal( true ) ).to.eql( [ AB, ABA ] )
+        expect( AB.preOrderTraversal( false ) ).to.eql( [ AB, ABA, B ] )
+        expect( A.preOrderTraversal() ).to.eql( [ A, AA, AB, ABA ] )
+        expect( A.preOrderTraversal( true ) ).to.eql( [ A, AA, AB, ABA ] )
+        expect( A.preOrderTraversal( false ) ).to.eql( [ A, AA, AB, ABA, B ] )
+    } )
+
+} )

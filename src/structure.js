@@ -576,4 +576,181 @@ export class Structure extends EventTarget {
         return false
     }
 
+    /**
+     * Under pre-order tree traversal, which of two structures comes first?  We
+     * call the first "earlier than" the other Structure, because we will use
+     * Structure hierarchies to represent documents, and first in a pre-order
+     * tree traversal would then mean earlier in the document.
+     * 
+     * Note that this is a strict ordering, so a Structure is not earlier than
+     * itself.
+     * 
+     * @param {Structure} other - The Structure with which to compare this one.
+     *   (The result is undefined if this is not a Structure.)
+     * @return {boolean} Whether this structure is earlier than the other, or
+     *   undefined if they are incomparable (not in the same tree)
+     * @see {@link Structure#isLaterThan isLaterThan()}
+     * @see {@link Structure#preOrderTraversal preOrderTraversal()}
+     * @see {@link Structure#nextInTree nextInTree()}
+     * @see {@link Structure#previousInTree previousInTree()}
+     */
+    isEarlierThan ( other ) {
+        // type check
+        if ( !( other instanceof Structure ) ) return undefined
+        // base case
+        if( other === this ) return false
+        // we will need to compare ancestors
+        const myAncestors = this.ancestors().reverse()
+        const otherAncestors = other.ancestors().reverse()
+        // if we have no common ancestor, we are incomparable
+        if ( otherAncestors[0] != myAncestors[0] ) return undefined
+        // we have a common top-level ancestor; find our least common ancestor
+        let lowest = null
+        while ( myAncestors[0] == otherAncestors[0] ) {
+            myAncestors.shift()
+            lowest = otherAncestors.shift()
+        }
+        // if either of us is an ancestor of the other, then that one is earlier
+        if ( lowest === this ) return true
+        if ( lowest === other ) return false
+        // otherwise, compare child indices within the common ancestor
+        return myAncestors[0].indexInParent()
+             < otherAncestors[0].indexInParent()
+    }
+
+    /**
+     * This is the opposite of {@link Structure#isEarlierThan isEarlierThan()}.
+     * We have `A.isLaterThan(B)` if and only if `B.isEarlierThan(A)`.  This is
+     * therefore just a convenience function.
+     * 
+     * @param {Structure} other - The Structure with which to compare this one.
+     *   (The result is undefined if this is not a Structure.)
+     * @return {boolean} Whether this structure is later than the other, or
+     *   undefined if they are incomparable (not in the same tree)
+     * @see {@link Structure#isEarlierThan isEarlierThan()}
+     * @see {@link Structure#preOrderTraversal preOrderTraversal()}
+     * @see {@link Structure#nextInTree nextInTree()}
+     * @see {@link Structure#previousInTree previousInTree()}
+     */
+    isLaterThan ( other ) {
+        if ( !( other instanceof Structure ) ) return undefined
+        return other.isEarlierThan( this )
+    }
+
+    /**
+     * Finds the next node in the same tree as this one, where "next" is defined
+     * in terms of a pre-order tree traversal.  If there is no such node, this
+     * will return undefined.
+     * 
+     * Therefore this function also returns the earliest node later than this
+     * one, in the sense of {@link Structure#isEarlierThan isEarlierThan()} and
+     * {@link Structure#isLaterThan isLaterThan()}.
+     * 
+     * For example, in a parent node with several atomic children, the next node
+     * of the parent is the first child, and the next node of each child is the
+     * one after, but the last child has no next node.
+     * 
+     * @return {Structure} The next node in pre-order traversal after this one
+     * @see {@link Structure#isEarlierThan isEarlierThan()}
+     * @see {@link Structure#isLaterThan isLaterThan()}
+     * @see {@link Structure#preOrderTraversal preOrderTraversal()}
+     * @see {@link Structure#previousInTree previousInTree()}
+     */
+    nextInTree () {
+        // if I have a first child, that's my next node.
+        if ( this._children.length > 0 )
+            return this._children[0]
+        // if I have a next sibling, that's my next node.
+        // otherwise, use my parent's next sibling, or my grandparent's, ...
+        for ( let ancestor of this.ancestorsIterator() )
+            if ( ancestor.nextSibling() )
+                return ancestor.nextSibling()
+        // no nodes after me, so return undefined
+    }
+
+    /**
+     * Finds the previous node in the same tree as this one, where "previous" is
+     * defined in terms of a pre-order tree traversal.  If there is no such
+     * node, this will return undefined.
+     * 
+     * Therefore this function also returns the latest node earlierr than this
+     * one, in the sense of {@link Structure#isEarlierThan isEarlierThan()} and
+     * {@link Structure#isLaterThan isLaterThan()}.
+     * 
+     * This is the reverse of {@link Structure#nextInTree nextInTree()}, in the
+     * sense that `X.nextInTree().previousInTree()` and
+     * `X.previousInTree().nextInTree()` will, in general, be `X`, unless one of
+     * the computations involved is undefined.
+     * 
+     * @return {Structure} The previous node in pre-order traversal before this
+     *   one
+     * @see {@link Structure#nextInTree nextInTree()}
+     * @see {@link Structure#isEarlierThan isEarlierThan()}
+     * @see {@link Structure#isLaterThan isLaterThan()}
+     * @see {@link Structure#preOrderTraversal preOrderTraversal()}
+     */
+    previousInTree () {
+        // if I have a previous sibling, then its latest descendant is my
+        // previous node
+        let beforeMe = this.previousSibling()
+        while ( beforeMe && beforeMe._children.length > 0 )
+            beforeMe = beforeMe.lastChild()
+        if ( beforeMe )
+            return beforeMe
+        // otherwise, my previous node is my parent (which may be null if
+        // I'm the earliest node in my tree, which we convert to undefined)
+        return this._parent || undefined
+    }
+
+    /**
+     * An iterator that walks through the entire tree from this node onward, in
+     * a pre-order tree traversal, yielding each node in turn.
+     * 
+     * @param {boolean} inThisTreeOnly - Set this to true to limit the iterator
+     *   to return only descendants of this Structure.  Set it to false to
+     *   permit the iterator to proceed outside of this tree into its context,
+     *   once all nodes within this tree have been exhausted.  If this Structure
+     *   has no parent, then this parameter is irrelevant.
+     * @yields {Structure} The next node after this one in pre-order tree
+     *   traversal, just as {@link Structure#nextInTree nextInTree()} would
+     *   yield, then the next after that, and so on.
+     * @see {@link Structure#nextInTree nextInTree()}
+     * @see {@link Structure#isEarlierThan isEarlierThan()}
+     * @see {@link Structure#isLaterThan isLaterThan()}
+     * @see {@link Structure#preOrderTraversal preOrderTraversal()}
+     */
+    *preOrderIterator ( inThisTreeOnly = true ) {
+        // compute the last descendant of this tree (or undefined if they did
+        // not limit us to traversing only this subtree)
+        let stopHere = inThisTreeOnly ? this : undefined
+        while ( stopHere && stopHere._children.length > 0 )
+            stopHere = stopHere.lastChild()
+        // now iterate over all the nexts (stopping only if we encounter the
+        // final descendant computed above, if any)
+        let nextResult = this
+        while ( nextResult ) {
+            yield nextResult
+            if ( nextResult === stopHere ) break
+            nextResult = nextResult.nextInTree()
+        }
+    }
+
+    /**
+     * The same as {@link Structure#preOrderIterator preOrderIterator()}, but
+     * already computed into array form for convenience (usually at a cost of
+     * efficiency).
+     * 
+     * @param {boolean} inThisTreeOnly - Has the same meaning as it does in
+     *   {@link Structure#preOrderIterator preOrderIterator()}
+     * @return {Structure[]} The array containing a pre-order tree traversal
+     *   starting with this node, beginning with
+     *   {@link Structure#nextInTree nextInTree()}, then the next after that,
+     *   and so on.
+     * @see {@link Structure#preOrderIterator preOrderIterator()}
+     * @see {@link Structure#nextInTree nextInTree()}
+     */
+    preOrderTraversal ( inThisTreeOnly = true ) {
+        return Array.from( this.preOrderIterator( inThisTreeOnly ) )
+    }
+
 }
