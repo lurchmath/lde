@@ -17,6 +17,12 @@ EventTarget.prototype.emit = function ( type, details = { } ) {
  * to navigate the tree.
  */
 export class Structure extends EventTarget {
+
+    //////
+    //
+    //  Constructor
+    //
+    //////
     
     /**
      * Create a new Structure.  Any argument that is not a Structure is ignored.
@@ -32,9 +38,17 @@ export class Structure extends EventTarget {
         }
     }
 
+    //////
+    //
+    //  Functions querying tree structure
+    //
+    //////
+    
     /**
      * This Structure's parent Structure, that is, the one enclosing it, if any
      * @return {Structure} This structure's parent node, or null if there isn't one
+     * @see {@link Structure#children children()}
+     * @see {@link Structure#child child()}
      */
     parent () { return this._parent }
 
@@ -45,6 +59,12 @@ export class Structure extends EventTarget {
      * {@link Structure.child()} function instead.
      * 
      * @return {Structure[]} A shallow copy of the Structure's children array
+     * @see {@link Structure#parent parent()}
+     * @see {@link Structure#child child()}
+     * @see {@link Structure#setChildren setChildren()}
+     * @see {@link Structure#allButFirstChild allButFirstChild()}
+     * @see {@link Structure#allButLastChild allButLastChild()}
+     * @see {@link Structure#childrenSatisfying childrenSatisfying()}
      */
     children () { return this._children.slice() }
 
@@ -57,152 +77,20 @@ export class Structure extends EventTarget {
      * 
      * @param {number} i - The index of the child being fetched
      * @return {Structure} The child at the given index, or undefined if none
+     * @see {@link Structure#parent parent()}
+     * @see {@link Structure#children children()}
+     * @see {@link Structure#firstChild firstChild()}
+     * @see {@link Structure#lastChild lastChild()}
      */
     child ( i ) { return this._children[i] }
 
     /**
      * The number of children of this Structure
      * @return {number} A nonnegative integer indicating the number of children
+     * @see {@link Structure#children children()}
+     * @see {@link Structure#child child()}
      */
     numChildren () { return this._children.length }
-
-    /**
-     * Insert a child into this Structure's list of children.
-     * 
-     * Any children at the given index or later will be moved one index later to
-     * make room for the new insertion.  The index can be anything from 0 to the
-     * number of children (inclusive); this last value means insert at the end
-     * of the children array.  The default insertion index is the beginning of
-     * the array.
-     * 
-     * If the child to be inserted is an ancestor of this structure, then we
-     * remove this structure from its parent, to obey the insertion command given
-     * while still maintaining acyclicity in the tree structure.  If the child to
-     * be inserted is this node itself, this function does nothing.
-     * 
-     * @param {Structure} child - the child to insert
-     * @param {number} atIndex - the index at which the new child will be
-     * @fires Structure#willBeInserted
-     * @fires Structure#wasInserted
-     */
-    insertChild ( child, atIndex = 0 ) {
-        if ( !( child instanceof Structure ) ) return
-        if ( child === this ) return
-        if ( atIndex < 0 || atIndex > this._children.length ) return
-        let walk = this
-        while ( ( walk = walk.parent() ) != null ) {
-            if ( walk === child ) {
-                this.remove();
-                break;
-            }
-        }
-        child.remove()
-        /**
-         * An event of this type is fired in a Structure immediately before that
-         * Structure is inserted as a child within a new parent.
-         * 
-         * @event Structure#willBeInserted
-         * @type {Object}
-         * @property {Structure} child - The Structure emitting the event, which
-         *   will soon be a child of a new parent Structure
-         * @property {Structure} parent - The new parent the child will have
-         *   after insertion
-         * @property {number} index - The new index the child will have after
-         *   insertion
-         */
-        child.emit( 'willBeInserted', {
-            child : child,
-            parent : this,
-            index : atIndex
-        } )
-        this._children.splice( atIndex, 0, child )
-        child._parent = this
-        /**
-         * An event of this type is fired in a Structure immediately after that
-         * Structure is inserted as a child within a new parent.
-         * 
-         * @event Structure#wasInserted
-         * @type {Object}
-         * @property {Structure} child - The Structure emitting the event, which
-         *   just became a child of a new parent Structure
-         * @property {Structure} parent - The new parent the child now has
-         * @property {number} index - The index the child now has in its new
-         *   parent
-         */
-        child.emit( 'wasInserted', {
-            child : child,
-            parent : this,
-            index : atIndex
-        } )
-    }
-
-    /**
-     * If this Structure has a parent, remove this from its parent's child list
-     * and set our parent pointer to null, thus severing the relationship.  If
-     * this has no parent, do nothing.
-     * 
-     * @fires Structure#willBeRemoved
-     */
-    remove () {
-        if ( this._parent != null ) {
-            const parent = this._parent
-            const index = this.indexInParent()
-            /**
-             * This event is fired in a Structure immediately before that
-             * Structure is removed from its parent Structure.  This could be
-             * from a simple removal, or it might be the first step in a
-             * re-parenting process that ends up with the Structure as the child
-             * of a new parent.
-             * 
-             * @event Structure#willBeRemoved
-             * @type {Object}
-             * @property {Structure} child - The Structure emitting the event,
-             *   which is about to be removed from its parent Structure
-             * @property {Structure} parent - The current parent Structure
-             * @property {number} index - The index the child has in its parent,
-             *   before the removal
-             */
-            this.emit( 'willBeRemoved', {
-                child : this,
-                parent : parent,
-                index : index
-            } )
-            this._parent._children.splice( this.indexInParent(), 1 )
-            this._parent = null
-            /**
-             * This event is fired in a Structure immediately after that
-             * Structure is removed from its parent Structure.  This could be
-             * from a simple removal, or it might be the first step in a
-             * re-parenting process that ends up with the Structure as the child
-             * of a new parent.
-             * 
-             * @event Structure#wasRemoved
-             * @type {Object}
-             * @property {Structure} child - The Structure emitting the event,
-             *   which was just removed from its parent Structure
-             * @property {Structure} parent - The old parent Structure from
-             *   which the child was just removed
-             * @property {number} index - The index the child had in its parent,
-             *   before the removal
-             */
-            this.emit( 'wasRemoved', {
-                child : this,
-                parent : parent,
-                index : index
-            } )
-        }
-    }
-
-    /**
-     * Calls {@link Structure#remove remove()} on the child with index `i`.
-     * Does nothing if the index is invalid.
-     * 
-     * @param {number} i - the index of the child to remove
-     */
-    removeChild ( i ) {
-        if ( i < 0 || i >= this._children.length ) return
-        this._children[i].remove()
-    }
 
     /**
      * Returns the value `i` such that `this.parent().child(i)` is this object,
@@ -221,6 +109,8 @@ export class Structure extends EventTarget {
     /**
      * Find the previous sibling of this Structure in its parent, if any
      * @return {Structure} The previous sibling, or undefined if there is none
+     * @see {@link Structure#children children()}
+     * @see {@link Structure#nextSibling nextSibling()}
      */
     previousSibling () {
         let index = this.indexInParent()
@@ -232,32 +122,13 @@ export class Structure extends EventTarget {
     /**
      * Find the next sibling of this Structure in its parent, if any
      * @return {Structure} The next sibling, or undefined if there is none
+     * @see {@link Structure#children children()}
+     * @see {@link Structure#previousSibling previousSibling()}
      */
     nextSibling () {
         let index = this.indexInParent()
         if ( index != null ) {
             return this._parent._children[index+1]
-        }
-    }
-
-    /**
-     * Replace this structure, exactly where it sits in its parent Structure,
-     * with the given one, thus deparenting this one.
-     * 
-     * For example, if `A` is a child of `B` and we call `B.replaceWith(C)`,
-     * then `C` will now be a child of `A` at the same index that `B` formerly
-     * occupied, and `B` will now have no parent.  If `C` had a parent before,
-     * it will have been removed from it (thus decreasing that parent's number
-     * of children by one).
-     * 
-     * @param {Structure} other - the Structure with which to replace this one
-     */
-    replaceWith ( other ) {
-        let originalParent = this._parent;
-        if ( originalParent != null ) {
-            const originalIndex = this.indexInParent()
-            this.remove()
-            originalParent.insertChild( other, originalIndex )
         }
     }
 
@@ -306,82 +177,6 @@ export class Structure extends EventTarget {
     allButLastChild () { return this._children.slice( 0, this._children.length-1 ) }
 
     /**
-     * Remove the last child of this Structure and return it.  If there is no
-     * such child, take no action and return undefined.
-     * @return {Structure} The popped last child, or undefined if none
-     * @see {@link Structure#pushChild pushChild()}
-     * @see {@link Structure#shiftChild shiftChild()}
-     */
-    popChild () {
-        const child = this.lastChild()
-        if ( !child ) return
-        child.remove()
-        return child
-    }
-
-    /**
-     * Remove the first child of this Structure and return it.  If there is no
-     * such child, take no action and return undefined.
-     * @return {Structure} The popped first child, or undefined if none
-     * @see {@link Structure#popChild popChild()}
-     * @see {@link Structure#unshiftChild unshiftChild()}
-     */
-    shiftChild () {
-        const child = this.firstChild()
-        if ( !child ) return
-        child.remove()
-        return child
-    }
-
-    /**
-     * Append a new child to the end of this Structure's list of children.  This
-     * is equivalent to a call to `insertChild()` with the length of the current
-     * children array as the index at which to insert.
-     * 
-     * @param {Structure} child - The new Structure to append
-     * @see {@link Structure#popChild popChild()}
-     * @see {@link Structure#unshiftChild unshiftChild()}
-     */
-    pushChild ( child ) { this.insertChild( child, this._children.length ) }
-
-    /**
-     * Prepend a new child to the beginning of this Structure's list of children.
-     * This is equivalent to a call to `insertChild()` with the default second
-     * parameter (i.e., insert at index zero), and thus this function is here
-     * only for convenience, to fit with shiftChild().
-     * 
-     * @param {Structure} child - The new Structure to prepend
-     * @see {@link Structure#shiftChild shiftChild()}
-     * @see {@link Structure#pushChild pushChild()}
-     */
-    unshiftChild ( child ) { this.insertChild( child ) }
-
-    /**
-     * Replace the entire children array of this Structure with a new one.
-     * 
-     * This is equivalent to removing all the current children of this Structure
-     * in order from lowest index to highest, then inserting all the children in
-     * the given array, again from lowest index to highest.
-     * 
-     * The intent is not for any of the elements of the given array to be
-     * ancestors or descendants of one another, but even if they are, the action
-     * taken here still follows the explanation given in the previous paragraph.
-     * 
-     * @param {Structure[]} children - New list of children
-     * @see {@link Structure#children children()}
-     * @see {@link Structure#removeChild removeChild()}
-     * @see {@link Structure#insertChild insertChild()}
-     */
-    setChildren ( children ) {
-        while ( this._children.length > 0 ) {
-            this.firstChild().remove()
-        }
-        for ( const child of children ) {
-            this.pushChild( child )
-        }
-    }
-
-    /**
      * My address within the given ancestor, as a sequence of indices
      * `[i1,i2,...,in]` such that `ancestor.child(i1).child(i2)....child(in)` is
      * this Structure.
@@ -396,6 +191,7 @@ export class Structure extends EventTarget {
      *   empty in the degenerate case where this Structure has no parent or this
      *   structure is the given ancestor
      * @see {@link Structure#child child()}
+     * @see {@link Structure#indexInParent indexInParent()}
      */
     address ( ancestor ) {
         if ( ancestor === this || !this.parent() ) return [ ]
@@ -417,6 +213,7 @@ export class Structure extends EventTarget {
      * @return {Structure} A descendant structure, following the definition
      *   above, or undefined if there is no such Structure
      * @see {@link Structure#child child()}
+     * @see {@link Structure#address address()}
      */
     index ( address ) {
         if ( !( address instanceof Array ) ) return undefined
@@ -426,6 +223,12 @@ export class Structure extends EventTarget {
         return nextStep.index( address.slice( 1 ) )
     }
 
+    //////
+    //
+    //  Advanced queries, including predicates and iterators
+    //
+    //////
+
     /**
      * The list of children of this Structure that satisfy the given predicate,
      * in the same order that they appear as children.  Obviously, not all
@@ -434,6 +237,7 @@ export class Structure extends EventTarget {
      * @param {function(Structure):boolean} predicate - The predicate to use for
      *   testing children
      * @return {Structure[]} The array of children satisfying the given predicate
+     * @see {@link Structure#children children()}
      * @see {@link Structure#descendantsSatisfying descendantsSatisfying()}
      * @see {@link Structure#hasChildSatisfying hasChildSatisfying()}
      */
@@ -520,6 +324,7 @@ export class Structure extends EventTarget {
      * 
      * @yields {Structure} This structure, then its parent, grandparent, etc.
      * @see {@link Structure#ancestors ancestors()}
+     * @see {@link Structure#parent parent()}
      */
     *ancestorsIterator () {
         yield this
@@ -535,6 +340,7 @@ export class Structure extends EventTarget {
      * @return {Structure[]} An array beginning with this structure, then its
      *   parent, grandparent, etc.
      * @see {@link Structure#ancestorsIterator ancestorsIterator()}
+     * @see {@link Structure#parent parent()}
      */
     ancestors () { return Array.from( this.ancestorsIterator() ) }
     
@@ -575,6 +381,271 @@ export class Structure extends EventTarget {
             if ( predicate( ancestor ) ) return true
         return false
     }
+
+    //////
+    //
+    //  Functions altering tree structure
+    //
+    //////
+
+    /**
+     * Insert a child into this Structure's list of children.
+     * 
+     * Any children at the given index or later will be moved one index later to
+     * make room for the new insertion.  The index can be anything from 0 to the
+     * number of children (inclusive); this last value means insert at the end
+     * of the children array.  The default insertion index is the beginning of
+     * the array.
+     * 
+     * If the child to be inserted is an ancestor of this structure, then we
+     * remove this structure from its parent, to obey the insertion command given
+     * while still maintaining acyclicity in the tree structure.  If the child to
+     * be inserted is this node itself, this function does nothing.
+     * 
+     * @param {Structure} child - the child to insert
+     * @param {number} atIndex - the index at which the new child will be
+     * @fires Structure#willBeInserted
+     * @fires Structure#wasInserted
+     * @see {@link Structure#children children()}
+     * @see {@link Structure#setChildren setChildren()}
+     * @see {@link Structure#child child()}
+     * @see {@link Structure#pushChild pushChild()}
+     * @see {@link Structure#unshiftChild unshiftChild()}
+     */
+    insertChild ( child, atIndex = 0 ) {
+        if ( !( child instanceof Structure ) ) return
+        if ( child === this ) return
+        if ( atIndex < 0 || atIndex > this._children.length ) return
+        let walk = this
+        while ( ( walk = walk.parent() ) != null ) {
+            if ( walk === child ) {
+                this.remove();
+                break;
+            }
+        }
+        child.remove()
+        /**
+         * An event of this type is fired in a Structure immediately before that
+         * Structure is inserted as a child within a new parent.
+         * 
+         * @event Structure#willBeInserted
+         * @type {Object}
+         * @property {Structure} child - The Structure emitting the event, which
+         *   will soon be a child of a new parent Structure
+         * @property {Structure} parent - The new parent the child will have
+         *   after insertion
+         * @property {number} index - The new index the child will have after
+         *   insertion
+         * @see {@link Structure#insertChild insertChild()}
+         */
+        child.emit( 'willBeInserted', {
+            child : child,
+            parent : this,
+            index : atIndex
+        } )
+        this._children.splice( atIndex, 0, child )
+        child._parent = this
+        /**
+         * An event of this type is fired in a Structure immediately after that
+         * Structure is inserted as a child within a new parent.
+         * 
+         * @event Structure#wasInserted
+         * @type {Object}
+         * @property {Structure} child - The Structure emitting the event, which
+         *   just became a child of a new parent Structure
+         * @property {Structure} parent - The new parent the child now has
+         * @property {number} index - The index the child now has in its new
+         *   parent
+         * @see {@link Structure#insertChild insertChild()}
+         */
+        child.emit( 'wasInserted', {
+            child : child,
+            parent : this,
+            index : atIndex
+        } )
+    }
+
+    /**
+     * If this Structure has a parent, remove this from its parent's child list
+     * and set our parent pointer to null, thus severing the relationship.  If
+     * this has no parent, do nothing.
+     * 
+     * @fires Structure#willBeRemoved
+     * @see {@link Structure#parent parent()}
+     * @see {@link Structure#removeChild removeChild()}
+     */
+    remove () {
+        if ( this._parent != null ) {
+            const parent = this._parent
+            const index = this.indexInParent()
+            /**
+             * This event is fired in a Structure immediately before that
+             * Structure is removed from its parent Structure.  This could be
+             * from a simple removal, or it might be the first step in a
+             * re-parenting process that ends up with the Structure as the child
+             * of a new parent.
+             * 
+             * @event Structure#willBeRemoved
+             * @type {Object}
+             * @property {Structure} child - The Structure emitting the event,
+             *   which is about to be removed from its parent Structure
+             * @property {Structure} parent - The current parent Structure
+             * @property {number} index - The index the child has in its parent,
+             *   before the removal
+             * @see {@link Structure#remove remove()}
+             */
+            this.emit( 'willBeRemoved', {
+                child : this,
+                parent : parent,
+                index : index
+            } )
+            this._parent._children.splice( this.indexInParent(), 1 )
+            this._parent = null
+            /**
+             * This event is fired in a Structure immediately after that
+             * Structure is removed from its parent Structure.  This could be
+             * from a simple removal, or it might be the first step in a
+             * re-parenting process that ends up with the Structure as the child
+             * of a new parent.
+             * 
+             * @event Structure#wasRemoved
+             * @type {Object}
+             * @property {Structure} child - The Structure emitting the event,
+             *   which was just removed from its parent Structure
+             * @property {Structure} parent - The old parent Structure from
+             *   which the child was just removed
+             * @property {number} index - The index the child had in its parent,
+             *   before the removal
+             * @see {@link Structure#remove remove()}
+             */
+            this.emit( 'wasRemoved', {
+                child : this,
+                parent : parent,
+                index : index
+            } )
+        }
+    }
+
+    /**
+     * Calls {@link Structure#remove remove()} on the child with index `i`.
+     * Does nothing if the index is invalid.
+     * 
+     * @param {number} i - the index of the child to remove
+     * @see {@link Structure#remove remove()}
+     * @see {@link Structure#child child()}
+     * @see {@link Structure#popChild popChild()}
+     * @see {@link Structure#shiftChild shiftChild()}
+     */
+    removeChild ( i ) {
+        if ( i < 0 || i >= this._children.length ) return
+        this._children[i].remove()
+    }
+
+    /**
+     * Replace this structure, exactly where it sits in its parent Structure,
+     * with the given one, thus deparenting this one.
+     * 
+     * For example, if `A` is a child of `B` and we call `B.replaceWith(C)`,
+     * then `C` will now be a child of `A` at the same index that `B` formerly
+     * occupied, and `B` will now have no parent.  If `C` had a parent before,
+     * it will have been removed from it (thus decreasing that parent's number
+     * of children by one).
+     * 
+     * @param {Structure} other - the Structure with which to replace this one
+     * @see {@link Structure#remove remove()}
+     * @see {@link Structure#child child()}
+     * @see {@link Structure#parent parent()}
+     */
+    replaceWith ( other ) {
+        let originalParent = this._parent;
+        if ( originalParent != null ) {
+            const originalIndex = this.indexInParent()
+            this.remove()
+            originalParent.insertChild( other, originalIndex )
+        }
+    }
+
+    /**
+     * Remove the last child of this Structure and return it.  If there is no
+     * such child, take no action and return undefined.
+     * @return {Structure} The popped last child, or undefined if none
+     * @see {@link Structure#pushChild pushChild()}
+     * @see {@link Structure#shiftChild shiftChild()}
+     */
+    popChild () {
+        const child = this.lastChild()
+        if ( !child ) return
+        child.remove()
+        return child
+    }
+
+    /**
+     * Remove the first child of this Structure and return it.  If there is no
+     * such child, take no action and return undefined.
+     * @return {Structure} The popped first child, or undefined if none
+     * @see {@link Structure#popChild popChild()}
+     * @see {@link Structure#unshiftChild unshiftChild()}
+     */
+    shiftChild () {
+        const child = this.firstChild()
+        if ( !child ) return
+        child.remove()
+        return child
+    }
+
+    /**
+     * Append a new child to the end of this Structure's list of children.  This
+     * is equivalent to a call to `insertChild()` with the length of the current
+     * children array as the index at which to insert.
+     * 
+     * @param {Structure} child - The new Structure to append
+     * @see {@link Structure#popChild popChild()}
+     * @see {@link Structure#unshiftChild unshiftChild()}
+     */
+    pushChild ( child ) { this.insertChild( child, this._children.length ) }
+
+    /**
+     * Prepend a new child to the beginning of this Structure's list of children.
+     * This is equivalent to a call to `insertChild()` with the default second
+     * parameter (i.e., insert at index zero), and thus this function is here
+     * only for convenience, to fit with shiftChild().
+     * 
+     * @param {Structure} child - The new Structure to prepend
+     * @see {@link Structure#shiftChild shiftChild()}
+     * @see {@link Structure#pushChild pushChild()}
+     */
+    unshiftChild ( child ) { this.insertChild( child ) }
+
+    /**
+     * Replace the entire children array of this Structure with a new one.
+     * 
+     * This is equivalent to removing all the current children of this Structure
+     * in order from lowest index to highest, then inserting all the children in
+     * the given array, again from lowest index to highest.
+     * 
+     * The intent is not for any of the elements of the given array to be
+     * ancestors or descendants of one another, but even if they are, the action
+     * taken here still follows the explanation given in the previous paragraph.
+     * 
+     * @param {Structure[]} children - New list of children
+     * @see {@link Structure#children children()}
+     * @see {@link Structure#removeChild removeChild()}
+     * @see {@link Structure#insertChild insertChild()}
+     */
+    setChildren ( children ) {
+        while ( this._children.length > 0 ) {
+            this.firstChild().remove()
+        }
+        for ( const child of children ) {
+            this.pushChild( child )
+        }
+    }
+
+    //////
+    //
+    //  Order relations and traversals
+    //
+    //////
 
     /**
      * Under pre-order tree traversal, which of two structures comes first?  We
