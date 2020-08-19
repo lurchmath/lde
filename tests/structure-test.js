@@ -1144,4 +1144,145 @@ describe( 'Structure order relations', () => {
         expect( A.preOrderTraversal( false ) ).to.eql( [ A, AA, AB, ABA, B ] )
     } )
 
+    it( 'computes accessibility and scope correctly', () => {
+        // Create a new hierarchy for testing
+        let A, B, C, D, BA, BB, DA, DB, DAA
+        const root = new Structure(
+            A = new Structure,
+            B = new Structure(
+                BA = new Structure,
+                BB = new Structure
+            ),
+            C = new Structure,
+            D = new Structure(
+                DA = new Structure(
+                    DAA = new Structure
+                ),
+                DB = new Structure
+            )
+        )
+        // Verify that reflexivity is false for accessibility by default
+        expect( root.isAccessibleTo( root ) ).to.equal( false )
+        expect( C.isAccessibleTo( C ) ).to.equal( false )
+        expect( DA.isAccessibleTo( DA ) ).to.equal( false )
+        // Verify that we can change that with the reflexivity flag
+        expect( root.isAccessibleTo( root, true ) ).to.equal( true )
+        expect( C.isAccessibleTo( C, true ) ).to.equal( true )
+        expect( DA.isAccessibleTo( DA, true ) ).to.equal( true )
+        // Check a smattering of the 100 possible isAccessibleTo() checks
+        expect( root.isAccessibleTo( A ) ).to.equal( false )
+        expect( root.isAccessibleTo( BA ) ).to.equal( false )
+        expect( root.isAccessibleTo( DAA ) ).to.equal( false )
+        expect( A.isAccessibleTo( root ) ).to.equal( false )
+        expect( A.isAccessibleTo( B ) ).to.equal( true )
+        expect( A.isAccessibleTo( BB ) ).to.equal( true )
+        expect( A.isAccessibleTo( DAA ) ).to.equal( true )
+        expect( BA.isAccessibleTo( B ) ).to.equal( false )
+        expect( BA.isAccessibleTo( BB ) ).to.equal( true )
+        expect( BA.isAccessibleTo( C ) ).to.equal( false )
+        expect( BA.isAccessibleTo( DA ) ).to.equal( false )
+        expect( BB.isAccessibleTo( C ) ).to.equal( false )
+        expect( C.isAccessibleTo( B ) ).to.equal( false )
+        expect( C.isAccessibleTo( BB ) ).to.equal( false )
+        expect( C.isAccessibleTo( D ) ).to.equal( true )
+        expect( C.isAccessibleTo( DB ) ).to.equal( true )
+        expect( D.isAccessibleTo( DA ) ).to.equal( false )
+        expect( D.isAccessibleTo( DAA ) ).to.equal( false )
+        expect( DA.isAccessibleTo( DB ) ).to.equal( true )
+        expect( DAA.isAccessibleTo( DB ) ).to.equal( false )
+        // Verify that reflexivity is true for in-the-scope-of by default
+        expect( root.isInTheScopeOf( root ) ).to.equal( true )
+        expect( C.isInTheScopeOf( C ) ).to.equal( true )
+        expect( DA.isInTheScopeOf( DA ) ).to.equal( true )
+        // Verify that we can change that with the reflexivity flag
+        expect( root.isInTheScopeOf( root, false ) ).to.equal( false )
+        expect( C.isInTheScopeOf( C, false ) ).to.equal( false )
+        expect( DA.isInTheScopeOf( DA, false ) ).to.equal( false )
+        // Check the same sample of pairs as for accessibility, just swapping
+        // the parameters and verifying the result is the same
+        expect( A.isInTheScopeOf( root ) ).to.equal( false )
+        expect( BA.isInTheScopeOf( root ) ).to.equal( false )
+        expect( DAA.isInTheScopeOf( root ) ).to.equal( false )
+        expect( root.isInTheScopeOf( A ) ).to.equal( false )
+        expect( B.isInTheScopeOf( A ) ).to.equal( true )
+        expect( BB.isInTheScopeOf( A ) ).to.equal( true )
+        expect( DAA.isInTheScopeOf( A ) ).to.equal( true )
+        expect( B.isInTheScopeOf( BA ) ).to.equal( false )
+        expect( BB.isInTheScopeOf( BA ) ).to.equal( true )
+        expect( C.isInTheScopeOf( BA ) ).to.equal( false )
+        expect( DA.isInTheScopeOf( BA ) ).to.equal( false )
+        expect( C.isInTheScopeOf( BB ) ).to.equal( false )
+        expect( B.isInTheScopeOf( C ) ).to.equal( false )
+        expect( BB.isInTheScopeOf( C ) ).to.equal( false )
+        expect( D.isInTheScopeOf( C ) ).to.equal( true )
+        expect( DB.isInTheScopeOf( C ) ).to.equal( true )
+        expect( DA.isInTheScopeOf( D ) ).to.equal( false )
+        expect( DAA.isInTheScopeOf( D ) ).to.equal( false )
+        expect( DB.isInTheScopeOf( DA ) ).to.equal( true )
+        expect( DB.isInTheScopeOf( DAA ) ).to.equal( false )
+    } )
+
+    it( 'iterates over accessibility and scope correctly', () => {
+        // Create a the same hierarchy for testing as in the previous test
+        let A, B, C, D, BA, BB, DA, DB, DAA
+        const root = new Structure(
+            A = new Structure,
+            B = new Structure(
+                BA = new Structure,
+                BB = new Structure
+            ),
+            C = new Structure,
+            D = new Structure(
+                DA = new Structure(
+                    DAA = new Structure
+                ),
+                DB = new Structure
+            )
+        )
+        // Verify accessibles lists for all structures, without reflexivity
+        expect( root.accessibles() ).to.eql( [ ] )
+        expect( A.accessibles() ).to.eql( [ ] )
+        expect( B.accessibles() ).to.eql( [ A ] )
+        expect( C.accessibles() ).to.eql( [ B, A ] )
+        expect( D.accessibles() ).to.eql( [ C, B, A ] )
+        expect( BA.accessibles() ).to.eql( [ A ] )
+        expect( BB.accessibles() ).to.eql( [ BA, A ] )
+        expect( DA.accessibles() ).to.eql( [ C, B, A ] )
+        expect( DB.accessibles() ).to.eql( [ DA, C, B, A ] )
+        expect( DAA.accessibles() ).to.eql( [ C, B, A ] )
+        // Repeat previous experiment, now with reflexivity
+        expect( root.accessibles( true ) ).to.eql( [ root ] )
+        expect( A.accessibles( true ) ).to.eql( [ A ] )
+        expect( B.accessibles( true ) ).to.eql( [ B, A ] )
+        expect( C.accessibles( true ) ).to.eql( [ C, B, A ] )
+        expect( D.accessibles( true ) ).to.eql( [ D, C, B, A ] )
+        expect( BA.accessibles( true ) ).to.eql( [ BA, A ] )
+        expect( BB.accessibles( true ) ).to.eql( [ BB, BA, A ] )
+        expect( DA.accessibles( true ) ).to.eql( [ DA, C, B, A ] )
+        expect( DB.accessibles( true ) ).to.eql( [ DB, DA, C, B, A ] )
+        expect( DAA.accessibles( true ) ).to.eql( [ DAA, C, B, A ] )
+        // Verify scope lists for all structures, without reflexivity
+        expect( root.scope() ).to.eql( [ root ] )
+        expect( A.scope() ).to.eql( [ A, B, BA, BB, C, D, DA, DAA, DB ] )
+        expect( B.scope() ).to.eql( [ B, C, D, DA, DAA, DB ] )
+        expect( C.scope() ).to.eql( [ C, D, DA, DAA, DB ] )
+        expect( D.scope() ).to.eql( [ D ] )
+        expect( BA.scope() ).to.eql( [ BA, BB ] )
+        expect( BB.scope() ).to.eql( [ BB ] )
+        expect( DA.scope() ).to.eql( [ DA, DB ] )
+        expect( DB.scope() ).to.eql( [ DB ] )
+        expect( DAA.scope() ).to.eql( [ DAA ] )
+        // Repeat previous experiment, now with reflexivity
+        expect( root.scope( false ) ).to.eql( [ ] )
+        expect( A.scope( false ) ).to.eql( [ B, BA, BB, C, D, DA, DAA, DB ] )
+        expect( B.scope( false ) ).to.eql( [ C, D, DA, DAA, DB ] )
+        expect( C.scope( false ) ).to.eql( [ D, DA, DAA, DB ] )
+        expect( D.scope( false ) ).to.eql( [ ] )
+        expect( BA.scope( false ) ).to.eql( [ BB ] )
+        expect( BB.scope( false ) ).to.eql( [ ] )
+        expect( DA.scope( false ) ).to.eql( [ DB ] )
+        expect( DB.scope( false ) ).to.eql( [ ] )
+        expect( DAA.scope( false ) ).to.eql( [ ] )
+    } )
+
 } )

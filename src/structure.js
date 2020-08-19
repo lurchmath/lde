@@ -827,4 +827,161 @@ export class Structure extends EventTarget {
         return Array.from( this.preOrderIterator( inThisTreeOnly ) )
     }
 
+    /**
+     * In computer programming, the notion of variable scope is common.  A line
+     * of code can "see" a variable (or is in the scope of that variable) if it
+     * appears later than the variable's declaration and at a deeper level of
+     * block nesting.  We have the same concept within Structures, and we call
+     * it both "scope" and "accessibility."  We say that any later Structure is
+     * "in the scope of" an earlier one, or equivalently, the earlier one "is
+     * accessible to" the later one, if the nesting of intermediate structures
+     * permits it in the usual way.
+     * 
+     * More specifically, a Structure `X` is in the scope of precisely the
+     * following other Structures: all of `X`'s previous siblings, all of
+     * `X.parent()`'s previous siblings (if `X.parent()` exists), all of
+     * `X.parent().parent()`'s previous siblings (if `X.parent().parent()`
+     * exists), and so on.  In particular, a Structure is not in its own scope,
+     * nor in the scope of any of its other ancestors.
+     * 
+     * The one exception to what's stated above is the reflexive case, whether
+     * `X.isAccessibleTo(X)`.  By default, this is false, because we typically
+     * think of `X.isAccessibleTo(Y)` as answering the question, "Can `Y`
+     * justify itself by citing `X`?" and we do not wish that relation to be
+     * reflexive.  However, `X.isInTheScopeOf(X)` would typically be considered
+     * true, because a variable declaration is the beginning of the scope of
+     * that variable.  So we provide the second parameter, `reflexive`, for
+     * customizing this behavior, and we have that, for any boolean value `b`,
+     * `X.isAccessibleTo(Y,b)` if and only if `Y.isInTheScopeOf(X,b)`.
+     * 
+     * @param {Structure} other - The Structure to which we're asking whether
+     *   the current one is accessible.  If this parameter is not a Structure,
+     *   the result is undefined.
+     * @param {boolean} reflexive - Whether the relation should be reflexive,
+     *   that is, whether it should judge `X.isAccessibleTo(X)` to be true.
+     * @return {boolean} Whether this Structure is accessible to `other`.
+     * @see {@link Structure#isInTheScopeOf isInTheScopeOf()}
+     */
+    isAccessibleTo ( other, reflexive = false ) {
+        if ( this === other ) return reflexive
+        if ( !( other instanceof Structure ) ) return undefined
+        if ( other.parent() === null ) return false
+        if ( this.parent() === other.parent() ) {
+            return this.indexInParent() < other.indexInParent()
+        }
+        return this.isAccessibleTo( other.parent() )
+    }
+
+    /**
+     * A full definition of both
+     * {@link Structure#isAccessibleTo isAccessibleTo()} and
+     * {@link Structure#isInTheScopeOf isInTheScopeOf()} appears in the
+     * documentation for {@link Structure#isAccessibleTo isAccessibleTo()}.
+     * Refer there for details.
+     * 
+     * @param {Structure} other - The Structure in whose scope we're asking
+     *   whether this one lies.  If this parameter is not a Structure, the
+     *   result is undefined.
+     * @param {boolean} reflexive - Whether the relation should be reflexive,
+     *   that is, whether it should judge `X.isInTheScopeOf(X)` to be true.
+     * @return {boolean} Whether this Structure is in the scope of `other`.
+     * @see {@link Structure#isAccessibleTo isAccessibleTo()}
+     */
+    isInTheScopeOf ( other, reflexive = true ) {
+        if ( !( other instanceof Structure ) ) return undefined
+        return other.isAccessibleTo( this, reflexive )
+    }
+
+    /**
+     * For a definition of accessibility, refer to the documentation for the
+     * {@link Structure#isAccessibleTo isAccessibleTo()} function.
+     * 
+     * @param {boolean} reflexive - Functions analogously to the `reflexive`
+     *   parameter for {@link Structure#isAccessibleTo isAccessibleTo()}; that
+     *   is, do we include this Structure on its list of accessibles?  The
+     *   default value is false.
+     * @yields {Structure} Each Structure accessible to this one, beginning with
+     *   the one closest to this one (often its previous sibling) and proceeding
+     *   back through the hierarchy, so that each new result is accessible to
+     *   (and earlier than) the previous).
+     * @see {@link Structure#isAccessibleTo isAccessibleTo()}
+     * @see {@link Structure#accessibles accessibles()}
+     */
+    *accessiblesIterator ( reflexive = false ) {
+        if ( reflexive ) yield this
+        const previous = this.previousSibling()
+        if ( previous ) { // yield previous sibling and all its accessibles
+            yield previous
+            yield* previous.accessiblesIterator()
+        } else { // defer computation to parent, if any
+            if ( this._parent ) yield* this._parent.accessiblesIterator()
+        }
+    }
+
+    /**
+     * The full contents of
+     * {@link Structure#accessiblesIterator accessiblesIterator()}, but put into
+     * an array rather than an iterator, for convenience, possibly at the cost
+     * of efficiency.
+     * 
+     * @param {boolean} reflexive - Passed directly to
+     *   {@link Structure#accessiblesIterator accessiblesIterator()}; see that
+     *   function for more information
+     * @return {Structure[]} All Structures accessible to this one, with the
+     *   latest (closest to this structure) first, proceeding on to the earliest
+     *   at the end of the array
+     * @see {@link Structure#accessiblesIterator accessiblesIterator()}
+     * @see {@link Structure#isAccessibleTo isAccessibleTo()}
+     */
+    accessibles ( reflexive = false ) {
+        return Array.from( this.accessiblesIterator( reflexive ) )
+    }
+
+    /**
+     * For a definition of scope, refer to the documentation for the
+     * {@link Structure#isAccessibleTo isAccessibleTo()} function.
+     * 
+     * In short, the scope of a node is itself, all of its later siblings, and
+     * all their descendants, where each entry on the list
+     * {@link Structure#isEarlierThan isEarlierThan()} all later entries.
+     * 
+     * @param {boolean} reflexive - Functions analogously to the `reflexive`
+     *   parameter for {@link Structure#isInTheScopeOf isInTheScopeOf()}; that
+     *   is, do we include this Structure on its list of things in its scope?
+     *   The default value is true.
+     * @yields {Structure} Each Structure in the scope of this one, beginning
+     *   with the one closest to this one (often its previous sibling) and
+     *   proceeding forward through the hierarchy, so that each new result
+     *   {@link Structure#isLaterThan isLaterThan()} the previous.
+     * @see {@link Structure#isInTheScopeOf isInTheScopeOf()}
+     * @see {@link Structure#scope scope()}
+     */
+    *scopeIterator ( reflexive = true ) {
+        for ( let sibling = this ; sibling ; sibling = sibling.nextSibling() ) {
+            if ( sibling === this ) {
+                if ( reflexive ) yield this
+            } else {
+                yield* sibling.descendantsIterator()
+            }
+        }
+    }
+
+    /**
+     * The full contents of {@link Structure#scopeIterator scopeIterator()}, but
+     * put into an array rather than an iterator, for convenience, possibly at
+     * the cost of efficiency.
+     * 
+     * @param {boolean} reflexive - Passed directly to
+     *   {@link Structure#scopeIterator scopeIterator()}; see that function for
+     *   more information
+     * @return {Structure[]} All Structures in the scope of to this one, with
+     *   the earliest (closest to this structure) first, proceeding on to the
+     *   latest at the end of the array
+     * @see {@link Structure#scopeIterator scopeIterator()}
+     * @see {@link Structure#isInTheScopeOf isInTheScopeOf()}
+     */
+    scope ( reflexive = true ) {
+        return Array.from( this.scopeIterator( reflexive ) )
+    }
+
 }
