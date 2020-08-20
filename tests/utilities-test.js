@@ -9,6 +9,10 @@ describe( 'Utilities', () => {
         expect( EventTarget.prototype.emit ).to.be.ok
     } )
 
+} )
+
+describe( 'JSON tools', () => {
+
     it( 'predictableStringify yields JSON with alphabetical keys', () => {
         // test some atomics
         expect( predictableStringify( 5 ) ).to.equal( "5" )
@@ -60,6 +64,10 @@ describe( 'Utilities', () => {
                 expect( JSON.equals( values[i], copies[j] ) ).to.equal( i == j )
     } )
 
+} )
+
+describe( 'Prototype extensions', () => {
+
     it( 'The EventTarget.prototype.emit function behaves correctly', () => {
         // create a thing that can emit events
         const E = new EventTarget
@@ -87,6 +95,40 @@ describe( 'Utilities', () => {
         // verify that we did not hear that event
         expect( eventsHeard.length ).to.equal( 1 )
         expect( eventsHeard[0] ).to.equal( firstHeard )
+    } )
+
+    it( 'The Map.prototype.deepCopy function behaves correctly', () => {
+        // create a Map with all JSON-encodable contents (because the function
+        // we are testing is guaranteed to work only for such Maps)
+        const M = new Map( [
+            [ 'favorite number', 5 ],
+            [ 'favorite color', 'blue' ],
+            [ 'favorite bands', [
+                'Destroy the Raging Monkeys',
+                'Unbelievable Hangover',
+                'Thrash Machine from the Grave'
+            ] ],
+            [ 'favorite data', { one : 1, two : 2, three : 3 } ]
+        ] )
+        // make a deep copy
+        const Mcopy = M.deepCopy()
+        // verify that the two maps have the same sets of keys
+        expect( M.keys() ).to.eql( Mcopy.keys() )
+        // verify that all atomic values are identical
+        expect( M.get( 'favorite number' ) ).to.equal(
+            Mcopy.get( 'favorite number' ) )
+        expect( M.get( 'favorite color' ) ).to.equal(
+            Mcopy.get( 'favorite color' ) )
+        // verify that all non-atomic values match structurally
+        expect( M.get( 'favorite bands' ) ).to.eql(
+            Mcopy.get( 'favorite bands' ) )
+        expect( M.get( 'favorite data' ) ).to.eql(
+            Mcopy.get( 'favorite data' ) )
+        // verify that all non-atomic values are not identical
+        expect( M.get( 'favorite bands' ) ).not.to.equal(
+            Mcopy.get( 'favorite bands' ) )
+        expect( M.get( 'favorite data' ) ).not.to.equal(
+            Mcopy.get( 'favorite data' ) )
     } )
 
 } )

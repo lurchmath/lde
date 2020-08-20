@@ -69,3 +69,13 @@ JSON.equals = ( x, y ) => {
 EventTarget.prototype.emit = function ( type, details = { } ) {
     this.dispatchEvent( Object.assign( new Event( type ), details ) )
 }
+
+/**
+ * Extend the built-in JavaScript `Map` class with a deep copy method.  This
+ * works only for Maps whose keys and values are all JSON-encodable.
+ * 
+ * @return {Map} A new map that is a deep copy of the original.
+ */
+Map.prototype.deepCopy = function () {
+    return new Map( JSON.parse( JSON.stringify( [ ...this ] ) ) )
+}
