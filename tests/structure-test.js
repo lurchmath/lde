@@ -1286,3 +1286,220 @@ describe( 'Structure order relations', () => {
     } )
 
 } )
+
+describe( 'Structure attributes', () => {
+
+    it( 'Are empty to begin with', () => {
+        // create a few structures on which we can set attributes
+        const S1 = new Structure
+        const S2 = new Structure
+        const S3 = new Structure( S2 )
+        // fetch attributes and ensure we get undefined each time
+        expect( S1.getAttribute( 'x' ) ).to.equal( undefined )
+        expect( S1.getAttribute( '100' ) ).to.equal( undefined )
+        expect( S1.getAttribute( -8 ) ).to.equal( undefined )
+        expect( S2.getAttribute( 'x' ) ).to.equal( undefined )
+        expect( S2.getAttribute( '100' ) ).to.equal( undefined )
+        expect( S2.getAttribute( -8 ) ).to.equal( undefined )
+        expect( S3.getAttribute( 'x' ) ).to.equal( undefined )
+        expect( S3.getAttribute( '100' ) ).to.equal( undefined )
+        expect( S3.getAttribute( -8 ) ).to.equal( undefined )
+        // repeat that experiment, but this time, providing a default, and
+        // ensuring that the default is returned, because the attribute does
+        // not exist
+        expect( S1.getAttribute( 'x', 'DEF' ) ).to.equal( 'DEF' )
+        expect( S1.getAttribute( '100', 'DEF' ) ).to.equal( 'DEF' )
+        expect( S1.getAttribute( -8, 'DEF' ) ).to.equal( 'DEF' )
+        expect( S2.getAttribute( 'x', 'DEF' ) ).to.equal( 'DEF' )
+        expect( S2.getAttribute( '100', 'DEF' ) ).to.equal( 'DEF' )
+        expect( S2.getAttribute( -8, 'DEF' ) ).to.equal( 'DEF' )
+        expect( S3.getAttribute( 'x', 'DEF' ) ).to.equal( 'DEF' )
+        expect( S3.getAttribute( '100', 'DEF' ) ).to.equal( 'DEF' )
+        expect( S3.getAttribute( -8, 'DEF' ) ).to.equal( 'DEF' )
+    } )
+
+    it( 'Can be set and gotten in the expected ways', () => {
+        // create a few structures on which we can set attributes
+        const S1 = new Structure
+        const S2 = new Structure
+        const S3 = new Structure( S2 )
+        // set some attributes
+        S1.setAttribute( 'ess one key', 'ess one value' )
+        S2.setAttribute( 5000000, { some: 'JSON', here: [1,2,3,4,5] } )
+        S2.setAttribute( 'second', [ 'At', 'rib', 'yout\'' ] )
+        // query those attributes, verify the right values come out
+        expect( S1.getAttribute( 'ess one key' ) ).to.equal( 'ess one value' )
+        expect( S2.getAttribute( 5000000 ) ).to.eql(
+            { some: 'JSON', here: [1,2,3,4,5] } )
+        expect( S2.getAttribute( 'second' ) ).to.eql(
+            [ 'At', 'rib', 'yout\'' ] )
+        // repeat that, with default values supplied, and verify that this is
+        // not relevant; default values are ignored because the attributes exist
+        expect( S1.getAttribute( 'ess one key', 'DEF' ) ).to.equal(
+            'ess one value' )
+        expect( S2.getAttribute( 5000000, 'DEF' ) ).to.eql(
+            { some: 'JSON', here: [1,2,3,4,5] } )
+        expect( S2.getAttribute( 'second', 'DEF' ) ).to.eql(
+            [ 'At', 'rib', 'yout\'' ] )
+        // verify that querying the right keys on the wrong structures yields
+        // undefined in each case
+        expect( S1.getAttribute( 5000000 ) ).to.equal( undefined )
+        expect( S3.getAttribute( 5000000 ) ).to.equal( undefined )
+        expect( S1.getAttribute( 'second' ) ).to.equal( undefined )
+        expect( S3.getAttribute( 'second' ) ).to.equal( undefined )
+        expect( S2.getAttribute( 'ess one key' ) ).to.equal( undefined )
+        expect( S3.getAttribute( 'ess one key' ) ).to.equal( undefined )
+        // repeat the queries from the previous test, for attributes that don't
+        // exist, and verify that the results are the same
+        expect( S1.getAttribute( 'x' ) ).to.equal( undefined )
+        expect( S1.getAttribute( '100' ) ).to.equal( undefined )
+        expect( S1.getAttribute( -8 ) ).to.equal( undefined )
+        expect( S2.getAttribute( 'x' ) ).to.equal( undefined )
+        expect( S2.getAttribute( '100' ) ).to.equal( undefined )
+        expect( S2.getAttribute( -8 ) ).to.equal( undefined )
+        expect( S3.getAttribute( 'x' ) ).to.equal( undefined )
+        expect( S3.getAttribute( '100' ) ).to.equal( undefined )
+        expect( S3.getAttribute( -8 ) ).to.equal( undefined )
+        expect( S1.getAttribute( 'x', 'DEF' ) ).to.equal( 'DEF' )
+        expect( S1.getAttribute( '100', 'DEF' ) ).to.equal( 'DEF' )
+        expect( S1.getAttribute( -8, 'DEF' ) ).to.equal( 'DEF' )
+        expect( S2.getAttribute( 'x', 'DEF' ) ).to.equal( 'DEF' )
+        expect( S2.getAttribute( '100', 'DEF' ) ).to.equal( 'DEF' )
+        expect( S2.getAttribute( -8, 'DEF' ) ).to.equal( 'DEF' )
+        expect( S3.getAttribute( 'x', 'DEF' ) ).to.equal( 'DEF' )
+        expect( S3.getAttribute( '100', 'DEF' ) ).to.equal( 'DEF' )
+        expect( S3.getAttribute( -8, 'DEF' ) ).to.equal( 'DEF' )
+    } )
+
+    it( 'Is a separate namespace from the Structure object itself', () => {
+        // make a structure
+        const S = new Structure
+        // verify that it, as a Structure object in JavaScript, has certain
+        // attributes and methods present (just a sample here)
+        expect( S.children ).to.be.ok
+        expect( S.getAttribute ).to.be.ok
+        expect( S.emit ).to.be.ok
+        // verify that none of those are present in its attributes as a
+        // Structure, i.e., with getAttribute()
+        expect( S.getAttribute( 'children' ) ).not.to.be.ok
+        expect( S.getAttribute( 'getAttribute' ) ).not.to.be.ok
+        expect( S.getAttribute( 'emit' ) ).not.to.be.ok
+    } )
+
+    it( 'Emits events when adding/removing/changing attributes', () => {
+        // make two Structures
+        const S1 = new Structure
+        const S2 = new Structure
+        // connect event handlers to each for recording events
+        const heardEvents1 = [ ]
+        const heardEvents2 = [ ]
+        S1.addEventListener( 'willBeChanged', e => heardEvents1.push( e ) )
+        S2.addEventListener( 'willBeChanged', e => heardEvents2.push( e ) )
+        S1.addEventListener( 'wasChanged', e => heardEvents1.push( e ) )
+        S2.addEventListener( 'wasChanged', e => heardEvents2.push( e ) )
+        // verify that all requisite events are called in the right order when
+        // adding an attribute
+        S1.setAttribute( 'x', 'y' )
+        expect( heardEvents1.length ).to.equal( 2 )
+        expect( heardEvents1[0] ).to.be.instanceOf( Event )
+        expect( heardEvents1[0].type ).to.equal( 'willBeChanged' )
+        expect( heardEvents1[0].structure ).to.equal( S1 )
+        expect( heardEvents1[0].key ).to.equal( 'x' )
+        expect( heardEvents1[0].oldValue ).to.equal( undefined )
+        expect( heardEvents1[0].newValue ).to.equal( 'y' )
+        expect( heardEvents1[1] ).to.be.instanceOf( Event )
+        expect( heardEvents1[1].type ).to.equal( 'wasChanged' )
+        expect( heardEvents1[1].structure ).to.equal( S1 )
+        expect( heardEvents1[1].key ).to.equal( 'x' )
+        expect( heardEvents1[1].oldValue ).to.equal( undefined )
+        expect( heardEvents1[1].newValue ).to.equal( 'y' )
+        expect( heardEvents2.length ).to.equal( 0 )
+        // verify that all requisite events are called in the right order when
+        // changing an attribute
+        S1.setAttribute( 'x', 'z' )
+        expect( heardEvents1.length ).to.equal( 4 )
+        expect( heardEvents1[2] ).to.be.instanceOf( Event )
+        expect( heardEvents1[2].type ).to.equal( 'willBeChanged' )
+        expect( heardEvents1[2].structure ).to.equal( S1 )
+        expect( heardEvents1[2].key ).to.equal( 'x' )
+        expect( heardEvents1[2].oldValue ).to.equal( 'y' )
+        expect( heardEvents1[2].newValue ).to.equal( 'z' )
+        expect( heardEvents1[3] ).to.be.instanceOf( Event )
+        expect( heardEvents1[3].type ).to.equal( 'wasChanged' )
+        expect( heardEvents1[3].structure ).to.equal( S1 )
+        expect( heardEvents1[3].key ).to.equal( 'x' )
+        expect( heardEvents1[3].oldValue ).to.equal( 'y' )
+        expect( heardEvents1[3].newValue ).to.equal( 'z' )
+        expect( heardEvents2.length ).to.equal( 0 )
+        // verify that all requisite events are called in the right order when
+        // removing an attribute
+        S1.clearAttributes( 'x' )
+        expect( heardEvents1.length ).to.equal( 6 )
+        expect( heardEvents1[4] ).to.be.instanceOf( Event )
+        expect( heardEvents1[4].type ).to.equal( 'willBeChanged' )
+        expect( heardEvents1[4].structure ).to.equal( S1 )
+        expect( heardEvents1[4].key ).to.equal( 'x' )
+        expect( heardEvents1[4].oldValue ).to.equal( 'z' )
+        expect( heardEvents1[4].newValue ).to.equal( undefined )
+        expect( heardEvents1[5] ).to.be.instanceOf( Event )
+        expect( heardEvents1[5].type ).to.equal( 'wasChanged' )
+        expect( heardEvents1[5].structure ).to.equal( S1 )
+        expect( heardEvents1[5].key ).to.equal( 'x' )
+        expect( heardEvents1[5].oldValue ).to.equal( 'z' )
+        expect( heardEvents1[5].newValue ).to.equal( undefined )
+        expect( heardEvents2.length ).to.equal( 0 )
+        // ensure that these events happen not only in the correct order, but
+        // that the first happens before the value changes and the second
+        // happens after the value changes
+        let before = null
+        let after = null
+        S2.addEventListener( 'willBeChanged',
+            e => { before = S2.getAttribute( 'a' ) } )
+        S2.addEventListener( 'wasChanged',
+            e => { after = S2.getAttribute( 'a' ) } )
+        S2.setAttribute( 'a', 'bee' )
+        // (these checks are analogous to ones we've done before)
+        expect( heardEvents2.length ).to.equal( 2 )
+        expect( heardEvents2[0] ).to.be.instanceOf( Event )
+        expect( heardEvents2[0].type ).to.equal( 'willBeChanged' )
+        expect( heardEvents2[0].structure ).to.equal( S2 )
+        expect( heardEvents2[0].key ).to.equal( 'a' )
+        expect( heardEvents2[0].oldValue ).to.equal( undefined )
+        expect( heardEvents2[0].newValue ).to.equal( 'bee' )
+        expect( heardEvents2[1] ).to.be.instanceOf( Event )
+        expect( heardEvents2[1].type ).to.equal( 'wasChanged' )
+        expect( heardEvents2[1].structure ).to.equal( S2 )
+        expect( heardEvents2[1].key ).to.equal( 'a' )
+        expect( heardEvents2[1].oldValue ).to.equal( undefined )
+        expect( heardEvents2[1].newValue ).to.equal( 'bee' )
+        expect( heardEvents1.length ).to.equal( 6 )
+        // (these final checks are the new ones about before/after the change)
+        expect( before ).to.equal( undefined )
+        expect( after ).to.equal( 'bee' )
+    } )
+
+    it( 'Supports adding attributes with the convenience function', () => {
+        // build the same structure two ways
+        // first, with the convenience function:
+        const copy1 = new Structure().attr( {
+            'name' : 'Rutherford', 'age' : 50, 'occupation' : 'clerk',
+            'hoursWorked' : [ 8, 7, 9, 8, 8, 9, 0, 10, 10, 8 ]
+        } )
+        // second, without it:
+        const copy2 = new Structure
+        copy2.setAttribute( 'name', 'Rutherford' )
+        copy2.setAttribute( 'age', 50 )
+        copy2.setAttribute( 'occupation', 'clerk' )
+        copy2.setAttribute( 'hoursWorked', [ 8, 7, 9, 8, 8, 9, 0, 10, 10, 8 ] )
+        // verify that the attributes are identical in both
+        const keysToCheck = [
+            'name', 'age', 'occupation', 'missing1', 'missing2'
+        ]
+        for( let key of keysToCheck ) {
+            const value1 = copy1.getAttribute( key )
+            const value2 = copy2.getAttribute( key )
+            expect( JSON.equals( value1, value2 ) ).to.equal( true )
+        }
+    } )
+
+} )

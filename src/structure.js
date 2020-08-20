@@ -24,9 +24,201 @@ export class Structure extends EventTarget {
         super()
         this._parent = null
         this._children = [ ]
+        this._attributes = new Map
         for ( const child of children ) {
             this.insertChild( child, this._children.length )
         }
+    }
+
+    //////
+    //
+    //  Functions about attributes
+    //
+    //////
+
+    /**
+     * Every Structure stores a dictionary of attributes as key-value pairs.
+     * All keys should be atomic (numbers, strings, booleans, etc.) and their
+     * associated values must be amenable to a JSON encoding.
+     * 
+     * This function looks up and returns the value of an attribute in this
+     * Structure, the one with the given `key`.
+     * 
+     * @param {*} key - name of the attribute to look up
+     * @param {*} defaultValue - the value that should be returned if the `key`
+     *   does not appear as the name of an attribute in this Structure
+     *   (defaults to undefined)
+     * @return {*} the value associated with the given `key`
+     */
+    getAttribute ( key, defaultValue = undefined ) {
+        return this._attributes.has( key ) ? this._attributes.get( key )
+                                           : defaultValue
+    }
+
+    /**
+     * For details on how Structures store attributes, see the documentation for
+     * the {@link Structure#getAttribute getAttribute()} function.
+     * 
+     * This function stores a new key-value pair in the Structure's attribute
+     * dictionary.  See the restrictions on keys and values in the documentation
+     * linked to above.  Calling this function overwrites any old value that was
+     * stored under the given `key`.
+     * 
+     * The change events are fired only if the new value is different from the
+     * old value, according to `JSON.equals()`.
+     * 
+     * @fires Structure#willBeChanged
+     * @fires Structure#wasChanged
+     * @param {*} key - The key that indexes the key-value pair we are about to
+     *   insert or overwrite; this must be atomic
+     * @param {*} value - The value to associate with the given key; this must
+     *   be a JavaScript value amenable to JSON encoding
+     * @see {@link Structure#attr attr()}
+     */
+    setAttribute ( key, value ) {
+        const oldValue = this._attributes.get( key )
+        if ( !JSON.equals( value, oldValue ) ) {
+            /**
+             * An event of this type is fired in a Structure immediately before
+             * one of that Structure's attributes is changed.
+             * 
+             * @event Structure#willBeChanged
+             * @type {Object}
+             * @property {Structure} structure - The Structure emitting the
+             *   event, which will soon have one of its attributes changed
+             * @property {*} key - An atomic value, the key of the attribute
+             *   that is about to change
+             * @property {*} oldValue - A JavaScript value amenable to JSON
+             *   encoding, the value currently associated with the key; this is
+             *   undefined if the value is being associated with an unused key
+             * @property {*} newValue - A JavaScript value amenable to JSON
+             *   encoding, the value about to be associated with the key; this
+             *   is undefined if the key-value pair is being removed rather than
+             *   changed to have a new value
+             * @see {@link Structure#wasChanged wasChanged}
+             * @see {@link Structure#setAttribute setAttribute()}
+             */
+            this.emit( 'willBeChanged', {
+                structure : this,
+                key : key,
+                oldValue : oldValue,
+                newValue : value
+            } )
+            this._attributes.set( key, value )
+            /**
+             * An event of this type is fired in a Structure immediately after
+             * one of that Structure's attributes is changed.
+             * 
+             * @event Structure#wasChanged
+             * @type {Object}
+             * @property {Structure} structure - The Structure emitting the
+             *   event, which just had one of its attributes changed
+             * @property {*} key - An atomic value, the key of the attribute
+             *   that just changed
+             * @property {*} oldValue - A JavaScript value amenable to JSON
+             *   encoding, the value formerly associated with the key; this is
+             *   undefined if the value is being associated with an unused key
+             * @property {*} newValue - A JavaScript value amenable to JSON
+             *   encoding, the value now associated with the key; this is
+             *   undefined if the key-value pair is being removed rather than
+             *   changed to have a new value
+             * @see {@link Structure#willBeChanged willBeChanged}
+             * @see {@link Structure#setAttribute setAttribute()}
+             */
+            this.emit( 'wasChanged', {
+                structure : this,
+                key : key,
+                oldValue : oldValue,
+                newValue : value
+            } )
+        }
+    }
+
+    /**
+     * For details on how Structures store attributes, see the documentation for
+     * the {@link Structure#getAttribute getAttribute()} function.
+     * 
+     * This function removes zero or more key-value pairs from the Structure's
+     * attribute dictionary.  See the restrictions on keys and values in the
+     * documentation linked to above.
+     * 
+     * The change events are fired only if the given keys are actually currently
+     * in use by some key-value pairs in the Structure.  If you pass multiple
+     * keys to be removed, each will generate a separate pair of
+     * {@link Structure#willBeChanged willBeChanged} and
+     * {@link Structure#wasChanged wasChanged} events.
+     * 
+     * @fires Structure#willBeChanged
+     * @fires Structure#wasChanged
+     * @param {Array} keys - The list of keys indicating which key-value pairs
+     *   should be removed from this Structure; each of these keys must be
+     *   atomic; if this parameter is omitted, it defaults to all the keys for
+     *   this Structure's attributes
+     */
+    clearAttributes ( ...keys ) {
+        if ( keys.length == 0 ) {
+            keys = this._attributes.keys()
+        }
+        for ( let key of keys ) {
+            if ( this._attributes.has( key ) ) {
+                const oldValue = this._attributes.get( key )
+                this.emit( 'willBeChanged', {
+                    structure : this,
+                    key : key,
+                    oldValue : oldValue,
+                    newValue : undefined
+                } )
+                this._attributes.delete( key )
+                this.emit( 'wasChanged', {
+                    structure : this,
+                    key : key,
+                    oldValue : oldValue,
+                    newValue : undefined
+                } )
+            }
+        }
+    }
+
+    /**
+     * Add attributes to a Structure and return the Structure.  This function is
+     * a convenient form of repeated calls to
+     * {@link Structure#setAttribute setAttribute()}, and returns the Structure
+     * for ease of use in method chaining.
+     * 
+     * Example use: `const S = new Structure().attr( { k1 : 'v1', k2 : 'v2' } )`
+     * 
+     * Because this calls {@link Structure#setAttribute setAttribute()} zero or
+     * more times, as dictated by the contents of `attributes`, it may result in
+     * multiple firings of the events
+     * {@link Structure#willBeChanged willBeChanged} and
+     * {@link Structure#wasChanged wasChanged}.
+     * 
+     * @param {Object|Map|Array} attributes - A collection of key-value pairs to
+     *   add to this Structure's attributes.  This can be a JavaScript Object,
+     *   with keys and values in the usual `{'key':value,...}` form, a
+     *   JavaScript `Map` object, or a JavaScript Array of key-value pairs, of
+     *   the form `[['key',value],...]`.  If this argument is not of any of
+     *   these three forms (or is omitted), this function does not add any
+     *   attributes to the Structure.
+     * @return The Structure itself, for use in method chaining, as in
+     *   the example shown above.
+     * @see {@link Structure#setAttribute setAttribute()}
+     */
+    attr ( attributes = [ ] ) {
+        if ( attributes instanceof Array ) {
+            for ( let pair of attributes ) {
+                this.setAttribute( pair[0], pair[1] )
+            }
+        } else if ( attributes instanceof Map ) {
+            for ( let key of attributes.keys() ) {
+                this.setAttribute( key, attributes.get( key ) )
+            }
+        } else if ( attributes instanceof Object ) {
+            for ( let key of Object.keys( attributes ) ) {
+                this.setAttribute( key, attributes[key] )
+            }
+        }
+        return this
     }
 
     //////
