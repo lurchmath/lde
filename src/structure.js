@@ -1,15 +1,5 @@
 
-/**
- * Extend the EventTarget prototype with a convenience method for emitting new
- * events.  Mimics the function of the same name from node.js, but here in the
- * browser.
- * 
- * @param {string} type - The type of event being emitted, as a string name
- * @param {object} details - Any additional fields to copy into the Event object
- */
-EventTarget.prototype.emit = function ( type, details = { } ) {
-    this.dispatchEvent( Object.assign( new Event( type ), details ) )
-}
+import { predictableStringify } from './utilities.js'
 
 /**
  * The Structure class, an n-ary tree of Structure instances, using functions
