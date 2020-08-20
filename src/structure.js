@@ -17,7 +17,8 @@ export class Structure extends EventTarget {
     /**
      * Create a new Structure.  Any argument that is not a Structure is ignored.
      * @constructor
-     * @param {...Structure} children - child structures to be added to this one
+     * @param {...Structure} children - child Structures to be added to this one
+     *   (using {@link Structure#insertChild insertChild()})
      */
     constructor ( ...children ) {
         super()
@@ -426,6 +427,7 @@ export class Structure extends EventTarget {
          *   after insertion
          * @property {number} index - The new index the child will have after
          *   insertion
+         * @see {@link Structure#wasInserted wasInserted}
          * @see {@link Structure#insertChild insertChild()}
          */
         child.emit( 'willBeInserted', {
@@ -446,6 +448,7 @@ export class Structure extends EventTarget {
          * @property {Structure} parent - The new parent the child now has
          * @property {number} index - The index the child now has in its new
          *   parent
+         * @see {@link Structure#willBeInserted willBeInserted}
          * @see {@link Structure#insertChild insertChild()}
          */
         child.emit( 'wasInserted', {
