@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Lurch Deductive Engine: Expression</title>
+    <title>Lurch Deductive Engine: utilities.js</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
@@ -24,159 +24,113 @@
 </header>
 
 
-<main class="layout-main ">
+<main class="layout-main  layout-content--source">
   <div class="container">
-    <p class="page-kind">Class</p>
-    <h1 class="page-title">Expression</h1>
+    <p class="page-kind">source</p>
+    <h1 class="page-title">utilities.js</h1>
     
 
 
 
+    
 
 <section>
-
-
-<header class="class">
-
-
-    
-        
-        <!-- <h2>Expression</h2> -->
-
-        
-
-        
-
-        
-            
-            <div class="class-description"><p>The Expression class, still just a stub for now.</p></div>
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-
-
-
-    
-        
-
-
-
-
-
-    
-
-
-    
-    <h3 class="subtitle">Constructor</h3>
-    
-
-    <div class="method-type">
-    
-    </div>
-
-    <h4 class="method-name" id="Expression">new Expression<span class="signature">()</span><span class="return-type-signature"></span>
-    </h4>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.7">, line 7</a>
-        </li>
-    </ul>
-
-
-
-    
-    </div>
-
-    
-
-    
-
-     
-
-    
-
-    
-
-
-    
-
-    
-
-    
-
-    
-</article>
-
+    <article>
+        <pre id="source" class="source-page line-numbers"><code class="language-js">
+/**
+ * @file Provides several useful utility functions that extend basic
+ *   JavaScript functionality
+ */
+
+/**
+ * A JSON stringification that is predictable.  The standard `JSON.stringify()`
+ * can produce different outputs unpredictably, because there is no required
+ * ordering on the key-value pairs.  This one requires keys to be output in
+ * increasing string order, so it is predictable.
+ */
+export const predictableStringify = ( obj ) => {
+    // arrays
+    if ( obj instanceof Array ) {
+        return `[${obj.map( predictableStringify ).join( ',' )}]`
+    }
+    // atomics
+    if ( !( obj instanceof Object ) ) {
+        return JSON.stringify( obj )
+    }
+    // objects
+    const keys = Object.keys( obj )
+    keys.sort()
+    const pair = ( key ) =>
+        `${JSON.stringify( key )}:${predictableStringify( obj[key] )}`
+    return `{${keys.map( pair ).join( ',' )}}`
+}
+
+/**
+ * Whether two objects that are amenable to JSON encoding are structurally
+ * equal.
+ */
+JSON.equals = ( x, y ) => {
+    // easy case
+    if ( x === y ) return true
+    // array case
+    if ( ( x instanceof Array ) != ( y instanceof Array ) ) return false
+    if ( x instanceof Array ) {
+        if ( x.length != y.length ) return false
+        for ( let i = 0 ; i &lt; x.length ; i++ ) {
+            if ( !JSON.equals( x[i], y[i] ) ) return false
+        }
+        return true
+    }
+    // atomic case
+    if ( ( x instanceof Object ) != ( y instanceof Object ) ) return false
+    if ( !( x instanceof Object ) ) return x === y
+    // object case
+    const xKeys = Object.keys( x )
+    const yKeys = Object.keys( y )
+    xKeys.sort()
+    yKeys.sort()
+    if ( !JSON.equals( xKeys, yKeys ) ) return false
+    for ( let i = 0 ; i &lt; xKeys.length ; i++ ) {
+        if ( !JSON.equals( x[xKeys[i]], y[xKeys[i]] ) ) return false
+    }
+    return true
+}
+
+/**
+ * Extend the EventTarget prototype with a convenience method for emitting new
+ * events.  Mimics the function of the same name from node.js, but here in the
+ * browser.
+ * 
+ * @param {string} type - The type of event being emitted, as a string name
+ * @param {object} details - Any additional fields to copy into the Event object
+ */
+EventTarget.prototype.emit = function ( type, details = { } ) {
+    this.dispatchEvent( Object.assign( new Event( type ), details ) )
+}
+
+/**
+ * Extend the built-in JavaScript `Map` class with a deep copy method.  This
+ * works only for Maps whose keys and values are all JSON-encodable.
+ * 
+ * @return {Map} A new map that is a deep copy of the original.
+ */
+Map.prototype.deepCopy = function () {
+    return new Map( JSON.parse( JSON.stringify( [ ...this ] ) ) )
+}
+
+/**
+ * Whether the given `item` appears as an entry in this array.
+ * 
+ * @param {*} item - The item that may or may not appear in the array, and we
+ *   are about to find out
+ * @return {boolean} True if and only if the item appears as an entry in the
+ *   array, and false otherwise 
+ */
+Array.prototype.contains = function ( item ) {
+    return this.indexOf( item ) != -1
+}
+</code></pre>
+    </article>
 </section>
 
 
