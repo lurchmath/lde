@@ -214,8 +214,8 @@ export class Structure extends EventTarget {
      *   the form `[['key',value],...]`.  If this argument is not of any of
      *   these three forms (or is omitted), this function does not add any
      *   attributes to the Structure.
-     * @return The Structure itself, for use in method chaining, as in
-     *   the example shown above.
+     * @return {Structure} The Structure itself, for use in method chaining, as
+     *   in the example shown above.
      * @see {@link Structure#setAttribute setAttribute()}
      */
     attr ( attributes = [ ] ) {
