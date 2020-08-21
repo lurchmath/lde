@@ -1,5 +1,15 @@
 
+// We import this because it's the subject of this test suite.
 import { Structure } from '../src/structure.js'
+
+// We import these just to verify that the subclass tracking provided by
+// the Structure module works for all of them.
+import { Declaration } from '../src/declaration.js'
+import { Environment } from '../src/environment.js'
+import { Expression } from '../src/expression.js'
+import { OutputStructure } from '../src/output-structure.js'
+
+// Test suites begin here.
 
 describe( 'Structure module', () => {
 
@@ -1510,6 +1520,204 @@ describe( 'Structure attributes', () => {
             const value2 = copy2.getAttribute( key )
             expect( JSON.equals( value1, value2 ) ).to.equal( true )
         }
+    } )
+
+} )
+
+describe( 'Structure copying and serialization', () => {
+
+    it( 'Associates class names with class objects', () => {
+        // Check not just the Structure class, but several others.
+        // Can't put these tests in those subclasses' test suites,
+        // because we're testing here the Structure class's support
+        // for all of this.
+        expect( Structure.className ).to.equal( 'Structure' )
+        expect( Structure.subclasses.get( 'Structure' ) ).to.equal( Structure )
+        expect( Declaration.className ).to.equal( 'Declaration' )
+        expect( Structure.subclasses.get( 'Declaration' ) ).to.equal( Declaration )
+        expect( Environment.className ).to.equal( 'Environment' )
+        expect( Structure.subclasses.get( 'Environment' ) ).to.equal( Environment )
+        expect( Expression.className ).to.equal( 'Expression' )
+        expect( Structure.subclasses.get( 'Expression' ) ).to.equal( Expression )
+        expect( OutputStructure.className ).to.equal( 'OutputStructure' )
+        expect( Structure.subclasses.get( 'OutputStructure' ) ).to.equal( OutputStructure )
+    } )
+
+    it( 'Supports deep copying of Structures', () => {
+        // Make a tiny Structure for testing.
+        const tiny = new Structure
+        tiny.setAttribute( 5, 6 )
+        // Make a copy and test that it copied correctly and did not mess up
+        // the original.
+        const C = tiny.copy()
+        expect( C ).not.to.equal( tiny )
+        expect( C.parent() ).to.equal( null )
+        expect( C.children() ).to.eql( [ ] )
+        expect( C.getAttribute( 5 ) ).to.equal( 6 )
+        expect( C.getAttribute( 6 ) ).to.equal( undefined )
+        expect( tiny.parent() ).to.equal( null )
+        expect( tiny.children() ).to.eql( [ ] )
+        expect( tiny.getAttribute( 5 ) ).to.equal( 6 )
+        expect( tiny.getAttributeKeys() ).to.eql( [ '5' ] )
+        // Ensure that changing data within the original doesn't change the copy.
+        tiny.setAttribute( 5, 10 )
+        expect( tiny.getAttribute( 5 ) ).to.equal( 10 )
+        expect( C.getAttribute( 5 ) ).to.equal( 6 )
+        // Make a more complex Structure for testing.
+        let A, AA, AB, AC, B
+        const tween = new Structure(
+            A = new Structure(
+                AA = new Structure,
+                AB = new Structure,
+                AC = new Structure
+            ),
+            B = new Structure
+        )
+        AB.setAttribute( 2, 7 )
+        // Make a copy of tween and test that it copied correctly and did not
+        // mess up the original.
+        const D = tween.copy()
+        expect( D ).not.to.equal( tween )
+        expect( D.children().length ).to.equal( 2 )
+        const DA = D.child( 0 )
+        expect( D.parent() ).to.equal( null )
+        expect( A.parent() ).not.to.equal( D )
+        expect( B.parent() ).not.to.equal( D )
+        expect( A.parent() ).to.equal( tween )
+        expect( B.parent() ).to.equal( tween )
+        expect( DA.parent() ).to.equal( D )
+        expect( DA.children().length ).to.equal( 3 )
+        const DAB = DA.child( 1 )
+        expect( DAB ).not.to.equal( AB )
+        expect( DAB.getAttribute( 2 ) ).to.equal( 7 )
+        const DB = D.child( 1 )
+        expect( DB.getAttributeKeys() ).to.eql( [ ] )
+        // Ensure that changing data within the original doesn't change the copy.
+        tween.setAttribute( 3, 8 )
+        expect( tween.getAttribute( 3 ) ).to.equal( 8 )
+        expect( DB.getAttributeKeys() ).to.eql( [ ] )
+        AB.setAttribute( 2, 9 )
+        expect( AB.getAttribute( 2 ) ).to.equal( 9 )
+        expect( DAB.getAttribute( 2 ) ).to.equal( 7 )
+    } )
+
+    it( 'Serializes and deserializes hierarchies correctly', () => {
+        // Begin with a trivial example, a single node hierarchy with no attributes.
+        let child1, child2
+        const loner = new Structure
+        let json = loner.toJSON()
+        expect( json ).not.to.be.instanceOf( Structure )
+        expect( json ).not.to.equal( loner )
+        expect( json.className ).to.equal( 'Structure' )
+        expect( json.attributes ).to.eql( [ ] )
+        expect( json.children ).to.eql( [ ] )
+        // Deserialize a copy from it and verify that it is correctly structured.
+        let copy = Structure.fromJSON( json )
+        expect( copy ).to.be.instanceOf( Structure )
+        expect( copy.getAttributeKeys() ).to.eql( [ ] )
+        expect( copy.attributes ).not.to.equal( json.attributes)
+        expect( copy.children() ).to.eql( [ ] )
+        expect( copy.parent() ).to.equal( null )
+        expect( copy ).not.to.equal( json )
+        expect( copy ).not.to.equal( loner )
+        // Now do another one-node example, but this one with some attributes of
+        // each type.
+        const atty = new Structure
+        atty.setAttribute( 1, 2 )
+        atty.setAttribute( 'three', [ 'four', { } ] )
+        json = atty.toJSON()
+        expect( json ).not.to.be.instanceOf( Structure )
+        expect( json ).not.to.equal( atty )
+        expect( json.className ).to.equal( 'Structure' )
+        expect( json.attributes ).to.be.instanceOf( Array )
+        expect( json.attributes.length ).to.equal( 2 )
+        let indexOf1 = json.attributes[0][0] == 1 ? 0 : 1
+        expect( json.attributes[indexOf1] ).to.eql( [ '1', 2 ] )
+        expect( json.attributes[1-indexOf1] ).to.eql(
+            [ 'three', [ 'four', { } ] ] )
+        expect( json.children ).to.eql( [ ] )
+        // Deserialize a copy from it and verify that it is correctly structured.
+        copy = Structure.fromJSON( json )
+        expect( copy ).to.be.instanceOf( Structure )
+        expect( copy.getAttributeKeys().length ).to.equal( 2 )
+        expect( copy.getAttributeKeys().contains( '1' ) ).to.equal( true )
+        expect( copy.getAttributeKeys().contains( 'three' ) ).to.equal( true )
+        expect( copy.getAttribute( 1 ) ).to.equal( 2 )
+        expect( copy.getAttribute( 'three' ) ).to.eql( [ 'four', { } ] )
+        expect( copy.getAttribute( 'three' ) ).not.to.equal(
+            atty.getAttribute( 'three' ) )
+        expect( copy.children() ).to.eql( [ ] )
+        expect( copy.parent() ).to.equal( null )
+        expect( copy ).not.to.equal( json )
+        expect( copy ).not.to.equal( atty )
+        // Now define two silly little subclasses of `Structure` for use in just
+        // the next test.
+        class Sub1 extends Structure {
+            static className = Structure.addSubclass( 'Sub1', Sub1 )
+            exampleMethod1 () { return 5 }
+        }
+        class Sub2 extends Structure {
+            static className = Structure.addSubclass( 'Sub2', Sub2 )
+            exampleMethod2() { return this.getAttribute( 'test' ) }
+        }
+        // Now create a hierarchy with three Structures in it, one of each of the
+        // three classes Structure, Sub1, and Sub2.
+        const bigger = new Structure(
+            child1 = new Sub1().attr( { 10 : 100 } ),
+            child2 = new Sub2().attr( { 'test' : 'ing' } )
+        )
+        // Verify that the children are of the expected classes.
+        expect( child1 ).to.be.instanceOf( Sub1 )
+        expect( child1.exampleMethod1 ).to.be.ok
+        expect( child2 ).to.be.instanceOf( Sub2 )
+        expect( child2.exampleMethod2 ).to.be.ok
+        // Serialize and verify that it came out correctly.
+        json = bigger.toJSON()
+        expect( json ).not.to.be.instanceOf( Structure )
+        expect( json ).not.to.equal( bigger )
+        expect( json.className ).to.equal( 'Structure' )
+        expect( json.attributes ).to.eql( [ ] )
+        expect( json.children.length ).to.equal( 2 )
+        let child = json.children[0]
+        expect( child ).not.to.be.instanceOf( Structure )
+        expect( child ).not.to.be.instanceOf( Sub1 )
+        expect( child.className ).to.equal( 'Sub1' )
+        expect( child.attributes ).to.eql( [ [ '10', 100 ] ] )
+        expect( child.children ).to.eql( [ ] )
+        expect( child.exampleMethod1 ).to.equal( undefined )
+        child = json.children[1]
+        expect( child ).not.to.be.instanceOf( Structure )
+        expect( child ).not.to.be.instanceOf( Sub2 )
+        expect( child.className ).to.equal( 'Sub2' )
+        expect( child.attributes ).to.eql( [ [ 'test', 'ing' ] ] )
+        expect( child.children ).to.eql( [ ] )
+        expect( child.exampleMethod2 ).to.equal( undefined )
+        // Deserialize and verify that each node is the same class as in the
+        // original hierarchy, as well as all the same tests we did for the
+        // earlier cases.
+        copy = Structure.fromJSON( json )
+        expect( copy ).to.be.instanceOf( Structure )
+        expect( copy.getAttributeKeys() ).to.eql( [ ] )
+        expect( copy.parent() ).to.equal( null )
+        expect( copy ).not.to.equal( json )
+        expect( copy ).not.to.equal( bigger )
+        expect( copy.children().length ).to.equal( 2 )
+        child = copy.children()[0]
+        expect( child ).to.be.instanceOf( Sub1 )
+        expect( child.getAttributeKeys() ).to.eql( [ '10' ] )
+        expect( child.getAttribute( '10' ) ).to.equal( 100 )
+        expect( child.parent() ).to.equal( copy )
+        expect( child ).not.to.equal( json.children[0] )
+        expect( child ).not.to.equal( child1 )
+        expect( child.children() ).to.eql( [ ] )
+        child = copy.children()[1]
+        expect( child ).to.be.instanceOf( Sub2 )
+        expect( child.getAttributeKeys() ).to.eql( [ 'test' ] )
+        expect( child.getAttribute( 'test' ) ).to.equal( 'ing' )
+        expect( child.parent() ).to.equal( copy )
+        expect( child ).not.to.equal( json.children[1] )
+        expect( child ).not.to.equal( child2 )
+        expect( child.children() ).to.eql( [ ] )
     } )
 
 } )

@@ -1189,4 +1189,133 @@ export class Structure extends EventTarget {
         return Array.from( this.scopeIterator( reflexive ) )
     }
 
+    //////
+    //
+    //  Functions for copying and serialization
+    //
+    //////
+
+    /**
+     * In order for a hierarchy of Structures to be able to be serialized and
+     * deserialized, we need to track the class of each Structure in the
+     * hierarchy.  We cannot reconstitute an object from its serialized state if
+     * we do not know which class to construct.  So we track all subclasses of
+     * this class in a single static map, here.
+     * 
+     * This class and each of its subclasses should add themselves to this map
+     * and save the corresponding name in a static `className` variable in their
+     * class.
+     * 
+     * @see {@link Structure#className className}
+     * @see {@link Structure#addSubclass addSubclass}
+     */
+    static subclasses = new Map
+
+    /**
+     * Adds a subclass to the static {@link Structure#subclasses subclasses} map
+     * tracked by this object, for use in reconsituting objects correctly from
+     * their serialized forms.
+     * 
+     * This method should be called once per subclass of `Structure`.  To see
+     * how, see the code that initializes {@link Structure#className className}.
+     * 
+     * @param {string} name - The name of the class, as it appears in code
+     * @param {class} classObject - The class itself, such as `Structure`, or
+     *   any of its subclasses, that is, the JavaScript object used when
+     *   constructing new instances.
+     * @return {string} The value of the `name` parameter, for convenience in
+     *   initializing each class's static `className` field
+     * @see {@link Structure#className className}
+     * @see {@link Structure#subclasses subclasses}
+     */
+    static addSubclass ( name, classObject ) {
+        Structure.subclasses.set( name, classObject )
+        return name
+    }
+
+    /**
+     * The name of this class, as a JavaScript string.  For the Structure class,
+     * this is, of course, `"Structure"`, but for subclasses, it will vary.
+     * 
+     * See the code initializing this member to see how subclasses should
+     * initialize their `className` members.  This is used in deserialization,
+     * to correctly reconstitute objects of the appropriate class.
+     * @see {@link Structure#subclasses subclasses}
+     * @see {@link Structure#addSubclass addSubclass}
+     */
+    static className = Structure.addSubclass( 'Structure', Structure )
+
+    /**
+     * A deep copy of this Structure.  It will have no subtree in common with
+     * this one, and yet it will satisfy an {@link Structure#equals equals()}
+     * check with this Structure.
+     * 
+     * In order to ensure that the copy has the same class as the original (even
+     * if that is a proper subclass of Structure), this function depends upon
+     * that subclass's having registered itself with the
+     * {@link Structure#subclasses subclasses} static member.
+     * 
+     * @return {Structure} A deep copy
+     * @see {@link Structure#equals equals()}
+     * @see {@link Structure#subclasses subclasses}
+     */
+    copy () {
+        const className = this.constructor.className
+        const classObject = Structure.subclasses.get( className )
+        const copy = new classObject
+        copy._attributes = this._attributes.deepCopy()
+        copy._children = this._children.map( child => child.copy() )
+        for ( let child of copy._children ) child._parent = copy
+        return copy
+    }
+
+    /**
+     * Convert this object to JavaScript data ready for JSON serialization.
+     * Note that the result of this function is *not* a string, but is ready to
+     * be converted into one through `JSON.stringify()` or (preferably),
+     * {@link predictableStringify predictableStringify()}.
+     * 
+     * The resulting object has some of its attributes directly re-used (not
+     * copied) from within this Structure (notably the values of many
+     * attributes), for the sake of efficiency.  Thus you should *not* modify
+     * the contents of the returned structure.  If you want a completely
+     * independent copy, call `JSON.parse(JSON.stringify())` on the return
+     * value.
+     * 
+     * The particular classes of this Structure and any of its children are
+     * stored in the result, so that a deep copy of this Structure can be
+     * recreated from that object using {@link Strucure#fromJSON fromJSON()}.
+     * 
+     * @return {Object} A serialized version of this Structure
+     * @see {@link Strucure#fromJSON fromJSON()}
+     * @see {@link Strucure#subclasses subclasses}
+     */
+    toJSON () {
+        return {
+            className : this.constructor.className,
+            attributes : [ ...this._attributes ],
+            children : this._children.map( child => child.toJSON() )
+        }
+    }
+
+    /**
+     * Deserialize the data in the argument, producing a new Structure instance
+     * (or, more specifically, sometimes an instance of one of its subclasses).
+     * 
+     * @param {Object} data - A JavaScript Object of the form produced by
+     *   {@link Structure#toJSON toJSON()}
+     * @return {Structure} A new Structure instance (which may actually be an
+     *   instance of a proper subclass of Structure) as encoded in the given
+     *   `data`
+     * @see {@link Structure#toJSON toJSON()}
+     */
+    static fromJSON ( data ) {
+        const classObject = Structure.subclasses.get( data.className )
+        const result = new classObject(
+            ...data.children.map( Structure.fromJSON ) )
+        result._attributes = new Map(
+            JSON.parse( JSON.stringify( data.attributes ) ) )
+        return result
+    }
+
 }
