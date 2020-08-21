@@ -131,4 +131,20 @@ describe( 'Prototype extensions', () => {
             Mcopy.get( 'favorite data' ) )
     } )
 
+    it( 'The Array.prototype.contains function behaves correctly', () => {
+        expect( [ 1, 2, 3 ].contains( 0 ) ).to.equal( false )
+        expect( [ 1, 2, 3 ].contains( 1 ) ).to.equal( true )
+        expect( [ 1, 2, 3 ].contains( 2 ) ).to.equal( true )
+        expect( [ 1, 2, 3 ].contains( 3 ) ).to.equal( true )
+        expect( [ 1, 2, 3 ].contains( 4 ) ).to.equal( false )
+        expect( [ 1, 2, 3 ].contains( '1' ) ).to.equal( false )
+        expect( [ [ 1 ], 2, 3 ].contains( 1 ) ).to.equal( false )
+        const particularArray = [ ]
+        expect( [ particularArray ].contains( particularArray ) ).to.equal( true )
+        expect( [ particularArray ].contains( [ ] ) ).to.equal( false )
+        const particularObject = { }
+        expect( [ particularObject ].contains( particularObject ) ).to.equal( true )
+        expect( [ particularObject ].contains( { } ) ).to.equal( false )
+    } )
+
 } )
