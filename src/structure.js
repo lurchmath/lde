@@ -1269,6 +1269,32 @@ export class Structure extends EventTarget {
         return copy
     }
 
+    equals ( other ) {
+        // other must be a structure
+        if ( !( other instanceof Structure ) ) return false
+        // other must have the same number of attribute keys
+        const keys1 = Array.from( this._attributes.keys() )
+        const keys2 = Array.from( other._attributes.keys() )
+        if ( keys1.length != keys2.length ) return false
+        // other must have the same set of attribute keys
+        keys1.sort()
+        keys2.sort()
+        if ( !JSON.equals( keys1, keys2 ) ) return false
+        // other must have the same value for each attribute key
+        for ( let key of keys1 )
+            if ( !JSON.equals( this.getAttribute( key ),
+                               other.getAttribute( key ) ) )
+                return false
+        // other must have the same number of children
+        if ( this._children.length != other._children.length ) return false
+        // other must have the same children, structurally, recursively compared
+        for ( let i = 0 ; i < this._children.length ; i++ )
+            if ( !this.child( i ).equals( other.child( i ) ) )
+                return false
+        // that is the complete set of requirements for equality
+        return true
+    }
+
     /**
      * Convert this object to JavaScript data ready for JSON serialization.
      * Note that the result of this function is *not* a string, but is ready to

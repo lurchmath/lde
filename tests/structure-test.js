@@ -1720,4 +1720,64 @@ describe( 'Structure copying and serialization', () => {
         expect( child.children() ).to.eql( [ ] )
     } )
 
+    it( 'Supports deep equality comparisons correctly', () => {
+        // Create four structures for testing
+        const S1 = new Structure(
+            new Structure,
+            new Structure().attr( { 'x' : 'y' } )
+        )
+        const S2 = new Structure(
+            new Structure,
+            new Structure().attr( { 'x' : 'y' } )
+        )
+        const S3 = new Structure(
+            new Structure().attr( { 1 : 2 } ),
+            new Structure
+        )
+        const S4 = new Structure(
+            new Structure
+        )
+        // Verify that only these structural equalities hold:  each Structure
+        // with itself, plus S1 with S2 (nothing else)
+        expect( S1.equals( S1 ) ).to.equal( true )
+        expect( S1.equals( S2 ) ).to.equal( true )
+        expect( S1.equals( S3 ) ).to.equal( false )
+        expect( S1.equals( S4 ) ).to.equal( false )
+        expect( S2.equals( S1 ) ).to.equal( true )
+        expect( S2.equals( S2 ) ).to.equal( true )
+        expect( S2.equals( S3 ) ).to.equal( false )
+        expect( S2.equals( S4 ) ).to.equal( false )
+        expect( S3.equals( S1 ) ).to.equal( false )
+        expect( S3.equals( S2 ) ).to.equal( false )
+        expect( S3.equals( S3 ) ).to.equal( true )
+        expect( S3.equals( S4 ) ).to.equal( false )
+        expect( S4.equals( S1 ) ).to.equal( false )
+        expect( S4.equals( S2 ) ).to.equal( false )
+        expect( S4.equals( S3 ) ).to.equal( false )
+        expect( S4.equals( S4 ) ).to.equal( true )
+        // Edit Structure S2 so that it is no longer like S1, and
+        // edit Structure S3 so that it becomes like S1.
+        S2.setAttribute( 'new', 'attribute' )
+        S3.child( 0 ).clearAttributes( 1 )
+        S3.child( 1 ).setAttribute( 'x', 'y' )
+        // Verify that only these structural equalities hold:  each Structure
+        // with itself, plus S1 with S3 (nothing else)
+        expect( S1.equals( S1 ) ).to.equal( true )
+        expect( S1.equals( S2 ) ).to.equal( false )
+        expect( S1.equals( S3 ) ).to.equal( true )
+        expect( S1.equals( S4 ) ).to.equal( false )
+        expect( S2.equals( S1 ) ).to.equal( false )
+        expect( S2.equals( S2 ) ).to.equal( true )
+        expect( S2.equals( S3 ) ).to.equal( false )
+        expect( S2.equals( S4 ) ).to.equal( false )
+        expect( S3.equals( S1 ) ).to.equal( true )
+        expect( S3.equals( S2 ) ).to.equal( false )
+        expect( S3.equals( S3 ) ).to.equal( true )
+        expect( S3.equals( S4 ) ).to.equal( false )
+        expect( S4.equals( S1 ) ).to.equal( false )
+        expect( S4.equals( S2 ) ).to.equal( false )
+        expect( S4.equals( S3 ) ).to.equal( false )
+        expect( S4.equals( S4 ) ).to.equal( true )
+    } )
+
 } )
