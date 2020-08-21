@@ -1308,6 +1308,15 @@ describe( 'Structure attributes', () => {
         expect( S1.getAttributeKeys() ).to.eql( [ ] )
         expect( S2.getAttributeKeys() ).to.eql( [ ] )
         expect( S3.getAttributeKeys() ).to.eql( [ ] )
+        expect( S1.hasAttribute( 'x' ) ).to.equal( false )
+        expect( S1.hasAttribute( '100' ) ).to.equal( false )
+        expect( S1.hasAttribute( -8 ) ).to.equal( false )
+        expect( S2.hasAttribute( 'x' ) ).to.equal( false )
+        expect( S2.hasAttribute( '100' ) ).to.equal( false )
+        expect( S2.hasAttribute( -8 ) ).to.equal( false )
+        expect( S3.hasAttribute( 'x' ) ).to.equal( false )
+        expect( S3.hasAttribute( '100' ) ).to.equal( false )
+        expect( S3.hasAttribute( -8 ) ).to.equal( false )
         // fetch attributes and ensure we get undefined each time
         expect( S1.getAttribute( 'x' ) ).to.equal( undefined )
         expect( S1.getAttribute( '100' ) ).to.equal( undefined )
@@ -1347,6 +1356,9 @@ describe( 'Structure attributes', () => {
         expect( S2.getAttributeKeys().contains( '5000000' ) ).to.equal( true )
         expect( S2.getAttributeKeys().contains( 'second' ) ).to.equal( true )
         expect( S3.getAttributeKeys() ).to.eql( [ ] )
+        expect( S1.hasAttribute( 'ess one key' ) ).to.equal( true )
+        expect( S2.hasAttribute( 5000000 ) ).to.equal( true )
+        expect( S2.hasAttribute( 'second' ) ).to.equal( true )
         // query those attributes, verify the right values come out
         expect( S1.getAttribute( 'ess one key' ) ).to.equal( 'ess one value' )
         expect( S2.getAttribute( 5000000 ) ).to.eql(
@@ -1646,6 +1658,7 @@ describe( 'Structure copying and serialization', () => {
         expect( tiny.children() ).to.eql( [ ] )
         expect( tiny.getAttribute( 5 ) ).to.equal( 6 )
         expect( tiny.getAttributeKeys() ).to.eql( [ '5' ] )
+        expect( tiny.hasAttribute( 5 ) ).to.equal( true )
         // Ensure that changing data within the original doesn't change the copy.
         tiny.setAttribute( 5, 10 )
         expect( tiny.getAttribute( 5 ) ).to.equal( 10 )
@@ -1727,8 +1740,8 @@ describe( 'Structure copying and serialization', () => {
         copy = Structure.fromJSON( json )
         expect( copy ).to.be.instanceOf( Structure )
         expect( copy.getAttributeKeys().length ).to.equal( 2 )
-        expect( copy.getAttributeKeys().contains( '1' ) ).to.equal( true )
-        expect( copy.getAttributeKeys().contains( 'three' ) ).to.equal( true )
+        expect( copy.hasAttribute( 1 ) ).to.equal( true )
+        expect( copy.hasAttribute( 'three' ) ).to.equal( true )
         expect( copy.getAttribute( 1 ) ).to.equal( 2 )
         expect( copy.getAttribute( 'three' ) ).to.eql( [ 'four', { } ] )
         expect( copy.getAttribute( 'three' ) ).not.to.equal(

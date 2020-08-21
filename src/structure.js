@@ -60,11 +60,29 @@ export class Structure extends EventTarget {
 
     /**
      * Get the list of keys used in the attributes dictionary within this
-     * Structure.
-     * @return {Array} A list of string values used as keys
+     * Structure.  For more details on the Structure attribution system, see the
+     * documentation for {@link Structure#getAttribute getAttribute()}.
+     * 
+     * Each key must be atomic and will be converted into a string if it is not
+     * already one.
+     * @return {Array} A list of values used as keys
      * @see {@link Structure#getAttribute getAttribute()}
      */
     getAttributeKeys () { return Array.from( this._attributes.keys() ) }
+
+    /**
+     * Whether this Structure has an attribute with the given key.  For more
+     * details on the Structure attribution system, see the documentation for
+     * {@link Structure#getAttribute getAttribute()}.
+     * @param {*} key - name of the attribute to look up; this should be atomic
+     *   and will be converted into a string if it is not already one
+     * @see {@link Structure#getAttribute getAttribute()}
+     * @see {@link Structure#getAttributeKeys getAttributeKeys()}
+     */
+    hasAttribute ( key ) {
+        key = `${key}`
+        return this._attributes.has( key )
+    }
 
     /**
      * For details on how Structures store attributes, see the documentation for
@@ -238,10 +256,10 @@ export class Structure extends EventTarget {
     /**
      * Structures can be categorized into types with simple string labels.
      * For instance, we might want to say that some Structures are binders, or
-     * are quoted, or are read-only, or anything.  Some of these attributes have
-     * meanings that may be respected by methods in this class or its
-     * subclasses, but the client is free to use any type names they wish.
-     * A Structure may have zero, one, or more types.
+     * are assumptions, or anything.  Some of these attributes have meanings
+     * that may be respected by methods in this class or its subclasses, but the
+     * client is free to use any type names they wish.  A Structure may have
+     * zero, one, or more types.
      * 
      * This convenience function, together with
      * {@link Structure#makeIntoA makeIntoA()} and {@link Structure#asA asA()},
