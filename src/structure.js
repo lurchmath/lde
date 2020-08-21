@@ -38,8 +38,8 @@ export class Structure extends EventTarget {
 
     /**
      * Every Structure stores a dictionary of attributes as key-value pairs.
-     * All keys should be atomic (numbers, strings, booleans, etc.) and their
-     * associated values must be amenable to a JSON encoding.
+     * All keys should be strings (or they will be converted into strings) and
+     * their associated values must be amenable to a JSON encoding.
      * 
      * This function looks up and returns the value of an attribute in this
      * Structure, the one with the given `key`.
@@ -49,11 +49,22 @@ export class Structure extends EventTarget {
      *   does not appear as the name of an attribute in this Structure
      *   (defaults to undefined)
      * @return {*} the value associated with the given `key`
+     * @see {@link Structure#setAttribute setAttribute()}
+     * @see {@link Structure#getAttributeKeys getAttributeKeys()}
      */
     getAttribute ( key, defaultValue = undefined ) {
+        key = `${key}`
         return this._attributes.has( key ) ? this._attributes.get( key )
                                            : defaultValue
     }
+
+    /**
+     * Get the list of keys used in the attributes dictionary within this
+     * Structure.
+     * @return {Array} A list of string values used as keys
+     * @see {@link Structure#getAttribute getAttribute()}
+     */
+    getAttributeKeys () { return Array.from( this._attributes.keys() ) }
 
     /**
      * For details on how Structures store attributes, see the documentation for
@@ -70,12 +81,13 @@ export class Structure extends EventTarget {
      * @fires Structure#willBeChanged
      * @fires Structure#wasChanged
      * @param {*} key - The key that indexes the key-value pair we are about to
-     *   insert or overwrite; this must be atomic
+     *   insert or overwrite; this must be a string or will be converted into one
      * @param {*} value - The value to associate with the given key; this must
      *   be a JavaScript value amenable to JSON encoding
      * @see {@link Structure#attr attr()}
      */
     setAttribute ( key, value ) {
+        key = `${key}`
         const oldValue = this._attributes.get( key )
         if ( !JSON.equals( value, oldValue ) ) {
             /**
@@ -86,7 +98,7 @@ export class Structure extends EventTarget {
              * @type {Object}
              * @property {Structure} structure - The Structure emitting the
              *   event, which will soon have one of its attributes changed
-             * @property {*} key - An atomic value, the key of the attribute
+             * @property {*} key - A string value, the key of the attribute
              *   that is about to change
              * @property {*} oldValue - A JavaScript value amenable to JSON
              *   encoding, the value currently associated with the key; this is
@@ -113,7 +125,7 @@ export class Structure extends EventTarget {
              * @type {Object}
              * @property {Structure} structure - The Structure emitting the
              *   event, which just had one of its attributes changed
-             * @property {*} key - An atomic value, the key of the attribute
+             * @property {*} key - A string value, the key of the attribute
              *   that just changed
              * @property {*} oldValue - A JavaScript value amenable to JSON
              *   encoding, the value formerly associated with the key; this is
@@ -151,15 +163,17 @@ export class Structure extends EventTarget {
      * @fires Structure#willBeChanged
      * @fires Structure#wasChanged
      * @param {Array} keys - The list of keys indicating which key-value pairs
-     *   should be removed from this Structure; each of these keys must be
-     *   atomic; if this parameter is omitted, it defaults to all the keys for
-     *   this Structure's attributes
+     *   should be removed from this Structure; each of these keys must be a
+     *   string, or it will be converted into one; if this parameter is omitted,
+     *   it defaults to all the keys for this Structure's attributes
+     * @see {@link Structure#getAttributeKeys getAttributeKeys()}
      */
     clearAttributes ( ...keys ) {
         if ( keys.length == 0 ) {
             keys = this._attributes.keys()
         }
         for ( let key of keys ) {
+            key = `${key}`
             if ( this._attributes.has( key ) ) {
                 const oldValue = this._attributes.get( key )
                 this.emit( 'willBeChanged', {

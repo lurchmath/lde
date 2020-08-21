@@ -1294,6 +1294,10 @@ describe( 'Structure attributes', () => {
         const S1 = new Structure
         const S2 = new Structure
         const S3 = new Structure( S2 )
+        // ensure that all three have no attribute keys
+        expect( S1.getAttributeKeys() ).to.eql( [ ] )
+        expect( S2.getAttributeKeys() ).to.eql( [ ] )
+        expect( S3.getAttributeKeys() ).to.eql( [ ] )
         // fetch attributes and ensure we get undefined each time
         expect( S1.getAttribute( 'x' ) ).to.equal( undefined )
         expect( S1.getAttribute( '100' ) ).to.equal( undefined )
@@ -1327,6 +1331,12 @@ describe( 'Structure attributes', () => {
         S1.setAttribute( 'ess one key', 'ess one value' )
         S2.setAttribute( 5000000, { some: 'JSON', here: [1,2,3,4,5] } )
         S2.setAttribute( 'second', [ 'At', 'rib', 'yout\'' ] )
+        // verify that the keys you've added exist
+        expect( S1.getAttributeKeys() ).to.eql( [ 'ess one key' ] )
+        expect( S2.getAttributeKeys().length ).to.equal( 2 )
+        expect( S2.getAttributeKeys().contains( '5000000' ) ).to.equal( true )
+        expect( S2.getAttributeKeys().contains( 'second' ) ).to.equal( true )
+        expect( S3.getAttributeKeys() ).to.eql( [ ] )
         // query those attributes, verify the right values come out
         expect( S1.getAttribute( 'ess one key' ) ).to.equal( 'ess one value' )
         expect( S2.getAttribute( 5000000 ) ).to.eql(
