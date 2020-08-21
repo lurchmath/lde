@@ -235,6 +235,85 @@ export class Structure extends EventTarget {
         return this
     }
 
+    /**
+     * Structures can be categorized into types with simple string labels.
+     * For instance, we might want to say that some Structures are binders, or
+     * are quoted, or are read-only, or anything.  Some of these attributes have
+     * meanings that may be respected by methods in this class or its
+     * subclasses, but the client is free to use any type names they wish.
+     * A Structure may have zero, one, or more types.
+     * 
+     * This convenience function, together with
+     * {@link Structure#makeIntoA makeIntoA()} and {@link Structure#asA asA()},
+     * makes it easy to use the Structure's attributes to store such
+     * information.
+     * 
+     * Note that the word "type" is being used in the informal, English sense,
+     * here.  There is no intended or implied reference to mathematical types,
+     * variable types in programming languages, or type theory in general.
+     * This suite of functions is for adding boolean flags to Structures in an
+     * easy way.
+     * 
+     * @param {string} type - The type we wish to query
+     * @return {boolean} Whether this Structure has that type
+     * @see {@link Structure#makeIntoA makeIntoA()}
+     * @see {@link Structure#unmakeIntoA unmakeIntoA()}
+     * @see {@link Structure#asA asA()}
+     */
+    isA ( type ) { return this.getAttribute( `_type_${type}` ) === true }
+
+    /**
+     * For a full explanation of the typing features afforded by this function,
+     * see the documentation for {@link Structure#isA isA()}.
+     * 
+     * This function adds the requested type to the Structure's attributes and
+     * returns the Structure itself, for use in method chaining, as in
+     * `S.makeIntoA( 'fruit' ).setAttribute( 'color', 'green' )`.
+     * 
+     * @param {string} type - The type to add to this Structure
+     * @return {Structure} This Structure, after the change has been made to it
+     * @see {@link Structure#isA isA()}
+     * @see {@link Structure#asA asA()}
+     * @see {@link Structure#unmakeIntoA unmakeIntoA()}
+     */
+    makeIntoA ( type ) {
+        this.setAttribute( `_type_${type}`, true )
+        return this
+    }
+
+    /**
+     * For a full explanation of the typing features afforded by this function,
+     * see the documentation for {@link Structure#isA isA()}.
+     * 
+     * This function removes the requested type to the Structure's attributes
+     * and returns the Structure itself, for use in method chaining, as in
+     * `S.unmakeIntoA( 'fruit' ).setAttribute( 'sad', true )`.
+     * 
+     * Admittedly, this is a pretty bad name for a function, but it is the
+     * reverse of {@link Structure#makeIntoA makeIntoA()}, so there you go.
+     * 
+     * @param {string} type - The type to remove from this Structure
+     * @return {Structure} This Structure, after the change has been made to it
+     * @see {@link Structure#isA isA()}
+     * @see {@link Structure#asA asA()}
+     * @see {@link Structure#makeIntoA makeIntoA()}
+     */
+    unmakeIntoA ( type ) {
+        this.clearAttributes( `_type_${type}` )
+        return this
+    }
+
+    /**
+     * Create a copy of this Structure, but with the given type added, using
+     * {@link Structure#makeIntoA makeIntoA()}.
+     * 
+     * @param {string} type - The type to add to the copy
+     * @return {Structure} A copy of this Structure, with the given type added
+     * @see {@link Structure#isA isA()}
+     * @see {@link Structure#makeIntoA makeIntoA()}
+     */
+    asA ( type ) { return this.copy().makeIntoA( type ) }
+
     //////
     //
     //  Functions querying tree structure

@@ -1522,6 +1522,93 @@ describe( 'Structure attributes', () => {
         }
     } )
 
+    it( 'Has working convenience functions for typing/categorization ', () => {
+        // build a few structures for testing
+        const S1 = new Structure
+        const S2 = new Structure
+        const S3 = new Structure
+        // make sure they have no types
+        expect( S1.isA( 'dog' ) ).to.equal( false )
+        expect( S1.isA( 'cat' ) ).to.equal( false )
+        expect( S1.isA( 'rectangle' ) ).to.equal( false )
+        expect( S2.isA( 'dog' ) ).to.equal( false )
+        expect( S2.isA( 'cat' ) ).to.equal( false )
+        expect( S2.isA( 'rectangle' ) ).to.equal( false )
+        expect( S3.isA( 'dog' ) ).to.equal( false )
+        expect( S3.isA( 'cat' ) ).to.equal( false )
+        expect( S3.isA( 'rectangle' ) ).to.equal( false )
+        // add some types to them
+        S1.makeIntoA( 'dog' )
+        S2.makeIntoA( 'cat' ).makeIntoA( 'rectangle' )
+        // verify that they have the types we added, and no others
+        expect( S1.isA( 'dog' ) ).to.equal( true )
+        expect( S1.isA( 'cat' ) ).to.equal( false )
+        expect( S1.isA( 'rectangle' ) ).to.equal( false )
+        expect( S2.isA( 'dog' ) ).to.equal( false )
+        expect( S2.isA( 'cat' ) ).to.equal( true )
+        expect( S2.isA( 'rectangle' ) ).to.equal( true )
+        expect( S3.isA( 'dog' ) ).to.equal( false )
+        expect( S3.isA( 'cat' ) ).to.equal( false )
+        expect( S3.isA( 'rectangle' ) ).to.equal( false )
+        // verify that if we copy them, they take their types along
+        const copy1 = S1.copy()
+        const copy2 = S2.copy()
+        const copy3 = S3.copy()
+        expect( copy1.isA( 'dog' ) ).to.equal( true )
+        expect( copy1.isA( 'cat' ) ).to.equal( false )
+        expect( copy1.isA( 'rectangle' ) ).to.equal( false )
+        expect( copy2.isA( 'dog' ) ).to.equal( false )
+        expect( copy2.isA( 'cat' ) ).to.equal( true )
+        expect( copy2.isA( 'rectangle' ) ).to.equal( true )
+        expect( copy3.isA( 'dog' ) ).to.equal( false )
+        expect( copy3.isA( 'cat' ) ).to.equal( false )
+        expect( copy3.isA( 'rectangle' ) ).to.equal( false )
+        // verify that if we remove types, they go away, unless the type wasn't
+        // there in the first place
+        S1.unmakeIntoA( 'dog' )
+        S2.unmakeIntoA( 'dog' )
+        S3.unmakeIntoA( 'dog' )
+        expect( S1.isA( 'dog' ) ).to.equal( false )
+        expect( S1.isA( 'cat' ) ).to.equal( false )
+        expect( S1.isA( 'rectangle' ) ).to.equal( false )
+        expect( S2.isA( 'dog' ) ).to.equal( false )
+        expect( S2.isA( 'cat' ) ).to.equal( true )
+        expect( S2.isA( 'rectangle' ) ).to.equal( true )
+        expect( S3.isA( 'dog' ) ).to.equal( false )
+        expect( S3.isA( 'cat' ) ).to.equal( false )
+        expect( S3.isA( 'rectangle' ) ).to.equal( false )
+        // Verify that such changes did not impact the copies
+        expect( copy1.isA( 'dog' ) ).to.equal( true )
+        expect( copy1.isA( 'cat' ) ).to.equal( false )
+        expect( copy1.isA( 'rectangle' ) ).to.equal( false )
+        expect( copy2.isA( 'dog' ) ).to.equal( false )
+        expect( copy2.isA( 'cat' ) ).to.equal( true )
+        expect( copy2.isA( 'rectangle' ) ).to.equal( true )
+        expect( copy3.isA( 'dog' ) ).to.equal( false )
+        expect( copy3.isA( 'cat' ) ).to.equal( false )
+        expect( copy3.isA( 'rectangle' ) ).to.equal( false )
+        // verify that we can make other copies and add types as we do so
+        const copy4 = S1.asA( 'ghost' )
+        const copy5 = S2.asA( 'pokemon' )
+        expect( copy4.isA( 'dog' ) ).to.equal( false )
+        expect( copy4.isA( 'cat' ) ).to.equal( false )
+        expect( copy4.isA( 'rectangle' ) ).to.equal( false )
+        expect( copy4.isA( 'ghost' ) ).to.equal( true )
+        expect( copy4.isA( 'pokemon' ) ).to.equal( false )
+        expect( copy5.isA( 'dog' ) ).to.equal( false )
+        expect( copy5.isA( 'cat' ) ).to.equal( true )
+        expect( copy5.isA( 'rectangle' ) ).to.equal( true )
+        expect( copy5.isA( 'ghost' ) ).to.equal( false )
+        expect( copy5.isA( 'pokemon' ) ).to.equal( true )
+        // and that did not mess up the originals
+        expect( S1.isA( 'dog' ) ).to.equal( false )
+        expect( S1.isA( 'cat' ) ).to.equal( false )
+        expect( S1.isA( 'rectangle' ) ).to.equal( false )
+        expect( S2.isA( 'dog' ) ).to.equal( false )
+        expect( S2.isA( 'cat' ) ).to.equal( true )
+        expect( S2.isA( 'rectangle' ) ).to.equal( true )
+    } )
+
 } )
 
 describe( 'Structure copying and serialization', () => {
