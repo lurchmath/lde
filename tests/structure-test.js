@@ -2002,4 +2002,331 @@ describe( 'Bound and free variables', () => {
         expect( S5.isAValidBinding() ).to.equal( true )
     } )
 
+    // the following utility function will make it easier to create
+    // identifiers
+    const ident = name => {
+        const result = new Structure
+        result.setIdentifierName( name )
+        return result
+    }
+
+    it( 'Should correctly compute the identifiers in a binding', () => {
+        // create some valid binding Structures and verify that
+        // boundIdentifiers() is always the array of children without the first
+        // or last child
+        const forall = new Structure( // ∀x,y, P(x,y)
+            ident( '∀' ),
+            ident( 'x' ),
+            ident( 'y' ),
+            new Structure( ident( 'P' ), ident( 'x' ), ident( 'y' ) )
+        ).makeIntoA( 'binding' )
+        const exists = new Structure( // ∃a, a>0
+            ident( '∃' ),
+            ident( 'a' ),
+            new Structure( ident( '>' ), ident( 'a' ), ident( 0 ) )
+        ).makeIntoA( 'binding' )
+        const sum = new Structure( // ∑_{i=1}^n i^2
+            ident( '∑' ),
+            ident( 'i' ),
+            new Structure(
+                ident( 1 ),
+                ident( 'n' ),
+                new Structure( ident( '^' ), ident( 'i' ), ident( 2 ) )
+            )
+        ).makeIntoA( 'binding' )
+        expect( forall.boundIdentifiers() ).to.eql(
+            [ forall.child( 1 ), forall.child( 2 ) ] )
+        expect( exists.boundIdentifiers() ).to.eql( [ exists.child( 1 ) ] )
+        expect( sum.boundIdentifiers() ).to.eql( [ sum.child( 1 ) ] )
+        // verify that each binds its own identifiers and none of the
+        // identifiers of the others
+        expect( forall.binds( 'x' ) ).to.equal( true )
+        expect( forall.binds( 'y' ) ).to.equal( true )
+        expect( forall.binds( 'a' ) ).to.equal( false )
+        expect( forall.binds( 'i' ) ).to.equal( false )
+        expect( exists.binds( 'x' ) ).to.equal( false )
+        expect( exists.binds( 'y' ) ).to.equal( false )
+        expect( exists.binds( 'a' ) ).to.equal( true )
+        expect( exists.binds( 'i' ) ).to.equal( false )
+        expect( sum.binds( 'x' ) ).to.equal( false )
+        expect( sum.binds( 'y' ) ).to.equal( false )
+        expect( sum.binds( 'a' ) ).to.equal( false )
+        expect( sum.binds( 'i' ) ).to.equal( true )
+        // create some not-valid-binding Structures and verify that
+        // boundIdentifiers() is always an empty array
+        const forgotToMarkBinding = new Structure(
+            ident( '∀' ),
+            ident( 'x' ),
+            ident( 'y' ),
+            new Structure( ident( 'P' ), ident( 'x' ), ident( 'y' ) )
+        )
+        const notEnoughChildren = new Structure(
+            ident( '∑' ),
+            ident( 'body' )
+        )
+        notEnoughChildren.makeIntoA( 'binding' )
+        const atomic = ident( 'atomic' )
+        atomic.makeIntoA( 'binding' )
+        expect( forgotToMarkBinding.boundIdentifiers() ).to.eql( [ ] )
+        expect( notEnoughChildren.boundIdentifiers() ).to.eql( [ ] )
+        expect( atomic.boundIdentifiers() ).to.eql( [ ] )
+        // verify that none of these bind any variables
+        for ( let struct of [ forgotToMarkBinding, notEnoughChildren, atomic ] )
+            for ( let identifier of [ 'x', 'y', 'a', 'i', 'body' ] )
+                expect( struct.binds( identifier ) ).to.equal( false )
+    } )
+
+    it( 'Should correctly compute the free identifiers in a Structure', () => {
+        // create the same Structures from the previous test
+        const forall = new Structure( // ∀x,y, P(x,y)
+            ident( '∀' ),
+            ident( 'x' ),
+            ident( 'y' ),
+            new Structure( ident( 'P' ), ident( 'x' ), ident( 'y' ) )
+        ).makeIntoA( 'binding' )
+        const exists = new Structure( // ∃a, a>0
+            ident( '∃' ),
+            ident( 'a' ),
+            new Structure( ident( '>' ), ident( 'a' ), ident( 0 ) )
+        ).makeIntoA( 'binding' )
+        const sum = new Structure( // ∑_{i=1}^n i^2
+            ident( '∑' ),
+            ident( 'i' ),
+            new Structure(
+                ident( 1 ),
+                ident( 'n' ),
+                new Structure( ident( '^' ), ident( 'i' ), ident( 2 ) )
+            )
+        ).makeIntoA( 'binding' )
+        const forgotToMarkBinding = new Structure(
+            ident( '∀' ),
+            ident( 'x' ),
+            ident( 'y' ),
+            new Structure( ident( 'P' ), ident( 'x' ), ident( 'y' ) )
+        )
+        const notEnoughChildren = new Structure(
+            ident( '∑' ),
+            ident( 'body' )
+        )
+        notEnoughChildren.makeIntoA( 'binding' )
+        const atomic = ident( 'atomic' )
+        atomic.makeIntoA( 'binding' )
+        // compute the list of free identifiers in each one, sort them (if
+        // needed) so that the result is in a canonical order, and compare to
+        // the correct answer in each case
+        expect( forall.freeIdentifiers().sort() ).to.eql( [ 'P', '∀' ] )
+        expect( exists.freeIdentifiers().sort() ).to.eql( [ '0', '>', '∃' ] )
+        expect( sum.freeIdentifiers().sort() ).to.eql(
+            [ '1', '2', '^', 'n', '∑' ] )
+        expect( forgotToMarkBinding.freeIdentifiers().sort() ).to.eql(
+            [ 'P', 'x', 'y', '∀' ] )
+        expect( notEnoughChildren.freeIdentifiers().sort() ).to.eql(
+            [ 'body', '∑' ] )
+        expect( atomic.freeIdentifiers().sort() ).to.eql( [ 'atomic' ] )
+    } )
+
+    // The following utility function converts a hierarchy of arrays into a
+    // hierarchy of plain vanilla Structures whose leaves are identifiers.
+    const makeTree = x => {
+        return x instanceof Array ? new Structure( ...x.map( makeTree ) )
+                                  : ident( x )
+    }
+
+    it( 'Should judge freeness of sub-Structures correctly', () => {
+        // test isFree() and occursFree() on all the subexpressions of a small
+        // summation expression
+        const sum = makeTree( // ∑_s f(s)
+            [ '∑', 's', [ 'f', 's' ] ]
+        ).makeIntoA( 'binding' )
+        // test with assumed top-level ancestor
+        expect( sum.child( 1 ).isFree() ).to.equal( false ) // first s
+        expect( sum.child( 2 ).isFree() ).to.equal( false ) // f(s)
+        expect( sum.index( [ 2, 1 ] ).isFree() ).to.equal( false ) // second s
+        // test with explicit top-level ancestor
+        expect( sum.child( 1 ).isFree( sum ) ).to.equal( false ) // first s
+        expect( sum.child( 2 ).isFree( sum ) ).to.equal( false ) // f(s)
+        expect( sum.index( [ 2, 1 ] ).isFree( sum ) ).to.equal( false ) // second s
+        // test with an inner ancestor, to change the answer
+        expect( sum.child( 1 ).isFree( sum.child( 1 ) ) ).to.equal( true )
+        expect( sum.child( 2 ).isFree( sum.child( 2 ) ) ).to.equal( true )
+        expect( sum.index( [ 2, 1 ] ).isFree( sum.child( 2 ) ) ).to.equal( true )
+        // and all occursFree() checks should also be false w/no inThis specified
+        const s = sum.child( 1 ).copy()
+        const fofs = sum.child( 2 ).copy()
+        expect( sum.occursFree( s ) ).to.equal( false )
+        expect( sum.occursFree( fofs ) ).to.equal( false )
+        // but can be true if the ancestor is specified as the f(s)
+        expect( sum.occursFree( s, sum.child( 2 ) ) ).to.equal( true )
+        expect( sum.occursFree( fofs, sum.child( 2 ) ) ).to.equal( true )
+
+        // test isFree() and occursFree() on some subexpressions of a small
+        // predicate logic expression
+        const predicateLogic1 = makeTree( // P(x) ^ ∀x,Q(x)
+            [ 'and', [ 'P', 'x' ], [ '∀', 'x', [ 'Q', 'x' ] ] ]
+        )
+        predicateLogic1.child( 2 ).makeIntoA( 'binding' )
+        // one x is free, the others are not, but thus x does occur free
+        const x1 = predicateLogic1.index( [ 1, 1 ] )
+        const x2 = predicateLogic1.index( [ 2, 1 ] )
+        const x3 = predicateLogic1.index( [ 2, 2, 1 ] )
+        expect( x1.equals( x2 ) ).to.equal( true )
+        expect( x1.equals( x3 ) ).to.equal( true )
+        expect( x1.isFree() ).to.equal( true )
+        expect( x2.isFree() ).to.equal( false )
+        expect( x3.isFree() ).to.equal( false )
+        expect( predicateLogic1.occursFree( x1.copy() ) ).to.equal( true )
+        // all other symbols all occur free
+        expect( predicateLogic1.occursFree( ident( 'and' ) ) ).to.equal( true )
+        expect( predicateLogic1.occursFree( ident( 'P' ) ) ).to.equal( true )
+        expect( predicateLogic1.occursFree( ident( 'Q' ) ) ).to.equal( true )
+        expect( predicateLogic1.occursFree( ident( '∀' ) ) ).to.equal( true )
+        // P(x) occurs free but Q(x) does not
+        const Pofx = predicateLogic1.child( 1 )
+        const Qofx = predicateLogic1.index( [ 2, 2 ] )
+        expect( predicateLogic1.occursFree( Pofx.copy() ) ).to.equal( true )
+        expect( predicateLogic1.occursFree( Qofx.copy() ) ).to.equal( false )
+        // x2, x3, and Qofx become free if we consider a lower ancestor
+        expect( x2.isFree( x2 ) ).to.equal( true )
+        expect( x3.isFree( x3 ) ).to.equal( true )
+        expect( x3.isFree( Qofx ) ).to.equal( true )
+        expect( Qofx.isFree( Qofx ) ).to.equal( true )
+        expect( predicateLogic1.occursFree( Qofx.copy(), Qofx ) ).to.equal( true )
+        expect( Qofx.parent().occursFree( x1.copy(), Qofx ) ).to.equal( true )
+        // make one small change (Q becomes P) and verify that P(x) still
+        // occurs free, because there is one outside the quantifier
+        const predicateLogic2 = makeTree( // P(x) ^ ∀x,P(x)
+            [ 'and', [ 'P', 'x' ], [ '∀', 'x', [ 'P', 'x' ] ] ]
+        )
+        predicateLogic2.child( 2 ).makeIntoA( 'binding' )
+        expect( predicateLogic2.occursFree( Pofx.copy() ) ).to.equal( true )
+    } )
+
+    it( 'Handles free replacement correctly', () => {
+        // recreate some of the same expressions used in the previous test
+        const sum = makeTree( // ∑_s f(s)
+            [ '∑', 's', [ 'f', 's' ] ]
+        ).makeIntoA( 'binding' )
+        const predicateLogic = makeTree( // P(x) ^ ∀x,P(x)
+            [ 'and', [ 'P', 'x' ], [ '∀', 'x', [ 'P', 'x' ] ] ]
+        )
+        predicateLogic.child( 2 ).makeIntoA( 'binding' )
+        // now create several expressions that have various free variables in
+        // them, for replacement-testing purposes
+        const gofx = makeTree( [ 'g', 'x' ] )
+        const hofs = makeTree( [ 'h', 's' ] )
+        const Pofy = makeTree( [ 'P', 'y' ] )
+        const xto2 = makeTree( [ '^', 'x', '2' ] )
+        const Exxeqy = makeTree(
+            [ '∃', 'x', [ '=', 'x', 'y' ] ]
+        ).makeIntoA( 'binding' )
+        // in the sum, any child can be replaced iff the new thing has no free s
+        for ( let i = 0 ; i < 3 ; i++ ) {
+            expect( gofx.isFreeToReplace( sum.child( i ) ) ).to.equal( true )
+            expect( hofs.isFreeToReplace( sum.child( i ) ) ).to.equal( false )
+            expect( Pofy.isFreeToReplace( sum.child( i ) ) ).to.equal( true )
+            expect( xto2.isFreeToReplace( sum.child( i ) ) ).to.equal( true )
+            expect( Exxeqy.isFreeToReplace( sum.child( i ) ) ).to.equal( true )
+        }
+        // so if we ask it to replace all free occurrences of s, we will get a
+        // completely transformed expression, as long as the replacement has no
+        // free s in it; in that case, we get no change
+        let test
+        test = sum.copy()
+        test.replaceFree( ident( 's' ), gofx )
+        expect( test.equals( makeTree(
+            [ '∑', [ 'g', 'x' ], [ 'f', [ 'g', 'x' ] ] ]
+        ).makeIntoA( 'binding' ) ) ).to.equal( true )
+        test = sum.copy()
+        test.replaceFree( ident( 's' ), hofs )
+        expect( test.equals( sum ) ).to.equal( true )
+        test = sum.copy()
+        test.replaceFree( ident( 's' ), Exxeqy )
+        let compare = makeTree(
+            [ '∑', [ '∃', 'x', [ '=', 'x', 'y' ] ],
+                   [ 'f', [ '∃', 'x', [ '=', 'x', 'y' ] ] ] ]
+        ).makeIntoA( 'binding' )
+        compare.child( 1 ).makeIntoA( 'binding' )
+        compare.index( [ 2, 1 ] ).makeIntoA( 'binding' )
+        expect( test.equals( compare ) ).to.equal( true )
+        // in the predicate logic expression, the first x can be replaced by
+        // anything, but the second x can be replaced only by things with no
+        // free x in them
+        const pl1x1 = predicateLogic.index( [ 1, 1 ] )
+        expect( gofx.isFreeToReplace( pl1x1 ) ).to.equal( true )
+        expect( hofs.isFreeToReplace( pl1x1 ) ).to.equal( true )
+        expect( Pofy.isFreeToReplace( pl1x1 ) ).to.equal( true )
+        expect( xto2.isFreeToReplace( pl1x1 ) ).to.equal( true )
+        expect( Exxeqy.isFreeToReplace( pl1x1 ) ).to.equal( true )
+        const pl1x2 = predicateLogic.index( [ 2, 2, 1 ] )
+        expect( gofx.isFreeToReplace( pl1x2 ) ).to.equal( false )
+        expect( hofs.isFreeToReplace( pl1x2 ) ).to.equal( true )
+        expect( Pofy.isFreeToReplace( pl1x2 ) ).to.equal( true )
+        expect( xto2.isFreeToReplace( pl1x2 ) ).to.equal( false )
+        expect( Exxeqy.isFreeToReplace( pl1x2 ) ).to.equal( true )
+        // the same answers hold if we try to replace each P(x) instead
+        const pl1Pofx1 = predicateLogic.child( 1 )
+        expect( gofx.isFreeToReplace( pl1Pofx1 ) ).to.equal( true )
+        expect( hofs.isFreeToReplace( pl1Pofx1 ) ).to.equal( true )
+        expect( Pofy.isFreeToReplace( pl1Pofx1 ) ).to.equal( true )
+        expect( xto2.isFreeToReplace( pl1Pofx1 ) ).to.equal( true )
+        expect( Exxeqy.isFreeToReplace( pl1Pofx1 ) ).to.equal( true )
+        const pl1Pofx2 = predicateLogic.index( [ 2, 2 ] )
+        expect( gofx.isFreeToReplace( pl1Pofx2 ) ).to.equal( false )
+        expect( hofs.isFreeToReplace( pl1Pofx2 ) ).to.equal( true )
+        expect( Pofy.isFreeToReplace( pl1Pofx2 ) ).to.equal( true )
+        expect( xto2.isFreeToReplace( pl1Pofx2 ) ).to.equal( false )
+        expect( Exxeqy.isFreeToReplace( pl1Pofx2 ) ).to.equal( true )
+        // so if we ask it to replace x wherever it's free to do so, then only
+        // the first x changes when the replacement contains a free x
+        test = predicateLogic.copy()
+        test.replaceFree( ident( 'x' ), gofx )
+        compare = makeTree(
+            [ 'and', [ 'P', [ 'g', 'x' ] ], [ '∀', 'x', [ 'P', 'x' ] ] ]
+        )
+        compare.child( 2 ).makeIntoA( 'binding' )
+        expect( test.equals( compare ) ).to.equal( true )
+        test = predicateLogic.copy()
+        test.replaceFree( ident( 'x' ), hofs )
+        compare = makeTree(
+            [ 'and', [ 'P', [ 'h', 's' ] ],
+                     [ '∀', [ 'h', 's' ], [ 'P', [ 'h', 's' ] ] ] ]
+        )
+        compare.child( 2 ).makeIntoA( 'binding' )
+        expect( test.equals( compare ) ).to.equal( true )
+        test = predicateLogic.copy()
+        test.replaceFree( ident( 'x' ), Exxeqy )
+        compare = makeTree(
+            [ 'and', [ 'P', [ '∃', 'x', [ '=', 'x', 'y' ] ] ],
+                     [ '∀', [ '∃', 'x', [ '=', 'x', 'y' ] ],
+                            [ 'P', [ '∃', 'x', [ '=', 'x', 'y' ] ] ] ] ]
+        )
+        compare.child( 2 ).makeIntoA( 'binding' )
+        compare.index( [ 1, 1 ] ).makeIntoA( 'binding' )
+        compare.index( [ 2, 1 ] ).makeIntoA( 'binding' )
+        compare.index( [ 2, 2, 1 ] ).makeIntoA( 'binding' )
+        expect( test.equals( compare ) ).to.equal( true )
+        // if we relativize where it should look for "freeness," then even
+        // replacements containing x free can be used, depending on the value of
+        // the inThis parameter
+        // First, try with inThis == the quantifier, which should give no change:
+        test = predicateLogic.copy()
+        test.replaceFree( ident( 'x' ), gofx, test.child( 2 ) )
+        compare = makeTree(
+            [ 'and', [ 'P', [ 'g', 'x' ] ], [ '∀', 'x', [ 'P', 'x' ] ] ]
+        )
+        compare.child( 2 ).makeIntoA( 'binding' )
+        expect( test.equals( compare ) ).to.equal( true )
+        // Next, try with inThis == the quantifier body, which should mean that
+        // only the first child of the quantifier is considered bound, so two
+        // replacements should happen instead of just one:
+        test = predicateLogic.copy()
+        test.replaceFree( ident( 'x' ), gofx, test.index( [ 2, 2 ] ) )
+        compare = makeTree(
+            [ 'and', [ 'P', [ 'g', 'x' ] ],
+                     [ '∀', 'x', [ 'P', [ 'g', 'x' ] ] ] ]
+        )
+        compare.child( 2 ).makeIntoA( 'binding' )
+        expect( test.equals( compare ) ).to.equal( true )
+    } )
+
 } )

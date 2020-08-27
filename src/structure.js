@@ -1578,4 +1578,165 @@ export class Structure extends EventTarget {
                 child => child.isAnIdentifier() )
     }
 
+    /**
+     * If a Structure {@link Structure#isAValidBinding isAValidBinding()} then
+     * all of its children other than the first and the last are its bound
+     * identifiers.  This function returns them in an array.  The exact children
+     * objects themselves are returned, in the order they sit within their
+     * parent; the result is *not* an array of the child identifiers *names.*
+     * 
+     * If this Structure is not a valid binding, this function returns an empty
+     * array instead.
+     * 
+     * @return {Array} The list of identifiers bound by this Structure, if and
+     *   only if it is one
+     * @see {@link Structure#binds binds()}
+     * @see {@link Structure#isAValidBinding isAValidBinding()}
+     */
+    boundIdentifiers () {
+        return this.isAValidBinding() ? this.allButLastChild().slice( 1 ) : [ ]
+    }
+
+    /**
+     * Given an identifier name, this function checks to see whether an
+     * identifier of that name appears on this Structure's list of
+     * {@link Structure#boundIdentifiers boundIdentifiers()}.
+     * 
+     * @param {string} identifierName - The name of the identifier to test
+     * @return {boolean} Whether this Structure is a binding and one of its
+     *   bound identifiers is has the given name
+     * @see {@link Structure#boundIdentifiers boundIdentifiers()}
+     * @see {@link Structure#isAValidBinding isAValidBinding()}
+     */
+    binds ( identifierName ) {
+        return this.boundIdentifiers().some( identifier =>
+            identifier.getIdentifierName() == identifierName )
+    }
+
+    /**
+     * An identifier X is free in an ancestor Y if and only if no Structure
+     * that is an ancestor A of X inside of (or equal to) Y satisfies
+     * `A.binds( X.getIdentifierName() )`.  This function returns an array of
+     * all identifier names that appear within this Structure and, at the point
+     * where they appear, are free in this ancestor Structure.
+     * 
+     * If, instead of just the names of the identifiers, you wish to have the
+     * identifier Structures themselves, you can couple the
+     * {@link Structure#isFree isFree()} function with the
+     * {@link Structure#descendantsSatisfying descendantsSatisfying()}
+     * function to achieve that.
+     * 
+     * @return {string[]} An array of names of free identifiers appearing as
+     *   descendants of this Structure
+     * @see {@link Structure#binds binds()}
+     * @see {@link Structure#boundIdentifiers boundIdentifiers()}
+     */
+    freeIdentifiers () {
+        // a single identifier is free in itself
+        if ( this.isAnIdentifier() ) return [ this.getIdentifierName() ]
+        // otherwise we collect all the free variables in all children...
+        const result = new Set
+        this.children().forEach( child =>
+            child.freeIdentifiers().forEach( name =>
+                result.add( name ) ) )
+        // ...excepting any that this Structure binds
+        this.boundIdentifiers().forEach( identifier =>
+            result.delete( identifier.getIdentifierName() ) )
+        return Array.from( result )
+    }
+
+    /**
+     * Is this Structure free in one of its ancestors?  If the ancestor is not
+     * specified, it defaults to the Structure's topmost ancestor.  Otherwise,
+     * you can specify it with the parameter.
+     * 
+     * A Structure is free in an ancestor if none of the Structure's free
+     * identifiers are bound within that ancestor.
+     * 
+     * @param {Structure*} inThis - The ancestor in which the question takes
+     *   place, as described above
+     * @return {boolean} Whether this Structure is free in the specified
+     *   ancestor (or its topmost ancestor if none is specified)
+     */
+    isFree ( inThis ) {
+        // compute the free identifiers in me that an ancestor might bind
+        const freeIdentifierNames = this.freeIdentifiers()
+        // walk upwards to the appropriate ancestor and see if any bind any of
+        // those identifiers; if so, I am not free in that ancestor
+        for ( let ancestor = this ; ancestor ; ancestor = ancestor.parent() ) {
+            if ( freeIdentifierNames.some( name => ancestor.binds( name ) ) )
+                return false
+            if ( ancestor == inThis ) break
+        }
+        // none bound me, so I am free
+        return true
+    }
+
+    /**
+     * Does a copy of the given Structure `struct` occur free anywhere in this
+     * Structure?  More specifically, is there a descendant D of this Structure
+     * such that `D.equals( struct )` and `D.isFree( inThis )`?
+     * 
+     * @param {Structure} struct - This function looks for copies of this
+     *   Structure
+     * @param {Structure*} inThis - The notion of "free" is relative to this
+     *   Structure, in the same sense of the `inThis` parameter to
+     *   {@link Structure#isFree isFree()}
+     * @return {boolean} True if and only if there is a copy of `struct` as a
+     *   descendant of this Structure satisfying `.isFree( inThis )`
+     * @see {@link Structure#isFree isFree()}
+     */
+    occursFree ( struct, inThis ) {
+        return this.hasDescendantSatisfying( descendant =>
+            descendant.equals( struct ) && descendant.isFree( inThis ) )
+    }
+
+    /**
+     * A Structure A is free to replace a Structure B if no identifier free in A
+     * becomes bound when B is replaced by A.
+     * @param {Structure} original - The Structure to be replaced with this one
+     * @param {Structure*} inThis - The ancestor we use as a context in which to
+     *   gauge bound/free identifiers, as in the `inThis` parameter to
+     *   {@link Structure#isFree isFree()}.  If omitted, the context defaults to
+     *   the top-level ancestor of `original`.
+     * @return {boolean} True if this Structure is free to replace `original`,
+     *   and false if it is not.
+     */
+    isFreeToReplace ( original, inThis ) {
+        // this implementation is an exact copy of isFree(), with one exception:
+        // while the free identifiers are computed from this Structure, freeness
+        // is computed from original.
+        const freeIdentifierNames = this.freeIdentifiers()
+        for ( let ancestor = original ; ancestor ; ancestor = ancestor.parent() ) {
+            if ( freeIdentifierNames.some( name => ancestor.binds( name ) ) )
+                return false
+            if ( ancestor == inThis ) break
+        }
+        return true
+    }
+
+    /**
+     * Consider every free occurrence of `original` within this Structure, and
+     * replace each with a copy of `replacement` if and only if `replacement` is
+     * free to replace that instance.  Each instance is judged separately, so
+     * there may be any number of replacements, from zero up to the number of
+     * free occurrences of `original`.
+     * 
+     * @param {Structure} original - Replace copies of this Structure with
+     *   copies of `replacement`
+     * @param {Structure} replacement - Replace copies of `original` with
+     *   copies of this structure
+     * @param {Structure*} inThis - When judging free/bound identifiers, judge
+     *   them relative to this ancestor context, in the same sense of the
+     *   `inThis` parameter to {@link Structure#isFree isFree()}
+     */
+    replaceFree ( original, replacement, inThis ) {
+        this.descendantsSatisfying(
+            descendant => descendant.equals( original )
+        ).forEach( instance => {
+            if ( replacement.isFreeToReplace( instance, inThis ) )
+                instance.replaceWith( replacement.copy() )
+        } )
+    }
+
 }
