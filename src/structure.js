@@ -1653,7 +1653,7 @@ export class Structure extends EventTarget {
      * A Structure is free in an ancestor if none of the Structure's free
      * identifiers are bound within that ancestor.
      * 
-     * @param {Structure*} inThis - The ancestor in which the question takes
+     * @param {Structure} [inThis] - The ancestor in which the question takes
      *   place, as described above
      * @return {boolean} Whether this Structure is free in the specified
      *   ancestor (or its topmost ancestor if none is specified)
@@ -1679,7 +1679,7 @@ export class Structure extends EventTarget {
      * 
      * @param {Structure} struct - This function looks for copies of this
      *   Structure
-     * @param {Structure*} inThis - The notion of "free" is relative to this
+     * @param {Structure} [inThis] - The notion of "free" is relative to this
      *   Structure, in the same sense of the `inThis` parameter to
      *   {@link Structure#isFree isFree()}
      * @return {boolean} True if and only if there is a copy of `struct` as a
@@ -1695,7 +1695,7 @@ export class Structure extends EventTarget {
      * A Structure A is free to replace a Structure B if no identifier free in A
      * becomes bound when B is replaced by A.
      * @param {Structure} original - The Structure to be replaced with this one
-     * @param {Structure*} inThis - The ancestor we use as a context in which to
+     * @param {Structure} [inThis] - The ancestor we use as a context in which to
      *   gauge bound/free identifiers, as in the `inThis` parameter to
      *   {@link Structure#isFree isFree()}.  If omitted, the context defaults to
      *   the top-level ancestor of `original`.
@@ -1726,7 +1726,7 @@ export class Structure extends EventTarget {
      *   copies of `replacement`
      * @param {Structure} replacement - Replace copies of `original` with
      *   copies of this structure
-     * @param {Structure*} inThis - When judging free/bound identifiers, judge
+     * @param {Structure} [inThis] - When judging free/bound identifiers, judge
      *   them relative to this ancestor context, in the same sense of the
      *   `inThis` parameter to {@link Structure#isFree isFree()}
      */
