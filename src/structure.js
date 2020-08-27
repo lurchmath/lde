@@ -1441,4 +1441,136 @@ export class Structure extends EventTarget {
         return result
     }
 
+    //////
+    //
+    //  Bound and free variables
+    //
+    //////
+
+    /**
+     * Although subclasses of the Structure class will be in charge of assigning
+     * mathematical meaning to Structures, we must assign a small amount of
+     * mathematical meaning even in this base class, so that we can implement
+     * here the notions of free and bound variables and functions that work with
+     * those concepts.  We do so in order that all Structures might have access
+     * to such fundamental concepts.
+     * 
+     * To define free and bound variables, we need to establish conventions for
+     * what constitutes a variable and how we go about binding one.  We thus
+     * define two conventions.
+     * 
+     * First, a Structure counts as an identifier (a superset of the more
+     * specific "variable" category, but we're keeping things quite general for
+     * now) if and only if it is atomic and has an attribute flagging it as an
+     * identifier by specifying its identifier *name.*  We use the
+     * `"_identifier"` key for such an attribute.
+     * 
+     * Second, we establish a convention for what it means to bind a variable,
+     * defined in the documentation for the
+     * {@link Structure#isAValidBinding isAValidBinding()} function.
+     * 
+     * @return {boolean} Whether this Structure is an identifier, according to
+     *   the definition given above
+     * @see {@link Structure#setIdentifierName setIdentifierName()}
+     * @see {@link Structure#getIdentifierName getIdentifierName()}
+     * @see {@link Structure#clearIdentifierName clearIdentifierName()}
+     * @see {@link Structure#isAValidBinding isAValidBinding()}
+     */
+    isAnIdentifier () { return this.isAtomic() && this.hasAttribute( '_identifier' ) }
+
+    /**
+     * Documentation on what it means for a Structure to be an identifier is
+     * given in the documentation for the
+     * {@link Structure#isAnIdentifier isAnIdentifier()} function.
+     * 
+     * To make a Structure into an identifier, call this method.
+     * 
+     * Although it is uncommon that you would want to make a Structure no
+     * longer an identifier once you had made it into one, you could do so by
+     * removing the `"_identifier"` attribute.
+     * 
+     * @param {string} name - The name of the identifier to assign to this
+     *   Structure; any non-string will be converted to a string before use
+     * @see {@link Structure#isAnIdentifier isAnIdentifier()}
+     * @see {@link Structure#getIdentifierName getIdentifierName()}
+     * @see {@link Structure#clearIdentifierName clearIdentifierName()}
+     * @see {@link Structure#isAValidBinding isAValidBinding()}
+     */
+    setIdentifierName ( name ) { this.setAttribute( '_identifier', `${name}` ) }
+
+    /**
+     * Documentation on what it means for a Structure to be an identifier is
+     * given in the documentation for the
+     * {@link Structure#isAnIdentifier isAnIdentifier()} function.
+     * 
+     * To fetch the name of a Structure that is an identifier, call this method.
+     * If it is not an identifier, `undefined` will be returned.
+     * 
+     * @return {string} The name of the Structure as an identifier, or
+     *   undefined if it is not an identifier
+     * @see {@link Structure#isAnIdentifier isAnIdentifier()}
+     * @see {@link Structure#getIdentifierName getIdentifierName()}
+     * @see {@link Structure#clearIdentifierName clearIdentifierName()}
+     * @see {@link Structure#isAValidBinding isAValidBinding()}
+     */
+    getIdentifierName () { return this.getAttribute( '_identifier' ) }
+
+    /**
+     * Documentation on what it means for a Structure to be an identifier is
+     * given in the documentation for the
+     * {@link Structure#isAnIdentifier isAnIdentifier()} function.
+     * 
+     * To remove any identifier name that has been added to this Structure in
+     * the past with {@link Structure#setIdentifierName setIdentifierName()},
+     * call this function.  It guarantees that afterwards,
+     * {@link Structure#isAnIdentifier isAnIdentifier()} will return false and
+     * {@link Structure#getIdentifierName getIdentifierName()} will return
+     * undefined.
+     * @see {@link Structure#isAnIdentifier isAnIdentifier()}
+     * @see {@link Structure#setIdentifierName setIdentifierName()}
+     * @see {@link Structure#getIdentifierName getIdentifierName()}
+     * @see {@link Structure#isAValidBinding isAValidBinding()}
+     */
+    clearIdentifierName () { this.clearAttributes( '_identifier' ) }
+
+    /**
+     * Documentation on what it means for a Structure to be an identifier is
+     * given in the documentation for the
+     * {@link Structure#isAnIdentifier isAnIdentifier()} function.
+     * 
+     * A Structure binds an identifier (or more than one) if it has the
+     * following form.
+     * 
+     *  * It has been marked as a binding by calling
+     *    {@link Structure#makeIntoA makeIntoA()} with the string argument
+     *    `"binding"`.
+     *  * It is non-atomic and has at least three children.
+     *  * The first child can be any kind of Structure, and it counts as the
+     *    quantifier or operator that is binding the variables.
+     *  * The last child can be any kind of Structure, and is the body of the
+     *    quantifier or operation, such as the inside of a summation or the
+     *    statement over which the Structure is quantifying.
+     *  * All other children (of which there must be at least one) must pass the
+     *    {@link Structure#isAnIdentifier isAnIdentifier()} check, and are the
+     *    variables being bound.
+     * 
+     * This function determines whether a structure has that form.  Although the
+     * client may mark a Structure as a binding just by calling
+     * `X.makeIntoA( "binding" )`, it might still be invalid by not satisfying
+     * one of the other parts of the above definition.  Hence the need for this
+     * function.
+     * 
+     * @return {boolean} Whether this Structure is a binding form, according to
+     *   the four-point definition given above
+     * @see {@link Structure#isAnIdentifier isAnIdentifier()}
+     * @see {@link Structure#setIdentifierName setIdentifierName()}
+     * @see {@link Structure#getIdentifierName getIdentifierName()}
+     */
+    isAValidBinding () {
+        return this.isA( 'binding' )
+            && this.numChildren() > 2
+            && this.allButLastChild().slice( 1 ).every(
+                child => child.isAnIdentifier() )
+    }
+
 }

@@ -1881,3 +1881,125 @@ describe( 'Structure copying and serialization', () => {
     } )
 
 } )
+
+describe( 'Bound and free variables', () => {
+
+    it( 'Should let us set/get which Structures are identifiers', () => {
+        // Create four example structures, two atomic and two nonatomic
+        const S1 = new Structure
+        const S2 = new Structure
+        const S3 = new Structure(
+            new Structure,
+            new Structure
+        )
+        const S4 = new Structure(
+            new Structure(
+                new Structure
+            )
+        )
+        // By default, none of these are identifiers, nor have identifier names
+        expect( S1.isAnIdentifier() ).to.equal( false )
+        expect( S2.isAnIdentifier() ).to.equal( false )
+        expect( S3.isAnIdentifier() ).to.equal( false )
+        expect( S4.isAnIdentifier() ).to.equal( false )
+        expect( S1.getIdentifierName() ).to.equal( undefined )
+        expect( S2.getIdentifierName() ).to.equal( undefined )
+        expect( S3.getIdentifierName() ).to.equal( undefined )
+        expect( S4.getIdentifierName() ).to.equal( undefined )
+        // We can set and get identifier names on any of them
+        S1.setIdentifierName( 'name of S1' )
+        S2.setIdentifierName( 'name of S2' )
+        S3.setIdentifierName( 'name of S3' )
+        S4.setIdentifierName( 'name of S4' )
+        expect( S1.getIdentifierName() ).to.equal( 'name of S1' )
+        expect( S2.getIdentifierName() ).to.equal( 'name of S2' )
+        expect( S3.getIdentifierName() ).to.equal( 'name of S3' )
+        expect( S4.getIdentifierName() ).to.equal( 'name of S4' )
+        // But that doesn't make them all identifiers; only the atomic ones are
+        expect( S1.isAnIdentifier() ).to.equal( true )
+        expect( S2.isAnIdentifier() ).to.equal( true )
+        expect( S3.isAnIdentifier() ).to.equal( false )
+        expect( S4.isAnIdentifier() ).to.equal( false )
+        // And if we clear out all identifier names, then nothing is an
+        // identifier, nor has an identifier name
+        S1.clearIdentifierName()
+        S2.clearIdentifierName()
+        S3.clearIdentifierName()
+        S4.clearIdentifierName()
+        expect( S1.isAnIdentifier() ).to.equal( false )
+        expect( S2.isAnIdentifier() ).to.equal( false )
+        expect( S3.isAnIdentifier() ).to.equal( false )
+        expect( S4.isAnIdentifier() ).to.equal( false )
+        expect( S1.getIdentifierName() ).to.equal( undefined )
+        expect( S2.getIdentifierName() ).to.equal( undefined )
+        expect( S3.getIdentifierName() ).to.equal( undefined )
+        expect( S4.getIdentifierName() ).to.equal( undefined )
+    } )
+
+    it( 'Should let us set/get which Structures are bindings', () => {
+        // Make several different example Structures
+        const S1 = new Structure
+        const S2 = new Structure(
+            new Structure
+        )
+        const S3 = new Structure(
+            new Structure,
+            new Structure
+        )
+        const S4 = new Structure(
+            new Structure,
+            new Structure,
+            new Structure
+        )
+        const S5 = new Structure(
+            new Structure,
+            new Structure,
+            new Structure,
+            new Structure( new Structure, new Structure )
+        )
+        // By default, none of these should be valid bindings
+        expect( S1.isAValidBinding() ).to.equal( false )
+        expect( S2.isAValidBinding() ).to.equal( false )
+        expect( S3.isAValidBinding() ).to.equal( false )
+        expect( S4.isAValidBinding() ).to.equal( false )
+        expect( S5.isAValidBinding() ).to.equal( false )
+        // If we mark them all as bindings, still we should find that none are
+        // valid bindings, because none have identifier children
+        S1.makeIntoA( 'binding' )
+        S2.makeIntoA( 'binding' )
+        S3.makeIntoA( 'binding' )
+        S4.makeIntoA( 'binding' )
+        S5.makeIntoA( 'binding' )
+        expect( S1.isAValidBinding() ).to.equal( false )
+        expect( S2.isAValidBinding() ).to.equal( false )
+        expect( S3.isAValidBinding() ).to.equal( false )
+        expect( S4.isAValidBinding() ).to.equal( false )
+        expect( S5.isAValidBinding() ).to.equal( false )
+        // If we mark all children as identifiers, this should make only S4 and
+        // S5 into bindings, because the first 3 don't have enough children.
+        S2.child( 0 ).setIdentifierName( 'x' )
+        S3.child( 0 ).setIdentifierName( 'y' )
+        S3.child( 1 ).setIdentifierName( 'z' )
+        S4.child( 0 ).setIdentifierName( 'xx' )
+        S4.child( 1 ).setIdentifierName( 'yy' )
+        S4.child( 2 ).setIdentifierName( 'zz' )
+        S5.child( 0 ).setIdentifierName( 'xxx' )
+        S5.child( 1 ).setIdentifierName( 'yyy' )
+        S5.child( 2 ).setIdentifierName( 'zzz' )
+        S5.child( 3 ).setIdentifierName( 'www' )
+        expect( S1.isAValidBinding() ).to.equal( false )
+        expect( S2.isAValidBinding() ).to.equal( false )
+        expect( S3.isAValidBinding() ).to.equal( false )
+        expect( S4.isAValidBinding() ).to.equal( true )
+        expect( S5.isAValidBinding() ).to.equal( true )
+        // If we make the first and last children of S4 and S5 to no longer be
+        // identifiers, that shouldn't matter; they should stay valid bindings.
+        S4.firstChild().clearIdentifierName()
+        S4.lastChild().clearIdentifierName()
+        S5.firstChild().clearIdentifierName()
+        S5.lastChild().clearIdentifierName()
+        expect( S4.isAValidBinding() ).to.equal( true )
+        expect( S5.isAValidBinding() ).to.equal( true )
+    } )
+
+} )
