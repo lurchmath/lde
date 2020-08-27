@@ -79,15 +79,3 @@ EventTarget.prototype.emit = function ( type, details = { } ) {
 Map.prototype.deepCopy = function () {
     return new Map( JSON.parse( JSON.stringify( [ ...this ] ) ) )
 }
-
-/**
- * Whether the given `item` appears as an entry in this array.
- * 
- * @param {*} item - The item that may or may not appear in the array, and we
- *   are about to find out
- * @return {boolean} True if and only if the item appears as an entry in the
- *   array, and false otherwise 
- */
-Array.prototype.contains = function ( item ) {
-    return this.indexOf( item ) != -1
-}

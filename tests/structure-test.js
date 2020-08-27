@@ -1353,8 +1353,8 @@ describe( 'Structure attributes', () => {
         // verify that the keys you've added exist
         expect( S1.getAttributeKeys() ).to.eql( [ 'ess one key' ] )
         expect( S2.getAttributeKeys().length ).to.equal( 2 )
-        expect( S2.getAttributeKeys().contains( '5000000' ) ).to.equal( true )
-        expect( S2.getAttributeKeys().contains( 'second' ) ).to.equal( true )
+        expect( S2.getAttributeKeys().includes( '5000000' ) ).to.equal( true )
+        expect( S2.getAttributeKeys().includes( 'second' ) ).to.equal( true )
         expect( S3.getAttributeKeys() ).to.eql( [ ] )
         expect( S1.hasAttribute( 'ess one key' ) ).to.equal( true )
         expect( S2.hasAttribute( 5000000 ) ).to.equal( true )
