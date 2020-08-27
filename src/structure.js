@@ -592,7 +592,7 @@ export class Structure extends EventTarget {
     /**
      * Whether this Structure has any descendant satisfying the given predicate.
      * The predicate will be evaluated on each descendant in depth-first order
-     * until one passes or all fail; it may not be evaluated on all descendaants,
+     * until one passes or all fail; it may not be evaluated on all descendants,
      * if not needed.
      * 
      * Note that this Structure counts as a descendant of itself.  To ignore
