@@ -1443,7 +1443,7 @@ export class Structure extends EventTarget {
 
     //////
     //
-    //  Bound and free variables
+    //  Bound and free identifiers
     //
     //////
 
@@ -1451,22 +1451,27 @@ export class Structure extends EventTarget {
      * Although subclasses of the Structure class will be in charge of assigning
      * mathematical meaning to Structures, we must assign a small amount of
      * mathematical meaning even in this base class, so that we can implement
-     * here the notions of free and bound variables and functions that work with
-     * those concepts.  We do so in order that all Structures might have access
-     * to such fundamental concepts.
+     * here the notions of free and bound identifiers and functions that work
+     * with those concepts.  We do so in order that all Structures might have
+     * access to such fundamental concepts.
      * 
-     * To define free and bound variables, we need to establish conventions for
-     * what constitutes a variable and how we go about binding one.  We thus
-     * define two conventions.
+     * Note that we speak of free and bound identifiers rather than free and
+     * bound variables, because whether an identifier is a variable or constant
+     * will be contingent upon which declarations are in force, something that
+     * requires much more machinery than what we're building here in the base
+     * Structure class.  Thus at this level of generality, we speak only of
+     * identifiers.
      * 
-     * First, a Structure counts as an identifier (a superset of the more
-     * specific "variable" category, but we're keeping things quite general for
-     * now) if and only if it is atomic and has an attribute flagging it as an
-     * identifier by specifying its identifier *name.*  We use the
-     * `"_identifier"` key for such an attribute.
+     * To define free and bound identifiers, we need to establish conventions
+     * for what constitutes an identifier and how we go about binding one.  We
+     * thus define two conventions.
      * 
-     * Second, we establish a convention for what it means to bind a variable,
-     * defined in the documentation for the
+     * First, a Structure counts as an identifier if and only if it is atomic
+     * and has an attribute flagging it as an identifier by specifying its
+     * identifier *name.*  We use the `"_identifier"` key for such an attribute.
+     * 
+     * Second, we establish a convention for what it means to bind an
+     * identifier, defined in the documentation for the
      * {@link Structure#isAValidBinding isAValidBinding()} function.
      * 
      * @return {boolean} Whether this Structure is an identifier, according to
@@ -1546,13 +1551,13 @@ export class Structure extends EventTarget {
      *    `"binding"`.
      *  * It is non-atomic and has at least three children.
      *  * The first child can be any kind of Structure, and it counts as the
-     *    quantifier or operator that is binding the variables.
+     *    quantifier or operator that is binding the identifiers.
      *  * The last child can be any kind of Structure, and is the body of the
      *    quantifier or operation, such as the inside of a summation or the
      *    statement over which the Structure is quantifying.
      *  * All other children (of which there must be at least one) must pass the
      *    {@link Structure#isAnIdentifier isAnIdentifier()} check, and are the
-     *    variables being bound.
+     *    identifiers being bound.
      * 
      * This function determines whether a structure has that form.  Although the
      * client may mark a Structure as a binding just by calling
