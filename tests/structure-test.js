@@ -1892,7 +1892,7 @@ describe( 'Structure copying and serialization', () => {
         Splus.setIdentifierName( '+' )
         const Slog = new Structure()
         Slog.setIdentifierName( 'log' )
-        const Ssum = new Structure( Splus, Sx.copy(), Sy.copy() )
+        const Ssum = new Structure( Splus, Sx, Sy )
         const Sexpr = new Structure( Slog, new Structure( SP, Sx.copy(), Sy.copy() ) )
         const Sempty = new Structure()
         const Sweird = new Structure( Sempty.copy() )
