@@ -1880,6 +1880,35 @@ describe( 'Structure copying and serialization', () => {
         expect( S4.equals( S4 ) ).to.equal( true )
     } )
 
+    it( 'Does a simple toString() representation as S-expressions', () => {
+        // make some stuff to ask for the string representation of
+        const Sx = new Structure()
+        Sx.setIdentifierName( 'x' )
+        const Sy = new Structure()
+        Sy.setIdentifierName( 'y' )
+        const SP = new Structure()
+        SP.setIdentifierName( 'P' )
+        const Splus = new Structure()
+        Splus.setIdentifierName( '+' )
+        const Slog = new Structure()
+        Slog.setIdentifierName( 'log' )
+        const Ssum = new Structure( Splus, Sx.copy(), Sy.copy() )
+        const Sexpr = new Structure( Slog, new Structure( SP, Sx.copy(), Sy.copy() ) )
+        const Sempty = new Structure()
+        const Sweird = new Structure( Sempty.copy() )
+        // test atomic string representations
+        expect( Sx.toString() ).to.equal( 'x' )
+        expect( Sy.toString() ).to.equal( 'y' )
+        expect( SP.toString() ).to.equal( 'P' )
+        expect( Splus.toString() ).to.equal( '+' )
+        expect( Slog.toString() ).to.equal( 'log' )
+        // test non-atomic string representations
+        expect( Ssum.toString() ).to.equal( '(+ x y)' )
+        expect( Sexpr.toString() ).to.equal( '(log (P x y))' )
+        expect( Sempty.toString() ).to.equal( 'undefined' )
+        expect( Sweird.toString() ).to.equal( '(undefined)' )
+    } )
+
 } )
 
 describe( 'Bound and free variables', () => {

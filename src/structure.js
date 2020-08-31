@@ -1441,6 +1441,22 @@ export class Structure extends EventTarget {
         return result
     }
 
+    /**
+     * A simple string representation that represents an atomic Structure using
+     * `getIdentifierName()` and a non-leaf node as an S-expression (that is,
+     * `(a b c ...)`) of the string representations of its children.  This
+     * produces LISP-like results.
+     * 
+     * @return {string} A simple string representation
+     * @see {@link Structure#toJSON toJSON()}
+     * @see {@link Structure#isAtomic isAtomic()}
+     * @see {@link Structure#getIdentifierName getIdentifierName()}
+     */
+    toString () {
+        return this.isAtomic() ? `${this.getIdentifierName()}` :
+            `(${this._children.map( child => child.toString() ).join( ' ' )})`
+    }
+
     //////
     //
     //  Bound and free identifiers
