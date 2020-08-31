@@ -131,4 +131,48 @@ describe( 'Prototype extensions', () => {
             Mcopy.get( 'favorite data' ) )
     } )
 
+    it( 'The Array.prototype.without() function works as expected', () => {
+        // test on an array of values
+        let array = [ 1, 2, 3 ]
+        expect( array.without( -1 ) ).to.eql( [ 1, 2, 3 ] )
+        expect( array.without( 0 ) ).to.eql( [ 2, 3 ] )
+        expect( array.without( 1 ) ).to.eql( [ 1, 3 ] )
+        expect( array.without( 2 ) ).to.eql( [ 1, 2 ] )
+        expect( array.without( 3 ) ).to.eql( [ 1, 2, 3 ] )
+        // test on an array of references
+        array = [ { }, { } ]
+        let test = array.without()
+        expect( test ).not.to.equal( array )
+        expect( test ).to.eql( [ { }, { } ] )
+        expect( test[0] ).to.equal( array[0] )
+        expect( test[1] ).to.equal( array[1] )
+        test = array.without( 0 )
+        expect( test ).not.to.equal( array )
+        expect( test ).to.eql( [ { } ] )
+        expect( test[0] ).to.equal( array[1] )
+        test = array.without( 1 )
+        expect( test ).not.to.equal( array )
+        expect( test ).to.eql( [ { } ] )
+        expect( test[0] ).to.equal( array[0] )
+        test = array.without( 2 )
+        expect( test ).not.to.equal( array )
+        expect( test ).to.eql( [ { }, { } ] )
+        expect( test[0] ).to.equal( array[0] )
+        expect( test[1] ).to.equal( array[1] )
+    } )
+
+    it( 'The Array.prototype.last() function works as expected', () => {
+        // make some objects for use in testing
+        const obj1 = { }
+        const obj2 = /foo/
+        const obj3 = [ [ [ ] ] ]
+        // run some tests
+        expect( [ 1, 2, 3 ].last() ).to.equal( 3 )
+        expect( [ 'help', 'me' ].last() ).to.equal( 'me' )
+        expect( [ obj1, obj2, obj3 ].last() ).to.equal( obj3 )
+        expect( [ obj2 ].last() ).to.equal( obj2 )
+        expect( [ obj1, obj1 ].last() ).to.equal( obj1 )
+        expect( [ ].last() ).to.equal( undefined )
+    } )
+
 } )

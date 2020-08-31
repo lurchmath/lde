@@ -79,3 +79,28 @@ EventTarget.prototype.emit = function ( type, details = { } ) {
 Map.prototype.deepCopy = function () {
     return new Map( JSON.parse( JSON.stringify( [ ...this ] ) ) )
 }
+
+/**
+ * Return a shallow copy of the array, but without one (specified) element.
+ * 
+ * If the given index is not a valid index into the array, then a shallow copy
+ * of the array is returned with *no* change to its elements (all included).
+ * 
+ * @param {number} index - Which entry to remove, as a zero-based index
+ * @return {Array} A shallow copy of the array, but without the element whose
+ *   index was given
+ */
+Array.prototype.without = function ( index ) {
+    if ( typeof( index ) != 'number' || (index|0) != index ) return this.slice()
+    if ( index < 0 || index >= this.length ) return this.slice()
+    return this.slice( 0, index ).concat( this.slice( index + 1 ) )
+}
+
+/**
+ * The last element of the array, equivalent to `A[A.length-1]` (if the array is
+ * named `A`)
+ * 
+ * @return {*} The last element of the array, or undefined if the array is
+ *   empty
+ */
+Array.prototype.last = function () { return this[this.length-1] }
