@@ -1758,4 +1758,187 @@ export class Structure extends EventTarget {
         } )
     }
 
+    //////
+    //
+    //  Unique IDs
+    //
+    //////
+
+    /**
+     * We want the capability of creating assigning each Structure in a given
+     * hierarchy a globally unique ID.  We therefore need a global place to
+     * store the mapping of IDs to instances, and thus we create this Map in the
+     * Structure class.
+     * 
+     * Each key in the map is an ID and the corresponding value is the instance
+     * with that ID.  Each ID is a string.
+     * 
+     * This data structure should not be accessed by clients; it is private to
+     * this class.  Use {@link Structure#instanceWithID instanceWithID()} and
+     * {@link Structure#trackIDs trackIDs()} instead.
+     * 
+     * @see {@link Structure#instanceWithID instanceWithID()}
+     * @see {@link Structure#trackIDs trackIDs()}
+     */
+    static IDs = new Map
+
+    /**
+     * Find a Structure instance from a given string ID.  This assumes that the
+     * assignment of ID to Structure has been recorded in the global mapping in
+     * {@link Structure#IDs IDs}, by the function
+     * {@link Structure#trackIDs trackIDs()}.  If it has not been so recorded,
+     * then this function will not find the instance and will return undefined.
+     * 
+     * Note that because this function is static, clients access it as
+     * `Structure.instanceWithID("...")`.
+     * 
+     * @param {string} id - The Structure ID to look up
+     * @return {Structure} The Structure that has the given ID, if any, or
+     *   undefined if no Structure has the given ID
+     * 
+     * @see {@link Structure#IDs IDs()}
+     * @see {@link Structure#trackIDs trackIDs()}
+     */
+    static instanceWithID ( id ) { return Structure.IDs.get( `${id}` ) }
+
+    /**
+     * The ID of this Structure, if it has one, or undefined otherwise.  An ID
+     * is always a string; this is ensured by the
+     * {@link Structure#setId setId()} function.
+     * 
+     * @return {string} The ID of this Structure, or undefined if there is none
+     * 
+     * @see {@link Structure#setId setID()}
+     */
+    ID () { return this.getAttribute( '_id' ) }
+
+    /**
+     * Set the ID of this Structure.  Note that this does not change the
+     * global tracking of IDs, because one could easily call this function to
+     * assign an already-in-use ID.  To ensure that the IDs in a hierarchy are
+     * tracked, call {@link Structure#trackIDs trackIDs()}, and if that has
+     * already been called, then to change a Structure's ID assignment, call
+     * {@link Structure#changeID changeID()}.
+     * 
+     * @param {string} id - The new ID to assign.  If this is not a string, it
+     *   will be converted into one.
+     * 
+     * @see {@link Structure#ID ID()}
+     * @see {@link Structure#trackIDs trackIDs()}
+     * @see {@link Structure#changeID changeID()}
+     */
+    setID ( id ) { this.setAttribute( '_id', `${id}` ) }
+
+    /**
+     * Store in the global {@link Structure#IDs IDs} mapping the association of
+     * this Structure's ID with this Structure instance itself.  If the
+     * parameter is set to true (the default), then do the same recursively to
+     * all of its descendants.
+     * 
+     * Calling this function then enables you to call
+     * {@link Structure#instanceWithID instanceWithID()} on any of the IDs of a
+     * descendant and get that descendant in return.  Note that this does not
+     * check to see if a Structure with the given ID has already been recorded;
+     * it will overwrite any past data in the {@link Structure#IDs IDs} mapping.
+     * 
+     * **Important:**
+     * To prevent memory leaks, whenever a Structure hierarchy is no longer used
+     * by the client, you should call {@link Structure#untrackIDs untrackIDs()}
+     * on it.
+     * 
+     * @param {boolean} recursive - Whether to recursively track IDs of all
+     *   child, grandchild, etc. Structures.  (If false, only this Structure's
+     *   ID is tracked, not those of its descendants.)
+     * 
+     * @see {@link Structure#IDs IDs}
+     * @see {@link Structure#untrackIDs untrackIDs()}
+     */
+    trackIDs ( recursive = true ) {
+        if ( this.hasAttribute( '_id' ) ) Structure.IDs.set( this.ID(), this )
+        if ( recursive ) for ( let child of this._children ) child.trackIDs()
+    }
+
+    /**
+     * This removes the ID of this Structure (and, if requested, all descendant
+     * Structures) from the global {@link Structure#IDs IDs} mapping.  It is the
+     * reverse of {@link Structure#trackIDs trackIDs()}, and should always be
+     * called once the client is finished using a Structure, to prevent memory
+     * leaks.
+     * 
+     * @param {boolean} recursive - Whether to recursively apply this function
+     *   to all child, grandchild, etc. Structures.  (If false, only this
+     *   Structure's ID is untracked, not those of its descendants.)
+     * 
+     * @see {@link Structure#IDs IDs}
+     * @see {@link Structure#trackIDs trackIDs()}
+     */
+    untrackIDs ( recursive = true ) {
+        console.log( 'supposed to untrack', this.ID(),
+            this.hasAttribute( '_id' ) )
+        if ( this.hasAttribute( '_id' ) ) Structure.IDs.delete( this.ID() )
+        if ( recursive ) for ( let child of this._children ) child.untrackIDs()
+    }
+
+    /**
+     * Check whether this Structure's ID is currently tracked and associated
+     * with this Structure itself.
+     * 
+     * @return {boolean} Whether the ID of this Structure is currently tracked
+     *   by the global {@link Structure#IDs IDs} mapping *and* that it is
+     *   associated, by that mapping, with this Structure
+     * 
+     * @see {@link Structure#IDs IDs}
+     * @see {@link Structure#trackIDs trackIDs()}
+     */
+    idIsTracked () {
+        return this.hasAttribute( '_id' )
+            && this == Structure.instanceWithID( this.ID() )
+    }
+
+    /**
+     * Remove the ID of this Structure and, if requested, all of its
+     * descendants.  This does not change anything about the global
+     * {@link Structure#IDs IDs} mapping, so if this Structure's IDs are
+     * tracked, you should call {@link Structure#untrackIDs untrackIDs()} first.
+     * 
+     * @param {boolean} recursive - Whether to clear IDs from all descendants of
+     *   this Structure as well
+     * 
+     * @see {@link Structure#IDs IDs}
+     * @see {@link Structure#untrackIDs untrackIDs()}
+     */
+    clearIDs ( recursive = true ) {
+        this.clearAttributes( '_id' )
+        if ( recursive ) for ( let child of this._children ) child.clearIDs()
+    }
+
+    /**
+     * If a Structure wishes to change its ID, then we may need to update the
+     * internal {@link Structure#IDs IDs} mapping.  The following function
+     * changes the ID and updates that mapping if needed all in one action, to
+     * make it easy for the client to change a Structure's ID, just by calling
+     * this function.
+     * 
+     * If for some reason the change was not possible, then this function will
+     * take no action and return false.  Possible reasons include:
+     *  * the new ID is already associated with another Structure
+     *  * the old ID isn't tracked in the {@link Structure#IDs IDs} mapping
+     *  * the new ID is the same as the old ID
+     * 
+     * @param {string} newID - The ID to use as the replacement for this
+     *   Structure's existing ID.  It will be treated as a string if it is not
+     *   already one.
+     * @return {boolean} True if the operation succeeded, false if it could not
+     *   be performed (and thus no action was taken)
+     */
+    changeID ( newID ) {
+        newID = `${newID}`
+        if ( Structure.IDs.has( newID )
+          || this != Structure.instanceWithID( this.ID() ) ) return false
+        Structure.IDs.delete( this.ID() )
+        this.setID( newID )
+        Structure.IDs.set( newID, this )
+        return true
+    }
+
 }
