@@ -1820,6 +1820,30 @@ describe( 'Structure copying and serialization', () => {
         expect( child.children() ).to.eql( [ ] )
     } )
 
+    it( 'Respects the includeIDs parameter when serializing', () => {
+        // create a small hierarchy with some IDs
+        const B1 = new Structure()
+        const B2 = new Structure()
+        const A = new Structure( B1, B2 )
+        A.setID( 'aardvark' )
+        B1.setID( 'beetle' )
+        B2.setID( 'bear' )
+        // ensure that serializing and deserializing includes IDs
+        const json = A.toJSON()
+        expect( json.attributes ).not.to.eql( [ ] )
+        const copy = Structure.fromJSON( json )
+        expect( copy.ID() ).to.equal( 'aardvark' )
+        expect( copy.child( 0 ).ID() ).to.equal( 'beetle' )
+        expect( copy.child( 1 ).ID() ).to.equal( 'bear' )
+        // a request not to include IDs should be obeyed
+        const json2 = A.toJSON( false )
+        expect( json2.attributes ).to.eql( [ ] )
+        const copy2 = Structure.fromJSON( json2 )
+        expect( copy2.ID() ).to.equal( undefined )
+        expect( copy2.child( 0 ).ID() ).to.equal( undefined )
+        expect( copy2.child( 1 ).ID() ).to.equal( undefined )
+    } )
+
     it( 'Supports deep equality comparisons correctly', () => {
         // Create four structures for testing
         const S1 = new Structure(

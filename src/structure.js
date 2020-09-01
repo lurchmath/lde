@@ -1409,15 +1409,28 @@ export class Structure extends EventTarget {
      * stored in the result, so that a deep copy of this Structure can be
      * recreated from that object using {@link Strucure#fromJSON fromJSON()}.
      * 
+     * If the serialized result will later be deserialized after the original
+     * has been destroyed, then you may wish to preserve the unique IDs of each
+     * Structure in the hierarchy in the serialization.  But if the original
+     * will still exist, you may not.  Thus the parameter lets you choose which
+     * of these behaviors you need.  By default, IDs are included.
+     * 
+     * @param {boolean} includeIDs - Whether to include the IDs of the
+     *   Structure and its descendants in the serialized form (as part of the
+     *   Structure's attributes)
      * @return {Object} A serialized version of this Structure
      * @see {@link Strucure#fromJSON fromJSON()}
      * @see {@link Strucure#subclasses subclasses}
      */
-    toJSON () {
+    toJSON ( includeIDs = true ) {
+        let serializedAttributes = [ ...this._attributes ]
+        if ( !includeIDs )
+            serializedAttributes = serializedAttributes.filter(
+                pair => pair[0] != '_id' )
         return {
             className : this.constructor.className,
-            attributes : [ ...this._attributes ],
-            children : this._children.map( child => child.toJSON() )
+            attributes : serializedAttributes,
+            children : this._children.map( child => child.toJSON( includeIDs ) )
         }
     }
 
