@@ -1939,4 +1939,30 @@ export class Structure extends EventTarget {
         return true
     }
 
+    //////
+    //
+    //  Sending feedback
+    //
+    //////
+
+    /**
+     * This implementation of the feedback function is a stub.  It does nothing
+     * except dump the data to the console.  However, it serves as the central
+     * method that all Structures should use to transmit feedback, so that when
+     * this class is used in the LDE, which has a mechanism for transmitting
+     * feedback messages to its clients, the LDE can override this
+     * implementation with a real one, and all calls that use this central
+     * channel will then be correctly routed.
+     * 
+     * Documentation will be forthcoming later about the required form and
+     * content of the `feedbackData` parameter.
+     * 
+     * @param {Object} feedbackData - Any data that can be encoded using
+     *   `JSON.stringify()` (or
+     *   {@link predictableStringify predictableStringify()}), to be transmitted
+     */
+    static feedback ( feedbackData ) {
+        console.log( 'Structure class feedback not implemented:', feedbackData )
+    }
+
 }
