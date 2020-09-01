@@ -1873,8 +1873,6 @@ export class Structure extends EventTarget {
      * @see {@link Structure#trackIDs trackIDs()}
      */
     untrackIDs ( recursive = true ) {
-        console.log( 'supposed to untrack', this.ID(),
-            this.hasAttribute( '_id' ) )
         if ( this.hasAttribute( '_id' ) ) Structure.IDs.delete( this.ID() )
         if ( recursive ) for ( let child of this._children ) child.untrackIDs()
     }
