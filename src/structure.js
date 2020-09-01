@@ -1425,6 +1425,9 @@ export class Structure extends EventTarget {
      * Deserialize the data in the argument, producing a new Structure instance
      * (or, more specifically, sometimes an instance of one of its subclasses).
      * 
+     * Note that because this function is static, clients access it as
+     * `Structure.fromJSON(...)`.
+     * 
      * @param {Object} data - A JavaScript Object of the form produced by
      *   {@link Structure#toJSON toJSON()}
      * @return {Structure} A new Structure instance (which may actually be an
