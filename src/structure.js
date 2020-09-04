@@ -236,15 +236,15 @@ export class Structure extends EventTarget {
      */
     attr ( attributes = [ ] ) {
         if ( attributes instanceof Array ) {
-            for ( let pair of attributes ) {
-                this.setAttribute( pair[0], pair[1] )
+            for ( const [ key, value ] of attributes ) {
+                this.setAttribute( key, value )
             }
         } else if ( attributes instanceof Map ) {
-            for ( let key of attributes.keys() ) {
-                this.setAttribute( key, attributes.get( key ) )
+            for ( const [ key, value ] of attributes ) {
+                this.setAttribute( key, value )
             }
         } else if ( attributes instanceof Object ) {
-            for ( let key of Object.keys( attributes ) ) {
+            for ( const key of Object.keys( attributes ) ) {
                 this.setAttribute( key, attributes[key] )
             }
         }
