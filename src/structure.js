@@ -1,4 +1,6 @@
 
+import { Connection } from './connection.js'
+
 /**
  * The Structure class, an n-ary tree of Structure instances, using functions
  * like {@link Structure#parent parent()} and {@link Structure#children children()}
@@ -1974,6 +1976,202 @@ export class Structure extends EventTarget {
      */
     static feedback ( feedbackData ) {
         console.log( 'Structure class feedback not implemented:', feedbackData )
+    }
+
+    //////
+    //
+    //  Connections
+    //
+    //////
+
+    /**
+     * Get the IDs of all connections into or out of this Structure.
+     * 
+     * @return {string[]} An array of all the IDs of all the connections into or
+     *   out of this Structure.  These unique IDs can be used to get a
+     *   {@link Connection Connection} object; see that class's
+     *   {@link Connection#withID withID()} function.
+     * @see {@link Structure#getConnections getConnections()}
+     * @see {@link Structure#getConnectionIDsIn getConnectionIDsIn()}
+     * @see {@link Structure#getConnectionIDsOut getConnectionIDsOut()}
+     */
+    getConnectionIDs () {
+        return this.getAttributeKeys().filter( key =>
+            key.substring( 0, 13 ) == '_conn target ' ||
+            key.substring( 0, 13 ) == '_conn source ' )
+        .map( key => key.substring( 13 ) )
+    }
+    
+    /**
+     * Get the IDs of all connections into this Structure.
+     * 
+     * @return {string[]} An array of all the IDs of all the connections into
+     *   this Structure.  These unique IDs can be used to get a
+     *   {@link Connection Connection} object; see that class's
+     *   {@link Connection#withID withID()} function.
+     * @see {@link Structure#getConnectionsIn getConnectionsIn()}
+     * @see {@link Structure#getConnectionIDs getConnectionIDs()}
+     * @see {@link Structure#getConnectionIDsOut getConnectionIDsOut()}
+     */
+    getConnectionIDsIn () {
+        return this.getAttributeKeys().filter( key =>
+            key.substring( 0, 13 ) == '_conn source ' )
+        .map( key => key.substring( 13 ) )
+    }
+    
+    /**
+     * Get the IDs of all connections out of this Structure.
+     * 
+     * @return {string[]} An array of all the IDs of all the connections out of
+     *   this Structure.  These unique IDs can be used to get a
+     *   {@link Connection Connection} object; see that class's
+     *   {@link Connection#withID withID()} function.
+     * @see {@link Structure#getConnectionsOut getConnectionsOut()}
+     * @see {@link Structure#getConnectionIDs getConnectionIDs()}
+     * @see {@link Structure#getConnectionIDsIn getConnectionIDsIn()}
+     */
+    getConnectionIDsOut () {
+        return this.getAttributeKeys().filter( key =>
+            key.substring( 0, 13 ) == '_conn target ' )
+        .map( key => key.substring( 13 ) )
+    }
+
+    /**
+     * Get all connections into or out of this Structure, as
+     * {@link Connection Connection} instances.  This function simply maps the
+     * {@link Connection#withID withID()} function over the result of
+     * {@link Structure#getConnectionIDs getConnectionIDs()}.
+     * 
+     * @return {Connection[]} An array of all the Connections into or out of
+     *   this Structure.
+     * @see {@link Structure#getConnectionIDs getConnectionIDs()}
+     * @see {@link Structure#getConnectionsIn getConnectionsIn()}
+     * @see {@link Structure#getConnectionsOut getConnectionsOut()}
+     */
+    getConnections () { return this.getConnectionIDs().map( Connection.withID ) }
+
+    /**
+     * Get all connections into this Structure, as
+     * {@link Connection Connection} instances.  This function simply maps the
+     * {@link Connection#withID withID()} function over the result of
+     * {@link Structure#getConnectionIDsIn getConnectionIDsIn()}.
+     * 
+     * @return {Connection[]} An array of all the Connections into this
+     *   Structure.
+     * @see {@link Structure#getConnectionIDsIn getConnectionIDsIn()}
+     * @see {@link Structure#getConnections getConnections()}
+     * @see {@link Structure#getConnectionsOut getConnectionsOut()}
+     */
+    getConnectionsIn () { return this.getConnectionIDsIn().map( Connection.withID ) }
+
+    /**
+     * Get all connections out of this Structure, as
+     * {@link Connection Connection} instances.  This function simply maps the
+     * {@link Connection#withID withID()} function over the result of
+     * {@link Structure#getConnectionIDsOut getConnectionIDsOut()}.
+     * 
+     * @return {Connection[]} An array of all the Connections out of this
+     *   Structure.
+     * @see {@link Structure#getConnectionIDsOut getConnectionIDsOut()}
+     * @see {@link Structure#getConnections getConnections()}
+     * @see {@link Structure#getConnectionsIn getConnectionsIn()}
+     */
+    getConnectionsOut () { return this.getConnectionIDsOut().map( Connection.withID ) }
+
+    /**
+     * Connect this Structure to another, called the *target,* optionally
+     * attaching some data to the connection as well.  This function just calls
+     * {@link Connection#create Connection.create()}, and is thus here just for
+     * convenience.
+     * 
+     * @param {string} connectionID - The unique ID to use for the new
+     *   connection we are to create
+     * @param {Structure} target - The target of the new connection
+     * @param {*} data - The optional data to attach to the new connection.  See
+     *   the {@link Connection#create create()} function in the
+     *   {@link Connection Connection} class for the acceptable formats of this
+     *   data.
+     * @return {Connection} A {@link Connection Connection} instance for the
+     *   newly created connection between this Structure and the target.  This
+     *   return value can be safely ignored, because the connection data is
+     *   stored in the source and target Structures, and is not dependent on the
+     *   Connection object itself.  However, the return value will be false if
+     *   the chosen connection ID is in use or if this Structure or the target
+     *   does not pass {@link Structure#idIsTracked idIsTracked()}.
+     */
+    connectTo ( connectionID, target, data = null ) {
+        return Connection.create( id, this.ID(), target.ID(), data )
+    }
+
+    /**
+     * Remove all connections into or out of this Structure.  This deletes the
+     * relevant data from this Structure's attributes as well as those of the
+     * Structures on the other end of each connection.  For documentation on the
+     * data format for this stored data, see the {@link Connection Connection}
+     * class.
+     * 
+     * This function simply runs {@link Connection#remove remove()} on every
+     * connection in {@link Structure#getConnections getConnections()}.
+     * 
+     * @see {@link Connection#remove remove()}
+     * @see {@link Structure#getConnections getConnections()}
+     */
+    removeConnections () {
+        this.getConnections().forEach( connection => connection.remove() )
+    }
+
+    /**
+     * There are some situations in which a Structure hierarchy will have data
+     * in it about connections, and yet those connections were not created with
+     * the API in the {@link Connection Connection}s class.  For example, if a
+     * Structure hierarchy has been saved in serialized form and then
+     * deserialized at a later date.  Thus we need a way to place into the
+     * {@link Connection#IDs IDs member of the Connection class} all the IDs of
+     * the connections in any given Structure hierarchy.  This function does so.
+     * In that way, it is very similar to {@link Structure#trackIDs trackIDs()}.
+     * 
+     * Connections are processed only at the source node, so that we do not
+     * process each one twice.  Thus any connection into this Structure from
+     * outside will not be processed by this function, but connections from this
+     * one out or among this one's descendants in either direction will be
+     * processed.
+     * 
+     * @return {boolean} True if and only if every connection ID that appers in
+     *   this Structure and its descendants was able to be added to the global
+     *   mapping in {@link Connection#IDs IDs}.  If any fail (because the ID was
+     *   already in use), this returns false.  Even if it returns false, it
+     *   still adds as many connections as it can to that global mapping.
+     */
+    trackConnections () {
+        let success = true
+        for ( const id of this.getConnectionIDsOut() ) {
+            if ( Connection.IDs.has( id ) ) {
+                success = false
+            } else {
+                Connection.IDs.set( id, this )
+            }
+        }
+        for ( const child of this.children() ) {
+            if ( !child.trackConnections() ) success = false
+        }
+        return success
+    }
+
+    /**
+     * When replacing a Structure in a hierarchy with another, we often want to
+     * transfer all connections that went into or out of the old Structure to
+     * its replacement instead.  This function performs that task.
+     * 
+     * This function is merely a convenient interface that just calls
+     * {@link Connection#transferConnections Connection.transferConnections()}
+     * on your behalf.
+     * 
+     * @param {Structure} recipient - The Structure to which to transfer all of
+     *   this one's connections
+     * @see {@link Connection#transferConnections Connection.transferConnections()}
+     */
+    transferConnectionsTo ( recipient ) {
+        Connection.transferConnections( this, recipient )
     }
 
 }
