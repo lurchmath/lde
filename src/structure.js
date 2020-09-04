@@ -1,6 +1,4 @@
 
-import { predictableStringify } from './utilities.js'
-
 /**
  * The Structure class, an n-ary tree of Structure instances, using functions
  * like {@link Structure#parent parent()} and {@link Structure#children children()}
