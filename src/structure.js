@@ -1776,10 +1776,10 @@ export class Structure extends EventTarget {
     //////
 
     /**
-     * We want the capability of creating assigning each Structure in a given
-     * hierarchy a globally unique ID.  We therefore need a global place to
-     * store the mapping of IDs to instances, and thus we create this Map in the
-     * Structure class.
+     * We want the capability of assigning each Structure in a given hierarchy a
+     * globally unique ID.  We therefore need a global place to store the
+     * mapping of IDs to instances, and thus we create this Map in the Structure
+     * class.
      * 
      * Each key in the map is an ID and the corresponding value is the instance
      * with that ID.  Each ID is a string.
