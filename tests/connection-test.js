@@ -30,14 +30,15 @@ describe( 'Creating Connection instances', () => {
         D.setID( 'D' )
         C.trackIDs()
         D.trackIDs()
+        c1 = c2 = c3 = null
     } )
 
     afterEach( () => {
         C.untrackIDs()
         D.untrackIDs()
-        c1.remove()
-        c2.remove()
-        c3.remove()
+        if ( c1 ) c1.remove()
+        if ( c2 ) c2.remove()
+        if ( c3 ) c3.remove()
     } )
 
     it( 'Can create connections with Connection.create()', () => {
@@ -125,14 +126,15 @@ describe( 'Connections with data', () => {
         D.setID( 'D' )
         C.trackIDs()
         D.trackIDs()
+        c1 = c2 = c3 = null
     } )
 
     afterEach( () => {
         C.untrackIDs()
         D.untrackIDs()
-        c1.remove()
-        c2.remove()
-        c3.remove()
+        if ( c1 ) c1.remove()
+        if ( c2 ) c2.remove()
+        if ( c3 ) c3.remove()
     } )
 
     it( 'Can create connections with data and let us query that data', () => {
