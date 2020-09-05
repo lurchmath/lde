@@ -354,14 +354,15 @@ export class Connection {
      *   {@link Connection#target target()}.
      */
     remove () {
-        const source = this.source()
-        if ( !source ) return false
-        const target = this.target()
-        if ( !target ) return false
-        source.clearAttributes( `_conn target ${this.id}`, `_conn data ${this.id}` )
-        target.clearAttributes( `_conn source ${this.id}` )
         Connection.IDs.delete( this.id )
-        return true
+        const source = this.source()
+        if ( source )
+            source.clearAttributes( `_conn target ${this.id}`,
+                                    `_conn data ${this.id}` )
+        const target = this.target()
+        if ( target )
+            target.clearAttributes( `_conn source ${this.id}` )
+        return !!source && !!target
     }
 
     /**

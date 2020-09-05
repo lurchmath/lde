@@ -2084,9 +2084,9 @@ export class Structure extends EventTarget {
      * {@link Connection#create Connection.create()}, and is thus here just for
      * convenience.
      * 
+     * @param {Structure} target - The target of the new connection
      * @param {string} connectionID - The unique ID to use for the new
      *   connection we are to create
-     * @param {Structure} target - The target of the new connection
      * @param {*} data - The optional data to attach to the new connection.  See
      *   the {@link Connection#create create()} function in the
      *   {@link Connection Connection} class for the acceptable formats of this
@@ -2099,8 +2099,8 @@ export class Structure extends EventTarget {
      *   the chosen connection ID is in use or if this Structure or the target
      *   does not pass {@link Structure#idIsTracked idIsTracked()}.
      */
-    connectTo ( connectionID, target, data = null ) {
-        return Connection.create( id, this.ID(), target.ID(), data )
+    connectTo ( target, connectionID, data = null ) {
+        return Connection.create( connectionID, this.ID(), target.ID(), data )
     }
 
     /**
