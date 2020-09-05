@@ -17,22 +17,34 @@ describe( 'Connection module', () => {
 
 describe( 'Creating Connection instances', () => {
 
-    it( 'Can create connections with Connection.create()', () => {
+    let A, B, C, D, c1, c2, c3
+    beforeEach( () => {
         // create some Structures to connect to one another
-        const A = new Structure
-        const B = new Structure
-        const C = new Structure( A, B )
-        const D = new Structure
+        A = new Structure
+        B = new Structure
+        C = new Structure( A, B )
+        D = new Structure
         A.setID( 'A' )
         B.setID( 'B' )
         C.setID( 'C' )
         D.setID( 'D' )
         C.trackIDs()
         D.trackIDs()
+    } )
+
+    afterEach( () => {
+        C.untrackIDs()
+        D.untrackIDs()
+        c1.remove()
+        c2.remove()
+        c3.remove()
+    } )
+
+    it( 'Can create connections with Connection.create()', () => {
         // make some connections
-        const c1 = Connection.create( 'c1', 'A', 'D' )
-        const c2 = Connection.create( 'c2', 'B', 'C' )
-        const c3 = Connection.create( 'c3', 'A', 'B' )
+        c1 = Connection.create( 'c1', 'A', 'D' )
+        c2 = Connection.create( 'c2', 'B', 'C' )
+        c3 = Connection.create( 'c3', 'A', 'B' )
         // verify that they succeeded
         expect( c1 ).to.be.instanceof( Connection )
         expect( c2 ).to.be.instanceof( Connection )
@@ -60,32 +72,14 @@ describe( 'Creating Connection instances', () => {
         expect( alsoc3.id ).to.equal( 'c3' )
         expect( alsoc3.source() ).to.equal( A )
         expect( alsoc3.target() ).to.equal( B )
-        // clean up after ourselves
-        C.untrackIDs()
-        D.untrackIDs()
-        c1.remove()
-        c2.remove()
-        c3.remove()
     } )
 
     it( 'Can create connections with S.connectTo()', () => {
-        // Same content as the previous test, but with a different way to make
-        // the connections.  See comments below that highlight the difference.
-        const A = new Structure
-        const B = new Structure
-        const C = new Structure( A, B )
-        const D = new Structure
-        A.setID( 'A' )
-        B.setID( 'B' )
-        C.setID( 'C' )
-        D.setID( 'D' )
-        C.trackIDs()
-        D.trackIDs()
-        // here are the differences
-        const c1 = A.connectTo( D, 'c1' )
-        const c2 = B.connectTo( C, 'c2' )
-        const c3 = A.connectTo( B, 'c3' )
-        // end of differences
+        // the only differences are how we choose to make the connections:
+        c1 = A.connectTo( D, 'c1' )
+        c2 = B.connectTo( C, 'c2' )
+        c3 = A.connectTo( B, 'c3' )
+        // all the actual tests are the same:
         expect( c1 ).to.be.instanceof( Connection )
         expect( c2 ).to.be.instanceof( Connection )
         expect( c3 ).to.be.instanceof( Connection )
@@ -110,11 +104,6 @@ describe( 'Creating Connection instances', () => {
         expect( alsoc3.id ).to.equal( 'c3' )
         expect( alsoc3.source() ).to.equal( A )
         expect( alsoc3.target() ).to.equal( B )
-        C.untrackIDs()
-        D.untrackIDs()
-        c1.remove()
-        c2.remove()
-        c3.remove()
     } )
 
     it( 'Source and target emit change events when connected' ) // to do
@@ -123,24 +112,36 @@ describe( 'Creating Connection instances', () => {
 
 describe( 'Connections with data', () => {
 
-    it( 'Can create connections with data and let us query that data', () => {
+    let A, B, C, D, c1, c2, c3
+    beforeEach( () => {
         // create some Structures to connect to one another
-        const A = new Structure
-        const B = new Structure
-        const C = new Structure( A, B )
-        const D = new Structure
+        A = new Structure
+        B = new Structure
+        C = new Structure( A, B )
+        D = new Structure
         A.setID( 'A' )
         B.setID( 'B' )
         C.setID( 'C' )
         D.setID( 'D' )
         C.trackIDs()
         D.trackIDs()
+    } )
+
+    afterEach( () => {
+        C.untrackIDs()
+        D.untrackIDs()
+        c1.remove()
+        c2.remove()
+        c3.remove()
+    } )
+
+    it( 'Can create connections with data and let us query that data', () => {
         // make some connections with data built in, in various ways
-        const c1 = Connection.create( 'c1', 'A', 'D',
+        c1 = Connection.create( 'c1', 'A', 'D',
             [ [ 'color', 'red' ], [ 'weight', '4kg' ] ] )
-        const c2 = Connection.create( 'c2', 'B', 'C',
+        c2 = Connection.create( 'c2', 'B', 'C',
             { color: 'blue', favoriteNumber: 3.14159 } )
-        const c3 = Connection.create( 'c3', 'A', 'B',
+        c3 = Connection.create( 'c3', 'A', 'B',
             new Map().set( 'height', 10 ) )
         // ensure we can query the data in those connections
         // test hasAttribute()
