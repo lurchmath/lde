@@ -9,6 +9,10 @@
  * can produce different outputs unpredictably, because there is no required
  * ordering on the key-value pairs.  This one requires keys to be output in
  * increasing string order, so it is predictable.
+ * 
+ * @param {*} obj - Any JavaScript value that is amenable to JSON encoding
+ * @return {string} A JSON encoding that has the keys in the same order (that
+ *   is, sorted in increasing alphabetical order) every time
  */
 export const predictableStringify = ( obj ) => {
     // arrays
@@ -30,6 +34,12 @@ export const predictableStringify = ( obj ) => {
 /**
  * Whether two objects that are amenable to JSON encoding are structurally
  * equal.
+ * 
+ * @param {*} x - The first of the two objects; this must be amenable to JSON
+ *   encoding
+ * @param {*} y - The second of the two objects; this must be amenable to JSON
+ *   encoding
+ * @return {boolean} Whether the two objects are structurally equal
  */
 JSON.equals = ( x, y ) => {
     // easy case
