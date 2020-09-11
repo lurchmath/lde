@@ -5,6 +5,14 @@ import { Connection } from '../src/connection.js'
 // We import this because we need Structures to make Connections among
 import { Structure } from '../src/structure.js'
 
+// I'm rollying my own spy functions, because chai's are annoying to use in
+// the browser.
+const makeSpy = () => {
+    const result = ( ...args ) => result.callRecord.push( args )
+    result.callRecord = [ ]
+    return result
+}
+
 // Test suites begin here.
 
 describe( 'Connection module', () => {
@@ -16,14 +24,6 @@ describe( 'Connection module', () => {
 } )
 
 describe( 'Creating Connection instances', () => {
-
-    // I'm rollying my own spy functions, because chai's are annoying to use in
-    // the browser.
-    const makeSpy = () => {
-        const result = ( ...args ) => result.callRecord.push( args )
-        result.callRecord = [ ]
-        return result
-    }
 
     let A, B, C, D, c1, c2, c3, listeners
     beforeEach( () => {
@@ -256,7 +256,7 @@ describe( 'Creating Connection instances', () => {
 
 describe( 'Connections with data', () => {
 
-    let A, B, C, D, c1, c2, c3
+    let A, B, C, D, c1, c2, c3, listeners
     beforeEach( () => {
         // create some Structures to connect to one another
         A = new Structure
@@ -269,6 +269,13 @@ describe( 'Connections with data', () => {
         D.setID( 'D' )
         C.trackIDs()
         D.trackIDs()
+        listeners = { }
+        for ( const id of [ 'A', 'B', 'C', 'D' ] ) {
+            Structure.instanceWithID( id ).addEventListener(
+                'willBeChanged', listeners[`${id} will`] = makeSpy() )
+            Structure.instanceWithID( id ).addEventListener(
+                'wasChanged', listeners[`${id} was`] = makeSpy() )
+        }
         c1 = c2 = c3 = null
     } )
 
@@ -338,9 +345,143 @@ describe( 'Connections with data', () => {
         }
     } )
 
-    it( 'Can let us edit the data of a connection' ) // to do
+    it( 'Can let us edit the data of a connection', () => {
+        // make a connection with data built in, plus two empty ones
+        c1 = Connection.create( 'c1', 'A', 'D',
+            [ [ 'color', 'red' ], [ 'weight', '4kg' ] ] )
+        c2 = Connection.create( 'c2', 'B', 'C' )
+        c3 = Connection.create( 'c3', 'A', 'B' )
+        // do a tiny repeat of the previous test, just to be sure the data is
+        // present in c1 but not in c2 nor c3
+        expect( c1.getAttributeKeys() ).to.eql( [ 'color', 'weight' ] )
+        expect( c2.getAttributeKeys() ).to.eql( [ ] )
+        expect( c3.getAttributeKeys() ).to.eql( [ ] )
+        // edit the data in the connections
+        c1.clearAttributes( 'color' )
+        c2.setAttribute( 'name', 'Henry' )
+        c3.attr( [ [ 'favorite vacation', 'Bahamas' ],
+                   [ 'favorite song', 'Don\'t Stop Believin\'' ] ] )
+        // verify that it changed
+        expect( c1.getAttributeKeys() ).to.eql( [ 'weight' ] )
+        expect( c2.getAttributeKeys() ).to.eql( [ 'name' ] )
+        expect( c3.getAttributeKeys() ).to.eql( [ 'favorite vacation',
+                                                  'favorite song' ] )
+        // and be thorough; check every key-value pair
+        expect( c1.getAttribute( 'weight' ) ).to.equal( '4kg' )
+        expect( c2.getAttribute( 'name' ) ).to.equal( 'Henry' )
+        expect( c3.getAttribute( 'favorite vacation' ) ).to.equal( 'Bahamas' )
+        expect( c3.getAttribute( 'favorite song' ) ).to.equal(
+            'Don\'t Stop Believin\'' )
+    } )
 
-    it( 'Source emits change events when changing connection data' ) // to do
+    it( 'Source emits change events when changing connection data', () => {
+        // set up connections just as in previous test
+        c1 = Connection.create( 'c1', 'A', 'D',
+            [ [ 'color', 'red' ], [ 'weight', '4kg' ] ] )
+        c2 = Connection.create( 'c2', 'B', 'C' )
+        c3 = Connection.create( 'c3', 'A', 'B' )
+        // ensure the right number of change events have been fired so far,
+        // due to those connections (which partially repeates a previous test,
+        // just to be safe) and the data in c1 (which is in A)
+        expect( listeners['A will'].callRecord.length ).to.equal( 3 )
+        expect( listeners['A was'].callRecord.length ).to.equal( 3 )
+        expect( listeners['B will'].callRecord.length ).to.equal( 2 )
+        expect( listeners['B was'].callRecord.length ).to.equal( 2 )
+        expect( listeners['C will'].callRecord.length ).to.equal( 1 )
+        expect( listeners['C was'].callRecord.length ).to.equal( 1 )
+        expect( listeners['D will'].callRecord.length ).to.equal( 1 )
+        expect( listeners['D was'].callRecord.length ).to.equal( 1 )
+        // we will therefore test only event emissions that come AFTER the ones
+        // already recorded (items 3 and up for A and B, and items 2 and up for
+        // C and D).  here we make the same edits as in the previous test, but
+        // now we check the events after each.
+
+        // first, edit c1
+        c1.clearAttributes( 'color' )
+        // this should be reflected as a change event in A,
+        // since the data is stored in the source Structure of the connection.
+        expect( listeners['A will'].callRecord.length ).to.equal( 4 )
+        let args = listeners['A was'].callRecord[3]
+        expect( args.length ).to.equal( 1 )
+        expect( args[0].structure ).to.equal( A )
+        expect( args[0].key ).to.equal( '_conn data c1' )
+        expect( args[0].oldValue ).to.eql( {'color':'red','weight':'4kg'} )
+        expect( args[0].newValue ).to.eql( {'weight':'4kg'} )
+        expect( listeners['A was'].callRecord.length ).to.equal( 4 )
+        args = listeners['A will'].callRecord[3]
+        expect( args.length ).to.equal( 1 )
+        expect( args[0].structure ).to.equal( A )
+        expect( args[0].key ).to.equal( '_conn data c1' )
+        expect( args[0].oldValue ).to.eql( {'color':'red','weight':'4kg'} )
+        expect( args[0].newValue ).to.eql( {'weight':'4kg'} )
+        // verify that no other Structure changed:
+        expect( listeners['B will'].callRecord.length ).to.equal( 2 )
+        expect( listeners['B was'].callRecord.length ).to.equal( 2 )
+        expect( listeners['C will'].callRecord.length ).to.equal( 1 )
+        expect( listeners['C was'].callRecord.length ).to.equal( 1 )
+        expect( listeners['D will'].callRecord.length ).to.equal( 1 )
+        expect( listeners['D was'].callRecord.length ).to.equal( 1 )
+
+        // next, edit c2
+        c2.setAttribute( 'name', 'Henry' )
+        // this should be reflected as a change event in B,
+        // since the data is stored in the source Structure of the connection.
+        expect( listeners['B will'].callRecord.length ).to.equal( 3 )
+        args = listeners['B was'].callRecord[2]
+        expect( args.length ).to.equal( 1 )
+        expect( args[0].structure ).to.equal( B )
+        expect( args[0].key ).to.equal( '_conn data c2' )
+        expect( args[0].oldValue ).to.equal( undefined )
+        expect( args[0].newValue ).to.eql( {'name':'Henry'} )
+        expect( listeners['B was'].callRecord.length ).to.equal( 3 )
+        args = listeners['B was'].callRecord[2]
+        expect( args.length ).to.equal( 1 )
+        expect( args[0].structure ).to.equal( B )
+        expect( args[0].key ).to.equal( '_conn data c2' )
+        expect( args[0].oldValue ).to.equal( undefined )
+        expect( args[0].newValue ).to.eql( {'name':'Henry'} )
+        // verify that no other Structure changed:
+        expect( listeners['A will'].callRecord.length ).to.equal( 4 )
+        expect( listeners['A was'].callRecord.length ).to.equal( 4 )
+        expect( listeners['C will'].callRecord.length ).to.equal( 1 )
+        expect( listeners['C was'].callRecord.length ).to.equal( 1 )
+        expect( listeners['D will'].callRecord.length ).to.equal( 1 )
+        expect( listeners['D was'].callRecord.length ).to.equal( 1 )
+
+        // last, edit c3
+        c3.attr( [ [ 'favorite vacation', 'Bahamas' ],
+                   [ 'favorite song', 'Don\'t Stop Believin\'' ] ] )
+        // this should be reflected as a change event in A,
+        // since the data is stored in the source Structure of the connection.
+        expect( listeners['A will'].callRecord.length ).to.equal( 5 )
+        args = listeners['A will'].callRecord[4]
+        expect( args.length ).to.equal( 1 )
+        expect( args[0].structure ).to.equal( A )
+        expect( args[0].key ).to.equal( '_conn data c3' )
+        expect( args[0].oldValue ).to.equal( undefined )
+        console.log( args[0].newValue )
+        expect( args[0].newValue ).to.eql( {
+            'favorite vacation' : 'Bahamas',
+            'favorite song' : 'Don\'t Stop Believin\''
+        } )
+        expect( listeners['A was'].callRecord.length ).to.equal( 5 )
+        args = listeners['A was'].callRecord[4]
+        expect( args.length ).to.equal( 1 )
+        expect( args[0].structure ).to.equal( A )
+        expect( args[0].key ).to.equal( '_conn data c3' )
+        expect( args[0].oldValue ).to.equal( undefined )
+        expect( args[0].newValue ).to.eql( {
+            'favorite vacation' : 'Bahamas',
+            'favorite song' : 'Don\'t Stop Believin\''
+        } )
+        // verify that no other Structure changed:
+        expect( listeners['B will'].callRecord.length ).to.equal( 3 )
+        expect( listeners['B was'].callRecord.length ).to.equal( 3 )
+        expect( listeners['C will'].callRecord.length ).to.equal( 1 )
+        expect( listeners['C was'].callRecord.length ).to.equal( 1 )
+        expect( listeners['D will'].callRecord.length ).to.equal( 1 )
+        expect( listeners['D was'].callRecord.length ).to.equal( 1 )
+    } )
 
 } )
 
