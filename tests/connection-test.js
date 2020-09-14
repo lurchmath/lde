@@ -459,7 +459,6 @@ describe( 'Connections with data', () => {
         expect( args[0].structure ).to.equal( A )
         expect( args[0].key ).to.equal( '_conn data c3' )
         expect( args[0].oldValue ).to.equal( undefined )
-        console.log( args[0].newValue )
         expect( args[0].newValue ).to.eql( {
             'favorite vacation' : 'Bahamas',
             'favorite song' : 'Don\'t Stop Believin\''
