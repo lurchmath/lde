@@ -2171,7 +2171,7 @@ export class Structure extends EventTarget {
      * @see {@link Connection#transferConnections Connection.transferConnections()}
      */
     transferConnectionsTo ( recipient ) {
-        Connection.transferConnections( this, recipient )
+        return Connection.transferConnections( this, recipient )
     }
 
 }

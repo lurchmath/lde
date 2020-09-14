@@ -354,14 +354,14 @@ export class Connection {
      *   {@link Connection#target target()}.
      */
     remove () {
-        Connection.IDs.delete( this.id )
         const source = this.source()
+        const target = this.target()
         if ( source )
             source.clearAttributes( `_conn target ${this.id}`,
                                     `_conn data ${this.id}` )
-        const target = this.target()
         if ( target )
             target.clearAttributes( `_conn source ${this.id}` )
+        Connection.IDs.delete( this.id )
         return !!source && !!target
     }
 
@@ -373,7 +373,8 @@ export class Connection {
      * @param {Structure} giver - The Structure that will lose its connections
      * @param {Structure} receiver - The Structure that will gain them
      * @return {boolean} Whether the operation succeeds, which happens as long
-     *   as the receiver has a tracked ID
+     *   as the receiver has a tracked ID and all relevant connections can be
+     *   successfully removed from one place and recreated in another
      * @see {@link Structure#transferConnectionsTo transferConnectionsTo()}
      */
     static transferConnections ( giver, receiver ) {
@@ -391,8 +392,9 @@ export class Connection {
             let data = connection._getData()
             if ( Object.keys( data ).length == 0 ) data = null
             // delete the old and add the new
-            connection.remove()
-            Connection.create( connection.id, source, target, data )
+            if ( !connection.remove() ) return false
+            if ( !Connection.create( connection.id, source.ID(),
+                                     target.ID(), data ) ) return false
         }
         return true
     }
