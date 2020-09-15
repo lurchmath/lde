@@ -405,4 +405,32 @@ export class Connection {
         return true
     }
 
+    /**
+     * When a Structure is undergoing a change of ID, if it is part of any
+     * connection, that connection will need to update how it is stored in the
+     * attributes of either the source or target, to stay consistent with the
+     * Structure's change of ID.
+     * 
+     * This function can be called when a Structure's ID changes, and if that
+     * Structure exists on either end of this connection, it will update the
+     * data on the other end to stay in sync with the ID change.
+     * 
+     * Clients should never need to call this; it is for use exclusively by the
+     * {@link Structure Structure} class.
+     * 
+     * @param {string} oldID - The old ID of the changing Structure
+     * @param {string} newID - The new ID of the changing Structure
+     * @see {@link Connection#changeTargetID changeTargetID()}
+     * @see {@link Structure#changeID changeID()}
+     */
+    handleIDChange ( oldID, newID ) {
+        const source = this.source()
+        const target = this.target()
+        if ( !source || !target ) return
+        if ( source.ID() == oldID )
+            target.setAttribute( `_conn source ${this.id}`, newID )
+        if ( target.ID() == oldID )
+            source.setAttribute( `_conn target ${this.id}`, newID )
+    }
+
 }

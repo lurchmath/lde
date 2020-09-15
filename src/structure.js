@@ -1950,9 +1950,13 @@ export class Structure extends EventTarget {
      * 
      * If for some reason the change was not possible, then this function will
      * take no action and return false.  Possible reasons include:
-     *  * the new ID is already associated with another Structure
      *  * the old ID isn't tracked in the {@link Structure#IDs IDs} mapping
+     *  * the new ID is already associated with another Structure
      *  * the new ID is the same as the old ID
+     * 
+     * This function also updates *other* Structures that connect to this one,
+     * changing their connections to use this Structure's new ID, so that all
+     * connections are preserved across the use of this function.
      * 
      * @param {string} newID - The ID to use as the replacement for this
      *   Structure's existing ID.  It will be treated as a string if it is not
@@ -1961,10 +1965,16 @@ export class Structure extends EventTarget {
      *   be performed (and thus no action was taken)
      */
     changeID ( newID ) {
+        // verify that we can do the job:
+        const oldID = this.ID()
         newID = `${newID}`
         if ( Structure.IDs.has( newID )
-          || this != Structure.instanceWithID( this.ID() ) ) return false
-        Structure.IDs.delete( this.ID() )
+          || this != Structure.instanceWithID( oldID ) ) return false
+        // change my ID in connections:
+        for ( const connection of this.getConnections() )
+            connection.handleIDChange( oldID, newID )
+        // change my ID:
+        Structure.IDs.delete( oldID )
         this.setID( newID )
         Structure.IDs.set( newID, this )
         return true
