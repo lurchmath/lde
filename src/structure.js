@@ -1854,6 +1854,11 @@ export class Structure extends EventTarget {
      * check to see if a Structure with the given ID has already been recorded;
      * it will overwrite any past data in the {@link Structure#IDs IDs} mapping.
      * 
+     * This function also makes a call to
+     * {@link Structure#trackConnections trackConnections()}, because IDs are
+     * required in order for connections to exist, and enabling IDs almost
+     * always coincides with enabling connections as well.
+     * 
      * **Important:**
      * To prevent memory leaks, whenever a Structure hierarchy is no longer used
      * by the client, you should call {@link Structure#untrackIDs untrackIDs()}
@@ -1865,8 +1870,10 @@ export class Structure extends EventTarget {
      * 
      * @see {@link Structure#IDs IDs}
      * @see {@link Structure#untrackIDs untrackIDs()}
+     * @see {@link Structure#trackConnections trackConnections()}
      */
     trackIDs ( recursive = true ) {
+        this.trackConnections()
         if ( this.hasAttribute( '_id' ) ) Structure.IDs.set( this.ID(), this )
         if ( recursive ) for ( let child of this._children ) child.trackIDs()
     }

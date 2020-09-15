@@ -69,11 +69,11 @@ export class Connection {
      * @param {string} id - The globally unique ID of a connection among
      *   Structure instances
      * @return {Connection} A Connection instance representing the connection
-     *   whose ID was given, or null if the given ID is not in the
+     *   whose ID was given, or undefined if the given ID is not in the
      *   {@link Connection#IDs IDs} mapping
      */
     static withID ( id ) {
-        return Connection.IDs.has( id ) ? new Connection( id ) : null
+        return Connection.IDs.has( id ) ? new Connection( id ) : undefined
     }
 
     /**

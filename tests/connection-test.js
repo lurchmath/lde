@@ -992,16 +992,223 @@ describe( 'Transferring connections', () => {
 
 describe( 'Tracking connections', () => {
 
-    it( 'Re-adds a deserialized Structure\'s data to the global mappings' ) // to do
-    //  - Create a hierarchy with connections then serialize it
-    //  - Remove its connections and untrack its IDs
-    //  - Verify that you can't get them with Connection.withID() or
-    //    Structure.instanceWithID() any longer
-    //  - Deserialize it, track its IDs, track its connections, and then verify that
-    //    you can now do Connection.withID() successfully and get the right data
+    let A, B, C, D, c1, c2, c3
+    beforeEach( () => {
+        // create some Structures to connect to one another
+        A = new Structure
+        B = new Structure
+        C = new Structure( A, B )
+        D = new Structure( C )
+        A.setID( 'A' )
+        B.setID( 'B' )
+        C.setID( 'C' )
+        D.setID( 'D' )
+        D.trackIDs()
+        // set up connections just as in previous test
+        c1 = Connection.create( 'c1', 'A', 'D',
+            [ [ 'color', 'red' ], [ 'weight', '4kg' ] ] )
+        c2 = Connection.create( 'c2', 'B', 'C' )
+        c3 = Connection.create( 'c3', 'A', 'B' )
+    } )
 
-    it( 'trackIDs() automatically calls trackConnections() as needed' ) // to do
-    // Requires updating trackIDs() to call trackConnections()
+    afterEach( () => {
+        D.untrackIDs()
+        c1.remove()
+        c2.remove()
+        c3.remove()
+    } )
+
+    it( 'Re-adds a deserialized Structure\'s data to the global mappings', () => {
+        // verify that the configuration is as expected from beforeEach()
+        expect( A ).is.instanceof( Structure )
+        expect( B ).is.instanceof( Structure )
+        expect( C ).is.instanceof( Structure )
+        expect( D ).is.instanceof( Structure )
+        expect( c1 ).is.instanceof( Connection )
+        expect( c2 ).is.instanceof( Connection )
+        expect( c3 ).is.instanceof( Connection )
+        expect( c1.source() ).to.equal( A )
+        expect( c1.target() ).to.equal( D )
+        expect( c2.source() ).to.equal( B )
+        expect( c2.target() ).to.equal( C )
+        expect( c3.source() ).to.equal( A )
+        expect( c3.target() ).to.equal( B )
+        expect( c1.getAttributeKeys() ).to.eql( [ 'color', 'weight' ] )
+        expect( c2.getAttributeKeys() ).to.eql( [ ] )
+        expect( c3.getAttributeKeys() ).to.eql( [ ] )
+        expect( A.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( A.getConnectionIDsOut() ).to.eql( [ 'c1', 'c3' ] )
+        expect( B.getConnectionIDsIn() ).to.eql( [ 'c3' ] )
+        expect( B.getConnectionIDsOut() ).to.eql( [ 'c2' ] )
+        expect( C.getConnectionIDsIn() ).to.eql( [ 'c2' ] )
+        expect( C.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( D.getConnectionIDsIn() ).to.eql( [ 'c1' ] )
+        expect( D.getConnectionIDsOut() ).to.eql( [ ] )
+        // serialize the entire hierarchy
+        const DJSON = D.toJSON()
+        // untrack all the IDs in the original and verify that all the
+        // connection data is gone and no ID of Structure/Connection is tracked
+        D.untrackIDs()
+        expect( c1.source() ).to.equal( undefined )
+        expect( c1.target() ).to.equal( undefined )
+        expect( c2.source() ).to.equal( undefined )
+        expect( c2.target() ).to.equal( undefined )
+        expect( c3.source() ).to.equal( undefined )
+        expect( c3.target() ).to.equal( undefined )
+        expect( c1.getAttributeKeys() ).to.eql( undefined )
+        expect( c2.getAttributeKeys() ).to.eql( undefined )
+        expect( c3.getAttributeKeys() ).to.eql( undefined )
+        expect( A.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( A.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( B.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( B.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( C.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( C.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( D.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( D.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( Structure.instanceWithID( 'A' ) ).to.equal( undefined )
+        expect( Structure.instanceWithID( 'B' ) ).to.equal( undefined )
+        expect( Structure.instanceWithID( 'C' ) ).to.equal( undefined )
+        expect( Structure.instanceWithID( 'D' ) ).to.equal( undefined )
+        expect( Connection.withID( 'c1' ) ).to.equal( undefined )
+        expect( Connection.withID( 'c2' ) ).to.equal( undefined )
+        expect( Connection.withID( 'c3' ) ).to.equal( undefined )
+        // deserialize the JSON data and start tracking everything again
+        const Dcopy = Structure.fromJSON( DJSON )
+        Dcopy.trackIDs()
+        Dcopy.trackConnections()
+        // verify that it is as it was before, except a copy
+        const Acopy = Structure.instanceWithID( 'A' )
+        const Bcopy = Structure.instanceWithID( 'B' )
+        const Ccopy = Structure.instanceWithID( 'C' )
+        expect( Acopy ).instanceof( Structure )
+        expect( Acopy ).to.be.ok
+        expect( Bcopy ).instanceof( Structure )
+        expect( Bcopy ).to.be.ok
+        expect( Ccopy ).instanceof( Structure )
+        expect( Ccopy ).to.be.ok
+        expect( Structure.instanceWithID( 'D' ) ).to.equal( Dcopy )
+        const c1copy = Connection.withID( 'c1' )
+        const c2copy = Connection.withID( 'c2' )
+        const c3copy = Connection.withID( 'c3' )
+        expect( c1copy ).instanceof( Connection )
+        expect( c1copy ).to.be.ok
+        expect( c2copy ).instanceof( Connection )
+        expect( c2copy ).to.be.ok
+        expect( c3copy ).instanceof( Connection )
+        expect( c3copy ).to.be.ok
+        expect( c1copy.source() ).to.equal( Acopy )
+        expect( c1copy.target() ).to.equal( Dcopy )
+        expect( c2copy.source() ).to.equal( Bcopy )
+        expect( c2copy.target() ).to.equal( Ccopy )
+        expect( c3copy.source() ).to.equal( Acopy )
+        expect( c3copy.target() ).to.equal( Bcopy )
+        expect( c1copy.getAttributeKeys() ).to.eql( [ 'color', 'weight' ] )
+        expect( c2copy.getAttributeKeys() ).to.eql( [ ] )
+        expect( c3copy.getAttributeKeys() ).to.eql( [ ] )
+        expect( Acopy.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( Acopy.getConnectionIDsOut() ).to.eql( [ 'c1', 'c3' ] )
+        expect( Bcopy.getConnectionIDsIn() ).to.eql( [ 'c3' ] )
+        expect( Bcopy.getConnectionIDsOut() ).to.eql( [ 'c2' ] )
+        expect( Ccopy.getConnectionIDsIn() ).to.eql( [ 'c2' ] )
+        expect( Ccopy.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( Dcopy.getConnectionIDsIn() ).to.eql( [ 'c1' ] )
+        expect( Dcopy.getConnectionIDsOut() ).to.eql( [ ] )
+    } )
+
+    it( 'trackIDs() automatically calls trackConnections() as needed', () => {
+        // exact same test as the previous, but without the explicit call to
+        // trackConnections(), instead letting trackIDs() do it for us
+        expect( A ).is.instanceof( Structure )
+        expect( B ).is.instanceof( Structure )
+        expect( C ).is.instanceof( Structure )
+        expect( D ).is.instanceof( Structure )
+        expect( c1 ).is.instanceof( Connection )
+        expect( c2 ).is.instanceof( Connection )
+        expect( c3 ).is.instanceof( Connection )
+        expect( c1.source() ).to.equal( A )
+        expect( c1.target() ).to.equal( D )
+        expect( c2.source() ).to.equal( B )
+        expect( c2.target() ).to.equal( C )
+        expect( c3.source() ).to.equal( A )
+        expect( c3.target() ).to.equal( B )
+        expect( c1.getAttributeKeys() ).to.eql( [ 'color', 'weight' ] )
+        expect( c2.getAttributeKeys() ).to.eql( [ ] )
+        expect( c3.getAttributeKeys() ).to.eql( [ ] )
+        expect( A.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( A.getConnectionIDsOut() ).to.eql( [ 'c1', 'c3' ] )
+        expect( B.getConnectionIDsIn() ).to.eql( [ 'c3' ] )
+        expect( B.getConnectionIDsOut() ).to.eql( [ 'c2' ] )
+        expect( C.getConnectionIDsIn() ).to.eql( [ 'c2' ] )
+        expect( C.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( D.getConnectionIDsIn() ).to.eql( [ 'c1' ] )
+        expect( D.getConnectionIDsOut() ).to.eql( [ ] )
+        const DJSON = D.toJSON()
+        D.untrackIDs()
+        expect( c1.source() ).to.equal( undefined )
+        expect( c1.target() ).to.equal( undefined )
+        expect( c2.source() ).to.equal( undefined )
+        expect( c2.target() ).to.equal( undefined )
+        expect( c3.source() ).to.equal( undefined )
+        expect( c3.target() ).to.equal( undefined )
+        expect( c1.getAttributeKeys() ).to.eql( undefined )
+        expect( c2.getAttributeKeys() ).to.eql( undefined )
+        expect( c3.getAttributeKeys() ).to.eql( undefined )
+        expect( A.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( A.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( B.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( B.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( C.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( C.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( D.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( D.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( Structure.instanceWithID( 'A' ) ).to.equal( undefined )
+        expect( Structure.instanceWithID( 'B' ) ).to.equal( undefined )
+        expect( Structure.instanceWithID( 'C' ) ).to.equal( undefined )
+        expect( Structure.instanceWithID( 'D' ) ).to.equal( undefined )
+        expect( Connection.withID( 'c1' ) ).to.equal( undefined )
+        expect( Connection.withID( 'c2' ) ).to.equal( undefined )
+        expect( Connection.withID( 'c3' ) ).to.equal( undefined )
+        const Dcopy = Structure.fromJSON( DJSON )
+        Dcopy.trackIDs()
+        // the call here to D.trackConnections() was removed on purpose
+        const Acopy = Structure.instanceWithID( 'A' )
+        const Bcopy = Structure.instanceWithID( 'B' )
+        const Ccopy = Structure.instanceWithID( 'C' )
+        expect( Acopy ).instanceof( Structure )
+        expect( Acopy ).to.be.ok
+        expect( Bcopy ).instanceof( Structure )
+        expect( Bcopy ).to.be.ok
+        expect( Ccopy ).instanceof( Structure )
+        expect( Ccopy ).to.be.ok
+        expect( Structure.instanceWithID( 'D' ) ).to.equal( Dcopy )
+        const c1copy = Connection.withID( 'c1' )
+        const c2copy = Connection.withID( 'c2' )
+        const c3copy = Connection.withID( 'c3' )
+        expect( c1copy ).instanceof( Connection )
+        expect( c1copy ).to.be.ok
+        expect( c2copy ).instanceof( Connection )
+        expect( c2copy ).to.be.ok
+        expect( c3copy ).instanceof( Connection )
+        expect( c3copy ).to.be.ok
+        expect( c1copy.source() ).to.equal( Acopy )
+        expect( c1copy.target() ).to.equal( Dcopy )
+        expect( c2copy.source() ).to.equal( Bcopy )
+        expect( c2copy.target() ).to.equal( Ccopy )
+        expect( c3copy.source() ).to.equal( Acopy )
+        expect( c3copy.target() ).to.equal( Bcopy )
+        expect( c1copy.getAttributeKeys() ).to.eql( [ 'color', 'weight' ] )
+        expect( c2copy.getAttributeKeys() ).to.eql( [ ] )
+        expect( c3copy.getAttributeKeys() ).to.eql( [ ] )
+        expect( Acopy.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( Acopy.getConnectionIDsOut() ).to.eql( [ 'c1', 'c3' ] )
+        expect( Bcopy.getConnectionIDsIn() ).to.eql( [ 'c3' ] )
+        expect( Bcopy.getConnectionIDsOut() ).to.eql( [ 'c2' ] )
+        expect( Ccopy.getConnectionIDsIn() ).to.eql( [ 'c2' ] )
+        expect( Ccopy.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( Dcopy.getConnectionIDsIn() ).to.eql( [ 'c1' ] )
+        expect( Dcopy.getConnectionIDsOut() ).to.eql( [ ] )
+    } )
 
 } )
 
