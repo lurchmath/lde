@@ -1878,14 +1878,20 @@ export class Structure extends EventTarget {
      * called once the client is finished using a Structure, to prevent memory
      * leaks.
      * 
+     * Because connections use the ID system, any connections that this
+     * Structure is a part of will also be severed, by a call to
+     * {@link Structure#removeConnections removeConnections()}.
+     * 
      * @param {boolean} recursive - Whether to recursively apply this function
      *   to all child, grandchild, etc. Structures.  (If false, only this
      *   Structure's ID is untracked, not those of its descendants.)
      * 
      * @see {@link Structure#IDs IDs}
      * @see {@link Structure#trackIDs trackIDs()}
+     * @see {@link Structure#clearIDs clearIDs()}
      */
     untrackIDs ( recursive = true ) {
+        this.removeConnections()
         if ( this.hasAttribute( '_id' ) ) Structure.IDs.delete( this.ID() )
         if ( recursive ) for ( let child of this._children ) child.untrackIDs()
     }
@@ -1912,6 +1918,10 @@ export class Structure extends EventTarget {
      * {@link Structure#IDs IDs} mapping, so if this Structure's IDs are
      * tracked, you should call {@link Structure#untrackIDs untrackIDs()} first.
      * 
+     * Because connections use the ID system, any connections that this
+     * Structure is a part of will also be severed, by a call to
+     * {@link Structure#removeConnections removeConnections()}.
+     * 
      * @param {boolean} recursive - Whether to clear IDs from all descendants of
      *   this Structure as well
      * 
@@ -1919,6 +1929,7 @@ export class Structure extends EventTarget {
      * @see {@link Structure#untrackIDs untrackIDs()}
      */
     clearIDs ( recursive = true ) {
+        this.removeConnections()
         this.clearAttributes( '_id' )
         if ( recursive ) for ( let child of this._children ) child.clearIDs()
     }

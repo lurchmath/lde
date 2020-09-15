@@ -484,6 +484,309 @@ describe( 'Connections with data', () => {
 
 } )
 
+describe( 'Removing connections', () => {
+
+    let A, B, C, D, c1, c2, c3
+    beforeEach( () => {
+        // create some Structures to connect to one another
+        A = new Structure
+        B = new Structure
+        C = new Structure( A, B )
+        D = new Structure
+        A.setID( 'A' )
+        B.setID( 'B' )
+        C.setID( 'C' )
+        D.setID( 'D' )
+        C.trackIDs()
+        D.trackIDs()
+        // set up connections just as in previous test
+        c1 = Connection.create( 'c1', 'A', 'D',
+            [ [ 'color', 'red' ], [ 'weight', '4kg' ] ] )
+        c2 = Connection.create( 'c2', 'B', 'C' )
+        c3 = Connection.create( 'c3', 'A', 'B' )
+    } )
+
+    afterEach( () => {
+        C.untrackIDs()
+        D.untrackIDs()
+        if ( c1 ) c1.remove()
+        if ( c2 ) c2.remove()
+        if ( c3 ) c3.remove()
+    } )
+
+    it( 'Connection.remove() removes the correct data from Structures', () => {
+        // verify that each Structure has the expected attributes
+        expect( A.hasAttribute( '_conn target c1' ) ).to.equal( true )
+        expect( A.hasAttribute( '_conn data c1' ) ).to.equal( true )
+        expect( D.hasAttribute( '_conn source c1' ) ).to.equal( true )
+        expect( B.hasAttribute( '_conn target c2' ) ).to.equal( true )
+        expect( C.hasAttribute( '_conn source c2' ) ).to.equal( true )
+        expect( A.hasAttribute( '_conn target c3' ) ).to.equal( true )
+        expect( B.hasAttribute( '_conn source c3' ) ).to.equal( true )
+        // remove connections one at a time and verify they remove these
+        // attributes.
+        // remove c1:
+        expect( c1.remove() ).to.equal( true )
+        expect( A.hasAttribute( '_conn target c1' ) ).to.equal( false )
+        expect( A.hasAttribute( '_conn data c1' ) ).to.equal( false )
+        expect( D.hasAttribute( '_conn source c1' ) ).to.equal( false )
+        expect( B.hasAttribute( '_conn target c2' ) ).to.equal( true )
+        expect( C.hasAttribute( '_conn source c2' ) ).to.equal( true )
+        expect( A.hasAttribute( '_conn target c3' ) ).to.equal( true )
+        expect( B.hasAttribute( '_conn source c3' ) ).to.equal( true )
+        // remove c2:
+        expect( c2.remove() ).to.equal( true )
+        expect( A.hasAttribute( '_conn target c1' ) ).to.equal( false )
+        expect( A.hasAttribute( '_conn data c1' ) ).to.equal( false )
+        expect( D.hasAttribute( '_conn source c1' ) ).to.equal( false )
+        expect( B.hasAttribute( '_conn target c2' ) ).to.equal( false )
+        expect( C.hasAttribute( '_conn source c2' ) ).to.equal( false )
+        expect( A.hasAttribute( '_conn target c3' ) ).to.equal( true )
+        expect( B.hasAttribute( '_conn source c3' ) ).to.equal( true )
+        // remove c3:
+        expect( c3.remove() ).to.equal( true )
+        expect( A.hasAttribute( '_conn target c1' ) ).to.equal( false )
+        expect( A.hasAttribute( '_conn data c1' ) ).to.equal( false )
+        expect( D.hasAttribute( '_conn source c1' ) ).to.equal( false )
+        expect( B.hasAttribute( '_conn target c2' ) ).to.equal( false )
+        expect( C.hasAttribute( '_conn source c2' ) ).to.equal( false )
+        expect( A.hasAttribute( '_conn target c3' ) ).to.equal( false )
+        expect( B.hasAttribute( '_conn source c3' ) ).to.equal( false )
+    } )
+
+    it( 'Makes old queries about the connection no longer return values', () => {
+        // verify that the configuration is as expected from beforeEach()
+        expect( A ).is.instanceof( Structure )
+        expect( B ).is.instanceof( Structure )
+        expect( C ).is.instanceof( Structure )
+        expect( D ).is.instanceof( Structure )
+        expect( c1 ).is.instanceof( Connection )
+        expect( c2 ).is.instanceof( Connection )
+        expect( c3 ).is.instanceof( Connection )
+        expect( c1.source() ).to.equal( A )
+        expect( c1.target() ).to.equal( D )
+        expect( c2.source() ).to.equal( B )
+        expect( c2.target() ).to.equal( C )
+        expect( c3.source() ).to.equal( A )
+        expect( c3.target() ).to.equal( B )
+        expect( c1.getAttributeKeys() ).to.eql( [ 'color', 'weight' ] )
+        expect( c2.getAttributeKeys() ).to.eql( [ ] )
+        expect( c3.getAttributeKeys() ).to.eql( [ ] )
+        expect( A.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( A.getConnectionIDsOut() ).to.eql( [ 'c1', 'c3' ] )
+        expect( B.getConnectionIDsIn() ).to.eql( [ 'c3' ] )
+        expect( B.getConnectionIDsOut() ).to.eql( [ 'c2' ] )
+        expect( C.getConnectionIDsIn() ).to.eql( [ 'c2' ] )
+        expect( C.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( D.getConnectionIDsIn() ).to.eql( [ 'c1' ] )
+        expect( D.getConnectionIDsOut() ).to.eql( [ ] )
+        // remove connections one at a time and verify they actually disappear
+        // removing c1:
+        expect( c1.remove() ).to.equal( true )
+        expect( c1.source() ).to.equal( undefined )
+        expect( c1.target() ).to.equal( undefined )
+        expect( c2.source() ).to.equal( B )
+        expect( c2.target() ).to.equal( C )
+        expect( c3.source() ).to.equal( A )
+        expect( c3.target() ).to.equal( B )
+        expect( c1.getAttributeKeys() ).to.eql( undefined )
+        expect( c2.getAttributeKeys() ).to.eql( [ ] )
+        expect( c3.getAttributeKeys() ).to.eql( [ ] )
+        expect( A.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( A.getConnectionIDsOut() ).to.eql( [ 'c3' ] )
+        expect( B.getConnectionIDsIn() ).to.eql( [ 'c3' ] )
+        expect( B.getConnectionIDsOut() ).to.eql( [ 'c2' ] )
+        expect( C.getConnectionIDsIn() ).to.eql( [ 'c2' ] )
+        expect( C.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( D.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( D.getConnectionIDsOut() ).to.eql( [ ] )
+        // removing c2:
+        expect( c2.remove() ).to.equal( true )
+        expect( c1.source() ).to.equal( undefined )
+        expect( c1.target() ).to.equal( undefined )
+        expect( c2.source() ).to.equal( undefined )
+        expect( c2.target() ).to.equal( undefined )
+        expect( c3.source() ).to.equal( A )
+        expect( c3.target() ).to.equal( B )
+        expect( c1.getAttributeKeys() ).to.eql( undefined )
+        expect( c2.getAttributeKeys() ).to.eql( undefined )
+        expect( c3.getAttributeKeys() ).to.eql( [ ] )
+        expect( A.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( A.getConnectionIDsOut() ).to.eql( [ 'c3' ] )
+        expect( B.getConnectionIDsIn() ).to.eql( [ 'c3' ] )
+        expect( B.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( C.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( C.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( D.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( D.getConnectionIDsOut() ).to.eql( [ ] )
+        // removing c3:
+        expect( c3.remove() ).to.equal( true )
+        expect( c1.source() ).to.equal( undefined )
+        expect( c1.target() ).to.equal( undefined )
+        expect( c2.source() ).to.equal( undefined )
+        expect( c2.target() ).to.equal( undefined )
+        expect( c3.source() ).to.equal( undefined )
+        expect( c3.target() ).to.equal( undefined )
+        expect( c1.getAttributeKeys() ).to.eql( undefined )
+        expect( c2.getAttributeKeys() ).to.eql( undefined )
+        expect( c3.getAttributeKeys() ).to.eql( undefined )
+        expect( A.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( A.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( B.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( B.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( C.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( C.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( D.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( D.getConnectionIDsOut() ).to.eql( [ ] )
+    } )
+
+    it( 'Can be done across a Structure with removeConnections()', () => {
+        // no need to re-verify any of the things about the beforeEach() setup
+        // that either of the previous two tests verifies.
+        // remove all connections related to C:
+        C.removeConnections()
+        expect( c1.source() ).to.equal( A )
+        expect( c1.target() ).to.equal( D )
+        expect( c2.source() ).to.equal( undefined )
+        expect( c2.target() ).to.equal( undefined )
+        expect( c3.source() ).to.equal( A )
+        expect( c3.target() ).to.equal( B )
+        expect( c1.getAttributeKeys() ).to.eql( [ 'color', 'weight' ] )
+        expect( c2.getAttributeKeys() ).to.eql( undefined )
+        expect( c3.getAttributeKeys() ).to.eql( [ ] )
+        expect( A.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( A.getConnectionIDsOut() ).to.eql( [ 'c1', 'c3' ] )
+        expect( B.getConnectionIDsIn() ).to.eql( [ 'c3' ] )
+        expect( B.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( C.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( C.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( D.getConnectionIDsIn() ).to.eql( [ 'c1' ] )
+        expect( D.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( A.hasAttribute( '_conn target c1' ) ).to.equal( true )
+        expect( A.hasAttribute( '_conn data c1' ) ).to.equal( true )
+        expect( D.hasAttribute( '_conn source c1' ) ).to.equal( true )
+        expect( B.hasAttribute( '_conn target c2' ) ).to.equal( false )
+        expect( C.hasAttribute( '_conn source c2' ) ).to.equal( false )
+        expect( A.hasAttribute( '_conn target c3' ) ).to.equal( true )
+        expect( B.hasAttribute( '_conn source c3' ) ).to.equal( true )
+        // remove all connections related to A:
+        A.removeConnections()
+        expect( c1.source() ).to.equal( undefined )
+        expect( c1.target() ).to.equal( undefined )
+        expect( c2.source() ).to.equal( undefined )
+        expect( c2.target() ).to.equal( undefined )
+        expect( c3.source() ).to.equal( undefined )
+        expect( c3.target() ).to.equal( undefined )
+        expect( c1.getAttributeKeys() ).to.eql( undefined )
+        expect( c2.getAttributeKeys() ).to.eql( undefined )
+        expect( c3.getAttributeKeys() ).to.eql( undefined )
+        expect( A.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( A.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( B.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( B.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( C.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( C.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( D.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( D.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( A.hasAttribute( '_conn target c1' ) ).to.equal( false )
+        expect( A.hasAttribute( '_conn data c1' ) ).to.equal( false )
+        expect( D.hasAttribute( '_conn source c1' ) ).to.equal( false )
+        expect( B.hasAttribute( '_conn target c2' ) ).to.equal( false )
+        expect( C.hasAttribute( '_conn source c2' ) ).to.equal( false )
+        expect( A.hasAttribute( '_conn target c3' ) ).to.equal( false )
+        expect( B.hasAttribute( '_conn source c3' ) ).to.equal( false )
+    } )
+
+    it( 'Is called automatically by clearIDs()', () => {
+        // no need to re-verify any of the things about the beforeEach() setup
+        // that either of the previous two tests verifies.
+        // remove ID of A:
+        A.clearIDs()
+        expect( c1.source() ).to.equal( undefined )
+        expect( c1.target() ).to.equal( undefined )
+        expect( c2.source() ).to.equal( B )
+        expect( c2.target() ).to.equal( C )
+        expect( c3.source() ).to.equal( undefined )
+        expect( c3.target() ).to.equal( undefined )
+        expect( c1.getAttributeKeys() ).to.eql( undefined )
+        expect( c2.getAttributeKeys() ).to.eql( [ ] )
+        expect( c3.getAttributeKeys() ).to.eql( undefined )
+        expect( A.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( A.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( B.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( B.getConnectionIDsOut() ).to.eql( [ 'c2' ] )
+        expect( C.getConnectionIDsIn() ).to.eql( [ 'c2' ] )
+        expect( C.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( D.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( D.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( A.hasAttribute( '_conn target c1' ) ).to.equal( false )
+        expect( A.hasAttribute( '_conn data c1' ) ).to.equal( false )
+        expect( D.hasAttribute( '_conn source c1' ) ).to.equal( false )
+        expect( B.hasAttribute( '_conn target c2' ) ).to.equal( true )
+        expect( C.hasAttribute( '_conn source c2' ) ).to.equal( true )
+        expect( A.hasAttribute( '_conn target c3' ) ).to.equal( false )
+        expect( B.hasAttribute( '_conn source c3' ) ).to.equal( false )
+        // remove ID of B:
+        B.clearIDs()
+        expect( c1.source() ).to.equal( undefined )
+        expect( c1.target() ).to.equal( undefined )
+        expect( c2.source() ).to.equal( undefined )
+        expect( c2.target() ).to.equal( undefined )
+        expect( c3.source() ).to.equal( undefined )
+        expect( c3.target() ).to.equal( undefined )
+        expect( c1.getAttributeKeys() ).to.eql( undefined )
+        expect( c2.getAttributeKeys() ).to.eql( undefined )
+        expect( c3.getAttributeKeys() ).to.eql( undefined )
+        expect( A.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( A.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( B.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( B.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( C.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( C.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( D.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( D.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( A.hasAttribute( '_conn target c1' ) ).to.equal( false )
+        expect( A.hasAttribute( '_conn data c1' ) ).to.equal( false )
+        expect( D.hasAttribute( '_conn source c1' ) ).to.equal( false )
+        expect( B.hasAttribute( '_conn target c2' ) ).to.equal( false )
+        expect( C.hasAttribute( '_conn source c2' ) ).to.equal( false )
+        expect( A.hasAttribute( '_conn target c3' ) ).to.equal( false )
+        expect( B.hasAttribute( '_conn source c3' ) ).to.equal( false )
+    } )
+
+    it( 'Is called automatically by untrackIDs()', () => {
+        // no need to re-verify any of the things about the beforeEach() setup
+        // that either of the previous two tests verifies.
+        // untrack all IDs inside C, which is the whole hierarchy:
+        C.untrackIDs()
+        expect( c1.source() ).to.equal( undefined )
+        expect( c1.target() ).to.equal( undefined )
+        expect( c2.source() ).to.equal( undefined )
+        expect( c2.target() ).to.equal( undefined )
+        expect( c3.source() ).to.equal( undefined )
+        expect( c3.target() ).to.equal( undefined )
+        expect( c1.getAttributeKeys() ).to.eql( undefined )
+        expect( c2.getAttributeKeys() ).to.eql( undefined )
+        expect( c3.getAttributeKeys() ).to.eql( undefined )
+        expect( A.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( A.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( B.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( B.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( C.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( C.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( D.getConnectionIDsIn() ).to.eql( [ ] )
+        expect( D.getConnectionIDsOut() ).to.eql( [ ] )
+        expect( A.hasAttribute( '_conn target c1' ) ).to.equal( false )
+        expect( A.hasAttribute( '_conn data c1' ) ).to.equal( false )
+        expect( D.hasAttribute( '_conn source c1' ) ).to.equal( false )
+        expect( B.hasAttribute( '_conn target c2' ) ).to.equal( false )
+        expect( C.hasAttribute( '_conn source c2' ) ).to.equal( false )
+        expect( A.hasAttribute( '_conn target c3' ) ).to.equal( false )
+        expect( B.hasAttribute( '_conn source c3' ) ).to.equal( false )
+    } )
+
+} )
+
 describe( 'Transferring connections', () => {
 
     let A, B, C, D, c1, c2, c3
@@ -687,19 +990,6 @@ describe( 'Transferring connections', () => {
 
 } )
 
-describe( 'Removing connections', () => {
-
-    it( 'Connection.remove() removes the correct data from Structures' ) // to do
-
-    it( 'Makes old queries about the connection no longer return values' ) // to do
-
-    it( 'Can be done across a Structure with removeConnections()' ) // to do
-
-    it( 'Is called automatically by untrackIDs() and clearIDs()' ) // to do
-    // Requires updating untrackIDs() and clearIDs()
-
-} )
-
 describe( 'Tracking connections', () => {
 
     it( 'Re-adds a deserialized Structure\'s data to the global mappings' ) // to do
@@ -724,3 +1014,5 @@ describe( 'Supporting Structure ID changes', () => {
     // Then update our new Structure.changeID() to call that function.
 
 } )
+
+// Add connection events for inserted/removed/changed?

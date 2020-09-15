@@ -253,7 +253,10 @@ export class Connection {
      * @see {@link Connection#setAttribute setAttribute()}
      * @see {@link Connection#getAttributeKeys getAttributeKeys()}
      */
-    getAttribute ( key ) { return this._getData()[key] }
+    getAttribute ( key ) {
+        const data = this._getData()
+        return data ? data[key] : undefined
+    }
 
     /**
      * Store a value in the data associated with this connection.  The data
@@ -291,11 +294,14 @@ export class Connection {
      * 
      * @return {string[]} A list of strings, each one a key.  If this Connection
      *   instance has an invalid ID or any other misconfiguration, this result
-     *   will be an empty list.
+     *   will be undefined.
      * @see {@link Connection#getAttribute getAttribute()}
      * @see {@link Connection#setAttribute setAttribute()}
      */
-    getAttributeKeys () { return Object.keys( this._getData() ) }
+    getAttributeKeys () {
+        const data = this._getData()
+        return data ? Object.keys( data ) : undefined
+    }
 
     /**
      * Check whether a key exists in the data associated with this connection.
