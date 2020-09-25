@@ -22,6 +22,7 @@ export class Structure extends EventTarget {
      */
     constructor ( ...children ) {
         super()
+        this._dirty = false
         this._parent = null
         this._children = [ ]
         this._attributes = new Map
@@ -29,6 +30,37 @@ export class Structure extends EventTarget {
             this.insertChild( child, this._children.length )
         }
     }
+
+    //////
+    //
+    //  The dirty flag
+    //
+    //////
+
+    /**
+     * Getter for the "dirty" flag of this Structure.  A Structure may be marked
+     * dirty by the client for any number of reasons.  For instance, if a
+     * Structure changes and thus needs to be reprocessed (such as interpreted
+     * or validated) to reflect those most recent changes, it may be marked
+     * dirty until such processing takes place.
+     * 
+     * Structure instances are constructed with their dirty flag set to false.
+     * 
+     * @return {boolean} Whether this Structure is currently marked dirty
+     * @see {@link Structure#markDirty markDirty()}
+     */
+    isDirty () { return this._dirty }
+
+    /**
+     * Setter for the "dirty" flag of this Structure.  For information on the
+     * meaning of the flag, see {@link Structure#isDirty isDirty()}.
+     * 
+     * @param {boolean} [on=true] Whether to mark it dirty (true)
+     *   or clean (false).  If this value is not boolean, it will be converted
+     *   to one (with the `!!` idiom).
+     * @see {@link Structure#isDirty isDirty()}
+     */
+    markDirty ( on = true ) { this._dirty = !!on }
 
     //////
     //

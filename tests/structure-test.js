@@ -2577,3 +2577,61 @@ describe( 'Unique IDs for Structure instances', () => {
     } )
 
 } )
+
+describe( 'Structure dirty flags', () => {
+
+    it( 'Ensure that instances are clean by default', () => {
+        // set up a small hierarchy of structures
+        let A, B, C, D
+        A = new Structure(
+            B = new Structure,
+            C = new Structure(
+                D = new Structure
+            )
+        )
+        // verify all are clean
+        expect( A.isDirty() ).to.equal( false )
+        expect( B.isDirty() ).to.equal( false )
+        expect( C.isDirty() ).to.equal( false )
+        expect( D.isDirty() ).to.equal( false )
+    } )
+
+    it( 'Ensure that getters and setters behave as expected', () => {
+        // set up the same small hierarchy of structures as in the previous test
+        let A, B, C, D
+        A = new Structure(
+            B = new Structure,
+            C = new Structure(
+                D = new Structure
+            )
+        )
+        // get and set a few values and ensure that they operate completely
+        // independently of one another (unlike in some subclasses, f.ex.)
+        A.markDirty( true )
+        expect( A.isDirty() ).to.equal( true )
+        expect( B.isDirty() ).to.equal( false )
+        expect( C.isDirty() ).to.equal( false )
+        expect( D.isDirty() ).to.equal( false )
+        C.markDirty()
+        expect( A.isDirty() ).to.equal( true )
+        expect( B.isDirty() ).to.equal( false )
+        expect( C.isDirty() ).to.equal( true )
+        expect( D.isDirty() ).to.equal( false )
+        B.markDirty( false )
+        expect( A.isDirty() ).to.equal( true )
+        expect( B.isDirty() ).to.equal( false )
+        expect( C.isDirty() ).to.equal( true )
+        expect( D.isDirty() ).to.equal( false )
+        D.markDirty( true )
+        expect( A.isDirty() ).to.equal( true )
+        expect( B.isDirty() ).to.equal( false )
+        expect( C.isDirty() ).to.equal( true )
+        expect( D.isDirty() ).to.equal( true )
+        C.markDirty( false )
+        expect( A.isDirty() ).to.equal( true )
+        expect( B.isDirty() ).to.equal( false )
+        expect( C.isDirty() ).to.equal( false )
+        expect( D.isDirty() ).to.equal( true )
+    } )
+
+} )
