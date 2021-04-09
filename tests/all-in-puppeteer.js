@@ -54,7 +54,12 @@ const showSummary = () => {
 
 // run puppeteer and collect results, sending them to the above functions
 ( async () => {
-    const browser = await puppeteer.launch()
+    const browser = await puppeteer.launch( {
+        args : [
+            '--no-sandbox',
+            '--disable-setuid-sandbox'
+        ]
+    } )
     const page = await browser.newPage()
     await page.goto( 'http://localhost:8080/tests/test-index.html' )
     await page.waitFor( () => window.hasOwnProperty( 'allMochaResults' ) )
