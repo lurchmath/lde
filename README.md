@@ -31,8 +31,14 @@ Choose one of the following 3 methods:
        * If it doesn't ask, you can always use the tiny green menu in the very
          bottom left of the VS Code window, which has a `><` icon, and choose
          the "Reopen in Container" option.
- 3. To use GitHub Codespaces:
-    * Check back later.
+ 3. To use [GitHub Codespaces](https://github.com/features/codespaces):
+    * From the green "Code" button
+      [on GitHub](https://github.com/lurchmath/lde/tree/reboot),
+      choose "Open with Codespaces."
+    * Choose a new codespace if it's your first
+      time doing so, or an existing one if you've done this before.
+    * The Codespace will contain the same configuration as it would if you had
+      used option 2., above, for developing in a container in VS Code locally.
 
 ## Running the tests
 
