@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Lurch Deductive Engine: </title>
+    <title>Lurch Deductive Engine: logic-concept.js</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
@@ -24,138 +24,49 @@
 </header>
 
 
-<main class="layout-main ">
+<main class="layout-main  layout-content--source">
   <div class="container">
-    <p class="page-kind"></p>
-    <h1 class="page-title"></h1>
+    <p class="page-kind">source</p>
+    <h1 class="page-title">logic-concept.js</h1>
     
 
 
 
     
-
-
-    <h3> </h3>
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-    <section class="readme">
-        <article><h2>The Lurch Deductive Engine (LDE) Source Code Documentation</h2>
-<p>The code is being rewritten mostly from scratch, so it is highly incomplete at
-the moment.  Check back later for more content here.</p>
-<p><a href="http://github.com/lurchmath/lde">The source code repository is here.</a></p>
-<p><a href="http://github.com/lurchmath/lde/wiki">The wiki containing design decisions is here.</a></p></article>
-    </section>
-
-
-
-
-
-
-
-
 
 <section>
+    <article>
+        <pre id="source" class="source-page line-numbers"><code class="language-js">
+import { MathConcept } from './math-concept.js'
 
+/**
+ * A LogicConcept is a specific type of MathConcept.  It is one that can be
+ * processed by the LDE when validating the correctness of steps of a user's
+ * work.  MathConcepts are more high-level, and in order to be processed by
+ * the LDE, must be broken down into LogicConcepts.
+ * 
+ * There are three types of LogicConcepts, described only vaguley here, but
+ * you can view the documentation in the appropriate subclasses for details.
+ * 
+ *  * An {@link Expression Expression} is what we typically think of as a
+ *    piece of mathematics--an equation, a statement, a formula, which is
+ *    often enclosed in `$...$` in a LaTeX document
+ *  * An {@link Environment Environment} is any larger structure in a
+ *    document that contains many expressions, such as a theorem, a proof,
+ *    a section, an example, or a chain of connected equations.
+ *  * A {@link Declaration Declaration} introduces a new variable or constant.
+ *    This is common in both computer programming (where many languages
+ *    require us to define our variables) and in mathematics (where we say
+ *    things like "Let x be an arbitrary real number" or "Let D be the
+ *    constant provided by Theorem 6.1."
+ */
+export class LogicConcept extends MathConcept {
 
-<header class="not-class">
+    static className = MathConcept.addSubclass( 'LogicConcept', LogicConcept )
 
-
-    
-        
-        <!-- <h2>utilities.js</h2> -->
-
-        
-
-        
-
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-
-
-
-    
-        
-            <div class="description"><p>Provides several useful utility functions that extend basic
-JavaScript functionality</p></div>
-        
-
-        
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-     
-
-    
-
-    
-
-
-    
-
-    
-
-    
-
-    
-</article>
-
+}
+</code></pre>
+    </article>
 </section>
 
 
