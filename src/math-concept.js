@@ -5,6 +5,20 @@ import { Connection } from './connection.js'
  * The MathConcept class, an n-ary tree of MathConcept instances, using functions
  * like {@link MathConcept#parent parent()} and {@link MathConcept#children children()}
  * to navigate the tree.
+ * 
+ * In many ways, this is an abstract base class.  Yes, you can construct instances of
+ * it, and the test suite does so to verify that all the features herein work.  But in
+ * actual applications, it will primarily (perhaps exclusively) be subclasses of this
+ * class that are instantiated.  There are two such types of subclasses:
+ * 
+ *  1. LogicConcepts, which the LDE knows how to process for validating variable
+ *     scoping and correctness of logical inference
+ *  2. MathConcepts that are lot merely logical, and thus can be arbitrarily complex
+ *     (such as a chain of equations, or a set of exercises), but which can be broken
+ *     down into many LogicConcepts algorithmically, for processing by the LDE
+ * 
+ * This second category of subclasses is not intended to be fully specified, but can
+ * grow and change over time, as new classes in that category are developed.
  */
 export class MathConcept extends EventTarget {
 
