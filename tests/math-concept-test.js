@@ -4,6 +4,7 @@ import { MathConcept } from '../src/math-concept.js'
 
 // We import these just to verify that the subclass tracking provided by
 // the MathConcept module works for all of them.
+import { LogicConcept } from '../src/logic-concept.js'
 import { Declaration } from '../src/declaration.js'
 import { Environment } from '../src/environment.js'
 import { Expression } from '../src/expression.js'
@@ -1631,6 +1632,8 @@ describe( 'MathConcept copying and serialization', () => {
         // for all of this.
         expect( MathConcept.className ).to.equal( 'MathConcept' )
         expect( MathConcept.subclasses.get( 'MathConcept' ) ).to.equal( MathConcept )
+        expect( LogicConcept.className ).to.equal( 'LogicConcept' )
+        expect( MathConcept.subclasses.get( 'LogicConcept' ) ).to.equal( LogicConcept )
         expect( Declaration.className ).to.equal( 'Declaration' )
         expect( MathConcept.subclasses.get( 'Declaration' ) ).to.equal( Declaration )
         expect( Environment.className ).to.equal( 'Environment' )
