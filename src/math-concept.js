@@ -15,7 +15,10 @@ import { Connection } from './connection.js'
  *     scoping and correctness of logical inference
  *  2. MathConcepts that are lot merely logical, and thus can be arbitrarily complex
  *     (such as a chain of equations, or a set of exercises), but which can be broken
- *     down into many LogicConcepts algorithmically, for processing by the LDE
+ *     down into many LogicConcepts algorithmically, for processing by the LDE.
+ *     This algorithmic breakdown is implemented in the
+ *     {@link MathConcept#interpretation interpretation()} function, which in this
+ *     abstract base class returns simply an empty list, meaning "no LogicConcepts."
  * 
  * This second category of subclasses is not intended to be fully specified, but can
  * grow and change over time, as new classes in that category are developed.
@@ -1341,6 +1344,30 @@ export class MathConcept extends EventTarget {
     scope ( reflexive = true ) {
         return Array.from( this.scopeIterator( reflexive ) )
     }
+
+    //////
+    //
+    //  Interpretation
+    //
+    //////
+
+    /**
+     * Any MathConcept can be interpreted, which means converting its high-level
+     * concepts into lower-level concepts that are only logical.  For example,
+     * in mathematics, we my write $x^2-1=(x-1)(x+1)=0$, but logically, this is
+     * two separate statements, $x^2-1=(x-1)(x+1)$ and $(x-1)(x+1)=0$.
+     * 
+     * The interpretation function defined here can be used by any subclass to
+     * implement its specific means of interpretation of mathematical concepts
+     * into logical ones.  In this abstract base class, the default is simply
+     * to return an empty list, meaning "no logic concepts."  Subclasses should
+     * override this with an implementation specific to their actual mathematical
+     * meaning.
+     * 
+     * @return {LogicConcept[]} The ordered list of LogicConcepts whose combined
+     *   meaning is equal to the meaning of this MathConcept
+     */
+    interpretation () { return [ ] }
 
     //////
     //
