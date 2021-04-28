@@ -72,9 +72,19 @@ export class MathConcept extends EventTarget {
      * @param {boolean} [on=true] Whether to mark it dirty (true)
      *   or clean (false).  If this value is not boolean, it will be converted
      *   to one (with the `!!` idiom).
+     * @param {boolean} [propagate] Whether to propagate the change upwards to
+     *   parent MathConcepts.  By default, this happens if and only if the `on`
+     *   member is true, so that dirtiness propagates upwards, but cleanness
+     *   does not.  This is appropriate because when a child needs reprocessing,
+     *   this often requires reprocessing its parent as well, but when a child
+     *   has been reprocessed, its parent may still need to be.
      * @see {@link MathConcept#isDirty isDirty()}
      */
-    markDirty ( on = true ) { this._dirty = !!on }
+    markDirty ( on = true, propagate ) {
+        this._dirty = !!on
+        if ( typeof( propagate ) == 'undefined' ) propagate = on
+        if ( propagate && this._parent ) this._parent.markDirty( on, propagate )
+    }
 
     //////
     //
