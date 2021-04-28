@@ -64,6 +64,62 @@ describe( 'JSON tools', () => {
                 expect( JSON.equals( values[i], copies[j] ) ).to.equal( i == j )
     } )
 
+    it( 'JSON.copy creates entirely new objects that satisfy JSON.equals', () => {
+        // build all the same JSON testing data as in the previous test, except
+        // this time, classify atomics vs. non-atomics
+        const atomicValues = [
+            1, -10, 33.33, 'my string', "your string"
+        ]
+        const nonAtomicValues = [
+            [ ], { }, [ 'one' ], [ 50, -99, 0, 3000 ], { k : 'v' },
+            { name : 'Sam', atBats : 50, hits : 15, RBIs : 8 },
+            [ { x : 1 }, { y : 10 } ]
+        ]
+        const allValues = atomicValues.concat( nonAtomicValues )
+        // ensure that every atomic value copies to something that is both
+        // JSON.equals() with the original and actually === the original also,
+        // but that neither is true for two different atomic values
+        for ( let i = 0 ; i < atomicValues.length ; i++ ) {
+            const copy = JSON.copy( atomicValues[i] )
+            for ( let j = 0 ; j < atomicValues.length ; j++ ) {
+                if ( i == j ) {
+                    expect( copy ).to.equal( atomicValues[j] )
+                    expect( JSON.equals( copy, atomicValues[j] ) )
+                } else {
+                    expect( copy ).to.not.equal( atomicValues[j] )
+                    expect( !JSON.equals( copy, atomicValues[j] ) )
+                }
+            }
+        }
+        // repeat the above test for non-atomic values, except ensure that
+        // they are only JSON.equals, NOT ===.
+        for ( let i = 0 ; i < nonAtomicValues.length ; i++ ) {
+            const copy = JSON.copy( nonAtomicValues[i] )
+            for ( let j = 0 ; j < nonAtomicValues.length ; j++ ) {
+                expect( copy ).to.not.equal( nonAtomicValues[j] )
+                expect( JSON.equals( copy, nonAtomicValues[j] ) ).to.equal( i == j )
+            }
+        }
+        // ensure that every atomic value and its copy are totally different
+        // from any nonAtomic value
+        for ( let i = 0 ; i < atomicValues.length ; i++ ) {
+            const copy = JSON.copy( atomicValues[i] )
+            for ( let j = 0 ; j < nonAtomicValues.length ; j++ ) {
+                expect( copy ).to.not.equal( nonAtomicValues[j] )
+                expect( !JSON.equals( copy, nonAtomicValues[j] ) )
+            }
+        }
+        // ensure that every nonAtomic value and its copy are totally different
+        // from any atomic value
+        for ( let i = 0 ; i < nonAtomicValues.length ; i++ ) {
+            const copy = JSON.copy( nonAtomicValues[i] )
+            for ( let j = 0 ; j < atomicValues.length ; j++ ) {
+                expect( copy ).to.not.equal( atomicValues[j] )
+                expect( !JSON.equals( copy, atomicValues[j] ) )
+            }
+        }
+    } )
+
 } )
 
 describe( 'Prototype extensions', () => {

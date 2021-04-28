@@ -223,7 +223,7 @@ export class Connection {
      * @see {@link Connection#setAttribute setAttribute()}
      */
     attr ( attributes = [ ] ) {
-        const newData = JSON.parse( JSON.stringify( this._getData() ) )
+        const newData = JSON.copy( this._getData() )
         if ( attributes instanceof Array ) {
             for ( const [ key, value ] of attributes ) {
                 newData[key] = value
@@ -280,7 +280,7 @@ export class Connection {
      * @see {@link Connection#attr attr()}
      */
     setAttribute ( key, value ) {
-        const newData = JSON.parse( JSON.stringify( this._getData() ) )
+        const newData = JSON.copy( this._getData() )
         newData[key] = value
         return this._setData( newData )
     }
@@ -341,7 +341,7 @@ export class Connection {
      * @see {@link Connection#getAttributeKeys getAttributeKeys()}
      */
     clearAttributes ( ...keys ) {
-        const newData = JSON.parse( JSON.stringify( this._getData() ) )
+        const newData = JSON.copy( this._getData() )
         for ( const key of keys ) delete newData[key]
         return this._setData( newData )
     }

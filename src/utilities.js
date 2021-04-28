@@ -69,6 +69,21 @@ JSON.equals = ( x, y ) => {
 }
 
 /**
+ * A deep copy of a JSON structure, as another JSON structure.
+ * 
+ * Right now this is implemented in the easiest way; we simply serialize
+ * and then deserialize using the built-in methods of `JSON.stringify()`
+ * and `JSON.parse()`.  This is, however, not a very efficient
+ * implementation, and could be improved later if needed.
+ * 
+ * @param {*} json - the structure to copy, which must be amenable to JSON
+ *   encoding using `JSON.stringify()`
+ * @return {*} if the input is an object, this is a deep copy; if the input
+ *   was atomic, this is the same atomic
+ */
+JSON.copy = json => JSON.parse( JSON.stringify( json ) )
+
+/**
  * Extend the EventTarget prototype with a convenience method for emitting new
  * events.  Mimics the function of the same name from node.js, but here in the
  * browser.
@@ -87,7 +102,7 @@ EventTarget.prototype.emit = function ( type, details = { } ) {
  * @return {Map} A new map that is a deep copy of the original.
  */
 Map.prototype.deepCopy = function () {
-    return new Map( JSON.parse( JSON.stringify( [ ...this ] ) ) )
+    return new Map( JSON.copy( [ ...this ] ) )
 }
 
 /**
