@@ -1485,8 +1485,7 @@ export class MathConcept extends EventTarget {
      * copied) from within this MathConcept (notably the values of many
      * attributes), for the sake of efficiency.  Thus you should *not* modify
      * the contents of the returned MathConcept.  If you want a completely
-     * independent copy, call `JSON.parse(JSON.stringify())` on the return
-     * value.
+     * independent copy, call `JSON.copy()` on the return value.
      * 
      * The particular classes of this MathConcept and any of its children are
      * stored in the result, so that a deep copy of this MathConcept can be
@@ -1535,8 +1534,7 @@ export class MathConcept extends EventTarget {
         const classObject = MathConcept.subclasses.get( data.className )
         const result = new classObject(
             ...data.children.map( MathConcept.fromJSON ) )
-        result._attributes = new Map(
-            JSON.parse( JSON.stringify( data.attributes ) ) )
+        result._attributes = new Map( JSON.copy( data.attributes ) )
         return result
     }
 
