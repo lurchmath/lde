@@ -1354,8 +1354,8 @@ export class MathConcept extends EventTarget {
     /**
      * Any MathConcept can be interpreted, which means converting its high-level
      * concepts into lower-level concepts that are only logical.  For example,
-     * in mathematics, we my write $x^2-1=(x-1)(x+1)=0$, but logically, this is
-     * two separate statements, $x^2-1=(x-1)(x+1)$ and $(x-1)(x+1)=0$.
+     * in mathematics, we my write A=B=C, but logically, this is two separate
+     * statements, A=B and B=C.
      * 
      * The interpretation function defined here can be used by any subclass to
      * implement its specific means of interpretation of mathematical concepts
