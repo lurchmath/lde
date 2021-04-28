@@ -1,11 +1,11 @@
 
-import { Structure } from '../src/structure.js'
+import { MathConcept } from '../src/math-concept.js'
 
 /**
  * The Declaration class, still just a stub for now.
  */
-export class Declaration extends Structure {
+export class Declaration extends MathConcept {
     
-    static className = Structure.addSubclass( 'Declaration', Declaration )
+    static className = MathConcept.addSubclass( 'Declaration', Declaration )
     
 }

@@ -2,8 +2,8 @@
 // We import this because it's the subject of this test suite.
 import { Connection } from '../src/connection.js'
 
-// We import this because we need Structures to make Connections among
-import { Structure } from '../src/structure.js'
+// We import this because we need MathConcept among which to make Connections
+import { MathConcept } from '../src/math-concept.js'
 
 // I'm rollying my own spy functions, because chai's are annoying to use in
 // the browser.
@@ -27,11 +27,11 @@ describe( 'Creating Connection instances', () => {
 
     let A, B, C, D, c1, c2, c3, listeners
     beforeEach( () => {
-        // create some Structures to connect to one another
-        A = new Structure
-        B = new Structure
-        C = new Structure( A, B )
-        D = new Structure
+        // create some MathConcepts to connect to one another
+        A = new MathConcept
+        B = new MathConcept
+        C = new MathConcept( A, B )
+        D = new MathConcept
         A.setID( 'A' )
         B.setID( 'B' )
         C.setID( 'C' )
@@ -40,9 +40,9 @@ describe( 'Creating Connection instances', () => {
         D.trackIDs()
         listeners = { }
         for ( const id of [ 'A', 'B', 'C', 'D' ] ) {
-            Structure.instanceWithID( id ).addEventListener(
+            MathConcept.instanceWithID( id ).addEventListener(
                 'willBeChanged', listeners[`${id} will`] = makeSpy() )
-            Structure.instanceWithID( id ).addEventListener(
+            MathConcept.instanceWithID( id ).addEventListener(
                 'wasChanged', listeners[`${id} was`] = makeSpy() )
         }
         c1 = c2 = c3 = null
@@ -142,7 +142,7 @@ describe( 'Creating Connection instances', () => {
         args = listeners['A will'].callRecord[0]
         expect( args.length ).to.equal( 1 )
         const Aevent1 = args[0]
-        expect( Aevent1.structure ).to.equal( A )
+        expect( Aevent1.concept ).to.equal( A )
         expect( Aevent1.key ).to.equal( '_conn target c1' )
         expect( Aevent1.oldValue ).to.equal( undefined )
         expect( Aevent1.newValue ).to.equal( 'D' )
@@ -150,7 +150,7 @@ describe( 'Creating Connection instances', () => {
         args = listeners['A was'].callRecord[0]
         expect( args.length ).to.equal( 1 )
         const Aevent2 = args[0]
-        expect( Aevent2.structure ).to.equal( A )
+        expect( Aevent2.concept ).to.equal( A )
         expect( Aevent2.key ).to.equal( '_conn target c1' )
         expect( Aevent2.oldValue ).to.equal( undefined )
         expect( Aevent2.newValue ).to.equal( 'D' )
@@ -162,7 +162,7 @@ describe( 'Creating Connection instances', () => {
         args = listeners['D will'].callRecord[0]
         expect( args.length ).to.equal( 1 )
         const Devent1 = args[0]
-        expect( Devent1.structure ).to.equal( D )
+        expect( Devent1.concept ).to.equal( D )
         expect( Devent1.key ).to.equal( '_conn source c1' )
         expect( Devent1.oldValue ).to.equal( undefined )
         expect( Devent1.newValue ).to.equal( 'A' )
@@ -170,7 +170,7 @@ describe( 'Creating Connection instances', () => {
         args = listeners['D was'].callRecord[0]
         expect( args.length ).to.equal( 1 )
         const Devent2 = args[0]
-        expect( Devent2.structure ).to.equal( D )
+        expect( Devent2.concept ).to.equal( D )
         expect( Devent2.key ).to.equal( '_conn source c1' )
         expect( Devent2.oldValue ).to.equal( undefined )
         expect( Devent2.newValue ).to.equal( 'A' )
@@ -182,7 +182,7 @@ describe( 'Creating Connection instances', () => {
         args = listeners['B will'].callRecord[0]
         expect( args.length ).to.equal( 1 )
         const Bevent1 = args[0]
-        expect( Bevent1.structure ).to.equal( B )
+        expect( Bevent1.concept ).to.equal( B )
         expect( Bevent1.key ).to.equal( '_conn target c2' )
         expect( Bevent1.oldValue ).to.equal( undefined )
         expect( Bevent1.newValue ).to.equal( 'C' )
@@ -190,7 +190,7 @@ describe( 'Creating Connection instances', () => {
         args = listeners['B was'].callRecord[0]
         expect( args.length ).to.equal( 1 )
         const Bevent2 = args[0]
-        expect( Bevent2.structure ).to.equal( B )
+        expect( Bevent2.concept ).to.equal( B )
         expect( Bevent2.key ).to.equal( '_conn target c2' )
         expect( Bevent2.oldValue ).to.equal( undefined )
         expect( Bevent2.newValue ).to.equal( 'C' )
@@ -198,7 +198,7 @@ describe( 'Creating Connection instances', () => {
         args = listeners['C will'].callRecord[0]
         expect( args.length ).to.equal( 1 )
         const Cevent1 = args[0]
-        expect( Cevent1.structure ).to.equal( C )
+        expect( Cevent1.concept ).to.equal( C )
         expect( Cevent1.key ).to.equal( '_conn source c2' )
         expect( Cevent1.oldValue ).to.equal( undefined )
         expect( Cevent1.newValue ).to.equal( 'B' )
@@ -206,7 +206,7 @@ describe( 'Creating Connection instances', () => {
         args = listeners['C was'].callRecord[0]
         expect( args.length ).to.equal( 1 )
         const Cevent2 = args[0]
-        expect( Cevent2.structure ).to.equal( C )
+        expect( Cevent2.concept ).to.equal( C )
         expect( Cevent2.key ).to.equal( '_conn source c2' )
         expect( Cevent2.oldValue ).to.equal( undefined )
         expect( Cevent2.newValue ).to.equal( 'B' )
@@ -218,7 +218,7 @@ describe( 'Creating Connection instances', () => {
         expect( listeners['A will'].callRecord[0] ).to.eql( [ Aevent1 ] )
         args = listeners['A will'].callRecord[1]
         expect( args.length ).to.equal( 1 )
-        expect( args[0].structure ).to.equal( A )
+        expect( args[0].concept ).to.equal( A )
         expect( args[0].key ).to.equal( '_conn target c3' )
         expect( args[0].oldValue ).to.equal( undefined )
         expect( args[0].newValue ).to.equal( 'B' )
@@ -226,7 +226,7 @@ describe( 'Creating Connection instances', () => {
         expect( listeners['A was'].callRecord[0] ).to.eql( [ Aevent2 ] )
         args = listeners['A was'].callRecord[1]
         expect( args.length ).to.equal( 1 )
-        expect( args[0].structure ).to.equal( A )
+        expect( args[0].concept ).to.equal( A )
         expect( args[0].key ).to.equal( '_conn target c3' )
         expect( args[0].oldValue ).to.equal( undefined )
         expect( args[0].newValue ).to.equal( 'B' )
@@ -234,7 +234,7 @@ describe( 'Creating Connection instances', () => {
         expect( listeners['B will'].callRecord[0] ).to.eql( [ Bevent1 ] )
         args = listeners['B will'].callRecord[1]
         expect( args.length ).to.equal( 1 )
-        expect( args[0].structure ).to.equal( B )
+        expect( args[0].concept ).to.equal( B )
         expect( args[0].key ).to.equal( '_conn source c3' )
         expect( args[0].oldValue ).to.equal( undefined )
         expect( args[0].newValue ).to.equal( 'A' )
@@ -242,7 +242,7 @@ describe( 'Creating Connection instances', () => {
         expect( listeners['B was'].callRecord[0] ).to.eql( [ Bevent2 ] )
         args = listeners['B was'].callRecord[1]
         expect( args.length ).to.equal( 1 )
-        expect( args[0].structure ).to.equal( B )
+        expect( args[0].concept ).to.equal( B )
         expect( args[0].key ).to.equal( '_conn source c3' )
         expect( args[0].oldValue ).to.equal( undefined )
         expect( args[0].newValue ).to.equal( 'A' )
@@ -258,11 +258,11 @@ describe( 'Connections with data', () => {
 
     let A, B, C, D, c1, c2, c3, listeners
     beforeEach( () => {
-        // create some Structures to connect to one another
-        A = new Structure
-        B = new Structure
-        C = new Structure( A, B )
-        D = new Structure
+        // create some MathConcepts to connect to one another
+        A = new MathConcept
+        B = new MathConcept
+        C = new MathConcept( A, B )
+        D = new MathConcept
         A.setID( 'A' )
         B.setID( 'B' )
         C.setID( 'C' )
@@ -271,9 +271,9 @@ describe( 'Connections with data', () => {
         D.trackIDs()
         listeners = { }
         for ( const id of [ 'A', 'B', 'C', 'D' ] ) {
-            Structure.instanceWithID( id ).addEventListener(
+            MathConcept.instanceWithID( id ).addEventListener(
                 'willBeChanged', listeners[`${id} will`] = makeSpy() )
-            Structure.instanceWithID( id ).addEventListener(
+            MathConcept.instanceWithID( id ).addEventListener(
                 'wasChanged', listeners[`${id} was`] = makeSpy() )
         }
         c1 = c2 = c3 = null
@@ -399,22 +399,22 @@ describe( 'Connections with data', () => {
         // first, edit c1
         c1.clearAttributes( 'color' )
         // this should be reflected as a change event in A,
-        // since the data is stored in the source Structure of the connection.
+        // since the data is stored in the source MathConcept of the connection.
         expect( listeners['A will'].callRecord.length ).to.equal( 4 )
         let args = listeners['A was'].callRecord[3]
         expect( args.length ).to.equal( 1 )
-        expect( args[0].structure ).to.equal( A )
+        expect( args[0].concept ).to.equal( A )
         expect( args[0].key ).to.equal( '_conn data c1' )
         expect( args[0].oldValue ).to.eql( {'color':'red','weight':'4kg'} )
         expect( args[0].newValue ).to.eql( {'weight':'4kg'} )
         expect( listeners['A was'].callRecord.length ).to.equal( 4 )
         args = listeners['A will'].callRecord[3]
         expect( args.length ).to.equal( 1 )
-        expect( args[0].structure ).to.equal( A )
+        expect( args[0].concept ).to.equal( A )
         expect( args[0].key ).to.equal( '_conn data c1' )
         expect( args[0].oldValue ).to.eql( {'color':'red','weight':'4kg'} )
         expect( args[0].newValue ).to.eql( {'weight':'4kg'} )
-        // verify that no other Structure changed:
+        // verify that no other MathConcept changed:
         expect( listeners['B will'].callRecord.length ).to.equal( 2 )
         expect( listeners['B was'].callRecord.length ).to.equal( 2 )
         expect( listeners['C will'].callRecord.length ).to.equal( 1 )
@@ -425,22 +425,22 @@ describe( 'Connections with data', () => {
         // next, edit c2
         c2.setAttribute( 'name', 'Henry' )
         // this should be reflected as a change event in B,
-        // since the data is stored in the source Structure of the connection.
+        // since the data is stored in the source MathConcept of the connection.
         expect( listeners['B will'].callRecord.length ).to.equal( 3 )
         args = listeners['B was'].callRecord[2]
         expect( args.length ).to.equal( 1 )
-        expect( args[0].structure ).to.equal( B )
+        expect( args[0].concept ).to.equal( B )
         expect( args[0].key ).to.equal( '_conn data c2' )
         expect( args[0].oldValue ).to.equal( undefined )
         expect( args[0].newValue ).to.eql( {'name':'Henry'} )
         expect( listeners['B was'].callRecord.length ).to.equal( 3 )
         args = listeners['B was'].callRecord[2]
         expect( args.length ).to.equal( 1 )
-        expect( args[0].structure ).to.equal( B )
+        expect( args[0].concept ).to.equal( B )
         expect( args[0].key ).to.equal( '_conn data c2' )
         expect( args[0].oldValue ).to.equal( undefined )
         expect( args[0].newValue ).to.eql( {'name':'Henry'} )
-        // verify that no other Structure changed:
+        // verify that no other MathConcept changed:
         expect( listeners['A will'].callRecord.length ).to.equal( 4 )
         expect( listeners['A was'].callRecord.length ).to.equal( 4 )
         expect( listeners['C will'].callRecord.length ).to.equal( 1 )
@@ -452,11 +452,11 @@ describe( 'Connections with data', () => {
         c3.attr( [ [ 'favorite vacation', 'Bahamas' ],
                    [ 'favorite song', 'Don\'t Stop Believin\'' ] ] )
         // this should be reflected as a change event in A,
-        // since the data is stored in the source Structure of the connection.
+        // since the data is stored in the source MathConcept of the connection.
         expect( listeners['A will'].callRecord.length ).to.equal( 5 )
         args = listeners['A will'].callRecord[4]
         expect( args.length ).to.equal( 1 )
-        expect( args[0].structure ).to.equal( A )
+        expect( args[0].concept ).to.equal( A )
         expect( args[0].key ).to.equal( '_conn data c3' )
         expect( args[0].oldValue ).to.equal( undefined )
         expect( args[0].newValue ).to.eql( {
@@ -466,14 +466,14 @@ describe( 'Connections with data', () => {
         expect( listeners['A was'].callRecord.length ).to.equal( 5 )
         args = listeners['A was'].callRecord[4]
         expect( args.length ).to.equal( 1 )
-        expect( args[0].structure ).to.equal( A )
+        expect( args[0].concept ).to.equal( A )
         expect( args[0].key ).to.equal( '_conn data c3' )
         expect( args[0].oldValue ).to.equal( undefined )
         expect( args[0].newValue ).to.eql( {
             'favorite vacation' : 'Bahamas',
             'favorite song' : 'Don\'t Stop Believin\''
         } )
-        // verify that no other Structure changed:
+        // verify that no other MathConcept changed:
         expect( listeners['B will'].callRecord.length ).to.equal( 3 )
         expect( listeners['B was'].callRecord.length ).to.equal( 3 )
         expect( listeners['C will'].callRecord.length ).to.equal( 1 )
@@ -488,11 +488,11 @@ describe( 'Removing connections', () => {
 
     let A, B, C, D, c1, c2, c3
     beforeEach( () => {
-        // create some Structures to connect to one another
-        A = new Structure
-        B = new Structure
-        C = new Structure( A, B )
-        D = new Structure
+        // create some MathConcepts to connect to one another
+        A = new MathConcept
+        B = new MathConcept
+        C = new MathConcept( A, B )
+        D = new MathConcept
         A.setID( 'A' )
         B.setID( 'B' )
         C.setID( 'C' )
@@ -514,8 +514,8 @@ describe( 'Removing connections', () => {
         if ( c3 ) c3.remove()
     } )
 
-    it( 'Connection.remove() removes the correct data from Structures', () => {
-        // verify that each Structure has the expected attributes
+    it( 'Connection.remove() removes the correct data from MathConcepts', () => {
+        // verify that each MathConcept has the expected attributes
         expect( A.hasAttribute( '_conn target c1' ) ).to.equal( true )
         expect( A.hasAttribute( '_conn data c1' ) ).to.equal( true )
         expect( D.hasAttribute( '_conn source c1' ) ).to.equal( true )
@@ -556,10 +556,10 @@ describe( 'Removing connections', () => {
 
     it( 'Makes old queries about the connection no longer return values', () => {
         // verify that the configuration is as expected from beforeEach()
-        expect( A ).is.instanceof( Structure )
-        expect( B ).is.instanceof( Structure )
-        expect( C ).is.instanceof( Structure )
-        expect( D ).is.instanceof( Structure )
+        expect( A ).is.instanceof( MathConcept )
+        expect( B ).is.instanceof( MathConcept )
+        expect( C ).is.instanceof( MathConcept )
+        expect( D ).is.instanceof( MathConcept )
         expect( c1 ).is.instanceof( Connection )
         expect( c2 ).is.instanceof( Connection )
         expect( c3 ).is.instanceof( Connection )
@@ -640,7 +640,7 @@ describe( 'Removing connections', () => {
         expect( D.getConnectionIDsOut() ).to.eql( [ ] )
     } )
 
-    it( 'Can be done across a Structure with removeConnections()', () => {
+    it( 'Can be done across a MathConcept with removeConnections()', () => {
         // no need to re-verify any of the things about the beforeEach() setup
         // that either of the previous two tests verifies.
         // remove all connections related to C:
@@ -791,11 +791,11 @@ describe( 'Transferring connections', () => {
 
     let A, B, C, D, c1, c2, c3
     beforeEach( () => {
-        // create some Structures to connect to one another
-        A = new Structure
-        B = new Structure
-        C = new Structure( A, B )
-        D = new Structure
+        // create some MathConcepts to connect to one another
+        A = new MathConcept
+        B = new MathConcept
+        C = new MathConcept( A, B )
+        D = new MathConcept
         A.setID( 'A' )
         B.setID( 'B' )
         C.setID( 'C' )
@@ -817,12 +817,12 @@ describe( 'Transferring connections', () => {
         c3.remove()
     } )
 
-    it( 'Lets us transfer connections from one Structure to another', () => {
+    it( 'Lets us transfer connections from one MathConcept to another', () => {
         // verify that the configuration is as expected from beforeEach()
-        expect( A ).is.instanceof( Structure )
-        expect( B ).is.instanceof( Structure )
-        expect( C ).is.instanceof( Structure )
-        expect( D ).is.instanceof( Structure )
+        expect( A ).is.instanceof( MathConcept )
+        expect( B ).is.instanceof( MathConcept )
+        expect( C ).is.instanceof( MathConcept )
+        expect( D ).is.instanceof( MathConcept )
         expect( c1 ).is.instanceof( Connection )
         expect( c2 ).is.instanceof( Connection )
         expect( c3 ).is.instanceof( Connection )
@@ -843,8 +843,8 @@ describe( 'Transferring connections', () => {
         expect( C.getConnectionIDsOut() ).to.eql( [ ] )
         expect( D.getConnectionIDsIn() ).to.eql( [ 'c1' ] )
         expect( D.getConnectionIDsOut() ).to.eql( [ ] )
-        // make a new Structure to move some connections to
-        const E = new Structure
+        // make a new MathConcept to move some connections to
+        const E = new MathConcept
         E.setID( 'E' )
         E.trackIDs()
         // transfer all of A's connections to it, and check to be sure it worked
@@ -902,13 +902,13 @@ describe( 'Transferring connections', () => {
         expect( E.getConnectionIDsOut() ).to.eql( [ 'c1', 'c3' ] )
     } )
 
-    it( 'Works if we call Structure.transferConnectionsTo() intead', () => {
+    it( 'Works if we call MathConcept.transferConnectionsTo() intead', () => {
         // same exact test as the previous, but with a differnet function in
         // place of Connection.transferConnections()
-        expect( A ).is.instanceof( Structure )
-        expect( B ).is.instanceof( Structure )
-        expect( C ).is.instanceof( Structure )
-        expect( D ).is.instanceof( Structure )
+        expect( A ).is.instanceof( MathConcept )
+        expect( B ).is.instanceof( MathConcept )
+        expect( C ).is.instanceof( MathConcept )
+        expect( D ).is.instanceof( MathConcept )
         expect( c1 ).is.instanceof( Connection )
         expect( c2 ).is.instanceof( Connection )
         expect( c3 ).is.instanceof( Connection )
@@ -929,8 +929,8 @@ describe( 'Transferring connections', () => {
         expect( C.getConnectionIDsOut() ).to.eql( [ ] )
         expect( D.getConnectionIDsIn() ).to.eql( [ 'c1' ] )
         expect( D.getConnectionIDsOut() ).to.eql( [ ] )
-        // make a new Structure to move some connections to
-        const E = new Structure
+        // make a new MathConcept to move some connections to
+        const E = new MathConcept
         E.setID( 'E' )
         E.trackIDs()
         // transfer all of A's connections to it, and check to be sure it worked
@@ -994,11 +994,11 @@ describe( 'Tracking connections', () => {
 
     let A, B, C, D, c1, c2, c3
     beforeEach( () => {
-        // create some Structures to connect to one another
-        A = new Structure
-        B = new Structure
-        C = new Structure( A, B )
-        D = new Structure( C )
+        // create some MathConcepts to connect to one another
+        A = new MathConcept
+        B = new MathConcept
+        C = new MathConcept( A, B )
+        D = new MathConcept( C )
         A.setID( 'A' )
         B.setID( 'B' )
         C.setID( 'C' )
@@ -1018,12 +1018,12 @@ describe( 'Tracking connections', () => {
         c3.remove()
     } )
 
-    it( 'Re-adds a deserialized Structure\'s data to the global mappings', () => {
+    it( 'Re-adds a deserialized MathConcept\'s data to the global mappings', () => {
         // verify that the configuration is as expected from beforeEach()
-        expect( A ).is.instanceof( Structure )
-        expect( B ).is.instanceof( Structure )
-        expect( C ).is.instanceof( Structure )
-        expect( D ).is.instanceof( Structure )
+        expect( A ).is.instanceof( MathConcept )
+        expect( B ).is.instanceof( MathConcept )
+        expect( C ).is.instanceof( MathConcept )
+        expect( D ).is.instanceof( MathConcept )
         expect( c1 ).is.instanceof( Connection )
         expect( c2 ).is.instanceof( Connection )
         expect( c3 ).is.instanceof( Connection )
@@ -1047,7 +1047,7 @@ describe( 'Tracking connections', () => {
         // serialize the entire hierarchy
         const DJSON = D.toJSON()
         // untrack all the IDs in the original and verify that all the
-        // connection data is gone and no ID of Structure/Connection is tracked
+        // connection data is gone and no ID of MathConcept/Connection is tracked
         D.untrackIDs()
         expect( c1.source() ).to.equal( undefined )
         expect( c1.target() ).to.equal( undefined )
@@ -1066,28 +1066,28 @@ describe( 'Tracking connections', () => {
         expect( C.getConnectionIDsOut() ).to.eql( [ ] )
         expect( D.getConnectionIDsIn() ).to.eql( [ ] )
         expect( D.getConnectionIDsOut() ).to.eql( [ ] )
-        expect( Structure.instanceWithID( 'A' ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( 'B' ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( 'C' ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( 'D' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( 'A' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( 'B' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( 'C' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( 'D' ) ).to.equal( undefined )
         expect( Connection.withID( 'c1' ) ).to.equal( undefined )
         expect( Connection.withID( 'c2' ) ).to.equal( undefined )
         expect( Connection.withID( 'c3' ) ).to.equal( undefined )
         // deserialize the JSON data and start tracking everything again
-        const Dcopy = Structure.fromJSON( DJSON )
+        const Dcopy = MathConcept.fromJSON( DJSON )
         Dcopy.trackIDs()
         Dcopy.trackConnections()
         // verify that it is as it was before, except a copy
-        const Acopy = Structure.instanceWithID( 'A' )
-        const Bcopy = Structure.instanceWithID( 'B' )
-        const Ccopy = Structure.instanceWithID( 'C' )
-        expect( Acopy ).instanceof( Structure )
+        const Acopy = MathConcept.instanceWithID( 'A' )
+        const Bcopy = MathConcept.instanceWithID( 'B' )
+        const Ccopy = MathConcept.instanceWithID( 'C' )
+        expect( Acopy ).instanceof( MathConcept )
         expect( Acopy ).to.be.ok
-        expect( Bcopy ).instanceof( Structure )
+        expect( Bcopy ).instanceof( MathConcept )
         expect( Bcopy ).to.be.ok
-        expect( Ccopy ).instanceof( Structure )
+        expect( Ccopy ).instanceof( MathConcept )
         expect( Ccopy ).to.be.ok
-        expect( Structure.instanceWithID( 'D' ) ).to.equal( Dcopy )
+        expect( MathConcept.instanceWithID( 'D' ) ).to.equal( Dcopy )
         const c1copy = Connection.withID( 'c1' )
         const c2copy = Connection.withID( 'c2' )
         const c3copy = Connection.withID( 'c3' )
@@ -1119,10 +1119,10 @@ describe( 'Tracking connections', () => {
     it( 'trackIDs() automatically calls trackConnections() as needed', () => {
         // exact same test as the previous, but without the explicit call to
         // trackConnections(), instead letting trackIDs() do it for us
-        expect( A ).is.instanceof( Structure )
-        expect( B ).is.instanceof( Structure )
-        expect( C ).is.instanceof( Structure )
-        expect( D ).is.instanceof( Structure )
+        expect( A ).is.instanceof( MathConcept )
+        expect( B ).is.instanceof( MathConcept )
+        expect( C ).is.instanceof( MathConcept )
+        expect( D ).is.instanceof( MathConcept )
         expect( c1 ).is.instanceof( Connection )
         expect( c2 ).is.instanceof( Connection )
         expect( c3 ).is.instanceof( Connection )
@@ -1162,26 +1162,26 @@ describe( 'Tracking connections', () => {
         expect( C.getConnectionIDsOut() ).to.eql( [ ] )
         expect( D.getConnectionIDsIn() ).to.eql( [ ] )
         expect( D.getConnectionIDsOut() ).to.eql( [ ] )
-        expect( Structure.instanceWithID( 'A' ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( 'B' ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( 'C' ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( 'D' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( 'A' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( 'B' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( 'C' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( 'D' ) ).to.equal( undefined )
         expect( Connection.withID( 'c1' ) ).to.equal( undefined )
         expect( Connection.withID( 'c2' ) ).to.equal( undefined )
         expect( Connection.withID( 'c3' ) ).to.equal( undefined )
-        const Dcopy = Structure.fromJSON( DJSON )
+        const Dcopy = MathConcept.fromJSON( DJSON )
         Dcopy.trackIDs()
         // the call here to D.trackConnections() was removed on purpose
-        const Acopy = Structure.instanceWithID( 'A' )
-        const Bcopy = Structure.instanceWithID( 'B' )
-        const Ccopy = Structure.instanceWithID( 'C' )
-        expect( Acopy ).instanceof( Structure )
+        const Acopy = MathConcept.instanceWithID( 'A' )
+        const Bcopy = MathConcept.instanceWithID( 'B' )
+        const Ccopy = MathConcept.instanceWithID( 'C' )
+        expect( Acopy ).instanceof( MathConcept )
         expect( Acopy ).to.be.ok
-        expect( Bcopy ).instanceof( Structure )
+        expect( Bcopy ).instanceof( MathConcept )
         expect( Bcopy ).to.be.ok
-        expect( Ccopy ).instanceof( Structure )
+        expect( Ccopy ).instanceof( MathConcept )
         expect( Ccopy ).to.be.ok
-        expect( Structure.instanceWithID( 'D' ) ).to.equal( Dcopy )
+        expect( MathConcept.instanceWithID( 'D' ) ).to.equal( Dcopy )
         const c1copy = Connection.withID( 'c1' )
         const c2copy = Connection.withID( 'c2' )
         const c3copy = Connection.withID( 'c3' )
@@ -1212,15 +1212,15 @@ describe( 'Tracking connections', () => {
 
 } )
 
-describe( 'Supporting Structure ID changes', () => {
+describe( 'Supporting MathConcept ID changes', () => {
 
     let A, B, C, D, c1, c2, c3
     beforeEach( () => {
-        // create some Structures to connect to one another
-        A = new Structure
-        B = new Structure
-        C = new Structure( A, B )
-        D = new Structure
+        // create some MathConcepts to connect to one another
+        A = new MathConcept
+        B = new MathConcept
+        C = new MathConcept( A, B )
+        D = new MathConcept
         A.setID( 'A' )
         B.setID( 'B' )
         C.setID( 'C' )
@@ -1244,10 +1244,10 @@ describe( 'Supporting Structure ID changes', () => {
 
     it( 'changeID() automatically updates connection data', () => {
         // verify that the configuration is as expected from beforeEach()
-        expect( A ).is.instanceof( Structure )
-        expect( B ).is.instanceof( Structure )
-        expect( C ).is.instanceof( Structure )
-        expect( D ).is.instanceof( Structure )
+        expect( A ).is.instanceof( MathConcept )
+        expect( B ).is.instanceof( MathConcept )
+        expect( C ).is.instanceof( MathConcept )
+        expect( D ).is.instanceof( MathConcept )
         expect( A.ID() ).is.equal( 'A' )
         expect( B.ID() ).is.equal( 'B' )
         expect( C.ID() ).is.equal( 'C' )
@@ -1275,10 +1275,10 @@ describe( 'Supporting Structure ID changes', () => {
         // change ID of A:
         A.changeID( 'A2' )
         // verify the effects are as expected:
-        expect( A ).is.instanceof( Structure )
-        expect( B ).is.instanceof( Structure )
-        expect( C ).is.instanceof( Structure )
-        expect( D ).is.instanceof( Structure )
+        expect( A ).is.instanceof( MathConcept )
+        expect( B ).is.instanceof( MathConcept )
+        expect( C ).is.instanceof( MathConcept )
+        expect( D ).is.instanceof( MathConcept )
         expect( A.ID() ).is.equal( 'A2' )
         expect( B.ID() ).is.equal( 'B' )
         expect( C.ID() ).is.equal( 'C' )
@@ -1306,10 +1306,10 @@ describe( 'Supporting Structure ID changes', () => {
         // change ID of B:
         B.changeID( 'B3' )
         // verify the effects are as expected:
-        expect( A ).is.instanceof( Structure )
-        expect( B ).is.instanceof( Structure )
-        expect( C ).is.instanceof( Structure )
-        expect( D ).is.instanceof( Structure )
+        expect( A ).is.instanceof( MathConcept )
+        expect( B ).is.instanceof( MathConcept )
+        expect( C ).is.instanceof( MathConcept )
+        expect( D ).is.instanceof( MathConcept )
         expect( A.ID() ).is.equal( 'A2' )
         expect( B.ID() ).is.equal( 'B3' )
         expect( C.ID() ).is.equal( 'C' )
@@ -1337,10 +1337,10 @@ describe( 'Supporting Structure ID changes', () => {
         // change ID of C:
         C.changeID( 'C4' )
         // verify the effects are as expected:
-        expect( A ).is.instanceof( Structure )
-        expect( B ).is.instanceof( Structure )
-        expect( C ).is.instanceof( Structure )
-        expect( D ).is.instanceof( Structure )
+        expect( A ).is.instanceof( MathConcept )
+        expect( B ).is.instanceof( MathConcept )
+        expect( C ).is.instanceof( MathConcept )
+        expect( D ).is.instanceof( MathConcept )
         expect( A.ID() ).is.equal( 'A2' )
         expect( B.ID() ).is.equal( 'B3' )
         expect( C.ID() ).is.equal( 'C4' )
@@ -1368,10 +1368,10 @@ describe( 'Supporting Structure ID changes', () => {
         // change ID of A again:
         A.changeID( 'fdksjfdlks' )
         // verify the effects are as expected:
-        expect( A ).is.instanceof( Structure )
-        expect( B ).is.instanceof( Structure )
-        expect( C ).is.instanceof( Structure )
-        expect( D ).is.instanceof( Structure )
+        expect( A ).is.instanceof( MathConcept )
+        expect( B ).is.instanceof( MathConcept )
+        expect( C ).is.instanceof( MathConcept )
+        expect( D ).is.instanceof( MathConcept )
         expect( A.ID() ).is.equal( 'fdksjfdlks' )
         expect( B.ID() ).is.equal( 'B3' )
         expect( C.ID() ).is.equal( 'C4' )

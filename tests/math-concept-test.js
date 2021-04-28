@@ -1,36 +1,35 @@
 
 // We import this because it's the subject of this test suite.
-import { Structure } from '../src/structure.js'
+import { MathConcept } from '../src/math-concept.js'
 
 // We import these just to verify that the subclass tracking provided by
-// the Structure module works for all of them.
+// the MathConcept module works for all of them.
 import { Declaration } from '../src/declaration.js'
 import { Environment } from '../src/environment.js'
 import { Expression } from '../src/expression.js'
-import { OutputStructure } from '../src/output-structure.js'
 
 // Test suites begin here.
 
-describe( 'Structure module', () => {
+describe( 'MathConcept module', () => {
 
     it( 'Ensure all expected global identifiers are declared', () => {
-        expect( Structure ).to.be.ok
+        expect( MathConcept ).to.be.ok
     } )
 
 } )
 
-describe( 'Structure construction', () => {
+describe( 'MathConcept construction', () => {
 
-    it( 'Structure objects can be built with constructors', () => {
-        // Make a small structure and name each node.
+    it( 'MathConcept objects can be built with constructors', () => {
+        // Make a small MathConcept and name each node.
         // This alsoo verifies that no error occurs.
         let A, AA, AB, B
-        const root = new Structure(
-            A = new Structure(
-                AA = new Structure,
-                AB = new Structure
+        const root = new MathConcept(
+            A = new MathConcept(
+                AA = new MathConcept,
+                AB = new MathConcept
             ),
-            B = new Structure
+            B = new MathConcept
         )
         // Ensure that all parent pointers were correctly established in the forming of
         // the hierarchy.
@@ -73,19 +72,19 @@ describe( 'Structure construction', () => {
         expect( B.nextSibling() ).to.equal( undefined )
     } )
 
-    it( 'Structure constructor ignores invalid child parameters', () => {
-        // Make a similar small structure hierarchy to the one in the previous test,
+    it( 'MathConcept constructor ignores invalid child parameters', () => {
+        // Make a similar small MathConcept hierarchy to the one in the previous test,
         // but add a few erroneous items.
         let A, AA, AB, B
-        const root = new Structure(
+        const root = new MathConcept(
             7,
-            A = new Structure(
-                AA = new Structure,
-                AB = new Structure,
-                'This is not a Structure'
+            A = new MathConcept(
+                AA = new MathConcept,
+                AB = new MathConcept,
+                'This is not a MathConcept'
             ),
             /regular expression/,
-            B = new Structure
+            B = new MathConcept
         )
 
         // Ensure that parent pointers and child arrays are exactly as they were in
@@ -114,19 +113,19 @@ describe( 'Structure construction', () => {
         expect( B.isAtomic() ).to.equal( true )
     } )
 
-    it( 'Structure constructor should prevent cyclic hierarchies', () => {
-        // Create a single Structure and try to make it a child of itself.  This should
-        // fail, leaving the Structure in its original state.
+    it( 'MathConcept constructor should prevent cyclic hierarchies', () => {
+        // Create a single MathConcept and try to make it a child of itself.  This should
+        // fail, leaving the MathConcept in its original state.
         let C, D
-        let A = new Structure
+        let A = new MathConcept
         A.insertChild( A )
         expect( A.parent() ).to.equal( null )
         expect( A.children() ).to.eql( [ ] )
 
-        // Create another Structure B and insert it as a child of A.  Then try to insert A
+        // Create another MathConcept B and insert it as a child of A.  Then try to insert A
         // as a child of B.  This should succeed, but should have removed B from being
         // a child of A, so that the structure remains acyclic.
-        let B = new Structure
+        let B = new MathConcept
         A.insertChild( B )
         expect( A.parent() ).to.equal( null )
         expect( A.children() ).to.eql( [ B ] )
@@ -138,12 +137,12 @@ describe( 'Structure construction', () => {
         expect( B.parent() ).to.equal( null )
         expect( B.children() ).to.eql( [ A ] )
 
-        // The same test should succeed if we do it with a structure with several nodes
+        // The same test should succeed if we do it with a MathConcept with several nodes
         // rather than just two.
-        A = new Structure(
-            B = new Structure,
-            C = new Structure(
-                D = new Structure
+        A = new MathConcept(
+            B = new MathConcept,
+            C = new MathConcept(
+                D = new MathConcept
             )
         )
         D.insertChild( A )
@@ -159,17 +158,17 @@ describe( 'Structure construction', () => {
 
 } )
 
-describe( 'Structure manipulation', () => {
+describe( 'MathConcept manipulation', () => {
 
-    it( 'Supports removing structures from parents', () => {
-        // Make the same small structure hierarchy as in the previous test.
+    it( 'Supports removing MathConcepts from parents', () => {
+        // Make the same small MathConcept hierarchy as in the previous test.
         let A, AA, AB, B
-        const root = new Structure(
-            A = new Structure(
-                AA = new Structure,
-                AB = new Structure
+        const root = new MathConcept(
+            A = new MathConcept(
+                AA = new MathConcept,
+                AB = new MathConcept
             ),
-            B = new Structure
+            B = new MathConcept
         )
 
         // Remove a child of the root and verify that the structure is as expected.
@@ -226,15 +225,15 @@ describe( 'Structure manipulation', () => {
         expect( B.isAtomic() ).to.equal( true )
     } )
 
-    it( 'Supports removing child structures', () => {
-        // Make the same small structure hierarchy as in the previous test.
+    it( 'Supports removing child MathConcepts', () => {
+        // Make the same small MathConcept hierarchy as in the previous test.
         let A, AA, AB, B
-        const root = new Structure(
-            A = new Structure(
-                AA = new Structure,
-                AB = new Structure
+        const root = new MathConcept(
+            A = new MathConcept(
+                AA = new MathConcept,
+                AB = new MathConcept
             ),
-            B = new Structure
+            B = new MathConcept
         )
 
         // Remove a child of the root and verify that the structure is as expected.
@@ -278,19 +277,19 @@ describe( 'Structure manipulation', () => {
         expect( B.parent() ).to.equal( null )
     } )
 
-    it( 'Supports inserting structures', () => {
-        // Make the same small structure hierarchy as in the previous test.
+    it( 'Supports inserting MathConcepts', () => {
+        // Make the same small MathConcept hierarchy as in the previous test.
         let A, AA, AB, B
-        const root = new Structure(
-            A = new Structure(
-                AA = new Structure,
-                AB = new Structure
+        const root = new MathConcept(
+            A = new MathConcept(
+                AA = new MathConcept,
+                AB = new MathConcept
             ),
-            B = new Structure
+            B = new MathConcept
         )
         
         // Add a new child of the root and verify that the structure is as expected.
-        const C = new Structure
+        const C = new MathConcept
         expect( C.parent() ).to.equal( null )
         expect( C.children() ).to.eql( [ ] )
         root.insertChild( C, 1 )
@@ -309,7 +308,7 @@ describe( 'Structure manipulation', () => {
         
         // Append a child to the end of the list of children of a child of the root and
         // verify that the structure is as expected.
-        const D = new Structure
+        const D = new MathConcept
         expect( D.parent() ).to.equal( null )
         expect( D.children() ).to.eql( [ ] )
         A.insertChild( D, 2 )
@@ -378,21 +377,21 @@ describe( 'Structure manipulation', () => {
         expect( B.isAtomic() ).to.equal( true )
     } )
 
-    it( 'Ssupports replacing structures', () => {
+    it( 'Ssupports replacing MathConcepts', () => {
 
-        // Make the same small structure hierarchy as in the previous test.
+        // Make the same small MathConcept hierarchy as in the previous test.
         let A, AA, AB, B
-        const root = new Structure(
-            A = new Structure(
-                AA = new Structure,
-                AB = new Structure
+        const root = new MathConcept(
+            A = new MathConcept(
+                AA = new MathConcept,
+                AB = new MathConcept
             ),
-            B = new Structure
+            B = new MathConcept
         )
 
-        // Replace one child of the root with a new structure and verify that all comes
+        // Replace one child of the root with a new MathConcept and verify that all comes
         // out as expected.
-        const C = new Structure
+        const C = new MathConcept
         expect( C.parent() ).to.equal( null )
         expect( C.children() ).to.eql( [ ] )
         B.replaceWith( C )
@@ -442,12 +441,12 @@ describe( 'Structure manipulation', () => {
     } )
         
     it( 'Handles push/pop/shift/unshift of children correctly', () => {
-        // Make a set of structures that we will build into a hierarchy.
-        const root = new Structure
-        const A = new Structure
-        const AA = new Structure
-        const AB  = new Structure
-        const B = new Structure
+        // Make a set of MathConcepts that we will build into a hierarchy.
+        const root = new MathConcept
+        const A = new MathConcept
+        const AA = new MathConcept
+        const AB  = new MathConcept
+        const B = new MathConcept
    
         // Verify that at first no one has any parent/child.
         expect( root.isAtomic() ).to.equal( true )
@@ -509,12 +508,12 @@ describe( 'Structure manipulation', () => {
     } )
         
     it( 'Can replace all children at once', () => {
-        // Make a set of structures that we will build into a hierarchy.
-        const root = new Structure
-        const A = new Structure
-        const AA = new Structure
-        const AB  = new Structure
-        const B = new Structure
+        // Make a set of MathConcepts that we will build into a hierarchy.
+        const root = new MathConcept
+        const A = new MathConcept
+        const AA = new MathConcept
+        const AB  = new MathConcept
+        const B = new MathConcept
    
         // Verify that at first no one has any parent/child.
         expect( root.isAtomic() ).to.equal( true )
@@ -589,7 +588,7 @@ describe( 'Structure manipulation', () => {
 
 } )
 
-describe( 'Events for changes to Structure instances', () => {
+describe( 'Events for changes to MathConcept instances', () => {
 
     // I'm rollying my own spy functions, because chai's are annoying to use in
     // the browser.
@@ -599,13 +598,13 @@ describe( 'Events for changes to Structure instances', () => {
         return result
     }
 
-    // Set up two Structures with lots of event listeners before each test.
+    // Set up two MathConcepts with lots of event listeners before each test.
     let A = null
     let B = null
     let ALs = [ ]
     let BLs = [ ]
     beforeEach( () => {
-        A = new Structure
+        A = new MathConcept
         ALs = {
             wasInserted : makeSpy(),
             wasRemoved : makeSpy(),
@@ -616,7 +615,7 @@ describe( 'Events for changes to Structure instances', () => {
         A.addEventListener( 'wasRemoved', ALs.wasRemoved )
         A.addEventListener( 'willBeInserted', ALs.willBeInserted )
         A.addEventListener( 'willBeRemoved', ALs.willBeRemoved )
-        B = new Structure
+        B = new MathConcept
         BLs = {
             wasInserted : makeSpy(),
             wasRemoved : makeSpy(),
@@ -695,17 +694,17 @@ describe( 'Events for changes to Structure instances', () => {
 
 } )
 
-describe( 'Structure lookup', () => {
+describe( 'MathConcept lookup', () => {
 
-    it( 'Correctly computes indices in parent Structure', () => {
-        // Make the same small structure hierarchy as in an earlier test.
+    it( 'Correctly computes indices in parent MathConcept', () => {
+        // Make the same small MathConcept hierarchy as in an earlier test.
         let A, AA, AB, B
-        const root = new Structure(
-            A = new Structure(
-                AA = new Structure,
-                AB = new Structure
+        const root = new MathConcept(
+            A = new MathConcept(
+                AA = new MathConcept,
+                AB = new MathConcept
             ),
-            B = new Structure
+            B = new MathConcept
         )
 
         // Check the index in parent of each node.
@@ -717,16 +716,16 @@ describe( 'Structure lookup', () => {
     } )
 
     it( 'Correctly computes [all but] first/last child', () => {
-        // Make a similar small structure hierarchy as in earlier tests.
+        // Make a similar small MathConcept hierarchy as in earlier tests.
         let A, AA, AAA, AB, B
-        const root = new Structure(
-            A = new Structure(
-                AA = new Structure(
-                    AAA = new Structure
+        const root = new MathConcept(
+            A = new MathConcept(
+                AA = new MathConcept(
+                    AAA = new MathConcept
                 ),
-                AB = new Structure
+                AB = new MathConcept
             ),
-            B = new Structure
+            B = new MathConcept
         )
         
         // Verify that firstChild(), lastChild(), allButFirstChild(), and
@@ -759,16 +758,16 @@ describe( 'Structure lookup', () => {
     } )
 
     it( 'Correctly computes addresses and indices', () => {
-        // Make a similar small structure hierarchy as in earlier tests.
+        // Make a similar small MathConcept hierarchy as in earlier tests.
         let A, AA, AAA, AB, B
-        const root = new Structure(
-            A = new Structure(
-                AA = new Structure(
-                    AAA = new Structure
+        const root = new MathConcept(
+            A = new MathConcept(
+                AA = new MathConcept(
+                    AAA = new MathConcept
                 ),
-                AB = new Structure
+                AB = new MathConcept
             ),
-            B = new Structure
+            B = new MathConcept
         )
         
         // Compute many addresses and verify that they're all correct
@@ -836,16 +835,16 @@ describe( 'Structure lookup', () => {
     } )
 
     it( 'Correctly computes ancestor chains', () => {
-        // Make a similar small structure hierarchy as in earlier tests.
+        // Make a similar small MathConcept hierarchy as in earlier tests.
         let A, AA, AAA, AB, B
-        const root = new Structure(
-            A = new Structure(
-                AA = new Structure(
-                    AAA = new Structure
+        const root = new MathConcept(
+            A = new MathConcept(
+                AA = new MathConcept(
+                    AAA = new MathConcept
                 ),
-                AB = new Structure
+                AB = new MathConcept
             ),
-            B = new Structure
+            B = new MathConcept
         )
 
         // Compute ancestor chains of everything and verify they're correct.
@@ -859,20 +858,20 @@ describe( 'Structure lookup', () => {
 
 } )
 
-describe( 'Structure predicate functions', () => {
+describe( 'MathConcept predicate functions', () => {
 
     it( 'Correctly finds children/descendants satisfying a predicate', () => {
-        // Make a similar small structure hierarchy as in earlier tests,
-        // but then give each structure a name, to help with testing.
+        // Make a similar small MathConcept hierarchy as in earlier tests,
+        // but then give each MathConcept a name, to help with testing.
         let A, AA, AAA, AB, B
-        const root = new Structure(
-            A = new Structure(
-                AA = new Structure(
-                    AAA = new Structure
+        const root = new MathConcept(
+            A = new MathConcept(
+                AA = new MathConcept(
+                    AAA = new MathConcept
                 ),
-                AB = new Structure
+                AB = new MathConcept
             ),
-            B = new Structure
+            B = new MathConcept
         )
         root.name = 'root'
         A.name = 'A'
@@ -958,17 +957,17 @@ describe( 'Structure predicate functions', () => {
     } )
 
     it( 'Correctly finds ancestors satisfying a predicate', () => {
-        // Make a similar small structure hierarchy as in earlier tests,
-        // but then give each structure a name, to help with testing.
+        // Make a similar small MathConcept hierarchy as in earlier tests,
+        // but then give each MathConcept a name, to help with testing.
         let A, AA, AAA, AB, B
-        const root = new Structure(
-            A = new Structure(
-                AA = new Structure(
-                    AAA = new Structure
+        const root = new MathConcept(
+            A = new MathConcept(
+                AA = new MathConcept(
+                    AAA = new MathConcept
                 ),
-                AB = new Structure
+                AB = new MathConcept
             ),
-            B = new Structure
+            B = new MathConcept
         )
         root.name = 'root'
         A.name = 'A'
@@ -1013,22 +1012,22 @@ describe( 'Structure predicate functions', () => {
 
 } )
 
-describe( 'Structure order relations', () => {
+describe( 'MathConcept order relations', () => {
 
-    it( 'correctly judges when one Structure is earlier than another', () => {
-        // Make some Structure hierarchies we can use for testing "earlier than"
+    it( 'correctly judges when one MathConcept is earlier than another', () => {
+        // Make some MathConcept hierarchies we can use for testing "earlier than"
         let A, AA, AB, ABA, B, dA
-        const root = new Structure(
-            A = new Structure(
-                AA = new Structure,
-                AB = new Structure(
-                    ABA = new Structure
+        const root = new MathConcept(
+            A = new MathConcept(
+                AA = new MathConcept,
+                AB = new MathConcept(
+                    ABA = new MathConcept
                 )
             ),
-            B = new Structure
+            B = new MathConcept
         )
-        const disconnected = new Structure(
-            dA = new Structure
+        const disconnected = new MathConcept(
+            dA = new MathConcept
         )
         // Apply earlier-than to all possible pairs of nodes in these trees,
         // and verify the correct answer in each case.
@@ -1096,7 +1095,7 @@ describe( 'Structure order relations', () => {
         expect( dA.isEarlierThan( B ) ).to.equal( undefined )
         expect( dA.isEarlierThan( disconnected ) ).to.equal( false )
         expect( dA.isEarlierThan( dA ) ).to.equal( false )
-        // isEarlierThan() returns undefined if passed a non-Structure
+        // isEarlierThan() returns undefined if passed a non-MathConcept
         expect( A.isEarlierThan() ).to.equal( undefined )
         expect( ABA.isEarlierThan( root.parent() ) ).to.equal( undefined )
         expect( dA.isEarlierThan( { } ) ).to.equal( undefined )
@@ -1109,19 +1108,19 @@ describe( 'Structure order relations', () => {
     } )
 
     it( 'creates correct pre-order tree traversal iterators', () => {
-        // Re-use the structure hierarchies from the previous test
+        // Re-use the MathConcept hierarchies from the previous test
         let A, AA, AB, ABA, B, dA
-        const root = new Structure(
-            A = new Structure(
-                AA = new Structure,
-                AB = new Structure(
-                    ABA = new Structure
+        const root = new MathConcept(
+            A = new MathConcept(
+                AA = new MathConcept,
+                AB = new MathConcept(
+                    ABA = new MathConcept
                 )
             ),
-            B = new Structure
+            B = new MathConcept
         )
-        const disconnected = new Structure(
-            dA = new Structure
+        const disconnected = new MathConcept(
+            dA = new MathConcept
         )
         // Compute nextInTree() and previousInTree() for each node, verifying
         // correctness.
@@ -1141,7 +1140,7 @@ describe( 'Structure order relations', () => {
         expect( B.previousInTree() ).to.equal( ABA )
         expect( disconnected.previousInTree() ).to.equal( undefined )
         expect( dA.previousInTree() ).to.equal( disconnected )
-        // Do a pre-order traversal of both structures and verify it's the same
+        // Do a pre-order traversal of both MathConcepts and verify it's the same
         // order as shown above.  Then try this on some subtrees, varying the
         // value of the parameter to stay within that subtree, or not.
         expect( root.preOrderTraversal() ).to.eql( [ root, A, AA, AB, ABA, B ] )
@@ -1157,18 +1156,18 @@ describe( 'Structure order relations', () => {
     it( 'computes accessibility and scope correctly', () => {
         // Create a new hierarchy for testing
         let A, B, C, D, BA, BB, DA, DB, DAA
-        const root = new Structure(
-            A = new Structure,
-            B = new Structure(
-                BA = new Structure,
-                BB = new Structure
+        const root = new MathConcept(
+            A = new MathConcept,
+            B = new MathConcept(
+                BA = new MathConcept,
+                BB = new MathConcept
             ),
-            C = new Structure,
-            D = new Structure(
-                DA = new Structure(
-                    DAA = new Structure
+            C = new MathConcept,
+            D = new MathConcept(
+                DA = new MathConcept(
+                    DAA = new MathConcept
                 ),
-                DB = new Structure
+                DB = new MathConcept
             )
         )
         // Verify that reflexivity is false for accessibility by default
@@ -1235,21 +1234,21 @@ describe( 'Structure order relations', () => {
     it( 'iterates over accessibility and scope correctly', () => {
         // Create a the same hierarchy for testing as in the previous test
         let A, B, C, D, BA, BB, DA, DB, DAA
-        const root = new Structure(
-            A = new Structure,
-            B = new Structure(
-                BA = new Structure,
-                BB = new Structure
+        const root = new MathConcept(
+            A = new MathConcept,
+            B = new MathConcept(
+                BA = new MathConcept,
+                BB = new MathConcept
             ),
-            C = new Structure,
-            D = new Structure(
-                DA = new Structure(
-                    DAA = new Structure
+            C = new MathConcept,
+            D = new MathConcept(
+                DA = new MathConcept(
+                    DAA = new MathConcept
                 ),
-                DB = new Structure
+                DB = new MathConcept
             )
         )
-        // Verify accessibles lists for all structures, without reflexivity
+        // Verify accessibles lists for all MathConcepts, without reflexivity
         expect( root.accessibles() ).to.eql( [ ] )
         expect( A.accessibles() ).to.eql( [ ] )
         expect( B.accessibles() ).to.eql( [ A ] )
@@ -1271,7 +1270,7 @@ describe( 'Structure order relations', () => {
         expect( DA.accessibles( true ) ).to.eql( [ DA, C, B, A ] )
         expect( DB.accessibles( true ) ).to.eql( [ DB, DA, C, B, A ] )
         expect( DAA.accessibles( true ) ).to.eql( [ DAA, C, B, A ] )
-        // Verify scope lists for all structures, without reflexivity
+        // Verify scope lists for all MathConcepts, without reflexivity
         expect( root.scope() ).to.eql( [ root ] )
         expect( A.scope() ).to.eql( [ A, B, BA, BB, C, D, DA, DAA, DB ] )
         expect( B.scope() ).to.eql( [ B, C, D, DA, DAA, DB ] )
@@ -1297,13 +1296,13 @@ describe( 'Structure order relations', () => {
 
 } )
 
-describe( 'Structure attributes', () => {
+describe( 'MathConcept attributes', () => {
 
     it( 'Are empty to begin with', () => {
-        // create a few structures on which we can set attributes
-        const S1 = new Structure
-        const S2 = new Structure
-        const S3 = new Structure( S2 )
+        // create a few MathConcepts on which we can set attributes
+        const S1 = new MathConcept
+        const S2 = new MathConcept
+        const S3 = new MathConcept( S2 )
         // ensure that all three have no attribute keys
         expect( S1.getAttributeKeys() ).to.eql( [ ] )
         expect( S2.getAttributeKeys() ).to.eql( [ ] )
@@ -1342,10 +1341,10 @@ describe( 'Structure attributes', () => {
     } )
 
     it( 'Can be set and gotten in the expected ways', () => {
-        // create a few structures on which we can set attributes
-        const S1 = new Structure
-        const S2 = new Structure
-        const S3 = new Structure( S2 )
+        // create a few MathConcepts on which we can set attributes
+        const S1 = new MathConcept
+        const S2 = new MathConcept
+        const S3 = new MathConcept( S2 )
         // set some attributes
         S1.setAttribute( 'ess one key', 'ess one value' )
         S2.setAttribute( 5000000, { some: 'JSON', here: [1,2,3,4,5] } )
@@ -1373,7 +1372,7 @@ describe( 'Structure attributes', () => {
             { some: 'JSON', here: [1,2,3,4,5] } )
         expect( S2.getAttribute( 'second', 'DEF' ) ).to.eql(
             [ 'At', 'rib', 'yout\'' ] )
-        // verify that querying the right keys on the wrong structures yields
+        // verify that querying the right keys on the wrong MathConcepts yields
         // undefined in each case
         expect( S1.getAttribute( 5000000 ) ).to.equal( undefined )
         expect( S3.getAttribute( 5000000 ) ).to.equal( undefined )
@@ -1403,25 +1402,25 @@ describe( 'Structure attributes', () => {
         expect( S3.getAttribute( -8, 'DEF' ) ).to.equal( 'DEF' )
     } )
 
-    it( 'Is a separate namespace from the Structure object itself', () => {
-        // make a structure
-        const S = new Structure
-        // verify that it, as a Structure object in JavaScript, has certain
+    it( 'Is a separate namespace from the MathConcept object itself', () => {
+        // make a MathConcept
+        const S = new MathConcept
+        // verify that it, as a MathConcept object in JavaScript, has certain
         // attributes and methods present (just a sample here)
         expect( S.children ).to.be.ok
         expect( S.getAttribute ).to.be.ok
         expect( S.emit ).to.be.ok
         // verify that none of those are present in its attributes as a
-        // Structure, i.e., with getAttribute()
+        // MathConcept, i.e., with getAttribute()
         expect( S.getAttribute( 'children' ) ).not.to.be.ok
         expect( S.getAttribute( 'getAttribute' ) ).not.to.be.ok
         expect( S.getAttribute( 'emit' ) ).not.to.be.ok
     } )
 
     it( 'Emits events when adding/removing/changing attributes', () => {
-        // make two Structures
-        const S1 = new Structure
-        const S2 = new Structure
+        // make two MathConcepts
+        const S1 = new MathConcept
+        const S2 = new MathConcept
         // connect event handlers to each for recording events
         const heardEvents1 = [ ]
         const heardEvents2 = [ ]
@@ -1435,13 +1434,13 @@ describe( 'Structure attributes', () => {
         expect( heardEvents1.length ).to.equal( 2 )
         expect( heardEvents1[0] ).to.be.instanceOf( Event )
         expect( heardEvents1[0].type ).to.equal( 'willBeChanged' )
-        expect( heardEvents1[0].structure ).to.equal( S1 )
+        expect( heardEvents1[0].concept ).to.equal( S1 )
         expect( heardEvents1[0].key ).to.equal( 'x' )
         expect( heardEvents1[0].oldValue ).to.equal( undefined )
         expect( heardEvents1[0].newValue ).to.equal( 'y' )
         expect( heardEvents1[1] ).to.be.instanceOf( Event )
         expect( heardEvents1[1].type ).to.equal( 'wasChanged' )
-        expect( heardEvents1[1].structure ).to.equal( S1 )
+        expect( heardEvents1[1].concept ).to.equal( S1 )
         expect( heardEvents1[1].key ).to.equal( 'x' )
         expect( heardEvents1[1].oldValue ).to.equal( undefined )
         expect( heardEvents1[1].newValue ).to.equal( 'y' )
@@ -1452,13 +1451,13 @@ describe( 'Structure attributes', () => {
         expect( heardEvents1.length ).to.equal( 4 )
         expect( heardEvents1[2] ).to.be.instanceOf( Event )
         expect( heardEvents1[2].type ).to.equal( 'willBeChanged' )
-        expect( heardEvents1[2].structure ).to.equal( S1 )
+        expect( heardEvents1[2].concept ).to.equal( S1 )
         expect( heardEvents1[2].key ).to.equal( 'x' )
         expect( heardEvents1[2].oldValue ).to.equal( 'y' )
         expect( heardEvents1[2].newValue ).to.equal( 'z' )
         expect( heardEvents1[3] ).to.be.instanceOf( Event )
         expect( heardEvents1[3].type ).to.equal( 'wasChanged' )
-        expect( heardEvents1[3].structure ).to.equal( S1 )
+        expect( heardEvents1[3].concept ).to.equal( S1 )
         expect( heardEvents1[3].key ).to.equal( 'x' )
         expect( heardEvents1[3].oldValue ).to.equal( 'y' )
         expect( heardEvents1[3].newValue ).to.equal( 'z' )
@@ -1469,13 +1468,13 @@ describe( 'Structure attributes', () => {
         expect( heardEvents1.length ).to.equal( 6 )
         expect( heardEvents1[4] ).to.be.instanceOf( Event )
         expect( heardEvents1[4].type ).to.equal( 'willBeChanged' )
-        expect( heardEvents1[4].structure ).to.equal( S1 )
+        expect( heardEvents1[4].concept ).to.equal( S1 )
         expect( heardEvents1[4].key ).to.equal( 'x' )
         expect( heardEvents1[4].oldValue ).to.equal( 'z' )
         expect( heardEvents1[4].newValue ).to.equal( undefined )
         expect( heardEvents1[5] ).to.be.instanceOf( Event )
         expect( heardEvents1[5].type ).to.equal( 'wasChanged' )
-        expect( heardEvents1[5].structure ).to.equal( S1 )
+        expect( heardEvents1[5].concept ).to.equal( S1 )
         expect( heardEvents1[5].key ).to.equal( 'x' )
         expect( heardEvents1[5].oldValue ).to.equal( 'z' )
         expect( heardEvents1[5].newValue ).to.equal( undefined )
@@ -1494,13 +1493,13 @@ describe( 'Structure attributes', () => {
         expect( heardEvents2.length ).to.equal( 2 )
         expect( heardEvents2[0] ).to.be.instanceOf( Event )
         expect( heardEvents2[0].type ).to.equal( 'willBeChanged' )
-        expect( heardEvents2[0].structure ).to.equal( S2 )
+        expect( heardEvents2[0].concept ).to.equal( S2 )
         expect( heardEvents2[0].key ).to.equal( 'a' )
         expect( heardEvents2[0].oldValue ).to.equal( undefined )
         expect( heardEvents2[0].newValue ).to.equal( 'bee' )
         expect( heardEvents2[1] ).to.be.instanceOf( Event )
         expect( heardEvents2[1].type ).to.equal( 'wasChanged' )
-        expect( heardEvents2[1].structure ).to.equal( S2 )
+        expect( heardEvents2[1].concept ).to.equal( S2 )
         expect( heardEvents2[1].key ).to.equal( 'a' )
         expect( heardEvents2[1].oldValue ).to.equal( undefined )
         expect( heardEvents2[1].newValue ).to.equal( 'bee' )
@@ -1511,14 +1510,14 @@ describe( 'Structure attributes', () => {
     } )
 
     it( 'Supports adding attributes with the convenience function', () => {
-        // build the same structure two ways
+        // build the same MathConcept two ways
         // first, with the convenience function:
-        const copy1 = new Structure().attr( {
+        const copy1 = new MathConcept().attr( {
             'name' : 'Rutherford', 'age' : 50, 'occupation' : 'clerk',
             'hoursWorked' : [ 8, 7, 9, 8, 8, 9, 0, 10, 10, 8 ]
         } )
         // second, without it:
-        const copy2 = new Structure
+        const copy2 = new MathConcept
         copy2.setAttribute( 'name', 'Rutherford' )
         copy2.setAttribute( 'age', 50 )
         copy2.setAttribute( 'occupation', 'clerk' )
@@ -1535,10 +1534,10 @@ describe( 'Structure attributes', () => {
     } )
 
     it( 'Has working convenience functions for typing/categorization ', () => {
-        // build a few structures for testing
-        const S1 = new Structure
-        const S2 = new Structure
-        const S3 = new Structure
+        // build a few MathConcepts for testing
+        const S1 = new MathConcept
+        const S2 = new MathConcept
+        const S3 = new MathConcept
         // make sure they have no types
         expect( S1.isA( 'dog' ) ).to.equal( false )
         expect( S1.isA( 'cat' ) ).to.equal( false )
@@ -1623,28 +1622,26 @@ describe( 'Structure attributes', () => {
 
 } )
 
-describe( 'Structure copying and serialization', () => {
+describe( 'MathConcept copying and serialization', () => {
 
     it( 'Associates class names with class objects', () => {
-        // Check not just the Structure class, but several others.
+        // Check not just the MathConcept class, but several others.
         // Can't put these tests in those subclasses' test suites,
-        // because we're testing here the Structure class's support
+        // because we're testing here the MathConcept class's support
         // for all of this.
-        expect( Structure.className ).to.equal( 'Structure' )
-        expect( Structure.subclasses.get( 'Structure' ) ).to.equal( Structure )
+        expect( MathConcept.className ).to.equal( 'MathConcept' )
+        expect( MathConcept.subclasses.get( 'MathConcept' ) ).to.equal( MathConcept )
         expect( Declaration.className ).to.equal( 'Declaration' )
-        expect( Structure.subclasses.get( 'Declaration' ) ).to.equal( Declaration )
+        expect( MathConcept.subclasses.get( 'Declaration' ) ).to.equal( Declaration )
         expect( Environment.className ).to.equal( 'Environment' )
-        expect( Structure.subclasses.get( 'Environment' ) ).to.equal( Environment )
+        expect( MathConcept.subclasses.get( 'Environment' ) ).to.equal( Environment )
         expect( Expression.className ).to.equal( 'Expression' )
-        expect( Structure.subclasses.get( 'Expression' ) ).to.equal( Expression )
-        expect( OutputStructure.className ).to.equal( 'OutputStructure' )
-        expect( Structure.subclasses.get( 'OutputStructure' ) ).to.equal( OutputStructure )
+        expect( MathConcept.subclasses.get( 'Expression' ) ).to.equal( Expression )
     } )
 
-    it( 'Supports deep copying of Structures', () => {
-        // Make a tiny Structure for testing.
-        const tiny = new Structure
+    it( 'Supports deep copying of MathConcepts', () => {
+        // Make a tiny MathConcept for testing.
+        const tiny = new MathConcept
         tiny.setAttribute( 5, 6 )
         // Make a copy and test that it copied correctly and did not mess up
         // the original.
@@ -1663,15 +1660,15 @@ describe( 'Structure copying and serialization', () => {
         tiny.setAttribute( 5, 10 )
         expect( tiny.getAttribute( 5 ) ).to.equal( 10 )
         expect( C.getAttribute( 5 ) ).to.equal( 6 )
-        // Make a more complex Structure for testing.
+        // Make a more complex MathConcept for testing.
         let A, AA, AB, AC, B
-        const tween = new Structure(
-            A = new Structure(
-                AA = new Structure,
-                AB = new Structure,
-                AC = new Structure
+        const tween = new MathConcept(
+            A = new MathConcept(
+                AA = new MathConcept,
+                AB = new MathConcept,
+                AC = new MathConcept
             ),
-            B = new Structure
+            B = new MathConcept
         )
         AB.setAttribute( 2, 7 )
         // Make a copy of tween and test that it copied correctly and did not
@@ -1704,16 +1701,16 @@ describe( 'Structure copying and serialization', () => {
     it( 'Serializes and deserializes hierarchies correctly', () => {
         // Begin with a trivial example, a single node hierarchy with no attributes.
         let child1, child2
-        const loner = new Structure
+        const loner = new MathConcept
         let json = loner.toJSON()
-        expect( json ).not.to.be.instanceOf( Structure )
+        expect( json ).not.to.be.instanceOf( MathConcept )
         expect( json ).not.to.equal( loner )
-        expect( json.className ).to.equal( 'Structure' )
+        expect( json.className ).to.equal( 'MathConcept' )
         expect( json.attributes ).to.eql( [ ] )
         expect( json.children ).to.eql( [ ] )
         // Deserialize a copy from it and verify that it is correctly structured.
-        let copy = Structure.fromJSON( json )
-        expect( copy ).to.be.instanceOf( Structure )
+        let copy = MathConcept.fromJSON( json )
+        expect( copy ).to.be.instanceOf( MathConcept )
         expect( copy.getAttributeKeys() ).to.eql( [ ] )
         expect( copy.attributes ).not.to.equal( json.attributes)
         expect( copy.children() ).to.eql( [ ] )
@@ -1722,13 +1719,13 @@ describe( 'Structure copying and serialization', () => {
         expect( copy ).not.to.equal( loner )
         // Now do another one-node example, but this one with some attributes of
         // each type.
-        const atty = new Structure
+        const atty = new MathConcept
         atty.setAttribute( 1, 2 )
         atty.setAttribute( 'three', [ 'four', { } ] )
         json = atty.toJSON()
-        expect( json ).not.to.be.instanceOf( Structure )
+        expect( json ).not.to.be.instanceOf( MathConcept )
         expect( json ).not.to.equal( atty )
-        expect( json.className ).to.equal( 'Structure' )
+        expect( json.className ).to.equal( 'MathConcept' )
         expect( json.attributes ).to.be.instanceOf( Array )
         expect( json.attributes.length ).to.equal( 2 )
         let indexOf1 = json.attributes[0][0] == 1 ? 0 : 1
@@ -1737,8 +1734,8 @@ describe( 'Structure copying and serialization', () => {
             [ 'three', [ 'four', { } ] ] )
         expect( json.children ).to.eql( [ ] )
         // Deserialize a copy from it and verify that it is correctly structured.
-        copy = Structure.fromJSON( json )
-        expect( copy ).to.be.instanceOf( Structure )
+        copy = MathConcept.fromJSON( json )
+        expect( copy ).to.be.instanceOf( MathConcept )
         expect( copy.getAttributeKeys().length ).to.equal( 2 )
         expect( copy.hasAttribute( 1 ) ).to.equal( true )
         expect( copy.hasAttribute( 'three' ) ).to.equal( true )
@@ -1750,19 +1747,19 @@ describe( 'Structure copying and serialization', () => {
         expect( copy.parent() ).to.equal( null )
         expect( copy ).not.to.equal( json )
         expect( copy ).not.to.equal( atty )
-        // Now define two silly little subclasses of `Structure` for use in just
+        // Now define two silly little subclasses of `MathConcept` for use in just
         // the next test.
-        class Sub1 extends Structure {
-            static className = Structure.addSubclass( 'Sub1', Sub1 )
+        class Sub1 extends MathConcept {
+            static className = MathConcept.addSubclass( 'Sub1', Sub1 )
             exampleMethod1 () { return 5 }
         }
-        class Sub2 extends Structure {
-            static className = Structure.addSubclass( 'Sub2', Sub2 )
+        class Sub2 extends MathConcept {
+            static className = MathConcept.addSubclass( 'Sub2', Sub2 )
             exampleMethod2() { return this.getAttribute( 'test' ) }
         }
-        // Now create a hierarchy with three Structures in it, one of each of the
-        // three classes Structure, Sub1, and Sub2.
-        const bigger = new Structure(
+        // Now create a hierarchy with three MathConcepts in it, one of each of the
+        // three classes MathConcept, Sub1, and Sub2.
+        const bigger = new MathConcept(
             child1 = new Sub1().attr( { 10 : 100 } ),
             child2 = new Sub2().attr( { 'test' : 'ing' } )
         )
@@ -1773,20 +1770,20 @@ describe( 'Structure copying and serialization', () => {
         expect( child2.exampleMethod2 ).to.be.ok
         // Serialize and verify that it came out correctly.
         json = bigger.toJSON()
-        expect( json ).not.to.be.instanceOf( Structure )
+        expect( json ).not.to.be.instanceOf( MathConcept )
         expect( json ).not.to.equal( bigger )
-        expect( json.className ).to.equal( 'Structure' )
+        expect( json.className ).to.equal( 'MathConcept' )
         expect( json.attributes ).to.eql( [ ] )
         expect( json.children.length ).to.equal( 2 )
         let child = json.children[0]
-        expect( child ).not.to.be.instanceOf( Structure )
+        expect( child ).not.to.be.instanceOf( MathConcept )
         expect( child ).not.to.be.instanceOf( Sub1 )
         expect( child.className ).to.equal( 'Sub1' )
         expect( child.attributes ).to.eql( [ [ '10', 100 ] ] )
         expect( child.children ).to.eql( [ ] )
         expect( child.exampleMethod1 ).to.equal( undefined )
         child = json.children[1]
-        expect( child ).not.to.be.instanceOf( Structure )
+        expect( child ).not.to.be.instanceOf( MathConcept )
         expect( child ).not.to.be.instanceOf( Sub2 )
         expect( child.className ).to.equal( 'Sub2' )
         expect( child.attributes ).to.eql( [ [ 'test', 'ing' ] ] )
@@ -1795,8 +1792,8 @@ describe( 'Structure copying and serialization', () => {
         // Deserialize and verify that each node is the same class as in the
         // original hierarchy, as well as all the same tests we did for the
         // earlier cases.
-        copy = Structure.fromJSON( json )
-        expect( copy ).to.be.instanceOf( Structure )
+        copy = MathConcept.fromJSON( json )
+        expect( copy ).to.be.instanceOf( MathConcept )
         expect( copy.getAttributeKeys() ).to.eql( [ ] )
         expect( copy.parent() ).to.equal( null )
         expect( copy ).not.to.equal( json )
@@ -1822,46 +1819,46 @@ describe( 'Structure copying and serialization', () => {
 
     it( 'Respects the includeIDs parameter when serializing', () => {
         // create a small hierarchy with some IDs
-        const B1 = new Structure()
-        const B2 = new Structure()
-        const A = new Structure( B1, B2 )
+        const B1 = new MathConcept()
+        const B2 = new MathConcept()
+        const A = new MathConcept( B1, B2 )
         A.setID( 'aardvark' )
         B1.setID( 'beetle' )
         B2.setID( 'bear' )
         // ensure that serializing and deserializing includes IDs
         const json = A.toJSON()
         expect( json.attributes ).not.to.eql( [ ] )
-        const copy = Structure.fromJSON( json )
+        const copy = MathConcept.fromJSON( json )
         expect( copy.ID() ).to.equal( 'aardvark' )
         expect( copy.child( 0 ).ID() ).to.equal( 'beetle' )
         expect( copy.child( 1 ).ID() ).to.equal( 'bear' )
         // a request not to include IDs should be obeyed
         const json2 = A.toJSON( false )
         expect( json2.attributes ).to.eql( [ ] )
-        const copy2 = Structure.fromJSON( json2 )
+        const copy2 = MathConcept.fromJSON( json2 )
         expect( copy2.ID() ).to.equal( undefined )
         expect( copy2.child( 0 ).ID() ).to.equal( undefined )
         expect( copy2.child( 1 ).ID() ).to.equal( undefined )
     } )
 
     it( 'Supports deep equality comparisons correctly', () => {
-        // Create four structures for testing
-        const S1 = new Structure(
-            new Structure,
-            new Structure().attr( { 'x' : 'y' } )
+        // Create four MathConcepts for testing
+        const S1 = new MathConcept(
+            new MathConcept,
+            new MathConcept().attr( { 'x' : 'y' } )
         )
-        const S2 = new Structure(
-            new Structure,
-            new Structure().attr( { 'x' : 'y' } )
+        const S2 = new MathConcept(
+            new MathConcept,
+            new MathConcept().attr( { 'x' : 'y' } )
         )
-        const S3 = new Structure(
-            new Structure().attr( { 1 : 2 } ),
-            new Structure
+        const S3 = new MathConcept(
+            new MathConcept().attr( { 1 : 2 } ),
+            new MathConcept
         )
-        const S4 = new Structure(
-            new Structure
+        const S4 = new MathConcept(
+            new MathConcept
         )
-        // Verify that only these structural equalities hold:  each Structure
+        // Verify that only these structural equalities hold:  each MathConcept
         // with itself, plus S1 with S2 (nothing else)
         expect( S1.equals( S1 ) ).to.equal( true )
         expect( S1.equals( S2 ) ).to.equal( true )
@@ -1879,12 +1876,12 @@ describe( 'Structure copying and serialization', () => {
         expect( S4.equals( S2 ) ).to.equal( false )
         expect( S4.equals( S3 ) ).to.equal( false )
         expect( S4.equals( S4 ) ).to.equal( true )
-        // Edit Structure S2 so that it is no longer like S1, and
-        // edit Structure S3 so that it becomes like S1.
+        // Edit MathConcept S2 so that it is no longer like S1, and
+        // edit MathConcept S3 so that it becomes like S1.
         S2.setAttribute( 'new', 'attribute' )
         S3.child( 0 ).clearAttributes( 1 )
         S3.child( 1 ).setAttribute( 'x', 'y' )
-        // Verify that only these structural equalities hold:  each Structure
+        // Verify that only these structural equalities hold:  each MathConcept
         // with itself, plus S1 with S3 (nothing else)
         expect( S1.equals( S1 ) ).to.equal( true )
         expect( S1.equals( S2 ) ).to.equal( false )
@@ -1906,20 +1903,20 @@ describe( 'Structure copying and serialization', () => {
 
     it( 'Does a simple toString() representation as S-expressions', () => {
         // make some stuff to ask for the string representation of
-        const Sx = new Structure()
+        const Sx = new MathConcept()
         Sx.setIdentifierName( 'x' )
-        const Sy = new Structure()
+        const Sy = new MathConcept()
         Sy.setIdentifierName( 'y' )
-        const SP = new Structure()
+        const SP = new MathConcept()
         SP.setIdentifierName( 'P' )
-        const Splus = new Structure()
+        const Splus = new MathConcept()
         Splus.setIdentifierName( '+' )
-        const Slog = new Structure()
+        const Slog = new MathConcept()
         Slog.setIdentifierName( 'log' )
-        const Ssum = new Structure( Splus, Sx, Sy )
-        const Sexpr = new Structure( Slog, new Structure( SP, Sx.copy(), Sy.copy() ) )
-        const Sempty = new Structure()
-        const Sweird = new Structure( Sempty.copy() )
+        const Ssum = new MathConcept( Splus, Sx, Sy )
+        const Sexpr = new MathConcept( Slog, new MathConcept( SP, Sx.copy(), Sy.copy() ) )
+        const Sempty = new MathConcept()
+        const Sweird = new MathConcept( Sempty.copy() )
         // test atomic string representations
         expect( Sx.toString() ).to.equal( 'x' )
         expect( Sy.toString() ).to.equal( 'y' )
@@ -1937,17 +1934,17 @@ describe( 'Structure copying and serialization', () => {
 
 describe( 'Bound and free variables', () => {
 
-    it( 'Should let us set/get which Structures are identifiers', () => {
-        // Create four example structures, two atomic and two nonatomic
-        const S1 = new Structure
-        const S2 = new Structure
-        const S3 = new Structure(
-            new Structure,
-            new Structure
+    it( 'Should let us set/get which MathConcepts are identifiers', () => {
+        // Create four example MathConcepts, two atomic and two nonatomic
+        const S1 = new MathConcept
+        const S2 = new MathConcept
+        const S3 = new MathConcept(
+            new MathConcept,
+            new MathConcept
         )
-        const S4 = new Structure(
-            new Structure(
-                new Structure
+        const S4 = new MathConcept(
+            new MathConcept(
+                new MathConcept
             )
         )
         // By default, none of these are identifiers, nor have identifier names
@@ -1989,26 +1986,26 @@ describe( 'Bound and free variables', () => {
         expect( S4.getIdentifierName() ).to.equal( undefined )
     } )
 
-    it( 'Should let us set/get which Structures are bindings', () => {
-        // Make several different example Structures
-        const S1 = new Structure
-        const S2 = new Structure(
-            new Structure
+    it( 'Should let us set/get which MathConcepts are bindings', () => {
+        // Make several different example MathConcepts
+        const S1 = new MathConcept
+        const S2 = new MathConcept(
+            new MathConcept
         )
-        const S3 = new Structure(
-            new Structure,
-            new Structure
+        const S3 = new MathConcept(
+            new MathConcept,
+            new MathConcept
         )
-        const S4 = new Structure(
-            new Structure,
-            new Structure,
-            new Structure
+        const S4 = new MathConcept(
+            new MathConcept,
+            new MathConcept,
+            new MathConcept
         )
-        const S5 = new Structure(
-            new Structure,
-            new Structure,
-            new Structure,
-            new Structure( new Structure, new Structure )
+        const S5 = new MathConcept(
+            new MathConcept,
+            new MathConcept,
+            new MathConcept,
+            new MathConcept( new MathConcept, new MathConcept )
         )
         // By default, none of these should be valid bindings
         expect( S1.isAValidBinding() ).to.equal( false )
@@ -2058,33 +2055,33 @@ describe( 'Bound and free variables', () => {
     // the following utility function will make it easier to create
     // identifiers
     const ident = name => {
-        const result = new Structure
+        const result = new MathConcept
         result.setIdentifierName( name )
         return result
     }
 
     it( 'Should correctly compute the identifiers in a binding', () => {
-        // create some valid binding Structures and verify that
+        // create some valid binding MathConcepts and verify that
         // boundIdentifiers() is always the array of children without the first
         // or last child
-        const forall = new Structure( // ∀x,y, P(x,y)
+        const forall = new MathConcept( // ∀x,y, P(x,y)
             ident( '∀' ),
             ident( 'x' ),
             ident( 'y' ),
-            new Structure( ident( 'P' ), ident( 'x' ), ident( 'y' ) )
+            new MathConcept( ident( 'P' ), ident( 'x' ), ident( 'y' ) )
         ).makeIntoA( 'binding' )
-        const exists = new Structure( // ∃a, a>0
+        const exists = new MathConcept( // ∃a, a>0
             ident( '∃' ),
             ident( 'a' ),
-            new Structure( ident( '>' ), ident( 'a' ), ident( 0 ) )
+            new MathConcept( ident( '>' ), ident( 'a' ), ident( 0 ) )
         ).makeIntoA( 'binding' )
-        const sum = new Structure( // ∑_{i=1}^n i^2
+        const sum = new MathConcept( // ∑_{i=1}^n i^2
             ident( '∑' ),
             ident( 'i' ),
-            new Structure(
+            new MathConcept(
                 ident( 1 ),
                 ident( 'n' ),
-                new Structure( ident( '^' ), ident( 'i' ), ident( 2 ) )
+                new MathConcept( ident( '^' ), ident( 'i' ), ident( 2 ) )
             )
         ).makeIntoA( 'binding' )
         expect( forall.boundIdentifiers() ).to.eql(
@@ -2105,15 +2102,15 @@ describe( 'Bound and free variables', () => {
         expect( sum.binds( 'y' ) ).to.equal( false )
         expect( sum.binds( 'a' ) ).to.equal( false )
         expect( sum.binds( 'i' ) ).to.equal( true )
-        // create some not-valid-binding Structures and verify that
+        // create some not-valid-binding MathConcepts and verify that
         // boundIdentifiers() is always an empty array
-        const forgotToMarkBinding = new Structure(
+        const forgotToMarkBinding = new MathConcept(
             ident( '∀' ),
             ident( 'x' ),
             ident( 'y' ),
-            new Structure( ident( 'P' ), ident( 'x' ), ident( 'y' ) )
+            new MathConcept( ident( 'P' ), ident( 'x' ), ident( 'y' ) )
         )
-        const notEnoughChildren = new Structure(
+        const notEnoughChildren = new MathConcept(
             ident( '∑' ),
             ident( 'body' )
         )
@@ -2129,35 +2126,35 @@ describe( 'Bound and free variables', () => {
                 expect( struct.binds( identifier ) ).to.equal( false )
     } )
 
-    it( 'Should correctly compute the free identifiers in a Structure', () => {
-        // create the same Structures from the previous test
-        const forall = new Structure( // ∀x,y, P(x,y)
+    it( 'Should correctly compute the free identifiers in a MathConcept', () => {
+        // create the same MathConcepts from the previous test
+        const forall = new MathConcept( // ∀x,y, P(x,y)
             ident( '∀' ),
             ident( 'x' ),
             ident( 'y' ),
-            new Structure( ident( 'P' ), ident( 'x' ), ident( 'y' ) )
+            new MathConcept( ident( 'P' ), ident( 'x' ), ident( 'y' ) )
         ).makeIntoA( 'binding' )
-        const exists = new Structure( // ∃a, a>0
+        const exists = new MathConcept( // ∃a, a>0
             ident( '∃' ),
             ident( 'a' ),
-            new Structure( ident( '>' ), ident( 'a' ), ident( 0 ) )
+            new MathConcept( ident( '>' ), ident( 'a' ), ident( 0 ) )
         ).makeIntoA( 'binding' )
-        const sum = new Structure( // ∑_{i=1}^n i^2
+        const sum = new MathConcept( // ∑_{i=1}^n i^2
             ident( '∑' ),
             ident( 'i' ),
-            new Structure(
+            new MathConcept(
                 ident( 1 ),
                 ident( 'n' ),
-                new Structure( ident( '^' ), ident( 'i' ), ident( 2 ) )
+                new MathConcept( ident( '^' ), ident( 'i' ), ident( 2 ) )
             )
         ).makeIntoA( 'binding' )
-        const forgotToMarkBinding = new Structure(
+        const forgotToMarkBinding = new MathConcept(
             ident( '∀' ),
             ident( 'x' ),
             ident( 'y' ),
-            new Structure( ident( 'P' ), ident( 'x' ), ident( 'y' ) )
+            new MathConcept( ident( 'P' ), ident( 'x' ), ident( 'y' ) )
         )
-        const notEnoughChildren = new Structure(
+        const notEnoughChildren = new MathConcept(
             ident( '∑' ),
             ident( 'body' )
         )
@@ -2179,13 +2176,13 @@ describe( 'Bound and free variables', () => {
     } )
 
     // The following utility function converts a hierarchy of arrays into a
-    // hierarchy of plain vanilla Structures whose leaves are identifiers.
+    // hierarchy of plain vanilla MathConcepts whose leaves are identifiers.
     const makeTree = x => {
-        return x instanceof Array ? new Structure( ...x.map( makeTree ) )
+        return x instanceof Array ? new MathConcept( ...x.map( makeTree ) )
                                   : ident( x )
     }
 
-    it( 'Should judge freeness of sub-Structures correctly', () => {
+    it( 'Should judge freeness of sub-MathConcepts correctly', () => {
         // test isFree() and occursFree() on all the subexpressions of a small
         // summation expression
         const sum = makeTree( // ∑_s f(s)
@@ -2384,14 +2381,14 @@ describe( 'Bound and free variables', () => {
 
 } )
 
-describe( 'Unique IDs for Structure instances', () => {
+describe( 'Unique IDs for MathConcept instances', () => {
 
     it( 'Can be set and gotten correctly', () => {
-        // make some structures
-        const A = new Structure()
-        const B1 = new Structure()
-        const B2 = new Structure()
-        const C = new Structure( B1, B2 )
+        // make some MathConcepts
+        const A = new MathConcept()
+        const B1 = new MathConcept()
+        const B2 = new MathConcept()
+        const C = new MathConcept( B1, B2 )
         // ensure nothing has an ID at first
         expect( A.ID() ).to.equal( undefined )
         expect( B1.ID() ).to.equal( undefined )
@@ -2428,80 +2425,80 @@ describe( 'Unique IDs for Structure instances', () => {
     } )
 
     it( 'Can be tracked globally', () => {
-        // set up the same structures as in the previous test
-        const A = new Structure()
-        const B1 = new Structure()
-        const B2 = new Structure()
-        const C = new Structure( B1, B2 )
+        // set up the same MathConcepts as in the previous test
+        const A = new MathConcept()
+        const B1 = new MathConcept()
+        const B2 = new MathConcept()
+        const C = new MathConcept( B1, B2 )
         A.setID( 'Four' )
         B1.setID( 'Score' )
         B2.setID( [ '&' ] )
         C.setID( 7 )
         // ensure that no IDs are currently tracked
-        expect( Structure.instanceWithID( 'Four' ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( 'Score' ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( '&' ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( '7' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( 'Four' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( 'Score' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( '&' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( '7' ) ).to.equal( undefined )
         expect( A.idIsTracked() ).to.equal( false )
         expect( B1.idIsTracked() ).to.equal( false )
         expect( B2.idIsTracked() ).to.equal( false )
         expect( C.idIsTracked() ).to.equal( false )
         // track some of the IDs and ensure that only those are now tracked
         A.trackIDs()
-        expect( Structure.instanceWithID( 'Four' ) ).to.equal( A )
-        expect( Structure.instanceWithID( 'Score' ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( '&' ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( '7' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( 'Four' ) ).to.equal( A )
+        expect( MathConcept.instanceWithID( 'Score' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( '&' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( '7' ) ).to.equal( undefined )
         expect( A.idIsTracked() ).to.equal( true )
         expect( B1.idIsTracked() ).to.equal( false )
         expect( B2.idIsTracked() ).to.equal( false )
         expect( C.idIsTracked() ).to.equal( false )
         // track C, but not recursively, so just C, not B1 nor B2, is tracked
         C.trackIDs( false )
-        expect( Structure.instanceWithID( 'Four' ) ).to.equal( A )
-        expect( Structure.instanceWithID( 'Score' ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( '&' ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( '7' ) ).to.equal( C )
+        expect( MathConcept.instanceWithID( 'Four' ) ).to.equal( A )
+        expect( MathConcept.instanceWithID( 'Score' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( '&' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( '7' ) ).to.equal( C )
         expect( A.idIsTracked() ).to.equal( true )
         expect( B1.idIsTracked() ).to.equal( false )
         expect( B2.idIsTracked() ).to.equal( false )
         expect( C.idIsTracked() ).to.equal( true )
         // now track C recursively, so that everything is tracked
         C.trackIDs()
-        expect( Structure.instanceWithID( 'Four' ) ).to.equal( A )
-        expect( Structure.instanceWithID( 'Score' ) ).to.equal( B1 )
-        expect( Structure.instanceWithID( '&' ) ).to.equal( B2 )
-        expect( Structure.instanceWithID( '7' ) ).to.equal( C )
+        expect( MathConcept.instanceWithID( 'Four' ) ).to.equal( A )
+        expect( MathConcept.instanceWithID( 'Score' ) ).to.equal( B1 )
+        expect( MathConcept.instanceWithID( '&' ) ).to.equal( B2 )
+        expect( MathConcept.instanceWithID( '7' ) ).to.equal( C )
         expect( A.idIsTracked() ).to.equal( true )
         expect( B1.idIsTracked() ).to.equal( true )
         expect( B2.idIsTracked() ).to.equal( true )
         expect( C.idIsTracked() ).to.equal( true )
         // untrack A's ID and ensure that it is no longer in the global mapping
         A.untrackIDs()
-        expect( Structure.instanceWithID( 'Four' ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( 'Score' ) ).to.equal( B1 )
-        expect( Structure.instanceWithID( '&' ) ).to.equal( B2 )
-        expect( Structure.instanceWithID( '7' ) ).to.equal( C )
+        expect( MathConcept.instanceWithID( 'Four' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( 'Score' ) ).to.equal( B1 )
+        expect( MathConcept.instanceWithID( '&' ) ).to.equal( B2 )
+        expect( MathConcept.instanceWithID( '7' ) ).to.equal( C )
         expect( A.idIsTracked() ).to.equal( false )
         expect( B1.idIsTracked() ).to.equal( true )
         expect( B2.idIsTracked() ).to.equal( true )
         expect( C.idIsTracked() ).to.equal( true )
         // untrack C's ID, but not recursively, so B1 and B2 stay tracked
         C.untrackIDs( false )
-        expect( Structure.instanceWithID( 'Four' ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( 'Score' ) ).to.equal( B1 )
-        expect( Structure.instanceWithID( '&' ) ).to.equal( B2 )
-        expect( Structure.instanceWithID( '7' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( 'Four' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( 'Score' ) ).to.equal( B1 )
+        expect( MathConcept.instanceWithID( '&' ) ).to.equal( B2 )
+        expect( MathConcept.instanceWithID( '7' ) ).to.equal( undefined )
         expect( A.idIsTracked() ).to.equal( false )
         expect( B1.idIsTracked() ).to.equal( true )
         expect( B2.idIsTracked() ).to.equal( true )
         expect( C.idIsTracked() ).to.equal( false )
         // untrack C, recursively, so all are now untracked
         C.untrackIDs()
-        expect( Structure.instanceWithID( 'Four' ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( 'Score' ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( '&' ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( '7' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( 'Four' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( 'Score' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( '&' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( '7' ) ).to.equal( undefined )
         expect( A.idIsTracked() ).to.equal( false )
         expect( B1.idIsTracked() ).to.equal( false )
         expect( B2.idIsTracked() ).to.equal( false )
@@ -2509,10 +2506,10 @@ describe( 'Unique IDs for Structure instances', () => {
     } )
 
     it( 'Can be changed, except when that doesn\'t make sense', () => {
-        // create a few small Structures and give them simple IDs and track them
-        const A = new Structure()
-        const B = new Structure()
-        const C = new Structure()
+        // create a few small MathConcepts and give them simple IDs and track them
+        const A = new MathConcept()
+        const B = new MathConcept()
+        const C = new MathConcept()
         A.setID( 1 )
         B.setID( 2 )
         C.setID( 3 )
@@ -2520,9 +2517,9 @@ describe( 'Unique IDs for Structure instances', () => {
         B.trackIDs()
         C.trackIDs()
         // ensure that they are tracked correctly
-        expect( Structure.instanceWithID( 1 ) ).to.equal( A )
-        expect( Structure.instanceWithID( 2 ) ).to.equal( B )
-        expect( Structure.instanceWithID( 3 ) ).to.equal( C )
+        expect( MathConcept.instanceWithID( 1 ) ).to.equal( A )
+        expect( MathConcept.instanceWithID( 2 ) ).to.equal( B )
+        expect( MathConcept.instanceWithID( 3 ) ).to.equal( C )
         // ask to change each ID i to i+3 and verify it works (in several ways)
         expect( A.changeID( 4 ) ).to.equal( true )
         expect( B.changeID( 5 ) ).to.equal( true )
@@ -2533,12 +2530,12 @@ describe( 'Unique IDs for Structure instances', () => {
         expect( A.idIsTracked() ).to.equal( true )
         expect( B.idIsTracked() ).to.equal( true )
         expect( C.idIsTracked() ).to.equal( true )
-        expect( Structure.instanceWithID( 1 ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( 2 ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( 3 ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( 4 ) ).to.equal( A )
-        expect( Structure.instanceWithID( 5 ) ).to.equal( B )
-        expect( Structure.instanceWithID( 6 ) ).to.equal( C )
+        expect( MathConcept.instanceWithID( 1 ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( 2 ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( 3 ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( 4 ) ).to.equal( A )
+        expect( MathConcept.instanceWithID( 5 ) ).to.equal( B )
+        expect( MathConcept.instanceWithID( 6 ) ).to.equal( C )
         // now to test: will changeID() fail if the new ID is already in use?
         expect( A.changeID( 6 ) ).to.equal( false )
         expect( A.ID() ).to.equal( '4' )
@@ -2547,19 +2544,19 @@ describe( 'Unique IDs for Structure instances', () => {
         expect( A.idIsTracked() ).to.equal( true )
         expect( B.idIsTracked() ).to.equal( true )
         expect( C.idIsTracked() ).to.equal( true )
-        expect( Structure.instanceWithID( 1 ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( 2 ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( 3 ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( 4 ) ).to.equal( A )
-        expect( Structure.instanceWithID( 5 ) ).to.equal( B )
-        expect( Structure.instanceWithID( 6 ) ).to.equal( C )
+        expect( MathConcept.instanceWithID( 1 ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( 2 ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( 3 ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( 4 ) ).to.equal( A )
+        expect( MathConcept.instanceWithID( 5 ) ).to.equal( B )
+        expect( MathConcept.instanceWithID( 6 ) ).to.equal( C )
         // now to test: will changeID() fail if the old ID isn't tracked?
-        const D = new Structure()
+        const D = new MathConcept()
         D.setID( 100 )
         expect( D.changeID( 200 ) ).to.equal( false )
         expect( D.idIsTracked() ).to.equal( false )
-        expect( Structure.instanceWithID( '100' ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( '200' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( '100' ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( '200' ) ).to.equal( undefined )
         // now to test: will changeID() fail if it's not really a change?
         expect( C.changeID( 6 ) ).to.equal( false )
         expect( A.ID() ).to.equal( '4' )
@@ -2568,25 +2565,25 @@ describe( 'Unique IDs for Structure instances', () => {
         expect( A.idIsTracked() ).to.equal( true )
         expect( B.idIsTracked() ).to.equal( true )
         expect( C.idIsTracked() ).to.equal( true )
-        expect( Structure.instanceWithID( 1 ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( 2 ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( 3 ) ).to.equal( undefined )
-        expect( Structure.instanceWithID( 4 ) ).to.equal( A )
-        expect( Structure.instanceWithID( 5 ) ).to.equal( B )
-        expect( Structure.instanceWithID( 6 ) ).to.equal( C )
+        expect( MathConcept.instanceWithID( 1 ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( 2 ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( 3 ) ).to.equal( undefined )
+        expect( MathConcept.instanceWithID( 4 ) ).to.equal( A )
+        expect( MathConcept.instanceWithID( 5 ) ).to.equal( B )
+        expect( MathConcept.instanceWithID( 6 ) ).to.equal( C )
     } )
 
 } )
 
-describe( 'Structure dirty flags', () => {
+describe( 'MathConcept dirty flags', () => {
 
     it( 'Ensure that instances are clean by default', () => {
-        // set up a small hierarchy of structures
+        // set up a small hierarchy of MathConcepts
         let A, B, C, D
-        A = new Structure(
-            B = new Structure,
-            C = new Structure(
-                D = new Structure
+        A = new MathConcept(
+            B = new MathConcept,
+            C = new MathConcept(
+                D = new MathConcept
             )
         )
         // verify all are clean
@@ -2597,12 +2594,12 @@ describe( 'Structure dirty flags', () => {
     } )
 
     it( 'Ensure that getters and setters behave as expected', () => {
-        // set up the same small hierarchy of structures as in the previous test
+        // set up the same small hierarchy of MathConcepts as in the previous test
         let A, B, C, D
-        A = new Structure(
-            B = new Structure,
-            C = new Structure(
-                D = new Structure
+        A = new MathConcept(
+            B = new MathConcept,
+            C = new MathConcept(
+                D = new MathConcept
             )
         )
         // get and set a few values and ensure that they operate completely

@@ -1,11 +1,11 @@
 
-import { Structure } from '../src/structure.js'
+import { MathConcept } from '../src/math-concept.js'
 
 /**
  * The Environment class, still just a stub for now.
  */
-export class Environment extends Structure {
+export class Environment extends MathConcept {
     
-    static className = Structure.addSubclass( 'Environment', Environment )
+    static className = MathConcept.addSubclass( 'Environment', Environment )
     
 }
