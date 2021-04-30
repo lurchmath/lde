@@ -1868,24 +1868,36 @@ describe( 'MathConcept copying and serialization', () => {
         const S4 = new MathConcept(
             new MathConcept
         )
+        const S5 = new MathConcept(
+            new LogicConcept
+        )
         // Verify that only these structural equalities hold:  each MathConcept
         // with itself, plus S1 with S2 (nothing else)
         expect( S1.equals( S1 ) ).to.equal( true )
         expect( S1.equals( S2 ) ).to.equal( true )
         expect( S1.equals( S3 ) ).to.equal( false )
         expect( S1.equals( S4 ) ).to.equal( false )
+        expect( S1.equals( S5 ) ).to.equal( false )
         expect( S2.equals( S1 ) ).to.equal( true )
         expect( S2.equals( S2 ) ).to.equal( true )
         expect( S2.equals( S3 ) ).to.equal( false )
         expect( S2.equals( S4 ) ).to.equal( false )
+        expect( S2.equals( S5 ) ).to.equal( false )
         expect( S3.equals( S1 ) ).to.equal( false )
         expect( S3.equals( S2 ) ).to.equal( false )
         expect( S3.equals( S3 ) ).to.equal( true )
         expect( S3.equals( S4 ) ).to.equal( false )
+        expect( S3.equals( S5 ) ).to.equal( false )
         expect( S4.equals( S1 ) ).to.equal( false )
         expect( S4.equals( S2 ) ).to.equal( false )
         expect( S4.equals( S3 ) ).to.equal( false )
         expect( S4.equals( S4 ) ).to.equal( true )
+        expect( S4.equals( S5 ) ).to.equal( false )
+        expect( S5.equals( S1 ) ).to.equal( false )
+        expect( S5.equals( S2 ) ).to.equal( false )
+        expect( S5.equals( S3 ) ).to.equal( false )
+        expect( S5.equals( S4 ) ).to.equal( false )
+        expect( S5.equals( S5 ) ).to.equal( true )
         // Edit MathConcept S2 so that it is no longer like S1, and
         // edit MathConcept S3 so that it becomes like S1.
         S2.setAttribute( 'new', 'attribute' )

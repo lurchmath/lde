@@ -1469,8 +1469,9 @@ export class MathConcept extends EventTarget {
      * @see {@link MathConcept#copy copy()}
      */
     equals ( other ) {
-        // other must be a MathConcept
+        // other must be a MathConcept with same specific subclass
         if ( !( other instanceof MathConcept ) ) return false
+        if ( this.constructor !== other.constructor ) return false
         // other must have the same number of attribute keys
         const keys1 = Array.from( this._attributes.keys() )
         const keys2 = Array.from( other._attributes.keys() )
