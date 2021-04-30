@@ -15,6 +15,13 @@ describe( 'MathConcept module', () => {
 
     it( 'Ensure all expected global identifiers are declared', () => {
         expect( MathConcept ).to.be.ok
+        expect( MathConcept.subclasses ).to.be.ok
+        expect( MathConcept.addSubclass ).to.be.ok
+        expect( MathConcept.className ).to.be.ok
+        expect( MathConcept.fromJSON ).to.be.ok
+        expect( MathConcept.IDs ).to.be.ok
+        expect( MathConcept.instanceWithID ).to.be.ok
+        expect( MathConcept.feedback ).to.be.ok
     } )
 
 } )
