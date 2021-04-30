@@ -39,7 +39,7 @@
       // The following code stores test results in a global variable, so that if
       // we open this page in a headless browser, we can extract the test results:
       let allMochaResults = [ ];
-      runner.on( 'test end', ( test ) => {
+      const storeTestResult = test => {
         allMochaResults.push( {
           name : test.title,
           suite : test.parent.title,
@@ -52,7 +52,9 @@
             stack : test.err.stack
           } : undefined
         } )
-      } );
+      }
+      runner.on( 'test end', storeTestResult );
+      runner.on( 'fail', storeTestResult );
       runner.on( 'end', () => { window.allMochaResults = allMochaResults } );
       // End of test result storage code.
     </script>
