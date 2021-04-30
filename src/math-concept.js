@@ -2102,10 +2102,27 @@ export class MathConcept extends EventTarget {
      * @param {Object} feedbackData - Any data that can be encoded using
      *   `JSON.stringify()` (or
      *   {@link predictableStringify predictableStringify()}), to be transmitted
-     * @see {@link MathConcept.feedback feedback()}
+     * @see {@link MathConcept#feedback feedback() method for instances}
      */
     static feedback ( feedbackData ) {
         console.log( 'MathConcept class feedback not implemented:', feedbackData )
+    }
+    
+    /**
+     * Send feedback on this particular MathConcept instance.  This takes the
+     * given feedback data, adds to it the fact that this particular instance is
+     * the subject of the feedback (by using its {@link MathConcept#id id()},
+     * and then asks the static {@link MathConcept.feedback feedback()} function
+     * to send that feedback to the LDE.
+     * 
+     * @param {Object} feedbackData - Any data that can be encoded using
+     *   `JSON.stringify()` (or
+     *   {@link predictableStringify predictableStringify()}), to be transmitted
+     * @see {@link MathConcept.feedback static feedback() method}
+     */
+    feedback ( feedbackData ) {
+        feedbackData.subject = this.ID()
+        MathConcept.feedback( feedbackData )
     }
 
     //////

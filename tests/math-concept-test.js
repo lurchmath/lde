@@ -9,6 +9,14 @@ import { Declaration } from '../src/declaration.js'
 import { Environment } from '../src/environment.js'
 import { Expression } from '../src/expression.js'
 
+// I'm rollying my own spy functions, because chai's are annoying to use in
+// the browser.
+const makeSpy = () => {
+    const result = ( ...args ) => result.callRecord.push( args )
+    result.callRecord = [ ]
+    return result
+}
+
 // Test suites begin here.
 
 describe( 'MathConcept module', () => {
@@ -2678,6 +2686,38 @@ describe( 'MathConcept dirty flags', () => {
         expect( B.isDirty() ).to.equal( false )
         expect( C.isDirty() ).to.equal( false )
         expect( D.isDirty() ).to.equal( true )
+    } )
+
+} )
+
+describe( 'Sending feedback about MathConcepts', () => {
+
+    it( 'Should call the static method from the instance method', () => {
+        // Remember the old implementation of the static method, so we can
+        // clean up after ourselves when this test is done
+        let oldMethod = MathConcept.feedback
+        // Replace the old method with one that we can watch be called
+        MathConcept.feedback = makeSpy()
+        // Verify that it works
+        expect( MathConcept.feedback.callRecord ).to.eql( [ ] )
+        const feedback1 = { 'what is this' : 'a test' }
+        MathConcept.feedback( feedback1 )
+        expect( MathConcept.feedback.callRecord ).to.eql( [ [ feedback1 ] ] )
+        // Create a MathConcept instance and send some feedback about it
+        let M = new MathConcept
+        M.trackIDs()
+        M.feedback( { 'and this?' : 'a REAL test!' } )
+        expect( MathConcept.feedback.callRecord ).to.eql( [
+            [ feedback1 ],
+            [
+                {
+                    'and this?' : 'a REAL test!',
+                    'subject' : M.ID()
+                }
+            ]
+        ] )
+        // Clean up after ourselves
+        MathConcept.feedback = oldMethod
     } )
 
 } )
