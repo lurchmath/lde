@@ -1387,7 +1387,7 @@ export class MathConcept extends EventTarget {
      * class.
      * 
      * @see {@link MathConcept#className className}
-     * @see {@link MathConcept#addSubclass addSubclass}
+     * @see {@link MathConcept.addSubclass addSubclass}
      */
     static subclasses = new Map
 
@@ -1421,7 +1421,7 @@ export class MathConcept extends EventTarget {
      * initialize their `className` members.  This is used in deserialization,
      * to correctly reconstitute objects of the appropriate class.
      * @see {@link MathConcept#subclasses subclasses}
-     * @see {@link MathConcept#addSubclass addSubclass}
+     * @see {@link MathConcept.addSubclass addSubclass}
      */
     static className = MathConcept.addSubclass( 'MathConcept', MathConcept )
 
@@ -1449,6 +1449,25 @@ export class MathConcept extends EventTarget {
         return copy
     }
 
+    /**
+     * Whether this MathConcept is structurally equal to the one passed as
+     * parameter.  In particular, this means that this function will return
+     * true if and only if all the following are true.
+     * 
+     *  * `other` is an instance of the MathConcept class
+     *  * `other` has the same set of attribute keys as this instance
+     *  * each of those keys maps to the same data in each instance (where
+     *    comparison of attribute values is done by
+     *    {@link JSON.equals JSON.equals()})
+     *  * `other` has the same number of children as this instance
+     *  * each of `other`'s children passes a recursive
+     *    {@link MathConcept#equals equals()} check with the corresponding
+     *    child of this instance
+     * 
+     * @param {MathConcept} other 
+     * @returns {boolean} true if and only if this MathConcept equals `other`
+     * @see {@link MathConcept#copy copy()}
+     */
     equals ( other ) {
         // other must be a MathConcept
         if ( !( other instanceof MathConcept ) ) return false
@@ -1489,7 +1508,7 @@ export class MathConcept extends EventTarget {
      * 
      * The particular classes of this MathConcept and any of its children are
      * stored in the result, so that a deep copy of this MathConcept can be
-     * recreated from that object using {@link Strucure#fromJSON fromJSON()}.
+     * recreated from that object using {@link Strucure.fromJSON fromJSON()}.
      * 
      * If the serialized result will later be deserialized after the original
      * has been destroyed, then you may wish to preserve the unique IDs of each
@@ -1501,7 +1520,7 @@ export class MathConcept extends EventTarget {
      *   MathConcept and its descendants in the serialized form (as part of the
      *   MathConcept's attributes)
      * @return {Object} A serialized version of this MathConcept
-     * @see {@link Strucure#fromJSON fromJSON()}
+     * @see {@link Strucure.fromJSON fromJSON()}
      * @see {@link Strucure#subclasses subclasses}
      */
     toJSON ( includeIDs = true ) {
@@ -1868,10 +1887,10 @@ export class MathConcept extends EventTarget {
      * with that ID.  Each ID is a string.
      * 
      * This data structure should not be accessed by clients; it is private to
-     * this class.  Use {@link MathConcept#instanceWithID instanceWithID()} and
+     * this class.  Use {@link MathConcept.instanceWithID instanceWithID()} and
      * {@link MathConcept#trackIDs trackIDs()} instead.
      * 
-     * @see {@link MathConcept#instanceWithID instanceWithID()}
+     * @see {@link MathConcept.instanceWithID instanceWithID()}
      * @see {@link MathConcept#trackIDs trackIDs()}
      */
     static IDs = new Map
@@ -1890,7 +1909,7 @@ export class MathConcept extends EventTarget {
      * @return {MathConcept} The MathConcept that has the given ID, if any, or
      *   undefined if no MathConcept has the given ID
      * 
-     * @see {@link MathConcept#IDs IDs()}
+     * @see {@link MathConcept#IDs IDs}
      * @see {@link MathConcept#trackIDs trackIDs()}
      */
     static instanceWithID ( id ) { return MathConcept.IDs.get( `${id}` ) }
@@ -1930,7 +1949,7 @@ export class MathConcept extends EventTarget {
      * all of its descendants.
      * 
      * Calling this function then enables you to call
-     * {@link MathConcept#instanceWithID instanceWithID()} on any of the IDs of a
+     * {@link MathConcept.instanceWithID instanceWithID()} on any of the IDs of a
      * descendant and get that descendant in return.  Note that this does not
      * check to see if a MathConcept with the given ID has already been recorded;
      * it will overwrite any past data in the {@link MathConcept#IDs IDs} mapping.
@@ -2082,6 +2101,7 @@ export class MathConcept extends EventTarget {
      * @param {Object} feedbackData - Any data that can be encoded using
      *   `JSON.stringify()` (or
      *   {@link predictableStringify predictableStringify()}), to be transmitted
+     * @see {@link MathConcept.feedback feedback()}
      */
     static feedback ( feedbackData ) {
         console.log( 'MathConcept class feedback not implemented:', feedbackData )
@@ -2099,7 +2119,7 @@ export class MathConcept extends EventTarget {
      * @return {string[]} An array of all the IDs of all the connections into or
      *   out of this MathConcept.  These unique IDs can be used to get a
      *   {@link Connection Connection} object; see that class's
-     *   {@link Connection#withID withID()} function.
+     *   {@link Connection.withID withID()} function.
      * @see {@link MathConcept#getConnections getConnections()}
      * @see {@link MathConcept#getConnectionIDsIn getConnectionIDsIn()}
      * @see {@link MathConcept#getConnectionIDsOut getConnectionIDsOut()}
@@ -2117,7 +2137,7 @@ export class MathConcept extends EventTarget {
      * @return {string[]} An array of all the IDs of all the connections into
      *   this MathConcept.  These unique IDs can be used to get a
      *   {@link Connection Connection} object; see that class's
-     *   {@link Connection#withID withID()} function.
+     *   {@link Connection.withID withID()} function.
      * @see {@link MathConcept#getConnectionsIn getConnectionsIn()}
      * @see {@link MathConcept#getConnectionIDs getConnectionIDs()}
      * @see {@link MathConcept#getConnectionIDsOut getConnectionIDsOut()}
@@ -2134,7 +2154,7 @@ export class MathConcept extends EventTarget {
      * @return {string[]} An array of all the IDs of all the connections out of
      *   this MathConcept.  These unique IDs can be used to get a
      *   {@link Connection Connection} object; see that class's
-     *   {@link Connection#withID withID()} function.
+     *   {@link Connection.withID withID()} function.
      * @see {@link MathConcept#getConnectionsOut getConnectionsOut()}
      * @see {@link MathConcept#getConnectionIDs getConnectionIDs()}
      * @see {@link MathConcept#getConnectionIDsIn getConnectionIDsIn()}
@@ -2148,7 +2168,7 @@ export class MathConcept extends EventTarget {
     /**
      * Get all connections into or out of this MathConcept, as
      * {@link Connection Connection} instances.  This function simply maps the
-     * {@link Connection#withID withID()} function over the result of
+     * {@link Connection.withID withID()} function over the result of
      * {@link MathConcept#getConnectionIDs getConnectionIDs()}.
      * 
      * @return {Connection[]} An array of all the Connections into or out of
@@ -2162,7 +2182,7 @@ export class MathConcept extends EventTarget {
     /**
      * Get all connections into this MathConcept, as
      * {@link Connection Connection} instances.  This function simply maps the
-     * {@link Connection#withID withID()} function over the result of
+     * {@link Connection.withID withID()} function over the result of
      * {@link MathConcept#getConnectionIDsIn getConnectionIDsIn()}.
      * 
      * @return {Connection[]} An array of all the Connections into this
@@ -2176,7 +2196,7 @@ export class MathConcept extends EventTarget {
     /**
      * Get all connections out of this MathConcept, as
      * {@link Connection Connection} instances.  This function simply maps the
-     * {@link Connection#withID withID()} function over the result of
+     * {@link Connection.withID withID()} function over the result of
      * {@link MathConcept#getConnectionIDsOut getConnectionIDsOut()}.
      * 
      * @return {Connection[]} An array of all the Connections out of this
@@ -2190,14 +2210,14 @@ export class MathConcept extends EventTarget {
     /**
      * Connect this MathConcept to another, called the *target,* optionally
      * attaching some data to the connection as well.  This function just calls
-     * {@link Connection#create Connection.create()}, and is thus here just for
+     * {@link Connection.create Connection.create()}, and is thus here just for
      * convenience.
      * 
      * @param {MathConcept} target - The target of the new connection
      * @param {string} connectionID - The unique ID to use for the new
      *   connection we are to create
      * @param {*} data - The optional data to attach to the new connection.  See
-     *   the {@link Connection#create create()} function in the
+     *   the {@link Connection.create create()} function in the
      *   {@link Connection Connection} class for the acceptable formats of this
      *   data.
      * @return {Connection} A {@link Connection Connection} instance for the
@@ -2235,7 +2255,7 @@ export class MathConcept extends EventTarget {
      * the API in the {@link Connection Connection}s class.  For example, if a
      * MathConcept hierarchy has been saved in serialized form and then
      * deserialized at a later date.  Thus we need a way to place into the
-     * {@link Connection#IDs IDs member of the Connection class} all the IDs of
+     * {@link Connection.IDs IDs member of the Connection class} all the IDs of
      * the connections in any given MathConcept hierarchy.  This function does so.
      * In that way, it is very similar to {@link MathConcept#trackIDs trackIDs()}.
      * 
@@ -2247,7 +2267,7 @@ export class MathConcept extends EventTarget {
      * 
      * @return {boolean} True if and only if every connection ID that appers in
      *   this MathConcept and its descendants was able to be added to the global
-     *   mapping in {@link Connection#IDs IDs}.  If any fail (because the ID was
+     *   mapping in {@link Connection.IDs IDs}.  If any fail (because the ID was
      *   already in use), this returns false.  Even if it returns false, it
      *   still adds as many connections as it can to that global mapping.
      */
@@ -2272,12 +2292,12 @@ export class MathConcept extends EventTarget {
      * its replacement instead.  This function performs that task.
      * 
      * This function is merely a convenient interface that just calls
-     * {@link Connection#transferConnections Connection.transferConnections()}
+     * {@link Connection.transferConnections Connection.transferConnections()}
      * on your behalf.
      * 
      * @param {MathConcept} recipient - The MathConcept to which to transfer all of
      *   this one's connections
-     * @see {@link Connection#transferConnections Connection.transferConnections()}
+     * @see {@link Connection.transferConnections Connection.transferConnections()}
      */
     transferConnectionsTo ( recipient ) {
         return Connection.transferConnections( this, recipient )

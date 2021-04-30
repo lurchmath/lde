@@ -51,9 +51,9 @@ export class Connection {
      * Connection with ID `x`.
      * 
      * This data structure should not be accessed by clients; it is private to
-     * this class.  Use {@link Connection#withID withID()} instead.
+     * this class.  Use {@link Connection.withID withID()} instead.
      * 
-     * @see {@link Connection#withID withID()}
+     * @see {@link Connection.withID withID()}
      */
     static IDs = new Map
 
@@ -70,7 +70,7 @@ export class Connection {
      *   MathConcept instances
      * @return {Connection} A Connection instance representing the connection
      *   whose ID was given, or undefined if the given ID is not in the
-     *   {@link Connection#IDs IDs} mapping
+     *   {@link Connection.IDs IDs} mapping
      */
     static withID ( id ) {
         return Connection.IDs.has( id ) ? new Connection( id ) : undefined
@@ -78,7 +78,7 @@ export class Connection {
 
     /**
      * This function constructs a new instance, and in that sense behaves very
-     * much like {@link Connection#withID withID()}, but that function is to be
+     * much like {@link Connection.withID withID()}, but that function is to be
      * preferred over this one for two reasons.
      * 
      *  1. This function always returns a Connection instance, since it is the
@@ -87,16 +87,16 @@ export class Connection {
      *     of any use to the client.
      *  2. Calling a constructor gives the illusion that the connection object
      *     is forming a connection between two {@link MathConcept MathConcept}s,
-     *     while the {@link Connection#withID withID()} function suggests the
+     *     while the {@link Connection.withID withID()} function suggests the
      *     truth more accurately, that we are simply getting ahold of an
      *     already-existing connection.  To form a new connection between two
-     *     MathConcepts, use the {@link Connection#create create()} function
+     *     MathConcepts, use the {@link Connection.create create()} function
      *     instead.
      * 
      * @param {string} id - The globally unique ID of a connection among
      *   MathConcept instances
-     * @see {@link Connection#withID withID()}
-     * @see {@link Connection#create create()}
+     * @see {@link Connection.withID withID()}
+     * @see {@link Connection.create create()}
      */
     constructor ( id ) { this.id = id }
 
@@ -108,7 +108,7 @@ export class Connection {
      * 
      * @param {string} connectionID - The ID to be used for the newly formed
      *   connection.  This must not already exist in the
-     *   {@link Connection#IDs IDs} mapping; if it does, this function takes no
+     *   {@link Connection.IDs IDs} mapping; if it does, this function takes no
      *   action.
      * @param {string} sourceID - The ID of the MathConcept that should be the
      *   source of the new connection.  If no MathConcept has this ID, this
@@ -144,7 +144,7 @@ export class Connection {
 
     /**
      * Get the source {@link MathConcept MathConcept} for this connection.  This is
-     * taken directly from the {@link Connection#IDs IDs} mapping.
+     * taken directly from the {@link Connection.IDs IDs} mapping.
      * 
      * @return {MathConcept} The source {@link MathConcept MathConcept}
      * @see {@link Connection#target target()}
@@ -352,7 +352,7 @@ export class Connection {
      * data representing the connection, and thus generates one
      * {@link MathConcept#willBeChanged willBeChanged} event and one
      * {@link MathConcept#wasChanged wasChanged} event in each.  It also removes
-     * this Connection's ID from {@link Connection#IDs the global mapping}.
+     * this Connection's ID from {@link Connection.IDs the global mapping}.
      * 
      * @return {boolean} True if and only if it succeeded in deleting the data
      *   in the source and target {@link MathConcept MathConcept}s.  This fails only

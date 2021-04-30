@@ -68,6 +68,8 @@ JSON.equals = ( x, y ) => {
     return true
 }
 
+/** @class JSON */
+
 /**
  * A deep copy of a JSON structure, as another JSON structure.
  * 
