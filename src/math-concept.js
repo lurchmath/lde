@@ -2103,6 +2103,7 @@ export class MathConcept extends EventTarget {
      *   `JSON.stringify()` (or
      *   {@link predictableStringify predictableStringify()}), to be transmitted
      * @see {@link MathConcept#feedback feedback() method for instances}
+     * @see {@link LogicConcept#feedback feedback() for LogicConcepts}
      */
     static feedback ( feedbackData ) {
         console.log( 'MathConcept class feedback not implemented:', feedbackData )
@@ -2119,6 +2120,7 @@ export class MathConcept extends EventTarget {
      *   `JSON.stringify()` (or
      *   {@link predictableStringify predictableStringify()}), to be transmitted
      * @see {@link MathConcept.feedback static feedback() method}
+     * @see {@link LogicConcept#feedback feedback() for LogicConcepts}
      */
     feedback ( feedbackData ) {
         feedbackData.subject = this.ID()
