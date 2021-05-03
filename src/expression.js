@@ -49,5 +49,34 @@ import { LogicConcept } from '../src/logic-concept.js'
 export class Expression extends LogicConcept {
     
     static className = MathConcept.addSubclass( 'Expression', Expression )
+
+    /**
+     * If this Expression has an Expression parent, then it is not the
+     * outermost expression in the hierarchy.  However, if it has a parent
+     * that is some other kind of {@link MathConcept} or
+     * {@link LogicConcept}, then it is the outermost Expression in the
+     * hierarchy.  If it has no parent, it is the outermost.
+     * 
+     * @returns {boolean} Whether this expression is the outermost
+     *   Expression in the {@link MathConcept} hierarchy in which it sits
+     * @see {@link Expression#getOutermost getOutermost()}
+     */
+    isOutermost () {
+        return this._parent === null
+            || !( this._parent instanceof Expression )
+    }
+
+    /**
+     * This function walks up the {@link MathConcept} hierarchy containing
+     * this Expression until it finds an ancestor satisfying
+     * {@link Expression#isOutermost isOutermost()}, and then it returns that
+     * Expression.
+     * 
+     * @returns {Expression} the outermost Expression ancestor of this
+     *   Expression
+     */
+    getOutermost () {
+        return this.isOutermost() ? this : this._parent.getOutermost()
+    }
     
 }
