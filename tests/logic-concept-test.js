@@ -3,13 +3,8 @@
 import { LogicConcept } from '../src/logic-concept.js'
 import { MathConcept } from '../src/math-concept.js'
 
-// I'm rollying my own spy functions, because chai's are annoying to use in
-// the browser.
-const makeSpy = () => {
-    const result = ( ...args ) => result.callRecord.push( args )
-    result.callRecord = [ ]
-    return result
-}
+// We need the makeSpy function for convenience testing of callbacks.
+import { makeSpy } from './test-utils.js'
 
 // Test suites begin here.
 
