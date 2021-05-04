@@ -7,24 +7,6 @@ describe( 'Symbol', () => {
         expect( Symbol ).to.be.ok
     } )
 
-    it( 'Should require a nonempty string at construction time', () => {
-        // Constructing a symbol with a nonempty string is fine.
-        expect( () => { new Symbol( 'hello' ) } ).not.to.throw()
-        expect( () => { new Symbol( '1' ) } ).not.to.throw()
-        expect( () => { new Symbol( 'Four score and seven years ago' ) } )
-            .not.to.throw()
-        expect( () => { new Symbol( 'αβγδε' ) } ).not.to.throw()
-        expect( () => { new Symbol( 'x₁' ) } ).not.to.throw()
-        // Constructing a symbol with a non-string is not fine.
-        expect( () => { new Symbol( 1 ) } ).to.throw()
-        expect( () => { new Symbol( null ) } ).to.throw()
-        expect( () => { new Symbol() } ).to.throw()
-        expect( () => { new Symbol( -17.6503 ) } ).to.throw()
-        expect( () => { new Symbol( [ "text", "array" ] ) } ).to.throw()
-        // Constructing a symbol with the empty string is not fine.
-        expect( () => { new Symbol( "" ) } ).to.throw()
-    } )
-
     it( 'Should let us query the text given at construction time', () => {
         // Create the same symbols as above and query the text in each.
         // It should be exactly the same as was provided at construction time.
@@ -38,6 +20,12 @@ describe( 'Symbol', () => {
         expect( S.text() ).to.equal( 'αβγδε' )
         S = new Symbol( 'x₁' )
         expect( S.text() ).to.equal( 'x₁' )
+        S = new Symbol( { } )
+        expect( S.text() ).to.equal( '[object Object]' )
+        S = new Symbol( [ ] )
+        expect( S.text() ).to.equal( 'undefined' )
+        S = new Symbol
+        expect( S.text() ).to.equal( 'undefined' )
     } )
 
     it( 'Should respect the "evaluate as" field to compute value()', () => {
@@ -99,6 +87,22 @@ describe( 'Symbol', () => {
         expect( S3.value() ).to.equal( '-578.12379' )
         expect( S4.value() ).to.equal( '9.3257268e31' )
         expect( S5.value() ).to.equal( 'Infinity' )
+    } )
+
+    it( 'Should let us copy Symbols, retaining their content', () => {
+        // This just ensures that copying a Symbol copies its text faithfully.
+        let S1 = new Symbol( 'some text here' )
+        let S2 = new Symbol( '***' )
+        let S3 = S1.copy()
+        let S4 = S2.copy()
+        expect( S3 ).to.be.instanceof( Symbol )
+        expect( S4 ).to.be.instanceof( Symbol )
+        expect( S3.numChildren() ).to.equal( 0 )
+        expect( S4.numChildren() ).to.equal( 0 )
+        expect( S3.text() ).to.equal( S1.text() )
+        expect( S4.text() ).to.equal( S2.text() )
+        expect( S3.text() ).to.equal( 'some text here' )
+        expect( S4.text() ).to.equal( '***' )
     } )
 
 } )

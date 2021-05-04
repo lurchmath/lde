@@ -25,16 +25,14 @@ export class Symbol extends Expression {
      * the text have any particular form, except that it be a nonempty string.
      * 
      * @param {String} text - any nonempty string to be used as the text for
-     *   this symbol
-     * @throws Will throw an error if the argument is not a string, or is the
-     *   empty string.
+     *   this symbol.  If this is not a string, it will be converted into
+     *   one with the `String` constructor in JavaScript.  If that returns an
+     *   empty string, it will be treated as `"undefined"` instead.
      */
     constructor ( text ) {
         super()
-        if ( typeof( text ) !== 'string' || text === '' )
-            throw new Error(
-                'Symbols are constructed from a nonempty string' )
-        this._text = text
+        text = String( text )
+        this.setAttribute( 'symbol text', text === '' ? 'undefined' : text )
     }
 
     /**
@@ -45,7 +43,7 @@ export class Symbol extends Expression {
      * 
      * @returns {String} the text given at construction time
      */
-    text () { return this._text }
+    text () { return this.getAttribute( 'symbol text' ) }
 
     /**
      * The original `value()` function was {@link Expression#value implemented
