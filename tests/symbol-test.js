@@ -1,5 +1,8 @@
 
 import { Symbol } from '../src/symbol.js'
+import { MathConcept } from '../src/math-concept.js'
+import { LogicConcept } from '../src/logic-concept.js'
+import { Expression } from '../src/expression.js'
 
 describe( 'Symbol', () => {
 
@@ -103,6 +106,47 @@ describe( 'Symbol', () => {
         expect( S4.text() ).to.equal( S2.text() )
         expect( S3.text() ).to.equal( 'some text here' )
         expect( S4.text() ).to.equal( '***' )
+    } )
+
+    it( 'Should not let us add children to a Symbol instance', () => {
+        // Create an instance for testing and ensure it has no children
+        let S = new Symbol( 'S' )
+        expect( S.numChildren() ).to.equal( 0 )
+        // Try to add a child of various types, and ensure that at no point
+        // does it actually work
+        let tryThis = new MathConcept
+        S.insertChild( tryThis )
+        expect( S.numChildren() ).to.equal( 0 )
+        expect( tryThis.parent() ).to.equal( null )
+        tryThis = new LogicConcept
+        S.insertChild( tryThis )
+        expect( S.numChildren() ).to.equal( 0 )
+        expect( tryThis.parent() ).to.equal( null )
+        tryThis = new Expression
+        S.insertChild( tryThis )
+        expect( S.numChildren() ).to.equal( 0 )
+        expect( tryThis.parent() ).to.equal( null )
+        tryThis = new Symbol( 'tt' )
+        S.insertChild( tryThis )
+        expect( S.numChildren() ).to.equal( 0 )
+        expect( tryThis.parent() ).to.equal( null )
+        // Repeat those same tests but with pushChild() instead.
+        let tryThis = new MathConcept
+        S.pushChild( tryThis )
+        expect( S.numChildren() ).to.equal( 0 )
+        expect( tryThis.parent() ).to.equal( null )
+        tryThis = new LogicConcept
+        S.pushChild( tryThis )
+        expect( S.numChildren() ).to.equal( 0 )
+        expect( tryThis.parent() ).to.equal( null )
+        tryThis = new Expression
+        S.pushChild( tryThis )
+        expect( S.numChildren() ).to.equal( 0 )
+        expect( tryThis.parent() ).to.equal( null )
+        tryThis = new Symbol( 'tt' )
+        S.pushChild( tryThis )
+        expect( S.numChildren() ).to.equal( 0 )
+        expect( tryThis.parent() ).to.equal( null )
     } )
 
 } )

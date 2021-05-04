@@ -36,6 +36,18 @@ export class Symbol extends Expression {
     }
 
     /**
+     * Symbols are supposed to be the atomic type of {@link Expression}.  Thus
+     * we override here the default behavior of the
+     * {@link MathConcept#insertChild insertChild()} member of the
+     * {@link MathConcept} class, making it now do nothing.  Since all other
+     * child insertion functions (such as
+     * {@link MathConcept#pushChild pushChild()}, etc.) rely internally on
+     * {@link MathConcept#insertChild insertChild()}, this effectively makes
+     * it impossible to add children to a Symbol instance.
+     */
+    insertChild () { }
+
+    /**
      * A Symbol never changes its text.  To have a new Symbol, just construct
      * a new one with the new text, rather than trying to re-use an old one
      * and change its text.  Consequently, this function returns the text
