@@ -40,6 +40,11 @@ export class Application extends Expression {
      * `p`.  Each of these three (`m`,`s`,`p`) would most likely be an
      * instance of the {@link Symbol} class.
      * 
+     * Note that while it is possible later to remove children from an
+     * Application until it has none, this is likely to result in the members
+     * of this class malfunctioning or throwing errors.  Clients should not
+     * remove the final child of an Application; that is not supported.
+     * 
      * @param {Expression} operator - The function or operation that is being
      *   applied to the operands.  This argument is required, and must be an
      *   {@link Expression}.
@@ -54,9 +59,48 @@ export class Application extends Expression {
              !( x instanceof Expression ) ) )
             throw new Error( 'All arguments to the Application constructor '
                            + 'must be Expression instances' )
-        super()
-        this._operator = operator
-        this._operands = operands
+        super( operator, ...operands )
     }
+
+    /**
+     * Applications store their operator and operands as children, in the same
+     * order as in LISP S-expressions, that is, with the operator as the first
+     * child, and the operands in order therafter (if there are any).  Thus
+     * this function returns the first child of this object, when considering
+     * it as an {@link Expression} (or more generally as a
+     * {@link MathConcept}).
+     * 
+     * If the children have not been manipulated since construction of the
+     * object, then this is the original operator given at construction time.
+     * If a new first child has been inserted since then, or the old first
+     * child removed, the new first child is assumed to be the operator.
+     * 
+     * @returns {Expression} the operator that this Application instance
+     *   applies to its operands
+     * @see {@link Application#operands operands()}
+     * @see {@link MathConcept#firstChild firstChild()}
+     */
+    operator () { return this.firstChild() }
+
+    /**
+     * Applications store their operator and operands as children, in the same
+     * order as in LISP S-expressions, that is, with the operator as the first
+     * child, and the operands in order therafter (if there are any).  Thus
+     * this function returns the list of all but the first child of this
+     * object, when considering it as an {@link Expression} (or more generally
+     * as a {@link MathConcept}).
+     * 
+     * If the children have not been manipulated since construction of the
+     * object, then this is the original array of operands given at
+     * construction time.  If children have been added or removed since then,
+     * the new array of children (after the first) is assumed to be the list
+     * of operands.
+     * 
+     * @returns {...Expression} the operands to which this Application
+     *   instance applies its operator
+     * @see {@link Application#operator operator()}
+     * @see {@link MathConcept#allButFirstChild allButFirstChild()}
+     */
+     operands () { return this.allButFirstChild() }
     
 }
