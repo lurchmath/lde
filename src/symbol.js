@@ -46,5 +46,40 @@ export class Symbol extends Expression {
      * @returns {String} the text given at construction time
      */
     text () { return this._text }
+
+    /**
+     * The original `value()` function was {@link Expression#value implemented
+     * in the Expression class}, but as a pure virtual method, meaning that it
+     * defers its implementation to subclasses.  Here, we add support for the
+     * following conventions:
+     * 
+     *  * A Symbol with the `"evaluate as"` attribute set to `"integer"` will
+     *    have a `value()` equal to the result of parsing the Symbol's
+     *    {@link Symbol#text text()} content as an integer, using the standard
+     *    JavaScript `parseInt()` function.  This includes ignoring nonsense
+     *    at the end of the string, returning the inital number only.  Nan
+     *    will be returned if the string does not even begin with an integer.
+     *  * A Symbol with the `"evaluate as"` attribute set to `"real"` will
+     *    have a `value()` equal to the result of parsing the Symbol's
+     *    {@link Symbol#text text()} content as a real number, using the
+     *    standard JavaScript `parseFloat()` function.  Note that this
+     *    supports not only standard decimal notation, but also the text
+     *    `"Infinity"` and scientific notation of the form `1.2e3` or
+     *    `1.2E3`.  Spaces are permitted and nonsense at the end of the string
+     *    is ignored.  NaN will be returned if the string does not even begin
+     *    with a float.
+     *  * A Symbol with the `"evaluate as"` attribute set to `"string"` will
+     *    have a `value()` equal to its {@link Symbol#text text()}.
+     * 
+     * @returns {*} The value of the Symbol, as documented above, or undefined
+     *   if none of the above cases applies
+     */
+    value () {
+        switch ( this.getAttribute( 'evaluate as' ) ) {
+            case 'integer' : return parseInt( this.text() )
+            case 'real' : return parseFloat( this.text() )
+            case 'string' : return this.text()
+        }
+    }
     
 }
