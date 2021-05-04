@@ -36,5 +36,15 @@ export class Symbol extends Expression {
                 'Symbols are constructed from a nonempty string' )
         this._text = text
     }
+
+    /**
+     * A Symbol never changes its text.  To have a new Symbol, just construct
+     * a new one with the new text, rather than trying to re-use an old one
+     * and change its text.  Consequently, this function returns the text
+     * given at the time the Symbol was constructed.
+     * 
+     * @returns {String} the text given at construction time
+     */
+    text () { return this._text }
     
 }
