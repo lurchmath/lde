@@ -1,6 +1,6 @@
 
-import { MathConcept } from '../src/math-concept.js'
-import { LogicConcept } from '../src/logic-concept.js'
+import { MathConcept } from './math-concept.js'
+import { LogicConcept } from './logic-concept.js'
 
 /**
  * The Environment class, still just a stub for now.

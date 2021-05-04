@@ -1,6 +1,6 @@
 
-import { MathConcept } from '../src/math-concept.js'
-import { LogicConcept } from '../src/logic-concept.js'
+import { MathConcept } from './math-concept.js'
+import { LogicConcept } from './logic-concept.js'
 
 /**
  * An Expression is a type of {@link LogicConcept}.  (For the other types, see
