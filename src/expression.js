@@ -51,6 +51,19 @@ export class Expression extends LogicConcept {
     static className = MathConcept.addSubclass( 'Expression', Expression )
 
     /**
+     * Constructs an Expression from the given list of children, which may
+     * be empty.  All children must also be instances of Expression; those
+     * that are not are filtered out.
+     * 
+     * @param  {...Expression} children child Expressions to be added to
+     *   this one (as in the constructors for {@link MathConcept} and
+     *   {@link LogicConcept})
+     */
+     constructor ( ...children ) {
+        super( ...children.filter( child => child instanceof Expression ) )
+    }
+
+    /**
      * If this Expression has an Expression parent, then it is not the
      * outermost expression in the hierarchy.  However, if it has a parent
      * that is some other kind of {@link MathConcept} or

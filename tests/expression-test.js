@@ -9,6 +9,31 @@ describe( 'Expression', () => {
         expect( Expression ).to.be.ok
     } )
 
+    it( 'Should permit only Expression children of Expressions', () => {
+        // Make some Expressions + some LogicConcepts that aren't Expressions
+        let L1 = new LogicConcept
+        let L2 = new LogicConcept
+        let L3 = new LogicConcept
+        let E1 = new Expression
+        let E2 = new Expression
+        let E3 = new Expression
+        // Construct some Expressions with a mix of the above things as
+        // children, and ensure the results filtered out all the Li, keeping
+        // only the Ei.
+        let test1 = new Expression( L1, E1 )
+        expect( test1.numChildren() ).to.equal( 1 )
+        expect( test1.child(0) ).to.equal( E1 )
+        let test2 = new Expression( E1, L1 )
+        expect( test2.numChildren() ).to.equal( 1 )
+        expect( test2.child(0) ).to.equal( E1 )
+        let test3 = new Expression( L2, L3 )
+        expect( test3.numChildren() ).to.equal( 0 )
+        let test4 = new Expression( E2, E3 )
+        expect( test4.numChildren() ).to.equal( 2 )
+        expect( test4.child(0) ).to.equal( E2 )
+        expect( test4.child(1) ).to.equal( E3 )
+    } )
+
     it( 'Should compute isOutermost/getOutermost correctly', () => {
         // Make a deeply nested hierarchy
         let A, B, C, D, E, F
