@@ -30,6 +30,7 @@ export class Symbol extends Expression {
      *   empty string.
      */
     constructor ( text ) {
+        super()
         if ( typeof( text ) !== 'string' || text === '' )
             throw new Error(
                 'Symbols are constructed from a nonempty string' )
