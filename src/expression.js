@@ -78,5 +78,37 @@ export class Expression extends LogicConcept {
     getOutermost () {
         return this.isOutermost() ? this : this._parent.getOutermost()
     }
+
+    /**
+     * Many mathematical expressions have standard interpretations.  We permit
+     * Expression instances to be marked with an attribute indicating that
+     * they have a standard interpretation, and what that interpretation is.
+     * This function looks for such attributes and applies them, computing the
+     * value of the Expression, if it has one, and returning undefined if it
+     * does not.
+     * 
+     * An Expression that has a value will have an attribute whose key is the
+     * string `"evaluate as"` and whose value is a string such as `"integer"`
+     * or `"integer base 2"` or `"string"` or `"ordered pair"` or any of a
+     * wide variety of other ways to evaluate the Expression's content.
+     * 
+     * It is intended that this list can grow over time, and this function be
+     * updated to support new types of simple mathematical values as they are
+     * needed.  It is not intended that every kind of possible interpretation
+     * should show up on this list, but rather just those types that are
+     * common/standard across enough of mathematics that they will be used in
+     * any kind of mathematics software.
+     * 
+     * This initial implementation provides support for *none* of the types of
+     * valuation described above, because each is best implemented in one of
+     * this class's subclasses ({@link Symbol}, {@link Application}, or
+     * {@link Binding}) instead.  A stub is implemented here as a pure virtual
+     * method, to guarantee that the function exists for all Expression
+     * instances and returns undefined by default.
+     * 
+     * @returns {*} any basic JavaScript value representing this Expression,
+     *   or undefined if it there is no such value
+     */
+    value () { }
     
 }

@@ -41,4 +41,13 @@ describe( 'Expression', () => {
         expect( F.getOutermost() ).to.equal( D )
     } )
 
+    it( 'Should return an undefined value for Expression instances', () => {
+        let E1 = new Expression
+        let E2 = new Expression
+        expect( E1.value ).to.be.ok
+        expect( E1.value() ).to.be.undefined
+        expect( E2.value ).to.be.ok
+        expect( E2.value() ).to.be.undefined
+    } )
+
 } )
