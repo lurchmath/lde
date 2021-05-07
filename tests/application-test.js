@@ -33,7 +33,7 @@ describe( 'Application', () => {
         let x = new Symbol( 'x' )
         let y = new Symbol( 'y' )
         // Try to construct Application instance with non-Expression arguments,
-        // and verify that an error is thrown in each case.
+        // and verify that no error is thrown in each case.
         expect( () => { new Application( E1 ) } ).not.to.throw()
         expect( () => { new Application( E1, E2 ) } ).not.to.throw()
         expect( () => { new Application( f ) } ).not.to.throw()
@@ -55,12 +55,13 @@ describe( 'Application', () => {
         let A3 = new Application( f )
         let A4 = new Application( f.copy(), x )
         let A5 = new Application( y, f.copy(), x.copy() )
-        // compute operator and operands in each case
+        // compute operator in each case
         expect( A1.operator() ).to.equal( E1 )
         expect( A2.operator() ).to.equal( A2.child(0) )
         expect( A3.operator() ).to.equal( f )
         expect( A4.operator() ).to.equal( A4.child(0) )
         expect( A5.operator() ).to.equal( y )
+        // compute operands in each case
         expect( A1.operands() ).to.eql( [ ] )
         let tmp = A2.operands()
         expect( tmp ).to.be.instanceof( Array )
