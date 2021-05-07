@@ -131,7 +131,7 @@ describe( 'Symbol', () => {
         expect( S.numChildren() ).to.equal( 0 )
         expect( tryThis.parent() ).to.equal( null )
         // Repeat those same tests but with pushChild() instead.
-        let tryThis = new MathConcept
+        tryThis = new MathConcept
         S.pushChild( tryThis )
         expect( S.numChildren() ).to.equal( 0 )
         expect( tryThis.parent() ).to.equal( null )
