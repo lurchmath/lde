@@ -189,4 +189,35 @@ export class Binding extends Expression {
      */
     boundVariables () { return this.children().slice( 1, -1 ) }
 
+    /**
+     * While the {@link Binding#boundVariables boundVariables()} method
+     * returns actual {@link Symbol} instances, this method converts each to
+     * its text name by calling the {@link Symbol#text text()} method in each,
+     * in order, and returning the results of those calls instead.  Obiously
+     * the client could do this on their own, but this is a convenience method
+     * that improves code readability.
+     * 
+     * @returns {...String} an Array of strings, the names of the bound
+     *   variables in this binding, in the same order that they appear in the
+     *   binding
+     */
+    boundVariableNames () {
+        return this.boundVariables().map( v => v.text() )
+    }
+
+    /**
+     * Test whether this Binding binds a variable with a given name.
+     * 
+     * @param {any} symbol - the symbol to test whether it's bound; this can
+     *   be a string containing the variable name, or a {@link Symbol}
+     *   instance (which will be converted to its {@link Symbol#text text()}),
+     *   or anything else, which will be converted to a string
+     * @returns {boolean} whether this Binding instance binds a variable with
+     *   the given name
+     */
+    binds ( symbol ) {
+        if ( symbol instanceof Symbol ) symbol = symbol.text()
+        return this.boundVariableNames().includes( String( symbol ) )
+    }
+
 }

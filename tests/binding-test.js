@@ -102,4 +102,50 @@ describe( 'Binding', () => {
         expect( B3.body() ).to.equal( B3.child(4) )
     } )
 
+    it( 'Should return bound variable names correctly', () => {
+        // Construct Bindings as in earlier tests.
+        // Note the importance of making copies when creating children!
+        // Otherwise you remove the same instance from earlier parents.
+        let B1 = new Binding( E1, x, E2 )
+        let B2 = new Binding( E2.copy(), f, y, E3 )
+        let B3 = new Binding(
+            E1.copy(), f.copy(), x.copy(), y.copy(), E3.copy() )
+        // compute bound variable names in each case
+        expect( B1.boundVariableNames() ).to.eql( [ 'x' ] )
+        expect( B2.boundVariableNames() ).to.eql( [ 'f', 'y' ] )
+        expect( B3.boundVariableNames() ).to.eql( [ 'f', 'x', 'y' ] )
+    } )
+
+    it( 'Should know whether a binding binds a given symbol', () => {
+        // Construct Bindings as in earlier tests.
+        // Note the importance of making copies when creating children!
+        // Otherwise you remove the same instance from earlier parents.
+        let B1 = new Binding( E1, x, E2 )
+        let B2 = new Binding( E2.copy(), f, y, E3 )
+        let B3 = new Binding(
+            E1.copy(), f.copy(), x.copy(), y.copy(), E3.copy() )
+        // compute bound variable names in each case
+        expect( B1.binds( 'f' ) ).to.equal( false )
+        expect( B1.binds( 'x' ) ).to.equal( true )
+        expect( B1.binds( 'y' ) ).to.equal( false )
+        expect( B1.binds( 'z' ) ).to.equal( false )
+        expect( B1.binds( f ) ).to.equal( false )
+        expect( B1.binds( x ) ).to.equal( true )
+        expect( B1.binds( y ) ).to.equal( false )
+        expect( B2.binds( 'f' ) ).to.equal( true )
+        expect( B2.binds( 'x' ) ).to.equal( false )
+        expect( B2.binds( 'y' ) ).to.equal( true )
+        expect( B2.binds( 'z' ) ).to.equal( false )
+        expect( B2.binds( f ) ).to.equal( true )
+        expect( B2.binds( x ) ).to.equal( false )
+        expect( B2.binds( y ) ).to.equal( true )
+        expect( B3.binds( 'f' ) ).to.equal( true )
+        expect( B3.binds( 'x' ) ).to.equal( true )
+        expect( B3.binds( 'y' ) ).to.equal( true )
+        expect( B3.binds( 'z' ) ).to.equal( false )
+        expect( B3.binds( f ) ).to.equal( true )
+        expect( B3.binds( x ) ).to.equal( true )
+        expect( B3.binds( y ) ).to.equal( true )
+    } )
+
 } )
