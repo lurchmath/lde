@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Lurch Deductive Engine: JSON</title>
+    <title>Lurch Deductive Engine: application.js</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
@@ -24,491 +24,126 @@
 </header>
 
 
-<main class="layout-main ">
+<main class="layout-main  layout-content--source">
   <div class="container">
-    <p class="page-kind">Class</p>
-    <h1 class="page-title">JSON</h1>
+    <p class="page-kind">source</p>
+    <h1 class="page-title">application.js</h1>
     
 
 
 
+    
 
 <section>
+    <article>
+        <pre id="source" class="source-page line-numbers"><code class="language-js">
+import { MathConcept } from './math-concept.js'
+import { Expression } from './expression.js'
 
-
-<header class="class">
-
-
+/**
+ * Many mathematical expressions are the application of some function or
+ * operator to zero or (typically) more arguments.  For example `f(x)` applies
+ * the function `f` to the argument `x`.  As another example, `17.2-p` applies
+ * the operation `-` to the arguments `17.2` and `p`.  We call such
+ * expressions Applications, and implement them in this class.
+ * 
+ * These were inspired by a structure of the same name defined in
+ * {@link https://openmath.org/about/ the OpenMath Standard}, but the reader
+ * is not expected to read that standard; we define in this documentation our
+ * version of what an Application is.
+ * 
+ * An Application is defined by a sequence of children, each of which is an
+ * {@link Expression}.  The first such child will be the function or operator
+ * that is applied to the rest of the children, and consequently, there must
+ * always be at least one child of any Application.  The constructor defined
+ * below requires this.
+ * 
+ * It is acceptable for there to be only one child, the function or operator
+ * itself, and no other children.  Such functions are uncommon in mathematics,
+ * but they are common in computer science.  For example, a function that
+ * generates new pseudo-random numbers each time it is called is a function
+ * that takes zero arguments.
+ */
+export class Application extends Expression {
     
-        
-        <!-- <h2>JSON</h2> -->
+    static className = MathConcept.addSubclass( 'Application', Application )
 
-        
+    /**
+     * Construct a new Application instance from the given operator (requried)
+     * and list of operands (zero or more).  For example, to construct `f(x)`,
+     * call `new Application(f,x)`, where we assume that `f` and `x` are
+     * already defined elsewhere (perhaps as {@link Symbol Symbols}).  Or to
+     * construct `17.2-p`, call `new Application(m,s,p)`, where `m` is the
+     * subtraction operator, `s` is the constant 17.2 and `p` is the variable
+     * `p`.  Each of these three (`m`,`s`,`p`) would most likely be an
+     * instance of the {@link Symbol} class.
+     * 
+     * Note that while it is possible later to remove children from an
+     * Application until it has none, this is likely to result in the members
+     * of this class malfunctioning or throwing errors.  Clients should not
+     * remove the final child of an Application; that is not supported.
+     * 
+     * @param {Expression} operator - The function or operation that is being
+     *   applied to the operands.  This argument is required, and must be an
+     *   {@link Expression}.
+     * @param  {...Expression} operands - The list of zero or more operands
+     *   to which the operator is being applied.  This may be an empty list,
+     *   but each entry on the list must be an {@link Expression}.
+     * @throws If any of the arguments is not an {@link Expression}, this
+     *   constructor throws an error.
+     */
+    constructor ( operator, ...operands ) {
+        if ( !( operator instanceof Expression ) || operands.some( x =>
+             !( x instanceof Expression ) ) )
+            throw new Error( 'All arguments to the Application constructor '
+                           + 'must be Expression instances' )
+        super( operator, ...operands )
+    }
 
-        
+    /**
+     * Applications store their operator and operands as children, in the same
+     * order as in LISP S-expressions, that is, with the operator as the first
+     * child, and the operands in order therafter (if there are any).  Thus
+     * this function returns the first child of this object, when considering
+     * it as an {@link Expression} (or more generally as a
+     * {@link MathConcept}).
+     * 
+     * If the children have not been manipulated since construction of the
+     * object, then this is the original operator given at construction time.
+     * If a new first child has been inserted since then, or the old first
+     * child removed, the new first child is assumed to be the operator.
+     * 
+     * @returns {Expression} the operator that this Application instance
+     *   applies to its operands
+     * @see {@link Application#operands operands()}
+     * @see {@link MathConcept#firstChild firstChild()}
+     */
+    operator () { return this.firstChild() }
 
-        
+    /**
+     * Applications store their operator and operands as children, in the same
+     * order as in LISP S-expressions, that is, with the operator as the first
+     * child, and the operands in order therafter (if there are any).  Thus
+     * this function returns the list of all but the first child of this
+     * object, when considering it as an {@link Expression} (or more generally
+     * as a {@link MathConcept}).
+     * 
+     * If the children have not been manipulated since construction of the
+     * object, then this is the original array of operands given at
+     * construction time.  If children have been added or removed since then,
+     * the new array of children (after the first) is assumed to be the list
+     * of operands.
+     * 
+     * @returns {...Expression} the operands to which this Application
+     *   instance applies its operator
+     * @see {@link Application#operator operator()}
+     * @see {@link MathConcept#allButFirstChild allButFirstChild()}
+     */
+     operands () { return this.allButFirstChild() }
     
-</header>
-
-<article>
-    <div class="container-overview">
-
-
-
-    
-        
-
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    
-    </div>
-
-    <h4 class="method-name" id="JSON">new JSON<span class="signature">()</span><span class="return-type-signature"></span>
-    </h4>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="utilities.js.html">utilities.js</a><a href="utilities.js.html#source.71">, line 71</a>
-        </li>
-    </ul>
-
-
-
-    
-    </div>
-
-    
-
-    
-
-     
-
-    
-
-    
-
-
-    
-
-    
-        <h3 class="subtitle">Methods</h3>
-
-        
-            
-
-
-    <article class="method">
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    <span class="method-type-signature is-static">static</span>
-    </div>
-
-    <h4 class="method-name" id=".copy">copy<span class="signature">(json)</span><span class="return-type-signature"> &rarr; {*}</span>
-    </h4>
-
-
-
-
-
-<div class="method-description">
-    
-    <p>A deep copy of a JSON structure, as another JSON structure.</p>
-<p>Right now this is implemented in the easiest way; we simply serialize
-and then deserialize using the built-in methods of <code>JSON.stringify()</code>
-and <code>JSON.parse()</code>.  This is, however, not a very efficient
-implementation, and could be improved later if needed.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Parameters</h4>
-    
-
-<ul class="method-params">
-    
-
-        <li>
-            
-                <span class="param-name">json</span>
-            
-
-            
-                
-
-
-    <span class="param-type">
-        <code>*</code>
-    </span>
-    
-
-            
-
-            
-
-            
-
-            <div class="param-description"><p>the structure to copy, which must be amenable to JSON
-encoding using <code>JSON.stringify()</code></p></div>
-            
-        </li>
-
-    
-</ul>
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-    <h4 class="method-heading">Returns</h4>
-    <ul>
-    
-        <li class="method-returns">
-            
-                <code>*</code>
-            
-            
-                <p>if the input is an object, this is a deep copy; if the input
-was atomic, this is the same atomic</p>
-            
-        </li>
-    
-    </ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="utilities.js.html">utilities.js</a><a href="utilities.js.html#source.86">, line 86</a>
-        </li>
-    </ul>
-
-
-
+}
+</code></pre>
     </article>
-
-        
-            
-
-
-    <article class="method">
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    <span class="method-type-signature is-static">static</span>
-    </div>
-
-    <h4 class="method-name" id=".equals">equals<span class="signature">(x, y)</span><span class="return-type-signature"> &rarr; {boolean}</span>
-    </h4>
-
-
-
-
-
-<div class="method-description">
-    
-    <p>Whether two objects that are amenable to JSON encoding are structurally
-equal.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Parameters</h4>
-    
-
-<ul class="method-params">
-    
-
-        <li>
-            
-                <span class="param-name">x</span>
-            
-
-            
-                
-
-
-    <span class="param-type">
-        <code>*</code>
-    </span>
-    
-
-            
-
-            
-
-            
-
-            <div class="param-description"><p>The first of the two objects; this must be amenable to JSON
-encoding</p></div>
-            
-        </li>
-
-    
-
-        <li>
-            
-                <span class="param-name">y</span>
-            
-
-            
-                
-
-
-    <span class="param-type">
-        <code>*</code>
-    </span>
-    
-
-            
-
-            
-
-            
-
-            <div class="param-description"><p>The second of the two objects; this must be amenable to JSON
-encoding</p></div>
-            
-        </li>
-
-    
-</ul>
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-    <h4 class="method-heading">Returns</h4>
-    <ul>
-    
-        <li class="method-returns">
-            
-                <code>boolean</code>
-            
-            
-                <p>Whether the two objects are structurally equal</p>
-            
-        </li>
-    
-    </ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="utilities.js.html">utilities.js</a><a href="utilities.js.html#source.44">, line 44</a>
-        </li>
-    </ul>
-
-
-
-    </article>
-
-        
-    
-
-    
-
-    
-</article>
-
 </section>
 
 

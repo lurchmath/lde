@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Lurch Deductive Engine: JSON</title>
+    <title>Lurch Deductive Engine: symbol.js</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
@@ -24,491 +24,115 @@
 </header>
 
 
-<main class="layout-main ">
+<main class="layout-main  layout-content--source">
   <div class="container">
-    <p class="page-kind">Class</p>
-    <h1 class="page-title">JSON</h1>
+    <p class="page-kind">source</p>
+    <h1 class="page-title">symbol.js</h1>
     
 
 
 
+    
 
 <section>
+    <article>
+        <pre id="source" class="source-page line-numbers"><code class="language-js">
+import { MathConcept } from './math-concept.js'
+import { Expression } from './expression.js'
 
-
-<header class="class">
-
-
+/**
+ * A Symbol is an atomic {@link Expression}.  This includes all types of
+ * mathematical symbols, from variables like x and y to constants like 1, 2,
+ * and pi, as well as symbols for operators like `+` or the capital sigma for
+ * summation.
+ * 
+ * The primary datum stored in a Symbol is a single text string, which defines
+ * the symbol.  For more information on this datum, see the constructor.
+ */
+export class Symbol extends Expression {
     
-        
-        <!-- <h2>JSON</h2> -->
+    static className = MathConcept.addSubclass( 'Symbol', Symbol )
 
-        
+    /**
+     * When constructing a symbol, we must provide the text that defines it.
+     * This will typically be the Unicode text for the symbol itself, such as
+     * `"x"` or `"1"`, or the Unicode character for the Greek letter pi.  But
+     * there is no formal requirement that the text stored in the symbol be
+     * exactly the text that would be used to represent the symbol in a
+     * typical mathematical document.  There is not even a requirement that
+     * the text have any particular form, except that it be a nonempty string.
+     * 
+     * @param {String} text - any nonempty string to be used as the text for
+     *   this symbol.  If this is not a string, it will be converted into
+     *   one with the `String` constructor in JavaScript.  If that returns an
+     *   empty string, it will be treated as `"undefined"` instead.
+     */
+    constructor ( text ) {
+        super()
+        text = String( text )
+        this.setAttribute( 'symbol text', text === '' ? 'undefined' : text )
+    }
 
-        
+    /**
+     * Symbols are supposed to be the atomic type of {@link Expression}.  Thus
+     * we override here the default behavior of the
+     * {@link MathConcept#insertChild insertChild()} member of the
+     * {@link MathConcept} class, making it now do nothing.  Since all other
+     * child insertion functions (such as
+     * {@link MathConcept#pushChild pushChild()}, etc.) rely internally on
+     * {@link MathConcept#insertChild insertChild()}, this effectively makes
+     * it impossible to add children to a Symbol instance.
+     */
+    insertChild () { }
 
-        
+    /**
+     * A Symbol never changes its text.  To have a new Symbol, just construct
+     * a new one with the new text, rather than trying to re-use an old one
+     * and change its text.  Consequently, this function returns the text
+     * given at the time the Symbol was constructed.
+     * 
+     * @returns {String} the text given at construction time
+     */
+    text () { return this.getAttribute( 'symbol text' ) }
+
+    /**
+     * The original `value()` function was {@link Expression#value implemented
+     * in the Expression class}, but as a pure virtual method, meaning that it
+     * defers its implementation to subclasses.  Here, we add support for the
+     * following conventions:
+     * 
+     *  * A Symbol with the `"evaluate as"` attribute set to `"integer"` will
+     *    have a `value()` equal to the result of parsing the Symbol's
+     *    {@link Symbol#text text()} content as an integer, using the standard
+     *    JavaScript `parseInt()` function.  This includes ignoring nonsense
+     *    at the end of the string, returning the inital number only.  Nan
+     *    will be returned if the string does not even begin with an integer.
+     *  * A Symbol with the `"evaluate as"` attribute set to `"real"` will
+     *    have a `value()` equal to the result of parsing the Symbol's
+     *    {@link Symbol#text text()} content as a real number, using the
+     *    standard JavaScript `parseFloat()` function.  Note that this
+     *    supports not only standard decimal notation, but also the text
+     *    `"Infinity"` and scientific notation of the form `1.2e3` or
+     *    `1.2E3`.  Spaces are permitted and nonsense at the end of the string
+     *    is ignored.  NaN will be returned if the string does not even begin
+     *    with a float.
+     *  * A Symbol with the `"evaluate as"` attribute set to `"string"` will
+     *    have a `value()` equal to its {@link Symbol#text text()}.
+     * 
+     * @returns {*} The value of the Symbol, as documented above, or undefined
+     *   if none of the above cases applies
+     */
+    value () {
+        switch ( this.getAttribute( 'evaluate as' ) ) {
+            case 'integer' : return parseInt( this.text() )
+            case 'real' : return parseFloat( this.text() )
+            case 'string' : return this.text()
+        }
+    }
     
-</header>
-
-<article>
-    <div class="container-overview">
-
-
-
-    
-        
-
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    
-    </div>
-
-    <h4 class="method-name" id="JSON">new JSON<span class="signature">()</span><span class="return-type-signature"></span>
-    </h4>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="utilities.js.html">utilities.js</a><a href="utilities.js.html#source.71">, line 71</a>
-        </li>
-    </ul>
-
-
-
-    
-    </div>
-
-    
-
-    
-
-     
-
-    
-
-    
-
-
-    
-
-    
-        <h3 class="subtitle">Methods</h3>
-
-        
-            
-
-
-    <article class="method">
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    <span class="method-type-signature is-static">static</span>
-    </div>
-
-    <h4 class="method-name" id=".copy">copy<span class="signature">(json)</span><span class="return-type-signature"> &rarr; {*}</span>
-    </h4>
-
-
-
-
-
-<div class="method-description">
-    
-    <p>A deep copy of a JSON structure, as another JSON structure.</p>
-<p>Right now this is implemented in the easiest way; we simply serialize
-and then deserialize using the built-in methods of <code>JSON.stringify()</code>
-and <code>JSON.parse()</code>.  This is, however, not a very efficient
-implementation, and could be improved later if needed.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Parameters</h4>
-    
-
-<ul class="method-params">
-    
-
-        <li>
-            
-                <span class="param-name">json</span>
-            
-
-            
-                
-
-
-    <span class="param-type">
-        <code>*</code>
-    </span>
-    
-
-            
-
-            
-
-            
-
-            <div class="param-description"><p>the structure to copy, which must be amenable to JSON
-encoding using <code>JSON.stringify()</code></p></div>
-            
-        </li>
-
-    
-</ul>
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-    <h4 class="method-heading">Returns</h4>
-    <ul>
-    
-        <li class="method-returns">
-            
-                <code>*</code>
-            
-            
-                <p>if the input is an object, this is a deep copy; if the input
-was atomic, this is the same atomic</p>
-            
-        </li>
-    
-    </ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="utilities.js.html">utilities.js</a><a href="utilities.js.html#source.86">, line 86</a>
-        </li>
-    </ul>
-
-
-
+}
+</code></pre>
     </article>
-
-        
-            
-
-
-    <article class="method">
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    <span class="method-type-signature is-static">static</span>
-    </div>
-
-    <h4 class="method-name" id=".equals">equals<span class="signature">(x, y)</span><span class="return-type-signature"> &rarr; {boolean}</span>
-    </h4>
-
-
-
-
-
-<div class="method-description">
-    
-    <p>Whether two objects that are amenable to JSON encoding are structurally
-equal.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Parameters</h4>
-    
-
-<ul class="method-params">
-    
-
-        <li>
-            
-                <span class="param-name">x</span>
-            
-
-            
-                
-
-
-    <span class="param-type">
-        <code>*</code>
-    </span>
-    
-
-            
-
-            
-
-            
-
-            <div class="param-description"><p>The first of the two objects; this must be amenable to JSON
-encoding</p></div>
-            
-        </li>
-
-    
-
-        <li>
-            
-                <span class="param-name">y</span>
-            
-
-            
-                
-
-
-    <span class="param-type">
-        <code>*</code>
-    </span>
-    
-
-            
-
-            
-
-            
-
-            <div class="param-description"><p>The second of the two objects; this must be amenable to JSON
-encoding</p></div>
-            
-        </li>
-
-    
-</ul>
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-    <h4 class="method-heading">Returns</h4>
-    <ul>
-    
-        <li class="method-returns">
-            
-                <code>boolean</code>
-            
-            
-                <p>Whether the two objects are structurally equal</p>
-            
-        </li>
-    
-    </ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="utilities.js.html">utilities.js</a><a href="utilities.js.html#source.44">, line 44</a>
-        </li>
-    </ul>
-
-
-
-    </article>
-
-        
-    
-
-    
-
-    
-</article>
-
 </section>
 
 
