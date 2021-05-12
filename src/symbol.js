@@ -58,6 +58,16 @@ export class Symbol extends Expression {
     text () { return this.getAttribute( 'symbol text' ) }
 
     /**
+     * This method overrides {@link MathConcept#toString the implementation in
+     * the MathConcept class}, which creates LISP-style S-expressions.  Here we
+     * handle the atomic case by writing the name of the symbol instead.
+     * 
+     * @returns {String} the string representation of this Symbol, which is just
+     *   its {@link Symbol#text text()}
+     */
+    toString () { return this.text() }
+
+    /**
      * The original `value()` function was {@link Expression#value implemented
      * in the Expression class}, but as a pure virtual method, meaning that it
      * defers its implementation to subclasses.  Here, we add support for the

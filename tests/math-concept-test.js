@@ -8,6 +8,8 @@ import { LogicConcept } from '../src/logic-concept.js'
 import { Declaration } from '../src/declaration.js'
 import { Environment } from '../src/environment.js'
 import { Expression } from '../src/expression.js'
+import { Symbol } from '../src/symbol.js'
+import { Binding } from '../src/binding.js'
 
 // We need the makeSpy function for convenience testing of callbacks.
 import { makeSpy } from './test-utils.js'
@@ -1928,291 +1930,72 @@ describe( 'MathConcept copying and serialization', () => {
 
     it( 'Does a simple toString() representation as S-expressions', () => {
         // make some stuff to ask for the string representation of
-        const Sx = new MathConcept()
-        Sx.setIdentifierName( 'x' )
-        const Sy = new MathConcept()
-        Sy.setIdentifierName( 'y' )
-        const SP = new MathConcept()
-        SP.setIdentifierName( 'P' )
-        const Splus = new MathConcept()
-        Splus.setIdentifierName( '+' )
-        const Slog = new MathConcept()
-        Slog.setIdentifierName( 'log' )
+        const Sx = new MathConcept
+        const Sy = new MathConcept
+        const SP = new MathConcept
+        const Splus = new MathConcept
+        const Slog = new MathConcept
         const Ssum = new MathConcept( Splus, Sx, Sy )
         const Sexpr = new MathConcept( Slog, new MathConcept( SP, Sx.copy(), Sy.copy() ) )
-        const Sempty = new MathConcept()
+        const Sempty = new MathConcept
         const Sweird = new MathConcept( Sempty.copy() )
         // test atomic string representations
-        expect( Sx.toString() ).to.equal( 'x' )
-        expect( Sy.toString() ).to.equal( 'y' )
-        expect( SP.toString() ).to.equal( 'P' )
-        expect( Splus.toString() ).to.equal( '+' )
-        expect( Slog.toString() ).to.equal( 'log' )
+        expect( Sx.toString() ).to.equal( '()' )
+        expect( Sy.toString() ).to.equal( '()' )
+        expect( SP.toString() ).to.equal( '()' )
+        expect( Splus.toString() ).to.equal( '()' )
+        expect( Slog.toString() ).to.equal( '()' )
         // test non-atomic string representations
-        expect( Ssum.toString() ).to.equal( '(+ x y)' )
-        expect( Sexpr.toString() ).to.equal( '(log (P x y))' )
-        expect( Sempty.toString() ).to.equal( 'undefined' )
-        expect( Sweird.toString() ).to.equal( '(undefined)' )
+        expect( Ssum.toString() ).to.equal( '(() () ())' )
+        expect( Sexpr.toString() ).to.equal( '(() (() () ()))' )
+        expect( Sempty.toString() ).to.equal( '()' )
+        expect( Sweird.toString() ).to.equal( '(())' )
     } )
 
 } )
 
 describe( 'Bound and free variables', () => {
 
-    it( 'Should let us set/get which MathConcepts are identifiers', () => {
-        // Create four example MathConcepts, two atomic and two nonatomic
-        const S1 = new MathConcept
-        const S2 = new MathConcept
-        const S3 = new MathConcept(
-            new MathConcept,
-            new MathConcept
-        )
-        const S4 = new MathConcept(
-            new MathConcept(
-                new MathConcept
-            )
-        )
-        // By default, none of these are identifiers, nor have identifier names
-        expect( S1.isAnIdentifier() ).to.equal( false )
-        expect( S2.isAnIdentifier() ).to.equal( false )
-        expect( S3.isAnIdentifier() ).to.equal( false )
-        expect( S4.isAnIdentifier() ).to.equal( false )
-        expect( S1.getIdentifierName() ).to.equal( undefined )
-        expect( S2.getIdentifierName() ).to.equal( undefined )
-        expect( S3.getIdentifierName() ).to.equal( undefined )
-        expect( S4.getIdentifierName() ).to.equal( undefined )
-        // We can set and get identifier names on any of them
-        S1.setIdentifierName( 'name of S1' )
-        S2.setIdentifierName( 'name of S2' )
-        S3.setIdentifierName( 'name of S3' )
-        S4.setIdentifierName( 'name of S4' )
-        expect( S1.getIdentifierName() ).to.equal( 'name of S1' )
-        expect( S2.getIdentifierName() ).to.equal( 'name of S2' )
-        expect( S3.getIdentifierName() ).to.equal( 'name of S3' )
-        expect( S4.getIdentifierName() ).to.equal( 'name of S4' )
-        // But that doesn't make them all identifiers; only the atomic ones are
-        expect( S1.isAnIdentifier() ).to.equal( true )
-        expect( S2.isAnIdentifier() ).to.equal( true )
-        expect( S3.isAnIdentifier() ).to.equal( false )
-        expect( S4.isAnIdentifier() ).to.equal( false )
-        // And if we clear out all identifier names, then nothing is an
-        // identifier, nor has an identifier name
-        S1.clearIdentifierName()
-        S2.clearIdentifierName()
-        S3.clearIdentifierName()
-        S4.clearIdentifierName()
-        expect( S1.isAnIdentifier() ).to.equal( false )
-        expect( S2.isAnIdentifier() ).to.equal( false )
-        expect( S3.isAnIdentifier() ).to.equal( false )
-        expect( S4.isAnIdentifier() ).to.equal( false )
-        expect( S1.getIdentifierName() ).to.equal( undefined )
-        expect( S2.getIdentifierName() ).to.equal( undefined )
-        expect( S3.getIdentifierName() ).to.equal( undefined )
-        expect( S4.getIdentifierName() ).to.equal( undefined )
-    } )
-
-    it( 'Should let us set/get which MathConcepts are bindings', () => {
-        // Make several different example MathConcepts
-        const S1 = new MathConcept
-        const S2 = new MathConcept(
-            new MathConcept
-        )
-        const S3 = new MathConcept(
-            new MathConcept,
-            new MathConcept
-        )
-        const S4 = new MathConcept(
-            new MathConcept,
-            new MathConcept,
-            new MathConcept
-        )
-        const S5 = new MathConcept(
-            new MathConcept,
-            new MathConcept,
-            new MathConcept,
-            new MathConcept( new MathConcept, new MathConcept )
-        )
-        // By default, none of these should be valid bindings
-        expect( S1.isAValidBinding() ).to.equal( false )
-        expect( S2.isAValidBinding() ).to.equal( false )
-        expect( S3.isAValidBinding() ).to.equal( false )
-        expect( S4.isAValidBinding() ).to.equal( false )
-        expect( S5.isAValidBinding() ).to.equal( false )
-        // If we mark them all as bindings, still we should find that none are
-        // valid bindings, because none have identifier children
-        S1.makeIntoA( 'binding' )
-        S2.makeIntoA( 'binding' )
-        S3.makeIntoA( 'binding' )
-        S4.makeIntoA( 'binding' )
-        S5.makeIntoA( 'binding' )
-        expect( S1.isAValidBinding() ).to.equal( false )
-        expect( S2.isAValidBinding() ).to.equal( false )
-        expect( S3.isAValidBinding() ).to.equal( false )
-        expect( S4.isAValidBinding() ).to.equal( false )
-        expect( S5.isAValidBinding() ).to.equal( false )
-        // If we mark all children as identifiers, this should make only S4 and
-        // S5 into bindings, because the first 3 don't have enough children.
-        S2.child( 0 ).setIdentifierName( 'x' )
-        S3.child( 0 ).setIdentifierName( 'y' )
-        S3.child( 1 ).setIdentifierName( 'z' )
-        S4.child( 0 ).setIdentifierName( 'xx' )
-        S4.child( 1 ).setIdentifierName( 'yy' )
-        S4.child( 2 ).setIdentifierName( 'zz' )
-        S5.child( 0 ).setIdentifierName( 'xxx' )
-        S5.child( 1 ).setIdentifierName( 'yyy' )
-        S5.child( 2 ).setIdentifierName( 'zzz' )
-        S5.child( 3 ).setIdentifierName( 'www' )
-        expect( S1.isAValidBinding() ).to.equal( false )
-        expect( S2.isAValidBinding() ).to.equal( false )
-        expect( S3.isAValidBinding() ).to.equal( false )
-        expect( S4.isAValidBinding() ).to.equal( true )
-        expect( S5.isAValidBinding() ).to.equal( true )
-        // If we make the first and last children of S4 and S5 to no longer be
-        // identifiers, that shouldn't matter; they should stay valid bindings.
-        S4.firstChild().clearIdentifierName()
-        S4.lastChild().clearIdentifierName()
-        S5.firstChild().clearIdentifierName()
-        S5.lastChild().clearIdentifierName()
-        expect( S4.isAValidBinding() ).to.equal( true )
-        expect( S5.isAValidBinding() ).to.equal( true )
-    } )
-
-    // the following utility function will make it easier to create
-    // identifiers
-    const ident = name => {
-        const result = new MathConcept
-        result.setIdentifierName( name )
-        return result
+    const makeTree = ( arg ) => {
+        if ( arg instanceof Array ) {
+            if ( arg[0] == 'bind' ) {
+                return new Binding( ...arg.slice( 1 ).map( makeTree ) )
+            } else {
+                return new Expression( ...arg.map( makeTree ) )
+            }
+        } else return new Symbol( arg )
     }
 
-    it( 'Should correctly compute the identifiers in a binding', () => {
-        // create some valid binding MathConcepts and verify that
-        // boundIdentifiers() is always the array of children without the first
-        // or last child
-        const forall = new MathConcept( // ∀x,y, P(x,y)
-            ident( '∀' ),
-            ident( 'x' ),
-            ident( 'y' ),
-            new MathConcept( ident( 'P' ), ident( 'x' ), ident( 'y' ) )
-        ).makeIntoA( 'binding' )
-        const exists = new MathConcept( // ∃a, a>0
-            ident( '∃' ),
-            ident( 'a' ),
-            new MathConcept( ident( '>' ), ident( 'a' ), ident( 0 ) )
-        ).makeIntoA( 'binding' )
-        const sum = new MathConcept( // ∑_{i=1}^n i^2
-            ident( '∑' ),
-            ident( 'i' ),
-            new MathConcept(
-                ident( 1 ),
-                ident( 'n' ),
-                new MathConcept( ident( '^' ), ident( 'i' ), ident( 2 ) )
-            )
-        ).makeIntoA( 'binding' )
-        expect( forall.boundIdentifiers() ).to.eql(
-            [ forall.child( 1 ), forall.child( 2 ) ] )
-        expect( exists.boundIdentifiers() ).to.eql( [ exists.child( 1 ) ] )
-        expect( sum.boundIdentifiers() ).to.eql( [ sum.child( 1 ) ] )
-        // verify that each binds its own identifiers and none of the
-        // identifiers of the others
-        expect( forall.binds( 'x' ) ).to.equal( true )
-        expect( forall.binds( 'y' ) ).to.equal( true )
-        expect( forall.binds( 'a' ) ).to.equal( false )
-        expect( forall.binds( 'i' ) ).to.equal( false )
-        expect( exists.binds( 'x' ) ).to.equal( false )
-        expect( exists.binds( 'y' ) ).to.equal( false )
-        expect( exists.binds( 'a' ) ).to.equal( true )
-        expect( exists.binds( 'i' ) ).to.equal( false )
-        expect( sum.binds( 'x' ) ).to.equal( false )
-        expect( sum.binds( 'y' ) ).to.equal( false )
-        expect( sum.binds( 'a' ) ).to.equal( false )
-        expect( sum.binds( 'i' ) ).to.equal( true )
-        // create some not-valid-binding MathConcepts and verify that
-        // boundIdentifiers() is always an empty array
-        const forgotToMarkBinding = new MathConcept(
-            ident( '∀' ),
-            ident( 'x' ),
-            ident( 'y' ),
-            new MathConcept( ident( 'P' ), ident( 'x' ), ident( 'y' ) )
-        )
-        const notEnoughChildren = new MathConcept(
-            ident( '∑' ),
-            ident( 'body' )
-        )
-        notEnoughChildren.makeIntoA( 'binding' )
-        const atomic = ident( 'atomic' )
-        atomic.makeIntoA( 'binding' )
-        expect( forgotToMarkBinding.boundIdentifiers() ).to.eql( [ ] )
-        expect( notEnoughChildren.boundIdentifiers() ).to.eql( [ ] )
-        expect( atomic.boundIdentifiers() ).to.eql( [ ] )
-        // verify that none of these bind any variables
-        for ( let struct of [ forgotToMarkBinding, notEnoughChildren, atomic ] )
-            for ( let identifier of [ 'x', 'y', 'a', 'i', 'body' ] )
-                expect( struct.binds( identifier ) ).to.equal( false )
-    } )
-
     it( 'Should correctly compute the free identifiers in a MathConcept', () => {
-        // create the same MathConcepts from the previous test
-        const forall = new MathConcept( // ∀x,y, P(x,y)
-            ident( '∀' ),
-            ident( 'x' ),
-            ident( 'y' ),
-            new MathConcept( ident( 'P' ), ident( 'x' ), ident( 'y' ) )
-        ).makeIntoA( 'binding' )
-        const exists = new MathConcept( // ∃a, a>0
-            ident( '∃' ),
-            ident( 'a' ),
-            new MathConcept( ident( '>' ), ident( 'a' ), ident( 0 ) )
-        ).makeIntoA( 'binding' )
-        const sum = new MathConcept( // ∑_{i=1}^n i^2
-            ident( '∑' ),
-            ident( 'i' ),
-            new MathConcept(
-                ident( 1 ),
-                ident( 'n' ),
-                new MathConcept( ident( '^' ), ident( 'i' ), ident( 2 ) )
-            )
-        ).makeIntoA( 'binding' )
-        const forgotToMarkBinding = new MathConcept(
-            ident( '∀' ),
-            ident( 'x' ),
-            ident( 'y' ),
-            new MathConcept( ident( 'P' ), ident( 'x' ), ident( 'y' ) )
-        )
-        const notEnoughChildren = new MathConcept(
-            ident( '∑' ),
-            ident( 'body' )
-        )
-        notEnoughChildren.makeIntoA( 'binding' )
-        const atomic = ident( 'atomic' )
-        atomic.makeIntoA( 'binding' )
+        // create some valid Bindings in which to detect free identifiers
+        const forall = makeTree(
+            [ 'bind', '∀', 'x', 'y', [ 'P', 'x', 'y' ] ] ) // ∀x,y, P(x,y)
+        const exists = makeTree(
+            [ 'bind', '∃', 'a', [ '>', 'a', 0 ] ] ) // ∃a, a>0
+        const sum = makeTree(
+            [ 'bind', [ '∑', 1, 'n' ], 'i', [ '^', 'i', 2 ] ] ) // ∑_{i=1}^n i^2
+        const forgotToMarkBinding = makeTree(
+            [ '∀', 'x', 'y', [ 'P', 'x', 'y' ] ] )
+        const notEnoughChildren = makeTree( [ '∑', 'body' ] )
+        const atomic = new Symbol( 'atomic' )
         // compute the list of free identifiers in each one, sort them (if
         // needed) so that the result is in a canonical order, and compare to
         // the correct answer in each case
-        expect( forall.freeIdentifiers().sort() ).to.eql( [ 'P', '∀' ] )
-        expect( exists.freeIdentifiers().sort() ).to.eql( [ '0', '>', '∃' ] )
-        expect( sum.freeIdentifiers().sort() ).to.eql(
+        expect( forall.freeIdentifierNames().sort() ).to.eql( [ 'P', '∀' ] )
+        expect( exists.freeIdentifierNames().sort() ).to.eql( [ '0', '>', '∃' ] )
+        expect( sum.freeIdentifierNames().sort() ).to.eql(
             [ '1', '2', '^', 'n', '∑' ] )
-        expect( forgotToMarkBinding.freeIdentifiers().sort() ).to.eql(
+        expect( forgotToMarkBinding.freeIdentifierNames().sort() ).to.eql(
             [ 'P', 'x', 'y', '∀' ] )
-        expect( notEnoughChildren.freeIdentifiers().sort() ).to.eql(
+        expect( notEnoughChildren.freeIdentifierNames().sort() ).to.eql(
             [ 'body', '∑' ] )
-        expect( atomic.freeIdentifiers().sort() ).to.eql( [ 'atomic' ] )
+        expect( atomic.freeIdentifierNames().sort() ).to.eql( [ 'atomic' ] )
     } )
-
-    // The following utility function converts a hierarchy of arrays into a
-    // hierarchy of plain vanilla MathConcepts whose leaves are identifiers.
-    const makeTree = x => {
-        return x instanceof Array ? new MathConcept( ...x.map( makeTree ) )
-                                  : ident( x )
-    }
 
     it( 'Should judge freeness of sub-MathConcepts correctly', () => {
         // test isFree() and occursFree() on all the subexpressions of a small
         // summation expression
-        const sum = makeTree( // ∑_s f(s)
-            [ '∑', 's', [ 'f', 's' ] ]
-        ).makeIntoA( 'binding' )
+        const sum = makeTree( [ 'bind', '∑', 's', [ 'f', 's' ] ] ) // ∑_s f(s)
         // test with assumed top-level ancestor
         expect( sum.child( 1 ).isFree() ).to.equal( false ) // first s
         expect( sum.child( 2 ).isFree() ).to.equal( false ) // f(s)
@@ -2236,10 +2019,11 @@ describe( 'Bound and free variables', () => {
 
         // test isFree() and occursFree() on some subexpressions of a small
         // predicate logic expression
-        const predicateLogic1 = makeTree( // P(x) ^ ∀x,Q(x)
-            [ 'and', [ 'P', 'x' ], [ '∀', 'x', [ 'Q', 'x' ] ] ]
-        )
-        predicateLogic1.child( 2 ).makeIntoA( 'binding' )
+        const predicateLogic1 = makeTree( [ // P(x) ^ ∀x,Q(x)
+            'and',
+            [ 'P', 'x' ],
+            [ 'bind', '∀', 'x', [ 'Q', 'x' ] ]
+        ] )
         // one x is free, the others are not, but thus x does occur free
         const x1 = predicateLogic1.index( [ 1, 1 ] )
         const x2 = predicateLogic1.index( [ 2, 1 ] )
@@ -2251,10 +2035,10 @@ describe( 'Bound and free variables', () => {
         expect( x3.isFree() ).to.equal( false )
         expect( predicateLogic1.occursFree( x1.copy() ) ).to.equal( true )
         // all other symbols all occur free
-        expect( predicateLogic1.occursFree( ident( 'and' ) ) ).to.equal( true )
-        expect( predicateLogic1.occursFree( ident( 'P' ) ) ).to.equal( true )
-        expect( predicateLogic1.occursFree( ident( 'Q' ) ) ).to.equal( true )
-        expect( predicateLogic1.occursFree( ident( '∀' ) ) ).to.equal( true )
+        expect( predicateLogic1.occursFree( new Symbol( 'and' ) ) ).to.equal( true )
+        expect( predicateLogic1.occursFree( new Symbol( 'P' ) ) ).to.equal( true )
+        expect( predicateLogic1.occursFree( new Symbol( 'Q' ) ) ).to.equal( true )
+        expect( predicateLogic1.occursFree( new Symbol( '∀' ) ) ).to.equal( true )
         // P(x) occurs free but Q(x) does not
         const Pofx = predicateLogic1.child( 1 )
         const Qofx = predicateLogic1.index( [ 2, 2 ] )
@@ -2269,31 +2053,29 @@ describe( 'Bound and free variables', () => {
         expect( Qofx.parent().occursFree( x1.copy(), Qofx ) ).to.equal( true )
         // make one small change (Q becomes P) and verify that P(x) still
         // occurs free, because there is one outside the quantifier
-        const predicateLogic2 = makeTree( // P(x) ^ ∀x,P(x)
-            [ 'and', [ 'P', 'x' ], [ '∀', 'x', [ 'P', 'x' ] ] ]
-        )
-        predicateLogic2.child( 2 ).makeIntoA( 'binding' )
+        const predicateLogic2 = makeTree( [ // P(x) ^ ∀x,P(x)
+            'and',
+            [ 'P', 'x' ],
+            [ 'bind', '∀', 'x', [ 'P', 'x' ] ]
+        ] )
         expect( predicateLogic2.occursFree( Pofx.copy() ) ).to.equal( true )
     } )
 
     it( 'Handles free replacement correctly', () => {
         // recreate some of the same expressions used in the previous test
-        const sum = makeTree( // ∑_s f(s)
-            [ '∑', 's', [ 'f', 's' ] ]
-        ).makeIntoA( 'binding' )
-        const predicateLogic = makeTree( // P(x) ^ ∀x,P(x)
-            [ 'and', [ 'P', 'x' ], [ '∀', 'x', [ 'P', 'x' ] ] ]
-        )
-        predicateLogic.child( 2 ).makeIntoA( 'binding' )
+        const sum = makeTree( [ 'bind', '∑', 's', [ 'f', 's' ] ] ) // ∑_s f(s)
+        const predicateLogic = makeTree( [ // P(x) ^ ∀x,P(x)
+            'and',
+            [ 'P', 'x' ],
+            [ 'bind', '∀', 'x', [ 'P', 'x' ] ]
+        ] )
         // now create several expressions that have various free variables in
         // them, for replacement-testing purposes
         const gofx = makeTree( [ 'g', 'x' ] )
         const hofs = makeTree( [ 'h', 's' ] )
         const Pofy = makeTree( [ 'P', 'y' ] )
         const xto2 = makeTree( [ '^', 'x', '2' ] )
-        const Exxeqy = makeTree(
-            [ '∃', 'x', [ '=', 'x', 'y' ] ]
-        ).makeIntoA( 'binding' )
+        const Exxeqy = makeTree( [ 'bind', '∃', 'x', [ '=', 'x', 'y' ] ] )
         // in the sum, any child can be replaced iff the new thing has no free s
         for ( let i = 0 ; i < 3 ; i++ ) {
             expect( gofx.isFreeToReplace( sum.child( i ) ) ).to.equal( true )
@@ -2307,21 +2089,20 @@ describe( 'Bound and free variables', () => {
         // free s in it; in that case, we get no change
         let test
         test = sum.copy()
-        test.replaceFree( ident( 's' ), gofx )
-        expect( test.equals( makeTree(
-            [ '∑', [ 'g', 'x' ], [ 'f', [ 'g', 'x' ] ] ]
-        ).makeIntoA( 'binding' ) ) ).to.equal( true )
+        test.replaceFree( new Symbol( 's' ), gofx )
+        const temp = makeTree( [ 'bind', '∑', 'TEMP', [ 'f', [ 'g', 'x' ] ] ] )
+        temp.child( 1 ).replaceWith( makeTree( [ 'g', 'x' ] ) )
+        expect( test.equals( temp ) ).to.equal( true )
         test = sum.copy()
-        test.replaceFree( ident( 's' ), hofs )
+        test.replaceFree( new Symbol( 's' ), hofs )
         expect( test.equals( sum ) ).to.equal( true )
         test = sum.copy()
-        test.replaceFree( ident( 's' ), Exxeqy )
+        test.replaceFree( new Symbol( 's' ), Exxeqy )
         let compare = makeTree(
-            [ '∑', [ '∃', 'x', [ '=', 'x', 'y' ] ],
-                   [ 'f', [ '∃', 'x', [ '=', 'x', 'y' ] ] ] ]
-        ).makeIntoA( 'binding' )
-        compare.child( 1 ).makeIntoA( 'binding' )
-        compare.index( [ 2, 1 ] ).makeIntoA( 'binding' )
+            [ 'bind', '∑', 'TEMP',
+                [ 'f', [ 'bind', '∃', 'x', [ '=', 'x', 'y' ] ] ] ] )
+        compare.child( 1 ).replaceWith(
+            makeTree( [ 'bind', '∃', 'x', [ '=', 'x', 'y' ] ] ) )
         expect( test.equals( compare ) ).to.equal( true )
         // in the predicate logic expression, the first x can be replaced by
         // anything, but the second x can be replaced only by things with no
@@ -2354,53 +2135,53 @@ describe( 'Bound and free variables', () => {
         // so if we ask it to replace x wherever it's free to do so, then only
         // the first x changes when the replacement contains a free x
         test = predicateLogic.copy()
-        test.replaceFree( ident( 'x' ), gofx )
+        test.replaceFree( new Symbol( 'x' ), gofx )
         compare = makeTree(
-            [ 'and', [ 'P', [ 'g', 'x' ] ], [ '∀', 'x', [ 'P', 'x' ] ] ]
+            [ 'and', [ 'P', [ 'g', 'x' ] ], [ 'bind', '∀', 'x', [ 'P', 'x' ] ] ]
         )
-        compare.child( 2 ).makeIntoA( 'binding' )
         expect( test.equals( compare ) ).to.equal( true )
         test = predicateLogic.copy()
-        test.replaceFree( ident( 'x' ), hofs )
+        test.replaceFree( new Symbol( 'x' ), hofs )
         compare = makeTree(
             [ 'and', [ 'P', [ 'h', 's' ] ],
-                     [ '∀', [ 'h', 's' ], [ 'P', [ 'h', 's' ] ] ] ]
+                     [ 'bind', '∀', 'TEMP', [ 'P', [ 'h', 's' ] ] ] ]
         )
-        compare.child( 2 ).makeIntoA( 'binding' )
+        compare.index( [ 2, 1 ] ).replaceWith( makeTree( [ 'h', 's' ] ) )
         expect( test.equals( compare ) ).to.equal( true )
         test = predicateLogic.copy()
-        test.replaceFree( ident( 'x' ), Exxeqy )
-        compare = makeTree(
-            [ 'and', [ 'P', [ '∃', 'x', [ '=', 'x', 'y' ] ] ],
-                     [ '∀', [ '∃', 'x', [ '=', 'x', 'y' ] ],
-                            [ 'P', [ '∃', 'x', [ '=', 'x', 'y' ] ] ] ] ]
-        )
-        compare.child( 2 ).makeIntoA( 'binding' )
-        compare.index( [ 1, 1 ] ).makeIntoA( 'binding' )
-        compare.index( [ 2, 1 ] ).makeIntoA( 'binding' )
-        compare.index( [ 2, 2, 1 ] ).makeIntoA( 'binding' )
+        test.replaceFree( new Symbol( 'x' ), Exxeqy )
+        compare = makeTree( [
+            'and',
+            [ 'P', [ 'bind', '∃', 'x', [ '=', 'x', 'y' ] ] ],
+            [
+                'bind',
+                '∀',
+                'TEMP',
+                [ 'P', [ 'bind', '∃', 'x', [ '=', 'x', 'y' ] ] ]
+            ]
+        ] )
+        compare.index( [ 2, 1 ] ).replaceWith( makeTree(
+            [ 'bind', '∃', 'x', [ '=', 'x', 'y' ] ] ) )
         expect( test.equals( compare ) ).to.equal( true )
         // if we relativize where it should look for "freeness," then even
         // replacements containing x free can be used, depending on the value of
         // the inThis parameter
         // First, try with inThis == the quantifier, which should give no change:
         test = predicateLogic.copy()
-        test.replaceFree( ident( 'x' ), gofx, test.child( 2 ) )
+        test.replaceFree( new Symbol( 'x' ), gofx, test.child( 2 ) )
         compare = makeTree(
-            [ 'and', [ 'P', [ 'g', 'x' ] ], [ '∀', 'x', [ 'P', 'x' ] ] ]
+            [ 'and', [ 'P', [ 'g', 'x' ] ], [ 'bind', '∀', 'x', [ 'P', 'x' ] ] ]
         )
-        compare.child( 2 ).makeIntoA( 'binding' )
         expect( test.equals( compare ) ).to.equal( true )
         // Next, try with inThis == the quantifier body, which should mean that
         // only the first child of the quantifier is considered bound, so two
         // replacements should happen instead of just one:
         test = predicateLogic.copy()
-        test.replaceFree( ident( 'x' ), gofx, test.index( [ 2, 2 ] ) )
+        test.replaceFree( new Symbol( 'x' ), gofx, test.index( [ 2, 2 ] ) )
         compare = makeTree(
             [ 'and', [ 'P', [ 'g', 'x' ] ],
-                     [ '∀', 'x', [ 'P', [ 'g', 'x' ] ] ] ]
+                     [ 'bind', '∀', 'x', [ 'P', [ 'g', 'x' ] ] ] ]
         )
-        compare.child( 2 ).makeIntoA( 'binding' )
         expect( test.equals( compare ) ).to.equal( true )
     } )
 

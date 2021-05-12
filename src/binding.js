@@ -202,7 +202,8 @@ export class Binding extends Expression {
      *   binding
      */
     boundVariableNames () {
-        return this.boundVariables().map( v => v.text() )
+        return this.boundVariables().map( v =>
+            v instanceof Symbol ? v.text() : undefined )
     }
 
     /**

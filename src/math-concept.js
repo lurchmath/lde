@@ -1442,10 +1442,9 @@ export class MathConcept extends EventTarget {
     copy () {
         const className = this.constructor.className
         const classObject = MathConcept.subclasses.get( className )
-        const copy = new classObject
+        const childCopies = this._children.map( child => child.copy() )
+        const copy = new classObject( ...childCopies )
         copy._attributes = this._attributes.deepCopy()
-        copy._children = this._children.map( child => child.copy() )
-        for ( let child of copy._children ) child._parent = copy
         return copy
     }
 
@@ -1559,19 +1558,19 @@ export class MathConcept extends EventTarget {
     }
 
     /**
-     * A simple string representation that represents an atomic MathConcept using
-     * `getIdentifierName()` and a non-leaf node as an S-expression (that is,
-     * `(a b c ...)`) of the string representations of its children.  This
-     * produces LISP-like results.
+     * A simple string representation that represents any MathConcept using
+     * an S-expression (that is, `(a b c ...)`) of the string representations of
+     * its children.  This produces LISP-like results, although they will
+     * contain only parentheses if all are MathConcept instances.  But
+     * subclasses can override this method to specialize it.
      * 
      * @return {string} A simple string representation
      * @see {@link MathConcept#toJSON toJSON()}
-     * @see {@link MathConcept#isAtomic isAtomic()}
-     * @see {@link MathConcept#getIdentifierName getIdentifierName()}
      */
     toString () {
-        return this.isAtomic() ? `${this.getIdentifierName()}` :
-            `(${this._children.map( child => child.toString() ).join( ' ' )})`
+        return '('
+             + this._children.map( child => child.toString() ).join( ' ' )
+             + ')'
     }
 
     //////
@@ -1581,177 +1580,11 @@ export class MathConcept extends EventTarget {
     //////
 
     /**
-     * Although subclasses of the MathConcept class will be in charge of assigning
-     * mathematical meaning to MathConcepts, we must assign a small amount of
-     * mathematical meaning even in this base class, so that we can implement
-     * here the notions of free and bound identifiers and functions that work
-     * with those concepts.  We do so in order that all MathConcepts might have
-     * access to such fundamental concepts.
-     * 
-     * Note that we speak of free and bound identifiers rather than free and
-     * bound variables, because whether an identifier is a variable or constant
-     * will be contingent upon which declarations are in force, something that
-     * requires much more machinery than what we're building here in the base
-     * MathConcept class.  Thus at this level of generality, we speak only of
-     * identifiers.
-     * 
-     * To define free and bound identifiers, we need to establish conventions
-     * for what constitutes an identifier and how we go about binding one.  We
-     * thus define two conventions.
-     * 
-     * First, a MathConcept counts as an identifier if and only if it is atomic
-     * and has an attribute flagging it as an identifier by specifying its
-     * identifier *name.*  We use the `"_identifier"` key for such an attribute.
-     * 
-     * Second, we establish a convention for what it means to bind an
-     * identifier, defined in the documentation for the
-     * {@link MathConcept#isAValidBinding isAValidBinding()} function.
-     * 
-     * @return {boolean} Whether this MathConcept is an identifier, according to
-     *   the definition given above
-     * @see {@link MathConcept#setIdentifierName setIdentifierName()}
-     * @see {@link MathConcept#getIdentifierName getIdentifierName()}
-     * @see {@link MathConcept#clearIdentifierName clearIdentifierName()}
-     * @see {@link MathConcept#isAValidBinding isAValidBinding()}
-     */
-    isAnIdentifier () { return this.isAtomic() && this.hasAttribute( '_identifier' ) }
-
-    /**
-     * Documentation on what it means for a MathConcept to be an identifier is
-     * given in the documentation for the
-     * {@link MathConcept#isAnIdentifier isAnIdentifier()} function.
-     * 
-     * To make a MathConcept into an identifier, call this method.
-     * 
-     * Although it is uncommon that you would want to make a MathConcept no
-     * longer an identifier once you had made it into one, you could do so by
-     * removing the `"_identifier"` attribute.
-     * 
-     * @param {string} name - The name of the identifier to assign to this
-     *   MathConcept; any non-string will be converted to a string before use
-     * @see {@link MathConcept#isAnIdentifier isAnIdentifier()}
-     * @see {@link MathConcept#getIdentifierName getIdentifierName()}
-     * @see {@link MathConcept#clearIdentifierName clearIdentifierName()}
-     * @see {@link MathConcept#isAValidBinding isAValidBinding()}
-     */
-    setIdentifierName ( name ) { this.setAttribute( '_identifier', `${name}` ) }
-
-    /**
-     * Documentation on what it means for a MathConcept to be an identifier is
-     * given in the documentation for the
-     * {@link MathConcept#isAnIdentifier isAnIdentifier()} function.
-     * 
-     * To fetch the name of a MathConcept that is an identifier, call this method.
-     * If it is not an identifier, `undefined` will be returned.
-     * 
-     * @return {string} The name of the MathConcept as an identifier, or
-     *   undefined if it is not an identifier
-     * @see {@link MathConcept#isAnIdentifier isAnIdentifier()}
-     * @see {@link MathConcept#getIdentifierName getIdentifierName()}
-     * @see {@link MathConcept#clearIdentifierName clearIdentifierName()}
-     * @see {@link MathConcept#isAValidBinding isAValidBinding()}
-     */
-    getIdentifierName () { return this.getAttribute( '_identifier' ) }
-
-    /**
-     * Documentation on what it means for a MathConcept to be an identifier is
-     * given in the documentation for the
-     * {@link MathConcept#isAnIdentifier isAnIdentifier()} function.
-     * 
-     * To remove any identifier name that has been added to this MathConcept in
-     * the past with {@link MathConcept#setIdentifierName setIdentifierName()},
-     * call this function.  It guarantees that afterwards,
-     * {@link MathConcept#isAnIdentifier isAnIdentifier()} will return false and
-     * {@link MathConcept#getIdentifierName getIdentifierName()} will return
-     * undefined.
-     * @see {@link MathConcept#isAnIdentifier isAnIdentifier()}
-     * @see {@link MathConcept#setIdentifierName setIdentifierName()}
-     * @see {@link MathConcept#getIdentifierName getIdentifierName()}
-     * @see {@link MathConcept#isAValidBinding isAValidBinding()}
-     */
-    clearIdentifierName () { this.clearAttributes( '_identifier' ) }
-
-    /**
-     * Documentation on what it means for a MathConcept to be an identifier is
-     * given in the documentation for the
-     * {@link MathConcept#isAnIdentifier isAnIdentifier()} function.
-     * 
-     * A MathConcept binds an identifier (or more than one) if it has the
-     * following form.
-     * 
-     *  * It has been marked as a binding by calling
-     *    {@link MathConcept#makeIntoA makeIntoA()} with the string argument
-     *    `"binding"`.
-     *  * It is non-atomic and has at least three children.
-     *  * The first child can be any kind of MathConcept, and it counts as the
-     *    quantifier or operator that is binding the identifiers.
-     *  * The last child can be any kind of MathConcept, and is the body of the
-     *    quantifier or operation, such as the inside of a summation or the
-     *    statement over which the MathConcept is quantifying.
-     *  * All other children (of which there must be at least one) must pass the
-     *    {@link MathConcept#isAnIdentifier isAnIdentifier()} check, and are the
-     *    identifiers being bound.
-     * 
-     * This function determines whether a MathConcept has that form.  Although the
-     * client may mark a MathConcept as a binding just by calling
-     * `X.makeIntoA( "binding" )`, it might still be invalid by not satisfying
-     * one of the other parts of the above definition.  Hence the need for this
-     * function.
-     * 
-     * @return {boolean} Whether this MathConcept is a binding form, according to
-     *   the four-point definition given above
-     * @see {@link MathConcept#isAnIdentifier isAnIdentifier()}
-     * @see {@link MathConcept#setIdentifierName setIdentifierName()}
-     * @see {@link MathConcept#getIdentifierName getIdentifierName()}
-     */
-    isAValidBinding () {
-        return this.isA( 'binding' )
-            && this.numChildren() > 2
-            && this.allButLastChild().slice( 1 ).every(
-                child => child.isAnIdentifier() )
-    }
-
-    /**
-     * If a MathConcept {@link MathConcept#isAValidBinding isAValidBinding()} then
-     * all of its children other than the first and the last are its bound
-     * identifiers.  This function returns them in an array.  The exact children
-     * objects themselves are returned, in the order they sit within their
-     * parent; the result is *not* an array of the child identifiers *names.*
-     * 
-     * If this MathConcept is not a valid binding, this function returns an empty
-     * array instead.
-     * 
-     * @return {Array} The list of identifiers bound by this MathConcept, if and
-     *   only if it is one
-     * @see {@link MathConcept#binds binds()}
-     * @see {@link MathConcept#isAValidBinding isAValidBinding()}
-     */
-    boundIdentifiers () {
-        return this.isAValidBinding() ? this.allButLastChild().slice( 1 ) : [ ]
-    }
-
-    /**
-     * Given an identifier name, this function checks to see whether an
-     * identifier of that name appears on this MathConcept's list of
-     * {@link MathConcept#boundIdentifiers boundIdentifiers()}.
-     * 
-     * @param {string} identifierName - The name of the identifier to test
-     * @return {boolean} Whether this MathConcept is a binding and one of its
-     *   bound identifiers is has the given name
-     * @see {@link MathConcept#boundIdentifiers boundIdentifiers()}
-     * @see {@link MathConcept#isAValidBinding isAValidBinding()}
-     */
-    binds ( identifierName ) {
-        return this.boundIdentifiers().some( identifier =>
-            identifier.getIdentifierName() == identifierName )
-    }
-
-    /**
-     * An identifier X is free in an ancestor Y if and only if no MathConcept
+     * A {@link Symbol} X is free in an ancestor Y if and only if no MathConcept
      * that is an ancestor A of X inside of (or equal to) Y satisfies
-     * `A.binds( X.getIdentifierName() )`.  This function returns an array of
-     * all identifier names that appear within this MathConcept and, at the point
-     * where they appear, are free in this ancestor MathConcept.
+     * `A.binds( X.text() )`.  This function returns an array of
+     * all identifier names that appear within this MathConcept and, at the
+     * point where they appear, are free in this ancestor MathConcept.
      * 
      * If, instead of just the names of the identifiers, you wish to have the
      * identifier MathConcepts themselves, you can couple the
@@ -1761,20 +1594,22 @@ export class MathConcept extends EventTarget {
      * 
      * @return {string[]} An array of names of free identifiers appearing as
      *   descendants of this MathConcept
-     * @see {@link MathConcept#binds binds()}
-     * @see {@link MathConcept#boundIdentifiers boundIdentifiers()}
+     * @see {@link Binding#binds binds()}
+     * @see {@link Binding#boundVariables boundVariables()}
      */
-    freeIdentifiers () {
+    freeIdentifierNames () {
         // a single identifier is free in itself
-        if ( this.isAnIdentifier() ) return [ this.getIdentifierName() ]
+        if ( this instanceof MathConcept.subclasses.get( 'Symbol' ) )
+            return [ this.text() ]
         // otherwise we collect all the free variables in all children...
         const result = new Set
         this.children().forEach( child =>
-            child.freeIdentifiers().forEach( name =>
+            child.freeIdentifierNames().forEach( name =>
                 result.add( name ) ) )
         // ...excepting any that this MathConcept binds
-        this.boundIdentifiers().forEach( identifier =>
-            result.delete( identifier.getIdentifierName() ) )
+        if ( this instanceof MathConcept.subclasses.get( 'Binding' ) )
+            this.boundVariableNames().forEach( name =>
+                result.delete( name ) )
         return Array.from( result )
     }
 
@@ -1793,11 +1628,12 @@ export class MathConcept extends EventTarget {
      */
     isFree ( inThis ) {
         // compute the free identifiers in me that an ancestor might bind
-        const freeIdentifierNames = this.freeIdentifiers()
+        const freeIdentifierNames = this.freeIdentifierNames()
         // walk upwards to the appropriate ancestor and see if any bind any of
         // those identifiers; if so, I am not free in that ancestor
         for ( let ancestor = this ; ancestor ; ancestor = ancestor.parent() ) {
-            if ( freeIdentifierNames.some( name => ancestor.binds( name ) ) )
+            if ( ( ancestor instanceof MathConcept.subclasses.get( 'Binding' ) )
+              && freeIdentifierNames.some( name => ancestor.binds( name ) ) )
                 return false
             if ( ancestor == inThis ) break
         }
@@ -1839,9 +1675,10 @@ export class MathConcept extends EventTarget {
         // this implementation is an exact copy of isFree(), with one exception:
         // while the free identifiers are computed from this MathConcept, freeness
         // is computed from original.
-        const freeIdentifierNames = this.freeIdentifiers()
+        const freeIdentifierNames = this.freeIdentifierNames()
         for ( let ancestor = original ; ancestor ; ancestor = ancestor.parent() ) {
-            if ( freeIdentifierNames.some( name => ancestor.binds( name ) ) )
+            if ( ( ancestor instanceof MathConcept.subclasses.get( 'Binding' ) )
+              && freeIdentifierNames.some( name => ancestor.binds( name ) ) )
                 return false
             if ( ancestor == inThis ) break
         }

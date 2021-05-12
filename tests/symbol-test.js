@@ -31,6 +31,26 @@ describe( 'Symbol', () => {
         expect( S.text() ).to.equal( 'undefined' )
     } )
 
+    it( 'Should have a toString() representation equal to its text', () => {
+        // Exactly the same test as the previous, but with toString() instead
+        let S = new Symbol( 'hello' )
+        expect( S.toString() ).to.equal( 'hello' )
+        S = new Symbol( '1' )
+        expect( S.toString() ).to.equal( '1' )
+        S = new Symbol( 'Four score and seven years ago' )
+        expect( S.toString() ).to.equal( 'Four score and seven years ago' )
+        S = new Symbol( 'αβγδε' )
+        expect( S.toString() ).to.equal( 'αβγδε' )
+        S = new Symbol( 'x₁' )
+        expect( S.toString() ).to.equal( 'x₁' )
+        S = new Symbol( { } )
+        expect( S.toString() ).to.equal( '[object Object]' )
+        S = new Symbol( [ ] )
+        expect( S.toString() ).to.equal( 'undefined' )
+        S = new Symbol
+        expect( S.toString() ).to.equal( 'undefined' )
+    } )
+
     it( 'Should respect the "evaluate as" field to compute value()', () => {
         // Create five symbols and ensure that none of them has a defined
         // value, because we set no "evaluate as" attribute on any of them.
