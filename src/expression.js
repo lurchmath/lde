@@ -1,6 +1,7 @@
 
 import { MathConcept } from './math-concept.js'
 import { LogicConcept } from './logic-concept.js'
+import { Environment } from './environment.js'
 
 /**
  * An Expression is a type of {@link LogicConcept}.  (For the other types, see
@@ -90,6 +91,31 @@ export class Expression extends LogicConcept {
      */
     getOutermost () {
         return this.isOutermost() ? this : this._parent.getOutermost()
+    }
+
+    /**
+     * Based on the definition given in the
+     * {@link Environment#conclusions conclusions()} function, an Expression
+     * will be a conclusion in one of its ancestors if all of the following
+     * are true.
+     * 
+     *  * it is not marked with the "given" attribute
+     *  * its parent is an {@link Environment}
+     *  * neither that parent nor any other ancestor (up to and including the
+     *    one specified as parameter) are marked with the "given" attribute
+     * 
+     * If no ancestor is provided, then the top-level {@link MathConcept}
+     * ancestor is used instead.
+     * 
+     * @param {MathConcept} ancestor - the context in which this query is
+     *   being made
+     */
+    isAConclusionIn ( ancestor ) {
+        if ( !( this.parent() instanceof Environment ) ) return false
+        for ( let walk = this ; walk && walk != ancestor ;
+                walk = walk.parent() )
+            if ( walk.isA( 'given' ) ) return false
+        return true
     }
 
     /**
