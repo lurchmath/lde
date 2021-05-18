@@ -119,10 +119,12 @@ export class Binding extends Expression {
         const head = args.shift()
         const body = args.pop()
         const boundVars = args
-        if ( !( head instanceof Expression )
-          || !( body instanceof Expression ) )
-            throw new Error( 'The head and body in a Binding constructor '
-                           + 'must both be Expression instances' )
+        if ( !( head instanceof Expression ) )
+            throw new Error( 'The head in a Binding constructor '
+                           + 'must be an Expression instance' )
+        if ( !( body instanceof Expression ) )
+            throw new Error( 'The body in a Binding constructor '
+                            + 'must be an Expression instance' )
         if ( boundVars.length === 0 )
             throw new Error( 'A Binding constructor requires at least one '
                            + 'bound variable' )
