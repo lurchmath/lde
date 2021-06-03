@@ -60,16 +60,15 @@
 the documentation of that class.)  Expressions are mathematical statements
 and their sub-parts, in the usual manner of organizing into tree form what
 many mathematicians informally call &quot;mathematical expressions&quot; as trees.</p>
-<p>For instance, <code>3 + k = 9</code> and <code>58/(1+x) &lt; e</code> are two mathematical
-expressions, written here without the usual mathematical notation, for
-simplicity.  Their subexpressions are also expressions, including, for
-example, <code>9</code>, <code>3+k</code>, <code>1+x</code>, and <code>58/(1+x)</code>.  Even <code>+</code> and <code>=</code> are
+<p>For instance, $3+k=9$ and $\frac{58}{1+x}&lt;e$ are two mathematical
+expressions.  Their subexpressions are also expressions, including, for
+example, $9$, $3+k$, $1+x$, and $\frac{58}{1+x}$.  Even $+$ and $=$ are
 subexpressions; they are functions that are being applied to arguments.</p>
 <p>When we speak of &quot;tree form,&quot; we refer to the idea that every expression
 can be organized into a tree by following the order of operations.  For
-example, <code>3 + k = 9</code> might have <code>=</code> at the root, with right child <code>9</code> and
-left child a subtree with <code>+</code> over <code>3</code> and <code>k</code>.  Although that is one way
-to organize expressions into trees, we actually choose a slightly different
+example, $3+k=9$ might have $=$ at the root, with right child $9$ and left
+child a subtree with $+$ over $3$ and $k$.  Although that is one way to
+organize expressions into trees, we actually choose a slightly different
 means of applying functions/operators to arguments, which will be covered
 in the documentation for the <a href="Application.html">Application</a> class.</p>
 <p>Expressions are analogous to what mathematicians typically write inside
@@ -79,12 +78,12 @@ or a section, or an axiom, or an exercise.</p>
 <p>There are three types of Expressions:</p>
 <ol>
 <li>A <a href="Symbol.html">Symbol</a>, which is atomic (a one-node tree), and can contain
-any mathematical symbol, such as <code>x</code>, <code>5</code>, <code>e</code>, <code>pi</code>, <code>B_4</code>, etc.
-(Note that notation here is in text form just for the documentation;
-actual symbols need not use this style.)</li>
+any mathematical symbol, such as $x$, $5$, $e$, $\pi$, $B_4$, etc.
+(Note that notation here is in math form just for the documentation;
+actual symbols may use a different style, such as <code>B_4</code>.)</li>
 <li>An <a href="Application.html">Application</a> of a function or operator to zero or more
-arguments, as in the example of <code>3 + k</code>, above, which applies <code>+</code> to
-the arguments <code>3</code> and <code>k</code>.  Applications are not atomic.</li>
+arguments, as in the example of $3 + k$, above, which applies $+$ to
+the arguments $3$ and $k$.  Applications are not atomic.</li>
 <li>A <a href="Binding.html">Binding</a>, which applies a quantifier or ranged operator to
 a body, using a bound variable.  There are many examples of this in
 mathematics, including indexed sums and products, existential and
@@ -244,7 +243,7 @@ this one (as in the constructors for <a href="MathConcept.html">MathConcept</a> 
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.63">, line 63</a>
+            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.62">, line 62</a>
         </li>
     </ul>
 
@@ -388,7 +387,7 @@ Expression</p>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.92">, line 92</a>
+            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.91">, line 91</a>
         </li>
     </ul>
 
@@ -535,7 +534,7 @@ being made</p></div>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.113">, line 113</a>
+            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.112">, line 112</a>
         </li>
     </ul>
 
@@ -663,7 +662,7 @@ Expression in the <a href="MathConcept.html">MathConcept</a> hierarchy in which 
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.78">, line 78</a>
+            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.77">, line 77</a>
         </li>
     </ul>
 
@@ -801,7 +800,7 @@ or undefined if it there is no such value</p>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.151">, line 151</a>
+            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.150">, line 150</a>
         </li>
     </ul>
 
@@ -827,7 +826,7 @@ or undefined if it there is no such value</p>
 
 <footer class="layout-footer">
   <div class="container">
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.4</a> on Thu Jun 03 2021 19:31:27 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.4</a> on Thu Jun 03 2021 19:45:54 GMT+0000 (Coordinated Universal Time)
   </div>
 </footer>
 
