@@ -19,6 +19,13 @@
             "command": "npm run test-server",
             "problemMatcher": [],
             "group": "build"
+        },
+        {
+            "label": "Rebuild source code documentation",
+            "type": "shell",
+            "command": "npm run docs",
+            "problemMatcher": [],
+            "group": "build"
         }
     ]
 }
