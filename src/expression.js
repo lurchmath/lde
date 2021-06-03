@@ -9,17 +9,16 @@ import { Environment } from './environment.js'
  * and their sub-parts, in the usual manner of organizing into tree form what
  * many mathematicians informally call "mathematical expressions" as trees.
  * 
- * For instance, `3 + k = 9` and `58/(1+x) < e` are two mathematical
- * expressions, written here without the usual mathematical notation, for
- * simplicity.  Their subexpressions are also expressions, including, for
- * example, `9`, `3+k`, `1+x`, and `58/(1+x)`.  Even `+` and `=` are
+ * For instance, $3+k=9$ and $\frac{58}{1+x}<e$ are two mathematical
+ * expressions.  Their subexpressions are also expressions, including, for
+ * example, $9$, $3+k$, $1+x$, and $\frac{58}{1+x}$.  Even $+$ and $=$ are
  * subexpressions; they are functions that are being applied to arguments.
  * 
  * When we speak of "tree form," we refer to the idea that every expression
  * can be organized into a tree by following the order of operations.  For
- * example, `3 + k = 9` might have `=` at the root, with right child `9` and
- * left child a subtree with `+` over `3` and `k`.  Although that is one way
- * to organize expressions into trees, we actually choose a slightly different
+ * example, $3+k=9$ might have $=$ at the root, with right child $9$ and left
+ * child a subtree with $+$ over $3$ and $k$.  Although that is one way to
+ * organize expressions into trees, we actually choose a slightly different
  * means of applying functions/operators to arguments, which will be covered
  * in the documentation for the {@link Application} class.
  * 
@@ -31,12 +30,12 @@ import { Environment } from './environment.js'
  * There are three types of Expressions:
  * 
  *  1. A {@link Symbol}, which is atomic (a one-node tree), and can contain
- *     any mathematical symbol, such as `x`, `5`, `e`, `pi`, `B_4`, etc.
- *     (Note that notation here is in text form just for the documentation;
- *     actual symbols need not use this style.)
+ *     any mathematical symbol, such as $x$, $5$, $e$, $\pi$, $B_4$, etc.
+ *     (Note that notation here is in math form just for the documentation;
+ *     actual symbols may use a different style, such as `B_4`.)
  *  2. An {@link Application} of a function or operator to zero or more
- *     arguments, as in the example of `3 + k`, above, which applies `+` to
- *     the arguments `3` and `k`.  Applications are not atomic.
+ *     arguments, as in the example of $3 + k$, above, which applies $+$ to
+ *     the arguments $3$ and $k$.  Applications are not atomic.
  *  3. A {@link Binding}, which applies a quantifier or ranged operator to
  *     a body, using a bound variable.  There are many examples of this in
  *     mathematics, including indexed sums and products, existential and

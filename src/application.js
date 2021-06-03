@@ -4,9 +4,9 @@ import { Expression } from './expression.js'
 
 /**
  * Many mathematical expressions are the application of some function or
- * operator to zero or (typically) more arguments.  For example `f(x)` applies
- * the function `f` to the argument `x`.  As another example, `17.2-p` applies
- * the operation `-` to the arguments `17.2` and `p`.  We call such
+ * operator to zero or (typically) more arguments.  For example $f(x)$ applies
+ * the function $f$ to the argument $x$.  As another example, $17.2-p$ applies
+ * the operation $-$ to the arguments $17.2$ and $p$.  We call such
  * expressions Applications, and implement them in this class.
  * 
  * These were inspired by a structure of the same name defined in
@@ -32,13 +32,13 @@ export class Application extends Expression {
 
     /**
      * Construct a new Application instance from the given operator (requried)
-     * and list of operands (zero or more).  For example, to construct `f(x)`,
+     * and list of operands (zero or more).  For example, to construct $f(x)$,
      * call `new Application(f,x)`, where we assume that `f` and `x` are
      * already defined elsewhere (perhaps as {@link Symbol Symbols}).  Or to
-     * construct `17.2-p`, call `new Application(m,s,p)`, where `m` is the
-     * subtraction operator, `s` is the constant 17.2 and `p` is the variable
-     * `p`.  Each of these three (`m`,`s`,`p`) would most likely be an
-     * instance of the {@link Symbol} class.
+     * construct $17.2-p$, call `new Application(m,s,p)`, where `m` is the
+     * subtraction operator, `s` is the constant $17.2$ and `p` is the
+     * variable $p$.  Each of these three (`m`,`s`,`p`) would most likely be
+     * an instance of the {@link Symbol} class.
      * 
      * Note that while it is possible later to remove children from an
      * Application until it has none, this is likely to result in the members

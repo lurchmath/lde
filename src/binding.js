@@ -5,16 +5,16 @@ import { Symbol } from './symbol.js'
 
 /**
  * Many mathematical expressions include "dummy variables," also called "bound
- * variables."  For example, a summation from `i=1` to `n` uses `i` as a
- * "dummy" or "bound" variable.  An integral ending in "dx" has x as a bound
- * variable.  There are many other examples, including (but not limited to)
- * the following.
+ * variables."  For example, in $\sum_{i=1}^n a_i$ uses $i$ as a "dummy" or
+ * "bound" variable.  Similarly, $\int x^2\;dx$ has $x$ as a bound varibale.
+ * There are many other examples, including (but not limited to) the
+ * following.
  * 
  *  * indexed sums, products, unions, and intersections throughout mathematics
- *  * for set-builder notation like `{ x+y | 0 < x < y }`
+ *  * for set-builder notation like $\left\\{ x+y \mid 0 < x < y \right\\}$
  *  * existentially and universally quantified expressions, such as
- *    "for all x > 0, |x|=x."
- *  * lambda functions from computer science
+ *    $\forall x > 0, ~|x|=x$.
+ *  * lambda functions from computer science, as in $\lambda x.x$
  * 
  * We say that such expressions "bind" the dummy/bound variable, and we
  * therefore call such expressions Bindings, and implement them in this class.
@@ -30,8 +30,8 @@ import { Symbol } from './symbol.js'
  * 
  *  * The first child will be the operator or quantifier that binds the
  *    variable(s).  (Note that a single operator can bind multiple variables,
- *    such as when we say "for all x, y, and z in Q...")  This first child is
- *    often called the "head."
+ *    such as when we say $\forall x, y, z \in \mathbb{Q},\ldots$.)  This
+ *    first child is often called the "head."
  *  * Following that operator will be the sequence of bound variables, all as
  *    siblings of the operator, that is, children of the Binding.
  *  * Following the bound variables will be exactly one final expression, the
@@ -66,7 +66,7 @@ export class Binding extends Expression {
      * Construct a new Binding instance from the given head (requried
      * {@link Expression}), list of bound variables (one or more
      * {@link Symbol Symbols}), and body (required {@link Expression}).  For
-     * example, to construct "for all x, -1 < x^2", you might do something
+     * example, to construct $\forall x, ~-1 < x^2$, you might do something
      * like the following.  Let us assume that `forAll` is the universal
      * quantifier (perhaps defined as a {@link Symbol}), `x` is the
      * {@link Symbol} `x`, and we have symbols `lessThan` and `power`.
@@ -77,10 +77,10 @@ export class Binding extends Expression {
      *         new Application( power, x, Symbol( 2 ) ) ) )
      * ```
      * 
-     * To construct the summation from `i=1` to `n` of `i^2`, we might do
-     * something like the following, assuming {@link Symbol Symbols} `i`,
-     * `n`, and `Sum`.  This might be read as "the sum from 1 to `n`, using
-     * bound variable `i`, of the formula `i^2`."
+     * To construct $\sum_{i=1}^n i^2$, we might do something like the
+     * following, assuming {@link Symbol Symbols} `i`, `n`, and `Sum`.  This
+     * might be read as "the sum from 1 to `n`, using bound variable `i`, of
+     * the formula $i^2$."
      * 
      * ```
      * new Binding(
