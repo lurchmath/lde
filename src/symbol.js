@@ -10,6 +10,11 @@ import { Expression } from './expression.js'
  * 
  * The primary datum stored in a Symbol is a single text string, which defines
  * the symbol.  For more information on this datum, see the constructor.
+ * 
+ * Note:  It is unfortunate that we have a class named Symbol in our
+ * ontology while JavaScript also has a class named Symbol.  When there is a
+ * need to use both in the same namespace (which occasionally arises, but not
+ * often), we will import this class using the alias `LurchSymbol` instead.
  */
 export class Symbol extends Expression {
     
