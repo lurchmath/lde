@@ -9,7 +9,6 @@ describe( 'Declaration', () => {
 
     it( 'Should declare the expected global identifiers', () => {
         expect( Declaration ).to.be.ok
-        console.log( Declaration.Types )
     } )
 
     let x, y, z, E1, E2
