@@ -156,44 +156,53 @@ export class LogicConcept extends MathConcept {
      * 
      * Putdown notation is defined as follows.
      * 
-     *  * A symbol is written using any sequence of non-whitespace characters
-     *    that does not include or conflict with the special characters below.
-     *    Thus symbols are quite flexible, including things like `x` and `y`
-     *    as well as `-459.7001` and `$===_-_@_-_===$` and much more.
-     *  * A symbol can also be written as a string literal whose only escape
-     *    characters are `\"` inside double-quoted literals, `\'` inside
-     *    single-quoted literals, and `\\` in any case.  Thus you can create
-     *    just about any symbol at all, including `"{ yes it's (a symbol) }"`,
-     *    which is not a compound expression, but is a single atomic symbol.
-     *  * An application is written using LISP notation.  Function application
-     *    requires at least one argument (no empty paren pairs).  For example,
-     *    you might write $\sin x$ as `(sin x)`.
-     *  * A binding expression (quantifier, summation, etc.) is written just
-     *    like a function application but with a comma before the body.  All
-     *    children before the body and after the first child must be symbols,
-     *    and are the bound variables.  Example:  `(∀ x, (P x))` means
-     *    $\forall x, P(x)$.
-     *  * A variable declaration lists the declared symbols in brackets,
-     *    followed by the keyword `var` followed by an optional body that is
-     *    an assumption made about the variables.  Example:
-     *    `[x var (P x)]` means "Let $x$ be arbitary and assume $P(x)$."
-     *  * A constant declaration is the same but with `const` instead of
-     *    `var`.  Again, the body is optional, so `[pi const]` declares the
-     *    symbol `pi` to be a constant.
-     *  * An environment is written with its children separated by spaces and
-     *    surrounded in curly brackets.  Example: `{ child1 child2 etc }`.
-     *  * An environment can be marked as a formula by using `{*` and `*}` as
-     *    the grouping markers instead of undecorated curly brackets.
-     *  * Any environment, declaration, or outermost expression can be marked
+     *  * A {@link Symbol Symbol} is written using any sequence of
+     *    non-whitespace characters that does not include or conflict with the
+     *    special characters below.  Thus symbols are quite flexible,
+     *    including things like `x` and `y` as well as `-459.7001` and
+     *    `$===_-_@_-_===$` and much more.
+     *  * A {@link Symbol Symbol} can also be written as a string literal
+     *    whose only escape characters are `\"` inside double-quoted literals,
+     *    `\'` inside single-quoted literals, and `\\` in any case.  Thus you
+     *    can create just about any symbol at all, including
+     *    `"{ yes it's (a symbol) }"`, which is not a compound expression, but
+     *    is a single atomic symbol.
+     *  * An {@link Application Application} is written using LISP notation.
+     *    Function application requires at least one argument (no empty paren
+     *    pairs).  For example, you might write $\sin x$ as `(sin x)`.
+     *  * A {@link Binding Binding} expression (quantifier, summation, etc.)
+     *    is written just like a function application but with a comma before
+     *    the body.  All children before the body and after the first child
+     *    must be {@link Symbol Symbols}, and are the bound variables.
+     *    Example:  `(∀ x, (P x))` means $\forall x, P(x)$.
+     *  * A variable {@link Declaration Declaration} lists the declared
+     *    {@link Symbol Symbols} in brackets, followed by the keyword `var`
+     *    followed by an optional body that is an assumption made about the
+     *    variables.  Example: `[x var (P x)]` means "Let $x$ be arbitary and
+     *    assume $P(x)$."
+     *  * A constant {@link Declaration Declaration} is the same but with
+     *    `const` instead of `var`.  Again, the body is optional, so
+     *    `[pi const]` declares the symbol `pi` to be a constant.
+     *  * An {@link Environment Environment} is written with its children
+     *    separated by spaces and surrounded in curly brackets.  Example:
+     *    `{ child1 child2 etc }`.
+     *  * A {@link Formula Formula} (which is a subclass of
+     *    {@link Environment Environment}) by using `{*` and `*}` as the
+     *    grouping markers instead of undecorated curly brackets.
+     *  * Any {@link Environment Environment},
+     *    {@link Declaration Declaration}, or
+     *    {@link Expression#isOutermost outermost Expression} can be marked
      *    as a "given" by preceding it with a colon, `:`.
-     *  * Any environment, declaration, or expression can be given additional
-     *    attributes by following it with `+{` and then for the rest of the
-     *    line (that is, until the next newline) writing as much JSON code as
-     *    you like, beginning with that initial `{`, as attributes to add to
-     *    the preceding object.  For example, to add the color green to a
-     *    symbol, we might do this: `my_symbol +{"color":"green"}`.  To add
-     *    more attributes than can fit on one line, simply start another
-     *    `+{...}` block on the next line.
+     *  * Any {@link Environment Environment},
+     *    {@link Declaration Declaration}, or
+     *    {@link Expression Expression} can be given additional attributes by
+     *    following it with `+{` and then for the rest of the line (that is,
+     *    until the next newline) writing as much JSON code as you like,
+     *    beginning with that initial `{`, as attributes to add to the
+     *    preceding object.  For example, to add the color green to a
+     *    {@link Symbol Symbol}, we might do this:
+     *    `my_symbol +{"color":"green"}`.  To add more attributes than can fit
+     *    on one line, simply start another `+{...}` block on the next line.
      *  * The notation `//` is used for one-line comments.  Anything after it
      *    is ignored, up until the next newline.  The previous rule has some
      *    conflict with this one, and we resolve it as follows.  If a `//`
