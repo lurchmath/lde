@@ -2,19 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Lurch Deductive Engine: Global</title>
+    <title>Lurch Deductive Engine: formula.js</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
     <link type="text/css" rel="stylesheet" href="styles/styles.css">
     
-
-    <script>
-        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
-    </script>
-    <script id="MathJax-script" async
-        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
-    </script>
 </head>
 <body>
 
@@ -31,177 +24,49 @@
 </header>
 
 
-<main class="layout-main ">
+<main class="layout-main  layout-content--source">
   <div class="container">
-    <p class="page-kind"></p>
-    <h1 class="page-title">Global</h1>
+    <p class="page-kind">source</p>
+    <h1 class="page-title">formula.js</h1>
     
 
 
 
+    
 
 <section>
+    <article>
+        <pre id="source" class="source-page line-numbers"><code class="language-js">
+import { MathConcept } from './math-concept.js'
+import { Environment } from './environment.js'
 
-
-<header class="not-class">
-
-
+/**
+ * A Formula is an {@link Environment Environment} that has not just one
+ * meaning, but a potentially infinite class of meanings, by virtue of
+ * substitution.  For a mathematical example, when we state the principle of
+ * mathematical induction about some statement $P(n)$, we do not mean that the
+ * principle holds only for some specific statement called $P(n)$, but rather
+ * for any statement about a natural number, which we might substitute in for
+ * the generic placeholder $P$.
+ * 
+ * In logic, this is sometimes referred to as the distinction between an axiom
+ * and an axiom scheme.  If an {@link Environment Environment} might be used
+ * as an axiom then a Formula can be used as an axiom scheme.
+ * 
+ * The rules for how we can substitute into a Formula to produce instances of
+ * it are not yet written here; this class is just a placeholder and we will
+ * return to complete both its implementation and its documentation at a
+ * future time.
+ */
+export class Formula extends Environment {
     
-        
-        <!-- <h2></h2> -->
+    static className = MathConcept.addSubclass( 'Formula', Formula )
 
-        
+    // Class implementation not yet complete; we will return to this later.
 
-        
-
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-
-
-
-    
-        
-
-        
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-     
-
-    
-
-    
-
-
-    
-        <h3 class="subtitle">Members</h3>
-
-        
-            
-
-<article class="member">
-    <div class="method-type">
-        <span class="method-type-signature is-constant">constant</span>
-    </div>
-<h4 class="member-name" id="predictableStringify">predictableStringify<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>A JSON stringification that is predictable.  The standard <code>JSON.stringify()</code>
-can produce different outputs unpredictably, because there is no required
-ordering on the key-value pairs.  This one requires keys to be output in
-increasing string order, so it is predictable.</p>
-</div>
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-
-
-
-
-    <h4>Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="utilities.js.html">utilities.js</a><a href="utilities.js.html#source.17">, line 17</a>
-        </li>
-    </ul>
-
-
-</article>
-        
-    
-
-    
-
-    
-
-    
-</article>
-
+}
+</code></pre>
+    </article>
 </section>
 
 
