@@ -289,6 +289,14 @@ export class LogicConcept extends MathConcept {
                 shiftNext()
             // handle open groupers
             } else if ( isNext( openGroupRE ) ) {
+                const inner = match[0]
+                const outer = lastOpenGrouper()
+                if ( outer == '(' && inner != '(' )
+                    problem( 'Expressions can contain only Symbols or '
+                           + 'other Expressions' )
+                if ( outer == '[' && [ '[', '{*' ].includes( inner ) )
+                    problem( 'Declarations may not contain Formulas or '
+                           + 'other Declarations' )
                 save()
                 shiftNext()
             // handle close groupers

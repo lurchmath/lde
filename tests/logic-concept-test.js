@@ -790,6 +790,29 @@ describe( 'putdown notation', () => {
         expect( () => {
             LogicConcept.fromPutdown( '{ {* thing *} } (((x)) uh-oh problem' )
         } ).to.throw( /^Reached end of input while still inside \(/ )
+        // all incorrect types of nesting
+        expect( () => {
+            LogicConcept.fromPutdown( '(f x { y })' )
+        } ).to.throw( /^Expressions can contain only/ )
+        expect( () => {
+            LogicConcept.fromPutdown( '(g {* z *} t)' )
+        } ).to.throw( /^Expressions can contain only/ )
+        expect( () => {
+            LogicConcept.fromPutdown( '([a var] (b c))' )
+        } ).to.throw( /^Expressions can contain only/ )
+        expect( () => {
+            LogicConcept.fromPutdown( '[pi const {* (foo pi) *}]' )
+        } ).to.throw( /^Declarations may not contain/ )
+        expect( () => {
+            LogicConcept.fromPutdown( '[pi const [m n var]]' )
+        } ).to.throw( /^Declarations may not contain/ )
+        // all other invalid ways to form a larger structure
+        expect( () => {
+            LogicConcept.fromPutdown( '[(x y) const]' )
+        } ).to.throw( /^Not every entry.*was a Symbol/ )
+        expect( () => {
+            LogicConcept.fromPutdown( '[{x y} const]' )
+        } ).to.throw( /^Not every entry.*was a Symbol/ )
     } )
 
 } )
