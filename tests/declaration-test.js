@@ -4,6 +4,7 @@ import { Expression } from '../src/expression.js'
 import { Symbol as LurchSymbol } from '../src/symbol.js'
 import { LogicConcept } from '../src/logic-concept.js'
 import { Environment } from '../src/environment.js'
+import { Formula } from '../src/formula.js'
 
 describe( 'Declaration', () => {
 
@@ -182,25 +183,25 @@ describe( 'Declaration', () => {
         } ).not.to.throw()
     } )
 
-    it( 'Should restrict Declaration bodies to Expressions only', () => {
+    it( 'Should restrict Declaration bodies appropriately', () => {
         // can't be a generic LogicConcept
         expect( () => {
             const D = new Declaration( Declaration.Variable, x,
                 new LogicConcept )
         } ).to.throw(
-            /^Optional third parameter.*must be an Expression instance/ )
-        // can't be another Declaration
+            /^Optional third parameter.*Expression or Environment/ )
+        // can't contain a Declaration
         expect( () => {
             const D = new Declaration( Declaration.Constant, x,
-                new Declaration( Declaration.Constant, y ) )
-        } ).to.throw(
-            /^Optional third parameter.*must be an Expression instance/ )
-        // can't be an Environment
+                new Environment(
+                    new Declaration( Declaration.Constant, y )
+                ) )
+        } ).to.throw( /^Body of a Declaration.*another Declaration/ )
+        // can't contain a Formula
         expect( () => {
             const D = new Declaration( Declaration.Variable, x,
-                new Environment )
-        } ).to.throw(
-            /^Optional third parameter.*must be an Expression instance/ )
+                new Environment( new Formula ) )
+        } ).to.throw( /^Body of a Declaration.*a Formula/ )
     } )
 
     it( 'Should let us query the body of any Declaration', () => {

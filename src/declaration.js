@@ -3,6 +3,8 @@ import { MathConcept } from './math-concept.js'
 import { LogicConcept } from './logic-concept.js'
 import { Symbol as LurchSymbol } from './symbol.js'
 import { Expression } from './expression.js'
+import { Environment } from './environment.js'
+import { Formula } from './formula.js'
 
 /**
  * In mathematics, we declare new variables and constants regularly, when we
@@ -28,6 +30,9 @@ import { Expression } from './expression.js'
  * "Let $x\in A$ be arbitrary," the type is a variable declaration, the list
  * of symbols contains just one entry, $x$, and the body is the statement
  * $x\in A$ being made about $x$.
+ * 
+ * The body of a declaration can be any LogicConcept that does not include
+ * (at any level of depth) a {@link Formula Formula} or another Declaration.
  */
 export class Declaration extends LogicConcept {
     
@@ -107,9 +112,13 @@ export class Declaration extends LogicConcept {
      *   repository, rather than the standard JavaScript Symbol type.  If a
      *   single symbol is passed, it will be treated as an array of just one
      *   symbol.
-     * @param {Expression} [body] - An optional body of the declaration, as
-     *   documented above.
-
+     * @param {LogicConcept} [body] - An optional body of the declaration, as
+     *   described above.  The body may be any
+     *   {@link Expression Expression}, or any {@link Environment Environment}
+     *   that does not contain a {@link Formula Formula} or another
+     *   {@link Declaration Declaration}.  If a declaration comes with several
+     *   assumptions about the declared variables, they can be placed inside
+     *   an {@link Environment Environment} to conjoin them.
      * @see {@link Declaration#type type()}
      * @see {@link Declaration#symbols symbols()}
      * @see {@link Declaration#expression expression()}
@@ -127,13 +136,19 @@ export class Declaration extends LogicConcept {
         if ( !symbols.every( symbol => symbol instanceof LurchSymbol ) )
             throw 'Not every entry in the array given to the '
                 + 'Declaration constructor was a Symbol'
-        if ( body && !( body instanceof Expression ) )
-            throw 'Optional third parameter to Declaration constructor, '
-                + 'if provided, must be an Expression instance'
-        if ( body )
+        if ( body ) {
+            if ( !( body instanceof Expression )
+              && !( body instanceof Environment ) )
+                throw 'Optional third parameter to Declaration constructor, '
+                    + 'if provided, must be an Expression or Environment'
+            if ( body instanceof Environment && body.hasDescendantSatisfying(
+                    d => d instanceof Formula || d instanceof Declaration ) )
+                throw 'Body of a Declaration may contain neither a Formula '
+                    + 'nor another Declaration'
             super( ...symbols, body )
-        else
+        } else {
             super( ...symbols )
+        }
         this._body = body
         this.setAttribute( 'declaration type', Symbol.keyFor( type ) )
     }
