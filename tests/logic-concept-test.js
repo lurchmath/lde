@@ -5,6 +5,7 @@ import { LogicConcept } from '../src/logic-concept.js'
 // And these are needed for other tests below, such as parsing
 import { MathConcept } from '../src/math-concept.js'
 import { Environment } from '../src/environment.js'
+import { Formula } from '../src/formula.js'
 import { Declaration } from '../src/declaration.js'
 import { Application } from '../src/application.js'
 import { Binding } from '../src/binding.js'
@@ -557,20 +558,18 @@ describe( 'putdown notation', () => {
         expect( test ).to.be.instanceof( Array )
         expect( test.length ).to.equal( 1 )
         expect( test[0].equals(
-            new Environment(
+            new Formula(
                 new Symbol( 'A' ),
                 new Symbol( 'B' ).asA( 'given' ),
                 new Symbol( 'C' )
-            ).asA( 'formula' )
+            )
         ) ).to.equal( true )
         // ----------
         test = LogicConcept.fromPutdown( ':{*{**}*}t:v' )
         expect( test ).to.be.instanceof( Array )
         expect( test.length ).to.equal( 3 )
         expect( test[0].equals(
-            new Environment(
-                new Environment().asA( 'formula' )
-            ).asA( 'given' ).asA( 'formula' )
+            new Formula( new Formula ).asA( 'given' )
         ) ).to.equal( true )
         expect( test[1].equals( new Symbol( 't' ) ) ).to.equal( true )
         expect( test[2].equals(
@@ -587,11 +586,11 @@ describe( 'putdown notation', () => {
         expect( test ).to.be.instanceof( Array )
         expect( test.length ).to.equal( 1 )
         expect( test[0].equals(
-            new Environment(
+            new Formula(
                 new Symbol( 'A' ),
                 new Symbol( 'B' ).asA( 'given' ),
                 new Symbol( 'C' )
-            ).asA( 'formula' )
+            )
         ) ).to.equal( true )
         // ----------
         test = LogicConcept.fromPutdown( `

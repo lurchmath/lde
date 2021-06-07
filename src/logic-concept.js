@@ -447,14 +447,15 @@ export class LogicConcept extends MathConcept {
                 children = applyModifiers( children )
                 // now all children are LogicConcepts, so we can build them
                 // into whatever compound object is appropriate by tree.type:
+                // Formulas
+                if ( tree.type == '{* *}' ) {
+                    const Formula = MathConcept.subclasses.get( 'Formula' )
+                    return new Formula( ...children )
                 // Environments
-                if ( tree.type == '{* *}' || tree.type == '{ }' ) {
+                } else if ( tree.type == '{ }' ) {
                     const Environment =
                         MathConcept.subclasses.get( 'Environment' )
-                    const result = new Environment( ...children )
-                    if ( tree.type == '{* *}' )
-                        result.makeIntoA( 'formula' )
-                    return result
+                    return new Environment( ...children )
                 // Expressions
                 } else if ( tree.type == '( )' ) {
                     if ( tree.isBinding ) {
