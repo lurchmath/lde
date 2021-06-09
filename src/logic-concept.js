@@ -308,7 +308,7 @@ export class LogicConcept extends MathConcept {
                     problem( `Mismatched groupers: ${pairText}` )
                 const group = {
                     type : pairText,
-                    contents : groupSoFar.slice( 1, groupSoFar.length-1 )
+                    contents : groupSoFar.slice( 1, -1 )
                 }
                 const n = group.contents.length
                 // can't end an environment with a colon
@@ -492,7 +492,7 @@ export class LogicConcept extends MathConcept {
                         Declaration.Variable : Declaration.Constant
                     return tree.hasBody ?
                         new Declaration( type,
-                            children.slice( 0, children.length-1 ),
+                            children.slice( 0, -1 ),
                             children.last() ) :
                         new Declaration( type, children )
                 // This should never happen:

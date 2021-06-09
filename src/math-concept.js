@@ -527,7 +527,7 @@ export class MathConcept extends EventTarget {
      * @see {@link MathConcept#lastChild lastChild()}
      * @see {@link MathConcept#allButFirstChild allButFirstChild()}
      */
-    allButLastChild () { return this._children.slice( 0, this._children.length-1 ) }
+    allButLastChild () { return this._children.slice( 0, -1 ) }
 
     /**
      * My address within the given ancestor, as a sequence of indices
