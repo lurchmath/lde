@@ -223,11 +223,11 @@ export class LogicConcept extends MathConcept {
         let processed = ''
         let match = null
         const isNext = regexp => match = regexp.exec( string )
-        const isLast = regexp => typeof( stack[stack.length-1] ) == 'string'
-            && regexp.test( stack[stack.length-1] )
+        const isLast = regexp => typeof( stack.last() ) == 'string'
+            && regexp.test( stack.last() )
         const problem = reason => {
             const lines = processed.split( '\n' )
-            const last = lines[lines.length-1]
+            const last = lines.last()
             throw `${reason}, line ${lines.length} col ${last.length}`
         }
         const shiftNext = () => {
@@ -283,7 +283,7 @@ export class LogicConcept extends MathConcept {
                 // can't modify a comma, colon, var/const, or nothing
                 if ( stack.length == 0 || isLast( givenRE )
                   || isLast( bindingRE ) || isLast( declarationRE )
-                  || isOpenGrouper( stack[stack.length-1] ) )
+                  || isOpenGrouper( stack.last() ) )
                     problem( 'Attribute JSON has no target to modify' )
                 save( { type : 'attributes', data : json } )
                 shiftNext()
@@ -493,7 +493,7 @@ export class LogicConcept extends MathConcept {
                     return tree.hasBody ?
                         new Declaration( type,
                             children.slice( 0, children.length-1 ),
-                            children[children.length-1] ) :
+                            children.last() ) :
                         new Declaration( type, children )
                 // This should never happen:
                 } else {

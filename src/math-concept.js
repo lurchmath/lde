@@ -507,7 +507,7 @@ export class MathConcept extends EventTarget {
      * @see {@link MathConcept#firstChild firstChild()}
      * @see {@link MathConcept#allButLastChild allButLastChild()}
      */
-    lastChild () { return this._children[this._children.length-1] }
+    lastChild () { return this._children.last() }
 
     /**
      * Convenience function for fetching the array containing all children of
