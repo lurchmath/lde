@@ -163,8 +163,8 @@ export class LogicConcept extends MathConcept {
      *    `$===_-_@_-_===$` and much more.
      *  * A {@link Symbol Symbol} can also be written as a string literal
      *    whose only escape characters are `\"` inside double-quoted literals,
-     *    `\'` inside single-quoted literals, and `\\` in any case.  Thus you
-     *    can create just about any symbol at all, including
+     *    `\'` inside single-quoted literals, and `\n` or `\\` in any case.
+     *    Thus you can create just about any symbol at all, including
      *    `"{ yes it's (a symbol) }"`, which is not a compound expression, but
      *    is a single atomic symbol.
      *  * An {@link Application Application} is written using LISP notation.
@@ -444,7 +444,7 @@ export class LogicConcept extends MathConcept {
                     const delim = tree[0]
                     return new LurchSymbol( tree.substring( 1, tree.length-1 )
                         .replace( RegExp( '\\\\'+delim, 'g' ), delim )
-                        .replace( /\\\\/g, '\\' ) )
+                        .replace( /\\\\/g, '\\' ).replace( /\n/g, '\\n' ) )
                 }
                 // everything else is already a symbol
                 return new LurchSymbol( tree )
@@ -502,6 +502,94 @@ export class LogicConcept extends MathConcept {
         }
         // parsing actually returns an array of parsed things
         return applyModifiers( stack.map( build ) )
+    }
+
+    /**
+     * This function is the inverse of
+     * {@link LogicConcept#fromPutdown fromPutdown()}, which creates
+     * LogicConcept instances from text in putdown notation.  This function
+     * writes putdown notation for any LogicConcept.  It should be the case
+     * that this function outputs valid putdown notation for any LogicConcept
+     * in which it is called, and that
+     * {@link LogicConcept#fromPutdown fromPutdown()} applied to that notation
+     * produces an object that {@link MathConcept#equals equals()} the
+     * original.
+     * 
+     * @returns {String} putdown notation for this LogicConcept instance
+     */
+    toPutdown () {
+        // Although normally it would make sense to use the dynamic dispatch
+        // built into the JavaScript language to accompish this task, we will
+        // reinvent the wheel a little bit here just in order to keep this
+        // code located all in the same file as the fromPutdown() code.
+        // Doing it all here also allows us to factor some common tools out,
+        // up above the switch statement, as you can see below.
+        const indent = ( text, depth ) => `  ${text.replace( /\n/g, '\n  ' )}`
+        const isTooBig = text => /\n/.test( text ) || text.length > 50
+        const childResults = this.children().map( child => child.toPutdown() )
+        const Environment = MathConcept.subclasses.get( 'Environment' )
+        const given = ( ( !this.parent()
+                       || this.parent() instanceof Environment )
+                     && this.isA( 'given' ) ) ? ':' : ''
+        const finalize = ( text, skip = [ ] ) => {
+            let attributes = [ ]
+            skip.push( '_type_given' ) // bad style, but concise
+            for ( let key of this.getAttributeKeys() )
+                if ( !skip.includes( key ) )
+                    attributes.push( '+{' + JSON.stringify( key ) + ':'
+                        + JSON.stringify( this.getAttribute( key ) ) + '}' )
+            if ( attributes.length == 0 )
+                attributes = ''
+            else if ( attributes.length == 1 )
+                attributes = ` ${attributes[0]}\n`
+            else
+                attributes = `\n    ${attributes.join('\n    ')}\n`
+            return given + text.replace( /\n\s*\n/g, '\n' ) + attributes
+        }
+        switch ( this.constructor.className ) {
+            case 'Symbol':
+                const text = this.text()
+                const result = finalize(
+                    !/\(|\)|\{|\}|\[|\]|:|\s|"|'/.test( text ) ? text :
+                    ( '"' + text.replace( /\\/g, '\\\\' )
+                                .replace( /"/g, '\\"' )
+                                .replace( /\n/g, '\\n' ) + '"' ),
+                    [ 'symbol text' ] )
+                return result
+            case 'Application':
+                return finalize( `(${childResults.join( ' ' )})` )
+            case 'Binding':
+                const body = childResults.pop()
+                return finalize( `(${childResults.join( ' ' )} , ${body})` )
+            case 'Declaration':
+                const Declaration = MathConcept.subclasses.get( 'Declaration' )
+                const type = this.type() == Declaration.Variable ?
+                    'var' : 'const'
+                if ( this.expression() ) {
+                    const body = childResults.pop()
+                    return finalize(
+                        `[${childResults.join( ' ' )} ${type} ${body}]`,
+                        [ 'declaration type' ] )
+                } else {
+                    return finalize( `[${childResults.join( ' ' )} ${type}]`,
+                        [ 'declaration type' ] )
+                }
+            case 'Environment':
+                const envInside = childResults.join( ' ' )
+                return finalize( envInside == '' ? '{ }' :
+                             isTooBig( envInside ) ?
+                             `{\n${indent(childResults.join( '\n' ))}\n}` :
+                             `{ ${envInside} }` )
+            case 'Formula':
+                const forInside = childResults.join( ' ' )
+                return finalize( forInside == '' ? '{* *}' :
+                             isTooBig( forInside ) ?
+                             `{*\n${indent(childResults.join( '\n' ))}\n*}` :
+                             `{* ${forInside} *}` )
+            default:
+                throw 'Cannot convert this class to putdown: '
+                    + this.constructor.className
+        }
     }
 
 }

@@ -192,7 +192,7 @@ describe( 'Sending feedback about LogicConcepts', () => {
 
 } )
 
-describe( 'putdown notation', () => {
+describe( 'Reading putdown notation', () => {
 
     const debugParsingResults = results => results.forEach( (result,index) =>
         console.log( `${index}. ` +
@@ -813,6 +813,392 @@ describe( 'putdown notation', () => {
         expect( () => {
             LogicConcept.fromPutdown( '[{x y} const]' )
         } ).to.throw( /^Not every entry.*was a Symbol/ )
+    } )
+
+} )
+
+describe( 'Writing putdown notation', () => {
+
+    let testLCs = [ ]
+    const addTestLC = testLC => testLCs.push( testLC )
+    const lastTestLC = () => testLCs.last()
+        
+    it( 'Should correctly represent any kind of Symbol', () => {
+        expect( new Symbol( 'x' ).toPutdown() ).to.equal( 'x' )
+        expect( new Symbol( 'one more thing' ).toPutdown() )
+            .to.equal( '"one more thing"' )
+        expect( new Symbol( '"""""' ).toPutdown() )
+            .to.equal( '"\\"\\"\\"\\"\\""' )
+        expect( new Symbol( '{}(){*@@@*}' ).toPutdown() )
+            .to.equal( '"{}(){*@@@*}"' )
+        expect( new Symbol( 'even\nmultiple\nlines' ).toPutdown() )
+            .to.equal( '"even\\nmultiple\\nlines"' )
+    } )
+
+    it( 'Should correctly represent nested Applications', () => {
+        let test
+        // simple one
+        test = new Application( new Symbol( 'f' ), new Symbol( 'x' ) )
+        expect( test.toPutdown() ).to.equal( '(f x)' )
+        // nested one
+        const discriminant = new Application(
+            new Symbol( '-' ),
+            new Application(
+                new Symbol( '^' ), new Symbol( 'b' ), new Symbol( '2' )
+            ),
+            new Application(
+                new Symbol( '*' ),
+                new Application(
+                    new Symbol( '*' ), new Symbol( '4' ), new Symbol( 'a' )
+                ),
+                new Symbol( 'c' )
+            )
+        )
+        expect( discriminant.toPutdown() )
+            .to.equal( '(- (^ b 2) (* (* 4 a) c))' )
+        // long one--no line breaks, because it's not an Environment
+        test = new Application(
+            new Symbol( 'one really huge function name' ),
+            new Symbol( 'one really huge argument name' ),
+            new Symbol( 'another really huge argument name' )
+        )
+        expect( test.toPutdown() ).to.equal(
+            '("one really huge function name"'
+          + ' "one really huge argument name"'
+          + ' "another really huge argument name")'
+        )
+    } )
+
+    it( 'Should correctly represent (nested) Bindings', () => {
+        let test
+        // simple one
+        test = new Binding(
+            new Symbol( '∀' ),
+            new Symbol( 'x' ),
+            new Symbol( 'P' )
+        )
+        expect( test.toPutdown() ).to.equal( '(∀ x , P)' )
+        // nested one
+        test = new Binding(
+            new Symbol( '∀' ),
+            new Symbol( 'x' ),
+            new Binding(
+                new Symbol( '∃' ),
+                new Symbol( 'y' ),
+                new Symbol( 'Some relationship of x and y' )
+            )
+        )
+        expect( test.toPutdown() ).to.equal(
+            '(∀ x , (∃ y , "Some relationship of x and y"))' )
+    } )
+
+    it( 'Should correctly represent combined Applications & Bindings', () => {
+        let test
+        // summation
+        test = new Binding(
+            new Application(
+                new Symbol( '∑' ), new Symbol( '1' ), new Symbol( 'n' )
+            ),
+            new Symbol( 'i' ),
+            new Application(
+                new Symbol( '^' ), new Symbol( 'i' ), new Symbol( '2' )
+            ),
+        )
+        expect( test.toPutdown() ).to.equal( '((∑ 1 n) i , (^ i 2))' )
+        // predicate logic
+        test = new Application(
+            new Symbol( 'or' ),
+            new Binding(
+                new Symbol( '∀' ),
+                new Symbol( 'x' ),
+                new Application( new Symbol( 'P' ), new Symbol( 'x' ) )
+            ),
+            new Binding(
+                new Symbol( '∀' ),
+                new Symbol( 't' ),
+                new Symbol( 'u' ),
+                new Symbol( 'v' ),
+                new Application(
+                    new Symbol( 'K' ),
+                    new Symbol( 't' ),
+                    new Symbol( 'u' ),
+                    new Symbol( 'v' )
+                )
+            )
+        )
+        expect( test.toPutdown() ).to.equal(
+            '(or (∀ x , (P x)) (∀ t u v , (K t u v)))' )
+    } )
+
+    it( 'Should correctly represent Declarations without bodies', () => {
+        let test
+        test = new Declaration( Declaration.Variable, [
+            new Symbol( 'Sunil' ),
+            new Symbol( 'Henry' ),
+            new Symbol( 'Rodrigo' )
+        ] )
+        expect( test.toPutdown() ).to.equal( '[Sunil Henry Rodrigo var]' )
+        test = new Declaration(
+            Declaration.Constant,
+            new Symbol( 'The Greek letter π' )
+        )
+        expect( test.toPutdown() ).to.equal( '["The Greek letter π" const]' )
+    } )
+
+    it( 'Should correctly represent Declarations any valid body', () => {
+        let test
+        // symbol body
+        test = new Declaration( Declaration.Variable, [
+            new Symbol( 'Sunil' ),
+            new Symbol( 'Henry' )
+        ], new Symbol( 'Helmut' ) )
+        expect( test.toPutdown() ).to.equal( '[Sunil Henry var Helmut]' )
+        // application body
+        test = new Declaration(
+            Declaration.Constant,
+            new Symbol( 'π' ),
+            new Application( new Symbol( 'Let\'s Eat' ), new Symbol( 'π' ) )
+        )
+        expect( test.toPutdown() ).to.equal( '[π const ("Let\'s Eat" π)]' )
+        // binding body
+        test = new Declaration(
+            Declaration.Constant,
+            new Symbol( '0' ),
+            new Binding(
+                new Symbol( '∀' ), new Symbol( 'n' ), new Symbol( "n>=0" )
+            )
+        )
+        expect( test.toPutdown() ).to.equal( '[0 const (∀ n , n>=0)]' )
+        // compound body
+        test = new Declaration(
+            Declaration.Constant,
+            new Symbol( '0' ),
+            new Binding(
+                new Symbol( '∀' ),
+                new Symbol( 'n' ),
+                new Application(
+                    new Symbol( '>=' ),
+                    new Symbol( 'n' ),
+                    new Symbol( '0' )
+                )
+            )
+        )
+        expect( test.toPutdown() ).to.equal( '[0 const (∀ n , (>= n 0))]' )
+    } )
+
+    it( 'Should correctly represent small (but nested) Environments', () => {
+        let test
+        test = new Environment
+        expect( test.toPutdown() ).to.equal( '{ }' )
+        test = new Environment( new Environment, new Environment )
+        expect( test.toPutdown() ).to.equal( '{ { } { } }' )
+        test = new Environment( new Environment( new Environment ) )
+        expect( test.toPutdown() ).to.equal( '{ { { } } }' )
+        test = new Environment(
+            new Environment().asA( 'given' ),
+            new Environment
+        )
+        expect( test.toPutdown() ).to.equal( '{ :{ } { } }' )
+        test = new Environment(
+            new Environment,
+            new Environment().asA( 'given' )
+        )
+        expect( test.toPutdown() ).to.equal( '{ { } :{ } }' )
+        test = new Environment(
+            new Environment().asA( 'given' ),
+            new Environment().asA( 'given' )
+        )
+        expect( test.toPutdown() ).to.equal( '{ :{ } :{ } }' )
+        test = new Environment(
+            new Environment,
+            new Environment
+        ).asA( 'given' )
+        expect( test.toPutdown() ).to.equal( ':{ { } { } }' )
+    } )
+
+    it( 'Should correctly represent Environments with content', () => {
+        let test
+        // tiny example
+        test = new Environment(
+            new Symbol( 'If this' ).asA( 'given' ),
+            new Symbol( 'then that' )
+        )
+        expect( test.toPutdown() ).to.equal( '{ :"If this" "then that" }' )
+        // universal introduction rule from predicate logic
+        test = new Environment(
+            new Declaration( Declaration.Variable, new Symbol( 'x' ) )
+                .asA( 'given' ),
+            new Application( new Symbol( 'P' ), new Symbol( 'x' ) )
+                .asA( 'given' ),
+            new Binding(
+                new Symbol( '∀' ),
+                new Symbol( 'x' ),
+                new Application( new Symbol( 'P' ), new Symbol( 'x' ) )
+            )
+        )
+        expect( test.toPutdown() ).to.equal(
+            '{ :[x var] :(P x) (∀ x , (P x)) }' )
+        // example with large content that must be broken over multiple lines
+        test = new Environment(
+            new Symbol( 'this is a long symbol name' ).asA( 'given' ),
+            new Symbol( 'this is also a long symbol name' ),
+            new Application(
+                new Symbol( 'beaucoup de longness, dude' ),
+                new Symbol( 'longedy long long longmeister' ),
+                new Symbol( 'short' )
+            ).asA( 'given' ),
+            new Environment(
+                new Symbol( 'beaucoup de longness, dude' ),
+                new Symbol( 'longedy long long longmeister' ).asA( 'given' ),
+                new Symbol( 'short' )
+            ).asA( 'given' ),
+            new Symbol( 'also short' )
+        )
+        expect( test.toPutdown() ).to.equal(
+            '{\n'
+          + '  :"this is a long symbol name"\n'
+          + '  "this is also a long symbol name"\n'
+          + '  :("beaucoup de longness, dude" "longedy long long longmeister" short)\n'
+          + '  :{\n'
+          + '    "beaucoup de longness, dude"\n'
+          + '    :"longedy long long longmeister"\n'
+          + '    short\n'
+          + '  }\n'
+          + '  "also short"\n'
+          + '}'
+        )
+    } )
+
+    it( 'Should correctly represent small (but nested) Formulas', () => {
+        let test
+        test = new Formula
+        expect( test.toPutdown() ).to.equal( '{* *}' )
+        test = new Formula( new Environment, new Environment )
+        expect( test.toPutdown() ).to.equal( '{* { } { } *}' )
+        test = new Formula( new Environment( new Environment ) )
+        expect( test.toPutdown() ).to.equal( '{* { { } } *}' )
+        test = new Formula(
+            new Environment().asA( 'given' ),
+            new Environment
+        )
+        expect( test.toPutdown() ).to.equal( '{* :{ } { } *}' )
+        test = new Formula(
+            new Environment,
+            new Environment().asA( 'given' )
+        )
+        expect( test.toPutdown() ).to.equal( '{* { } :{ } *}' )
+        test = new Environment(
+            new Formula().asA( 'given' ),
+            new Formula().asA( 'given' )
+        )
+        expect( test.toPutdown() ).to.equal( '{ :{* *} :{* *} }' )
+        test = new Formula(
+            new Environment,
+            new Environment
+        ).asA( 'given' )
+        expect( test.toPutdown() ).to.equal( ':{* { } { } *}' )
+    } )
+
+    it( 'Should correctly represent Formulas with content', () => {
+        let test
+        // tiny example
+        test = new Formula(
+            new Symbol( 'If this' ).asA( 'given' ),
+            new Symbol( 'then that' )
+        )
+        expect( test.toPutdown() ).to.equal( '{* :"If this" "then that" *}' )
+        // universal introduction rule from predicate logic
+        test = new Formula(
+            new Declaration( Declaration.Variable, new Symbol( 'x' ) )
+                .asA( 'given' ),
+            new Application( new Symbol( 'P' ), new Symbol( 'x' ) )
+                .asA( 'given' ),
+            new Binding(
+                new Symbol( '∀' ),
+                new Symbol( 'x' ),
+                new Application( new Symbol( 'P' ), new Symbol( 'x' ) )
+            )
+        )
+        expect( test.toPutdown() ).to.equal(
+            '{* :[x var] :(P x) (∀ x , (P x)) *}' )
+        // example with large content that must be broken over multiple lines
+        test = new Formula(
+            new Symbol( 'this is a long symbol name' ).asA( 'given' ),
+            new Symbol( 'this is also a long symbol name' ),
+            new Application(
+                new Symbol( 'beaucoup de longness, dude' ),
+                new Symbol( 'longedy long long longmeister' ),
+                new Symbol( 'short' )
+            ).asA( 'given' ),
+            new Environment(
+                new Symbol( 'beaucoup de longness, dude' ),
+                new Symbol( 'longedy long long longmeister' ).asA( 'given' ),
+                new Symbol( 'short' )
+            ).asA( 'given' ),
+            new Symbol( 'also short' )
+        )
+        expect( test.toPutdown() ).to.equal(
+            '{*\n'
+          + '  :"this is a long symbol name"\n'
+          + '  "this is also a long symbol name"\n'
+          + '  :("beaucoup de longness, dude" "longedy long long longmeister" short)\n'
+          + '  :{\n'
+          + '    "beaucoup de longness, dude"\n'
+          + '    :"longedy long long longmeister"\n'
+          + '    short\n'
+          + '  }\n'
+          + '  "also short"\n'
+          + '*}'
+        )
+    } )
+
+    it( 'Should correctly add attributes to any kind of output', () => {
+        let test
+        // symbol with attributes
+        test = new Symbol( 'x' ).attr( { 'color' : 'purple' } )
+        expect( test.toPutdown() ).to.equal( 'x +{"color":"purple"}\n' )
+        // application with attributes in various places
+        test = new Application(
+            new Symbol( 'x' ).attr( { 'type' : 'cloud' } ),
+            new Symbol( 'y' )
+        ).attr( { 'altitude' : '10000ft' } )
+        expect( test.toPutdown() ).to.equal(
+            '(x +{"type":"cloud"}\n y) +{"altitude":"10000ft"}\n' )
+        // binding with attributes in various places
+        test = new Binding(
+            new Symbol( 'Disjoint Union' ).attr( { 1 : 2, 3 : 4 } ),
+            new Symbol( 'i' ),
+            new Application(
+                new Symbol( 'indexing' ),
+                new Symbol( 'S' ),
+                new Symbol( 'i' )
+            )
+        )
+        expect( test.toPutdown() ).to.equal(
+            '("Disjoint Union"\n'
+          + '    +{"1":2}\n'
+          + '    +{"3":4}\n'
+          + ' i , (indexing S i))' )
+        // environment with attributes in many places
+        test = new Environment(
+            new Symbol( 'A' ).attr( { 'City' : 'Boston' } ).asA( 'given' ),
+            new Environment(
+                new Symbol( 'B' ).asA( 'given' ),
+                new Symbol( 'C' ).attr(
+                    { 'Time' : 'Early', 'Weather' : 'Nice' } )
+            ).asA( 'given' )
+        ).attr( { 'State' : 'MA' } )
+        expect( test.toPutdown() ).to.equal(
+            '{\n'
+          + '  :A +{"City":"Boston"}\n'
+          + '  :{\n'
+          + '    :B\n'
+          + '    C\n'
+          + '        +{"Time":"Early"}\n'
+          + '        +{"Weather":"Nice"}\n'
+          + '  }\n'
+          + '} +{"State":"MA"}\n' )
+        // we could do other tests here but this is a pretty good start
     } )
 
 } )
