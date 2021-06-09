@@ -154,6 +154,25 @@ export class Declaration extends LogicConcept {
     }
 
     /**
+     * We override here the {@link LogicConcept#copy default copy() method}
+     * for {@link LogicConcept LogicConcepts} because that method assumes that
+     * the arguments the constructor requires are the
+     * {@link LogicConcept LogicConcept}'s children.  But in this case, we
+     * have an extra first parameter for the Declaration type.
+     * 
+     * @returns {Declaration} a structural copy of this object
+     * @see {@link LogicConcept#copy copy()}
+     * @see {@link LogicConcept#equals equals()}
+     */
+    copy () {
+        return new Declaration(
+            this.type(),
+            this.symbols().map( symbol => symbol.copy() ),
+            this.expression() ? this.expression().copy() : undefined
+        )
+    }
+
+    /**
      * Return the type of declaration, which is the first argument passed to
      * the constructor.  It will be one of the items in
      * {@link Declaration.Types the list of types}.
