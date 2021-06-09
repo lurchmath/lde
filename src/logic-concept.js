@@ -350,8 +350,7 @@ export class LogicConcept extends MathConcept {
                     // 3. If 2nd-to-last item is a comma, group is a binding
                     if ( n >= 2 && bindingRE.test( group.contents[n-2] ) ) {
                         group.isBinding = true
-                        group.contents = group.contents.slice( 0, n-2 )
-                            .concat( group.contents.slice( n-1 ) )
+                        group.contents = group.contents.without( n-2 )
                     // 4. Otherwise the comma is misplaced
                     } else if ( numCommas > 0 ) {
                         problem( 'Misplaced comma inside expression' )
@@ -412,8 +411,7 @@ export class LogicConcept extends MathConcept {
                 // if an entry is a colon, mark the next as a given
                 if ( givenRE.test( sequence[i] ) ) {
                     sequence[i+1].makeIntoA( 'given' )
-                    sequence = sequence.slice( 0, i ).concat(
-                        sequence.slice( i+1 ) )
+                    sequence = sequence.without( i )
                 // if an entry is an attributes object, modify the previous
                 } else if ( sequence[i] instanceof Object
                          && sequence[i].type == 'attributes' ) {
@@ -421,8 +419,7 @@ export class LogicConcept extends MathConcept {
                         if ( sequence[i].data.hasOwnProperty( key ) )
                             sequence[i-1].setAttribute( key,
                                 sequence[i].data[key] )
-                    sequence = sequence.slice( 0, i ).concat(
-                        sequence.slice( i+1 ) )
+                    sequence = sequence.without( i )
                 // if an entry is a LogicConcept, it's all set
                 } else if ( sequence[i] instanceof LogicConcept ) {
                     i++
