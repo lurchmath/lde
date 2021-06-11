@@ -6,5 +6,8 @@
     },
     "metadata": {
         "title": "Lurch Deductive Engine"
+    },
+    "source": {
+        "exclude": [ "./src/database/*", "./jsdoc-add-mathjax.js" ]
     }
 }
