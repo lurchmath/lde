@@ -2,6 +2,7 @@
   "name": "lde",
   "version": "0.1.0",
   "description": "Lurch Deductive Engine (LDE)",
+  "type": "module",
   "directories": {
     "doc": "docs",
     "test": "tests"

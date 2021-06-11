@@ -5,8 +5,8 @@
  * This script is run by "npm run docs" immediately after jsdoc completes.
  */
 
-const fs = require( 'fs' )
-const path = require( 'path' )
+import fs from 'fs'
+import path from 'path'
 
 // The script content to insert:
 const MathJaxCode = `
@@ -19,7 +19,8 @@ const MathJaxCode = `
 `
 
 // Read all files in the docs folder
-const docsFolder = path.join( __dirname, 'docs' )
+const docsFolder = path.join( path.dirname(
+    import.meta.url.substring( 7 ) ), 'docs' )
 fs.readdir( docsFolder, ( err, files ) => {
     if ( err )
         return console.error(
