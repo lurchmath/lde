@@ -2,7 +2,7 @@
 // Launch a simple web server in the test folder, so that the user can
 // point to it with their browser.
 
-require( './simple-server.js' ).startServer( { verbose : false } )
+require( './simple-server.cjs' ).startServer( { verbose : false } )
 
 /*
 
