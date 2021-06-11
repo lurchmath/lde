@@ -21,6 +21,7 @@
   "scripts": {
     "test": "node --trace-warnings tests/all-in-puppeteer.js",
     "docs": "rm -rf docs && jsdoc src/* -d docs -R doc-main.md -c jsdoc-conf.json && node jsdoc-add-mathjax.js",
+    "build-db": "cd src/database && node generate.js",
     "show-docs": "open docs/index.html",
     "test-server": "node tests/test-server.cjs"
   },

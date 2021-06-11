@@ -26,6 +26,13 @@
             "command": "npm run docs",
             "problemMatcher": [],
             "group": "build"
+        },
+        {
+            "label": "Rebuild database from disk",
+            "type": "shell",
+            "command": "npm run build-db",
+            "problemMatcher": [],
+            "group": "build"
         }
     ]
 }
