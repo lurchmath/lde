@@ -1,0 +1,15 @@
+---
+rule: true
+names:
+ - negation elimination
+ - "-E"
+---
+
+{*
+    :{
+        :(not A)
+        B
+        (not B)
+    }
+    A
+*}

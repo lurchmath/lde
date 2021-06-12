@@ -1,0 +1,9 @@
+---
+testing:
+  syntax: invalid
+---
+
+// This file contains an Expression with an Environment inside, which is
+// invalid putdown syntax.
+
+(+ 1 2 { :A B })

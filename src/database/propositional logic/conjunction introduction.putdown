@@ -1,0 +1,12 @@
+---
+rule: true
+names:
+ - conjunction introduction
+ - "^I"
+---
+
+{*
+    :A
+    :B
+    (and A B)
+*}

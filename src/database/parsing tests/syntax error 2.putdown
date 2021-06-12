@@ -1,0 +1,13 @@
+---
+testing:
+  syntax: invalid
+---
+
+// This file contains several different variable and constant declarations,
+// but one of them has an invalid structure that is a putdown syntax error.
+
+[x y z var] // valid
+[A B C const] // valid
+[x y z var (P x y z)] // valid
+[A B C const { (Q A) (R B) (S T) }] // valid
+[x y z var [A B C const]] // invalid

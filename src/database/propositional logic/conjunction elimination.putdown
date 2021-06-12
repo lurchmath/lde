@@ -1,0 +1,12 @@
+---
+rule: true
+names:
+ - conjunction elimination
+ - "^E"
+---
+
+{*
+    :(and A B)
+    A
+    B
+*}

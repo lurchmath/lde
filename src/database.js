@@ -13,44 +13,171 @@
 
 const putdownDatabase = [
   {
-    "filename": "/one/example.putdown",
-    "metadata": {},
-    "content": "\n// a comment\n(= (+ a b) (+ b a))\n\n\n"
+    "filename": "/parsing tests/syntax error 1.putdown",
+    "metadata": {
+      "testing": {
+        "syntax": "invalid"
+      }
+    },
+    "content": "\n// This file contains an Expression with an Environment inside, which is\n// invalid putdown syntax.\n\n(+ 1 2 { :A B })\n"
   },
   {
-    "filename": "/one/three/deep.putdown",
+    "filename": "/parsing tests/syntax error 2.putdown",
     "metadata": {
-      "yaml": true,
-      "colors": [
-        "red",
-        "blue",
-        "green"
-      ],
+      "testing": {
+        "syntax": "invalid"
+      }
+    },
+    "content": "\n// This file contains several different variable and constant declarations,\n// but one of them has an invalid structure that is a putdown syntax error.\n\n[x y z var] // valid\n[A B C const] // valid\n[x y z var (P x y z)] // valid\n[A B C const { (Q A) (R B) (S T) }] // valid\n[x y z var [A B C const]] // invalid\n"
+  },
+  {
+    "filename": "/parsing tests/valid syntax 1.putdown",
+    "metadata": {
+      "testing": {
+        "syntax": "valid",
+        "length": 4
+      }
+    },
+    "content": "\n// This file contains several Expressions, all using valid putdown notation.\n\n(+ 1 2)\n\n(- k t (* u v))\n\n(polynomial (variable x) (coefficients 9 0 -6 2 1))\n\n(forall x , (exists y , (> x y)))\n"
+  },
+  {
+    "filename": "/parsing tests/valid syntax 2.putdown",
+    "metadata": {
+      "testing": {
+        "syntax": "valid",
+        "length": 1
+      }
+    },
+    "content": "\n// This file contains some nested Environments, Expressions, and Declarations,\n// all using valid putdown syntax.\n\n{\n    // Let x be arbitrary.\n    :[x var]\n    // Assume x is a real number.\n    :(in x R)\n    // Claim that x is a complex number, by Theorem 21\n    (in x C) +{\"reason\":\"Theorem 21\"}\n}\n"
+  },
+  {
+    "filename": "/propositional logic/all rules.putdown",
+    "metadata": {
       "includes": [
-        "../example.putdown",
-        "/two/other.putdown"
+        "conjunction introduction.putdown",
+        "conjunction elimination.putdown",
+        "disjunction introduction.putdown",
+        "disjunction elimination.putdown",
+        "conditional introduction.putdown",
+        "conditional elimination.putdown",
+        "negation introduction.putdown",
+        "negation elimination.putdown",
+        "biconditional introduction.putdown",
+        "biconditional elimination.putdown"
       ]
     },
-    "content": "\n// a comment\n(= (+ a b) (+ b a))\n\n\n\n\n+\n3\n5\n\n// that will be 3 expressions\n\n\n\n(sometimes I feel like (a motherless child)\n\t(a long long way)\n\t(from my home))\n\n",
-    "original": "\n(sometimes I feel like (a motherless child)\n\t(a long long way)\n\t(from my home))\n\n"
+    "content": "\n{*\n    :A\n    :B\n    (and A B)\n*}\n\n\n{*\n    :(and A B)\n    A\n    B\n*}\n\n\n{*\n    :A\n    (or A B)\n*}\n\n{*\n    :B\n    (or A B)\n*}\n\n\n{*\n    :(or A B)\n    :(implies A C)\n    :(implies B C)\n    C\n*}\n\n\n{*\n    :{\n        :A\n        B\n    }\n    (implies A B)\n*}\n\n\n{*\n    :(implies A B)\n    :A\n    B\n*}\n\n\n{*\n    :{\n        :A\n        B\n        (not B)\n    }\n    (not A)\n*}\n\n\n{*\n    :{\n        :(not A)\n        B\n        (not B)\n    }\n    A\n*}\n\n\n{*\n    :{\n        :A\n        B\n    }\n    :{\n        :B\n        A\n    }\n    (iff A B)\n*}\n\n\n{*\n    :(iff A B)\n    :A\n    B\n*}\n\n{*\n    :(iff A B)\n    :B\n    A\n*}\n\n",
+    "original": ""
   },
   {
-    "filename": "/two/other.putdown",
-    "metadata": {},
-    "content": "\n+\n3\n5\n\n// that will be 3 expressions\n\n"
-  },
-  {
-    "filename": "/two/other2.putdown",
+    "filename": "/propositional logic/biconditional elimination.putdown",
     "metadata": {
-      "author": "Nathan Carter",
-      "type": "putdown"
+      "rule": true,
+      "names": [
+        "biconditional elimination",
+        "<->E"
+      ]
     },
-    "content": "\n{\n\t:A\n\t:B\n\tC\n}\n\n"
+    "content": "\n{*\n    :(iff A B)\n    :A\n    B\n*}\n\n{*\n    :(iff A B)\n    :B\n    A\n*}\n"
   },
   {
-    "filename": "/two/other3.putdown",
-    "metadata": {},
-    "content": "\n{\n\t:{ X Y }\n\tY\n\tX\n}\n+{\"rule\":\"true\"}\n\n(\"hello, there!\" this is an (example expression) YEAH)\n\n"
+    "filename": "/propositional logic/biconditional introduction.putdown",
+    "metadata": {
+      "rule": true,
+      "names": [
+        "conditional introduction",
+        "->I"
+      ]
+    },
+    "content": "\n{*\n    :{\n        :A\n        B\n    }\n    :{\n        :B\n        A\n    }\n    (iff A B)\n*}\n"
+  },
+  {
+    "filename": "/propositional logic/conditional elimination.putdown",
+    "metadata": {
+      "rule": true,
+      "names": [
+        "conditional elimination",
+        "->E"
+      ]
+    },
+    "content": "\n{*\n    :(implies A B)\n    :A\n    B\n*}\n"
+  },
+  {
+    "filename": "/propositional logic/conditional introduction.putdown",
+    "metadata": {
+      "rule": true,
+      "names": [
+        "conditional introduction",
+        "->I"
+      ]
+    },
+    "content": "\n{*\n    :{\n        :A\n        B\n    }\n    (implies A B)\n*}\n"
+  },
+  {
+    "filename": "/propositional logic/conjunction elimination.putdown",
+    "metadata": {
+      "rule": true,
+      "names": [
+        "conjunction elimination",
+        "^E"
+      ]
+    },
+    "content": "\n{*\n    :(and A B)\n    A\n    B\n*}\n"
+  },
+  {
+    "filename": "/propositional logic/conjunction introduction.putdown",
+    "metadata": {
+      "rule": true,
+      "names": [
+        "conjunction introduction",
+        "^I"
+      ]
+    },
+    "content": "\n{*\n    :A\n    :B\n    (and A B)\n*}\n"
+  },
+  {
+    "filename": "/propositional logic/disjunction elimination.putdown",
+    "metadata": {
+      "rule": true,
+      "names": [
+        "disjunction elimination",
+        "vE"
+      ]
+    },
+    "content": "\n{*\n    :(or A B)\n    :(implies A C)\n    :(implies B C)\n    C\n*}\n"
+  },
+  {
+    "filename": "/propositional logic/disjunction introduction.putdown",
+    "metadata": {
+      "rule": true,
+      "names": [
+        "disjunction introduction",
+        "vI"
+      ]
+    },
+    "content": "\n{*\n    :A\n    (or A B)\n*}\n\n{*\n    :B\n    (or A B)\n*}\n"
+  },
+  {
+    "filename": "/propositional logic/negation elimination.putdown",
+    "metadata": {
+      "rule": true,
+      "names": [
+        "negation elimination",
+        "-E"
+      ]
+    },
+    "content": "\n{*\n    :{\n        :(not A)\n        B\n        (not B)\n    }\n    A\n*}\n"
+  },
+  {
+    "filename": "/propositional logic/negation introduction.putdown",
+    "metadata": {
+      "rule": true,
+      "names": [
+        "negation introduction",
+        "-I"
+      ]
+    },
+    "content": "\n{*\n    :{\n        :A\n        B\n        (not B)\n    }\n    (not A)\n*}\n"
   }
 ]
 
@@ -94,6 +221,11 @@ export const keysPaths = ( prefix = '' ) => {
         key => key.substring( prefix.length ).split( '/' )[0] ) ) )
 }
 
+// Get the list of all keys whose metadata satisfies a given predicate.
+export const filterByMetadata = predicate =>
+    putdownDatabase.filter( entry => predicate( entry.metadata ) )
+    .map( entry => entry.filename )
+
 // Read attributes from database entries; internal module helper function.
 const getEntryAttribute = ( entryName, attribute ) => {
     const entry = putdownDatabase.find( entry => entry.filename == entryName )
@@ -128,9 +260,11 @@ export const getPutdown = entryName =>
 // (For that, see getPutdown().)
 // It will not include that YAML header, which has been converted to JSON and
 // is available via getMetadata().
-export const getPutdownWithoutIncludes = entryName =>
-    getEntryAttribute( entryName, 'original' ) ||
-    getEntryAttribute( entryName, 'content' )
+export const getPutdownWithoutIncludes = entryName => {
+    const original = getEntryAttribute( entryName, 'original' )
+    return typeof( original ) == 'undefined' ?
+        getEntryAttribute( entryName, 'content' ) : original
+}
 
 // Get a cached parsed result of the given entry's full putdown source, if any
 // exists yet in the database.
@@ -180,7 +314,7 @@ export const getLogicConcept = entryName => {
 // create a default object so that clients can do:
 // import Database from './database.js'
 export default {
-    keys, keysStartingWith, keysPaths,
+    keys, keysStartingWith, keysPaths, filterByMetadata,
     getMetadata, getPutdown, getPutdownWithoutIncludes,
     getLogicConcepts, getLogicConcept
 }

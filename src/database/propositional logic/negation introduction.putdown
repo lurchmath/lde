@@ -1,0 +1,15 @@
+---
+rule: true
+names:
+ - negation introduction
+ - "-I"
+---
+
+{*
+    :{
+        :A
+        B
+        (not B)
+    }
+    (not A)
+*}

@@ -1,0 +1,13 @@
+---
+includes:
+ - "conjunction introduction.putdown"
+ - "conjunction elimination.putdown"
+ - "disjunction introduction.putdown"
+ - "disjunction elimination.putdown"
+ - "conditional introduction.putdown"
+ - "conditional elimination.putdown"
+ - "negation introduction.putdown"
+ - "negation elimination.putdown"
+ - "biconditional introduction.putdown"
+ - "biconditional elimination.putdown"
+---

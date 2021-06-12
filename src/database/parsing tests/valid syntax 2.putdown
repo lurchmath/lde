@@ -1,0 +1,17 @@
+---
+testing:
+  syntax: valid
+  length: 1
+---
+
+// This file contains some nested Environments, Expressions, and Declarations,
+// all using valid putdown syntax.
+
+{
+    // Let x be arbitrary.
+    :[x var]
+    // Assume x is a real number.
+    :(in x R)
+    // Claim that x is a complex number, by Theorem 21
+    (in x C) +{"reason":"Theorem 21"}
+}

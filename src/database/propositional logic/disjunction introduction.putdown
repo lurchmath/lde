@@ -1,0 +1,16 @@
+---
+rule: true
+names:
+ - disjunction introduction
+ - "vI"
+---
+
+{*
+    :A
+    (or A B)
+*}
+
+{*
+    :B
+    (or A B)
+*}

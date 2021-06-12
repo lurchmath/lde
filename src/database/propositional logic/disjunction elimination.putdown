@@ -1,0 +1,13 @@
+---
+rule: true
+names:
+ - disjunction elimination
+ - "vE"
+---
+
+{*
+    :(or A B)
+    :(implies A C)
+    :(implies B C)
+    C
+*}

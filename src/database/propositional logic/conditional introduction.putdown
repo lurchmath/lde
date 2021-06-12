@@ -1,0 +1,14 @@
+---
+rule: true
+names:
+ - conditional introduction
+ - "->I"
+---
+
+{*
+    :{
+        :A
+        B
+    }
+    (implies A B)
+*}

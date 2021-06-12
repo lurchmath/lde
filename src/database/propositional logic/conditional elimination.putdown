@@ -1,0 +1,12 @@
+---
+rule: true
+names:
+ - conditional elimination
+ - "->E"
+---
+
+{*
+    :(implies A B)
+    :A
+    B
+*}

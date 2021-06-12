@@ -1,0 +1,15 @@
+---
+testing:
+  syntax: valid
+  length: 4
+---
+
+// This file contains several Expressions, all using valid putdown notation.
+
+(+ 1 2)
+
+(- k t (* u v))
+
+(polynomial (variable x) (coefficients 9 0 -6 2 1))
+
+(forall x , (exists y , (> x y)))

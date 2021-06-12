@@ -1,0 +1,18 @@
+---
+rule: true
+names:
+ - biconditional elimination
+ - "<->E"
+---
+
+{*
+    :(iff A B)
+    :A
+    B
+*}
+
+{*
+    :(iff A B)
+    :B
+    A
+*}
