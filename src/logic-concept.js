@@ -243,7 +243,7 @@ export class LogicConcept extends MathConcept {
         const commentRE = /^\/\/.*\n/
         const givenRE = /^:/
         const bindingRE = /^,/
-        const declarationRE = /^var|^const/
+        const declarationRE = /^var\b|^const\b/
         const attributesRE = /^[+][{].*(?:\n|$)/
         const whitespaceRE = /^\s/
         const symbolRE = /^(?:(?!,|\(|\)|\{|\}|\[|\]|:)\S)+/
