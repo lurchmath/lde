@@ -1,5 +1,6 @@
 ---
 includes:
+ - "declare connectives.putdown"
  - "conjunction introduction.putdown"
  - "conjunction elimination.putdown"
  - "disjunction introduction.putdown"
