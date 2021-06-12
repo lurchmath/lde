@@ -51,12 +51,12 @@ describe( 'Database', () => {
 
     it( 'Should verify that entries with invalid syntax do not parse', () => {
         // The database contains at least one entry marked as "invalid syntax"
-        const validSyntax = Database.filterByMetadata( metadata =>
+        const invalidSyntax = Database.filterByMetadata( metadata =>
             metadata.testing && metadata.testing.syntax &&
             metadata.testing.syntax == 'invalid' )
-        expect( validSyntax ).to.have.lengthOf.above( 0 )
+        expect( invalidSyntax ).to.have.lengthOf.above( 0 )
         // For every such entry, asking for its LogicConcepts throws an error.
-        validSyntax.forEach( key => {
+        invalidSyntax.forEach( key => {
             expect( () => Database.getLogicConcepts( key ),
                 `Parsing ${key}` ).to.throw()
         } )
