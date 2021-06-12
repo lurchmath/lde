@@ -58,7 +58,7 @@ const allFilenames = recur( baseFolder )
 const database = allFilenames.map( filename => {
     console.log( `Reading contents of ${filename}...` )
     const content = String( fs.readFileSync( filename ) )
-    const yaml = /^---\n(?:.|\n)*\n---\n/.exec( content )
+    const yaml = /^---\n(?:.|\n)*\n---(?:\n|$)/.exec( content )
     return yaml ? {
         filename : filename,
         metadata : jsyaml.load( yaml[0].substring( 0, yaml[0].length-4 ) ),

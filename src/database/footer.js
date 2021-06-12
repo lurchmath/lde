@@ -77,9 +77,11 @@ export const getPutdown = entryName =>
 // (For that, see getPutdown().)
 // It will not include that YAML header, which has been converted to JSON and
 // is available via getMetadata().
-export const getPutdownWithoutIncludes = entryName =>
-    getEntryAttribute( entryName, 'original' ) ||
-    getEntryAttribute( entryName, 'content' )
+export const getPutdownWithoutIncludes = entryName => {
+    const original = getEntryAttribute( entryName, 'original' )
+    return typeof( original ) == 'undefined' ?
+        getEntryAttribute( entryName, 'content' ) : original
+}
 
 // Get a cached parsed result of the given entry's full putdown source, if any
 // exists yet in the database.
