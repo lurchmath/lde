@@ -38,6 +38,11 @@ export const keysPaths = ( prefix = '' ) => {
         key => key.substring( prefix.length ).split( '/' )[0] ) ) )
 }
 
+// Get the list of all keys whose metadata satisfies a given predicate.
+export const filterByMetadata = predicate =>
+    putdownDatabase.filter( entry => predicate( entry.metadata ) )
+    .map( entry => entry.filename )
+
 // Read attributes from database entries; internal module helper function.
 const getEntryAttribute = ( entryName, attribute ) => {
     const entry = putdownDatabase.find( entry => entry.filename == entryName )
@@ -124,7 +129,7 @@ export const getLogicConcept = entryName => {
 // create a default object so that clients can do:
 // import Database from './database.js'
 export default {
-    keys, keysStartingWith, keysPaths,
+    keys, keysStartingWith, keysPaths, filterByMetadata,
     getMetadata, getPutdown, getPutdownWithoutIncludes,
     getLogicConcepts, getLogicConcept
 }
