@@ -3,13 +3,8 @@ import { Expression } from './expression.js'
 import { Application } from './application.js'
 import { Binding } from './binding.js'
 import { Symbol } from './symbol.js'
-import { setAPI, isExpressionFunction, makeExpressionFunction,
-    isExpressionFunctionApplication, makeExpressionFunctionApplication,
-    canApplyExpressionFunctionApplication, getVariablesIn, occursFree, isFree,
-    applyExpressionFunctionApplication, getNewVariableRelativeTo,
-    replaceWithoutCapture, alphaConvert, alphaEquivalent, betaReduce,
-    makeConstantExpression, makeProjectionExpression, makeImitationExpression,
-    CASES, Constraint, ConstraintList, MatchingChallenge
+import { setAPI, makeExpressionFunction, makeExpressionFunctionApplication,
+    Constraint, ConstraintList, MatchingChallenge
 } from '../node_modules/second-order-matching/src/matching-without-om.js'
 
 // The following function call teaches the second-order-matching module
@@ -144,26 +139,6 @@ export const display = matchingData => {
 }
 
 export {
-    // // Clients will not need most of the things that we could export here,
-    // // so we list them in case later it becomes useful to expose one, but
-    // // we keep most of them unexposed, for simplicity.
-    // setAPI,
-    // isExpressionFunction,
-    // isExpressionFunctionApplication,
-    // canApplyExpressionFunctionApplication,
-    // getVariablesIn,
-    // occursFree,
-    // isFree,
-    // applyExpressionFunctionApplication,
-    // getNewVariableRelativeTo,
-    // replaceWithoutCapture,
-    // alphaConvert,
-    // alphaEquivalent,
-    // betaReduce,
-    // makeConstantExpression,
-    // makeProjectionExpression,
-    // makeImitationExpression,
-    // CASES,
     Constraint,
     ConstraintList,
     makeExpressionFunction,
