@@ -77,7 +77,8 @@ setAPI( {
 
     // How can we construct a new application instance?
     // Just call the Application constructor.
-    application : children => new Application( ...children ),
+    application : children =>
+        new Application( ...children.map( c => c.copy() ) ),
 
     // How can we get the list of children of a function application instance?
     // There is a method in the LogicConcept class for this purpose.
@@ -88,10 +89,10 @@ setAPI( {
     isBinding : expression => expression instanceof Binding,
 
     // How can we construct a new bidning instance?
-    // Just call the Binding constructor; it has the same signature as the
-    // corresponding method from the matching API.
-    binding : ( symbol, variables, body ) =>
-        new Binding( symbol, variables, body ),
+    // Just call the Binding constructor; it has almost the same signature as
+    // the corresponding method from the matching API.
+    binding : ( symbol, variables, body ) => new Binding(
+        symbol.copy(), ...variables.map( v => v.copy() ), body.copy() ),
 
     // How can we get the head symbol/expression of a binding?
     // There is a built-in method from the Binding class for this.
@@ -127,6 +128,21 @@ setAPI( {
 
 } )
 
+export const display = matchingData => {
+    if ( matchingData instanceof Constraint )
+        return ( '(' + matchingData.pattern.toPutdown()
+              + ', ' + matchingData.expression.toPutdown() + ')' )
+            .replace( / \+\{"_type_metavariable":true\}\n/g, '' )
+    if ( matchingData instanceof ConstraintList )
+        return '{ ' + matchingData.contents.map( display ).join( ', ' ) + ' }'
+    if ( matchingData instanceof Array
+      && matchingData.every( entry => entry instanceof ConstraintList ) )
+        return matchingData.length == 0 ? 'No solutions' :
+            matchingData.map( ( entry, index ) =>
+                `${index}. ${display( entry )}` ).join( '\n' )
+    return String( matchingData )
+}
+
 export {
     // // Clients will not need most of the things that we could export here,
     // // so we list them in case later it becomes useful to expose one, but
@@ -148,8 +164,8 @@ export {
     // makeProjectionExpression,
     // makeImitationExpression,
     // CASES,
-    // Constraint,
-    // ConstraintList,
+    Constraint,
+    ConstraintList,
     makeExpressionFunction,
     makeExpressionFunctionApplication,
     MatchingChallenge
