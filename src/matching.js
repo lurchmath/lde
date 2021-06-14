@@ -10,115 +10,356 @@ import { setAPI, makeExpressionFunction, makeExpressionFunctionApplication,
 // The following function call teaches the second-order-matching module
 // imported from npm the specific expression API used in this repository.
 
+/**
+ * The matching module we [import from npm](https://www.npmjs.com/package/second-order-matching)
+ * requires us to specify how it should interact with the mathematical
+ * expressions in the client project.  We make a call to the matching module's
+ * `setAPI()` function and provide it with all the tools it needs to interface
+ * with {@link LogicConcept LogicConcept} instances.  We document in this
+ * namespace all those tools.
+ * 
+ * @namespace Matching
+ */
+
 setAPI( {
 
-    // The matching module needs to how how to answer several key questions
-    // about our specific expression class and its tools, so that it can
-    // interface with them.  Here are the questions and our answers.
-    
-    // How can we tell what an "expression" is?
-    // For us, that's any instance of the Expression class.
+    /**
+     * How can the matching module tell what an expression is?
+     * In the LDE, it's any instance of the {@link Expression Expression}
+     * class.
+     * 
+     * @memberof Matching
+     * @param {*} object - any type of input, to be tested for whether it is
+     *   an expression, in the LDE's sense of that term
+     * @returns {boolean} whether the input is an expression
+     */
     isExpression : object => object instanceof Expression,
 
-    // How can we get the list of subexpressions of a given expression
-    // satisfying a given predicate?
-    // We have a function for exactly that.
+    /**
+     * How can the matching module get a list of all subexpressions of a given
+     * expression that satisfy a certain predicate?  We use the
+     * {@link MathConcept#descendantsSatisfying descendantsSatisfying()}
+     * function for this purpose.
+     * 
+     * @memberof Matching
+     * @param {Expression} expression - the expression whose descendants should
+     *   be searched
+     * @param filter - a function that takes {@link Expression Expression}
+     *   instances as inputs and yields boolean outputs
+     * @returns {Expression[]} a JavaScript array of all descendants satisfying
+     *   the given predicate
+     */
     filterSubexpressions : ( expression, filter ) =>
         expression.descendantsSatisfying( filter ),
     
-    // How can we detect whether two expression are the same "type"?
-    // For us, that just means checking if they belong to the same class.
+    /**
+     * How can the matching module tell when two expressions have the same
+     * type?  We check to ensure they have the same class (e.g.,
+     * {@link Symbol Symbol}, {@link Application Application}, etc.).
+     * 
+     * @memberof Matching
+     * @param {Expression} expression1 - the first expression to compare
+     * @param {Expression} expression2 - the second expression to compare
+     * @returns {boolean} whether the two expressions have the same type
+     */
     sameType : ( expression1, expression2 ) =>
         expression1.constructor.className == expression2.constructor.className,
     
-    // How to make deep copies?  We have a function for that.
+    /**
+     * How can the matching module make a deep copy of an expression?
+     * The {@link MathConcept MathConcept} class has a built-in
+     * {@link MathConcept#copy copy()} function for this purpose.
+     * 
+     * @memberof Matching
+     * @param {Expression} expression - the expression to deep copy
+     * @returns {Expression} a deep copy
+     */
     copy : expression => expression.copy(),
 
-    // How to compare expressions for equality?  Again, we have a function.
+    /**
+     * How can the matching module test two expressions for deep structural
+     * equality?  The {@link MathConcept MathConcept} class has a built-in
+     * {@link MathConcept#equals equals()} function for this purpose.
+     * 
+     * @memberof Matching
+     * @param {Expression} expression1 - the first expression to compare
+     * @param {Expression} expression2 - the second expression to compare
+     * @returns {boolean} whether the two expressions are equal as tree
+     *   structures
+     */
     equal : ( expression1, expression2 ) => expression1.equals( expression2 ),
     
-    // How to replace any expression, in place in its parent context, with a
-    // different expression?  Again, we have a function.
+    /**
+     * How can the matching module replace any expression in its parent context
+     * with another expression?  The {@link MathConcept MathConcept} class has
+     * a built-in {@link MathConcept#replaceWith replaceWith()} function for
+     * this purpose.
+     * 
+     * @memberof Matching
+     * @param {Expression} toReplace - the expression to replace, in its parent
+     *   context, with another expression
+     * @param {Expression} withThis - the expression to replace the other with
+     */
     replace : ( toReplace, withThis ) => toReplace.replaceWith( withThis ),
 
-    // How to tell if an expression is a variable?
-    // The LDE does not distinguish constants from variables internally, so we
-    // will artificially prefix anything that the matching package wants to
-    // call a "symbol" with the prefix "symbol: " and use that as an indicator.
-    // See the function further below for constructing symbols.
+    /**
+     * How can the matching module tell when an expression is a variable?
+     * The LDE does not distinguish constants from variables internally, so we
+     * will artificially prefix any {@link Symbol Symbol} that the matching
+     * module wants to call a "symbol" with the prefix `"symbol: "` and use
+     * that as an indicator.
+     * 
+     * See {@link Matching.symbol symbol()} further below for details.
+     * 
+     * @memberof Matching
+     * @param {Expression} expression - the expression to test for whether it
+     *   is a variable
+     * @returns {boolean} whether the expression is a variable
+     */
     isVariable : expression => expression instanceof Symbol
                             && !expression.text().startsWith( 'symbol: ' ),
     
-    // If we have a variable instance, how can we fetch its name?
-    // There is a function built into the Symbol class for that purpose.
+    /**
+     * Given a variable, how can the matching module fetch its name?
+     * The {@link Symbol Symbol} class provides a {@link Symbol#text text()}
+     * function for exactly this purpose.
+     * 
+     * @memberof Matching
+     * @param {Expression} expression - the variable whose name we need
+     * @returns {string} the name of the variable
+     */
     getVariableName : expression => expression.text(),
 
-    // How can we construct a new variable with a given name?
-    // Just use the Symbol constructor.  (Yes, there's the small chance that
-    // this could cause problems if any client named a variable with a name
-    // that literally begins with the text "symbol: " but that's highly
-    // unlikely and a very confusing decision anyway.)
+    /**
+     * How can the matching module construct a variable with a given name?
+     * We use the {@link Symbol Symbol} class to store both what the matching
+     * module calls "variables" and what it calls "symbols," but we store
+     * variables with whatever name is requested, whereas we store symbols with
+     * the prefix `"symbol: "` in front of their name, to distinguish them from
+     * variables.
+     * 
+     * While there is a small chance that this could cause ambiguity if you
+     * have a variable whose name literally begins with the text `"symbol: "`,
+     * that event is unlikely in the extreme, and a bad idea anyway.
+     * 
+     * @memberof Matching
+     * @param {string} text - the name to use for the variable being created
+     * @returns {Symbol} an instance of the {@link Symbol Symbol} class, the
+     *   variable that was created
+     */
     variable : text => new Symbol( text ),
 
-    // How can we construct a new symbol with a given name?
-    // Same as constructing a variable, but prefix it with the text "symbol: "
-    // mentioned above for distinguishing symbols from variables.
+    /**
+     * How can the matching module construct a variable with a given name?
+     * We use the {@link Symbol Symbol} class to store both what the matching
+     * module calls "variables" and what it calls "symbols," but we store
+     * variables with whatever name is requested, whereas we store symbols with
+     * the prefix `"symbol: "` in front of their name, to distinguish them from
+     * variables.
+     * 
+     * While there is a small chance that this could cause ambiguity if you
+     * have a variable whose name literally begins with the text `"symbol: "`,
+     * that event is unlikely in the extreme, and a bad idea anyway.
+     * 
+     * @memberof Matching
+     * @param {string} text - the name to use for the symbol being created;
+     *   this text will be prefixed with `"symbol: "`
+     * @returns {Symbol} an instance of the {@link Symbol Symbol} class, the
+     *   symbol that was created
+     */
     symbol : text => new Symbol( `symbol: ${text}` ),
 
-    // How can we tell if an expression is a function application?
-    // This answer is straightforward, we have a function application class for
-    // exactly this purpose.
+    /**
+     * How can the matching module tell when an expression is the application
+     * of a function or operator?  The LDE has a class,
+     * {@link Application Application}, for exactly this purpose; we just check
+     * to see if the object is an instance of that class.
+     * 
+     * @memberof Matching
+     * @param {Expression} expression - the expression to test for whether it
+     *   is an application
+     * @returns {boolean} whether the expression is an application
+     */
     isApplication : expression => expression instanceof Application,
 
-    // How can we construct a new application instance?
-    // Just call the Application constructor.
+    /**
+     * How can the matching module construct a function application with a
+     * given set of expressions to use as children?  (By convention, the first
+     * is the operator/function being applied, and the rest are its arguments,
+     * in order.)  We simply call the {@link Application Application}
+     * constructor.
+     * 
+     * Note that all children provided in the first argument will be deep
+     * copied, because the matching module expects and relies upon that
+     * behavior.  It is not possible, using this function, to move/share
+     * subexpressions between expressions.
+     * 
+     * @memberof Matching
+     * @param {Expression[]} children - a JavaScript array of the child
+     *   expressions, in the order described above
+     * @returns {Application} an instance of the
+     *   {@link Application Application} class, which this function creates
+     */
     application : children =>
         new Application( ...children.map( c => c.copy() ) ),
 
-    // How can we get the list of children of a function application instance?
-    // There is a method in the LogicConcept class for this purpose.
+    /**
+     * How can the matching module query the list of children expression of a
+     * given expression?  The {@link MathConcept MathConcept} class provides
+     * the {@link MathConcept#children children()} function for this purpose.
+     * 
+     * A few notes about it:
+     * 
+     *  * An {@link Application Application}'s children are returned in the
+     *    order explained {@link Matching.application here}.
+     *  * A {@link Binding Binding}'s children are its head, then its list of
+     *    bound variables ({@link Symbol Symbol} instances), in order, then its
+     *    body.
+     *  * An atomic expression will have an empty children list.
+     * 
+     * @memberof Matching
+     * @param {Expression} expression - the expression whose children are
+     *   being requested
+     * @returns {Expression[]} the JavaScript array of all children of this
+     *   expression
+     */
     getChildren : expression => expression.children(),
 
-    // How can we tell if an expression is a binding (e.g., quantification)?
-    // This answer is straightforward, we have a binding class for this.
+    /**
+     * How can the matching module tell when an expression is a binding
+     * expression?  The LDE has a class, {@link Binding Binding}, for exactly
+     * this purpose; we just check to see if the object is an instance of that
+     * class.
+     * 
+     * @memberof Matching
+     * @param {Expression} expression - the expression to test for whether it
+     *   is a binding
+     * @returns {boolean} whether the expression is a binding
+     */
     isBinding : expression => expression instanceof Binding,
 
-    // How can we construct a new bidning instance?
-    // Just call the Binding constructor; it has almost the same signature as
-    // the corresponding method from the matching API.
+    /**
+     * How can the matching module construct a binding expression with a
+     * given head, variable list, and body?  We simply call the
+     * {@link Binding Binding} constructor.
+     * 
+     * Note that all children provided in the arguments will be deep copied,
+     * because the matching module expects and relies upon that behavior.  It
+     * is not possible, using this function, to move/share subexpressions
+     * between expressions.
+     * 
+     * @memberof Matching
+     * @param {Expression} symbol - the head of the binding, which is often a
+     *   symbol, but can also be a compound expression
+     * @param {Symbol[]} variables - a JavaScript array of the variables to be
+     *   bound by the expression created (or one single variable that will be
+     *   placed into an array)
+     * @param {Expression} body - the body of the new binding to be created
+     * @returns {Binding} an instance of the {@link Binding Binding} class,
+     *   which this function creates
+     */
     binding : ( symbol, variables, body ) => new Binding(
         symbol.copy(), ...variables.map( v => v.copy() ), body.copy() ),
 
-    // How can we get the head symbol/expression of a binding?
-    // There is a built-in method from the Binding class for this.
+    /**
+     * How can the matching module query the head symbol or expression in a
+     * binding expression?  We give it access to the built-in
+     * {@link Binding#head head()} function in the {@link Binding Binding}
+     * class.
+     * 
+     * @memberof Matching
+     * @param {Binding} binding - the binding expression whose head is to be
+     *   retrieved
+     * @returns {Expression} the head of the given binding expression, which is
+     *   often a {@link Symbol Symbol} instance, but may be a compound
+     *   expression
+     */
     bindingHead : binding => binding.head(),
 
-    // How can we get the list of variables a binding expression binds?
-    // There is a built-in method from the Binding class for this.
+    /**
+     * How can the matching module query the list of bound variables in a
+     * binding expression?  We give it access to the built-in
+     * {@link Binding#boundVariables boundVariables()} function in the
+     * {@link Binding Binding} class.  Note that these are the actual
+     * {@link Symbol Symbol} instances, not their names.
+     * 
+     * @memberof Matching
+     * @param {Binding} binding - the binding expression whose list of bound
+     *   variables is to be retrieved
+     * @returns {Symbol[]} the bound variables in the binding expression
+     *   (the actual instances, not copies, and not just the names as text)
+     */
     bindingVariables : binding => binding.boundVariables(),
 
-    // How can we get the body expression of a binding?
-    // There is a built-in method from the Binding class for this.
+    /**
+     * How can the matching module query the body of a binding expression?
+     * We give it access to the built-in {@link Binding#body body()} function
+     * in the {@link Binding Binding} class.
+     * 
+     * @memberof Matching
+     * @param {Binding} binding - the binding expression whose body is to be
+     *   retrieved
+     * @returns {Expression} the body of the given binding expression
+     */
     bindingBody : binding => binding.body(),
 
-    // How can we tell if a particular instance of a variable is free in a
-    // given ancestor expression?
-    // We have a method in the MathConcept class that could answer this same
-    // question for any subexpression, not just one of variable type.  So we
-    // can just defer this question to that method.
+    /**
+     * How can the matching module tell whether a particular instance of a
+     * variable is free in a given ancestor expression?  We give it access to
+     * the built-in {@link MathConcept#isFree isFree()} function in the
+     * {@link MathConcept MathConcept} class.
+     * 
+     * @memberof Matching
+     * @param {Symbol} variable - the variable to test for freeness; note that
+     *   this is an actual {@link Symbol Symbol} instance whose ancestor
+     *   context is relevant to this function, not just the name or another
+     *   copy of the same variable
+     * @param {Expression} [expression] - optional ancestor context in which to
+     *   test for freeness; if this is provided, only bindings within this
+     *   ancestor are relevant, but if it is omitted, all ancestor bindings are
+     *   relevant
+     * @returns {boolean} whether the given variable is free in the given
+     *   ancestor expression (or its topmost ancestor if no ancestor expression
+     *   is provided)
+     */
     variableIsFree : ( variable, expression ) => variable.isFree( expression ),
 
-    // How can we mark a variable as being a metavariable?
-    // There is a feature of MathConcepts that lets you read/write/clear any
-    // attribute from them using functions isA/makeIntoA/unmakeIntoA.  We just
-    // leverage that functionality.
+    /**
+     * How can the matching module mark a given variable as a metavariable?  We
+     * leverage the built-in {@link MathConcept#makeIntoA makeIntoA()} function
+     * in the {@link MathConcept MathConcept} class.
+     * 
+     * @memberof Matching
+     * @param {Symbol} variable - the variable to mark as a metavariable
+     * @see {@link Matching.isMetavariable isMetavariable}
+     * @see {@link Matching.clearMetavariable clearMetavariable}
+     */
     setMetavariable : variable => variable.makeIntoA( 'metavariable' ),
 
-    // How can we check if a veriable is a metavariable?  Same; see above.
+    /**
+     * How can the matching module check whether a given variable has been
+     * marked as a metavariable?  We leverage the built-in
+     * {@link MathConcept#isA isA()} function in the
+     * {@link MathConcept MathConcept} class.
+     * 
+     * @memberof Matching
+     * @param {Symbol} variable - the variable to check for whether it is a
+     *   metavariable
+     * @see {@link Matching.setMetavariable setMetavariable}
+     * @see {@link Matching.clearMetavariable clearMetavariable}
+     */
     isMetavariable : variable => variable.isA( 'metavariable' ),
 
-    // How can we set a veriable to no longer be a metavariable?
-    // Same; see above.
+    /**
+     * How can the matching module unmark a given variable as a metavariable?
+     * We leverage the built-in {@link MathConcept#unmakeIntoA unmakeIntoA()}
+     * function in the {@link MathConcept MathConcept} class.
+     * 
+     * @memberof Matching
+     * @param {Symbol} variable - the variable to unmark as a metavariable
+     * @see {@link Matching.setMetavariable setMetavariable}
+     * @see {@link Matching.isMetavariable isMetavariable}
+     */
     clearMetavariable : variable => variable.unmakeIntoA( 'metavariable' )
 
 } )
