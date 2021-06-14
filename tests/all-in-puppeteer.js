@@ -5,14 +5,15 @@
 
 // First launch a simple web server in the test folder.
 
-require( './simple-server.js' ).startServer( { verbose : false } )
+import( './simple-server.cjs' ).then( module =>
+    module.startServer( { verbose : false } ) )
 
 // Now fire up an invisible Chromium to visit the test page and get its results:
 
-const puppeteer = require( 'puppeteer' )
+import puppeteer from 'puppeteer'
 
 // define colors for various test result types
-const clr = require( 'ansi-colors' )
+import clr from 'ansi-colors'
 const color = ( type, text ) => {
     if ( typeof text == 'undefined' ) text = type
     return type == 'passed' ? clr.green( text ) :
