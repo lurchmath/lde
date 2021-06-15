@@ -1,10 +1,5 @@
 
 /**
- * @file Provides several useful utility functions that extend basic
- *   JavaScript functionality
- */
-
-/**
  * A JSON stringification that is predictable.  The standard `JSON.stringify()`
  * can produce different outputs unpredictably, because there is no required
  * ordering on the key-value pairs.  This one requires keys to be output in
