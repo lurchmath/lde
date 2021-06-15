@@ -70,7 +70,83 @@ requires us to specify how it should interact with the mathematical
 expressions in the client project.  We make a call to the matching module's
 <code>setAPI()</code> function and provide it with all the tools it needs to interface
 with <a href="LogicConcept.html">LogicConcept</a> instances.  We document in this
-namespace all those tools.</p></div>
+namespace all those tools.</p>
+<p>To use this in other code, import it with code something like
+<code>import Matching from '../src/matching.js'</code> (or whatever path is required
+based on where you're importing it from).  In the rest of this
+documentation, we assume you have issued a call like the one above and thus
+have access to a <code>Matching</code> object representing this module.</p>
+<p>It will contain the following five members, all from the npm package linked
+to above.</p>
+<ul>
+<li><code>Matching.Constraint</code>, used for constructing constraints.  A constraint
+is a pair of expressions, the left of which may contain metavariables
+and is called the &quot;pattern.&quot;  It is a constraint in that we use such
+pairs to describe the problems the matching module must solve for us.
+The given pattern must be instantiated in some way to equal the given
+expression.  To mark a <a href="Symbol.html">Symbol</a> as a metavariable, simply
+call <code>s.makeIntoA( 'metavariable' )</code>, using the existing
+function from MathConcepts.</li>
+<li><code>Matching.ConstraintList</code>, used to collect multiple constraints into a
+list, which has two purposes.  It can be used to pose a matching problem
+to the matching module, and it can also be used to report a solution
+back from the module to the client.  When reporting a solution, all the
+patterns will be atomic metavariables.</li>
+<li><code>Matching.makeExpressionFunction</code>, used to construct expressions whose
+meaning is a function that can build other expressions.  For instance,
+the expression function $\lambda x.x+3$ can be applied to the expression
+$5$ to produce the expression $5+3$.  You would create $\lambda x.x+3$
+by calling <code>Matching.makeExpressionFunction(x,y)</code>, where <code>x</code> contains
+the expression $x$ and <code>y</code> contains the expression $x+3$.</li>
+<li><code>Matching.makeExpressionFunctionApplication</code>, used to construct
+expressions whose meaning is the application of an expression function
+to another expression.  This is most often required when writing $P(x)$
+inside a rule of inference, as in &quot;from $\forall x,P(x)$ we can conclude
+$P(t)$.&quot;  To construct the latter of these two expressions, you would
+call <code>Matching.makeExpressionFunctionApplication(P,t)</code>, where <code>P</code> and
+<code>t</code> are atomic expressions, probably metavariables.</li>
+<li><code>Matching.MatchingChallenge</code>, used to both pose and solve matching
+problems.  The code block below shows examples.</li>
+</ul>
+<pre class="prettyprint source lang-javascript"><code>// Let's say we want to check the rule &quot;from A and B, conclude and(A,B)&quot;
+// against the instance &quot;from X and or(Y,Z), conclude and(X,or(Y,Z)).&quot;
+
+// First, create all the ingredients
+const A = new Symbol( 'A' ).makeIntoA( 'metavariable' )
+const B = new Symbol( 'B' ).makeIntoA( 'metavariable' )
+const AandB = new Application( new Symbol( 'and' ), A.copy(), B.copy() )
+const X = new Symbol( 'X' )
+const YorZ = LogicConcept.fromPutdown( '(or Y Z)' )[0]
+const XandYorZ = LogicConcept.fromPutdown( '(and X (or Y Z))' )[0]
+
+// Next, set up the problem
+const challenge = new Matching.MatchingChallenge( [ A,     X ],
+                                                  [ B,     YorZ ],
+                                                  [ AandB, XandYorZ ] )
+
+// Finally, get the set of solutions
+const solutions = challenge.getSolutions()
+
+// If solutions.length == 0, the challenge has no solutions.
+// If solutions.length > 1, the challenge has many solutions.
+// In this case, solutions.length == 1.
+const only = solutions[0]
+// And if we checked, we would find that it was a constraint list
+// containing the constraints (A,X) and (B,or(Y,Z)) (not necessarily in
+// that order).
+// There is a (mostly undocumented) Matching.display function that can
+// print constraints, constraint lists, and expressions, so we could do:
+console.log( Matching.display( only ) )
+// And we would see:  { (A,X), (B,(or Y Z)) }
+</code></pre>
+<p>All the functions documented below in this namespace are not for use in the
+LDE.  Rather, they are created to give the matching module (which is not
+part of the LDE) the language it needs (in terms of functions that already
+exist in the LDE) to interface with things like <a href="Symbol.html">Symbols</a>,
+<a href="Expression.html">Expressions</a>, etc.  Thus the rest of this file is just
+documenting the API we provide to the matching module, not the API for our
+own use in the LDE.  For that, see the documentation of all the other
+classes such as <a href="Symbol.html">Symbol</a>, <a href="Expression.html">Expression</a>, etc.</p></div>
         
 
         
@@ -280,7 +356,7 @@ expressions, in the order described above</p></div>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.203">, line 203</a>
+            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.283">, line 283</a>
         </li>
     </ul>
 
@@ -491,7 +567,7 @@ which this function creates</p>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.261">, line 261</a>
+            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.341">, line 341</a>
         </li>
     </ul>
 
@@ -643,7 +719,7 @@ retrieved</p></div>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.304">, line 304</a>
+            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.384">, line 384</a>
         </li>
     </ul>
 
@@ -798,7 +874,7 @@ expression</p>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.277">, line 277</a>
+            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.357">, line 357</a>
         </li>
     </ul>
 
@@ -953,7 +1029,7 @@ variables is to be retrieved</p></div>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.292">, line 292</a>
+            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.372">, line 372</a>
         </li>
     </ul>
 
@@ -1099,7 +1175,7 @@ function in the <a href="MathConcept.html">MathConcept</a> class.</p>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.363">, line 363</a>
+            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.443">, line 443</a>
         </li>
     </ul>
 
@@ -1250,7 +1326,7 @@ The <a href="MathConcept.html">MathConcept</a> class has a built-in
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.77">, line 77</a>
+            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.157">, line 157</a>
         </li>
     </ul>
 
@@ -1428,7 +1504,7 @@ structures</p>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.90">, line 90</a>
+            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.170">, line 170</a>
         </li>
     </ul>
 
@@ -1600,7 +1676,7 @@ the given predicate</p>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.52">, line 52</a>
+            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.132">, line 132</a>
         </li>
     </ul>
 
@@ -1762,7 +1838,7 @@ expression</p>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.226">, line 226</a>
+            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.306">, line 306</a>
         </li>
     </ul>
 
@@ -1913,7 +1989,7 @@ function for exactly this purpose.</p>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.131">, line 131</a>
+            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.211">, line 211</a>
         </li>
     </ul>
 
@@ -2066,7 +2142,7 @@ is an application</p></div>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.183">, line 183</a>
+            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.263">, line 263</a>
         </li>
     </ul>
 
@@ -2219,7 +2295,7 @@ is a binding</p></div>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.239">, line 239</a>
+            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.319">, line 319</a>
         </li>
     </ul>
 
@@ -2371,7 +2447,7 @@ an expression, in the LDE's sense of that term</p></div>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.36">, line 36</a>
+            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.116">, line 116</a>
         </li>
     </ul>
 
@@ -2519,7 +2595,7 @@ metavariable</p></div>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.351">, line 351</a>
+            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.431">, line 431</a>
         </li>
     </ul>
 
@@ -2674,7 +2750,7 @@ is a variable</p></div>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.119">, line 119</a>
+            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.199">, line 199</a>
         </li>
     </ul>
 
@@ -2839,7 +2915,7 @@ context, with another expression</p></div>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.103">, line 103</a>
+            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.183">, line 183</a>
         </li>
     </ul>
 
@@ -3016,7 +3092,7 @@ type?  We check to ensure they have the same class (e.g.,
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.65">, line 65</a>
+            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.145">, line 145</a>
         </li>
     </ul>
 
@@ -3162,7 +3238,7 @@ in the <a href="MathConcept.html">MathConcept</a> class.</p>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.337">, line 337</a>
+            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.417">, line 417</a>
         </li>
     </ul>
 
@@ -3321,7 +3397,7 @@ symbol that was created</p>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.170">, line 170</a>
+            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.250">, line 250</a>
         </li>
     </ul>
 
@@ -3479,7 +3555,7 @@ variable that was created</p>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.150">, line 150</a>
+            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.230">, line 230</a>
         </li>
     </ul>
 
@@ -3683,7 +3759,7 @@ is provided)</p>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.325">, line 325</a>
+            <a href="matching.js.html">matching.js</a><a href="matching.js.html#source.405">, line 405</a>
         </li>
     </ul>
 
@@ -3709,7 +3785,7 @@ is provided)</p>
 
 <footer class="layout-footer">
   <div class="container">
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.4</a> on Tue Jun 15 2021 15:40:49 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.4</a> on Tue Jun 15 2021 16:30:11 GMT+0000 (Coordinated Universal Time)
   </div>
 </footer>
 
