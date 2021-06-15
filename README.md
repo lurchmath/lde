@@ -1,9 +1,8 @@
 
 # The Lurch Deductive Engine (LDE)
 
-This branch is a rebooting of the entire LDE repository.  There's nothing to
-see here yet.  Once this branch has made greater progress, it will be usable.
-Right now, it's stripped to the studs.
+This repository is in the process of being rebuilt under a new design.
+That rebuilding is about 50% complete.  Check back later, or just pardon the dust.
 
 ## Getting started with development
 
