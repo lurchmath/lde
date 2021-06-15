@@ -18,6 +18,86 @@ import { setAPI, makeExpressionFunction, makeExpressionFunctionApplication,
  * with {@link LogicConcept LogicConcept} instances.  We document in this
  * namespace all those tools.
  * 
+ * To use this in other code, import it with code something like
+ * `import Matching from '../src/matching.js'` (or whatever path is required
+ * based on where you're importing it from).  In the rest of this
+ * documentation, we assume you have issued a call like the one above and thus
+ * have access to a `Matching` object representing this module.
+ * 
+ * It will contain the following five members, all from the npm package linked
+ * to above.
+ * 
+ *  * `Matching.Constraint`, used for constructing constraints.  A constraint
+ *    is a pair of expressions, the left of which may contain metavariables
+ *    and is called the "pattern."  It is a constraint in that we use such
+ *    pairs to describe the problems the matching module must solve for us.
+ *    The given pattern must be instantiated in some way to equal the given
+ *    expression.  To mark a {@link Symbol Symbol} as a metavariable, simply
+ *    call `s.makeIntoA( 'metavariable' )`, using the existing
+ *    {@link MathConcept.makeIntoA function from MathConcepts}.
+ *  * `Matching.ConstraintList`, used to collect multiple constraints into a
+ *    list, which has two purposes.  It can be used to pose a matching problem
+ *    to the matching module, and it can also be used to report a solution
+ *    back from the module to the client.  When reporting a solution, all the
+ *    patterns will be atomic metavariables.
+ *  * `Matching.makeExpressionFunction`, used to construct expressions whose
+ *    meaning is a function that can build other expressions.  For instance,
+ *    the expression function $\lambda x.x+3$ can be applied to the expression
+ *    $5$ to produce the expression $5+3$.  You would create $\lambda x.x+3$
+ *    by calling `Matching.makeExpressionFunction(x,y)`, where `x` contains
+ *    the expression $x$ and `y` contains the expression $x+3$.
+ *  * `Matching.makeExpressionFunctionApplication`, used to construct
+ *    expressions whose meaning is the application of an expression function
+ *    to another expression.  This is most often required when writing $P(x)$
+ *    inside a rule of inference, as in "from $\forall x,P(x)$ we can conclude
+ *    $P(t)$."  To construct the latter of these two expressions, you would
+ *    call `Matching.makeExpressionFunctionApplication(P,t)`, where `P` and
+ *    `t` are atomic expressions, probably metavariables.
+ *  * `Matching.MatchingChallenge`, used to both pose and solve matching
+ *    problems.  The code block below shows examples.
+ * 
+ * ```javascript
+ * // Let's say we want to check the rule "from A and B, conclude and(A,B)"
+ * // against the instance "from X and or(Y,Z), conclude and(X,or(Y,Z))."
+ * 
+ * // First, create all the ingredients
+ * const A = new Symbol( 'A' ).makeIntoA( 'metavariable' )
+ * const B = new Symbol( 'B' ).makeIntoA( 'metavariable' )
+ * const AandB = new Application( new Symbol( 'and' ), A.copy(), B.copy() )
+ * const X = new Symbol( 'X' )
+ * const YorZ = LogicConcept.fromPutdown( '(or Y Z)' )[0]
+ * const XandYorZ = LogicConcept.fromPutdown( '(and X (or Y Z))' )[0]
+ * 
+ * // Next, set up the problem
+ * const challenge = new Matching.MatchingChallenge( [ A,     X ],
+ *                                                   [ B,     YorZ ],
+ *                                                   [ AandB, XandYorZ ] )
+ * 
+ * // Finally, get the set of solutions
+ * const solutions = challenge.getSolutions()
+ * 
+ * // If solutions.length == 0, the challenge has no solutions.
+ * // If solutions.length > 1, the challenge has many solutions.
+ * // In this case, solutions.length == 1.
+ * const only = solutions[0]
+ * // And if we checked, we would find that it was a constraint list
+ * // containing the constraints (A,X) and (B,or(Y,Z)) (not necessarily in
+ * // that order).
+ * // There is a (mostly undocumented) Matching.display function that can
+ * // print constraints, constraint lists, and expressions, so we could do:
+ * console.log( Matching.display( only ) )
+ * // And we would see:  { (A,X), (B,(or Y Z)) }
+ * ```
+ * 
+ * All the functions documented below in this namespace are not for use in the
+ * LDE.  Rather, they are created to give the matching module (which is not
+ * part of the LDE) the language it needs (in terms of functions that already
+ * exist in the LDE) to interface with things like {@link Symbol Symbols},
+ * {@link Expression Expressions}, etc.  Thus the rest of this file is just
+ * documenting the API we provide to the matching module, not the API for our
+ * own use in the LDE.  For that, see the documentation of all the other
+ * classes such as {@link Symbol Symbol}, {@link Expression Expression}, etc.
+ * 
  * @namespace Matching
  */
 
