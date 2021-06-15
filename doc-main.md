@@ -1,5 +1,5 @@
  
-## The Lurch Deductive Engine (LDE) Source Code Documentation
+# The Lurch Deductive Engine (LDE) Source Code Documentation
 
 This repository is in the process of rebuilding the LDE, discarding an old
 design and replacing it with a better, updated design.  That work is still in
@@ -8,7 +8,7 @@ progress, and is perhaps 50% complete.
 The navigation menu on the left shows classes and namespaces in alphabetical
 order, but the overview below is more logically organized.
 
-## Code documentation overview
+## Overview
 
 Every symbolic math software needs some data structure for storing trees of
 mathematical symbols that represent mathematical meaning.  In the LDE, the
@@ -33,8 +33,13 @@ There are also some basic tools, including:
  * for working with {@link JSON JSON} and
    {@link predictableStringify serializing it}.
 
-## Other links
+And when working in the test suite, feel free to import
+{@link Database the Database module} for access to a library of
+{@link LogicConcept LogicConcept} instances written in putdown notation, with
+corresponding metadata.
 
-[Source code repository](http://github.com/lurchmath/lde)
+## GitHub
+
+[Source code](http://github.com/lurchmath/lde)
 
 [Design wiki](http://github.com/lurchmath/lde/wiki)
