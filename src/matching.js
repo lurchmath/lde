@@ -3,8 +3,8 @@ import { Expression } from './expression.js'
 import { Application } from './application.js'
 import { Binding } from './binding.js'
 import { Symbol } from './symbol.js'
-import { setAPI, Constraint, ConstraintList, MatchingChallenge
-} from '../node_modules/second-order-matching/src/matching-without-om.js'
+import { setAPI, Constraint, ConstraintList, MatchingChallenge }
+    from '../node_modules/second-order-matching/src/matching-without-om.js'
 
 // The following function call teaches the second-order-matching module
 // imported from npm the specific expression API used in this repository.
@@ -23,7 +23,7 @@ import { setAPI, Constraint, ConstraintList, MatchingChallenge
  * documentation, we assume you have issued a call like the one above and thus
  * have access to a `Matching` object representing this module.
  * 
- * It will contain the following five members, all from the npm package linked
+ * It will contain the following three members, all from the npm package linked
  * to above.
  * 
  *  * `Matching.Constraint`, used for constructing constraints.  A constraint
