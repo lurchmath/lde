@@ -3,8 +3,7 @@ import { Expression } from './expression.js'
 import { Application } from './application.js'
 import { Binding } from './binding.js'
 import { Symbol } from './symbol.js'
-import { setAPI, makeExpressionFunction, makeExpressionFunctionApplication,
-    Constraint, ConstraintList, MatchingChallenge
+import { setAPI, Constraint, ConstraintList, MatchingChallenge
 } from '../node_modules/second-order-matching/src/matching-without-om.js'
 
 // The following function call teaches the second-order-matching module
@@ -40,19 +39,6 @@ import { setAPI, makeExpressionFunction, makeExpressionFunctionApplication,
  *    to the matching module, and it can also be used to report a solution
  *    back from the module to the client.  When reporting a solution, all the
  *    patterns will be atomic metavariables.
- *  * `Matching.makeExpressionFunction`, used to construct expressions whose
- *    meaning is a function that can build other expressions.  For instance,
- *    the expression function $\lambda x.x+3$ can be applied to the expression
- *    $5$ to produce the expression $5+3$.  You would create $\lambda x.x+3$
- *    by calling `Matching.makeExpressionFunction(x,y)`, where `x` contains
- *    the expression $x$ and `y` contains the expression $x+3$.
- *  * `Matching.makeExpressionFunctionApplication`, used to construct
- *    expressions whose meaning is the application of an expression function
- *    to another expression.  This is most often required when writing $P(x)$
- *    inside a rule of inference, as in "from $\forall x,P(x)$ we can conclude
- *    $P(t)$."  To construct the latter of these two expressions, you would
- *    call `Matching.makeExpressionFunctionApplication(P,t)`, where `P` and
- *    `t` are atomic expressions, probably metavariables.
  *  * `Matching.MatchingChallenge`, used to both pose and solve matching
  *    problems.  The code block below shows examples.
  * 
@@ -184,20 +170,15 @@ setAPI( {
 
     /**
      * How can the matching module tell when an expression is a variable?
-     * The LDE does not distinguish constants from variables internally, so we
-     * will artificially prefix any {@link Symbol Symbol} that the matching
-     * module wants to call a "symbol" with the prefix `"symbol: "` and use
-     * that as an indicator.
-     * 
-     * See {@link Matching.symbol symbol()} further below for details.
+     * What the matching package calls a variable, this module calls a
+     * {@link Symbol Symbol}, so we will just use that class for variables.
      * 
      * @memberof Matching
      * @param {Expression} expression - the expression to test for whether it
      *   is a variable
      * @returns {boolean} whether the expression is a variable
      */
-    isVariable : expression => expression instanceof Symbol
-                            && !expression.text().startsWith( 'symbol: ' ),
+    isVariable : expression => expression instanceof Symbol,
     
     /**
      * Given a variable, how can the matching module fetch its name?
@@ -212,15 +193,8 @@ setAPI( {
 
     /**
      * How can the matching module construct a variable with a given name?
-     * We use the {@link Symbol Symbol} class to store both what the matching
-     * module calls "variables" and what it calls "symbols," but we store
-     * variables with whatever name is requested, whereas we store symbols with
-     * the prefix `"symbol: "` in front of their name, to distinguish them from
-     * variables.
-     * 
-     * While there is a small chance that this could cause ambiguity if you
-     * have a variable whose name literally begins with the text `"symbol: "`,
-     * that event is unlikely in the extreme, and a bad idea anyway.
+     * We use the {@link Symbol Symbol} class to store what the matching
+     * module calls "variables."
      * 
      * @memberof Matching
      * @param {string} text - the name to use for the variable being created
@@ -228,26 +202,6 @@ setAPI( {
      *   variable that was created
      */
     variable : text => new Symbol( text ),
-
-    /**
-     * How can the matching module construct a variable with a given name?
-     * We use the {@link Symbol Symbol} class to store both what the matching
-     * module calls "variables" and what it calls "symbols," but we store
-     * variables with whatever name is requested, whereas we store symbols with
-     * the prefix `"symbol: "` in front of their name, to distinguish them from
-     * variables.
-     * 
-     * While there is a small chance that this could cause ambiguity if you
-     * have a variable whose name literally begins with the text `"symbol: "`,
-     * that event is unlikely in the extreme, and a bad idea anyway.
-     * 
-     * @memberof Matching
-     * @param {string} text - the name to use for the symbol being created;
-     *   this text will be prefixed with `"symbol: "`
-     * @returns {Symbol} an instance of the {@link Symbol Symbol} class, the
-     *   symbol that was created
-     */
-    symbol : text => new Symbol( `symbol: ${text}` ),
 
     /**
      * How can the matching module tell when an expression is the application
@@ -440,7 +394,18 @@ setAPI( {
      * @see {@link Matching.setMetavariable setMetavariable}
      * @see {@link Matching.isMetavariable isMetavariable}
      */
-    clearMetavariable : variable => variable.unmakeIntoA( 'metavariable' )
+    clearMetavariable : variable => variable.unmakeIntoA( 'metavariable' ),
+
+    /**
+     * How can the matching module distinguish normal expressions from
+     * metalinguistic expressions?  It requires that we provide it with a
+     * special expression that we don't plan to use for any other purpose, and
+     * that it can use as a flag to indicate when an expression is a
+     * metalinguistic one.  We choose the symbol `@` for this purpose.
+     * 
+     * @memberof Matching
+     */
+    metaFlag : new Symbol( '@' )
 
 } )
 
@@ -459,10 +424,4 @@ export const display = matchingData => {
     return String( matchingData )
 }
 
-export {
-    Constraint,
-    ConstraintList,
-    makeExpressionFunction,
-    makeExpressionFunctionApplication,
-    MatchingChallenge
-}
+export { Constraint, ConstraintList, MatchingChallenge }

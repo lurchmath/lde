@@ -1,54 +1,21 @@
 
 import { LogicConcept } from '../src/logic-concept.js'
 import { Expression } from '../src/expression.js'
-import { Binding } from '../src/binding.js'
 import { Symbol } from '../src/symbol.js'
 import * as Matching from '../src/matching.js'
 
 // We first define a bunch of tools that are useful in the testing below.
 
-// For this test file only, we define some shorthand abbreviations for
-// matching-related concepts.
-//  - We'll write a symbol _A to mean A, but flagged as a metavariable.
-//  - We'll write A_of_B to mean the application of A to B as an
-//    expression function.  Note that either A or B or both can begin
-//    with an underscore to indicate that they are metavariables, as in
-//    _A_of__B.
-//  - We'll write lambda to have the usual meaning from the lambda
-//    calculus, so putdown of (lambda x , x) is the identity function,
-//    as an expression function.
-// How to check for such conventions:
+// For this test file only, we define one piece of shorthand for
+// matching-related concepts:  We'll write a symbol _A to mean A,
+// but flagged as a metavariable.  How to check for such conventions:
 const needsMetavariableConversion = expression =>
     expression instanceof Symbol && expression.text().startsWith( '_' )
-const needsEFAConversion = expression =>
-    expression instanceof Symbol && /_of_/.test( expression.text() )
-const lambda = new Symbol( 'lambda' )
-const needsLambdaConversion = expression =>
-    expression instanceof Binding && expression.head().equals( lambda )
-// How to do all conventions at once, recursively, on any Expression:
-const applyAllConventions = expression => {
+const applyMetavariableConversion = expression => {
     const convertToMetavariable = symbol =>
         new Symbol( symbol.text().substring( 1 ) ).makeIntoA( 'metavariable' )
-    const convertToEFA = symbol => {
-        const text = symbol.text()
-        const index = text.indexOf( '_of_' )
-        return Matching.makeExpressionFunctionApplication(
-            applyAllConventions( new Symbol( text.substring( 0, index ) ) ),
-            applyAllConventions( new Symbol( text.substring( index + 3 ) ) ) )
-    }
-    const convertToEF = expression =>
-        applyAllConventions( Matching.makeExpressionFunction(
-            expression.boundVariables()[0], expression.body() ) )
-    if ( needsEFAConversion( expression ) )
-        return applyAllConventions( convertToEFA( expression ) )
     if ( needsMetavariableConversion( expression ) )
         return convertToMetavariable( expression )
-    if ( needsLambdaConversion( expression ) )
-        return applyAllConventions( convertToEF( expression ) )
-    expression.descendantsSatisfying( needsEFAConversion )
-        .forEach( d => d.replaceWith( convertToEFA( d ) ) )
-    expression.descendantsSatisfying( needsLambdaConversion )
-        .forEach( d => d.replaceWith( convertToEF( d ) ) )
     expression.descendantsSatisfying( needsMetavariableConversion )
         .forEach( d => d.replaceWith( convertToMetavariable( d ) ) )
     return expression
@@ -66,7 +33,7 @@ const quickExpression = maybeExpr => {
             throw 'Parsing did not yield an Expression: ' + maybeExpr
         maybeExpr = parsed[0]
     }
-    maybeExpr = applyAllConventions( maybeExpr )
+    maybeExpr = applyMetavariableConversion( maybeExpr )
     return maybeExpr
 }
 
@@ -128,8 +95,8 @@ const checkSolutions = ( ...expected ) => {
 describe( 'Matching', () => {
 
     it( 'Should declare the expected tools', () => {
-        expect( Matching.makeExpressionFunction ).to.be.ok
-        expect( Matching.makeExpressionFunctionApplication ).to.be.ok
+        expect( Matching.Constraint ).to.be.ok
+        expect( Matching.ConstraintList ).to.be.ok
         expect( Matching.MatchingChallenge ).to.be.ok
     } )
 
@@ -150,52 +117,52 @@ describe( 'Matching', () => {
 
     it( 'Should correctly solve matching challenges with an EFA', () => {
         // this matches in four ways
-        solveChallenge( '_P_of_x', '(f 1)' )
+        solveChallenge( '(@ _P _x)', '(f 1)' )
         expect( checkSolutions(
-            [ '_P', '(lambda v0 , v0)', '_x', '(f 1)' ],
-            [ '_P', '(lambda v0 , (f v0))', '_x', '1' ],
-            [ '_P', '(lambda v0 , (v0 1))', '_x', 'f' ],
-            [ '_P', '(lambda v0 , (f 1))' ]
+            [ '_P', '(@ v0 , v0)', '_x', '(f 1)' ],
+            [ '_P', '(@ v0 , (f v0))', '_x', '1' ],
+            [ '_P', '(@ v0 , (v0 1))', '_x', 'f' ],
+            [ '_P', '(@ v0 , (f 1))' ]
         ) ).to.equal( true )
         // this matches in five ways
-        solveChallenge( '_P_of_x', '(f f)' )
+        solveChallenge( '(@ _P _x)', '(f f)' )
         expect( checkSolutions(
-            [ '_P', '(lambda v0 , v0)', '_x', '(f f)' ],
-            [ '_P', '(lambda v0 , (f v0))', '_x', 'f' ],
-            [ '_P', '(lambda v0 , (v0 f))', '_x', 'f' ],
-            [ '_P', '(lambda v0 , (v0 v0))', '_x', 'f' ],
-            [ '_P', '(lambda v0 , (f f))' ]
+            [ '_P', '(@ v0 , v0)', '_x', '(f f)' ],
+            [ '_P', '(@ v0 , (f v0))', '_x', 'f' ],
+            [ '_P', '(@ v0 , (v0 f))', '_x', 'f' ],
+            [ '_P', '(@ v0 , (v0 v0))', '_x', 'f' ],
+            [ '_P', '(@ v0 , (f f))' ]
         ) ).to.equal( true )
     } )
 
     it( 'Should correctly solve a few miscellaneous challenges', () => {
         // test 1
-        solveChallenge( '_P_of__x', '(b 2)', '_P_of__y', '(b 3)' )
+        solveChallenge( '(@ _P _x)', '(b 2)', '(@ _P _y)', '(b 3)' )
         expect( checkSolutions(
-            [ '_x', '(b 2)', '_y', '(b 3)', '_P', '(lambda v0 , v0)' ],
-            [ '_x', '2', '_y', '3', '_P', '(lambda v0 , (b v0))' ]
+            [ '_x', '(b 2)', '_y', '(b 3)', '_P', '(@ v0 , v0)' ],
+            [ '_x', '2', '_y', '3', '_P', '(@ v0 , (b v0))' ]
         ) ).to.equal( true )
         // test 2
-        solveChallenge( '_P_of__x', '(f a a)', '_x', 'b' )
+        solveChallenge( '(@ _P _x)', '(f a a)', '_x', 'b' )
         expect( checkSolutions(
-            [ '_x', 'b', '_P', '(lambda v0 , (f a a))' ]
+            [ '_x', 'b', '_P', '(@ v0 , (f a a))' ]
         ) ).to.equal( true )
         // test using induction on N
-        solveChallenge( '_P_of_0', '(= 7 5)',
-                        '(∀ _k , (=> _P_of__k ("symbol: EFA" _P (+ _k 1))))',
+        solveChallenge( '(@ _P 0)', '(= 7 5)',
+                        '(∀ _k , (=> (@ _P _k) (@ _P (+ _k 1))))',
                         '(∀ n , (=> (= 7 5) (= 7 5)))',
-                        '(∀ _n , _P_of__n)', '(∀ n , (= 7 5))' )
+                        '(∀ _n , (@ _P _n))', '(∀ n , (= 7 5))' )
         expect( checkSolutions(
-            [ '_P', '(lambda v0 , (= 7 5))', '_k', 'n', '_n', 'n' ]
+            [ '_P', '(@ v0 , (= 7 5))', '_k', 'n', '_n', 'n' ]
         ) ).to.equal( true )
         // test using ∃E rule
         solveChallenge(
-            '(∃ _x , _P_of__x)',         '(∃ x , (> x 0))',
-            '(∀ _y , (=> _P_of__y _Q))', '(∀ x , (=> (> x 0) (> -1 0)))',
-            '_Q',                        '(> -1 0)' )
+            '(∃ _x , (@ _P _x))',         '(∃ x , (> x 0))',
+            '(∀ _y , (=> (@ _P _y) _Q))', '(∀ x , (=> (> x 0) (> -1 0)))',
+            '_Q',                         '(> -1 0)' )
         expect( checkSolutions(
             [ '_x', 'x', '_y', 'x',
-              '_P', '(lambda v0 , (> v0 0))', '_Q', '(> -1 0)' ]
+              '_P', '(@ v0 , (> v0 0))', '_Q', '(> -1 0)' ]
         ) ).to.equal( true )
     } )
 
@@ -204,27 +171,27 @@ describe( 'Matching', () => {
         // --------------------------   -----------------
         // Forall x, P(x)               Forall r, r^2+1>0
         // Thus P(T)                    Thus (-9)^2+1>0
-        solveChallenge( '(∀ _x , _P_of__x)', '(∀ r , (> (+ (sq r) 1) 0))',
-                        '_P_of__T',          '(> (+ (sq -9) 1) 0)' )
+        solveChallenge( '(∀ _x , (@ _P _x))', '(∀ r , (> (+ (sq r) 1) 0))',
+                        '(@ _P _T)',          '(> (+ (sq -9) 1) 0)' )
         expect( checkSolutions(
-            [ '_P', '(lambda v0 , (> (+ (sq v0) 1) 0))',
+            [ '_P', '(@ v0 , (> (+ (sq v0) 1) 0))',
               '_T', '-9', '_x', 'r' ]
         ) ).to.equal( true )
         // Trying to match this rule:   To this instance:
         // --------------------------   -----------------
         // Forall x, P(x)               Forall x, R(x,y)
         // Thus P(t)                    Thus R(3,y)
-        solveChallenge( '(∀ _x , _P_of__x)', '(∀ x , (R x y))',
-                        '_P_of__t',          '(R 3 y)' )
+        solveChallenge( '(∀ _x , (@ _P _x))', '(∀ x , (R x y))',
+                        '(@ _P _t)',          '(R 3 y)' )
         expect( checkSolutions(
-            [ '_P', '(lambda v0 , (R v0 y))', '_t', '3', '_x', 'x' ]
+            [ '_P', '(@ v0 , (R v0 y))', '_t', '3', '_x', 'x' ]
         ) ).to.equal( true )
         // Trying to match this rule:   To this instance:
         // --------------------------   -----------------
         // Forall x, P(x)               Forall x, Exists y, x < y
         // Thus P(t)                    Thus Exists y, y < y
-        solveChallenge( '(∀ _x , _P_of__x)', '(∀ x , (∃ y , (< x y)))',
-                        '_P_of__t',          '(∃ y , (< y y))' )
+        solveChallenge( '(∀ _x , (@ _P _x))', '(∀ x , (∃ y , (< x y)))',
+                        '(@ _P _T)',          '(∃ y , (< y y))' )
         expect( checkSolutions() ).to.equal( true )
     } )
 
@@ -233,26 +200,26 @@ describe( 'Matching', () => {
         // --------------------------   -----------------
         // P(t)                         1 > 0
         // Thus exists x, P(x)          Exists x, x > 0
-        solveChallenge( '_P_of__t',          '(> 1 0)',
-                        '(∃ _x , _P_of__x)', '(∃ x , (> x 0))' )
+        solveChallenge( '(@ _P _t)',          '(> 1 0)',
+                        '(∃ _x , (@ _P _x))', '(∃ x , (> x 0))' )
         expect( checkSolutions(
-            [ '_P', '(lambda v0 , (> v0 0))', '_t', '1', '_x', 'x' ]
+            [ '_P', '(@ v0 , (> v0 0))', '_t', '1', '_x', 'x' ]
         ) ).to.equal( true )
         // Trying to match this rule:   To this instance:
         // --------------------------   -----------------
         // P(t)                         x != t
         // Thus exists x, P(x)          Exists y, y != t
-        solveChallenge( '_P_of__t',          '(!= x t)',
-                        '(∃ _x , _P_of__x)', '(∃ y , (!= y t))' )
+        solveChallenge( '(@ _P _t)',          '(!= x t)',
+                        '(∃ _x , (@ _P _x))', '(∃ y , (!= y t))' )
         expect( checkSolutions(
-            [ '_P', '(lambda v0 , (!= v0 t))', '_t', 'x', '_x', 'y' ]
+            [ '_P', '(@ v0 , (!= v0 t))', '_t', 'x', '_x', 'y' ]
         ) ).to.equal( true )
         // Trying to match this rule:   To this instance:
         // --------------------------   -----------------
         // P(t)                         x != t
         // Thus exists x, P(x)          Exists x, x != x
-        solveChallenge( '_P_of__t',          '(!= x t)',
-                        '(∃ _x , _P_of__x)', '(∃ x , (!= x x))' )
+        solveChallenge( '(@ _P _t)',          '(!= x t)',
+                        '(∃ _x , (@ _P _x))', '(∃ x , (!= x x))' )
         expect( checkSolutions() ).to.equal( true )
     } )
 
@@ -262,31 +229,31 @@ describe( 'Matching', () => {
         // a = b                        t = 1
         // P(a)                         t > 0
         // Thus P(b)                    Thus 1 > 0
-        solveChallenge( '(= _a _b)', '(= t 1)',
-                        '_P_of__a',  '(> t 0)',
-                        '_P_of__b',  '(> 1 0)' )
+        solveChallenge( '(= _a _b)',  '(= t 1)',
+                        '(@ _P _a)',  '(> t 0)',
+                        '(@ _P _b)',  '(> 1 0)' )
         expect( checkSolutions(
-            [ '_a', 't', '_b', '1', '_P', '(lambda v0 , (> v0 0))' ]
+            [ '_a', 't', '_b', '1', '_P', '(@ v0 , (> v0 0))' ]
         ) ).to.equal( true )
         // Trying to match this rule:   To this instance:
         // --------------------------   -----------------
         // a = b                        t = 1
         // P(a)                         1 + 1 = 2
         // Thus P(b)                    t + 1 = 2
-        solveChallenge( '(= _a _b)', '(= t 1)',
-                        '_P_of__a',  '(= (+ 1 1) 2)',
-                        '_P_of__b',  '(= (+ t 1) 2)' )
+        solveChallenge( '(= _a _b)',  '(= t 1)',
+                        '(@ _P _a)',  '(= (+ 1 1) 2)',
+                        '(@ _P _b)',  '(= (+ t 1) 2)' )
         expect( checkSolutions() ).to.equal( true )
         // Trying to match this rule:   To this instance:
         // --------------------------   -----------------
         // a = b                        1 = 2
         // P(a)                         1 + 1 = 2
         // Thus P(b)                    1 + 2 = 2
-        solveChallenge( '(= _a _b)', '(= 1 2)',
-                        '_P_of__a',  '(= (+ 1 1) 2)',
-                        '_P_of__b',  '(= (+ 1 2) 2)' )
+        solveChallenge( '(= _a _b)',  '(= 1 2)',
+                        '(@ _P _a)',  '(= (+ 1 1) 2)',
+                        '(@ _P _b)',  '(= (+ 1 2) 2)' )
         expect( checkSolutions(
-            [ '_a', '1', '_b', '2', '_P', '(lambda v0 , (= (+ 1 v0) 2))' ]
+            [ '_a', '1', '_b', '2', '_P', '(@ v0 , (= (+ 1 v0) 2))' ]
         ) ).to.equal( true )
     } )
 
