@@ -3,8 +3,10 @@ import { Expression } from './expression.js'
 import { Application } from './application.js'
 import { Binding } from './binding.js'
 import { Symbol } from './symbol.js'
-import { setAPI, Constraint, ConstraintList, MatchingChallenge }
-    from '../node_modules/second-order-matching/src/matching-without-om.js'
+import {
+    setAPI, Constraint, ConstraintList, MatchingChallenge,
+    isExpressionFunctionApplication
+} from '../node_modules/second-order-matching/src/matching-without-om.js'
 
 // The following function call teaches the second-order-matching module
 // imported from npm the specific expression API used in this repository.
@@ -409,6 +411,11 @@ setAPI( {
 
 } )
 
+// This function can take as input either a Constraint, a ConstraintList, or a
+// JavaScript array of ConstraintLists.  It will return a string representation
+// of the object in each case.  If it receives any other type of input, it just
+// hands it to the String() constructor to convert.  It's a debugging utility
+// function.
 export const display = matchingData => {
     if ( matchingData instanceof Constraint )
         return ( '(' + matchingData.pattern.toPutdown()
@@ -422,6 +429,65 @@ export const display = matchingData => {
             matchingData.map( ( entry, index ) =>
                 `${index}. ${display( entry )}` ).join( '\n' )
     return String( matchingData )
+}
+
+/**
+ * Given a list of patterns (expressions that may contain metavariables), we
+ * want to be able to take a list of expressions (that contain no
+ * metavariables) and find all the different ways that one might instantiate
+ * the metavariables in the patterns to yield expressions from the given list.
+ * Because such a computation may take a lot of time, we create a generator
+ * that generates the answers and can be called as many times as desired.
+ * 
+ * @param {Expression[]} patterns - a JavaScript array of
+ *   {@link Expression Expressions}, each of which may contain metavariables
+ * @param {Expression[]} expressions - a JavaScript array of
+ *   {@link Expression Expressions}, none of which may contain metavariables
+ * @yields {Object} the next instantiation of the patterns list that appears
+ *   in the instantiations list, as documented above
+ */
+export function* allPatternInstantiations ( patterns, expressions ) {
+    // base cases:
+    // console.log( 'can [ '
+    //   + patterns.map( x => x.toPutdown() ).join( ', ')
+    //   + ' ] match [ '
+    //   + expressions.map( x => x.toPutdown() ).join( ', ' )
+    //   + ' ] ?' )
+    if ( patterns.length == 0 ) {
+        yield new ConstraintList()
+        return
+    }
+    if ( expressions.length == 0 ) return
+    // induction step:
+    // try matching each pattern against each expression without recursion.
+    // then whichever one would let us reduce the combinatorial explosion the
+    // most, go down its branches only.  that is, we're trying to figure out
+    // which pattern to match first, and we'll match first the one that leaves
+    // us the least matching to do thereafter.
+    const prospects = patterns.map( pattern =>
+        expressions.map( expression =>
+            new MatchingChallenge( [ pattern, expression ] )
+                .getSolutions() ).flat() )
+    // find the most promising prospect--the shortest one:
+    const minLength = Math.min( ...prospects.map( p => p.length ) )
+    const index = prospects.findIndex( p => p.length == minLength )
+    // console.log( 'prospects:\n' + prospects.map( display ).join( '\n--\n' ) )
+    // pursue each of its matches as follows...
+    for ( let prospect of prospects[index] ) {
+        // simplify all other patterns by instantiating known metavariables
+        const otherPatterns = patterns.without( index ).map( other => {
+            prospect.contents.map( constraint =>
+                other = constraint.applyInstantiation( other ) )
+            return other
+        } )
+        // console.log( 'recurring...' )
+        // recur on the simpler task of having one fewer pattern, and yield
+        // all the solutions that the recursion yields
+        const recur = allPatternInstantiations( otherPatterns, expressions )
+        for ( let solution of recur )
+            yield new ConstraintList( ...prospect.contents,
+                                      ...solution.contents )
+    }
 }
 
 export { Constraint, ConstraintList, MatchingChallenge }

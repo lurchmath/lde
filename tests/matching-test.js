@@ -258,3 +258,88 @@ describe( 'Matching', () => {
     } )
 
 } )
+
+describe( 'Matching sequences', () => {
+
+    it( 'Should work for the trivial base cases', () => {
+        let test
+        // if the patterns list is empty, there is one solution: { }
+        test = Array.from( Matching.allPatternInstantiations( [ ], [ ] ) )
+        expect( test ).to.be.instanceOf( Array )
+        expect( test ).to.have.lengthOf( 1 )
+        expect( test[0] ).to.be.instanceOf( Matching.ConstraintList )
+        expect( test[0].length ).to.equal( 0 )
+        // if the patterns list is empty, there is one solution: { }
+        test = Array.from( Matching.allPatternInstantiations( [ ], [
+            quickExpression( '(a (b c) d)' ),
+            quickExpression( '"Super Man and Wonder Woman"' ),
+        ] ) )
+        expect( test ).to.be.instanceOf( Array )
+        expect( test ).to.have.lengthOf( 1 )
+        expect( test[0] ).to.be.instanceOf( Matching.ConstraintList )
+        expect( test[0].length ).to.equal( 0 )
+        // if the patterns list is nonempty, but the expressions list is
+        // empty, there are no solutions
+        test = Array.from( Matching.allPatternInstantiations( [
+            quickExpression( '(a (b c) d)' ),
+            quickExpression( '"Super Man and Wonder Woman"' ),
+        ], [ ] ) )
+        expect( test ).to.be.instanceOf( Array )
+        expect( test ).to.have.lengthOf( 0 )
+    } )
+
+    it( 'Should work for pattern lists of length 1', () => {
+        // what if the expression list has 1 entry, and it matches in 1 way?
+        solutions = Array.from( Matching.allPatternInstantiations( [
+            quickExpression( '(f _x)' )
+        ], [
+            quickExpression( '(f 3000)' )
+        ] ) )
+        expect( checkSolutions(
+            [ '_x', '3000' ]
+        ) ).to.equal( true )
+        // what if the expression list has 1 entry, and it matches in 2 ways?
+        solutions = Array.from( Matching.allPatternInstantiations( [
+            quickExpression( '(@ _F _x)' )
+        ], [
+            quickExpression( '5' )
+        ] ) )
+        expect( checkSolutions(
+            [ '_F', '(@ v0 , v0)', '_x', '5' ],
+            [ '_F', '(@ v0 , 5)' ]
+        ) ).to.equal( true )
+        // what if the expression list has 2 entries, and each matches 1 way?
+        solutions = Array.from( Matching.allPatternInstantiations( [
+            quickExpression( '(f _x)' )
+        ], [
+            quickExpression( '(f 3000)' ),
+            quickExpression( '(f 4000)' )
+        ] ) )
+        expect( checkSolutions(
+            [ '_x', '3000' ],
+            [ '_x', '4000' ]
+        ) ).to.equal( true )
+        // what if the expression list has 2 entries, and each matches 2 ways?
+        solutions = Array.from( Matching.allPatternInstantiations( [
+            quickExpression( '(@ _F _x)' )
+        ], [
+            quickExpression( '"Captain Marvel"' ),
+            quickExpression( '"Joe Biden"' )
+        ] ) )
+        expect( checkSolutions(
+            [ '_F', '(@ v0 , v0)', '_x', '"Captain Marvel"' ],
+            [ '_F', '(@ v0 , "Captain Marvel")' ],
+            [ '_F', '(@ v0 , v0)', '_x', '"Joe Biden"' ],
+            [ '_F', '(@ v0 , "Joe Biden")' ]
+        ) ).to.equal( true )
+        // what if the expression list has 2 entries, and none match?
+        solutions = Array.from( Matching.allPatternInstantiations( [
+            quickExpression( '(f _x)' )
+        ], [
+            quickExpression( '"Captain Marvel"' ),
+            quickExpression( '(g x)' )
+        ] ) )
+        expect( checkSolutions() ).to.equal( true )
+    } )
+
+} )
