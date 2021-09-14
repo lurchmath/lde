@@ -7,9 +7,7 @@
     "doc": "docs",
     "test": "tests"
   },
-  "dependencies": {
-    "second-order-matching": "^1.1.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "chai": "^4.2.0",
     "esm": "^3.2.25",
