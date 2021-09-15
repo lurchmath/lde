@@ -267,6 +267,7 @@ export class LogicConcept extends MathConcept {
                 if ( isOpenGrouper( stack[i] ) ) return stack[i]
             return
         }
+        const allOpenGroupers = () => stack.filter( isOpenGrouper )
         // tokenize and do a little parsing
         while ( string.length > 0 ) {
             // skip comments and whitespace
@@ -294,10 +295,8 @@ export class LogicConcept extends MathConcept {
                 if ( outer == '(' && inner != '(' )
                     problem( 'Expressions can contain only Symbols or '
                            + 'other Expressions' )
-                // we do not police formulas inside declarations here, because
-                // they are disallowed at any depth, not just one, and an error
-                // will be thrown later anyway, if and when the declaration
-                // construction is attempted
+                if ( inner == '{*' && allOpenGroupers().includes( '[' ) )
+                    problem( 'Declaration bodies cannot contain Formulas' )
                 save()
                 shiftNext()
             // handle close groupers

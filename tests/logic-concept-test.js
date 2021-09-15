@@ -839,10 +839,10 @@ describe( 'Reading putdown notation', () => {
         } ).to.throw( /^Expressions can contain only/ )
         expect( () => {
             LogicConcept.fromPutdown( '[pi const {* uh oh formula *}]' )
-        } ).to.throw( /^Body of a Declaration.*Formula$/ )
+        } ).to.throw( /^Declaration bodies cannot contain Formulas/ )
         expect( () => {
             LogicConcept.fromPutdown( '[pi const { foo {* inner formula *} }]' )
-        } ).to.throw( /^Body of a Declaration.*Formula$/ )
+        } ).to.throw( /^Declaration bodies cannot contain Formulas/ )
         // all other invalid ways to form a larger structure
         expect( () => {
             LogicConcept.fromPutdown( '[(x y) const]' )
