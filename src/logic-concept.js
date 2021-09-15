@@ -294,9 +294,10 @@ export class LogicConcept extends MathConcept {
                 if ( outer == '(' && inner != '(' )
                     problem( 'Expressions can contain only Symbols or '
                            + 'other Expressions' )
-                if ( outer == '[' && [ '[', '{*' ].includes( inner ) )
-                    problem( 'Declarations may not contain Formulas or '
-                           + 'other Declarations' )
+                // we do not police formulas inside declarations here, because
+                // they are disallowed at any depth, not just one, and an error
+                // will be thrown later anyway, if and when the declaration
+                // construction is attempted
                 save()
                 shiftNext()
             // handle close groupers

@@ -19,9 +19,9 @@ import { Formula } from './formula.js'
  *    arbitrary."
  *  * A constant declaration is the kind where the declared symbols are not
  *    intended to vary in meaning throughout the subsequent discussion.  These
- *    symbols are often global in scope and are typically inappropriate for
- *    use in quantifiers.  For instance, the declaration of the symbol 0 in
- *    the Peano axioms is a constant declaration.
+ *    symbols are often global in scope and are inappropriate for use in
+ *    quantifiers.  For instance, the declaration of the symbol 0 in the Peano
+ *    axioms is a constant declaration.
  * 
  * Each Declaration instance has a type (variable or constant), a list of
  * symbols being declared (which are instances of the {@link Symbol Symbol}
@@ -32,7 +32,7 @@ import { Formula } from './formula.js'
  * $x\in A$ being made about $x$.
  * 
  * The body of a declaration can be any LogicConcept that does not include
- * (at any level of depth) a {@link Formula Formula} or another Declaration.
+ * (at any level of depth) a {@link Formula Formula}.
  */
 export class Declaration extends LogicConcept {
     
@@ -89,7 +89,9 @@ export class Declaration extends LogicConcept {
      * that sentence, we are declaring a variable $x$ and imposing on it a
      * two-part condition (a conjunction), that $x$ is a real number and it is
      * greater than $N$.  Thus the body of the declaration would be that
-     * mathematical expression, $x\in\mathbb{R}\wedge x>N$.
+     * mathematical expression, $x\in\mathbb{R}\wedge x>N$.  Or it could be
+     * formulated as an {@link Environment Environment} with two claims, which
+     * are $x\in\mathbb{R}$ and $x>N$.
      * 
      * However, it is also possible to declare variables with no conditions
      * attached, as in the mathematical statement "Let $x$ be arbitrary."  So
@@ -113,12 +115,10 @@ export class Declaration extends LogicConcept {
      *   single symbol is passed, it will be treated as an array of just one
      *   symbol.
      * @param {LogicConcept} [body] - An optional body of the declaration, as
-     *   described above.  The body may be any
-     *   {@link Expression Expression}, or any {@link Environment Environment}
-     *   that does not contain a {@link Formula Formula} or another
-     *   {@link Declaration Declaration}.  If a declaration comes with several
-     *   assumptions about the declared variables, they can be placed inside
-     *   an {@link Environment Environment} to conjoin them.
+     *   described above.  The body may be any {@link LogicConcept LogicConcept}
+     *   that does not contain a {@link Formula Formula}.  If a declaration
+     *   comes with several assumptions about the declared variables, they can
+     *   be placed inside an {@link Environment Environment} to conjoin them.
      * @see {@link Declaration#type type()}
      * @see {@link Declaration#symbols symbols()}
      * @see {@link Declaration#expression expression()}
@@ -137,14 +137,11 @@ export class Declaration extends LogicConcept {
             throw 'Not every entry in the array given to the '
                 + 'Declaration constructor was a Symbol'
         if ( body ) {
-            if ( !( body instanceof Expression )
-              && !( body instanceof Environment ) )
+            if ( !( body instanceof LogicConcept ) )
                 throw 'Optional third parameter to Declaration constructor, '
-                    + 'if provided, must be an Expression or Environment'
-            if ( body instanceof Environment && body.hasDescendantSatisfying(
-                    d => d instanceof Formula || d instanceof Declaration ) )
-                throw 'Body of a Declaration may contain neither a Formula '
-                    + 'nor another Declaration'
+                    + 'if provided, must be a LogicConcept'
+            if ( body.hasDescendantSatisfying( d => d instanceof Formula ) )
+                throw 'Body of a Declaration may not contain a Formula'
             super( ...symbols, body )
         } else {
             super( ...symbols )
@@ -213,10 +210,10 @@ export class Declaration extends LogicConcept {
      * this Declaration after its construction, this function returns
      * undefined.
      * 
-     * @returns {Expression|undefined} The body expression provided to this
-     *   object at construction time, if there was one, or undefined if not.
+     * @returns {LogicConcept|undefined} The body provided to this object at
+     *   construction time, if there was one, or undefined if not.
      *   If there was one, it is guaranteed to be an instance of the
-     *   {@link Expression Expression} class.
+     *   {@link LogicConcept LogicConcept} class.
      * @see {@link Declaration#type type()}
      * @see {@link Declaration#symbols symbols()}
      */

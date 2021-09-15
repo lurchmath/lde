@@ -440,6 +440,43 @@ describe( 'Reading putdown notation', () => {
             )
         ) ).to.equal( true )
         // ----------
+        test = LogicConcept.fromPutdown( `[x var { (∈ x Z) (> x 5) }]` )
+        expect( test ).to.be.instanceof( Array )
+        expect( test.length ).to.equal( 1 )
+        expect( test[0].equals(
+            new Declaration(
+                Declaration.Variable,
+                new Symbol( 'x' ),
+                new Environment(
+                    new Application(
+                        new Symbol( '∈' ),
+                        new Symbol( 'x' ),
+                        new Symbol( 'Z' )
+                    ),
+                    new Application(
+                        new Symbol( '>' ),
+                        new Symbol( 'x' ),
+                        new Symbol( '5' )
+                    )
+                )
+            )
+        ) ).to.equal( true )
+        // ----------
+        test = LogicConcept.fromPutdown( `[pi const [m n var]]` )
+        expect( test ).to.be.instanceof( Array )
+        expect( test.length ).to.equal( 1 )
+        expect( test[0].equals(
+            new Declaration(
+                Declaration.Constant,
+                new Symbol( 'pi' ),
+                new Declaration(
+                    Declaration.Variable,
+                    new Symbol( 'm' ),
+                    new Symbol( 'n' )
+                )
+            )
+        ) ).to.equal( true )
+        // ----------
         test = LogicConcept.fromPutdown(
             '[pi const ("something about circles" pi)]'
           + '[e  const ("something about limits"  e)]' )
@@ -801,11 +838,11 @@ describe( 'Reading putdown notation', () => {
             LogicConcept.fromPutdown( '([a var] (b c))' )
         } ).to.throw( /^Expressions can contain only/ )
         expect( () => {
-            LogicConcept.fromPutdown( '[pi const {* (foo pi) *}]' )
-        } ).to.throw( /^Declarations may not contain/ )
+            LogicConcept.fromPutdown( '[pi const {* uh oh formula *}]' )
+        } ).to.throw( /^Body of a Declaration.*Formula$/ )
         expect( () => {
-            LogicConcept.fromPutdown( '[pi const [m n var]]' )
-        } ).to.throw( /^Declarations may not contain/ )
+            LogicConcept.fromPutdown( '[pi const { foo {* inner formula *} }]' )
+        } ).to.throw( /^Body of a Declaration.*Formula$/ )
         // all other invalid ways to form a larger structure
         expect( () => {
             LogicConcept.fromPutdown( '[(x y) const]' )

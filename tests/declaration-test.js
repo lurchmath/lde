@@ -12,7 +12,7 @@ describe( 'Declaration', () => {
         expect( Declaration ).to.be.ok
     } )
 
-    let x, y, z, E1, E2
+    let x, y, z, L1, L2, L3, L4
     beforeEach( () => {
         // Make some (Lurch) symbols to declare
         // Note: Most places in the codebase, we call these Symbols, but in
@@ -22,9 +22,11 @@ describe( 'Declaration', () => {
         x = new LurchSymbol( 'x' )
         y = new LurchSymbol( 'y' )
         z = new LurchSymbol( 'z' )
-        // Make some expressions to use as bodies
-        E1 = new Expression( new Expression, new Expression )
-        E2 = new Expression( new Expression )
+        // Make some LogicConcepts to use as bodies
+        L1 = new Expression( new Expression, new Expression )
+        L2 = new Expression( new Expression )
+        L3 = new Environment( new Expression )
+        L4 = new LogicConcept()
     } )
 
     it( 'Should notice if we call it with the wrong signature', () => {
@@ -52,10 +54,10 @@ describe( 'Declaration', () => {
             const D = new Declaration( Declaration.Variable, [ x, y ] )
         } ).not.to.throw()
         expect( () => {
-            const D = new Declaration( Declaration.Variable, x, E1 )
+            const D = new Declaration( Declaration.Variable, x, L1 )
         } ).not.to.throw()
         expect( () => {
-            const D = new Declaration( Declaration.Variable, [ x, y ], E2 )
+            const D = new Declaration( Declaration.Variable, [ x, y ], L2 )
         } ).not.to.throw()
     } )
 
@@ -67,10 +69,10 @@ describe( 'Declaration', () => {
             const D = new Declaration( Declaration.Constant, [ x, y ] )
         } ).not.to.throw()
         expect( () => {
-            const D = new Declaration( Declaration.Constant, x, E1 )
+            const D = new Declaration( Declaration.Constant, x, L1 )
         } ).not.to.throw()
         expect( () => {
-            const D = new Declaration( Declaration.Constant, [ x, y ], E2 )
+            const D = new Declaration( Declaration.Constant, [ x, y ], L2 )
         } ).not.to.throw()
     } )
 
@@ -82,17 +84,17 @@ describe( 'Declaration', () => {
             const D = new Declaration( undefined, [ x, y ] )
         } ).to.throw( /^Invalid declaration type: / )
         expect( () => {
-            const D = new Declaration( 'Variable', x, E1 )
+            const D = new Declaration( 'Variable', x, L1 )
         } ).to.throw( /^Invalid declaration type: / )
         expect( () => {
-            const D = new Declaration( 10, [ x, y ], E2 )
+            const D = new Declaration( 10, [ x, y ], L2 )
         } ).to.throw( /^Invalid declaration type: / )
     } )
 
     it( 'Should return the correct type for each Declaration', () => {
         // make two declarations
         const D1 = new Declaration( Declaration.Variable, x )
-        const D2 = new Declaration( Declaration.Constant, x, E1 )
+        const D2 = new Declaration( Declaration.Constant, x, L1 )
         // first, can we query the types?
         expect( D1.type() ).to.equal( Declaration.Variable )
         expect( D2.type() ).to.equal( Declaration.Constant )
@@ -101,7 +103,7 @@ describe( 'Declaration', () => {
         expect( String( D2.type() ) ).to.match( /constant/i )
         // third, are the types comparable correctly with one another?
         const D3 = new Declaration( Declaration.Variable, y )
-        const D4 = new Declaration( Declaration.Constant, y, E2 )
+        const D4 = new Declaration( Declaration.Constant, y, L2 )
         expect( D1.type() ).to.equal( D3.type() )
         expect( D2.type() ).to.equal( D4.type() )
         expect( D1.type() ).not.to.equal( D2.type() )
@@ -115,13 +117,13 @@ describe( 'Declaration', () => {
             const D = new Declaration( Declaration.Variable, x )
         } ).not.to.throw()
         expect( () => {
-            const D = new Declaration( Declaration.Variable, [ x, y ], E1 )
+            const D = new Declaration( Declaration.Variable, [ x, y ], L3 )
         } ).not.to.throw()
         expect( () => {
             const D = new Declaration( Declaration.Constant, [ x, y, z ] )
         } ).not.to.throw()
         expect( () => {
-            const D = new Declaration( Declaration.Constant, [ x, y, z ], E2 )
+            const D = new Declaration( Declaration.Constant, [ x, y, z ], L4 )
         } ).not.to.throw()
     } )
 
@@ -130,16 +132,16 @@ describe( 'Declaration', () => {
             const D = new Declaration( Declaration.Variable )
         } ).to.throw( /^Second argument to Declaration constructor / )
         expect( () => {
-            const D = new Declaration( Declaration.Constant, E1 )
+            const D = new Declaration( Declaration.Constant, L1 )
         } ).to.throw( /^Second argument to Declaration constructor / )
     } )
 
     it( 'Should not permit Declarations of non-symbols', () => {
         expect( () => {
-            const D = new Declaration( Declaration.Variable, E1, E2 )
+            const D = new Declaration( Declaration.Variable, L1, L2 )
         } ).to.throw( /^Second argument to Declaration constructor must be / )
         expect( () => {
-            const D = new Declaration( Declaration.Constant, [ x, y, E2 ], E1 )
+            const D = new Declaration( Declaration.Constant, [ x, y, L2 ], L3 )
         } ).to.throw( /^Not every entry in the array.*was a Symbol$/ )
     } )
 
@@ -148,7 +150,7 @@ describe( 'Declaration', () => {
         let list = D1.symbols()
         expect( list.length ).to.equal( 1 )
         expect( list[0] ).to.equal( x )
-        const D2 = new Declaration( Declaration.Variable, [ x, y ], E1 )
+        const D2 = new Declaration( Declaration.Variable, [ x, y ], L1 )
         list = D2.symbols()
         expect( list.length ).to.equal( 2 )
         expect( list[0] ).to.equal( x )
@@ -158,7 +160,7 @@ describe( 'Declaration', () => {
         expect( list.length ).to.equal( 3 )
         expect( list[0] ).to.equal( x )
         expect( list[1] ).to.equal( y )
-        const D4 = new Declaration( Declaration.Constant, [ z, y, x ], E2 )
+        const D4 = new Declaration( Declaration.Constant, [ z, y, x ], L4 )
         list = D4.symbols()
         expect( list.length ).to.equal( 3 )
         expect( list[0] ).to.equal( z )
@@ -169,10 +171,10 @@ describe( 'Declaration', () => {
     it( 'Should let us construct Declarations with or without bodies', () => {
         // with bodies
         expect( () => {
-            const D = new Declaration( Declaration.Variable, x, E1 )
+            const D = new Declaration( Declaration.Variable, x, L1 )
         } ).not.to.throw()
         expect( () => {
-            const D = new Declaration( Declaration.Constant, [ x, y ], E2 )
+            const D = new Declaration( Declaration.Constant, [ x, y ], L2 )
         } ).not.to.throw()
         // without bodies
         expect( () => {
@@ -184,19 +186,12 @@ describe( 'Declaration', () => {
     } )
 
     it( 'Should restrict Declaration bodies appropriately', () => {
-        // can't be a generic LogicConcept
+        // can't be anything but a LogicConcept
         expect( () => {
             const D = new Declaration( Declaration.Variable, x,
-                new LogicConcept )
+                [ 5 ] )
         } ).to.throw(
-            /^Optional third parameter.*Expression or Environment/ )
-        // can't contain a Declaration
-        expect( () => {
-            const D = new Declaration( Declaration.Constant, x,
-                new Environment(
-                    new Declaration( Declaration.Constant, y )
-                ) )
-        } ).to.throw( /^Body of a Declaration.*another Declaration/ )
+            /^Optional third parameter.*LogicConcept$/ )
         // can't contain a Formula
         expect( () => {
             const D = new Declaration( Declaration.Variable, x,
@@ -205,17 +200,23 @@ describe( 'Declaration', () => {
     } )
 
     it( 'Should let us query the body of any Declaration', () => {
-        // body == E1
-        const D1 = new Declaration( Declaration.Variable, x, E1 )
-        expect( D1.expression() ).to.equal( E1 )
-        // body == E2
-        const D2 = new Declaration( Declaration.Constant, [ x, y ], E2 )
-        expect( D2.expression() ).to.equal( E2 )
+        // body == L1
+        const D1 = new Declaration( Declaration.Variable, x, L1 )
+        expect( D1.expression() ).to.equal( L1 )
+        // body == L2
+        const D2 = new Declaration( Declaration.Constant, [ x, y ], L2 )
+        expect( D2.expression() ).to.equal( L2 )
+        // body == L3
+        const D3 = new Declaration( Declaration.Variable, x, L3 )
+        expect( D3.expression() ).to.equal( L3 )
+        // body == L4
+        const D4 = new Declaration( Declaration.Constant, [ x, y ], L4 )
+        expect( D4.expression() ).to.equal( L4 )
         // no body provided at construction time
-        const D3 = new Declaration( Declaration.Variable, x )
-        expect( D3.expression() ).to.equal( undefined )
-        const D4 = new Declaration( Declaration.Constant, [ x, y ] )
-        expect( D4.expression() ).to.equal( undefined )
+        const D5 = new Declaration( Declaration.Variable, x )
+        expect( D5.expression() ).to.equal( undefined )
+        const D6 = new Declaration( Declaration.Constant, [ x, y ] )
+        expect( D6.expression() ).to.equal( undefined )
     } )
 
 } )

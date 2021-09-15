@@ -730,7 +730,7 @@ const putdownDatabase = [
         "syntax": "invalid"
       }
     },
-    "content": "\n// This file contains several different variable and constant declarations,\n// but one of them has an invalid structure that is a putdown syntax error.\n\n[x y z var] // valid\n[A B C const] // valid\n[x y z var (P x y z)] // valid\n[A B C const { (Q A) (R B) (S T) }] // valid\n[x y z var [A B C const]] // invalid\n"
+    "content": "\n// This file contains several different variable and constant declarations,\n// but one of them has an invalid structure that is a putdown syntax error.\n\n[x y z var] // valid\n[A B C const] // valid\n[x y z var (P x y z)] // valid\n[A B C const { (Q A) (R B) (S T) }] // valid\n[x y z var {* A B C *}] // invalid\n"
   },
   {
     "filename": "/parsing tests/valid syntax 1.putdown",
