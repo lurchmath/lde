@@ -101,6 +101,6 @@ export class Application extends Expression {
      * @see {@link Application#operator operator()}
      * @see {@link MathConcept#allButFirstChild allButFirstChild()}
      */
-     operands () { return this.allButFirstChild() }
+    operands () { return this.allButFirstChild() }
     
 }
