@@ -219,7 +219,6 @@ export class LogicConcept extends MathConcept {
      */
     static fromPutdown ( string ) {
         // linear string processing tools
-        const original = string
         let processed = ''
         let match = null
         const isNext = regexp => match = regexp.exec( string )
@@ -524,7 +523,7 @@ export class LogicConcept extends MathConcept {
         // code located all in the same file as the fromPutdown() code.
         // Doing it all here also allows us to factor some common tools out,
         // up above the switch statement, as you can see below.
-        const indent = ( text, depth ) => `  ${text.replace( /\n/g, '\n  ' )}`
+        const indent = text => `  ${text.replace( /\n/g, '\n  ' )}`
         const isTooBig = text => /\n/.test( text ) || text.length > 50
         const childResults = this.children().map( child => child.toPutdown() )
         const Environment = MathConcept.subclasses.get( 'Environment' )
