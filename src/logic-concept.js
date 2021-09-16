@@ -251,6 +251,10 @@ export class LogicConcept extends MathConcept {
         const isGrouperPair = ( g, h ) =>
             groupers.some( pair => pair[0] == g && pair[1] == h )
         const evalAttributes = () => JSON.parse( match[0].substring( 1 ) )
+        const exactMatch = ( re, str ) => {
+            const match = re.exec( str )
+            return match && match[0].length == str.length
+        }
         // stack management
         const stack = [ ]
         const save = x => stack.push( x || match[0] )
@@ -311,7 +315,7 @@ export class LogicConcept extends MathConcept {
                 }
                 const n = group.contents.length
                 // can't end an environment with a colon
-                if ( givenRE.test( group.contents[n-1] ) )
+                if ( exactMatch( givenRE, group.contents[n-1] ) )
                     problem( 'Cannot end an environment with a colon' )
                 // handle meaning of a declaration, or errors it might contain:
                 if ( group.type == '[ ]' ) {
@@ -343,16 +347,19 @@ export class LogicConcept extends MathConcept {
                         problem( 'Empty applications are not permitted' )
                     // 2. More than one comma is invalid syntax
                     const numCommas = group.contents.filter( x =>
-                        bindingRE.test( x ) ).length
+                        exactMatch( bindingRE, x ) ).length
                     if ( numCommas > 1 )
                         problem( 'An expression can have at most one comma' )
-                    // 3. If 2nd-to-last item is a comma, group is a binding
-                    if ( n >= 2 && bindingRE.test( group.contents[n-2] ) ) {
+                    // 3. If 2nd-to-last item (but not item #0) is a comma,
+                    // group is either a binding or a declaration
+                    if ( n >= 3
+                      && exactMatch( bindingRE, group.contents[n-2] ) ) {
                         group.isBinding = true
                         group.contents = group.contents.without( n-2 )
-                    // 4. Otherwise the comma is misplaced
+                    // 4. If some other item is a comma, it's misplaced.
                     } else if ( numCommas > 0 ) {
                         problem( 'Misplaced comma inside expression' )
+                    // 5. No item is a comma, so it's an application.
                     } else {
                         group.isBinding = false
                     }
