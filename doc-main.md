@@ -29,7 +29,6 @@ There are also some basic tools, including:
 
  * for {@link Connection connecting} math concept instances irrespective of
    tree structure,
- * for {@link Matching pattern-matching} with math concepts,
  * for working with {@link JSON JSON} and
    {@link predictableStringify serializing it}.
 
