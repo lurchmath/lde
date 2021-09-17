@@ -1,4 +1,7 @@
 
+import { Symbol } from '../symbol.js'
+import { LogicConcept } from '../logic-concept.js'
+
 /**
  * @see {@link Constraint#metavariable metavariable}
  */
@@ -129,5 +132,90 @@ export class Constraint {
      * @returns {LogicConcept} the expression given at construction time
      */
     get expression () { return this._expression }
+
+    /**
+     * Creates a copy of this Constraint.  It is a shallow copy, in the sense
+     * that it shares the same pattern and expression instances with this
+     * Constraint, but that should be irrelevant, because Constraints are
+     * immutable.  That is, they never alter their own patterns or expressions,
+     * and the client is instructed not to alter them either, as per the
+     * documentation in {@link Constraint the constructor}.
+     * 
+     * @returns {Constraint} a copy of this Constraint
+     */
+    copy () { return new Constraint( this._pattern, this._expression ) }
+
+    /**
+     * If a Constraint's pattern is a single metavariable, then that Constraint
+     * can be used as a tool for substitution.  For instance, the Constraint
+     * $(A,2)$ can be applied to the expression $A-\frac{A}{B}$ to yield
+     * $2-\frac{2}{B}$.  A Constraint is only useful for application if its
+     * pattern is a single metavariable.  This function tests whether that is
+     * the case.
+     * 
+     * @returns {boolean} true if and only if this Constraint can be applied
+     *   like a function (that is, whether its pattern is just a single
+     *   metavariable)
+     * 
+     * @see {@link Constraint#applyTo applyTo()}
+     * @see {@link Constraint#appliedTo appliedTo()}
+     */
+    canBeApplied () {
+        return this.pattern instanceof Symbol
+            && this.pattern.isA( metavariable )
+    }
+
+    /**
+     * Apply this Constraint, as a substitution instruction, to the given
+     * target.  If the target is a {@link LogicConcept LogicConcept}, replace
+     * every instance in it of this Constraint's pattern with a copy of this
+     * Constraint's expression.  If the target is another Constraint, just
+     * operate on its pattern (since its expression will not contain any
+     * metavariables that need to be replaced).
+     * 
+     * If this Constraint does not pass the
+     * {@link Constraint#canBeApplied canBeApplied()} test, then this function
+     * throws an error.  It also throws an error if the target is not one of the
+     * two types mentioned above.
+     * 
+     * @param {LogicConcept|Constraint} target the object to which we should
+     *   apply this Constraint, in place
+     * 
+     * @see {@link Constraint#canBeApplied canBeApplied()}
+     * @see {@link Constraint#appliedTo appliedTo()}
+     */
+    applyTo ( target ) {
+        if ( !this.canBeApplied() )
+            throw 'Cannot apply a Constraint whose pattern is not a metavariable'
+        if ( target instanceof Constraint )
+            return this.applyTo( target.pattern )
+        if ( !( target instanceof LogicConcept ) )
+            throw 'Invalid target for applying a Constraint'
+        target.descendantsSatisfying( d => d.equals( this.pattern )
+                                    && d.isA( metavariable )
+        ).forEach( d => d.replaceWith( this.expression.copy() ) )
+    }
+
+    /**
+     * Create a copy of the target and then call
+     * {@link Constraint#applyTo applyTo()} on the copy, returning the copy
+     * afterwards.  In other words, this behaves exactly like
+     * {@link Constraint#applyTo applyTo()}, but instead of operating on the
+     * `target` in place, it operates on a copy and returns the copy.
+     * 
+     * @param {LogicConcept|Constraint} target the object to which we should
+     *   apply this Constraint, resulting in a copy
+     * @returns {LogicConcept|Constraint} a new copy of the `target` with the
+     *   application of this Constraint having been done
+     * 
+     * @see {@link Constraint#canBeApplied canBeApplied()}
+     * @see {@link Constraint#applyTo applyTo()}
+     * @see {@link Constraint#copy copy()}
+     */
+    appliedTo ( target ) {
+        const copy = target.copy()
+        this.applyTo( copy )
+        return copy
+    }
 
 }

@@ -1,6 +1,7 @@
 
 import { Symbol } from '../src/symbol.js'
 import { Application } from '../src/application.js'
+import { Binding } from '../src/binding.js'
 import { Environment } from '../src/environment.js'
 import { LogicConcept } from '../src/logic-concept.js'
 import { metavariable, Constraint } from '../src/matching/constraint.js'
@@ -104,9 +105,120 @@ describe( 'Constraint', () => {
         expect( () => C = new Constraint( P, E ) ).to.throw(
             'may not contain metavariables' )
         // even just one metavariable is problematic in the expression
-        E = new Symbol( 'oh well' ).makeIntoA( metavariable )
+        E = new Symbol( 'oh well' ).asA( metavariable )
         expect( () => C = new Constraint( P, E ) ).to.throw(
             'may not contain metavariables' )
+    } )
+
+    it( 'Should support making shallow copies', () => {
+        // Construct one of the constraints we made in the previous test
+        let P, E, C
+        ;[ P, E ] = LogicConcept.fromPutdown( `
+            (+ 1 (- K Q))
+            (* n m)
+        ` )
+        P.child( 2 ).child( 1 ).makeIntoA( metavariable )
+        P.child( 2 ).child( 2 ).makeIntoA( metavariable )
+        C = new Constraint( P, E )
+        // make a copy and ensure it throws no errors
+        let copy
+        expect( () => copy = C.copy() ).not.to.throw()
+        // ensure that it has the same pattern and expression as the original
+        expect( C.pattern ).to.equal( copy.pattern )
+        expect( C.expression ).to.equal( copy.expression )
+        // and yet they are not the same object
+        expect( C ).not.to.equal( copy )
+    } )
+
+    it( 'Should reliably test whether it can be applied', () => {
+        let C
+        // a Constraint whose pattern is a single metavariable can be applied
+        C = new Constraint(
+            new Symbol( 'example' ).asA( metavariable ),
+            LogicConcept.fromPutdown( '(x y z a b c)' )[0]
+        )
+        expect( C.canBeApplied() ).to.equal( true )
+        // a Constraint whose pattern is a single symbol cannot be applied,
+        // if we don't mark that symbol as a metavariable
+        C = new Constraint(
+            new Symbol( 'example' ),
+            LogicConcept.fromPutdown( '(x y z a b c)' )[0]
+        )
+        expect( C.canBeApplied() ).to.equal( false )
+        // a Constraint whose pattern is anything other than a symbol cannot be
+        // applied, even if we (erroneously) mark that pattern as a metavariable
+        C = new Constraint(
+            LogicConcept.fromPutdown( '(1 2 3)' )[0].asA( metavariable ),
+            LogicConcept.fromPutdown( '(x y z a b c)' )[0]
+        )
+        expect( C.canBeApplied() ).to.equal( false )
+        C = new Constraint(
+            LogicConcept.fromPutdown( '[pi const]' )[0].asA( metavariable ),
+            LogicConcept.fromPutdown( '(x y z a b c)' )[0]
+        )
+        expect( C.canBeApplied() ).to.equal( false )
+        C = new Constraint(
+            LogicConcept.fromPutdown( '{ { } }' )[0].asA( metavariable ),
+            LogicConcept.fromPutdown( '(x y z a b c)' )[0]
+        )
+        expect( C.canBeApplied() ).to.equal( false )
+    } )
+
+    it( 'Should apply itself correctly in-place or functionally', () => {
+        // create a Constraint that can be applied
+        let X = new Symbol( 'X' ).asA( metavariable )
+        let C = new Constraint(
+            X.copy(),
+            LogicConcept.fromPutdown( '(exp (- x))' )[0]
+        )
+        // create three patterns to which to apply it, and copies of each
+        let P1 = new Application( new Symbol( 'f' ), X.copy() )
+        let P2 = new Binding( new Symbol( '𝝺' ), new Symbol( 'v' ),
+            new Application( X.copy(), new Symbol( 'v' ) ) )
+        let P3 = new Environment( X.copy(), X.copy(), X.copy() )
+        const P1copy = P1.copy()
+        const P2copy = P2.copy()
+        const P3copy = P3.copy()
+        expect( P1.equals( P1copy ) ).to.equal( true )
+        expect( P2.equals( P2copy ) ).to.equal( true )
+        expect( P3.equals( P3copy ) ).to.equal( true )
+        // create expected results after applying the constraint
+        const newP1 = LogicConcept.fromPutdown( '(f (exp (- x)))' )[0]
+        const newP2 = LogicConcept.fromPutdown( '(𝝺 v , ((exp (- x)) v))' )[0]
+        const newP3 = LogicConcept.fromPutdown(
+            '{ (exp (- x)) (exp (- x)) (exp (- x)) }' )[0]
+        // apply C to P1 in place and ensure the result is as expected
+        // and P1 is no longer equal to P1copy
+        expect( () => C.applyTo( P1 ) ).not.to.throw()
+        expect( P1.equals( P1copy ) ).to.equal( false )
+        expect( P1.equals( newP1 ) ).to.equal( true )
+        // repeat same experiment for P2 and P2copy
+        expect( () => C.applyTo( P2 ) ).not.to.throw()
+        expect( P2.equals( P2copy ) ).to.equal( false )
+        expect( P2.equals( newP2 ) ).to.equal( true )
+        // repeat same experiment for P3 and P3copy
+        expect( () => C.applyTo( P3 ) ).not.to.throw()
+        expect( P3.equals( P3copy ) ).to.equal( false )
+        expect( P3.equals( newP3 ) ).to.equal( true )
+        // make new targets from the backup copies we saved of P1,P2,P3
+        let P1_2 = P1copy.copy()
+        let P2_2 = P2copy.copy()
+        let P3_2 = P3copy.copy()
+        // apply C functionally (not in place) to those three, saving the
+        // results as new expressions, then ensure that no change took place
+        // in any of those originals
+        const applied1 = C.appliedTo( P1_2 )
+        const applied2 = C.appliedTo( P2_2 )
+        const applied3 = C.appliedTo( P3_2 )
+        expect( P1copy.equals( P1_2 ) ).to.equal( true )
+        expect( P2copy.equals( P2_2 ) ).to.equal( true )
+        expect( P3copy.equals( P3_2 ) ).to.equal( true )
+        // then ensure that the results computed this way are the same as the
+        // results computed with the in-place applyTo(), which were verified
+        // above to be correct
+        expect( applied1.equals( P1 ) ).to.equal( true )
+        expect( applied2.equals( P2 ) ).to.equal( true )
+        expect( applied3.equals( P3 ) ).to.equal( true )
     } )
 
 } )
