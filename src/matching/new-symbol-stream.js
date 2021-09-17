@@ -71,6 +71,7 @@ export class NewSymbolStream {
      * @param  {...any} args Any combination of {@link MathConcept MathConcepts}
      *   and JavaScript strings, which will be interpreted as the set of symbols
      *   that this stream is not allowed to produce, as defined above.
+     * @see {@link NewSymbolStream#avoid avoid()}
      */
     avoid ( ...args ) {
         const avoidString = str => {
@@ -106,6 +107,7 @@ export class NewSymbolStream {
      * @returns {Symbol} a single {@link Symbol Symbol} instance whose name is
      *   guaranteed to satisfy the constraint described in the documentation for
      *   the {@link NewSymbolStream#avoid avoid()} function.
+     * @see {@link NewSymbolStream#nextN nextN()}
      */
     next () { return new Symbol( `new${++this._lastIndex}` ) }
 
@@ -118,6 +120,7 @@ export class NewSymbolStream {
      * @param {integer} N the number of symbols to produce
      * @returns {Symbol[]} An array of length `N` containing all new symbols,
      *   produced by repeated calls to {@link NewSymbolStream#next next()}.
+     * @see {@link NewSymbolStream#next next()}
      */
     nextN ( N ) { return Array.from( { length : N } ).map( () => this.next() ) }
 
