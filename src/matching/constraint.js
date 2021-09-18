@@ -1,6 +1,67 @@
 
 import { Symbol } from '../symbol.js'
+import { Application } from '../application.js'
+import { Binding } from '../binding.js'
 import { LogicConcept } from '../logic-concept.js'
+import { isAnEFA } from './expression-functions.js'
+
+// Utility function used below.  It means that the LC is an Application type,
+// but not an Expression Function Application.
+const isASimpleApplication = x => ( x instanceof Application ) && !isAnEFA( x )
+// This does not appear documented in the source code documentation, because it
+// is internal to this module.  It is a list of the predicates for classifying
+// constraints, in increasing order of complexity, for use in the rank()
+// function documented in the Constraint class below.
+const predicates = [
+    // failure type: Constraints that can never be satisfied
+    {
+        name : 'failure',
+        predicate : C => {
+            if ( !Constraint.containsAMetavariable( C.pattern )
+              && !C.pattern.equals( C.expression ) )
+                return true
+            if ( isASimpleApplication( C.pattern ) ) {
+                if ( !( C.expression instanceof Application )
+                  || C.pattern.numChildren() != C.expression.numChildren() )
+                    return true
+            }
+            if ( C.pattern instanceof Binding ) {
+                if ( !( C.expression instanceof Binding )
+                  || C.pattern.numChildren() != C.expression.numChildren() )
+                    return true
+            }
+            return false
+        }
+    },
+    // success type: Constraints that are already satisfied
+    {
+        name : 'success',
+        predicate : C => !Constraint.containsAMetavariable( C.pattern )
+            && C.pattern.equals( C.expression )
+    },
+    // instantiation type: Constraints that are just metavar |--> expression
+    {
+        name : 'instantiation',
+        predicate : C => C.canBeApplied()
+    },
+    // children type: Constraints that depend on many smaller constraints,
+    // built from the children of this Constraint's pattern and expression
+    {
+        name : 'children',
+        predicate : C => ( isASimpleApplication( C.pattern )
+                        && ( C.expression instanceof Application ) )
+                      || ( ( C.pattern instanceof Binding )
+                        && ( C.expression instanceof Binding ) )
+    },
+    // EFA type: Constraints that can only be satisfied by exploring the many
+    // sub-options coming from an Expression Function Application pattern
+    {
+        name : 'EFA',
+        predicate : C => isAnEFA( C.pattern )
+    }
+    // All Constraints should satisfy one of the categories above.
+    // There are no other possibilities.
+]
 
 /**
  * @see {@link Constraint#metavariable metavariable}
@@ -216,6 +277,43 @@ export class Constraint {
         const copy = target.copy()
         this.applyTo( copy )
         return copy
+    }
+
+    /**
+     * Compute and return the complexity of this Constraint.  The return value
+     * is cached, so that future calls to this function do not recompute it.
+     * The cache is never invalidated, because Constraints are viewed as
+     * immutable.
+     * 
+     * This value can be used to sort Constraints so that constraints with lower
+     * complexity are processed first in algorithms, for the sake of efficiency.
+     * We will later add here a cross-reference to the Problem class, once it
+     * has been created.
+     * 
+     * @returns {integer} the complexity of this Constraint, ranked on a scale
+     *   beginning with zero (trivial) and counting upwards towards more
+     *   complex constraints
+     * @see {@link Constraint#complexityName complexityName()}
+     */
+    complexity () {
+        if ( !this.hasOwnProperty( '_complexity' ) ) {
+            let index = predicates.findIndex( obj => obj.predicate( this ) )
+            this._complexity = index
+        }
+        return this._complexity
+    }
+
+    /**
+     * This function returns a single-word description of the
+     * {@link Constraint#complexity complexity()} of this Constraint.  It is
+     * mostly useful in debugging.
+     * 
+     * @returns {string} a description of this Constraint's complexity
+     * 
+     * @see {@link Constraint#complexity complexity()}
+     */
+    complexityName () {
+        return predicates[this.complexity()].name
     }
 
 }

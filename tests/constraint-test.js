@@ -5,6 +5,7 @@ import { Binding } from '../src/binding.js'
 import { Environment } from '../src/environment.js'
 import { LogicConcept } from '../src/logic-concept.js'
 import { metavariable, Constraint } from '../src/matching/constraint.js'
+import { newEFA } from '../src/matching/expression-functions.js'
 
 describe( 'Constraint', () => {
 
@@ -219,6 +220,76 @@ describe( 'Constraint', () => {
         expect( applied1.equals( P1 ) ).to.equal( true )
         expect( applied2.equals( P2 ) ).to.equal( true )
         expect( applied3.equals( P3 ) ).to.equal( true )
+    } )
+
+    it( 'Should correctly compute complexity levels and names', () => {
+        let P, E, C
+        // Two different non-patterns = failure
+        P = LogicConcept.fromPutdown( 'a' )[0]
+        E = LogicConcept.fromPutdown( '(b c)' )[0]
+        C = new Constraint( P, E )
+        expect( C.complexity() ).to.equal( 0 )
+        expect( C.complexityName() ).to.equal( 'failure' )
+        // Application and non-application = failure
+        P = LogicConcept.fromPutdown( '(x y z)' )[0]
+        P.child( 1 ).makeIntoA( metavariable )
+        E = LogicConcept.fromPutdown( '(a b , c)' )[0]
+        C = new Constraint( P, E )
+        expect( C.complexity() ).to.equal( 0 )
+        expect( C.complexityName() ).to.equal( 'failure' )
+        // Binding and non-binding = failure
+        P = LogicConcept.fromPutdown( '(x y , z)' )[0]
+        P.child( 1 ).makeIntoA( metavariable )
+        E = LogicConcept.fromPutdown( '(a b c)' )[0]
+        C = new Constraint( P, E )
+        expect( C.complexity() ).to.equal( 0 )
+        expect( C.complexityName() ).to.equal( 'failure' )
+        // Applications with different sizes = failure
+        P = LogicConcept.fromPutdown( '(x y z)' )[0]
+        P.child( 1 ).makeIntoA( metavariable )
+        E = LogicConcept.fromPutdown( '(a b)' )[0]
+        C = new Constraint( P, E )
+        expect( C.complexity() ).to.equal( 0 )
+        expect( C.complexityName() ).to.equal( 'failure' )
+        // Bindings with different sizes = failure
+        P = LogicConcept.fromPutdown( '(x y z , w)' )[0]
+        P.child( 1 ).makeIntoA( metavariable )
+        E = LogicConcept.fromPutdown( '(a b , c)' )[0]
+        C = new Constraint( P, E )
+        expect( C.complexity() ).to.equal( 0 )
+        expect( C.complexityName() ).to.equal( 'failure' )
+        // Two different non-patterns = success
+        P = LogicConcept.fromPutdown( '(x (w w) z)' )[0]
+        E = LogicConcept.fromPutdown( '(x (w w) z)' )[0]
+        C = new Constraint( P, E )
+        expect( C.complexity() ).to.equal( 1 )
+        expect( C.complexityName() ).to.equal( 'success' )
+        // Metavariable pattern = instantiation
+        P = new Symbol( 'A' ).asA( metavariable )
+        E = LogicConcept.fromPutdown( '(a b)' )[0]
+        C = new Constraint( P, E )
+        expect( C.complexity() ).to.equal( 2 )
+        expect( C.complexityName() ).to.equal( 'instantiation' )
+        // Applications with same sizes = children
+        P = LogicConcept.fromPutdown( '(x y z)' )[0]
+        P.child( 1 ).makeIntoA( metavariable )
+        E = LogicConcept.fromPutdown( '(a b c)' )[0]
+        C = new Constraint( P, E )
+        expect( C.complexity() ).to.equal( 3 )
+        expect( C.complexityName() ).to.equal( 'children' )
+        // Bindings with same sizes = children
+        P = LogicConcept.fromPutdown( '(x y z , w)' )[0]
+        P.child( 1 ).makeIntoA( metavariable )
+        E = LogicConcept.fromPutdown( '(a b c , d)' )[0]
+        C = new Constraint( P, E )
+        expect( C.complexity() ).to.equal( 3 )
+        expect( C.complexityName() ).to.equal( 'children' )
+        // Exprssion Function Application pattern = EFA
+        P = newEFA( new Symbol( 'P' ).asA( metavariable ), new Symbol( 'x' ) )
+        E = LogicConcept.fromPutdown( '(a b c d)' )[0]
+        C = new Constraint( P, E )
+        expect( C.complexity() ).to.equal( 4 )
+        expect( C.complexityName() ).to.equal( 'EFA' )
     } )
 
 } )
