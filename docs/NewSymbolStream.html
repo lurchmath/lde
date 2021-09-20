@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Lurch Deductive Engine: LogicConcept</title>
+    <title>Lurch Deductive Engine: NewSymbolStream</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
@@ -34,7 +34,7 @@
 <main class="layout-main ">
   <div class="container">
     <p class="page-kind">Class</p>
-    <h1 class="page-title">LogicConcept</h1>
+    <h1 class="page-title">NewSymbolStream</h1>
     
 
 
@@ -48,7 +48,7 @@
 
     
         
-        <!-- <h2>LogicConcept</h2> -->
+        <!-- <h2>NewSymbolStream</h2> -->
 
         
 
@@ -56,25 +56,27 @@
 
         
             
-            <div class="class-description"><p>A LogicConcept is a specific type of MathConcept.  It is one that can be
-processed by the LDE when validating the correctness of steps of a user's
-work.  MathConcepts are more high-level, and in order to be processed by
-the LDE, must be broken down into LogicConcepts.</p>
-<p>There are three types of LogicConcepts, described only vaguley here, but
-you can view the documentation in the appropriate subclasses for details.</p>
-<ul>
-<li>An <a href="Expression.html">Expression</a> is what we typically think of as a piece of
-mathematics--an equation, a statement, a formula, which is often
-enclosed in <code>$...$</code> in a LaTeX document</li>
-<li>An <a href="Environment.html">Environment</a> is any larger structure in a document that
-contains many expressions, such as a theorem, a proof, a section, an
-example, or a chain of connected equations.</li>
-<li>A <a href="Declaration.html">Declaration</a> introduces a new variable or constant.  This is
-common in both computer programming (where many languages require us
-to define our variables) and in mathematics (where we say things like
-&quot;Let x be an arbitrary real number&quot; or &quot;Let D be the constant provided
-by Theorem 6.1.&quot;</li>
-</ul></div>
+            <div class="class-description"><p>In many situations, it's useful to be able to create new symbols, which
+means symbols that have not already appeared in a given context.  Consider
+the following example.</p>
+<p>Say we have a mathematical expression like $\forall x,x&gt;y$, and we wish to
+substitute some value for $y$, and we want to avoid variable capture.
+That is, perhaps we're substituting $y=x^2$, and we want to avoid the $x$ in
+$x^2$ becoming bound by the quantifier.  So we need to perform
+$\alpha$-renaming on $\forall x,x&gt;y$, using a new symbol that does not
+show up in any of these expressions so far.  That is, the new symbol should
+not be any of $x,y,\forall,&gt;,=,2$.</p>
+<p>In that example, we would like to create one new symbol, where &quot;new&quot; means
+&quot;does not appear in any of a chosen set of expressions.&quot;  In other
+situations, we may need to create many new variables, such as when
+constructing an $n$-ary $\lambda$ expression and needing to name its
+parameters.  In either case, a NewSymbolStream can solve the problem, as
+follows.</p>
+<p><a href="NewSymbolStream.html">Construct a NewSymbolStream</a>, passing as arguments to
+the constructor all the expressions containing &quot;old&quot; symbols, those that are
+not permitted to be created.  Then ask for one new symbol with
+<a href="NewSymbolStream.html#next">next()</a>, or ask for many new symbols with
+<a href="NewSymbolStream.html#nextN">nextN()</a>.</p></div>
         
     
 </header>
@@ -102,7 +104,7 @@ by Theorem 6.1.&quot;</li>
     
     </div>
 
-    <h4 class="method-name" id="LogicConcept">new LogicConcept<span class="signature">(&hellip;children)</span><span class="return-type-signature"></span>
+    <h4 class="method-name" id="NewSymbolStream">new NewSymbolStream<span class="signature">(&hellip;args)</span><span class="return-type-signature"></span>
     </h4>
 
 
@@ -111,11 +113,12 @@ by Theorem 6.1.&quot;</li>
 
 <div class="method-description">
     
-    <p>Constructs a LogicConcept from the given list of children, which may
-be empty.  All children must also be instances of LogicConcept; those
-that are not are filtered out.</p>
-<p>Newly constructed LogicConcept instances (unlike MathConcepts) are
-marked dirty by default, indicating that they probably need validation.</p>
+    <p>Construct an object that can produce new symbols.  Provide as arguments
+any expressions whose symbols must be avoided when producing new symbols.
+This object guarantees that new symbols produced by calls to
+<a href="NewSymbolStream.html#next">next()</a> or
+<a href="NewSymbolStream.html#nextN">nextN()</a> will never yield a symbol that
+appears in any of the expressions given as arguments.</p>
 </div>
 
 
@@ -134,7 +137,7 @@ marked dirty by default, indicating that they probably need validation.</p>
 
         <li>
             
-                <span class="param-name">children</span>
+                <span class="param-name">args</span>
             
 
             
@@ -142,7 +145,7 @@ marked dirty by default, indicating that they probably need validation.</p>
 
 
     <span class="param-type">
-        <code><a href="LogicConcept.html">LogicConcept</a></code>
+        <code>any</code>
     </span>
     
 
@@ -162,8 +165,9 @@ marked dirty by default, indicating that they probably need validation.</p>
 
             
 
-            <div class="param-description"><p>child LogicConcepts to be added to
-this one (as in the constructor for <a href="MathConcept.html">MathConcept</a>)</p></div>
+            <div class="param-description"><p>These are passed directly to the
+<a href="NewSymbolStream.html#avoid">avoid()</a> function; see its documentation
+for details.</p></div>
             
         </li>
 
@@ -226,7 +230,7 @@ this one (as in the constructor for <a href="MathConcept.html">MathConcept</a>)<
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="logic-concept.js.html">logic-concept.js</a><a href="logic-concept.js.html#source.40">, line 40</a>
+            <a href="matching_new-symbol-stream.js.html">matching/new-symbol-stream.js</a><a href="matching_new-symbol-stream.js.html#source.45">, line 45</a>
         </li>
     </ul>
 
@@ -241,7 +245,7 @@ this one (as in the constructor for <a href="MathConcept.html">MathConcept</a>)<
         <h3 class="subsection-title">Classes</h3>
 
         <dl>
-            <dt><a href="LogicConcept.html">LogicConcept</a></dt>
+            <dt><a href="NewSymbolStream.html">NewSymbolStream</a></dt>
             <dd></dd>
         </dl>
     
@@ -273,10 +277,10 @@ this one (as in the constructor for <a href="MathConcept.html">MathConcept</a>)<
     
 
     <div class="method-type">
-    <span class="method-type-signature is-static">static</span>
+    
     </div>
 
-    <h4 class="method-name" id=".fromPutdown">fromPutdown<span class="signature">(string)</span><span class="return-type-signature"> &rarr; {<a href="Array.html">Array</a>.&lt;<a href="LogicConcept.html">LogicConcept</a>>}</span>
+    <h4 class="method-name" id="avoid">avoid<span class="signature">(&hellip;args)</span><span class="return-type-signature"></span>
     </h4>
 
 
@@ -285,70 +289,23 @@ this one (as in the constructor for <a href="MathConcept.html">MathConcept</a>)<
 
 <div class="method-description">
     
-    <p>This function takes putdown notation for one or more LogicConcepts and
-builds instances of them by parsing the input, returning an array of
-the results.  Putdown is a simple format, and so it plays on the name
-of the famous simple format &quot;markdown,&quot; but turns it into something
-that sounds undesirable (and humorous?).  Putdown and Markdown have no
-connection, neither historically nor in the format itself.</p>
-<p>Putdown notation is defined as follows.</p>
-<ul>
-<li>A <a href="Symbol.html">Symbol</a> is written using any sequence of
-non-whitespace characters that does not include or conflict with the
-special characters below.  Thus symbols are quite flexible,
-including things like <code>x</code> and <code>y</code> as well as <code>-459.7001</code> and
-<code>$===_-_@_-_===$</code> and much more.</li>
-<li>A <a href="Symbol.html">Symbol</a> can also be written as a string literal
-whose only escape characters are <code>\&quot;</code> inside double-quoted literals,
-<code>\'</code> inside single-quoted literals, and <code>\n</code> or <code>\\</code> in any case.
-Thus you can create just about any symbol at all, including
-<code>&quot;{ yes it's (a symbol) }&quot;</code>, which is not a compound expression, but
-is a single atomic symbol.</li>
-<li>An <a href="Application.html">Application</a> is written using LISP notation.
-Function application requires at least one argument (no empty paren
-pairs).  For example, you might write $\sin x$ as <code>(sin x)</code>.</li>
-<li>A <a href="Binding.html">Binding</a> expression (quantifier, summation, etc.)
-is written just like a function application but with a comma before
-the body.  All children before the body and after the first child
-must be <a href="Symbol.html">Symbols</a>, and are the bound variables.
-Example:  <code>(∀ x, (P x))</code> means $\forall x, P(x)$.</li>
-<li>A variable <a href="Declaration.html">Declaration</a> lists the declared
-<a href="Symbol.html">Symbols</a> in brackets, followed by the keyword <code>var</code>
-followed by an optional body that is an assumption made about the
-variables.  Example: <code>[x var (P x)]</code> means &quot;Let $x$ be arbitary and
-assume $P(x)$.&quot;</li>
-<li>A constant <a href="Declaration.html">Declaration</a> is the same but with
-<code>const</code> instead of <code>var</code>.  Again, the body is optional, so
-<code>[pi const]</code> declares the symbol <code>pi</code> to be a constant.</li>
-<li>An <a href="Environment.html">Environment</a> is written with its children
-separated by spaces and surrounded in curly brackets.  Example:
-<code>{ child1 child2 etc }</code>.</li>
-<li>A <a href="Formula.html">Formula</a> (which is a subclass of
-<a href="Environment.html">Environment</a>) by using <code>{*</code> and <code>*}</code> as the
-grouping markers instead of undecorated curly brackets.</li>
-<li>Any <a href="Environment.html">Environment</a>,
-<a href="Declaration.html">Declaration</a>, or
-<a href="Expression.html#isOutermost">outermost Expression</a> can be marked
-as a &quot;given&quot; by preceding it with a colon, <code>:</code>.</li>
-<li>Any <a href="Environment.html">Environment</a>,
-<a href="Declaration.html">Declaration</a>, or
-<a href="Expression.html">Expression</a> can be given additional attributes by
-following it with <code>+{</code> and then for the rest of the line (that is,
-until the next newline) writing as much JSON code as you like,
-beginning with that initial <code>{</code>, as attributes to add to the
-preceding object.  For example, to add the color green to a
-<a href="Symbol.html">Symbol</a>, we might do this:
-<code>my_symbol +{&quot;color&quot;:&quot;green&quot;}</code>.  To add more attributes than can fit
-on one line, simply start another <code>+{...}</code> block on the next line.</li>
-<li>The notation <code>//</code> is used for one-line comments.  Anything after it
-is ignored, up until the next newline.  The previous rule has some
-conflict with this one, and we resolve it as follows.  If a <code>//</code>
-occurs before a <code>+{</code> on a line, then the <code>//</code> takes precedence and
-the rest of the line is a comment, so the <code>+{</code> is ignored.  But if
-the <code>+{</code> appears first, it takes precedence, and the rest of the
-line is interpreted as JSON code, so a trailing <code>//</code> comment will
-most likely create invalid JSON, and thus should be avoided.</li>
-</ul>
+    <p>This function instructs the stream to avoid producing any of the symbols
+appearing in the <code>args</code> list.  Those arguments may be any
+<a href="MathConcept.html">MathConcept</a>, in which case all descendants of it
+(including itself) that are <a href="Symbol.html">Symbols</a> will be avoided by
+this stream (i.e., never produced as output).  The arguments may also be
+strings, in which case they are treated as the names of symbols that
+cannot be produced as output.</p>
+<p>To be precise, if $A$ is any argument to this function, and $s$ is the
+name of any symbol appearing in $A$ (or $A$ is simply the string $s$)
+then this object guarantees that, for any $n$, calling
+<a href="NewSymbolStream.html#nextN">nextN()</a> on $n$ will produce an Array of
+<a href="Symbol.html">Symbol</a> instances none of which are named $s$.</p>
+<p>Note that if you later change the expressions provided here, those
+changes are not tracked or noticed by this stream.  The stream takes note
+of the symbols in the arguments at the time you call it, and does not
+check back later to see if the expressions have changed.  You can update
+the stream using more calls to <a href="NewSymbolStream.html#avoid">avoid()</a>.</p>
 </div>
 
 
@@ -367,7 +324,7 @@ most likely create invalid JSON, and thus should be avoided.</li>
 
         <li>
             
-                <span class="param-name">string</span>
+                <span class="param-name">args</span>
             
 
             
@@ -375,215 +332,29 @@ most likely create invalid JSON, and thus should be avoided.</li>
 
 
     <span class="param-type">
-        <code>String</code>
+        <code>any</code>
     </span>
     
 
             
 
             
-
-            
-
-            <div class="param-description"><p>should contain putdown notation for one or
-more LogicConcepts</p></div>
-            
-        </li>
-
-    
-</ul>
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-    <h4 class="method-heading">Returns</h4>
-    <ul>
-    
-        <li class="method-returns">
-            
-                <code>Array.&lt;LogicConcept></code>
-            
-            
-                <p>an Array of the LogicConcepts described in
-putdown notation in the argument</p>
-            
-        </li>
-    
-    </ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="logic-concept.js.html">logic-concept.js</a><a href="logic-concept.js.html#source.220">, line 220</a>
-        </li>
-    </ul>
-
-
-
-    </article>
-
-        
-            
-
-
-    <article class="method">
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    
-    </div>
-
-    <h4 class="method-name" id="enableFeedback">enableFeedback<span class="signature">(enable, flushQueue)</span><span class="return-type-signature"></span>
-    </h4>
-
-
-
-
-
-<div class="method-description">
-    
-    <p>Enable or disable feedback, optionally flushing the queue of any old,
-stored feedback from when feedback was disabled.</p>
-<p>To understand what it means for feedback to be enabled or disabled,
-see the documentation for <a href="LogicConcept.html#feedback">feedback()</a>.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Parameters</h4>
-    
-
-<ul class="method-params">
-    
-
-        <li>
-            
-                <span class="param-name">enable</span>
-            
-
-            
+                <span class="param-attributes">
                 
 
-
-    <span class="param-type">
-        <code>boolean</code>
-    </span>
-    
-
-            
-
-            
-
-            
-                
-                    <span class="param-default">
-                        true
-                    </span>
-                
-            
-
-            <div class="param-description"><p>whether to enable feedback (if true) or
-disable it (if false)</p></div>
-            
-        </li>
-
-    
-
-        <li>
-            
-                <span class="param-name">flushQueue</span>
-            
-
-            
                 
 
-
-    <span class="param-type">
-        <code>boolean</code>
-    </span>
-    
-
-            
-
-            
-
-            
                 
-                    <span class="param-default">
-                        false
-                    </span>
+                    &lt;repeatable&gt;<br>
                 
+                </span>
             
 
-            <div class="param-description"><p>when enabling feedback, there may be
-a backlog of old feedback that was stored (and not sent) when
-feedback was disabled.  If this parameter is true, then that
-backlog of old feedback is all sent immediately, in the same
-order it was enqueued.  If this parameter is false, then taht
-backlog of old feedback is discarded.</p></div>
+            
+
+            <div class="param-description"><p>Any combination of <a href="MathConcept.html">MathConcepts</a>
+and JavaScript strings, which will be interpreted as the set of symbols
+that this stream is not allowed to produce, as defined above.</p></div>
             
         </li>
 
@@ -625,7 +396,7 @@ backlog of old feedback is discarded.</p></div>
         <h4 class="method-heading">See</h4>
         <ul>
             
-                <li><a href="LogicConcept.html#feedback">feedback()</a></li>
+                <li><a href="NewSymbolStream.html#avoid">avoid()</a></li>
             
         </ul>
     
@@ -653,7 +424,7 @@ backlog of old feedback is discarded.</p></div>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="logic-concept.js.html">logic-concept.js</a><a href="logic-concept.js.html#source.142">, line 142</a>
+            <a href="matching_new-symbol-stream.js.html">matching/new-symbol-stream.js</a><a href="matching_new-symbol-stream.js.html#source.76">, line 76</a>
         </li>
     </ul>
 
@@ -679,7 +450,7 @@ backlog of old feedback is discarded.</p></div>
     
     </div>
 
-    <h4 class="method-name" id="feedback">feedback<span class="signature">(feedbackData)</span><span class="return-type-signature"></span>
+    <h4 class="method-name" id="next">next<span class="signature">()</span><span class="return-type-signature"> &rarr; {<a href="Symbol.html">Symbol</a>}</span>
     </h4>
 
 
@@ -688,22 +459,146 @@ backlog of old feedback is discarded.</p></div>
 
 <div class="method-description">
     
-    <p>This method does one of two things, depending on whether feedback for
-this instance is enabled, which can be customized using
-<a href="LogicConcept.html#enableFeedback">enableFeedback()</a>.</p>
-<p>If feedback is enabled and this object has an
-<a href="LogicConcept.html#origin">origin()</a>, then this method just calls the
-<a href="MathConcept.html#feedback">feedback()</a> method in that origin, with the
-same parameter.  The reason for this is that feedback to the LDE about
-a LogicConcept should always be mediated through the MathConcept that
-gave rise to that LogicConcept.</p>
-<p>If feedback is disabled, then the feedback given as the parameter will
-be stored in a feedback queue, which can be discarded or flushed later,
-using <a href="LogicConcept.html#enableFeedback">enableFeedback()</a>.</p>
-<p>Note that there is no third option; if feedback is enabled, but this
-object has no <a href="LogicConcept.html#origin">origin()</a>, then there is no
-way for this object to send the requested feedback, so this method will
-take no action.</p>
+    <p>Produce a single new symbol from this stream.  The stream guarantees that
+it will not produce any of the symbols it was instructed to avoid, by
+all earlier calls to the <a href="NewSymbolStream.html#avoid">avoid()</a> function,
+and it guarantees that it will not produce any symbol it has produced
+before.</p>
+<p>Of course, calls to <a href="NewSymbolStream.html#avoid">avoid()</a> must precede
+calls to this function if they are to be obeyed.  That is, calling
+<code>S.avoid(x)</code> and then <code>S.next()</code> and then <code>S.avoid(y)</code> guarantees that
+the result of the call to <code>next()</code> will avoid <code>x</code>, but makes no
+guarantees about <code>y</code>, since it was not instructed to avoid <code>y</code> until
+after the call to <code>next()</code>.  But later calls to <code>next()</code> will also avoid
+<code>y</code>.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="NewSymbolStream.html#nextN">nextN()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>Symbol</code>
+            
+            
+                <p>a single <a href="Symbol.html">Symbol</a> instance whose name is
+guaranteed to satisfy the constraint described in the documentation for
+the <a href="NewSymbolStream.html#avoid">avoid()</a> function.</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_new-symbol-stream.js.html">matching/new-symbol-stream.js</a><a href="matching_new-symbol-stream.js.html#source.112">, line 112</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="nextN">nextN<span class="signature">(N)</span><span class="return-type-signature"> &rarr; {<a href="Array.html">Array</a>.&lt;<a href="Symbol.html">Symbol</a>>}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Produce new symbols from this stream.  The stream guarantees that
+it will not produce any of the symbols it was instructed to avoid, by
+calls to the <a href="NewSymbolStream.html#avoid">avoid()</a> function, and it
+guarantees that it will not produce any symbol it has produced before.</p>
 </div>
 
 
@@ -722,7 +617,7 @@ take no action.</p>
 
         <li>
             
-                <span class="param-name">feedbackData</span>
+                <span class="param-name">N</span>
             
 
             
@@ -730,7 +625,7 @@ take no action.</p>
 
 
     <span class="param-type">
-        <code>Object</code>
+        <code>integer</code>
     </span>
     
 
@@ -740,9 +635,7 @@ take no action.</p>
 
             
 
-            <div class="param-description"><p>Any data that can be encoded using
-<code>JSON.stringify()</code> (or
-<a href="global.html#predictableStringify">predictableStringify()</a>), to be transmitted</p></div>
+            <div class="param-description"><p>the number of symbols to produce</p></div>
             
         </li>
 
@@ -784,9 +677,7 @@ take no action.</p>
         <h4 class="method-heading">See</h4>
         <ul>
             
-                <li><a href="MathConcept.html#.feedback">MathConcept static feedback() method</a></li>
-            
-                <li><a href="MathConcept.html#feedback">MathConcept feedback() method for instances</a></li>
+                <li><a href="NewSymbolStream.html#next">next()</a></li>
             
         </ul>
     
@@ -796,452 +687,16 @@ take no action.</p>
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="logic-concept.js.html">logic-concept.js</a><a href="logic-concept.js.html#source.117">, line 117</a>
-        </li>
-    </ul>
-
-
-
-    </article>
-
-        
-            
-
-
-    <article class="method">
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    
-    </div>
-
-    <h4 class="method-name" id="markDirty">markDirty<span class="signature">(on<span class="signature-attributes">opt</span>, propagate<span class="signature-attributes">opt</span>)</span><span class="return-type-signature"></span>
-    </h4>
-
-
-
-
-
-<div class="method-description">
-    
-    <p>Overrides the behavior in <a href="MathConcept.html#markDirty">the parent class</a>,
-where the default behavior is to propagate dirtiness up to ancestors,
-whereas we do not want that here.  The reason is that MathConcepts use
-the dirty flag to indicate whether they need to have their interpretation
-recomputed, but LogicConcepts use the dirty flag to indicate whether they
-need to have their validation recomputed.  Interpretation tends to depend
-on the interpretation of children, whereas validation does not.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Parameters</h4>
-    
-
-<ul class="method-params">
-    
-
-        <li>
-            
-                <span class="param-name">on</span>
-            
-
-            
-                
-
-
-    <span class="param-type">
-        <code>boolean</code>
-    </span>
-    
-
-            
-
-            
-                <span class="param-attributes">
-                
-                    &lt;optional&gt;<br>
-                
-
-                
-
-                
-                </span>
-            
-
-            
-                
-                    <span class="param-default">
-                        true
-                    </span>
-                
-            
-
-            <div class="param-description"><p>same meaning as in
-<a href="MathConcept.html#markDirty">the parent class</a></p></div>
-            
-        </li>
-
-    
-
-        <li>
-            
-                <span class="param-name">propagate</span>
-            
-
-            
-                
-
-
-    <span class="param-type">
-        <code>boolean</code>
-    </span>
-    
-
-            
-
-            
-                <span class="param-attributes">
-                
-                    &lt;optional&gt;<br>
-                
-
-                
-
-                
-                </span>
-            
-
-            
-                
-                    <span class="param-default">
-                        false
-                    </span>
-                
-            
-
-            <div class="param-description"><p>same meaning as in
-<a href="MathConcept.html#markDirty">the parent class</a>, except the default is
-now false</p></div>
-            
-        </li>
-
-    
-</ul>
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="logic-concept.js.html">logic-concept.js</a><a href="logic-concept.js.html#source.63">, line 63</a>
-        </li>
-    </ul>
-
-
-
-    </article>
-
-        
-            
-
-
-    <article class="method">
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    
-    </div>
-
-    <h4 class="method-name" id="origin">origin<span class="signature">()</span><span class="return-type-signature"> &rarr; {<a href="MathConcept.html">MathConcept</a>}</span>
-    </h4>
-
-
-
-
-
-<div class="method-description">
-    
-    <p>Many LogicConcept instances will be created by interpreting a
-MathConcept, and breaking it down into smaller, simpler parts, expressed
-as LogicConcepts.  We will typically want to track, for any given
-LogicConcept, which MathConcept it came from, in that sense.  This
-function returns that value.</p>
-<p>There is no corresponding setter function, because it is not expected
-that clients should be changing the origin of a LogicConcept.  Later,
-when we implement interpretation of MathConcepts into LogicConcepts,
-we will populate this value in that code.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
     <h4 class="method-heading">Returns</h4>
     <ul>
     
         <li class="method-returns">
             
-                <code>MathConcept</code>
+                <code>Array.&lt;Symbol></code>
             
             
-                <p>the object whose interpretation led to the
-construction of this LogicConcept</p>
-            
-        </li>
-    
-    </ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="logic-concept.js.html">logic-concept.js</a><a href="logic-concept.js.html#source.88">, line 88</a>
-        </li>
-    </ul>
-
-
-
-    </article>
-
-        
-            
-
-
-    <article class="method">
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    
-    </div>
-
-    <h4 class="method-name" id="toPutdown">toPutdown<span class="signature">()</span><span class="return-type-signature"> &rarr; {String}</span>
-    </h4>
-
-
-
-
-
-<div class="method-description">
-    
-    <p>This function is the inverse of
-<a href="LogicConcept.html#.fromPutdown">fromPutdown()</a>, which creates
-LogicConcept instances from text in putdown notation.  This function
-writes putdown notation for any LogicConcept.  It should be the case
-that this function outputs valid putdown notation for any LogicConcept
-in which it is called, and that
-<a href="LogicConcept.html#.fromPutdown">fromPutdown()</a> applied to that notation
-produces an object that <a href="MathConcept.html#equals">equals()</a> the
-original.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-    <h4 class="method-heading">Returns</h4>
-    <ul>
-    
-        <li class="method-returns">
-            
-                <code>String</code>
-            
-            
-                <p>putdown notation for this LogicConcept instance</p>
+                <p>An array of length <code>N</code> containing all new symbols,
+produced by repeated calls to <a href="NewSymbolStream.html#next">next()</a>.</p>
             
         </li>
     
@@ -1265,7 +720,7 @@ original.</p>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="logic-concept.js.html">logic-concept.js</a><a href="logic-concept.js.html#source.526">, line 526</a>
+            <a href="matching_new-symbol-stream.js.html">matching/new-symbol-stream.js</a><a href="matching_new-symbol-stream.js.html#source.125">, line 125</a>
         </li>
     </ul>
 

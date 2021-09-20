@@ -2,19 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Lurch Deductive Engine: LogicConcept</title>
+    <title>Lurch Deductive Engine: matching/constraint.js</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
     <link type="text/css" rel="stylesheet" href="styles/styles.css">
     
-
-    <script>
-        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
-    </script>
-    <script id="MathJax-script" async
-        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
-    </script>
 </head>
 <body>
 
@@ -31,1256 +24,354 @@
 </header>
 
 
-<main class="layout-main ">
+<main class="layout-main  layout-content--source">
   <div class="container">
-    <p class="page-kind">Class</p>
-    <h1 class="page-title">LogicConcept</h1>
+    <p class="page-kind">source</p>
+    <h1 class="page-title">matching/constraint.js</h1>
     
 
 
 
+    
 
 <section>
-
-
-<header class="class">
-
-
-    
-        
-        <!-- <h2>LogicConcept</h2> -->
-
-        
-
-        
-
-        
-            
-            <div class="class-description"><p>A LogicConcept is a specific type of MathConcept.  It is one that can be
-processed by the LDE when validating the correctness of steps of a user's
-work.  MathConcepts are more high-level, and in order to be processed by
-the LDE, must be broken down into LogicConcepts.</p>
-<p>There are three types of LogicConcepts, described only vaguley here, but
-you can view the documentation in the appropriate subclasses for details.</p>
-<ul>
-<li>An <a href="Expression.html">Expression</a> is what we typically think of as a piece of
-mathematics--an equation, a statement, a formula, which is often
-enclosed in <code>$...$</code> in a LaTeX document</li>
-<li>An <a href="Environment.html">Environment</a> is any larger structure in a document that
-contains many expressions, such as a theorem, a proof, a section, an
-example, or a chain of connected equations.</li>
-<li>A <a href="Declaration.html">Declaration</a> introduces a new variable or constant.  This is
-common in both computer programming (where many languages require us
-to define our variables) and in mathematics (where we say things like
-&quot;Let x be an arbitrary real number&quot; or &quot;Let D be the constant provided
-by Theorem 6.1.&quot;</li>
-</ul></div>
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-
-
-
-    
-        
-
-
-
-
-
-    
-
-
-    
-    <h3 class="subtitle">Constructor</h3>
-    
-
-    <div class="method-type">
-    
-    </div>
-
-    <h4 class="method-name" id="LogicConcept">new LogicConcept<span class="signature">(&hellip;children)</span><span class="return-type-signature"></span>
-    </h4>
-
-
-
-
-
-<div class="method-description">
-    
-    <p>Constructs a LogicConcept from the given list of children, which may
-be empty.  All children must also be instances of LogicConcept; those
-that are not are filtered out.</p>
-<p>Newly constructed LogicConcept instances (unlike MathConcepts) are
-marked dirty by default, indicating that they probably need validation.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Parameters</h4>
-    
-
-<ul class="method-params">
-    
-
-        <li>
-            
-                <span class="param-name">children</span>
-            
-
-            
-                
-
-
-    <span class="param-type">
-        <code><a href="LogicConcept.html">LogicConcept</a></code>
-    </span>
-    
-
-            
-
-            
-                <span class="param-attributes">
-                
-
-                
-
-                
-                    &lt;repeatable&gt;<br>
-                
-                </span>
-            
-
-            
-
-            <div class="param-description"><p>child LogicConcepts to be added to
-this one (as in the constructor for <a href="MathConcept.html">MathConcept</a>)</p></div>
-            
-        </li>
-
-    
-</ul>
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="logic-concept.js.html">logic-concept.js</a><a href="logic-concept.js.html#source.40">, line 40</a>
-        </li>
-    </ul>
-
-
-
-    
-    </div>
-
-    
-
-    
-        <h3 class="subsection-title">Classes</h3>
-
-        <dl>
-            <dt><a href="LogicConcept.html">LogicConcept</a></dt>
-            <dd></dd>
-        </dl>
-    
-
-     
-
-    
-
-    
-
-
-    
-
-    
-        <h3 class="subtitle">Methods</h3>
-
-        
-            
-
-
-    <article class="method">
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    <span class="method-type-signature is-static">static</span>
-    </div>
-
-    <h4 class="method-name" id=".fromPutdown">fromPutdown<span class="signature">(string)</span><span class="return-type-signature"> &rarr; {<a href="Array.html">Array</a>.&lt;<a href="LogicConcept.html">LogicConcept</a>>}</span>
-    </h4>
-
-
-
-
-
-<div class="method-description">
-    
-    <p>This function takes putdown notation for one or more LogicConcepts and
-builds instances of them by parsing the input, returning an array of
-the results.  Putdown is a simple format, and so it plays on the name
-of the famous simple format &quot;markdown,&quot; but turns it into something
-that sounds undesirable (and humorous?).  Putdown and Markdown have no
-connection, neither historically nor in the format itself.</p>
-<p>Putdown notation is defined as follows.</p>
-<ul>
-<li>A <a href="Symbol.html">Symbol</a> is written using any sequence of
-non-whitespace characters that does not include or conflict with the
-special characters below.  Thus symbols are quite flexible,
-including things like <code>x</code> and <code>y</code> as well as <code>-459.7001</code> and
-<code>$===_-_@_-_===$</code> and much more.</li>
-<li>A <a href="Symbol.html">Symbol</a> can also be written as a string literal
-whose only escape characters are <code>\&quot;</code> inside double-quoted literals,
-<code>\'</code> inside single-quoted literals, and <code>\n</code> or <code>\\</code> in any case.
-Thus you can create just about any symbol at all, including
-<code>&quot;{ yes it's (a symbol) }&quot;</code>, which is not a compound expression, but
-is a single atomic symbol.</li>
-<li>An <a href="Application.html">Application</a> is written using LISP notation.
-Function application requires at least one argument (no empty paren
-pairs).  For example, you might write $\sin x$ as <code>(sin x)</code>.</li>
-<li>A <a href="Binding.html">Binding</a> expression (quantifier, summation, etc.)
-is written just like a function application but with a comma before
-the body.  All children before the body and after the first child
-must be <a href="Symbol.html">Symbols</a>, and are the bound variables.
-Example:  <code>(∀ x, (P x))</code> means $\forall x, P(x)$.</li>
-<li>A variable <a href="Declaration.html">Declaration</a> lists the declared
-<a href="Symbol.html">Symbols</a> in brackets, followed by the keyword <code>var</code>
-followed by an optional body that is an assumption made about the
-variables.  Example: <code>[x var (P x)]</code> means &quot;Let $x$ be arbitary and
-assume $P(x)$.&quot;</li>
-<li>A constant <a href="Declaration.html">Declaration</a> is the same but with
-<code>const</code> instead of <code>var</code>.  Again, the body is optional, so
-<code>[pi const]</code> declares the symbol <code>pi</code> to be a constant.</li>
-<li>An <a href="Environment.html">Environment</a> is written with its children
-separated by spaces and surrounded in curly brackets.  Example:
-<code>{ child1 child2 etc }</code>.</li>
-<li>A <a href="Formula.html">Formula</a> (which is a subclass of
-<a href="Environment.html">Environment</a>) by using <code>{*</code> and <code>*}</code> as the
-grouping markers instead of undecorated curly brackets.</li>
-<li>Any <a href="Environment.html">Environment</a>,
-<a href="Declaration.html">Declaration</a>, or
-<a href="Expression.html#isOutermost">outermost Expression</a> can be marked
-as a &quot;given&quot; by preceding it with a colon, <code>:</code>.</li>
-<li>Any <a href="Environment.html">Environment</a>,
-<a href="Declaration.html">Declaration</a>, or
-<a href="Expression.html">Expression</a> can be given additional attributes by
-following it with <code>+{</code> and then for the rest of the line (that is,
-until the next newline) writing as much JSON code as you like,
-beginning with that initial <code>{</code>, as attributes to add to the
-preceding object.  For example, to add the color green to a
-<a href="Symbol.html">Symbol</a>, we might do this:
-<code>my_symbol +{&quot;color&quot;:&quot;green&quot;}</code>.  To add more attributes than can fit
-on one line, simply start another <code>+{...}</code> block on the next line.</li>
-<li>The notation <code>//</code> is used for one-line comments.  Anything after it
-is ignored, up until the next newline.  The previous rule has some
-conflict with this one, and we resolve it as follows.  If a <code>//</code>
-occurs before a <code>+{</code> on a line, then the <code>//</code> takes precedence and
-the rest of the line is a comment, so the <code>+{</code> is ignored.  But if
-the <code>+{</code> appears first, it takes precedence, and the rest of the
-line is interpreted as JSON code, so a trailing <code>//</code> comment will
-most likely create invalid JSON, and thus should be avoided.</li>
-</ul>
-</div>
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Parameters</h4>
-    
-
-<ul class="method-params">
-    
-
-        <li>
-            
-                <span class="param-name">string</span>
-            
-
-            
-                
-
-
-    <span class="param-type">
-        <code>String</code>
-    </span>
-    
-
-            
-
-            
-
-            
-
-            <div class="param-description"><p>should contain putdown notation for one or
-more LogicConcepts</p></div>
-            
-        </li>
-
-    
-</ul>
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-    <h4 class="method-heading">Returns</h4>
-    <ul>
-    
-        <li class="method-returns">
-            
-                <code>Array.&lt;LogicConcept></code>
-            
-            
-                <p>an Array of the LogicConcepts described in
-putdown notation in the argument</p>
-            
-        </li>
-    
-    </ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="logic-concept.js.html">logic-concept.js</a><a href="logic-concept.js.html#source.220">, line 220</a>
-        </li>
-    </ul>
-
-
-
+    <article>
+        <pre id="source" class="source-page line-numbers"><code class="language-js">
+import { Symbol } from '../symbol.js'
+import { Application } from '../application.js'
+import { Binding } from '../binding.js'
+import { LogicConcept } from '../logic-concept.js'
+import { isAnEFA } from './expression-functions.js'
+
+// Utility function used below.  It means that the LC is an Application type,
+// but not an Expression Function Application.
+const isASimpleApplication = x => ( x instanceof Application ) &amp;&amp; !isAnEFA( x )
+// This does not appear documented in the source code documentation, because it
+// is internal to this module.  It is a list of the predicates for classifying
+// constraints, in increasing order of complexity, for use in the rank()
+// function documented in the Constraint class below.
+const predicates = [
+    // failure type: Constraints that can never be satisfied
+    {
+        name : 'failure',
+        predicate : C => {
+            if ( !Constraint.containsAMetavariable( C.pattern )
+              &amp;&amp; !C.pattern.equals( C.expression ) )
+                return true
+            if ( isASimpleApplication( C.pattern ) ) {
+                if ( !( C.expression instanceof Application )
+                  || C.pattern.numChildren() != C.expression.numChildren() )
+                    return true
+            }
+            if ( C.pattern instanceof Binding ) {
+                if ( !( C.expression instanceof Binding )
+                  || C.pattern.numChildren() != C.expression.numChildren() )
+                    return true
+            }
+            return false
+        }
+    },
+    // success type: Constraints that are already satisfied
+    {
+        name : 'success',
+        predicate : C => !Constraint.containsAMetavariable( C.pattern )
+            &amp;&amp; C.pattern.equals( C.expression )
+    },
+    // instantiation type: Constraints that are just metavar |--> expression
+    {
+        name : 'instantiation',
+        predicate : C => C.canBeApplied()
+    },
+    // children type: Constraints that depend on many smaller constraints,
+    // built from the children of this Constraint's pattern and expression
+    {
+        name : 'children',
+        predicate : C => ( isASimpleApplication( C.pattern )
+                        &amp;&amp; ( C.expression instanceof Application ) )
+                      || ( ( C.pattern instanceof Binding )
+                        &amp;&amp; ( C.expression instanceof Binding ) )
+    },
+    // EFA type: Constraints that can only be satisfied by exploring the many
+    // sub-options coming from an Expression Function Application pattern
+    {
+        name : 'EFA',
+        predicate : C => isAnEFA( C.pattern )
+    }
+    // All Constraints should satisfy one of the categories above.
+    // There are no other possibilities.
+]
+
+/**
+ * @see {@link Constraint#metavariable metavariable}
+ */
+export const metavariable = 'LDE MV'
+
+/**
+ * A Constraint is a pattern-expression pair often written $(p,e)$ and used to
+ * express the idea that the expression $e$ matches the pattern $p$.  The $e$
+ * will be an instance of {@link Expression Expression} and the $p$ will be as
+ * well, but it may contain metavariables, as defined
+ * {@link Constraint#metavariable here}.
+ * 
+ * Note that a Constraint need not be true or satisfiable.  Here are three
+ * examples using ordinary mathematical notation.  For the purposes of these
+ * examples, let us assume that capital letter symbols stand for metavariables,
+ * and no other symbols are metavariables.
+ * 
+ *  * The constraint $(3-t,3-t)$ is clearly satisfiable, because its expression
+ *    already exactly matches its pattern, with no metavariables even coming
+ *    into play at all.
+ *  * The constraint $(A+B,3x+y^2)$ is satisfiable, because we could instantiate
+ *    the metavariables with $A\mapsto 3x,B\mapsto y^2$ to demonstrate that $e$
+ *    is of the form expressed by $p$.
+ *  * The constraint $(3,\forall x.P(x))$ is not satisfiable, because $p\neq e$
+ *    and $p$ contains no metavariables that we might instantiate to change $p$.
+ *  * The constraint $(A+B,\forall x.P(x))$ is not satisfiable, because no
+ *    possible instantiations of the metavariables $A,B$ can make the summation
+ *    in $p$ into the universal quantifier in $e$.
+ * 
+ * Typically Constraints are arranged into sets, and we will provide an
+ * algorithm for solving a set of Constraints, or saying that it is not
+ * solvable.  That has not yet been implemented, and this documentation will be
+ * updated later when it has been implemented.
+ */
+export class Constraint {
+
+    /**
+     * Any {@link Symbol Symbol} can be marked as a "metavariable," which means
+     * that it is usable for substitution or pattern matching, when comparing
+     * one expression to another.  For instance, if we compare $a+b$ to
+     * $3x+y^2$, and the $a$ and $b$ are metavariables, then we can see that
+     * $3x+y^2$ has the form $a+b$, demonstrable by substituting
+     * $a\mapsto 3x,b\mapsto y^2$.
+     * 
+     * You can make any symbol into a metavariable using this value, with code
+     * such as `mySymbol.makeIntoA(Constraint.metavariable)`.  Note that the
+     * Constraint module also exports a constant of the same name
+     * (`metavariable`), so if you import that, you can shorten the above code
+     * to `mySymbol.makeIntoA(metavariable)`.
+     * 
+     * Although it is also possible to mark other kinds of
+     * {@link MathConcept MathConcept} instances as a metavariable, that has no
+     * sensible meaning, and will be ignored.  The metavariable flag is only
+     * important on {@link Symbol Symbols}, and thus should be put only there.
+     * 
+     * *WARNING:* JavaScript does not support `static const` members in classes,
+     * so technically this field is writable, even though it should not be
+     * changed.  Do not alter the value of this static member.  If and when
+     * ECMAScript7 supports `static const` members, we will upgrade this to a
+     * `static const` member.
+     * 
+     * @see {@link Constraint#isAPattern isAPattern()}
+     */
+    static metavariable = metavariable
+
+    /**
+     * A pattern is an {@link Expression Expression} that may contain a
+     * metavariable, and hence *all* {@link Expression Expressions} are
+     * patterns, though an {@link Expression Expression} without any
+     * metavariables is a pattern only in a degenerate sense.  But sometimes we
+     * need to know we are working with an {@link Expression Expression} that
+     * does *not* contain a metavariable.  This function is therefore useful.
+     * 
+     * Recall that a metavariable is any {@link Symbol Symbol} that has been
+     * marked as a metavariable as described in the documentation for
+     * {@link Constraint#metavariable metavariable}.
+     * 
+     * @param {LogicConcept} LC the {@link LogicConcept LogicConcept} to test
+     *   for whether it contains any metavariables
+     * @returns {boolean} true if and only if `LC` contains no metavariables
+     * @static
+     */
+    static containsAMetavariable ( LC ) {
+        return LC.hasDescendantSatisfying( d => d.isA( metavariable ) )
+    }
+
+    /**
+     * Constructs a new Constraint with the given pattern and expression.
+     * Throws an error if `expression` satisfies
+     * {@link Constraint.containsAMetavariable containsAMetavariable()}.
+     * 
+     * Constraints are to be treated as immutable.  Do not later alter the
+     * pattern or expression of this constraint.  If you need a different
+     * constraint, simply construct a new one.
+     * 
+     * @param {Expression} pattern any {@link Expression Expression} instance,
+     *   but typically one containing metavariables, to be used as the pattern
+     *   for this Constraint, as documented at the top of this page
+     * @param {Expression} expression any {@link Expression Expression} instance
+     *   that contains no instance of a metavariable, so that it can be used as
+     *   the expression for this Constraint
+     * 
+     * @see {@link Constraint#pattern pattern getter}
+     * @see {@link Constraint#expression expression getter}
+     */
+    constructor ( pattern, expression ) {
+        if ( Constraint.containsAMetavariable( expression ) )
+            throw 'The expression in a constraint may not contain metavariables'
+        this._pattern = pattern
+        this._expression = expression
+    }
+
+    /**
+     * Getter for the pattern provided at construction time.  This function is
+     * useful for making the pattern member act as a read-only member, even
+     * though no member is really read-only in JavaScript.
+     * 
+     * @returns {LogicConcept} the pattern given at construction time
+     */
+    get pattern () { return this._pattern }
+
+    /**
+     * Getter for the expression provided at construction time.  This function
+     * is useful for making the expression member act as a read-only member,
+     * even though no member is really read-only in JavaScript.
+     * 
+     * @returns {LogicConcept} the expression given at construction time
+     */
+    get expression () { return this._expression }
+
+    /**
+     * Creates a copy of this Constraint.  It is a shallow copy, in the sense
+     * that it shares the same pattern and expression instances with this
+     * Constraint, but that should be irrelevant, because Constraints are
+     * immutable.  That is, they never alter their own patterns or expressions,
+     * and the client is instructed not to alter them either, as per the
+     * documentation in {@link Constraint the constructor}.
+     * 
+     * @returns {Constraint} a copy of this Constraint
+     */
+    copy () { return new Constraint( this._pattern, this._expression ) }
+
+    /**
+     * If a Constraint's pattern is a single metavariable, then that Constraint
+     * can be used as a tool for substitution.  For instance, the Constraint
+     * $(A,2)$ can be applied to the expression $A-\frac{A}{B}$ to yield
+     * $2-\frac{2}{B}$.  A Constraint is only useful for application if its
+     * pattern is a single metavariable.  This function tests whether that is
+     * the case.
+     * 
+     * @returns {boolean} true if and only if this Constraint can be applied
+     *   like a function (that is, whether its pattern is just a single
+     *   metavariable)
+     * 
+     * @see {@link Constraint#applyTo applyTo()}
+     * @see {@link Constraint#appliedTo appliedTo()}
+     */
+    canBeApplied () {
+        return this.pattern instanceof Symbol
+            &amp;&amp; this.pattern.isA( metavariable )
+    }
+
+    /**
+     * Apply this Constraint, as a substitution instruction, to the given
+     * target.  If the target is a {@link LogicConcept LogicConcept}, replace
+     * every instance in it of this Constraint's pattern with a copy of this
+     * Constraint's expression.  If the target is another Constraint, just
+     * operate on its pattern (since its expression will not contain any
+     * metavariables that need to be replaced).
+     * 
+     * If this Constraint does not pass the
+     * {@link Constraint#canBeApplied canBeApplied()} test, then this function
+     * throws an error.  It also throws an error if the target is not one of the
+     * two types mentioned above.
+     * 
+     * @param {LogicConcept|Constraint} target the object to which we should
+     *   apply this Constraint, in place
+     * 
+     * @see {@link Constraint#canBeApplied canBeApplied()}
+     * @see {@link Constraint#appliedTo appliedTo()}
+     */
+    applyTo ( target ) {
+        if ( !this.canBeApplied() )
+            throw 'Cannot apply a Constraint whose pattern is not a metavariable'
+        if ( target instanceof Constraint )
+            return this.applyTo( target.pattern )
+        if ( !( target instanceof LogicConcept ) )
+            throw 'Invalid target for applying a Constraint'
+        target.descendantsSatisfying( d => d.equals( this.pattern )
+                                    &amp;&amp; d.isA( metavariable )
+        ).forEach( d => d.replaceWith( this.expression.copy() ) )
+    }
+
+    /**
+     * Create a copy of the target and then call
+     * {@link Constraint#applyTo applyTo()} on the copy, returning the copy
+     * afterwards.  In other words, this behaves exactly like
+     * {@link Constraint#applyTo applyTo()}, but instead of operating on the
+     * `target` in place, it operates on a copy and returns the copy.
+     * 
+     * @param {LogicConcept|Constraint} target the object to which we should
+     *   apply this Constraint, resulting in a copy
+     * @returns {LogicConcept|Constraint} a new copy of the `target` with the
+     *   application of this Constraint having been done
+     * 
+     * @see {@link Constraint#canBeApplied canBeApplied()}
+     * @see {@link Constraint#applyTo applyTo()}
+     * @see {@link Constraint#copy copy()}
+     */
+    appliedTo ( target ) {
+        const copy = target.copy()
+        this.applyTo( copy )
+        return copy
+    }
+
+    /**
+     * Compute and return the complexity of this Constraint.  The return value
+     * is cached, so that future calls to this function do not recompute it.
+     * The cache is never invalidated, because Constraints are viewed as
+     * immutable.  Complexities include:
+     * 
+     *  * 0, or "failure": any constraint not matching any of the categories
+     *    listed below, and therefore impossible to reconcile into a solution
+     *  * 1, or "success": any constraint $(p,e)$ for which $p=e$ (and thus $p$
+     *    contains no metavariables)
+     *  * 2, or "instantiation": any constraint $(p,e)$ for which $p$ is a lone
+     *    metavariable, so that the clear unique solution is $p\mapsto e$
+     *  * 3, or "children": any constraint $(p,e)$ where $p$ and $e$ are both
+     *    compound expressions with the same structure, so that the appropriate
+     *    next step en route to a solution is to pair up their corresponding
+     *    children and see if a solution exists to that Constraint set
+     *  * 4, or "EFA": any constraint $(p,e)$ where $p$ is an Expression
+     *    Function Application, as defined in the documentation for the
+     *    {@link ExpressionFunctions ExpressionFunctions} namespace
+     * 
+     * This value can be used to sort Constraints so that constraints with lower
+     * complexity are processed first in algorithms, for the sake of efficiency.
+     * We will later add here a cross-reference to the Problem class, once it
+     * has been created.
+     * 
+     * @returns {integer} the complexity of this Constraint, ranked on a scale
+     *   beginning with zero (trivial) and counting upwards towards more
+     *   complex constraints
+     * @see {@link Constraint#complexityName complexityName()}
+     */
+    complexity () {
+        if ( !this.hasOwnProperty( '_complexity' ) ) {
+            let index = predicates.findIndex( obj => obj.predicate( this ) )
+            this._complexity = index
+        }
+        return this._complexity
+    }
+
+    /**
+     * This function returns a single-word description of the
+     * {@link Constraint#complexity complexity()} of this Constraint.  It is
+     * mostly useful in debugging.  The names listed after each integer in the
+     * documentation for the {@link Constraint#complexity complexity()} function
+     * are the names returned by this function.
+     * 
+     * @returns {string} a description of this Constraint's complexity
+     * 
+     * @see {@link Constraint#complexity complexity()}
+     */
+    complexityName () {
+        return predicates[this.complexity()].name
+    }
+
+}
+</code></pre>
     </article>
-
-        
-            
-
-
-    <article class="method">
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    
-    </div>
-
-    <h4 class="method-name" id="enableFeedback">enableFeedback<span class="signature">(enable, flushQueue)</span><span class="return-type-signature"></span>
-    </h4>
-
-
-
-
-
-<div class="method-description">
-    
-    <p>Enable or disable feedback, optionally flushing the queue of any old,
-stored feedback from when feedback was disabled.</p>
-<p>To understand what it means for feedback to be enabled or disabled,
-see the documentation for <a href="LogicConcept.html#feedback">feedback()</a>.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Parameters</h4>
-    
-
-<ul class="method-params">
-    
-
-        <li>
-            
-                <span class="param-name">enable</span>
-            
-
-            
-                
-
-
-    <span class="param-type">
-        <code>boolean</code>
-    </span>
-    
-
-            
-
-            
-
-            
-                
-                    <span class="param-default">
-                        true
-                    </span>
-                
-            
-
-            <div class="param-description"><p>whether to enable feedback (if true) or
-disable it (if false)</p></div>
-            
-        </li>
-
-    
-
-        <li>
-            
-                <span class="param-name">flushQueue</span>
-            
-
-            
-                
-
-
-    <span class="param-type">
-        <code>boolean</code>
-    </span>
-    
-
-            
-
-            
-
-            
-                
-                    <span class="param-default">
-                        false
-                    </span>
-                
-            
-
-            <div class="param-description"><p>when enabling feedback, there may be
-a backlog of old feedback that was stored (and not sent) when
-feedback was disabled.  If this parameter is true, then that
-backlog of old feedback is all sent immediately, in the same
-order it was enqueued.  If this parameter is false, then taht
-backlog of old feedback is discarded.</p></div>
-            
-        </li>
-
-    
-</ul>
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h4 class="method-heading">See</h4>
-        <ul>
-            
-                <li><a href="LogicConcept.html#feedback">feedback()</a></li>
-            
-        </ul>
-    
-
-    
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="logic-concept.js.html">logic-concept.js</a><a href="logic-concept.js.html#source.142">, line 142</a>
-        </li>
-    </ul>
-
-
-
-    </article>
-
-        
-            
-
-
-    <article class="method">
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    
-    </div>
-
-    <h4 class="method-name" id="feedback">feedback<span class="signature">(feedbackData)</span><span class="return-type-signature"></span>
-    </h4>
-
-
-
-
-
-<div class="method-description">
-    
-    <p>This method does one of two things, depending on whether feedback for
-this instance is enabled, which can be customized using
-<a href="LogicConcept.html#enableFeedback">enableFeedback()</a>.</p>
-<p>If feedback is enabled and this object has an
-<a href="LogicConcept.html#origin">origin()</a>, then this method just calls the
-<a href="MathConcept.html#feedback">feedback()</a> method in that origin, with the
-same parameter.  The reason for this is that feedback to the LDE about
-a LogicConcept should always be mediated through the MathConcept that
-gave rise to that LogicConcept.</p>
-<p>If feedback is disabled, then the feedback given as the parameter will
-be stored in a feedback queue, which can be discarded or flushed later,
-using <a href="LogicConcept.html#enableFeedback">enableFeedback()</a>.</p>
-<p>Note that there is no third option; if feedback is enabled, but this
-object has no <a href="LogicConcept.html#origin">origin()</a>, then there is no
-way for this object to send the requested feedback, so this method will
-take no action.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Parameters</h4>
-    
-
-<ul class="method-params">
-    
-
-        <li>
-            
-                <span class="param-name">feedbackData</span>
-            
-
-            
-                
-
-
-    <span class="param-type">
-        <code>Object</code>
-    </span>
-    
-
-            
-
-            
-
-            
-
-            <div class="param-description"><p>Any data that can be encoded using
-<code>JSON.stringify()</code> (or
-<a href="global.html#predictableStringify">predictableStringify()</a>), to be transmitted</p></div>
-            
-        </li>
-
-    
-</ul>
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h4 class="method-heading">See</h4>
-        <ul>
-            
-                <li><a href="MathConcept.html#.feedback">MathConcept static feedback() method</a></li>
-            
-                <li><a href="MathConcept.html#feedback">MathConcept feedback() method for instances</a></li>
-            
-        </ul>
-    
-
-    
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="logic-concept.js.html">logic-concept.js</a><a href="logic-concept.js.html#source.117">, line 117</a>
-        </li>
-    </ul>
-
-
-
-    </article>
-
-        
-            
-
-
-    <article class="method">
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    
-    </div>
-
-    <h4 class="method-name" id="markDirty">markDirty<span class="signature">(on<span class="signature-attributes">opt</span>, propagate<span class="signature-attributes">opt</span>)</span><span class="return-type-signature"></span>
-    </h4>
-
-
-
-
-
-<div class="method-description">
-    
-    <p>Overrides the behavior in <a href="MathConcept.html#markDirty">the parent class</a>,
-where the default behavior is to propagate dirtiness up to ancestors,
-whereas we do not want that here.  The reason is that MathConcepts use
-the dirty flag to indicate whether they need to have their interpretation
-recomputed, but LogicConcepts use the dirty flag to indicate whether they
-need to have their validation recomputed.  Interpretation tends to depend
-on the interpretation of children, whereas validation does not.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Parameters</h4>
-    
-
-<ul class="method-params">
-    
-
-        <li>
-            
-                <span class="param-name">on</span>
-            
-
-            
-                
-
-
-    <span class="param-type">
-        <code>boolean</code>
-    </span>
-    
-
-            
-
-            
-                <span class="param-attributes">
-                
-                    &lt;optional&gt;<br>
-                
-
-                
-
-                
-                </span>
-            
-
-            
-                
-                    <span class="param-default">
-                        true
-                    </span>
-                
-            
-
-            <div class="param-description"><p>same meaning as in
-<a href="MathConcept.html#markDirty">the parent class</a></p></div>
-            
-        </li>
-
-    
-
-        <li>
-            
-                <span class="param-name">propagate</span>
-            
-
-            
-                
-
-
-    <span class="param-type">
-        <code>boolean</code>
-    </span>
-    
-
-            
-
-            
-                <span class="param-attributes">
-                
-                    &lt;optional&gt;<br>
-                
-
-                
-
-                
-                </span>
-            
-
-            
-                
-                    <span class="param-default">
-                        false
-                    </span>
-                
-            
-
-            <div class="param-description"><p>same meaning as in
-<a href="MathConcept.html#markDirty">the parent class</a>, except the default is
-now false</p></div>
-            
-        </li>
-
-    
-</ul>
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="logic-concept.js.html">logic-concept.js</a><a href="logic-concept.js.html#source.63">, line 63</a>
-        </li>
-    </ul>
-
-
-
-    </article>
-
-        
-            
-
-
-    <article class="method">
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    
-    </div>
-
-    <h4 class="method-name" id="origin">origin<span class="signature">()</span><span class="return-type-signature"> &rarr; {<a href="MathConcept.html">MathConcept</a>}</span>
-    </h4>
-
-
-
-
-
-<div class="method-description">
-    
-    <p>Many LogicConcept instances will be created by interpreting a
-MathConcept, and breaking it down into smaller, simpler parts, expressed
-as LogicConcepts.  We will typically want to track, for any given
-LogicConcept, which MathConcept it came from, in that sense.  This
-function returns that value.</p>
-<p>There is no corresponding setter function, because it is not expected
-that clients should be changing the origin of a LogicConcept.  Later,
-when we implement interpretation of MathConcepts into LogicConcepts,
-we will populate this value in that code.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-    <h4 class="method-heading">Returns</h4>
-    <ul>
-    
-        <li class="method-returns">
-            
-                <code>MathConcept</code>
-            
-            
-                <p>the object whose interpretation led to the
-construction of this LogicConcept</p>
-            
-        </li>
-    
-    </ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="logic-concept.js.html">logic-concept.js</a><a href="logic-concept.js.html#source.88">, line 88</a>
-        </li>
-    </ul>
-
-
-
-    </article>
-
-        
-            
-
-
-    <article class="method">
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    
-    </div>
-
-    <h4 class="method-name" id="toPutdown">toPutdown<span class="signature">()</span><span class="return-type-signature"> &rarr; {String}</span>
-    </h4>
-
-
-
-
-
-<div class="method-description">
-    
-    <p>This function is the inverse of
-<a href="LogicConcept.html#.fromPutdown">fromPutdown()</a>, which creates
-LogicConcept instances from text in putdown notation.  This function
-writes putdown notation for any LogicConcept.  It should be the case
-that this function outputs valid putdown notation for any LogicConcept
-in which it is called, and that
-<a href="LogicConcept.html#.fromPutdown">fromPutdown()</a> applied to that notation
-produces an object that <a href="MathConcept.html#equals">equals()</a> the
-original.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-    <h4 class="method-heading">Returns</h4>
-    <ul>
-    
-        <li class="method-returns">
-            
-                <code>String</code>
-            
-            
-                <p>putdown notation for this LogicConcept instance</p>
-            
-        </li>
-    
-    </ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="logic-concept.js.html">logic-concept.js</a><a href="logic-concept.js.html#source.526">, line 526</a>
-        </li>
-    </ul>
-
-
-
-    </article>
-
-        
-    
-
-    
-
-    
-</article>
-
 </section>
 
 
