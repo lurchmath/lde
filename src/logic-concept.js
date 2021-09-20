@@ -512,12 +512,12 @@ export class LogicConcept extends MathConcept {
 
     /**
      * This function is the inverse of
-     * {@link LogicConcept#fromPutdown fromPutdown()}, which creates
+     * {@link LogicConcept.fromPutdown fromPutdown()}, which creates
      * LogicConcept instances from text in putdown notation.  This function
      * writes putdown notation for any LogicConcept.  It should be the case
      * that this function outputs valid putdown notation for any LogicConcept
      * in which it is called, and that
-     * {@link LogicConcept#fromPutdown fromPutdown()} applied to that notation
+     * {@link LogicConcept.fromPutdown fromPutdown()} applied to that notation
      * produces an object that {@link MathConcept#equals equals()} the
      * original.
      * 

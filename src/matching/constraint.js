@@ -70,12 +70,10 @@ export const metavariable = 'LDE MV'
 
 /**
  * A Constraint is a pattern-expression pair often written $(p,e)$ and used to
- * express the idea that the expression $e$ matches the pattern $p$.  Although
- * we call $e$ the "expression," and it almost always is an instance of the
- * {@link Expression Expression} class, this implementation is sufficiently
- * general to permit both $p$ and $e$ to be any instances of the
- * {@link LogicConcept LogicConcept} class, provided that $e$ contains no
- * metavariables (a concept defined {@link Constraint#metavariable here}).
+ * express the idea that the expression $e$ matches the pattern $p$.  The $e$
+ * will be an instance of {@link Expression Expression} and the $p$ will be as
+ * well, but it may contain metavariables, as defined
+ * {@link Constraint#metavariable here}.
  * 
  * Note that a Constraint need not be true or satisfiable.  Here are three
  * examples using ordinary mathematical notation.  For the purposes of these
@@ -88,9 +86,9 @@ export const metavariable = 'LDE MV'
  *  * The constraint $(A+B,3x+y^2)$ is satisfiable, because we could instantiate
  *    the metavariables with $A\mapsto 3x,B\mapsto y^2$ to demonstrate that $e$
  *    is of the form expressed by $p$.
- *  * The constraint $(3,\forall x,P(x))$ is not satisfiable, because $p\neq e$
+ *  * The constraint $(3,\forall x.P(x))$ is not satisfiable, because $p\neq e$
  *    and $p$ contains no metavariables that we might instantiate to change $p$.
- *  * The constraint $(A+B,\forall x,P(x))$ is not satisfiable, because no
+ *  * The constraint $(A+B,\forall x.P(x))$ is not satisfiable, because no
  *    possible instantiations of the metavariables $A,B$ can make the summation
  *    in $p$ into the universal quantifier in $e$.
  * 
@@ -123,7 +121,7 @@ export class Constraint {
      * *WARNING:* JavaScript does not support `static const` members in classes,
      * so technically this field is writable, even though it should not be
      * changed.  Do not alter the value of this static member.  If and when
-     * EcmaScript7 supports `static const` members, we will upgrade this to a
+     * ECMAScript7 supports `static const` members, we will upgrade this to a
      * `static const` member.
      * 
      * @see {@link Constraint#isAPattern isAPattern()}
@@ -131,11 +129,11 @@ export class Constraint {
     static metavariable = metavariable
 
     /**
-     * A pattern is a {@link LogicConcept LogicConcept} that may contain a
-     * metavariable, and hence *all* {@link LogicConcept LogicConcepts} are
-     * patterns, though a {@link LogicConcept LogicConcept} without any
+     * A pattern is an {@link Expression Expression} that may contain a
+     * metavariable, and hence *all* {@link Expression Expressions} are
+     * patterns, though an {@link Expression Expression} without any
      * metavariables is a pattern only in a degenerate sense.  But sometimes we
-     * need to know we are working with a {@link LogicConcept LogicConcept} that
+     * need to know we are working with an {@link Expression Expression} that
      * does *not* contain a metavariable.  This function is therefore useful.
      * 
      * Recall that a metavariable is any {@link Symbol Symbol} that has been
@@ -145,6 +143,7 @@ export class Constraint {
      * @param {LogicConcept} LC the {@link LogicConcept LogicConcept} to test
      *   for whether it contains any metavariables
      * @returns {boolean} true if and only if `LC` contains no metavariables
+     * @static
      */
     static containsAMetavariable ( LC ) {
         return LC.hasDescendantSatisfying( d => d.isA( metavariable ) )
@@ -153,18 +152,18 @@ export class Constraint {
     /**
      * Constructs a new Constraint with the given pattern and expression.
      * Throws an error if `expression` satisfies
-     * {@link Constraint#containsAMetavariable containsAMetavariable()}.
+     * {@link Constraint.containsAMetavariable containsAMetavariable()}.
      * 
      * Constraints are to be treated as immutable.  Do not later alter the
      * pattern or expression of this constraint.  If you need a different
      * constraint, simply construct a new one.
      * 
-     * @param {LogicConcept} pattern any {@link LogicConcept LogicConcept}
-     *   instance, but typically one containing metavariables, to be used as
-     *   the pattern for this Constraint, as documented at the top of this page
-     * @param {LogicConcept} expression any {@link LogicConcept LogicConcept}
-     *   instance that contains no instance of a metavariable, so that it can be
-     *   used as the expression for this Constraint
+     * @param {Expression} pattern any {@link Expression Expression} instance,
+     *   but typically one containing metavariables, to be used as the pattern
+     *   for this Constraint, as documented at the top of this page
+     * @param {Expression} expression any {@link Expression Expression} instance
+     *   that contains no instance of a metavariable, so that it can be used as
+     *   the expression for this Constraint
      * 
      * @see {@link Constraint#pattern pattern getter}
      * @see {@link Constraint#expression expression getter}
@@ -283,7 +282,21 @@ export class Constraint {
      * Compute and return the complexity of this Constraint.  The return value
      * is cached, so that future calls to this function do not recompute it.
      * The cache is never invalidated, because Constraints are viewed as
-     * immutable.
+     * immutable.  Complexities include:
+     * 
+     *  * 0, or "failure": any constraint not matching any of the categories
+     *    listed below, and therefore impossible to reconcile into a solution
+     *  * 1, or "success": any constraint $(p,e)$ for which $p=e$ (and thus $p$
+     *    contains no metavariables)
+     *  * 2, or "instantiation": any constraint $(p,e)$ for which $p$ is a lone
+     *    metavariable, so that the clear unique solution is $p\mapsto e$
+     *  * 3, or "children": any constraint $(p,e)$ where $p$ and $e$ are both
+     *    compound expressions with the same structure, so that the appropriate
+     *    next step en route to a solution is to pair up their corresponding
+     *    children and see if a solution exists to that Constraint set
+     *  * 4, or "EFA": any constraint $(p,e)$ where $p$ is an Expression
+     *    Function Application, as defined in the documentation for the
+     *    {@link ExpressionFunctions ExpressionFunctions} namespace
      * 
      * This value can be used to sort Constraints so that constraints with lower
      * complexity are processed first in algorithms, for the sake of efficiency.
@@ -306,7 +319,9 @@ export class Constraint {
     /**
      * This function returns a single-word description of the
      * {@link Constraint#complexity complexity()} of this Constraint.  It is
-     * mostly useful in debugging.
+     * mostly useful in debugging.  The names listed after each integer in the
+     * documentation for the {@link Constraint#complexity complexity()} function
+     * are the names returned by this function.
      * 
      * @returns {string} a description of this Constraint's complexity
      * 

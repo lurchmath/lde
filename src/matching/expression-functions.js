@@ -2,7 +2,6 @@
 /**
  * @file Defines functions for working with expression functions and their
  *   applications
- * @namespace ExpressionFunctions
  * 
  * Let $\mathcal{L}$ be the set of expressions in a language.  Here, we will
  * think of $\mathcal{L}$ as all possible {@link Expression Expressions}, in
@@ -15,7 +14,7 @@
  * This module provides functions that let us do so.
  * 
  * We will write an Expression Function using standard $\lambda$ notation, as in
- * $\lambda v1,\ldots,v_n.B$, where each $v_i$ is a parameter to the function
+ * $\lambda v_1,\ldots,v_n.B$, where each $v_i$ is a parameter to the function
  * (represented using a {@link Symbol Symbol} with the name `v_1`, `v_2`, etc.))
  * and the body $B$ is any {@link Expression Expression} that may contain free
  * instances of the $v_i$ that can be replaced with other
@@ -26,14 +25,14 @@
  * 
  * The above paragraph uses ordinary mathematical notation, but we will need to
  * be able to write expression functions in
- * {@link LogicConcept#fromPutdown putdown notation} so that we can express
+ * {@link LogicConcept.fromPutdown putdown} notation so that we can express
  * them as {@link LogicConcept LogicConcepts}.  We define a constant in this
  * module to be `"LDE lambda"` so that we can express the $f$ from above as
  * `("LDE lambda" v_1 v_2 , (+ v_1 (cos (+ v_2 1))))`.
- * That constant is not guaranteed to always have that name, so clients should
- * not hard-code that name into their code, but instead use
- * {@link ExpressionFunctions#newEF newEF()} and
- * {@link ExpressionFunctions#isAnEF isAnEF()}.
+ * That constant may change in later versions of the LDE, so clients should not
+ * hard-code that name into their code, but instead use
+ * {@link module:ExpressionFunctions.newEF newEF()} and
+ * {@link module:ExpressionFunctions.isAnEF isAnEF()}.
  * 
  * An *Expression Function Application* (or EFA for short) is an
  * {@link Expression Expression} expressing the idea that we are applying some
@@ -42,10 +41,12 @@
  * {@link LogicConcept#fromPutdown putdown notation} as `(f 3 k)` because that
  * would be indistinguishable from normal function application.  Thus we need a
  * new symbol.  We define a constant in this module to be `"LDE EFA"` so that we
- * can express $f(3,k)$ as `("LDE EFA" f 3 k)`.  That constant is not guaranteed
- * to always have that name, so clients should not hard-code that name into
- * their code, but instead use {@link ExpressionFunctions#newEF newEFA()} and
- * {@link ExpressionFunctions#isAnEF isAnEFA()}.
+ * can express $f(3,k)$ as `("LDE EFA" f 3 k)`.  That constant may change in
+ * later versions of the LDE, so clients should not hard-code that name into
+ * their code, but instead use {@link module:ExpressionFunctions.newEF newEFA()} and
+ * {@link module:ExpressionFunctions.isAnEF isAnEFA()}.
+ *
+ * @module ExpressionFunctions
  */
 
 import { Symbol } from "../symbol.js"
@@ -74,8 +75,7 @@ const expressionFunction = new Symbol( 'LDE lambda' )
  * @returns {Binding} an Expression Function encoded as described in the
  *   documentation at the top of this file
  * 
- * @namespace ExpressionFunctions
- * @see {@link ExpressionFunctions#isAnEF isAnEF()}
+ * @see {@link module:ExpressionFunctions.isAnEF isAnEF()}
  */
 export const newEF = ( ...args ) =>
     new Binding( expressionFunction.copy(), ...args )
@@ -83,14 +83,13 @@ export const newEF = ( ...args ) =>
 /**
  * Test whether the given {@link Expression Expression} encodes an Expression
  * Function, as defined by the encoding documented at the top of this file, and
- * as produced by the function {@link ExpressionFunctions#newEF newEF()}.
+ * as produced by the function {@link module:ExpressionFunctions.newEF newEF()}.
  * 
  * @param {Expression} expr the {@link Expression Expression} to test whether it
  *   encodes an Expression Function
  * @returns {boolean} true if and only if `expr` encodes an Expression Function
  * 
- * @namespace ExpressionFunctions
- * @see {@link ExpressionFunctions#newEF newEF()}
+ * @see {@link module:ExpressionFunctions.newEF newEF()}
  */
 export const isAnEF = expr =>
     expr instanceof Binding && expr.head().equals( expressionFunction )
@@ -111,14 +110,14 @@ const expressionFunctionApplication = new Symbol( 'LDE EFA' )
  * 
  * If the first argument is a metavariable then there must be one or more
  * additional arguments of any type.  If the first argument is an Expression
- * Function (as per {@link ExpressionFunctions#isAnEF isAnEF()}) then there must
+ * Function (as per {@link module:ExpressionFunctions.isAnEF isAnEF()}) then there must
  * be a number of arguments following it that are equal to its arity.  If these
  * rules are not followed, an error is thrown.
  * 
  * @param  {Expression} operator the {@link Expression Expression} to be used as
  *   the expression function in the result; this should be either an Expression
  *   Function (that is, it satisfies
- *   {@link ExpressionFunctions#isAnEF isAnEF()}) or a metavariable (that is,
+ *   {@link module:ExpressionFunctions.isAnEF isAnEF()}) or a metavariable (that is,
  *   it satisfies `.isA( Constraint.metavariable )`, as defined in
  *   {@link Constraint#metavariable the Constraint class}), because no other
  *   type of {@link Expression Expression} can be applied as an Expression
@@ -128,8 +127,7 @@ const expressionFunctionApplication = new Symbol( 'LDE EFA' )
  * @returns {Application} an Expression Function Application encoded as
  *   described in the documentation at the top of this file
  * 
- * @namespace ExpressionFunctions
- * @see {@link ExpressionFunctions#isAnEFA isAnEFA()}
+ * @see {@link module:ExpressionFunctions.isAnEFA isAnEFA()}
  */
 export const newEFA = ( operator, ...operands ) => {
     if ( operator.isA( metavariable ) && operands.length == 0 )
@@ -144,15 +142,14 @@ export const newEFA = ( operator, ...operands ) => {
 /**
  * Test whether the given expression encodes an Expression Function Application,
  * as defined by the encoding documented at the top of this file, and as
- * produced by the function {@link ExpressionFunctions#newEFA newEFA()}.
+ * produced by the function {@link module:ExpressionFunctions.newEFA newEFA()}.
  * 
  * @param {Expression} expr the expression to test whether it encodes an
  *   Expression Function Application
  * @returns {boolean} true if and only if `expr` encodes an Expression Function
  *   Application
  * 
- * @namespace ExpressionFunctions
- * @see {@link ExpressionFunctions#newEFA newEFA()}
+ * @see {@link module:ExpressionFunctions.newEFA newEFA()}
  */
 export const isAnEFA = expr =>
     expr instanceof Application
