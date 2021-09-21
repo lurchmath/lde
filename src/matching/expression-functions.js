@@ -32,10 +32,14 @@
  * That constant may change in later versions of the LDE, so clients should not
  * hard-code that name into their code, but instead use
  * {@link module:ExpressionFunctions.newEF newEF()} and
- * {@link module:ExpressionFunctions.isAnEF isAnEF()}.  You can also check the
- * number of arguments of an expression function with
+ * {@link module:ExpressionFunctions.isAnEF isAnEF()}.
+ * 
+ * You can also check the number of arguments of an expression function with
  * {@link module:ExpressionFunctions.arityOfEF arityOfEF()} and apply them with
- * {@link module:ExpressionFunctions.applyEF applyEF()}.
+ * {@link module:ExpressionFunctions.applyEF applyEF()}.  And you can create
+ * simple types of expression functions with
+ * {@link module:ExpressionFunctions.constantEF constantEF()} and
+ * {@link module:ExpressionFunctions.projectionEF projectionEF()}.
  * 
  * An *Expression Function Application* (or EFA for short) is an
  * {@link Expression Expression} expressing the idea that we are applying some
@@ -46,8 +50,8 @@
  * new symbol.  We define a constant in this module to be `"LDE EFA"` so that we
  * can express $f(3,k)$ as `("LDE EFA" f 3 k)`.  That constant may change in
  * later versions of the LDE, so clients should not hard-code that name into
- * their code, but instead use {@link module:ExpressionFunctions.newEF newEFA()} and
- * {@link module:ExpressionFunctions.isAnEF isAnEFA()}.  You can also check
+ * their code, but instead use {@link module:ExpressionFunctions.newEF newEFA()}
+ * and {@link module:ExpressionFunctions.isAnEF isAnEFA()}.  You can also check
  * whether an EFA is evaluatable with
  * {@link module:ExpressionFunctions.canBetaReduce canBetaReduce()} and evaluate
  * it (or any possible $\beta$-reduction inside it) with
@@ -175,6 +179,56 @@ export const applyEF = ( ef, ...args ) => {
     } )
     return result
 }
+
+// Used internally to create a sequence of dummy variables,
+// useful when building an expression function.
+const dummyVariable = i => new Symbol( `v${i}` )
+const dummyVariables = n =>
+    Array( n ).fill( 0 ).map( ( _, i ) => dummyVariable( i ) )
+
+/**
+ * Create an expression function (as defined
+ * {@link module:ExpressionFunctions.isAnEF here}) that is a constant function
+ * (that is, it always returns the same expression).  That is, the function can
+ * be expressed as $\lambda v_1,\ldots,v_n. E$ for some expression $E$ not
+ * containing any of the $v_i$.
+ * 
+ * @param {integer} arity the number of parameters for the function that will be
+ *   created; this must be at least 1.
+ * @param {Expression} output the output that the function should give on any
+ *   input (because it is a constant function)
+ * @returns {Expression} an expression function (that is, something that will
+ *   pass the {@link module:ExpressionFunctions.isAnEF isAnEF()} test) with the
+ *   given number of arguments, that always returns the given `output`
+ * 
+ * @see {@link module:ExpressionFunctions.isAnEF isAnEF()}
+ * @see {@link module:ExpressionFunctions.newEF newEF()}
+ * @see {@link module:ExpressionFunctions.projectionEF projectionEF()}
+ */
+export const constantEF = ( arity, output ) =>
+    newEF( ...dummyVariables( arity ), output.copy() )
+
+/**
+ * Create an expression function (as defined
+ * {@link module:ExpressionFunctions.isAnEF here}) that returns one of its
+ * arguments.  That is, the function can be expressed as
+ * $\lambda v_1,\ldots,v_n. v_i$ for some $i$ between 1 and $n$.
+ * 
+ * @param {integer} arity the number of parameters for the function that will be
+ *   created; this must be at least 1.
+ * @param {integer} index the index of the parameter that will also be the body
+ *   of the function; the function will always return the argument at this index
+ * @returns {Expression} an expression function (that is, something that will
+ *   pass the {@link module:ExpressionFunctions.isAnEF isAnEF()} test) with the
+ *   given number of arguments, that always returns the argument with the given
+ *   index
+ * 
+ * @see {@link module:ExpressionFunctions.isAnEF isAnEF()}
+ * @see {@link module:ExpressionFunctions.newEF newEF()}
+ * @see {@link module:ExpressionFunctions.constantEF constantEF()}
+ */
+export const projectionEF = ( arity, index ) =>
+    newEF( ...dummyVariables( arity ), dummyVariable( index ) )
 
 // We use this symbol for encoding Expression Function Applications as
 // LogicConcepts, as described above.

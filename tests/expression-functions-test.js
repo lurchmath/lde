@@ -1,6 +1,6 @@
 
 import {
-    newEF, isAnEF, arityOfEF, applyEF,
+    newEF, isAnEF, arityOfEF, applyEF, constantEF, projectionEF,
     newEFA, isAnEFA, canBetaReduce, betaReduce, fullBetaReduce
 } from '../src/matching/expression-functions.js'
 import { Symbol } from '../src/symbol.js'
@@ -217,6 +217,78 @@ describe( 'Expression Functions', () => {
         expect( () => applyEF( newEFA(
             newEF( new Symbol( 'x' ), new Symbol( 'x' ) ), new Symbol( '2' )
         ), args ) ).to.throw( /requires an expression function/ )
+    } )
+
+    it( 'Should be able to build and apply constant and projection EFs', () => {
+        // Ensure that constantEF() always creates functions with the requested
+        // arity.
+        const B = LogicConcept.fromPutdown( '(example body)' )[0]
+        const C = LogicConcept.fromPutdown( '"another one"' )[0]
+        expect( arityOfEF( constantEF( 1, B ) ) ).to.equal( 1 )
+        expect( arityOfEF( constantEF( 2, B ) ) ).to.equal( 2 )
+        expect( arityOfEF( constantEF( 3, B ) ) ).to.equal( 3 )
+        expect( arityOfEF( constantEF( 4, B ) ) ).to.equal( 4 )
+        // Ensure that constantEF() always creates functions with the requested
+        // body.
+        expect( constantEF( 1, B ).body().equals( B ) ).to.equal( true )
+        expect( constantEF( 2, B ).body().equals( B ) ).to.equal( true )
+        expect( constantEF( 3, C ).body().equals( C ) ).to.equal( true )
+        expect( constantEF( 4, C ).body().equals( C ) ).to.equal( true )
+        // Ensure that applying a constantEF() always gives the same output.
+        expect( applyEF( constantEF( 1, B ), new Symbol( 5 ) ).equals( B ) )
+            .to.equal( true )
+        expect( applyEF( constantEF( 1, B ), new Symbol( "YO!" ) ).equals( B ) )
+            .to.equal( true )
+        expect( applyEF( constantEF( 1, C ), new Symbol( 5 ) ).equals( C ) )
+            .to.equal( true )
+        expect(
+            applyEF(
+                constantEF( 3, C ),
+                new Symbol( "YO!" ),
+                new Symbol( "Adrian!" ),
+                new Symbol( "It's Rocky!" )
+            ).equals( C )
+        ).to.equal( true )
+        // Ensure that projectionEF() always creates functions with the
+        // requested arity.
+        expect( arityOfEF( projectionEF( 1, 0 ) ) ).to.equal( 1 )
+        expect( arityOfEF( projectionEF( 2, 0 ) ) ).to.equal( 2 )
+        expect( arityOfEF( projectionEF( 3, 1 ) ) ).to.equal( 3 )
+        expect( arityOfEF( projectionEF( 4, 1 ) ) ).to.equal( 4 )
+        // Ensure that projectionEF() always creates functions whose body is a
+        // copy of one of the parameters--and the correct one.
+        let ef
+        ef = projectionEF( 1, 0 )
+        expect( ef.body().equals( ef.boundVariables()[0] ) ).to.equal( true )
+        ef = projectionEF( 2, 0 )
+        expect( ef.body().equals( ef.boundVariables()[0] ) ).to.equal( true )
+        ef = projectionEF( 3, 1 )
+        expect( ef.body().equals( ef.boundVariables()[1] ) ).to.equal( true )
+        ef = projectionEF( 4, 1 )
+        expect( ef.body().equals( ef.boundVariables()[1] ) ).to.equal( true )
+        // Ensure that applying a projectionEF() gives a copy of one of the
+        // arguments as output--but just a copy, not the actual argument.
+        let args, result
+        ef = projectionEF( 1, 0 )
+        args = [ new Symbol( 5 ) ]
+        result = applyEF( ef, ...args )
+        expect( result.equals( args[0] ) ).to.equal( true )
+        expect( result === args[0] ).to.equal( false )
+        ef = projectionEF( 2, 0 )
+        args = [ new Symbol( "and" ), new Symbol( "or" ) ]
+        result = applyEF( ef, ...args )
+        expect( result.equals( args[0] ) ).to.equal( true )
+        expect( result === args[0] ).to.equal( false )
+        ef = projectionEF( 3, 1 )
+        args = LogicConcept.fromPutdown( 'sym (a p p) (bind ing , body)' )
+        result = applyEF( ef, ...args )
+        expect( result.equals( args[1] ) ).to.equal( true )
+        expect( result === args[1] ).to.equal( false )
+        ef = projectionEF( 4, 1 )
+        args = LogicConcept.fromPutdown( '9 88 777 6666' )
+        result = applyEF( ef, ...args )
+        expect( result.equals( args[1] ) ).to.equal( true )
+        expect( result === args[1] ).to.equal( false )
     } )
 
     it( 'Should let us construct valid EFAs', () => {
