@@ -227,41 +227,48 @@ export class Constraint {
 
     /**
      * Apply this Constraint, as a substitution instruction, to the given
-     * target.  If the target is a {@link LogicConcept LogicConcept}, replace
-     * every instance in it of this Constraint's pattern with a copy of this
-     * Constraint's expression.  If the target is another Constraint, just
-     * operate on its pattern (since its expression will not contain any
-     * metavariables that need to be replaced).
+     * {@link LogicConcept LogicConcept}, replacing every instance in it of this
+     * Constraint's pattern with a copy of this Constraint's expression.
+     * 
+     * Because this function operates in-place, it cannot be applied to another
+     * Constraint; such objects are to be immutable.  Instead, use the
+     * {@link Constraint#appliedTo appliedTo()} form, which can operate on
+     * Constraint instances.
      * 
      * If this Constraint does not pass the
      * {@link Constraint#canBeApplied canBeApplied()} test, then this function
      * throws an error.  It also throws an error if the target is not one of the
      * two types mentioned above.
      * 
-     * @param {LogicConcept|Constraint} target the object to which we should
-     *   apply this Constraint, in place
+     * @param {LogicConcept} LC the object to which we should apply this
+     *   Constraint, in place
      * 
      * @see {@link Constraint#canBeApplied canBeApplied()}
      * @see {@link Constraint#appliedTo appliedTo()}
      */
-    applyTo ( target ) {
+    applyTo ( LC ) {
         if ( !this.canBeApplied() )
             throw 'Cannot apply a Constraint whose pattern is not a metavariable'
-        if ( target instanceof Constraint )
-            return this.applyTo( target.pattern )
-        if ( !( target instanceof LogicConcept ) )
-            throw 'Invalid target for applying a Constraint'
-        target.descendantsSatisfying( d => d.equals( this.pattern )
-                                    && d.isA( metavariable )
+        if ( !( LC instanceof LogicConcept ) )
+            throw 'Can apply Constraints only to LogicConcepts'
+        LC.descendantsSatisfying( d => d.equals( this.pattern )
+                               && d.isA( metavariable )
         ).forEach( d => d.replaceWith( this.expression.copy() ) )
     }
 
     /**
-     * Create a copy of the target and then call
-     * {@link Constraint#applyTo applyTo()} on the copy, returning the copy
-     * afterwards.  In other words, this behaves exactly like
+     * If the target is a {@link LogicConcept LogicConcept}, create a copy of it
+     * and then call {@link Constraint#applyTo applyTo()} on the copy, returning
+     * the copy afterwards.  In other words, this behaves exactly like
      * {@link Constraint#applyTo applyTo()}, but instead of operating on the
-     * `target` in place, it operates on a copy and returns the copy.
+     * target in place, it operates on a copy and returns the copy.
+     * 
+     * If the target is a Constraint, build a new constraint with the same
+     * expression as the given Constraint, but with a pattern built by running
+     * the original Constraint's pattern through this same function, as defined
+     * in the previous paragraph.  That is, `appliedTo()` run on a Constraint
+     * $(p,e)$ yields a constraint $(p',e)$, where $p'$ is the result of
+     * `appliedTo(p)`.
      * 
      * @param {LogicConcept|Constraint} target the object to which we should
      *   apply this Constraint, resulting in a copy
@@ -273,9 +280,14 @@ export class Constraint {
      * @see {@link Constraint#copy copy()}
      */
     appliedTo ( target ) {
-        const copy = target.copy()
-        this.applyTo( copy )
-        return copy
+        if ( target instanceof LogicConcept ) {
+            const copy = target.copy()
+            this.applyTo( copy )
+            return copy
+        } else {
+            return new Constraint( this.appliedTo( target.pattern ),
+                                   target.expression )
+        }
     }
 
     /**

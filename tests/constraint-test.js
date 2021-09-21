@@ -220,6 +220,19 @@ describe( 'Constraint', () => {
         expect( applied1.equals( P1 ) ).to.equal( true )
         expect( applied2.equals( P2 ) ).to.equal( true )
         expect( applied3.equals( P3 ) ).to.equal( true )
+        // ensure that Constraints cannot be applied in-place to other
+        // Constraints
+        let badTarget = new Constraint( P1.copy(),
+            LogicConcept.fromPutdown( '(hello there "friend")' )[0] )
+        expect( () => C.applyTo( badTarget ) ).to.throw( /only.*LogicConcepts/ )
+        // but it is okay to apply not-in-place to a Constraint, thus creating
+        // a new, altered copy
+        let substituted
+        expect( () => substituted = C.appliedTo( badTarget ) ).not.to.throw()
+        expect( substituted.pattern.equals( C.appliedTo( P1.copy() ) ) )
+            .to.equal( true )
+        expect( substituted.expression.equals( badTarget.expression ) )
+            .to.equal( true )
     } )
 
     it( 'Should correctly compute complexity levels and names', () => {
