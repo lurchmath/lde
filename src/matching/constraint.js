@@ -62,6 +62,11 @@ const predicates = [
     // All Constraints should satisfy one of the categories above.
     // There are no other possibilities.
 ]
+const failure = predicates[0]
+const success = predicates[1]
+const instantiation = predicates[2]
+const children = predicates[3]
+const EFA = predicates[4]
 
 /**
  * @see {@link Constraint#metavariable metavariable}
@@ -343,6 +348,30 @@ export class Constraint {
         return predicates[this.complexity()].name
     }
 
+    /**
+     * If a Constraint has {@link Constraint#complexity complexity()} = 3,
+     * and thus {@link Constraint#complexityName complexityName()} = "children",
+     * then the pattern and expression are either both
+     * {@link Application Applications} or both {@link Binding Bindings}, and
+     * have the same number of children.  It is therefore useful when solving
+     * this constraint to pair up the corresponding children into new Constraint
+     * instances.  This function does so, returning them as an array.
+     * 
+     * For example, if we have a pattern $p=(a~b~c)$ and an expression
+     * $e=(x~y~z)$ then the Constraint $(p,e)$ has complexity 3, and we can call
+     * this function on it, yielding three new Constraints, $(a,x)$, $(b,y)$,
+     * and $(c,z)$.
+     * 
+     * @returns {...Constraint} all child constraints computed from this
+     *   Constraint, as a JavaScript array, in the same order that the children
+     *   appear in the pattern (and expression) of this constraint
+     */
+    children () {
+        if ( this.complexity() != predicates.indexOf( children ) )
+            throw 'Cannot compute children for this type of Constraint'
+        return this.pattern.children().map( ( child, index ) =>
+            new Constraint( child, this.expression.child( index ) ) )
+    }
 
     /**
      * The string representation of a Constraint $(p,e)$ is simply the string

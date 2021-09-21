@@ -305,4 +305,56 @@ describe( 'Constraint', () => {
         expect( C.complexityName() ).to.equal( 'EFA' )
     } )
 
+    it( 'Should correctly compute arrays of child constraints', () => {
+        let P, E, C
+        // First, it should throw an error if you try to compute child
+        // constraints for the wrong type of constraints.
+        P = LogicConcept.fromPutdown( 'a' )[0]
+        E = LogicConcept.fromPutdown( '(b c)' )[0]
+        C = new Constraint( P, E )
+        expect( () => C.children() ).to.throw( /^Cannot compute.*this type/ )
+        P = newEFA( new Symbol( 'P' ).asA( metavariable ), new Symbol( 'x' ) )
+        E = LogicConcept.fromPutdown( '(a b c d)' )[0]
+        C = new Constraint( P, E )
+        expect( () => C.children() ).to.throw( /^Cannot compute.*this type/ )
+        // Next, consider two applications of the same size
+        P = LogicConcept.fromPutdown( '(x y z)' )[0]
+        P.child( 1 ).makeIntoA( metavariable )
+        E = LogicConcept.fromPutdown( '(a b c)' )[0]
+        C = new Constraint( P, E )
+        let result
+        expect( () => result = C.children() ).not.to.throw()
+        expect( result.length ).to.equal( 3 )
+        expect( result[0] ).to.be.instanceOf( Constraint )
+        expect( result[0].pattern.equals( new Symbol( 'x' ) ) ).to.equal( true )
+        expect( result[0].expression.equals( new Symbol( 'a' ) ) ).to.equal( true )
+        expect( result[1] ).to.be.instanceOf( Constraint )
+        expect( result[1].pattern.equals( new Symbol( 'y' ).asA( metavariable ) ) )
+            .to.equal( true )
+        expect( result[1].expression.equals( new Symbol( 'b' ) ) ).to.equal( true )
+        expect( result[2] ).to.be.instanceOf( Constraint )
+        expect( result[2].pattern.equals( new Symbol( 'z' ) ) ).to.equal( true )
+        expect( result[2].expression.equals( new Symbol( 'c' ) ) ).to.equal( true )
+        // Last, consider two bindings of the same size
+        P = LogicConcept.fromPutdown( '(x y z , w)' )[0]
+        P.child( 1 ).makeIntoA( metavariable )
+        E = LogicConcept.fromPutdown( '(a b c , d)' )[0]
+        C = new Constraint( P, E )
+        expect( () => result = C.children() ).not.to.throw()
+        expect( result.length ).to.equal( 4 )
+        expect( result[0] ).to.be.instanceOf( Constraint )
+        expect( result[0].pattern.equals( new Symbol( 'x' ) ) ).to.equal( true )
+        expect( result[0].expression.equals( new Symbol( 'a' ) ) ).to.equal( true )
+        expect( result[1] ).to.be.instanceOf( Constraint )
+        expect( result[1].pattern.equals( new Symbol( 'y' ).asA( metavariable ) ) )
+            .to.equal( true )
+        expect( result[1].expression.equals( new Symbol( 'b' ) ) ).to.equal( true )
+        expect( result[2] ).to.be.instanceOf( Constraint )
+        expect( result[2].pattern.equals( new Symbol( 'z' ) ) ).to.equal( true )
+        expect( result[2].expression.equals( new Symbol( 'c' ) ) ).to.equal( true )
+        expect( result[3] ).to.be.instanceOf( Constraint )
+        expect( result[3].pattern.equals( new Symbol( 'w' ) ) ).to.equal( true )
+        expect( result[3].expression.equals( new Symbol( 'd' ) ) ).to.equal( true )
+    } )
+
 } )
