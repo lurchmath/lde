@@ -230,6 +230,28 @@ export const constantEF = ( arity, output ) =>
 export const projectionEF = ( arity, index ) =>
     newEF( ...dummyVariables( arity ), dummyVariable( index ) )
 
+/**
+ * Construct a function whose body is an application of the form shown below.
+ * The caller provides the arity of the function as well as a list of symbols to
+ * be used in constructing the function's body, as shown below.  Assume the
+ * given arity is $n$ and the list of symbols given is $F_1,\ldots,F_m$.
+ * Further assume that the symbol used to indicate an EFA (as defined
+ * {@link module:ExpressionFunctions.isAnEFA here}) is $A$.  Then the
+ * expression function created will be
+ * $$ \lambda v_1,\ldots,v_n.((A~F_1~v_1~\cdots~v_n)~\cdots~(A~F_m~v_1~\cdots~v_n)). $$
+ * This particular form is useful in one of the matching algorithms we will
+ * write later.
+ * 
+ * @param {integer} arity the number of parameters to give the new function
+ * @param {...Symbol|...string} symbols an array of symbols or names of symbols
+ *   to be used to construct the function, as documented above
+ */
+export const applicationEF = ( arity, symbols ) => newEF(
+    ...dummyVariables( arity ),
+    new Application( ...symbols.map( sym =>
+        newEFA( sym instanceof Symbol ? sym : new Symbol( sym ),
+                ...dummyVariables( arity ) ) ) ) )
+
 // We use this symbol for encoding Expression Function Applications as
 // LogicConcepts, as described above.
 const expressionFunctionApplication = new Symbol( 'LDE EFA' )

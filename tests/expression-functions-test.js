@@ -1,6 +1,6 @@
 
 import {
-    newEF, isAnEF, arityOfEF, applyEF, constantEF, projectionEF,
+    newEF, isAnEF, arityOfEF, applyEF, constantEF, projectionEF, applicationEF,
     newEFA, isAnEFA, canBetaReduce, betaReduce, fullBetaReduce
 } from '../src/matching/expression-functions.js'
 import { Symbol } from '../src/symbol.js'
@@ -289,6 +289,67 @@ describe( 'Expression Functions', () => {
         result = applyEF( ef, ...args )
         expect( result.equals( args[1] ) ).to.equal( true )
         expect( result === args[1] ).to.equal( false )
+    } )
+
+    it( 'Should be able to build complex application EFs', () => {
+        // We do just two tests of this as example cases
+        let names, arity, ef, body, params, child
+        // Example 1: applicationEF(2,['A','B']) should give
+        // lambda v1,v2. ((A v1 v2) (B v1 v2))
+        arity = 2
+        names = [ 'A', 'B' ]
+        ef = applicationEF( arity, names )
+        expect( isAnEF( ef ) ).to.equal( true )
+        params = ef.boundVariables()
+        expect( arityOfEF( ef ) ).to.equal( arity )
+        expect( params.length ).to.equal( arity )
+        body = ef.body()
+        expect( body instanceof Application ).to.equal( true )
+        expect( body.numChildren() ).to.equal( names.length )
+        child = body.child( 0 )
+        expect( isAnEFA( child ) ).to.equal( true )
+        expect( child.numChildren() ).to.equal( params.length + 2 )
+        expect( child.child( 1 ) instanceof Symbol ).to.equal( true )
+        expect( child.child( 1 ).text() ).to.equal( names[0] )
+        expect( child.child( 2 ).equals( params[0] ) ).to.equal( true )
+        expect( child.child( 3 ).equals( params[1] ) ).to.equal( true )
+        child = body.child( 1 )
+        expect( isAnEFA( child ) ).to.equal( true )
+        expect( child.numChildren() ).to.equal( params.length + 2 )
+        expect( child.child( 1 ) instanceof Symbol ).to.equal( true )
+        expect( child.child( 1 ).text() ).to.equal( names[1] )
+        expect( child.child( 2 ).equals( params[0] ) ).to.equal( true )
+        expect( child.child( 3 ).equals( params[1] ) ).to.equal( true )
+        // Example 1: applicationEF(1,[x,y,z]) should give
+        // lambda v1. ((x v1) (y v1) (z v1))
+        arity = 1
+        names = [ new Symbol( 'x' ), new Symbol( 'y' ), new Symbol( 'z' ) ]
+        ef = applicationEF( arity, names )
+        expect( isAnEF( ef ) ).to.equal( true )
+        params = ef.boundVariables()
+        expect( arityOfEF( ef ) ).to.equal( arity )
+        expect( params.length ).to.equal( arity )
+        body = ef.body()
+        expect( body instanceof Application ).to.equal( true )
+        expect( body.numChildren() ).to.equal( names.length )
+        child = body.child( 0 )
+        expect( isAnEFA( child ) ).to.equal( true )
+        expect( child.numChildren() ).to.equal( params.length + 2 )
+        expect( child.child( 1 ) instanceof Symbol ).to.equal( true )
+        expect( child.child( 1 ).text() ).to.equal( names[0].text() )
+        expect( child.child( 2 ).equals( ef.boundVariables()[0] ) ).to.equal( true )
+        child = body.child( 1 )
+        expect( isAnEFA( child ) ).to.equal( true )
+        expect( child.numChildren() ).to.equal( params.length + 2 )
+        expect( child.child( 1 ) instanceof Symbol ).to.equal( true )
+        expect( child.child( 1 ).text() ).to.equal( names[1].text() )
+        expect( child.child( 2 ).equals( ef.boundVariables()[0] ) ).to.equal( true )
+        child = body.child( 2 )
+        expect( isAnEFA( child ) ).to.equal( true )
+        expect( child.numChildren() ).to.equal( params.length + 2 )
+        expect( child.child( 1 ) instanceof Symbol ).to.equal( true )
+        expect( child.child( 1 ).text() ).to.equal( names[2].text() )
+        expect( child.child( 2 ).equals( ef.boundVariables()[0] ) ).to.equal( true )
     } )
 
     it( 'Should let us construct valid EFAs', () => {
