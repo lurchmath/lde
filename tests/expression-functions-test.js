@@ -1,6 +1,7 @@
 
 import {
-    newEF, isAnEF, arityOfEF, applyEF, newEFA, isAnEFA
+    newEF, isAnEF, arityOfEF, applyEF,
+    newEFA, isAnEFA, canBetaReduce, betaReduce
 } from '../src/matching/expression-functions.js'
 import { Symbol } from '../src/symbol.js'
 import { Application } from '../src/application.js'
@@ -305,6 +306,137 @@ describe( 'Expression Functions', () => {
         // An EF
         expect( isAnEFA( idEF ) ).to.equal( false )
         expect( isAnEFA( projEF ) ).to.equal( false )
+    } )
+
+    it( 'Should be able to tell when beta reduction is possible', () => {
+        let efa
+        // Two of the EFAs we constructed in the previous test use actual EFs,
+        // and thus can be part of an expression that can be beta-reduced
+        const idEF = newEF( new Symbol( 'x' ), new Symbol( 'x' ) )
+        efa = newEFA( idEF, new Symbol( 'a' ) )
+        expect( isAnEFA( efa ) ).to.equal( true )
+        expect( canBetaReduce( efa ) ).to.equal( true )
+        const projEF = newEF(
+            new Symbol( 'v1' ), new Symbol( 'v2' ), new Symbol( 'v3' ),
+            new Symbol( 'v4' ), new Symbol( 'v2' )
+        )
+        efa = newEFA(
+            projEF,
+            new Symbol( 1 ), new Symbol( 2 ), new Symbol( 3 ), new Symbol( 4 )
+        )
+        expect( isAnEFA( efa ) ).to.equal( true )
+        expect( canBetaReduce( efa ) ).to.equal( true )
+        // Those same two EFAs, if we change the number of arguments, can no
+        // longer be beta-reduced
+        efa = newEFA( idEF, new Symbol( 'a' ) ) // correct # of args
+        efa.pushChild( new Symbol( 'b' ) ) // now too many args
+        expect( isAnEFA( efa ) ).to.equal( true )
+        expect( canBetaReduce( efa ) ).to.equal( false )
+        efa = newEFA( projEF, // correct # of args:
+            new Symbol( 1 ), new Symbol( 2 ), new Symbol( 3 ), new Symbol( 4 ) )
+        efa.popChild() // now too few args
+        expect( isAnEFA( efa ) ).to.equal( true )
+        expect( canBetaReduce( efa ) ).to.equal( false )
+        // The EFAs created in the previous test using metavariables for the EF
+        // cannot be beta-reduced, because we don't know the actual EF to use
+        let M = new Symbol( 'M' ).asA( metavariable )
+        efa = newEFA( M, new Symbol( 'p' ) )
+        expect( isAnEFA( efa ) ).to.equal( true )
+        expect( canBetaReduce( efa ) ).to.equal( false )
+        efa = newEFA( M, new Symbol( 'p' ), new Symbol( 'q' ) )
+        expect( isAnEFA( efa ) ).to.equal( true )
+        expect( canBetaReduce( efa ) ).to.equal( false )
+        efa = newEFA( M, new Symbol( 'p' ), new Symbol( 'q' ), new Symbol( 'r' ) )
+        expect( isAnEFA( efa ) ).to.equal( true )
+        expect( canBetaReduce( efa ) ).to.equal( false )
+        // And of course, anything that's not a valid EFA in the first place
+        // cannot be beta-reduced
+        expect( canBetaReduce( new Symbol( 'x' ) ) ).to.equal( false )
+        expect( canBetaReduce( new Application( new Symbol( 'x' ) ) ) )
+            .to.equal( false )
+        expect( canBetaReduce( LogicConcept.fromPutdown( '(sum i , (f i))' )[0] ) )
+            .to.equal( false )
+        expect( canBetaReduce( new Environment() ) ).to.equal( false )
+        expect( canBetaReduce( LogicConcept.fromPutdown( '[pi e const]' )[0] ) )
+            .to.equal( false )
+        expect( canBetaReduce( LogicConcept.fromPutdown( '(/ 1 (+ 1 x))' )[0] ) )
+            .to.equal( false )
+        expect( canBetaReduce( idEF ) ).to.equal( false )
+        expect( canBetaReduce( projEF ) ).to.equal( false )
+    } )
+
+    it( 'Should be able to do all beta reductions in an expression', () => {
+        let expr, result
+        // If no beta reductions are needed, we just get back an exact copy.
+        expr = LogicConcept.fromPutdown( '(no (beta reductions) "here")' )[0]
+        result = expr.copy()
+        expect( betaReduce( expr ).equals( result ) ).to.equal( true )
+        // If the expression is an EFA, it will be done; we use an example from
+        // an earlier test of applyEF
+        expr = newEFA(
+            newEF(
+                new Symbol( 'u' ), new Symbol( 'v' ),
+                LogicConcept.fromPutdown( '(+ (- u 1) (- v 1))' )[0]
+            ),
+            ...LogicConcept.fromPutdown( '"FOO" "BAR"' )
+        )
+        result = LogicConcept.fromPutdown( '(+ (- "FOO" 1) (- "BAR" 1))' )[0]
+        expect( betaReduce( expr ).equals( result ) ).to.equal( true )
+        // If the expression contains an EFA, it will be done; we use an example
+        // from an earlier test of applyEF, but this time deeper inside a larger
+        // expression
+        expr = new Application( // (+ 5 ((lambda v1 v2 , v2) 6 7))
+            new Symbol( '+' ),
+            new Symbol( 5 ),
+            newEFA(
+                newEF(
+                    new Symbol( 'v1' ), new Symbol( 'v2' ), new Symbol( 'v2' )
+                ),
+                new Symbol( 6 ),
+                new Symbol( 7 )
+            )
+        )
+        result = LogicConcept.fromPutdown( '(+ 5 7)' )[0]
+        expect( betaReduce( expr ).equals( result ) ).to.equal( true )
+        // Multiple EFAs in the same expression work fine.
+        expr = new Application(
+            newEFA(
+                newEF( new Symbol( 'x' ), new Symbol( 'x' ) ),
+                LogicConcept.fromPutdown( '(∃ y , (P y))' )[0]
+            ),
+            newEFA(
+                newEF( new Symbol( 'x' ), new Symbol( 'y' ), new Symbol( 'x' ) ),
+                ...LogicConcept.fromPutdown( '(a b) (c d)' )
+            )
+        )
+        result = LogicConcept.fromPutdown( '((∃ y , (P y)) (a b))' )[0]
+        expect( betaReduce( expr ).equals( result ) ).to.equal( true )
+        // Even nested EFAs work okay, as long as it is one that terminates
+        expr = new Application(
+            new Symbol( "and the answer is:" ),
+            newEFA(
+                newEF(
+                    new Symbol( 'x' ),
+                    new Symbol( 'y' ),
+                    LogicConcept.fromPutdown( '(together x y)' )[0]
+                ),
+                LogicConcept.fromPutdown( '(once (upon (a time)))' )[0],
+                newEFA(
+                    newEF(
+                        new Symbol( 'v' ),
+                        LogicConcept.fromPutdown( '(v v v)' )[0]
+                    ),
+                    new Symbol( 'hi!' )
+                )
+            )
+        )
+        result = LogicConcept.fromPutdown( `
+            ("and the answer is:"
+                (together (once (upon (a time)))
+                ("hi!" "hi!" "hi!"))
+            )
+        ` )[0]
+        expect( betaReduce( expr ).equals( result ) ).to.equal( true )
     } )
 
 } )

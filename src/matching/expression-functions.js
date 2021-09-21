@@ -230,3 +230,73 @@ export const newEFA = ( operator, ...operands ) => {
 export const isAnEFA = expr =>
     expr instanceof Application && expr.numChildren() > 2
  && expr.firstChild().equals( expressionFunctionApplication )
+
+/**
+ * An expression can be $\beta$-reduced if it is an expression function
+ * application and the expression function in question is not a metavariable,
+ * but an actual expression function.  To help distinguish these two
+ * possibilities, consider:
+ * 
+ *  * If `P` is a {@link Constraint.metavariable metavariable} and `x` is a
+ *    {@link Symbol Symbol}, we could create an expression function appliaction
+ *    with, for example, `newEFA(P,new Symbol(5))`, but we could not evaluate
+ *    it, because we do not know the meaning of `P`.
+ *  * If `f` is an expression function, that is, it would pass the test
+ *    `isAnEF(f)` defined {@link module:ExpressionFunctions.isAnEF here}, and
+ *    `x` is as above, then (assuming the arity of `f` is 1) the expression
+ *    `newEFA(f,new Symbol(5))` can be evaluated, because `f` has a body and we
+ *    can substitute 5 into its body in the appropriate places.
+ * 
+ * Thus we need a function to distinguish these two cases.  Both will pass the
+ * test {@link module:ExpressionFunctions.isAnEFA isAnEFA()}, but only one can
+ * be applied.  Such application is called $\beta$-reduction, so we have this
+ * function `canBetaReduce()` that can detect when we are in the second case,
+ * above, rather than the first.  That is, does the expression being applied
+ * pass the {@link module:ExpressionFunctions.isAnEF isAnEF()} test, or is it
+ * just a metavariable?  This function returns true only in the former case,
+ * plus it also verifies that the correct number of arguments are present; if
+ * not, it returns false for that reason.
+ * 
+ * @param {Expression} expr the expression to test whether it is amenable to
+ *   $\beta$-reduction
+ * @returns {boolean} whether the given expression can be $\beta$-reduced
+ */
+export const canBetaReduce = expr =>
+    isAnEFA( expr ) && isAnEF( expr.child( 1 ) )
+ && expr.numChildren() == arityOfEF( expr.child( 1 ) ) + 2
+
+/**
+ * Make a copy of the given {@link Expression Expression}, then find inside it
+ * all subexpressions passing the test in
+ * {@link module:ExpressionFunctions.canBetaReduce canBetaReduce()}, and apply
+ * each such $\beta$-reduction using
+ * {@link module:ExpressionFunctions.applyEF applyEF()}.  Continue this process
+ * until there are no more opportunities for $\beta$-reduction.
+ * 
+ * This process is, in general, not guaranteed to terminate.  Clients should
+ * take care to call it only in situations where it is guaranteed to terminate.
+ * For example, the following expression function application will
+ * $\beta$-reduce to itself, and thus enter an infinite loop.
+ * $$ ((\lambda v. (v v)) (\lambda v. (v v))) $$
+ * In the LDE, we are unlikely to permit users to write input that requires us
+ * to apply expression functions to other expression functions, thus preventing
+ * cases like this one.
+ * 
+ * @param {Expression} expr the {@link Expression Expression} in which to seek
+ *   all opportunities for $\beta$-reduction and apply them
+ * @returns {Expression} a copy of the original expression, but with all
+ *   opportunities for $\beta$-reduction taken
+ */
+export const betaReduce = expr => {
+    const wrapper = new Application( expr.copy() )
+    let allDone = false
+    while ( !allDone ) {
+        allDone = true
+        wrapper.descendantsSatisfying( canBetaReduce ).forEach( efa => {
+            efa.replaceWith(
+                applyEF( efa.child( 1 ), ...efa.children().slice( 2 ) ) )
+            allDone = false
+        } )
+    }
+    return wrapper.popChild()
+}
