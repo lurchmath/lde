@@ -1,7 +1,7 @@
 
 import {
     newEF, isAnEF, arityOfEF, applyEF,
-    newEFA, isAnEFA, canBetaReduce, betaReduce
+    newEFA, isAnEFA, canBetaReduce, betaReduce, fullBetaReduce
 } from '../src/matching/expression-functions.js'
 import { Symbol } from '../src/symbol.js'
 import { Application } from '../src/application.js'
@@ -365,12 +365,11 @@ describe( 'Expression Functions', () => {
         expect( canBetaReduce( projEF ) ).to.equal( false )
     } )
 
-    it( 'Should be able to do all beta reductions in an expression', () => {
+    it( 'Should be able to do single steps of beta reduction', () => {
         let expr, result
-        // If no beta reductions are needed, we just get back an exact copy.
+        // If no beta reductions are needed, we get undefined
         expr = LogicConcept.fromPutdown( '(no (beta reductions) "here")' )[0]
-        result = expr.copy()
-        expect( betaReduce( expr ).equals( result ) ).to.equal( true )
+        expect( betaReduce( expr ) ).to.be.undefined
         // If the expression is an EFA, it will be done; we use an example from
         // an earlier test of applyEF
         expr = newEFA(
@@ -382,6 +381,41 @@ describe( 'Expression Functions', () => {
         )
         result = LogicConcept.fromPutdown( '(+ (- "FOO" 1) (- "BAR" 1))' )[0]
         expect( betaReduce( expr ).equals( result ) ).to.equal( true )
+        // If the expression contains an EFA, but that EFA is not the whole
+        // expression, then we get undefined.  This is part of what
+        // distinguishes betaReduce() from fullBetaReduce().
+        expr = new Application( // (+ 5 ((lambda v1 v2 , v2) 6 7))
+            new Symbol( '+' ),
+            new Symbol( 5 ),
+            newEFA(
+                newEF(
+                    new Symbol( 'v1' ), new Symbol( 'v2' ), new Symbol( 'v2' )
+                ),
+                new Symbol( 6 ),
+                new Symbol( 7 )
+            )
+        )
+        result = LogicConcept.fromPutdown( '(+ 5 7)' )[0]
+        expect( betaReduce( expr ) ).to.be.undefined
+    } )
+
+    it( 'Should be able to do all beta reductions in an expression', () => {
+        let expr, result
+        // If no beta reductions are needed, we just get back an exact copy.
+        expr = LogicConcept.fromPutdown( '(no (beta reductions) "here")' )[0]
+        result = expr.copy()
+        expect( fullBetaReduce( expr ).equals( result ) ).to.equal( true )
+        // If the expression is an EFA, it will be done; we use an example from
+        // an earlier test of applyEF
+        expr = newEFA(
+            newEF(
+                new Symbol( 'u' ), new Symbol( 'v' ),
+                LogicConcept.fromPutdown( '(+ (- u 1) (- v 1))' )[0]
+            ),
+            ...LogicConcept.fromPutdown( '"FOO" "BAR"' )
+        )
+        result = LogicConcept.fromPutdown( '(+ (- "FOO" 1) (- "BAR" 1))' )[0]
+        expect( fullBetaReduce( expr ).equals( result ) ).to.equal( true )
         // If the expression contains an EFA, it will be done; we use an example
         // from an earlier test of applyEF, but this time deeper inside a larger
         // expression
@@ -397,7 +431,7 @@ describe( 'Expression Functions', () => {
             )
         )
         result = LogicConcept.fromPutdown( '(+ 5 7)' )[0]
-        expect( betaReduce( expr ).equals( result ) ).to.equal( true )
+        expect( fullBetaReduce( expr ).equals( result ) ).to.equal( true )
         // Multiple EFAs in the same expression work fine.
         expr = new Application(
             newEFA(
@@ -410,7 +444,7 @@ describe( 'Expression Functions', () => {
             )
         )
         result = LogicConcept.fromPutdown( '((∃ y , (P y)) (a b))' )[0]
-        expect( betaReduce( expr ).equals( result ) ).to.equal( true )
+        expect( fullBetaReduce( expr ).equals( result ) ).to.equal( true )
         // Even nested EFAs work okay, as long as it is one that terminates
         expr = new Application(
             new Symbol( "and the answer is:" ),
@@ -436,7 +470,7 @@ describe( 'Expression Functions', () => {
                 ("hi!" "hi!" "hi!"))
             )
         ` )[0]
-        expect( betaReduce( expr ).equals( result ) ).to.equal( true )
+        expect( fullBetaReduce( expr ).equals( result ) ).to.equal( true )
     } )
 
 } )

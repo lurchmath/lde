@@ -51,7 +51,8 @@
  * whether an EFA is evaluatable with
  * {@link module:ExpressionFunctions.canBetaReduce canBetaReduce()} and evaluate
  * it (or any possible $\beta$-reduction inside it) with
- * {@link module:ExpressionFunctions.betaReduce betaReduce()}.
+ * {@link module:ExpressionFunctions.betaReduce betaReduce()} and
+ * {@link module:ExpressionFunctions.fullBetaReduce fullBetaReduce()}.
  *
  * @module ExpressionFunctions
  */
@@ -279,12 +280,39 @@ export const canBetaReduce = expr =>
  && expr.numChildren() == arityOfEF( expr.child( 1 ) ) + 2
 
 /**
+ * If {@link module:ExpressionFunctions.canBetaReduce canBetaReduce()} returns
+ * true, we may want to act upon that and perform the $\beta$-reduction.  This
+ * function does so.  It requires an argument that passes the
+ * {@link module:ExpressionFunctions.canBetaReduce canBetaReduce()} test, and it
+ * will perform exactly one step of $\beta$-reduction.  That is, it will
+ * substitute the arguments of the expression function application into (a copy
+ * of) the body of the expression function and return the result.
+ * 
+ * Note that the process of $\beta$-reduction is usually considered to be the
+ * repetition of this process in all possible ways until it termintes (if it
+ * does).  That process is implemented in the function
+ * {@link module:ExpressionFunctions.fullBetaReduce fullBetaReduce()}.  This
+ * function does just one step.
+ * 
+ * @param {Expression} expr an expression to be $\beta$-reduced, if possible
+ * @returns {Expression} a copy of the given expression, with $\beta$-reduction
+ *   applied to it once, or undefined if the expression is not an expression
+ *   function application applied to the correct number of arguments (as judged
+ *   by {@link module:ExpressionFunctions.canBetaReduce canBetaReduce()})
+ * 
+ * @see {@link module:ExpressionFunctions.canBetaReduce canBetaReduce()}
+ * @see {@link module:ExpressionFunctions.fullBetaReduce fullBetaReduce()}
+ */
+export const betaReduce = expr => canBetaReduce( expr ) ?
+    applyEF( expr.child( 1 ), ...expr.children().slice( 2 ) ) : undefined
+
+/**
  * Make a copy of the given {@link Expression Expression}, then find inside it
  * all subexpressions passing the test in
  * {@link module:ExpressionFunctions.canBetaReduce canBetaReduce()}, and apply
  * each such $\beta$-reduction using
- * {@link module:ExpressionFunctions.applyEF applyEF()}.  Continue this process
- * until there are no more opportunities for $\beta$-reduction.
+ * {@link module:ExpressionFunctions.betaReduce betaReduce()}.  Continue this
+ * process until there are no more opportunities for $\beta$-reduction.
  * 
  * This process is, in general, not guaranteed to terminate.  Clients should
  * take care to call it only in situations where it is guaranteed to terminate.
@@ -299,15 +327,17 @@ export const canBetaReduce = expr =>
  *   all opportunities for $\beta$-reduction and apply them
  * @returns {Expression} a copy of the original expression, but with all
  *   opportunities for $\beta$-reduction taken
+ * 
+ * @see {@link module:ExpressionFunctions.canBetaReduce canBetaReduce()}
+ * @see {@link module:ExpressionFunctions.betaReduce betaReduce()}
  */
-export const betaReduce = expr => {
+export const fullBetaReduce = expr => {
     const wrapper = new Application( expr.copy() )
     let allDone = false
     while ( !allDone ) {
         allDone = true
         wrapper.descendantsSatisfying( canBetaReduce ).forEach( efa => {
-            efa.replaceWith(
-                applyEF( efa.child( 1 ), ...efa.children().slice( 2 ) ) )
+            efa.replaceWith( betaReduce( efa ) )
             allDone = false
         } )
     }
