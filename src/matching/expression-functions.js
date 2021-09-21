@@ -32,7 +32,10 @@
  * That constant may change in later versions of the LDE, so clients should not
  * hard-code that name into their code, but instead use
  * {@link module:ExpressionFunctions.newEF newEF()} and
- * {@link module:ExpressionFunctions.isAnEF isAnEF()}.
+ * {@link module:ExpressionFunctions.isAnEF isAnEF()}.  You can also check the
+ * number of arguments of an expression function with
+ * {@link module:ExpressionFunctions.arityOfEF arityOfEF()} and apply them with
+ * {@link module:ExpressionFunctions.applyEF applyEF()}.
  * 
  * An *Expression Function Application* (or EFA for short) is an
  * {@link Expression Expression} expressing the idea that we are applying some
@@ -44,7 +47,11 @@
  * can express $f(3,k)$ as `("LDE EFA" f 3 k)`.  That constant may change in
  * later versions of the LDE, so clients should not hard-code that name into
  * their code, but instead use {@link module:ExpressionFunctions.newEF newEFA()} and
- * {@link module:ExpressionFunctions.isAnEF isAnEFA()}.
+ * {@link module:ExpressionFunctions.isAnEF isAnEFA()}.  You can also check
+ * whether an EFA is evaluatable with
+ * {@link module:ExpressionFunctions.canBetaReduce canBetaReduce()} and evaluate
+ * it (or any possible $\beta$-reduction inside it) with
+ * {@link module:ExpressionFunctions.betaReduce betaReduce()}.
  *
  * @module ExpressionFunctions
  */
@@ -238,7 +245,7 @@ export const isAnEFA = expr =>
  * possibilities, consider:
  * 
  *  * If `P` is a {@link Constraint.metavariable metavariable} and `x` is a
- *    {@link Symbol Symbol}, we could create an expression function appliaction
+ *    {@link Symbol Symbol}, we could create an expression function application
  *    with, for example, `newEFA(P,new Symbol(5))`, but we could not evaluate
  *    it, because we do not know the meaning of `P`.
  *  * If `f` is an expression function, that is, it would pass the test
@@ -256,6 +263,12 @@ export const isAnEFA = expr =>
  * just a metavariable?  This function returns true only in the former case,
  * plus it also verifies that the correct number of arguments are present; if
  * not, it returns false for that reason.
+ * 
+ * Examples:
+ * 
+ *  * `canBetaReduce(newEFA(metavar,arg))` returns false
+ *  * `canBetaReduce(newEFA(newEF(symbol,body),arg))` returns true
+ *  * `canBetaReduce(newEFA(newEF(symbol,body),too,many,args))` returns false
  * 
  * @param {Expression} expr the expression to test whether it is amenable to
  *   $\beta$-reduction
@@ -277,7 +290,7 @@ export const canBetaReduce = expr =>
  * take care to call it only in situations where it is guaranteed to terminate.
  * For example, the following expression function application will
  * $\beta$-reduce to itself, and thus enter an infinite loop.
- * $$ ((\lambda v. (v v)) (\lambda v. (v v))) $$
+ * $$ ((\lambda v. (v~v))~(\lambda v. (v~v))) $$
  * In the LDE, we are unlikely to permit users to write input that requires us
  * to apply expression functions to other expression functions, thus preventing
  * cases like this one.
