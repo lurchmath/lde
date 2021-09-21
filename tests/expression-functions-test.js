@@ -135,7 +135,7 @@ describe( 'Expression Functions', () => {
         ) ) ).to.throw( /requires an expression function/ )
     } )
 
-    it( 'Should be able to detect the arity of expression functions', () => {
+    it( 'Should be able to correctly apply expression functions', () => {
         // Reconstruct all the EFs we've used before, but this time try applying
         // each to some arguments.  In cases where it's relevant, ensure that
         // the result is an entirely new object, not the exact same thing as any
