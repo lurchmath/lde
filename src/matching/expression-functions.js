@@ -94,6 +94,78 @@ export const newEF = ( ...args ) =>
 export const isAnEF = expr =>
     expr instanceof Binding && expr.head().equals( expressionFunction )
 
+/**
+ * Compute the arity of a given expression function.  If `ef` is not an
+ * expression function (as judged by
+ * {@link module:ExpressionFunctions.isAnEF isAnEF()}) then an error is thrown.
+ * Otherwise, a positive integer is returned representing the arity of the given
+ * function, 1 for a unary function, 2 for a binary function, etc.
+ * 
+ * @param {Expression} ef the expression function whose arity is to be computed
+ * @returns {integer} the arity of `ef`
+ * 
+ * @see {@link module:ExpressionFunctions.isAnEF isAnEF()}
+ * @see {@link module:ExpressionFunctions.applyEF applyEF()}
+ */
+export const arityOfEF = ef => {
+    if ( !isAnEF( ef ) )
+        throw 'arityOfEF requires an expression function as first argument'
+    return ef.boundVariables().length
+}
+
+/**
+ * Applies `ef` as an expression function to a list of arguments.  If `ef` is
+ * not an expression function (as per
+ * {@link module:ExpressionFunctions.isAnEF isAnEF()}) or the list of arguments
+ * is the wrong length, an error is thrown.  Otherwise, a copy of the body of
+ * `ef` is returned with all parameters substituted with arguments.
+ * 
+ * For example, if `ef` is an {@link Expression Expression} representing
+ * $\lambda v_1,v_2.\sqrt{v_1^2+v_2^2}$ and `A` another representing $x-1$ and
+ * `B` another representing $y+1$, then `applyEF(ef,A,B)` would be a newly
+ * constructed {@link Expression Expression} instance (sharing no subtrees with
+ * any of those already mentioned) representing $\sqrt{(x-1)^2+(y+1)^2}$.
+ * 
+ * No check is made regarding whether this might cause variable capture, and no
+ * effort is made to do $\alpha$-substitution to avoid variable capture.  Thus
+ * this routine is of limited value; it should be used only in situations where
+ * the caller knows that no variable capture will take place.  For example, if
+ * `ef` is $\lambda v.\sum_{i=1}^n i^v$ then `applyEF(ef,i)` is
+ * $\sum_{i=1}^n i^i$.  No error is thrown; the capture simply happens.
+ * 
+ * @param {Expression} ef an {@link Expression Expression} representing an
+ *   expression function, that is, one that would be judged to be an expression
+ *   function by the {@link module:ExpressionFunctions.isAnEF isAnEF()} function
+ * @param {...Expression} args the arguments to which to apply `ef`
+ * @returns {Expression} a new {@link Expression Expression} instance
+ *   representing the application of `ef` to the given `args`
+ * 
+ * @see {@link module:ExpressionFunctions.isAnEF isAnEF()}
+ * @see {@link module:ExpressionFunctions.arityOfEF arityOfEF()}
+ */
+export const applyEF = ( ef, ...args ) => {
+    // verify that all arguments are the way they are supposed to be
+    if ( !isAnEF( ef ) )
+        throw 'applyEF() requires an expression function as first argument'
+    if ( args.length != arityOfEF( ef ) )
+        throw 'Incorrect number of arguments given to expression function'
+    // if it's a projection function, replaceWith() won't work correctly
+    const parameters = ef.boundVariables().map( bv => bv.text() )
+    if ( ef.body() instanceof Symbol ) {
+        const paramIndex = parameters.indexOf( ef.body().text() )
+        if ( paramIndex > -1 ) return args[paramIndex].copy()
+    }
+    // otherwise we actually have to do replacement within a copy of the body
+    const result = ef.body().copy()
+    result.descendantsSatisfying(
+        d => ( d instanceof Symbol ) && d.isFree( result )
+    ).forEach( sym => {
+        const paramIndex = parameters.indexOf( sym.text() )
+        if ( paramIndex > -1 ) sym.replaceWith( args[paramIndex].copy() )
+    } )
+    return result
+}
+
 // We use this symbol for encoding Expression Function Applications as
 // LogicConcepts, as described above.
 const expressionFunctionApplication = new Symbol( 'LDE EFA' )
