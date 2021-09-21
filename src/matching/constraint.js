@@ -343,4 +343,18 @@ export class Constraint {
         return predicates[this.complexity()].name
     }
 
+
+    /**
+     * The string representation of a Constraint $(p,e)$ is simply the string
+     * "(P,E)" where P is the {@link LogicConcept#toPutdown putdown}
+     * representation of $p$ and E is the {@link LogicConcept#toPutdown putdown}
+     * representation of $e$.
+     * 
+     * @returns {string} a string representation of the Constraint, useful in
+     *   debugging
+     */
+    toString () {
+        return `(${this.pattern.toPutdown()},${this.expression.toPutdown()})`
+    }
+
 }
