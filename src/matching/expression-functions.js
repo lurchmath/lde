@@ -61,6 +61,8 @@ const expressionFunction = new Symbol( 'LDE lambda' )
 /**
  * Creates a new expression function, encoded as a
  * {@link LogicConcept LogicConcept}, as described at the top of this file.
+ * The arguments are not copied; if you do not wish them removed from their
+ * existing contexts, pass copies to this function.
  * 
  * For example, if `x` and `y` are {@link Symbol Symbol} instances with the
  * names "x" and "y" and `B` is an Application, such as `(+ x y)`, then
@@ -173,6 +175,8 @@ const expressionFunctionApplication = new Symbol( 'LDE EFA' )
 /**
  * Creates a new Expression Function Application, encoded as an
  * {@link Expression Expression}, as described at the top of this file.
+ * The arguments are not copied; if you do not wish them removed from their
+ * existing contexts, pass copies to this function.
  * 
  * For example, if `F` is an {@link Expression Expression} representing an
  * Expression Function (or a metavariable that might later be instantiated as
@@ -224,5 +228,5 @@ export const newEFA = ( operator, ...operands ) => {
  * @see {@link module:ExpressionFunctions.newEFA newEFA()}
  */
 export const isAnEFA = expr =>
-    expr instanceof Application
+    expr instanceof Application && expr.numChildren() > 2
  && expr.firstChild().equals( expressionFunctionApplication )
