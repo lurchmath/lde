@@ -3,6 +3,7 @@ import { metavariable } from '../src/matching/constraint.js'
 import { Application } from '../src/application.js'
 import { Binding } from '../src/binding.js'
 import { CaptureConstraint } from '../src/matching/capture-constraint.js'
+import { Constraint } from '../src/matching/constraint.js'
 import { LogicConcept } from '../src/logic-concept.js'
 import { Symbol } from '../src/symbol.js'
 
@@ -133,5 +134,51 @@ describe( 'Capture Constraints', () => {
         expect( CC.satisfied() ).to.be.undefined
         expect( CC.violated() ).to.equal( false )
     } )
+
+    it( 'Should let us apply Constraints to it', () => {
+        let C, CC, b, f, result
+
+        // Case 1:
+        b = new Symbol( 'thing' ).asA( metavariable )
+        f = new Symbol( 'temp' ).asA( metavariable )
+        CC = new CaptureConstraint( b, f )
+        C = new Constraint( b, LogicConcept.fromPutdown( '"ho ho ho"' )[0] )
+        // try appliedTo() in this case
+        expect( () => result = C.appliedTo( CC ) ).not.to.throw()
+        // ensure that CC has not changed
+        expect( CC.bound ).to.equal( b )
+        expect( CC.free ).to.equal( f )
+        // ensure that the result had C applied to it
+        expect( result.bound.equals( C.expression ) ).to.equal( true )
+        expect( result.bound ).not.to.equal( C.expression )
+        expect( result.free.equals( f ) ).to.equal( true )
+        // try applyTo() in this case
+        expect( () => C.applyTo( CC ) ).not.to.throw()
+        // ensure that CC has changed
+        expect( CC.bound.equals( C.expression ) ).to.equal( true )
+        expect( CC.bound ).not.to.equal( C.expression )
+        expect( CC.free.equals( f ) ).to.equal( true )
+
+        // Case 2:
+        b = new Symbol( 'thing' ).asA( metavariable )
+        f = new Symbol( 'temp' ).asA( metavariable )
+        CC = new CaptureConstraint( b, f )
+        C = new Constraint( f, LogicConcept.fromPutdown( '((1 2) 3)' )[0] )
+        // try appliedTo() in this case
+        expect( () => result = C.appliedTo( CC ) ).not.to.throw()
+        // ensure that CC has not changed
+        expect( CC.bound ).to.equal( b )
+        expect( CC.free ).to.equal( f )
+        // ensure that the result had C applied to it
+        expect( result.bound.equals( b ) ).to.equal( true )
+        expect( result.free.equals( C.expression ) ).to.equal( true )
+        expect( result.free ).not.to.equal( C.expression )
+        // try applyTo() in this case
+        expect( () => C.applyTo( CC ) ).not.to.throw()
+        // ensure that CC has changed
+        expect( CC.bound.equals( b ) ).to.equal( true )
+        expect( CC.free.equals( C.expression ) ).to.equal( true )
+        expect( CC.free ).not.to.equal( C.expression )
+     } )
 
 } )

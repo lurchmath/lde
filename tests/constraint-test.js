@@ -224,7 +224,8 @@ describe( 'Constraint', () => {
         // Constraints
         let badTarget = new Constraint( P1.copy(),
             LogicConcept.fromPutdown( '(hello there "friend")' )[0] )
-        expect( () => C.applyTo( badTarget ) ).to.throw( /only.*LogicConcepts/ )
+        expect( () => C.applyTo( badTarget ) ).to.throw(
+            /^Cannot apply a constraint to that/ )
         // but it is okay to apply not-in-place to a Constraint, thus creating
         // a new, altered copy
         let substituted
