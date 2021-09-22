@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Lurch Deductive Engine: Expression</title>
+    <title>Lurch Deductive Engine: CaptureConstraint</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
@@ -34,7 +34,7 @@
 <main class="layout-main ">
   <div class="container">
     <p class="page-kind">Class</p>
-    <h1 class="page-title">Expression</h1>
+    <h1 class="page-title">CaptureConstraint</h1>
     
 
 
@@ -48,7 +48,7 @@
 
     
         
-        <!-- <h2>Expression</h2> -->
+        <!-- <h2>CaptureConstraint</h2> -->
 
         
 
@@ -56,43 +56,22 @@
 
         
             
-            <div class="class-description"><p>An Expression is a type of <a href="LogicConcept.html">LogicConcept</a>.  (For the other types, see
-the documentation of that class.)  Expressions are mathematical statements
-and their sub-parts, in the usual manner of organizing into tree form what
-many mathematicians informally call &quot;mathematical expressions&quot; as trees.</p>
-<p>For instance, $3+k=9$ and $\frac{58}{1+x}&lt;e$ are two mathematical
-expressions.  Their subexpressions are also expressions, including, for
-example, $9$, $3+k$, $1+x$, and $\frac{58}{1+x}$.  Even $+$ and $=$ are
-subexpressions; they are functions that are being applied to arguments.</p>
-<p>When we speak of &quot;tree form,&quot; we refer to the idea that every expression
-can be organized into a tree by following the order of operations.  For
-example, $3+k=9$ might have $=$ at the root, with right child $9$ and left
-child a subtree with $+$ over $3$ and $k$.  Although that is one way to
-organize expressions into trees, we actually choose a slightly different
-means of applying functions/operators to arguments, which will be covered
-in the documentation for the <a href="Application.html">Application</a> class.</p>
-<p>Expressions are analogous to what mathematicians typically write inside
-<code>$...$</code> or <code>$$...$$</code> math mode in LaTeX.  This distinguishes them from
-larger structures that appear in mathematical writing, such as a proof,
-or a section, or an axiom, or an exercise.</p>
-<p>There are three types of Expressions:</p>
-<ol>
-<li>A <a href="Symbol.html">Symbol</a>, which is atomic (a one-node tree), and can contain
-any mathematical symbol, such as $x$, $5$, $e$, $\pi$, $B_4$, etc.
-(Note that notation here is in math form just for the documentation;
-actual symbols may use a different style, such as <code>B_4</code>.)</li>
-<li>An <a href="Application.html">Application</a> of a function or operator to zero or more
-arguments, as in the example of $3 + k$, above, which applies $+$ to
-the arguments $3$ and $k$.  Applications are not atomic.</li>
-<li>A <a href="Binding.html">Binding</a>, which applies a quantifier or ranged operator to
-a body, using a bound variable.  There are many examples of this in
-mathematics, including indexed sums and products, existential and
-universal quantifiers, and more.  Bindings are not atomic.</li>
-</ol>
-<p>We do not define these further here; see the documentation of each of
-the classes linked to above for details.  The Expression class is an
-abstract base class, and every instance should be an instance of one of
-those three subclasses.</p></div>
+            <div class="class-description"><p>A capture constraint is a pair of variables $(b,f)$, where the former appears
+as a bound variable (hence the name $b$) and in its scope, the latter appears
+free (hence the name $f$).  It is called a capture constraint because the
+variable $f$ cannot be replaced by any expression containing $b$ free, or
+variable capture would occur.  (The reader may recall that the standard
+definition of variable capture is that a variable that appears free in an
+expression becomes bound when that expression is placed in a new context,
+typically through substitution.)</p>
+<p>This class will store the $b$ and $f$ internally, but note that either of
+them might be a metavariable.  Such metavariables are interpreted as meaning
+&quot;we do not yet know the value of this variable, but it will be determined
+later, and replaced here when we determine it.&quot;  Consequently, we might have
+a capture constraint whose meaning is still uncertain, until the
+metavariables in it have been instantiated.  See the
+<a href="CaptureConstraint.html#complete">complete()</a> function below for more
+details.</p></div>
         
     
 </header>
@@ -120,7 +99,7 @@ those three subclasses.</p></div>
     
     </div>
 
-    <h4 class="method-name" id="Expression">new Expression<span class="signature">(&hellip;children)</span><span class="return-type-signature"></span>
+    <h4 class="method-name" id="CaptureConstraint">new CaptureConstraint<span class="signature">(bound, free)</span><span class="return-type-signature"></span>
     </h4>
 
 
@@ -129,9 +108,10 @@ those three subclasses.</p></div>
 
 <div class="method-description">
     
-    <p>Constructs an Expression from the given list of children, which may
-be empty.  All children must also be instances of Expression; those
-that are not are filtered out.</p>
+    <p>Construct a capture constraint $(b,f)$, as defined above, by specifying
+the bound and free variables $b$ and $f$, in that order, as parameters.
+Although both should be <a href="Symbol.html">Symbols</a>, the latter may be a
+metavariable that is later replaced by an entire expression.</p>
 </div>
 
 
@@ -150,7 +130,7 @@ that are not are filtered out.</p>
 
         <li>
             
-                <span class="param-name">children</span>
+                <span class="param-name">bound</span>
             
 
             
@@ -158,29 +138,45 @@ that are not are filtered out.</p>
 
 
     <span class="param-type">
-        <code><a href="Expression.html">Expression</a></code>
+        <code><a href="Symbol.html">Symbol</a></code>
     </span>
     
 
             
 
             
-                <span class="param-attributes">
+
+            
+
+            <div class="param-description"><p>the bound variable $b$ in the definition of capture
+constraint at the top of this page</p></div>
+            
+        </li>
+
+    
+
+        <li>
+            
+                <span class="param-name">free</span>
+            
+
+            
                 
 
-                
 
-                
-                    &lt;repeatable&gt;<br>
-                
-                </span>
+    <span class="param-type">
+        <code><a href="Symbol.html">Symbol</a></code>
+    </span>
+    
+
             
 
             
 
-            <div class="param-description"><p>child Expressions to be added to
-this one (as in the constructors for <a href="MathConcept.html">MathConcept</a> and
-<a href="LogicConcept.html">LogicConcept</a>)</p></div>
+            
+
+            <div class="param-description"><p>the free variable $f$ in the definition of capture
+constraint at the top of this page</p></div>
             
         </li>
 
@@ -243,7 +239,7 @@ this one (as in the constructors for <a href="MathConcept.html">MathConcept</a> 
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.62">, line 62</a>
+            <a href="matching_capture-constraint.js.html">matching/capture-constraint.js</a><a href="matching_capture-constraint.js.html#source.37">, line 37</a>
         </li>
     </ul>
 
@@ -258,7 +254,7 @@ this one (as in the constructors for <a href="MathConcept.html">MathConcept</a> 
         <h3 class="subsection-title">Classes</h3>
 
         <dl>
-            <dt><a href="Expression.html">Expression</a></dt>
+            <dt><a href="CaptureConstraint.html">CaptureConstraint</a></dt>
             <dd></dd>
         </dl>
     
@@ -293,7 +289,7 @@ this one (as in the constructors for <a href="MathConcept.html">MathConcept</a> 
     
     </div>
 
-    <h4 class="method-name" id="getOutermost">getOutermost<span class="signature">()</span><span class="return-type-signature"> &rarr; {<a href="Expression.html">Expression</a>}</span>
+    <h4 class="method-name" id="complete">complete<span class="signature">()</span><span class="return-type-signature"> &rarr; {boolean}</span>
     </h4>
 
 
@@ -302,278 +298,13 @@ this one (as in the constructors for <a href="MathConcept.html">MathConcept</a> 
 
 <div class="method-description">
     
-    <p>This function walks up the <a href="MathConcept.html">MathConcept</a> hierarchy containing
-this Expression until it finds an ancestor satisfying
-<a href="Expression.html#isOutermost">isOutermost()</a>, and then it returns that
-Expression.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-    <h4 class="method-heading">Returns</h4>
-    <ul>
-    
-        <li class="method-returns">
-            
-                <code>Expression</code>
-            
-            
-                <p>the outermost Expression ancestor of this
-Expression</p>
-            
-        </li>
-    
-    </ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.91">, line 91</a>
-        </li>
-    </ul>
-
-
-
-    </article>
-
-        
-            
-
-
-    <article class="method">
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    
-    </div>
-
-    <h4 class="method-name" id="isAConclusionIn">isAConclusionIn<span class="signature">(ancestor)</span><span class="return-type-signature"></span>
-    </h4>
-
-
-
-
-
-<div class="method-description">
-    
-    <p>Based on the definition given in the
-<a href="Environment.html#conclusions">conclusions()</a> function, an Expression
-will be a conclusion in one of its ancestors if all of the following
-are true.</p>
-<ul>
-<li>it is not marked with the &quot;given&quot; attribute</li>
-<li>its parent is an <a href="Environment.html">Environment</a></li>
-<li>neither that parent nor any other ancestor (up to and including the
-one specified as parameter) are marked with the &quot;given&quot; attribute</li>
-</ul>
-<p>If no ancestor is provided, then the top-level <a href="MathConcept.html">MathConcept</a>
-ancestor is used instead.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Parameters</h4>
-    
-
-<ul class="method-params">
-    
-
-        <li>
-            
-                <span class="param-name">ancestor</span>
-            
-
-            
-                
-
-
-    <span class="param-type">
-        <code><a href="MathConcept.html">MathConcept</a></code>
-    </span>
-    
-
-            
-
-            
-
-            
-
-            <div class="param-description"><p>the context in which this query is
-being made</p></div>
-            
-        </li>
-
-    
-</ul>
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.112">, line 112</a>
-        </li>
-    </ul>
-
-
-
-    </article>
-
-        
-            
-
-
-    <article class="method">
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    
-    </div>
-
-    <h4 class="method-name" id="isOutermost">isOutermost<span class="signature">()</span><span class="return-type-signature"> &rarr; {boolean}</span>
-    </h4>
-
-
-
-
-
-<div class="method-description">
-    
-    <p>If this Expression has an Expression parent, then it is not the
-outermost expression in the hierarchy.  However, if it has a parent
-that is some other kind of <a href="MathConcept.html">MathConcept</a> or
-<a href="LogicConcept.html">LogicConcept</a>, then it is the outermost Expression in the
-hierarchy.  If it has no parent, it is the outermost.</p>
+    <p>A capture constraint is complete if neither its bound nor free variables
+is a metavariable.  If either is a metavariable, its eventual value has
+not yet been determined (or not yet communicated to this object) and thus
+we can't judge everything about it that we might like to (such as
+<a href="CaptureConstraint.html#satisfied">satisfied()</a> or
+<a href="CaptureConstraint.html#violated">violated()</a>).  This function lets us
+know whethe we have enough information to evaluate such predicates.</p>
 </div>
 
 
@@ -619,7 +350,9 @@ hierarchy.  If it has no parent, it is the outermost.</p>
         <h4 class="method-heading">See</h4>
         <ul>
             
-                <li><a href="Expression.html#getOutermost">getOutermost()</a></li>
+                <li><a href="CaptureConstraint.html#satisfied">satisfied()</a></li>
+            
+                <li><a href="CaptureConstraint.html#violated">violated()</a></li>
             
         </ul>
     
@@ -637,8 +370,7 @@ hierarchy.  If it has no parent, it is the outermost.</p>
                 <code>boolean</code>
             
             
-                <p>Whether this expression is the outermost
-Expression in the <a href="MathConcept.html">MathConcept</a> hierarchy in which it sits</p>
+                <p>true iff this constraint contains no metavariables</p>
             
         </li>
     
@@ -662,7 +394,7 @@ Expression in the <a href="MathConcept.html">MathConcept</a> hierarchy in which 
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.77">, line 77</a>
+            <a href="matching_capture-constraint.js.html">matching/capture-constraint.js</a><a href="matching_capture-constraint.js.html#source.85">, line 85</a>
         </li>
     </ul>
 
@@ -688,7 +420,7 @@ Expression in the <a href="MathConcept.html">MathConcept</a> hierarchy in which 
     
     </div>
 
-    <h4 class="method-name" id="value">value<span class="signature">()</span><span class="return-type-signature"> &rarr; {*}</span>
+    <h4 class="method-name" id="copy">copy<span class="signature">()</span><span class="return-type-signature"> &rarr; {<a href="CaptureConstraint.html">CaptureConstraint</a>}</span>
     </h4>
 
 
@@ -697,28 +429,9 @@ Expression in the <a href="MathConcept.html">MathConcept</a> hierarchy in which 
 
 <div class="method-description">
     
-    <p>Many mathematical expressions have standard interpretations.  We permit
-Expression instances to be marked with an attribute indicating that
-they have a standard interpretation, and what that interpretation is.
-This function looks for such attributes and applies them, computing the
-value of the Expression, if it has one, and returning undefined if it
-does not.</p>
-<p>An Expression that has a value will have an attribute whose key is the
-string <code>&quot;evaluate as&quot;</code> and whose value is a string such as <code>&quot;integer&quot;</code>
-or <code>&quot;integer base 2&quot;</code> or <code>&quot;string&quot;</code> or <code>&quot;ordered pair&quot;</code> or any of a
-wide variety of other ways to evaluate the Expression's content.</p>
-<p>It is intended that this list can grow over time, and this function be
-updated to support new types of simple mathematical values as they are
-needed.  It is not intended that every kind of possible interpretation
-should show up on this list, but rather just those types that are
-common/standard across enough of mathematics that they will be used in
-any kind of mathematics software.</p>
-<p>This initial implementation provides support for <em>none</em> of the types of
-valuation described above, because each is best implemented in one of
-this class's subclasses (<a href="Symbol.html">Symbol</a>, <a href="Application.html">Application</a>, or
-<a href="Binding.html">Binding</a>) instead.  A stub is implemented here as a pure virtual
-method, to guarantee that the function exists for all Expression
-instances and returns undefined by default.</p>
+    <p>Create and return a new CaptureConstraint instance that has the same
+bound and free members as this one.  It is a shallow copy, so the two
+members are the exact same objects, not structural copies.</p>
 </div>
 
 
@@ -772,11 +485,10 @@ instances and returns undefined by default.</p>
     
         <li class="method-returns">
             
-                <code>*</code>
+                <code>CaptureConstraint</code>
             
             
-                <p>any basic JavaScript value representing this Expression,
-or undefined if it there is no such value</p>
+                <p>a shallow copy of this object</p>
             
         </li>
     
@@ -800,7 +512,429 @@ or undefined if it there is no such value</p>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.150">, line 150</a>
+            <a href="matching_capture-constraint.js.html">matching/capture-constraint.js</a><a href="matching_capture-constraint.js.html#source.68">, line 68</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="equals">equals<span class="signature">(other)</span><span class="return-type-signature"> &rarr; {boolean}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Recall that the bound and free members of this class, provided at
+construction time, are instances of the <a href="MathConcept.html">MathConcept</a>
+class.  (They begin as <a href="Symbol.html">Symbols</a>, but may be substituted
+later.)  One instance of this class equals another if their corresponding
+bound and free members are equal, as per
+<a href="MathConcept.html#equals">the equality checking routine in the MathConcept class</a>.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">other</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code><a href="CaptureConstraint.html">CaptureConstraint</a></code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>another instance of this class</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>boolean</code>
+            
+            
+                <p>whether this instance equals the other instance, in
+the sense that they have the same bound and free members</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_capture-constraint.js.html">matching/capture-constraint.js</a><a href="matching_capture-constraint.js.html#source.57">, line 57</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="satisfied">satisfied<span class="signature">()</span><span class="return-type-signature"> &rarr; {boolean|undefined}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>A constraint is satisfied if its bound variable does not occur free in
+its free expression.  Although this suggests that this function should
+return a boolean, it actually may return undefined if this object is not
+<a href="CaptureConstraint.html#complete">complete()</a>, because we don't have
+enough information to answer the question.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="CaptureConstraint.html#complete">complete()</a></li>
+            
+                <li><a href="CaptureConstraint.html#violated">violated()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>boolean</code>
+            
+                <code>undefined</code>
+            
+            
+                <p>true if the object is complete and its bound
+variable does not occur free in its free expression, false if it is
+complete and its bound variable does occur free in its free expression,
+and undefined if it is not complete</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_capture-constraint.js.html">matching/capture-constraint.js</a><a href="matching_capture-constraint.js.html#source.103">, line 103</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="violated">violated<span class="signature">()</span><span class="return-type-signature"> &rarr; {boolean}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>A constraint is violated if it is complete and not satisfied.  That is,
+a constraint cannot be violated unless we have enough information to say
+whether it is satisfied (hence the check for whether it is
+<a href="CaptureConstraint.html#complete">complete()</a>), but once it is complete,
+then violated means the same thing as not
+<a href="CaptureConstraint.html#satisfied">satisfied()</a>.</p>
+<p>Unlike <a href="CaptureConstraint.html#satisfied">satisfied()</a>, this function
+will never return undefined.  The constraint is not yet violated if we do
+not yet have non-metavariable values for both the bound and free members.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="CaptureConstraint.html#complete">complete()</a></li>
+            
+                <li><a href="CaptureConstraint.html#satisfied">satisfied()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>boolean</code>
+            
+            
+                <p>whether this constraint is (known to be) violated</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_capture-constraint.js.html">matching/capture-constraint.js</a><a href="matching_capture-constraint.js.html#source.124">, line 124</a>
         </li>
     </ul>
 
