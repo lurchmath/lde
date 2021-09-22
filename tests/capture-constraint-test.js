@@ -2,7 +2,9 @@
 import { metavariable } from '../src/matching/constraint.js'
 import { Application } from '../src/application.js'
 import { Binding } from '../src/binding.js'
-import { CaptureConstraint } from '../src/matching/capture-constraint.js'
+import {
+    CaptureConstraint, CaptureConstraints
+} from '../src/matching/capture-constraint.js'
 import { Constraint } from '../src/matching/constraint.js'
 import { LogicConcept } from '../src/logic-concept.js'
 import { Symbol } from '../src/symbol.js'
@@ -180,5 +182,180 @@ describe( 'Capture Constraints', () => {
         expect( CC.free.equals( C.expression ) ).to.equal( true )
         expect( CC.free ).not.to.equal( C.expression )
      } )
+
+} )
+
+describe( 'Capture Constraint sets', () => {
+
+    it( 'Should declare the correct global identifiers', () => {
+        expect( CaptureConstraints ).to.be.ok
+    } )
+
+    it( 'Should let us construct empty instances', () => {
+        let C
+        expect( () => C = new CaptureConstraints() ).not.to.throw()
+        expect( C.empty() ).to.equal( true )
+    } )
+
+    it( 'Should correctly construct instances from capture constraints', () => {
+        // Note: This function also indirectly tests CaptureConstraints.add()
+
+        // use 3 constraints, but one is redundant, so the set will have only 2
+        let ccon1, ccon2, ccon3, C
+        ccon1 = new CaptureConstraint( new Symbol( 'x' ), new Symbol( 'y' ) )
+        ccon2 = new CaptureConstraint( new Symbol( 'a' ), new Symbol( 'y' ) )
+        ccon3 = new CaptureConstraint( new Symbol( 'x' ), new Symbol( 'y' ) )
+        expect( () => C = new CaptureConstraints( ccon1, ccon2, ccon3 ) )
+            .not.to.throw()
+        expect( C.empty() ).to.equal( false )
+        expect( C.constraints.length ).to.equal( 2 )
+        expect( C.constraints[0].equals( ccon1 ) ).to.equal( true )
+        expect( C.constraints[1].equals( ccon2 ) ).to.equal( true )
+    } )
+
+    it( 'Should correctly construct instances from patterns', () => {
+        // Note: This function also indirectly tests CaptureConstraints.add()
+        // and CaptureConstraints.scan()
+
+        let pat1, pat2, C
+        pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
+        pat1.child( 1 ).makeIntoA( metavariable ) // outer x
+        pat1.index( [ 2, 2, 1, 1 ] ).makeIntoA( metavariable ) // inner x
+        pat2 = new Symbol( 'foo' ).makeIntoA( metavariable )
+        expect( () => C = new CaptureConstraints( pat1, pat2 ) )
+            .not.to.throw()
+        expect( C.empty() ).to.equal( false )
+        expect( C.constraints.length ).to.equal( 4 )
+        expect( C.constraints[0].equals( new CaptureConstraint(
+            new Symbol( 'x' ).asA( metavariable ), new Symbol( '∃' )
+        ) ) ).to.equal( true )
+        expect( C.constraints[1].equals( new CaptureConstraint(
+            new Symbol( 'x' ).asA( metavariable ), new Symbol( '=' )
+        ) ) ).to.equal( true )
+        expect( C.constraints[2].equals( new CaptureConstraint(
+            new Symbol( 'x' ).asA( metavariable ), new Symbol( '+' )
+        ) ) ).to.equal( true )
+        expect( C.constraints[3].equals( new CaptureConstraint(
+            new Symbol( 'x' ).asA( metavariable ), new Symbol( '1' )
+        ) ) ).to.equal( true )
+    } )
+
+    it( 'Should correctly construct instances from Constraints', () => {
+        // Note: This function also indirectly tests CaptureConstraints.add()
+        // and CaptureConstraints.scan()
+        
+        let con1, con2, C
+        con1 = new Constraint(
+            LogicConcept.fromPutdown( '(∀ x , (= (+ x 1) y))' )[0],
+            LogicConcept.fromPutdown( '(Happy Halloween)' )[0]
+        )
+        con1.pattern.child( 1 ).makeIntoA( metavariable ) // outer x
+        con1.pattern.index( [ 2, 1, 1 ] ).makeIntoA( metavariable ) // inner x
+        con2 = new Constraint(
+            new Symbol( 'foo' ).makeIntoA( metavariable ),
+            new Symbol( 'bar' )
+        )
+        expect( () => C = new CaptureConstraints( con1, con2 ) ).not.to.throw()
+        expect( C.empty() ).to.equal( false )
+        expect( C.constraints.length ).to.equal( 4 )
+        expect( C.constraints[0].equals( new CaptureConstraint(
+            new Symbol( 'x' ).asA( metavariable ), new Symbol( '=' )
+        ) ) ).to.equal( true )
+        expect( C.constraints[1].equals( new CaptureConstraint(
+            new Symbol( 'x' ).asA( metavariable ), new Symbol( '+' )
+        ) ) ).to.equal( true )
+        expect( C.constraints[2].equals( new CaptureConstraint(
+            new Symbol( 'x' ).asA( metavariable ), new Symbol( '1' )
+        ) ) ).to.equal( true )
+        expect( C.constraints[3].equals( new CaptureConstraint(
+            new Symbol( 'x' ).asA( metavariable ), new Symbol( 'y' )
+        ) ) ).to.equal( true )
+    } )
+
+    it( 'Should be able to make shallow copies', () => {
+        // recreate the constraint set from an earlier test
+        let ccon1, ccon2, ccon3, C
+        ccon1 = new CaptureConstraint( new Symbol( 'x' ), new Symbol( 'y' ) )
+        ccon2 = new CaptureConstraint( new Symbol( 'a' ), new Symbol( 'y' ) )
+        ccon3 = new CaptureConstraint( new Symbol( 'x' ), new Symbol( 'y' ) )
+        expect( () => C = new CaptureConstraints( ccon1, ccon2, ccon3 ) )
+            .not.to.throw()
+        expect( C.empty() ).to.equal( false )
+        expect( C.constraints.length ).to.equal( 2 )
+        expect( C.constraints[0].equals( ccon1 ) ).to.equal( true )
+        expect( C.constraints[1].equals( ccon2 ) ).to.equal( true )
+        // make a copy and test various properties
+        let Ccopy
+        expect( () => Ccopy = C.copy() ).not.to.throw()
+        expect( Ccopy.constraints.length ).to.equal( C.constraints.length )
+        expect( Ccopy.constraints.length ).to.equal( 2 )
+        expect( Ccopy.constraints[0].equals( C.constraints[0] ) ).to.equal( true )
+        expect( Ccopy.constraints[1].equals( C.constraints[1] ) ).to.equal( true )
+        expect( C ).not.to.equal( Ccopy )
+        expect( C.constraints ).not.to.equal( Ccopy.constraints )
+    } )
+
+    it( 'Should correctly judge sets as satisfied and/or violated', () => {
+        let C
+        // make a set that is satisfied, not violated
+        C = new CaptureConstraints(
+            new CaptureConstraint( new Symbol( 1 ), new Symbol( 2 ) ),
+            new CaptureConstraint( new Symbol( 3 ), new Symbol( 4 ) )
+        )
+        expect( C.satisfied() ).to.equal( true )
+        expect( C.violated() ).to.equal( false )
+        // make a set that is violated, not satisfied
+        C = new CaptureConstraints(
+            new CaptureConstraint( new Symbol( 1 ), new Symbol( 2 ) ),
+            new CaptureConstraint( new Symbol( 3 ), new Symbol( 4 ) )
+        )
+        C.constraints[0].free = LogicConcept.fromPutdown( '(f 1)' )[0]
+        expect( C.satisfied() ).to.equal( false )
+        expect( C.violated() ).to.equal( true )
+    } )
+
+    it( 'Should correctly simplify instances', () => {
+        let C
+        // make a set that is all removable constraints
+        C = new CaptureConstraints(
+            new CaptureConstraint( new Symbol( 1 ), new Symbol( 2 ) ),
+            new CaptureConstraint( new Symbol( 3 ), new Symbol( 4 ) )
+        )
+        expect( C.constraints.length ).to.equal( 2 )
+        expect( () => C.simplify() ).not.to.throw()
+        expect( C.constraints.length ).to.equal( 0 )
+        // make a set with one removable constraint, and one not because it is
+        // violated
+        C = new CaptureConstraints(
+            new CaptureConstraint( new Symbol( 1 ), new Symbol( 2 ) ),
+            new CaptureConstraint( new Symbol( 3 ), new Symbol( 4 ) )
+        )
+        C.constraints[0].free = LogicConcept.fromPutdown( '(f 1)' )[0]
+        expect( C.constraints.length ).to.equal( 2 )
+        expect( () => C.simplify() ).not.to.throw()
+        expect( C.constraints.length ).to.equal( 1 )
+        expect( C.violated() ).to.equal( true )
+        expect( C.satisfied() ).to.equal( false )
+        // make a set with one removable constraint, and one not because it is
+        // incomplete
+        C = new CaptureConstraints(
+            new CaptureConstraint( new Symbol( 1 ), new Symbol( 2 ) ),
+            new CaptureConstraint( new Symbol( 3 ).asA( metavariable ),
+                                   new Symbol( 4 ) )
+        )
+        expect( C.constraints.length ).to.equal( 2 )
+        expect( () => C.simplify() ).not.to.throw()
+        expect( C.constraints.length ).to.equal( 1 )
+        expect( C.violated() ).to.equal( false )
+        expect( C.satisfied() ).to.equal( false )
+        // now instantiate that constraint with something that doesn't violate
+        // it, and ensure that simplifying again removes it
+        C.constraints[0].bound = new Symbol( 'and we are good' )
+        expect( C.constraints.length ).to.equal( 1 )
+        expect( () => C.simplify() ).not.to.throw()
+        expect( C.constraints.length ).to.equal( 0 )
+        expect( C.violated() ).to.equal( false )
+        expect( C.satisfied() ).to.equal( true )
+    } )
 
 } )

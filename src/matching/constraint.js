@@ -4,7 +4,7 @@ import { Application } from '../application.js'
 import { Binding } from '../binding.js'
 import { LogicConcept } from '../logic-concept.js'
 import { isAnEFA } from './expression-functions.js'
-import { CaptureConstraint } from './capture-constraint.js'
+import { CaptureConstraint, CaptureConstraints } from './capture-constraint.js'
 
 // Utility function used below.  It means that the LC is an Application type,
 // but not an Expression Function Application.
@@ -233,10 +233,16 @@ export class Constraint {
 
     /**
      * Apply this Constraint, as a substitution instruction, to the given
-     * {@link LogicConcept LogicConcept}, replacing every instance in it of this
-     * Constraint's pattern with a copy of this Constraint's expression.
-     * Or, if the `target` is a CaptureConstraint, apply this Constraint to both
-     * its bound and free members, in place.
+     * `target`, in place.  Each type of target is treated differently, as
+     * follows.
+     * 
+     *  * If the `target` is a {@link LogicConcept LogicConcept}, replace every
+     *    instance in it of this Constraint's pattern with a copy of this
+     *    Constraint's expression.
+     *  * If the `target` is a {@link CaptureConstraint CaptureConstraint},
+     *    apply this Constraint to both its bound and free members, in place.
+     *  * If the `target` is a {@link CaptureConstraints set of Capture
+     *    Constraints}, then just apply the above action to each one.
      * 
      * Because this function operates in-place, it cannot be applied to another
      * Constraint; such objects are to be immutable.  Instead, use the
@@ -269,28 +275,37 @@ export class Constraint {
         } else if ( target instanceof CaptureConstraint ) {
             target.bound = this.appliedTo( target.bound )
             target.free = this.appliedTo( target.free )
+        } else if ( target instanceof CaptureConstraints ) {
+            target.constraints.forEach(
+                constraint => this.applyTo( constraint ) )
         } else {
             throw 'Cannot apply a constraint to that kind of target'
         }
     }
 
     /**
-     * If the target is a {@link LogicConcept LogicConcept}, create a copy of it
-     * and then call {@link Constraint#applyTo applyTo()} on the copy, returning
-     * the copy afterwards.  In other words, this behaves exactly like
-     * {@link Constraint#applyTo applyTo()}, but instead of operating on the
-     * target in place, it operates on a copy and returns the copy.
+     * Apply this Constraint, as a substitution instruction, to the given
+     * `target`, returning the result as a new object (not altering the
+     * original).  Each type of target is treated differently, as follows.
      * 
-     * If the target is a Constraint, build a new constraint with the same
-     * expression as the given Constraint, but with a pattern built by running
-     * the original Constraint's pattern through this same function, as defined
-     * in the previous paragraph.  That is, `appliedTo()` run on a Constraint
-     * $(p,e)$ yields a constraint $(p',e)$, where $p'$ is the result of
-     * `appliedTo(p)`.
-     * 
-     * If the target is a {@link CaptureConstraint CaptureConstraint}, create a
-     * copy of it with bound and free members that have been run through this
-     * function, each one treated as a {@link LogicConcept LogicConcept}.
+     *  * If the `target` is a {@link LogicConcept LogicConcept}, create a copy
+     *    of it and then call {@link Constraint#applyTo applyTo()} on the copy,
+     *    returning the copy afterwards.  In other words, this behaves exactly
+     *    like {@link Constraint#applyTo applyTo()}, but instead of operating on
+     *    the `target` in place, it operates on a copy and returns the copy.
+     *  * If the `target` is a Constraint, build a new constraint with the same
+     *    expression as the given Constraint, but with a pattern built by
+     *    running the original Constraint's pattern through this same function,
+     *    as defined in the previous paragraph.  That is, `appliedTo()` run on a
+     *    Constraint $(p,e)$ yields a constraint $(p',e)$, where $p'$ is the
+     *    result of `appliedTo(p)`.
+     *  * If the `target` is a {@link CaptureConstraint CaptureConstraint},
+     *    create a copy of it with bound and free members that have been run
+     *    through this function, each one treated as a
+     *    {@link LogicConcept LogicConcept}.
+     *  * If the `target` is a {@link CaptureConstraints set of Capture
+     *    Constraints}, then make a copy, apply this Constraint to the copy, and
+     *    return that copy.
      * 
      * @param {LogicConcept|Constraint|CaptureConstraint} target the object to
      *   which we should apply this Constraint, resulting in a copy
@@ -314,6 +329,10 @@ export class Constraint {
             const copy = target.copy()
             copy.bound = this.appliedTo( copy.bound )
             copy.free = this.appliedTo( copy.free )
+            return copy
+        } else if ( target instanceof CaptureConstraints ) {
+            const copy = target.copy()
+            this.applyTo( copy )
             return copy
         } else {
             throw 'Cannot apply a constraint to that kind of target'

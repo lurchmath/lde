@@ -1,6 +1,9 @@
 
 import { metavariable } from './constraint.js'
 import { Symbol } from '../symbol.js'
+import { Binding } from '../binding.js'
+import { LogicConcept } from '../logic-concept.js'
+import { Constraint } from './constraint.js'
 
 /**
  * A capture constraint is a pair of variables $(b,f)$, where the former appears
@@ -123,6 +126,216 @@ export class CaptureConstraint {
      */
     violated () {
         return this.satisfied() === false
+    }
+
+    /**
+     * The string representation of a capture constraint is simply the string
+     * "(b,f)" where b is the {@link LogicConcept#toPutdown putdown}
+     * representation of the bound symbol of the constraint and f is the
+     * {@link LogicConcept#toPutdown putdown} representation of the free symbol
+     * (or expression) of the constraint.
+     * 
+     * @returns {string} a string representation of the constraint, useful in
+     *   debugging
+     * 
+     * @see {@link CaptureConstraints#toString toString() for constraint sets}
+     */
+     toString () {
+        return `(${this.bound.toPutdown()},${this.free.toPutdown()})`
+    }
+
+}
+
+/**
+ * A capture constraint (singular) is defined in the
+ * {@link CaptureConstraint CaptureConstraint class}, but a set of capture
+ * constraints (plural) is defined here, in the
+ * {@link CaptureConstraints CaptureConstraints class}.
+ */
+export class CaptureConstraints {
+
+    /**
+     * Create a new set of capture constraints by providing a list of objects to
+     * add to the set.  Depending on what types of objects are provided,
+     * different actions are performed.
+     * 
+     *  * For any argument that is a
+     *    {@link CaptureConstraint CaptureConstraint}, it is added to the list
+     *    of capture constraints in this set as long as an identical one does
+     *    not already appear on that list (judging by
+     *    {@link CaptureConstraint#equals equality for capture constraints}).
+     *    We add it using {@link CaptureConstraints#add the add() function}.
+     *  * For any argument that is a {@link LogicConcept LogicConcept}, it is
+     *    treated as a pattern (as documented at the top of the
+     *    {@link Constraint Constraint} module) and scanned to find all pairs
+     *    of variables $u,v$ where at least one is a metavariable and $v$
+     *    appears free inside a binding that binds $u$.  It then adds the
+     *    corresponding capture constraint to this object.  The pairs are found
+     *    with the {@link CaptureConstraints#scan scan()} function and the
+     *    constraints added using the {@link CaptureConstraints#add add()}
+     *    function.
+     *  * For any argument that is a {@link Constraint Constraint}, we ignore
+     *    its expression and just process its pattern, as in the previous bullet
+     *    point.
+     *  * Any other type of argument throws an error.
+     * 
+     * @param  {...Constraint|...LogicConcept|...CaptureConstraint} args the
+     *   constraints to add to this list, as documented above
+     * 
+     * @see {@link CaptureConstraints#add add()}
+     * @see {@link CaptureConstraints#scan scan()}
+     */
+    constructor ( ...args ) {
+        this.constraints = [ ]
+        for ( let arg of args ) {
+            if ( arg instanceof CaptureConstraint ) {
+                this.add( arg )
+            } else if ( arg instanceof Constraint ) {
+                this.scan( arg.pattern )
+            } else if ( arg instanceof LogicConcept ) {
+                this.scan( arg )
+            } else {
+                throw 'Invalid argument to CaptureConstraints constructor'
+            }
+        }
+    }
+
+    /**
+     * Is this capture constraint set empty?  Return true if it is empty and
+     * false if it contains any capture constraints.
+     * 
+     * @returns {boolean} whether this set is empty
+     */
+    empty () {
+        return this.constraints.length == 0
+    }
+
+    /**
+     * Create a shallow copy of this object.  It will contain the same set of
+     * {@link CaptureConstraint CaptureConstraint} instances, but it will be a
+     * distinct object in memory.
+     * 
+     * @returns {CaptureConstraints} a shallow copy of this object
+     */
+    copy () {
+        const result = new CaptureConstraints()
+        result.constraints = this.constraints.slice()
+        return result
+    }
+
+    /**
+     * Add to this object all the given {@link CaptureConstraint capture
+     * constraints}, except any that are already present in this set.  We detect
+     * which ones are already present by comparing new ones to old ones using
+     * the {@link CaptureConstraint#equals equals()} function for capture
+     * constraints.
+     * 
+     * @param  {...CaptureConstraint} constraints a list of capture constraints
+     *   to add to this object
+     */
+    add ( ...constraints ) {
+        for ( let newOne of constraints )
+            if ( !this.constraints.some( oldOne => oldOne.equals( newOne ) ) )
+                this.constraints.push( newOne )
+    }
+
+    /**
+     * This method is for internal use only.  It scans a pattern and finds all
+     * capture constraints in it and adds them to this class (using the
+     * {@link CaptureConstraints#add add()} function).  A capture constraint
+     * $(b,f)$ is one in which either $b$ or $f$ is a metavariable (or both are)
+     * and $f$ occurs free inside a binding that binds $b$ in the given pattern.
+     * 
+     * @param {Expression} pattern the expression (typically containing
+     *   metavariables) to scan for capture constraints
+     * @param {...Symbol} [bound] a list of variables bound above the `pattern`
+     *   being scanned; this pattern is typically used only in recursive calls,
+     *   and clients can ignore it
+     * 
+     * @see {@link CaptureConstraints#add add()}
+     */
+    scan ( pattern, bound = [ ] ) {
+        if ( pattern instanceof Symbol
+          && !bound.some( bv => bv.equals( pattern ) ) )
+            bound.forEach( bv => {
+                if ( ( bv.isA( metavariable ) || pattern.isA( metavariable ) )
+                  && !bv.equals( pattern ) )
+                    this.add( new CaptureConstraint( bv, pattern ) )
+            } )
+        let recurOn = pattern.children()
+        if ( pattern instanceof Binding ) {
+            // process the head not as part of the quantified scope
+            this.scan( recurOn.shift(), bound )
+            // process everything else as part of the quantified scope later
+            bound = bound.slice()
+            pattern.boundVariables().forEach( newBV => {
+                if ( !bound.some( oldBV => oldBV.equals( newBV ) ) )
+                    bound.push( newBV )
+            } )
+        }
+        recurOn.forEach( child => this.scan( child, bound ) )
+    }
+
+    /**
+     * Returns true if and only if all capture constraints in this set are
+     * {@link CaptureConstraint#satisfied satisfied()}.  If any are
+     * {@link CaptureConstraint#complete incomplete} or violated, it will return
+     * false.
+     * 
+     * @returns {boolean} whether all the constraints in this set are satisfied
+     * 
+     * @see {@link CaptureConstraints#violated violated()}
+     * @see {@link CaptureConstraints#simplify simplify()}
+     */
+    satisfied () {
+        return this.constraints.every( constraint => constraint.satisfied() )
+    }
+    
+    /**
+     * Returns true if and only if any capture constraint in this set is
+     * {@link CaptureConstraint#violated violated()}.  If all are either
+     * {@link CaptureConstraint#complete incomplete} or satisfied, it will
+     * return false.
+     * 
+     * @returns {boolean} whether any constraint in this set is violated
+     * 
+     * @see {@link CaptureConstraints#satisfied satisfied()}
+     * @see {@link CaptureConstraints#simplify simplify()}
+     */
+    violated () {
+        return this.constraints.some( constraint => constraint.violated() )
+    }
+    
+    /**
+     * Simplify this set by removing any entry that is
+     * {@link CaptureConstraint#complete complete()} and
+     * {@link CaptureConstraint#satisfied satisfied()}, because no such
+     * constraints change whether this set of constraints is
+     * {@link CaptureConstraints#satisfied satisfied()} or
+     * {@link CaptureConstraints#violated violated()}.
+     * 
+     * @see {@link CaptureConstraints#satisfied satisfied()}
+     * @see {@link CaptureConstraints#violated violated()}
+     */
+    simplify () {
+        this.constraints = this.constraints.filter( constraint =>
+            !constraint.complete() || !constraint.satisfied() )
+    }
+
+    /**
+     * The string representation of a capture constraint set is simply the
+     * comma-separated list of string representations of its capture
+     * constraints, surrounded by curly brackets to suggest a set.  For example,
+     * it might be "{(x,3),(y,K)}" or "{}".
+     * 
+     * @returns {string} a string representation of the set, useful in
+     *   debugging
+     * 
+     * @see {@link CaptureConstraint#toString toString() for individual capture
+     *   constraints}
+     */
+    toString () {
+        return `{${this.constraints.map(x=>x.toString()).join(',')}}`
     }
 
 }
