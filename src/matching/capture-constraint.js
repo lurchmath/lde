@@ -294,8 +294,8 @@ export class CaptureConstraints {
     /**
      * Returns true if and only if any capture constraint in this set is
      * {@link CaptureConstraint#violated violated()}.  If all are either
-     * {@link CaptureConstraint#complete incomplete} or satisfied, it will
-     * return false.
+     * {@link CaptureConstraint#complete incomplete} or
+     * {@link CaptureConstraint#satisfied satisfied()}, it will return false.
      * 
      * @returns {boolean} whether any constraint in this set is violated
      * 
