@@ -1,7 +1,5 @@
 
 /**
- * @module Matching
- * 
  * This module simply gathers all the definitions from smaller modules in the
  * `/src/matching` folder and places them in a single namespace.  This makes it
  * convenient for the user to `import Matching from './matching.js'` and then
@@ -21,6 +19,8 @@
  * @see {@link CaptureConstraints CaptureConstraints class}
  * @see {@link module:ExpressionFunctions ExpressionFunctions module}
  * @see {@link Problem Problem class}
+ *
+ * @module Matching
  */
 
 import { NewSymbolStream } from "./matching/new-symbol-stream.js"
