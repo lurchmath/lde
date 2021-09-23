@@ -75,7 +75,7 @@ export class NewSymbolStream {
      */
     avoid ( ...args ) {
         const avoidString = str => {
-            if ( /^new([0-9]+)$/.test( str ) ) {
+            if ( /^v([0-9]+)$/.test( str ) ) {
                 let index = parseInt( str.substring( 3 ) )
                 this._lastIndex = Math.max( this._lastIndex, index )
             }
@@ -109,7 +109,7 @@ export class NewSymbolStream {
      *   the {@link NewSymbolStream#avoid avoid()} function.
      * @see {@link NewSymbolStream#nextN nextN()}
      */
-    next () { return new Symbol( `new${++this._lastIndex}` ) }
+    next () { return new Symbol( `v${++this._lastIndex}` ) }
 
     /**
      * Produce new symbols from this stream.  The stream guarantees that

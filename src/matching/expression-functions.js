@@ -65,6 +65,7 @@ import { Symbol } from "../symbol.js"
 import { Binding } from "../binding.js"
 import { Application } from "../application.js"
 import { metavariable } from "./constraint.js"
+import { NewSymbolStream } from "./new-symbol-stream.js"
 
 // We use this symbol for encoding expression functions as LogicConcepts, as
 // described above.
@@ -180,18 +181,13 @@ export const applyEF = ( ef, ...args ) => {
     return result
 }
 
-// Used internally to create a sequence of dummy variables,
-// useful when building an expression function.
-const dummyVariable = i => new Symbol( `v${i}` )
-const dummyVariables = n =>
-    Array( n ).fill( 0 ).map( ( _, i ) => dummyVariable( i ) )
-
 /**
  * Create an expression function (as defined
  * {@link module:ExpressionFunctions.isAnEF here}) that is a constant function
  * (that is, it always returns the same expression).  That is, the function can
  * be expressed as $\lambda v_1,\ldots,v_n. E$ for some expression $E$ not
- * containing any of the $v_i$.
+ * containing any of the $v_i$.  The variables will have names chosen so that
+ * none of them appears free in $E$.
  * 
  * @param {integer} arity the number of parameters for the function that will be
  *   created; this must be at least 1.
@@ -205,8 +201,10 @@ const dummyVariables = n =>
  * @see {@link module:ExpressionFunctions.newEF newEF()}
  * @see {@link module:ExpressionFunctions.projectionEF projectionEF()}
  */
-export const constantEF = ( arity, output ) =>
-    newEF( ...dummyVariables( arity ), output.copy() )
+export const constantEF = ( arity, output ) => {
+    const parameters = new NewSymbolStream( output ).nextN( arity )
+    return newEF( ...parameters, output.copy() )
+}
 
 /**
  * Create an expression function (as defined
@@ -227,8 +225,10 @@ export const constantEF = ( arity, output ) =>
  * @see {@link module:ExpressionFunctions.newEF newEF()}
  * @see {@link module:ExpressionFunctions.constantEF constantEF()}
  */
-export const projectionEF = ( arity, index ) =>
-    newEF( ...dummyVariables( arity ), dummyVariable( index ) )
+export const projectionEF = ( arity, index ) => {
+    const parameters = new NewSymbolStream().nextN( arity )
+    return newEF( ...parameters, parameters[index].copy() )
+}
 
 /**
  * Construct a function whose body is an application of the form shown below.
@@ -239,18 +239,21 @@ export const projectionEF = ( arity, index ) =>
  * {@link module:ExpressionFunctions.isAnEFA here}) is $A$.  Then the
  * expression function created will be
  * $$ \lambda v_1,\ldots,v_n.((A~F_1~v_1~\cdots~v_n)~\cdots~(A~F_m~v_1~\cdots~v_n)). $$
- * This particular form is useful in one of the matching algorithms we will
- * write later.
+ * This particular form is useful in the matching algorithm in the
+ * {@link Problem Problem} class.  The bound variables will be chosen so that
+ * none of them is equal to any of the symbols $F_1,\ldots,F_m$.
  * 
  * @param {integer} arity the number of parameters to give the new function
  * @param {...Symbol|...string} symbols an array of symbols or names of symbols
  *   to be used to construct the function, as documented above
  */
-export const applicationEF = ( arity, symbols ) => newEF(
-    ...dummyVariables( arity ),
-    new Application( ...symbols.map( sym =>
-        newEFA( sym instanceof Symbol ? sym : new Symbol( sym ),
-                ...dummyVariables( arity ) ) ) ) )
+export const applicationEF = ( arity, symbols ) => {
+    const parameters = new NewSymbolStream( ...symbols ).nextN( arity )
+    return newEF( ...parameters,
+        new Application( ...symbols.map( sym =>
+            newEFA( sym instanceof Symbol ? sym : new Symbol( sym ),
+                    ...parameters.map( p => p.copy() ) ) ) ) )
+}
 
 // We use this symbol for encoding Expression Function Applications as
 // LogicConcepts, as described above.

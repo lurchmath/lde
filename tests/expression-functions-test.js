@@ -249,6 +249,15 @@ describe( 'Expression Functions', () => {
                 new Symbol( "It's Rocky!" )
             ).equals( C )
         ).to.equal( true )
+        // Ensure that constantEF() avoids using parameters that appear in the
+        // body
+        const defaultParam = constantEF( 1, new Symbol( 1 ) ).boundVariables()[0]
+        const shouldAvoidIt = constantEF( 1, defaultParam )
+        expect( isAnEF( shouldAvoidIt ) ).to.equal( true )
+        expect( arityOfEF( shouldAvoidIt ) ).to.equal( 1 )
+        expect( shouldAvoidIt.boundVariables()[0].equals( defaultParam ) )
+            .to.equal( false )
+        expect( shouldAvoidIt.body().equals( defaultParam ) ).to.equal( true )
         // Ensure that projectionEF() always creates functions with the
         // requested arity.
         expect( arityOfEF( projectionEF( 1, 0 ) ) ).to.equal( 1 )
@@ -295,7 +304,7 @@ describe( 'Expression Functions', () => {
         // We do just two tests of this as example cases
         let names, arity, ef, body, params, child
         // Example 1: applicationEF(2,['A','B']) should give
-        // lambda v1,v2. ((A v1 v2) (B v1 v2))
+        // lambda v1,v2. ((EFA A v1 v2) (EFA B v1 v2))
         arity = 2
         names = [ 'A', 'B' ]
         ef = applicationEF( arity, names )
@@ -320,8 +329,36 @@ describe( 'Expression Functions', () => {
         expect( child.child( 1 ).text() ).to.equal( names[1] )
         expect( child.child( 2 ).equals( params[0] ) ).to.equal( true )
         expect( child.child( 3 ).equals( params[1] ) ).to.equal( true )
-        // Example 1: applicationEF(1,[x,y,z]) should give
-        // lambda v1. ((x v1) (y v1) (z v1))
+        // Example 2: applicationEF(2,['v2','v1']) should give
+        // lambda v3,v4. ((EFA v2 v3 v4) (EFA v1 v3 v4))
+        arity = 2
+        names = [ 'v2', 'v1' ]
+        ef = applicationEF( arity, names )
+        expect( isAnEF( ef ) ).to.equal( true )
+        params = ef.boundVariables()
+        expect( arityOfEF( ef ) ).to.equal( arity )
+        expect( params.length ).to.equal( arity )
+        expect( params[0].text() ).not.to.be.oneOf( names ) // avoided capture
+        expect( params[1].text() ).not.to.be.oneOf( names ) // avoided capture
+        body = ef.body()
+        expect( body instanceof Application ).to.equal( true )
+        expect( body.numChildren() ).to.equal( names.length )
+        child = body.child( 0 )
+        expect( isAnEFA( child ) ).to.equal( true )
+        expect( child.numChildren() ).to.equal( params.length + 2 )
+        expect( child.child( 1 ) instanceof Symbol ).to.equal( true )
+        expect( child.child( 1 ).text() ).to.equal( names[0] )
+        expect( child.child( 2 ).equals( params[0] ) ).to.equal( true )
+        expect( child.child( 3 ).equals( params[1] ) ).to.equal( true )
+        child = body.child( 1 )
+        expect( isAnEFA( child ) ).to.equal( true )
+        expect( child.numChildren() ).to.equal( params.length + 2 )
+        expect( child.child( 1 ) instanceof Symbol ).to.equal( true )
+        expect( child.child( 1 ).text() ).to.equal( names[1] )
+        expect( child.child( 2 ).equals( params[0] ) ).to.equal( true )
+        expect( child.child( 3 ).equals( params[1] ) ).to.equal( true )
+        // Example 3: applicationEF(1,[x,y,z]) should give
+        // lambda v1. ((EFA x v1) (EFA y v1) (EFA z v1))
         arity = 1
         names = [ new Symbol( 'x' ), new Symbol( 'y' ), new Symbol( 'z' ) ]
         ef = applicationEF( arity, names )
