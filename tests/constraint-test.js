@@ -4,16 +4,15 @@ import { Application } from '../src/application.js'
 import { Binding } from '../src/binding.js'
 import { Environment } from '../src/environment.js'
 import { LogicConcept } from '../src/logic-concept.js'
-import { metavariable, Constraint } from '../src/matching/constraint.js'
-import { newEFA } from '../src/matching/expression-functions.js'
+import M from '../src/matching.js'
 
 describe( 'Constraint', () => {
 
     it( 'Should declare the relevant global identifiers', () => {
-        expect( metavariable ).to.be.ok
-        expect( typeof metavariable ).to.equal( 'string' )
-        expect( metavariable ).to.equal( Constraint.metavariable )
-        expect( Constraint ).to.be.ok
+        expect( M.metavariable ).to.be.ok
+        expect( typeof M.metavariable ).to.equal( 'string' )
+        expect( M.metavariable ).to.equal( M.Constraint.metavariable )
+        expect( M.Constraint ).to.be.ok
     } )
 
     it( 'Should let us mark metavariables, and it can detect them', () => {
@@ -23,35 +22,35 @@ describe( 'Constraint', () => {
         const C = new Symbol( 'C c see sea sí sim' )
         const D = new Symbol( 'd' )
         const E = new Symbol( '∃' )
-        expect( A.isA( metavariable ) ).to.equal( false )
-        expect( B.isA( metavariable ) ).to.equal( false )
-        expect( C.isA( metavariable ) ).to.equal( false )
-        expect( D.isA( metavariable ) ).to.equal( false )
-        expect( E.isA( metavariable ) ).to.equal( false )
-        B.makeIntoA( metavariable )
-        D.makeIntoA( metavariable )
-        expect( A.isA( metavariable ) ).to.equal( false )
-        expect( B.isA( metavariable ) ).to.equal( true )
-        expect( C.isA( metavariable ) ).to.equal( false )
-        expect( D.isA( metavariable ) ).to.equal( true )
-        expect( E.isA( metavariable ) ).to.equal( false )
-        A.makeIntoA( metavariable )
-        D.unmakeIntoA( metavariable )
-        expect( A.isA( metavariable ) ).to.equal( true )
-        expect( B.isA( metavariable ) ).to.equal( true )
-        expect( C.isA( metavariable ) ).to.equal( false )
-        expect( D.isA( metavariable ) ).to.equal( false )
-        expect( E.isA( metavariable ) ).to.equal( false )
+        expect( A.isA( M.metavariable ) ).to.equal( false )
+        expect( B.isA( M.metavariable ) ).to.equal( false )
+        expect( C.isA( M.metavariable ) ).to.equal( false )
+        expect( D.isA( M.metavariable ) ).to.equal( false )
+        expect( E.isA( M.metavariable ) ).to.equal( false )
+        B.makeIntoA( M.metavariable )
+        D.makeIntoA( M.metavariable )
+        expect( A.isA( M.metavariable ) ).to.equal( false )
+        expect( B.isA( M.metavariable ) ).to.equal( true )
+        expect( C.isA( M.metavariable ) ).to.equal( false )
+        expect( D.isA( M.metavariable ) ).to.equal( true )
+        expect( E.isA( M.metavariable ) ).to.equal( false )
+        A.makeIntoA( M.metavariable )
+        D.unmakeIntoA( M.metavariable )
+        expect( A.isA( M.metavariable ) ).to.equal( true )
+        expect( B.isA( M.metavariable ) ).to.equal( true )
+        expect( C.isA( M.metavariable ) ).to.equal( false )
+        expect( D.isA( M.metavariable ) ).to.equal( false )
+        expect( E.isA( M.metavariable ) ).to.equal( false )
         // test compound expressions
         const big1 = new Application( A, B, C )
         const big2 = new Environment( C, D, E )
         const big3 = new LogicConcept( big1, big2 )
-        expect( big1.isA( metavariable ) ).to.equal( false )
-        expect( big2.isA( metavariable ) ).to.equal( false )
-        expect( big3.isA( metavariable ) ).to.equal( false )
-        expect( Constraint.containsAMetavariable( big1 ) ).to.equal( true )
-        expect( Constraint.containsAMetavariable( big2 ) ).to.equal( false )
-        expect( Constraint.containsAMetavariable( big3 ) ).to.equal( true )
+        expect( big1.isA( M.metavariable ) ).to.equal( false )
+        expect( big2.isA( M.metavariable ) ).to.equal( false )
+        expect( big3.isA( M.metavariable ) ).to.equal( false )
+        expect( M.Constraint.containsAMetavariable( big1 ) ).to.equal( true )
+        expect( M.Constraint.containsAMetavariable( big2 ) ).to.equal( false )
+        expect( M.Constraint.containsAMetavariable( big3 ) ).to.equal( true )
     } )
 
     it( 'Should let us construct only well-formed Constraints', () => {
@@ -61,8 +60,8 @@ describe( 'Constraint', () => {
             (+ 1 2)
             (* n m)
         ` )
-        expect( () => C = new Constraint( P, E ) ).not.to.throw()
-        expect( C ).to.be.instanceOf( Constraint )
+        expect( () => C = new M.Constraint( P, E ) ).not.to.throw()
+        expect( C ).to.be.instanceOf( M.Constraint )
         // in here, we also test the getters for pattern and expression, briefly
         expect( C.pattern ).to.equal( P )
         expect( C.expression ).to.equal ( E )
@@ -72,11 +71,11 @@ describe( 'Constraint', () => {
             (* n m)
         ` )
         expect( P.child( 2 ).child( 1 ).text() ).to.equal( 'K' )
-        P.child( 2 ).child( 1 ).makeIntoA( metavariable )
+        P.child( 2 ).child( 1 ).makeIntoA( M.metavariable )
         expect( P.child( 2 ).child( 2 ).text() ).to.equal( 'Q' )
-        P.child( 2 ).child( 2 ).makeIntoA( metavariable )
-        expect( () => C = new Constraint( P, E ) ).not.to.throw()
-        expect( C ).to.be.instanceOf( Constraint )
+        P.child( 2 ).child( 2 ).makeIntoA( M.metavariable )
+        expect( () => C = new M.Constraint( P, E ) ).not.to.throw()
+        expect( C ).to.be.instanceOf( M.Constraint )
         expect( C.pattern ).to.equal( P )
         expect( C.expression ).to.equal ( E )
         // if there are metavariables in both, errors should be thrown
@@ -85,14 +84,14 @@ describe( 'Constraint', () => {
             (* n m)
         ` )
         expect( P.child( 2 ).child( 1 ).text() ).to.equal( 'K' )
-        P.child( 2 ).child( 1 ).makeIntoA( metavariable )
+        P.child( 2 ).child( 1 ).makeIntoA( M.metavariable )
         expect( P.child( 2 ).child( 2 ).text() ).to.equal( 'Q' )
-        P.child( 2 ).child( 2 ).makeIntoA( metavariable )
+        P.child( 2 ).child( 2 ).makeIntoA( M.metavariable )
         expect( E.child( 1 ).text() ).to.equal( 'n' )
-        E.child( 1 ).makeIntoA( metavariable )
+        E.child( 1 ).makeIntoA( M.metavariable )
         expect( E.child( 2 ).text() ).to.equal( 'm' )
-        E.child( 2 ).makeIntoA( metavariable )
-        expect( () => C = new Constraint( P, E ) ).to.throw(
+        E.child( 2 ).makeIntoA( M.metavariable )
+        expect( () => C = new M.Constraint( P, E ) ).to.throw(
             'may not contain metavariables' )
         // if there are metavariables in the expression, errors should be thrown
         ;[ P, E ] = LogicConcept.fromPutdown( `
@@ -100,14 +99,14 @@ describe( 'Constraint', () => {
             (* n m)
         ` )
         expect( E.child( 1 ).text() ).to.equal( 'n' )
-        E.child( 1 ).makeIntoA( metavariable )
+        E.child( 1 ).makeIntoA( M.metavariable )
         expect( E.child( 2 ).text() ).to.equal( 'm' )
-        E.child( 2 ).makeIntoA( metavariable )
-        expect( () => C = new Constraint( P, E ) ).to.throw(
+        E.child( 2 ).makeIntoA( M.metavariable )
+        expect( () => C = new M.Constraint( P, E ) ).to.throw(
             'may not contain metavariables' )
         // even just one metavariable is problematic in the expression
-        E = new Symbol( 'oh well' ).asA( metavariable )
-        expect( () => C = new Constraint( P, E ) ).to.throw(
+        E = new Symbol( 'oh well' ).asA( M.metavariable )
+        expect( () => C = new M.Constraint( P, E ) ).to.throw(
             'may not contain metavariables' )
     } )
 
@@ -118,9 +117,9 @@ describe( 'Constraint', () => {
             (+ 1 (- K Q))
             (* n m)
         ` )
-        P.child( 2 ).child( 1 ).makeIntoA( metavariable )
-        P.child( 2 ).child( 2 ).makeIntoA( metavariable )
-        C = new Constraint( P, E )
+        P.child( 2 ).child( 1 ).makeIntoA( M.metavariable )
+        P.child( 2 ).child( 2 ).makeIntoA( M.metavariable )
+        C = new M.Constraint( P, E )
         // make a copy and ensure it throws no errors
         let copy
         expect( () => copy = C.copy() ).not.to.throw()
@@ -134,32 +133,32 @@ describe( 'Constraint', () => {
     it( 'Should reliably test whether it can be applied', () => {
         let C
         // a Constraint whose pattern is a single metavariable can be applied
-        C = new Constraint(
-            new Symbol( 'example' ).asA( metavariable ),
+        C = new M.Constraint(
+            new Symbol( 'example' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(x y z a b c)' )[0]
         )
         expect( C.canBeApplied() ).to.equal( true )
         // a Constraint whose pattern is a single symbol cannot be applied,
         // if we don't mark that symbol as a metavariable
-        C = new Constraint(
+        C = new M.Constraint(
             new Symbol( 'example' ),
             LogicConcept.fromPutdown( '(x y z a b c)' )[0]
         )
         expect( C.canBeApplied() ).to.equal( false )
         // a Constraint whose pattern is anything other than a symbol cannot be
         // applied, even if we (erroneously) mark that pattern as a metavariable
-        C = new Constraint(
-            LogicConcept.fromPutdown( '(1 2 3)' )[0].asA( metavariable ),
+        C = new M.Constraint(
+            LogicConcept.fromPutdown( '(1 2 3)' )[0].asA( M.metavariable ),
             LogicConcept.fromPutdown( '(x y z a b c)' )[0]
         )
         expect( C.canBeApplied() ).to.equal( false )
-        C = new Constraint(
-            LogicConcept.fromPutdown( '[pi const]' )[0].asA( metavariable ),
+        C = new M.Constraint(
+            LogicConcept.fromPutdown( '[pi const]' )[0].asA( M.metavariable ),
             LogicConcept.fromPutdown( '(x y z a b c)' )[0]
         )
         expect( C.canBeApplied() ).to.equal( false )
-        C = new Constraint(
-            LogicConcept.fromPutdown( '{ { } }' )[0].asA( metavariable ),
+        C = new M.Constraint(
+            LogicConcept.fromPutdown( '{ { } }' )[0].asA( M.metavariable ),
             LogicConcept.fromPutdown( '(x y z a b c)' )[0]
         )
         expect( C.canBeApplied() ).to.equal( false )
@@ -167,8 +166,8 @@ describe( 'Constraint', () => {
 
     it( 'Should apply itself correctly in-place or functionally', () => {
         // create a Constraint that can be applied
-        let X = new Symbol( 'X' ).asA( metavariable )
-        let C = new Constraint(
+        let X = new Symbol( 'X' ).asA( M.metavariable )
+        let C = new M.Constraint(
             X.copy(),
             LogicConcept.fromPutdown( '(exp (- x))' )[0]
         )
@@ -222,7 +221,7 @@ describe( 'Constraint', () => {
         expect( applied3.equals( P3 ) ).to.equal( true )
         // ensure that Constraints cannot be applied in-place to other
         // Constraints
-        let badTarget = new Constraint( P1.copy(),
+        let badTarget = new M.Constraint( P1.copy(),
             LogicConcept.fromPutdown( '(hello there "friend")' )[0] )
         expect( () => C.applyTo( badTarget ) ).to.throw(
             /^Cannot apply a constraint to that/ )
@@ -241,67 +240,67 @@ describe( 'Constraint', () => {
         // Two different non-patterns = failure
         P = LogicConcept.fromPutdown( 'a' )[0]
         E = LogicConcept.fromPutdown( '(b c)' )[0]
-        C = new Constraint( P, E )
+        C = new M.Constraint( P, E )
         expect( C.complexity() ).to.equal( 0 )
         expect( C.complexityName() ).to.equal( 'failure' )
         // Application and non-application = failure
         P = LogicConcept.fromPutdown( '(x y z)' )[0]
-        P.child( 1 ).makeIntoA( metavariable )
+        P.child( 1 ).makeIntoA( M.metavariable )
         E = LogicConcept.fromPutdown( '(a b , c)' )[0]
-        C = new Constraint( P, E )
+        C = new M.Constraint( P, E )
         expect( C.complexity() ).to.equal( 0 )
         expect( C.complexityName() ).to.equal( 'failure' )
         // Binding and non-binding = failure
         P = LogicConcept.fromPutdown( '(x y , z)' )[0]
-        P.child( 1 ).makeIntoA( metavariable )
+        P.child( 1 ).makeIntoA( M.metavariable )
         E = LogicConcept.fromPutdown( '(a b c)' )[0]
-        C = new Constraint( P, E )
+        C = new M.Constraint( P, E )
         expect( C.complexity() ).to.equal( 0 )
         expect( C.complexityName() ).to.equal( 'failure' )
         // Applications with different sizes = failure
         P = LogicConcept.fromPutdown( '(x y z)' )[0]
-        P.child( 1 ).makeIntoA( metavariable )
+        P.child( 1 ).makeIntoA( M.metavariable )
         E = LogicConcept.fromPutdown( '(a b)' )[0]
-        C = new Constraint( P, E )
+        C = new M.Constraint( P, E )
         expect( C.complexity() ).to.equal( 0 )
         expect( C.complexityName() ).to.equal( 'failure' )
         // Bindings with different sizes = failure
         P = LogicConcept.fromPutdown( '(x y z , w)' )[0]
-        P.child( 1 ).makeIntoA( metavariable )
+        P.child( 1 ).makeIntoA( M.metavariable )
         E = LogicConcept.fromPutdown( '(a b , c)' )[0]
-        C = new Constraint( P, E )
+        C = new M.Constraint( P, E )
         expect( C.complexity() ).to.equal( 0 )
         expect( C.complexityName() ).to.equal( 'failure' )
         // Two different non-patterns = success
         P = LogicConcept.fromPutdown( '(x (w w) z)' )[0]
         E = LogicConcept.fromPutdown( '(x (w w) z)' )[0]
-        C = new Constraint( P, E )
+        C = new M.Constraint( P, E )
         expect( C.complexity() ).to.equal( 1 )
         expect( C.complexityName() ).to.equal( 'success' )
         // Metavariable pattern = instantiation
-        P = new Symbol( 'A' ).asA( metavariable )
+        P = new Symbol( 'A' ).asA( M.metavariable )
         E = LogicConcept.fromPutdown( '(a b)' )[0]
-        C = new Constraint( P, E )
+        C = new M.Constraint( P, E )
         expect( C.complexity() ).to.equal( 2 )
         expect( C.complexityName() ).to.equal( 'instantiation' )
         // Applications with same sizes = children
         P = LogicConcept.fromPutdown( '(x y z)' )[0]
-        P.child( 1 ).makeIntoA( metavariable )
+        P.child( 1 ).makeIntoA( M.metavariable )
         E = LogicConcept.fromPutdown( '(a b c)' )[0]
-        C = new Constraint( P, E )
+        C = new M.Constraint( P, E )
         expect( C.complexity() ).to.equal( 3 )
         expect( C.complexityName() ).to.equal( 'children' )
         // Bindings with same sizes = children
         P = LogicConcept.fromPutdown( '(x y z , w)' )[0]
-        P.child( 1 ).makeIntoA( metavariable )
+        P.child( 1 ).makeIntoA( M.metavariable )
         E = LogicConcept.fromPutdown( '(a b c , d)' )[0]
-        C = new Constraint( P, E )
+        C = new M.Constraint( P, E )
         expect( C.complexity() ).to.equal( 3 )
         expect( C.complexityName() ).to.equal( 'children' )
         // Exprssion Function Application pattern = EFA
-        P = newEFA( new Symbol( 'P' ).asA( metavariable ), new Symbol( 'x' ) )
+        P = M.newEFA( new Symbol( 'P' ).asA( M.metavariable ), new Symbol( 'x' ) )
         E = LogicConcept.fromPutdown( '(a b c d)' )[0]
-        C = new Constraint( P, E )
+        C = new M.Constraint( P, E )
         expect( C.complexity() ).to.equal( 4 )
         expect( C.complexityName() ).to.equal( 'EFA' )
     } )
@@ -312,48 +311,48 @@ describe( 'Constraint', () => {
         // constraints for the wrong type of constraints.
         P = LogicConcept.fromPutdown( 'a' )[0]
         E = LogicConcept.fromPutdown( '(b c)' )[0]
-        C = new Constraint( P, E )
+        C = new M.Constraint( P, E )
         expect( () => C.children() ).to.throw( /^Cannot compute.*this type/ )
-        P = newEFA( new Symbol( 'P' ).asA( metavariable ), new Symbol( 'x' ) )
+        P = M.newEFA( new Symbol( 'P' ).asA( M.metavariable ), new Symbol( 'x' ) )
         E = LogicConcept.fromPutdown( '(a b c d)' )[0]
-        C = new Constraint( P, E )
+        C = new M.Constraint( P, E )
         expect( () => C.children() ).to.throw( /^Cannot compute.*this type/ )
         // Next, consider two applications of the same size
         P = LogicConcept.fromPutdown( '(x y z)' )[0]
-        P.child( 1 ).makeIntoA( metavariable )
+        P.child( 1 ).makeIntoA( M.metavariable )
         E = LogicConcept.fromPutdown( '(a b c)' )[0]
-        C = new Constraint( P, E )
+        C = new M.Constraint( P, E )
         let result
         expect( () => result = C.children() ).not.to.throw()
         expect( result.length ).to.equal( 3 )
-        expect( result[0] ).to.be.instanceOf( Constraint )
+        expect( result[0] ).to.be.instanceOf( M.Constraint )
         expect( result[0].pattern.equals( new Symbol( 'x' ) ) ).to.equal( true )
         expect( result[0].expression.equals( new Symbol( 'a' ) ) ).to.equal( true )
-        expect( result[1] ).to.be.instanceOf( Constraint )
-        expect( result[1].pattern.equals( new Symbol( 'y' ).asA( metavariable ) ) )
+        expect( result[1] ).to.be.instanceOf( M.Constraint )
+        expect( result[1].pattern.equals( new Symbol( 'y' ).asA( M.metavariable ) ) )
             .to.equal( true )
         expect( result[1].expression.equals( new Symbol( 'b' ) ) ).to.equal( true )
-        expect( result[2] ).to.be.instanceOf( Constraint )
+        expect( result[2] ).to.be.instanceOf( M.Constraint )
         expect( result[2].pattern.equals( new Symbol( 'z' ) ) ).to.equal( true )
         expect( result[2].expression.equals( new Symbol( 'c' ) ) ).to.equal( true )
         // Last, consider two bindings of the same size
         P = LogicConcept.fromPutdown( '(x y z , w)' )[0]
-        P.child( 1 ).makeIntoA( metavariable )
+        P.child( 1 ).makeIntoA( M.metavariable )
         E = LogicConcept.fromPutdown( '(a b c , d)' )[0]
-        C = new Constraint( P, E )
+        C = new M.Constraint( P, E )
         expect( () => result = C.children() ).not.to.throw()
         expect( result.length ).to.equal( 4 )
-        expect( result[0] ).to.be.instanceOf( Constraint )
+        expect( result[0] ).to.be.instanceOf( M.Constraint )
         expect( result[0].pattern.equals( new Symbol( 'x' ) ) ).to.equal( true )
         expect( result[0].expression.equals( new Symbol( 'a' ) ) ).to.equal( true )
-        expect( result[1] ).to.be.instanceOf( Constraint )
-        expect( result[1].pattern.equals( new Symbol( 'y' ).asA( metavariable ) ) )
+        expect( result[1] ).to.be.instanceOf( M.Constraint )
+        expect( result[1].pattern.equals( new Symbol( 'y' ).asA( M.metavariable ) ) )
             .to.equal( true )
         expect( result[1].expression.equals( new Symbol( 'b' ) ) ).to.equal( true )
-        expect( result[2] ).to.be.instanceOf( Constraint )
+        expect( result[2] ).to.be.instanceOf( M.Constraint )
         expect( result[2].pattern.equals( new Symbol( 'z' ) ) ).to.equal( true )
         expect( result[2].expression.equals( new Symbol( 'c' ) ) ).to.equal( true )
-        expect( result[3] ).to.be.instanceOf( Constraint )
+        expect( result[3] ).to.be.instanceOf( M.Constraint )
         expect( result[3].pattern.equals( new Symbol( 'w' ) ) ).to.equal( true )
         expect( result[3].expression.equals( new Symbol( 'd' ) ) ).to.equal( true )
     } )

@@ -1,10 +1,10 @@
 
-import { Problem } from '../src/matching/problem.js'
+import M from '../src/matching.js'
 
 describe( 'Problem', () => {
 
     it( 'Should declare the correct global identifiers', () => {
-        expect( Problem ).to.be.ok
+        expect( M.Problem ).to.be.ok
     } )
 
 } )
