@@ -98,10 +98,9 @@ export const metavariable = 'LDE MV'
  *    possible instantiations of the metavariables $A,B$ can make the summation
  *    in $p$ into the universal quantifier in $e$.
  * 
- * Typically Constraints are arranged into sets, and we will provide an
- * algorithm for solving a set of Constraints, or saying that it is not
- * solvable.  That has not yet been implemented, and this documentation will be
- * updated later when it has been implemented.
+ * Typically Constraints are arranged into sets, and there are algorithms for
+ * solving sets of Constraints.  See the {@link Problem Problem} class for more
+ * details.
  */
 export class Constraint {
 
@@ -361,8 +360,8 @@ export class Constraint {
      * 
      * This value can be used to sort Constraints so that constraints with lower
      * complexity are processed first in algorithms, for the sake of efficiency.
-     * We will later add here a cross-reference to the Problem class, once it
-     * has been created.
+     * For example, the {@link Problem Problem} class has algorithms that make
+     * use of this function.
      * 
      * @returns {integer} the complexity of this Constraint, ranked on a scale
      *   beginning with zero (trivial) and counting upwards towards more
