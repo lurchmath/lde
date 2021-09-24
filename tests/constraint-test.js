@@ -130,6 +130,48 @@ describe( 'Constraint', () => {
         expect( C ).not.to.equal( copy )
     } )
 
+    it( 'Should correctly compute equality for two instances', () => {
+        // a constraint is equal to one that looks exactly the same
+        expect( new M.Constraint(
+            new Symbol( 'X' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown( '(sqrt (+ (^ x 2) (^ y 2)))' )[0]
+        ).equals( new M.Constraint(
+            new Symbol( 'X' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown( '(sqrt (+ (^ x 2) (^ y 2)))' )[0]
+        ) ) ).to.equal( true )
+        // two constraints are not equal if their patterns differ, even if just
+        // by an attribute, such as whether one is a metavariable
+        expect( new M.Constraint(
+            new Symbol( 'X' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown( '(sqrt (+ (^ x 2) (^ y 2)))' )[0]
+        ).equals( new M.Constraint(
+            new Symbol( 'X' ),
+            LogicConcept.fromPutdown( '(sqrt (+ (^ x 2) (^ y 2)))' )[0]
+        ) ) ).to.equal( false )
+        // two constraints are not equal if their expressions differ
+        expect( new M.Constraint(
+            new Symbol( 'X' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown( '(sqrt (+ (^ x 2) (^ y 2)))' )[0]
+        ).equals( new M.Constraint(
+            new Symbol( 'X' ).asA( M.metavariable ),
+            new Symbol( 'y' )
+        ) ) ).to.equal( false )
+        // two constraints are not equal if both pattern and expression differ
+        expect( new M.Constraint(
+            new Symbol( 'X' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown( '(sqrt (+ (^ x 2) (^ y 2)))' )[0]
+        ).equals( new M.Constraint(
+            new Symbol( 'X' ),
+            new Symbol( 'y' )
+        ) ) ).to.equal( false )
+        // a constraint is equal to a copy of itself
+        let C = new M.Constraint(
+            new Symbol( 'X' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown( '(sqrt (+ (^ x 2) (^ y 2)))' )[0]
+        )
+        expect( C.equals( C.copy() ) ).to.equal( true )
+    } )
+
     it( 'Should reliably test whether it can be applied', () => {
         let C
         // a Constraint whose pattern is a single metavariable can be applied

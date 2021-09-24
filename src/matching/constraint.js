@@ -211,6 +211,21 @@ export class Constraint {
     copy () { return new Constraint( this._pattern, this._expression ) }
 
     /**
+     * Two Constraints are equal if they have the same pattern and the same
+     * expression.  Comparison of patterns and expressions is done using the
+     * {@link MathConcept#equals equals()} member of the
+     * {@link MathConcept MathConcept} class.
+     * 
+     * @param {Constraint} other another instance of this class, to be compared
+     *   with this one for equality
+     * @returns {boolean} whether the two instances are structurally equal
+     */
+    equals ( other ) {
+        return this._pattern.equals( other._pattern )
+            && this._expression.equals( other._expression )
+    }
+
+    /**
      * If a Constraint's pattern is a single metavariable, then that Constraint
      * can be used as a tool for substitution.  For instance, the Constraint
      * $(A,2)$ can be applied to the expression $A-\frac{A}{B}$ to yield
