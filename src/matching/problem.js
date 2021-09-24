@@ -148,21 +148,25 @@ export class Problem {
     }
 
     /**
-     * Most clients will not call this function; it is mostly for internal use,
-     * because the internal ordering of the constraints is not published to the
-     * clients, and they shouldn't have a need to know it.  But various
-     * algorithms within this class occasionally need to remove a constraint,
-     * and this function is used to do so.
+     * Most clients will not call this function; it is mostly for internal use.
+     * Various algorithms within this class occasionally need to remove a
+     * constraint, and this function is used to do so.
      * 
-     * @param {integer} index a non-negative integer indicating the index of the
-     *   constraint to remove; it must be between 0 and this problem's length
-     *   minus 1, inclusive
+     * @param {integer|Constraint} toRemove the caller can provide an integer
+     *   between 0 and this problem's length minus 1, inclusive, to have this
+     *   function remove the constraint at that index; or the caller can provide
+     *   a {@link Constraint Constraint} instance, and this function will remove
+     *   any constraint equal to that one, if this Problem contains such a copy
      * 
      * @see {@link Problem#add add()}
      * @see {@link Problem#empty empty()}
      */
-    remove ( index ) {
-        this.constraints.splice( index, 1 )
+    remove ( toRemove ) {
+        if ( toRemove instanceof Constraint )
+            toRemove = this.constraints.findIndex( constraint =>
+                constraint.equals( toRemove ) )
+        if ( /^\d+$/.test( toRemove ) && toRemove < this.length )
+            this.constraints.splice( toRemove, 1 )
     }
 
     /**
@@ -171,15 +175,16 @@ export class Problem {
      * {@link Problem#copy copy()} function, and then call
      * {@link Problem#remove remove()} in the copy, then return the new object.
      * 
-     * @param {integer} index a non-negative integer indicating the index of the
-     *   constraint to remove; it must be between 0 and this problem's length
-     *   minus 1, inclusive
+     * @param {integer|Constraint} toRemove the {@link Constraint Constraint}
+     *   to remove, or a copy of it, or the index of it; this argument will be
+     *   passed directly to {@link Problem.remove remove()}, so see the
+     *   documentation there for details
      * @returns {Problem} a new problem instance equal to this one minus the
      *   constraint at the given index
      */
-    without ( index ) {
+    without ( toRemove ) {
         const result = this.copy()
-        result.remove( index )
+        result.remove( toRemove )
         return result
     }
 

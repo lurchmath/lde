@@ -589,13 +589,207 @@ describe( 'Problem', () => {
         expect( P4.constraints.some( C => C.equals( C4 ) ) ).to.equal( true )
     } )
 
-    xit( 'Should preserve increasing complexity ordering of constraints', () => {
-        // to do
+    it( 'Should preserve increasing complexity ordering of constraints', () => {
+        // create several constraints, at least one of each complexity level,
+        // and more than one of some complexity levels.
+        let C1, C2, C3, C4, C5, C6, C7
+        C1 = new M.Constraint( new Symbol( 1 ), new Symbol( 2 ) )
+        C2 = new M.Constraint( ...LogicConcept.fromPutdown( `
+            (this thingy here is just)
+            ("not equal to" this (other thingy) here)
+        ` ) )
+        C3 = new M.Constraint( ...LogicConcept.fromPutdown( 'same same' ) )
+        C4 = new M.Constraint( ...LogicConcept.fromPutdown( `
+            (one large , (expression "and its" (twin twin) sister))
+            (one large , (expression "and its" (twin twin) sister))
+        ` ) )
+        C5 = new M.Constraint(
+            new Symbol( 'metavar' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown( '(instantiation of that metavar)' )[0]
+        )
+        C6 = new M.Constraint( ...LogicConcept.fromPutdown( `
+            (the children of this one must match)
+            (the children of this second one here)
+        ` ) )
+        C6.pattern.child( 1 ).makeIntoA( M.metavariable )
+        C7 = new M.Constraint(
+            M.newEFA( new Symbol( 'P' ).asA( M.metavariable ), new Symbol( 2 ) ),
+            LogicConcept.fromPutdown( '(("some") (structure))' )[0]
+        )
+        expect( C1.complexity() ).to.equal( 0 )
+        expect( C2.complexity() ).to.equal( 0 )
+        expect( C3.complexity() ).to.equal( 1 )
+        expect( C4.complexity() ).to.equal( 1 )
+        expect( C5.complexity() ).to.equal( 2 )
+        expect( C6.complexity() ).to.equal( 3 )
+        expect( C7.complexity() ).to.equal( 4 )
+        // now try inserting various combinations of them into various problem
+        // instances, and ensure they always show up in an order that is a
+        // suborder of C1,C2,C3,C4,C5,C6,C7, with the exceptions that C1,C2 are
+        // interchangeable, as are C3,C4.
+        let P
+        // set 1, default ordering:
+        P = new M.Problem( C1, C4, C7 )
+        expect( P.length ).to.equal( 3 )
+        expect( P.constraints[0].equals( C1 ) ).to.equal( true )
+        expect( P.constraints[1].equals( C4 ) ).to.equal( true )
+        expect( P.constraints[2].equals( C7 ) ).to.equal( true )
+        // set 1, new ordering:
+        P = new M.Problem( C4, C7, C1 )
+        expect( P.length ).to.equal( 3 )
+        expect( P.constraints[0].equals( C1 ) ).to.equal( true )
+        expect( P.constraints[1].equals( C4 ) ).to.equal( true )
+        expect( P.constraints[2].equals( C7 ) ).to.equal( true )
+        // set 2, default ordering:
+        P = new M.Problem( C3, C4, C5 )
+        expect( P.length ).to.equal( 3 )
+        expect( P.constraints[0].equals( C4 ) ).to.equal( true )
+        expect( P.constraints[1].equals( C3 ) ).to.equal( true )
+        expect( P.constraints[2].equals( C5 ) ).to.equal( true )
+        // set 2, new ordering:
+        P = new M.Problem( C5, C4, C3 )
+        expect( P.length ).to.equal( 3 )
+        expect( P.constraints[0].equals( C3 ) ).to.equal( true )
+        expect( P.constraints[1].equals( C4 ) ).to.equal( true )
+        expect( P.constraints[2].equals( C5 ) ).to.equal( true )
+        // set 3, default ordering:
+        P = new M.Problem( C2, C6 )
+        expect( P.length ).to.equal( 2 )
+        expect( P.constraints[0].equals( C2 ) ).to.equal( true )
+        expect( P.constraints[1].equals( C6 ) ).to.equal( true )
+        // set 3, new ordering:
+        P = new M.Problem( C6, C2 )
+        expect( P.length ).to.equal( 2 )
+        expect( P.constraints[0].equals( C2 ) ).to.equal( true )
+        expect( P.constraints[1].equals( C6 ) ).to.equal( true )
+        // full set, default ordering:
+        P = new M.Problem( C1, C2, C3, C4, C5, C6, C7 )
+        expect( P.length ).to.equal( 7 )
+        expect( P.constraints[0].equals( C2 ) ).to.equal( true )
+        expect( P.constraints[1].equals( C1 ) ).to.equal( true )
+        expect( P.constraints[2].equals( C4 ) ).to.equal( true )
+        expect( P.constraints[3].equals( C3 ) ).to.equal( true )
+        expect( P.constraints[4].equals( C5 ) ).to.equal( true )
+        expect( P.constraints[5].equals( C6 ) ).to.equal( true )
+        expect( P.constraints[6].equals( C7 ) ).to.equal( true )
+        // full set, new ordering:
+        P = new M.Problem( C3, C7, C5, C4, C2, C6, C1 )
+        expect( P.length ).to.equal( 7 )
+        expect( P.constraints[0].equals( C1 ) ).to.equal( true )
+        expect( P.constraints[1].equals( C2 ) ).to.equal( true )
+        expect( P.constraints[2].equals( C4 ) ).to.equal( true )
+        expect( P.constraints[3].equals( C3 ) ).to.equal( true )
+        expect( P.constraints[4].equals( C5 ) ).to.equal( true )
+        expect( P.constraints[5].equals( C6 ) ).to.equal( true )
+        expect( P.constraints[6].equals( C7 ) ).to.equal( true )
     } )
 
-    xit( 'Should remove constraints correctly, even using without()', () => {
-        // to do
-        // also test empty and length in each case here
+    it( 'Should remove constraints correctly, even using without()', () => {
+        // re-use the same set of 7 constraints from the previous test function
+        let C1, C2, C3, C4, C5, C6, C7
+        C1 = new M.Constraint( new Symbol( 1 ), new Symbol( 2 ) )
+        C2 = new M.Constraint( ...LogicConcept.fromPutdown( `
+            (this thingy here is just)
+            ("not equal to" this (other thingy) here)
+        ` ) )
+        C3 = new M.Constraint( ...LogicConcept.fromPutdown( 'same same' ) )
+        C4 = new M.Constraint( ...LogicConcept.fromPutdown( `
+            (one large , (expression "and its" (twin twin) sister))
+            (one large , (expression "and its" (twin twin) sister))
+        ` ) )
+        C5 = new M.Constraint(
+            new Symbol( 'metavar' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown( '(instantiation of that metavar)' )[0]
+        )
+        C6 = new M.Constraint( ...LogicConcept.fromPutdown( `
+            (the children of this one must match)
+            (the children of this second one here)
+        ` ) )
+        C6.pattern.child( 1 ).makeIntoA( M.metavariable )
+        C7 = new M.Constraint(
+            M.newEFA( new Symbol( 'P' ).asA( M.metavariable ), new Symbol( 2 ) ),
+            LogicConcept.fromPutdown( '(("some") (structure))' )[0]
+        )
+        // build one of the large problems from the previous test function,
+        // and ensure it looks just like it did in that case
+        let P, Q
+        P = new M.Problem( C1, C2, C3, C4, C5, C6, C7 )
+        expect( P.length ).to.equal( 7 )
+        expect( P.constraints[0].equals( C2 ) ).to.equal( true )
+        expect( P.constraints[1].equals( C1 ) ).to.equal( true )
+        expect( P.constraints[2].equals( C4 ) ).to.equal( true )
+        expect( P.constraints[3].equals( C3 ) ).to.equal( true )
+        expect( P.constraints[4].equals( C5 ) ).to.equal( true )
+        expect( P.constraints[5].equals( C6 ) ).to.equal( true )
+        expect( P.constraints[6].equals( C7 ) ).to.equal( true )
+        // remove a constraint and ensure P has changed
+        P.remove( C3 )
+        expect( P.length ).to.equal( 6 )
+        expect( P.constraints[0].equals( C2 ) ).to.equal( true )
+        expect( P.constraints[1].equals( C1 ) ).to.equal( true )
+        expect( P.constraints[2].equals( C4 ) ).to.equal( true )
+        expect( P.constraints[3].equals( C5 ) ).to.equal( true )
+        expect( P.constraints[4].equals( C6 ) ).to.equal( true )
+        expect( P.constraints[5].equals( C7 ) ).to.equal( true )
+        // remove a constraint by index and ensure P has changed
+        P.remove( 4 )
+        expect( P.length ).to.equal( 5 )
+        expect( P.constraints[0].equals( C2 ) ).to.equal( true )
+        expect( P.constraints[1].equals( C1 ) ).to.equal( true )
+        expect( P.constraints[2].equals( C4 ) ).to.equal( true )
+        expect( P.constraints[3].equals( C5 ) ).to.equal( true )
+        expect( P.constraints[4].equals( C7 ) ).to.equal( true )
+        // remove a nonexistent constraint and ensure no changes
+        P.remove( C6 )
+        expect( P.length ).to.equal( 5 )
+        expect( P.constraints[0].equals( C2 ) ).to.equal( true )
+        expect( P.constraints[1].equals( C1 ) ).to.equal( true )
+        expect( P.constraints[2].equals( C4 ) ).to.equal( true )
+        expect( P.constraints[3].equals( C5 ) ).to.equal( true )
+        expect( P.constraints[4].equals( C7 ) ).to.equal( true )
+        // remove invalid indices and ensure no changes
+        P.remove( -1 )
+        expect( P.length ).to.equal( 5 )
+        expect( P.constraints[0].equals( C2 ) ).to.equal( true )
+        expect( P.constraints[1].equals( C1 ) ).to.equal( true )
+        expect( P.constraints[2].equals( C4 ) ).to.equal( true )
+        expect( P.constraints[3].equals( C5 ) ).to.equal( true )
+        expect( P.constraints[4].equals( C7 ) ).to.equal( true )
+        P.remove( 30 )
+        expect( P.length ).to.equal( 5 )
+        expect( P.constraints[0].equals( C2 ) ).to.equal( true )
+        expect( P.constraints[1].equals( C1 ) ).to.equal( true )
+        expect( P.constraints[2].equals( C4 ) ).to.equal( true )
+        expect( P.constraints[3].equals( C5 ) ).to.equal( true )
+        expect( P.constraints[4].equals( C7 ) ).to.equal( true )
+        // make a copy of P without some entries (indicated by indices)
+        // and ensure it works, and that P has not changed
+        Q = P.without( 1 ).without( 0 )
+        expect( Q ).not.to.equal( P )
+        expect( P.length ).to.equal( 5 )
+        expect( P.constraints[0].equals( C2 ) ).to.equal( true )
+        expect( P.constraints[1].equals( C1 ) ).to.equal( true )
+        expect( P.constraints[2].equals( C4 ) ).to.equal( true )
+        expect( P.constraints[3].equals( C5 ) ).to.equal( true )
+        expect( P.constraints[4].equals( C7 ) ).to.equal( true )
+        expect( Q.length ).to.equal( 3 )
+        expect( Q.constraints[0].equals( C4 ) ).to.equal( true )
+        expect( Q.constraints[1].equals( C5 ) ).to.equal( true )
+        expect( Q.constraints[2].equals( C7 ) ).to.equal( true )
+        // similar to the previous, but this time removing constraints rather
+        // than just indices
+        Q = P.without( C1 ).without( C5 )
+        expect( Q ).not.to.equal( P )
+        expect( P.length ).to.equal( 5 )
+        expect( P.constraints[0].equals( C2 ) ).to.equal( true )
+        expect( P.constraints[1].equals( C1 ) ).to.equal( true )
+        expect( P.constraints[2].equals( C4 ) ).to.equal( true )
+        expect( P.constraints[3].equals( C5 ) ).to.equal( true )
+        expect( P.constraints[4].equals( C7 ) ).to.equal( true )
+        expect( Q.length ).to.equal( 3 )
+        expect( Q.constraints[0].equals( C2 ) ).to.equal( true )
+        expect( Q.constraints[1].equals( C4 ) ).to.equal( true )
+        expect( Q.constraints[2].equals( C7 ) ).to.equal( true )
     } )
 
     xit( 'Should compare problems for equality correctly', () => {
