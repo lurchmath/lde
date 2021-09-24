@@ -125,8 +125,8 @@ export class Problem {
             // find location to insert that preserves increasing complexity
             const index = this.constraints.findIndex( already =>
                 already.complexity() >= constraint.complexity() )
-            if ( index == -1 ) index = this.constraints.length
-            this.constraints.splice( index, 0, constraint )
+            this.constraints.splice(
+                index == -1 ? this.constraints.length : index, 0, constraint )
         } )
     }
 
@@ -240,6 +240,21 @@ export class Problem {
         if ( this.constraints.length != other.constraints.length ) return false
         return this.constraints.every( c1 =>
             other.constraints.some( c2 => c1.equals( c2 ) ) )
+    }
+
+    /**
+     * The string representation of a Problem is simply the comma-separated list
+     * of string representations of its {@link Constraint Constraints},
+     * surrounded by curly brackets to suggest a set.  For example, it might be
+     * "{(A,(- x)),(B,(+ 1 t))}" or "{}".
+     * 
+     * @returns {string} a string representation of the Problem, useful in
+     *   debugging
+     * 
+     * @see {@link Constraint#toString toString() for individual constraints}
+     */
+    toString () {
+        return `{${this.constraints.map(x=>x.toString()).join(',')}}`
     }
 
 }
