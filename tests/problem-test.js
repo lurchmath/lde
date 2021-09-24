@@ -792,12 +792,105 @@ describe( 'Problem', () => {
         expect( Q.constraints[2].equals( C7 ) ).to.equal( true )
     } )
 
-    xit( 'Should compare problems for equality correctly', () => {
-        // to do
+    it( 'Should compare problems for equality correctly', () => {
+        // re-use the same set of 7 constraints from the previous test function
+        let C1, C2, C3, C4, C5, C6, C7
+        C1 = new M.Constraint( new Symbol( 1 ), new Symbol( 2 ) )
+        C2 = new M.Constraint( ...LogicConcept.fromPutdown( `
+            (this thingy here is just)
+            ("not equal to" this (other thingy) here)
+        ` ) )
+        C3 = new M.Constraint( ...LogicConcept.fromPutdown( 'same same' ) )
+        C4 = new M.Constraint( ...LogicConcept.fromPutdown( `
+            (one large , (expression "and its" (twin twin) sister))
+            (one large , (expression "and its" (twin twin) sister))
+        ` ) )
+        C5 = new M.Constraint(
+            new Symbol( 'metavar' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown( '(instantiation of that metavar)' )[0]
+        )
+        C6 = new M.Constraint( ...LogicConcept.fromPutdown( `
+            (the children of this one must match)
+            (the children of this second one here)
+        ` ) )
+        C6.pattern.child( 1 ).makeIntoA( M.metavariable )
+        C7 = new M.Constraint(
+            M.newEFA( new Symbol( 'P' ).asA( M.metavariable ), new Symbol( 2 ) ),
+            LogicConcept.fromPutdown( '(("some") (structure))' )[0]
+        )
+        // make several problems with various combinations of the constraints
+        let P1, P2, P3, P4, P5
+        P1 = new M.Problem( C1, C3, C5 )
+        P2 = new M.Problem( C2, C3, C4 )
+        P3 = new M.Problem( C3, C1, C5, C3 )
+        P4 = new M.Problem( C3, C6, C7 )
+        P5 = new M.Problem( C7, C3, C6 )
+        // test all possible pairs for equality
+        expect( P1.equals( P1 ) ).to.equal( true )
+        expect( P1.equals( P2 ) ).to.equal( false )
+        expect( P1.equals( P3 ) ).to.equal( true )
+        expect( P1.equals( P4 ) ).to.equal( false )
+        expect( P1.equals( P5 ) ).to.equal( false )
+        expect( P2.equals( P1 ) ).to.equal( false )
+        expect( P2.equals( P2 ) ).to.equal( true )
+        expect( P2.equals( P3 ) ).to.equal( false )
+        expect( P2.equals( P4 ) ).to.equal( false )
+        expect( P2.equals( P5 ) ).to.equal( false )
+        expect( P3.equals( P1 ) ).to.equal( true )
+        expect( P3.equals( P2 ) ).to.equal( false )
+        expect( P3.equals( P3 ) ).to.equal( true )
+        expect( P3.equals( P4 ) ).to.equal( false )
+        expect( P3.equals( P5 ) ).to.equal( false )
+        expect( P4.equals( P1 ) ).to.equal( false )
+        expect( P4.equals( P2 ) ).to.equal( false )
+        expect( P4.equals( P3 ) ).to.equal( false )
+        expect( P4.equals( P4 ) ).to.equal( true )
+        expect( P4.equals( P5 ) ).to.equal( true )
+        expect( P5.equals( P1 ) ).to.equal( false )
+        expect( P5.equals( P2 ) ).to.equal( false )
+        expect( P5.equals( P3 ) ).to.equal( false )
+        expect( P5.equals( P4 ) ).to.equal( true )
+        expect( P5.equals( P5 ) ).to.equal( true )
     } )
 
-    xit( 'Should make shallow copies correctly', () => {
-        // to do
+    it( 'Should make shallow copies correctly', () => {
+        // re-use a few of the constraints from the previous test function
+        let C1, C2, C3, C4
+        C1 = new M.Constraint( new Symbol( 1 ), new Symbol( 2 ) )
+        C2 = new M.Constraint( ...LogicConcept.fromPutdown( 'same same' ) )
+        C3 = new M.Constraint(
+            new Symbol( 'metavar' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown( '(instantiation of that metavar)' )[0]
+        )
+        C4 = new M.Constraint(
+            M.newEFA( new Symbol( 'P' ).asA( M.metavariable ), new Symbol( 2 ) ),
+            LogicConcept.fromPutdown( '(("some") (structure))' )[0]
+        )
+        // make some problems using those constraints
+        let P1, P2, P3, P4
+        P1 = new M.Problem( C1, C2, C3 )
+        P2 = new M.Problem( C2, C4 )
+        // make copies and verify that they are the same structurally, but not
+        // the same objects in memory
+        expect( () => P3 = P1.copy() ).not.to.throw()
+        expect( () => P4 = P2.copy() ).not.to.throw()
+        expect( P3 ).not.to.equal( P1 )
+        expect( P4 ).not.to.equal( P2 )
+        expect( P1.length ).to.equal( P3.length )
+        expect( P2.length ).to.equal( P4.length )
+        expect( P1.equals( P3 ) ).to.equal( true )
+        expect( P2.equals( P4 ) ).to.equal( true )
+        expect( P3.equals( P1 ) ).to.equal( true )
+        expect( P4.equals( P2 ) ).to.equal( true )
+        // ensure they contain the exact same constraint objects in the same
+        // order, since these are just shallow copies
+        expect( P1.length ).to.equal( 3 )
+        expect( P1.constraints[0] ).to.equal( P3.constraints[0] )
+        expect( P1.constraints[1] ).to.equal( P3.constraints[1] )
+        expect( P1.constraints[2] ).to.equal( P3.constraints[2] )
+        expect( P2.length ).to.equal( 2 )
+        expect( P2.constraints[0] ).to.equal( P4.constraints[0] )
+        expect( P2.constraints[1] ).to.equal( P4.constraints[1] )
     } )
 
 } )
