@@ -334,8 +334,8 @@ export class Constraint {
      * 
      * @param {LogicConcept|Constraint|CaptureConstraint|CaptureConstraints|Problem} target
      *   the object to which we should apply this Constraint, resulting in a copy
-     * @returns {LogicConcept|Constraint|CaptureConstraint} a new copy of the
-     *   `target` with the application of this Constraint having been done
+     * @returns {LogicConcept|Constraint|CaptureConstraint|CaptureConstraints|Problem}
+     *   a new copy of the `target` with the application of this Constraint having been done
      * 
      * @see {@link Constraint#canBeApplied canBeApplied()}
      * @see {@link Constraint#applyTo applyTo()}

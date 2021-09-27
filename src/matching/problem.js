@@ -1,6 +1,7 @@
 
 import { LogicConcept } from "../logic-concept.js"
 import { Constraint } from "./constraint.js"
+import { CaptureConstraint, CaptureConstraints } from "./capture-constraint.js"
 
 /**
  * A matching problem is a set of {@link Constraint Constraints} to be solved.
@@ -245,6 +246,84 @@ export class Problem {
         if ( this.constraints.length != other.constraints.length ) return false
         return this.constraints.every( c1 =>
             other.constraints.some( c2 => c1.equals( c2 ) ) )
+    }
+
+    /**
+     * Recall that we can ask, for a {@link Constraint Constraint}, whether it
+     * {@link Constraint#canBeApplied canBeApplied()}, and if it can, then such
+     * {@link Constraint#applyTo application} can be done to many different
+     * types of objects.  We can treat Problems the same way, because they are
+     * sets of constraints.
+     * 
+     * A problem can be applied if every one of its constraints can.  This
+     * function answers that question.
+     * 
+     * @returns {boolean} whether all the {@link Constraint Constraints} in this
+     *   problem {@link Constraint#canBeApplied can be applied}
+     * 
+     * @see {@link Problem#applyTo applyTo()}
+     * @see {@link Problem#appliedTo appliedTo()}
+     */
+    canBeApplied () {
+        return this.constraints.every( constraint => constraint.canBeApplied() )
+    }
+
+    /**
+     * Apply each constraint in this Problem to the given `target`.  This
+     * function therefore makes calls to the {@link Constraint#applyTo applyTo()
+     * function in its Constraints}.  See that function for more details on how
+     * each type of target is treated.
+     * 
+     * @param {LogicConcept|CaptureConstraint|CaptureConstraints|Problem} target
+     *   the object to which this problem should be applied
+     * 
+     * @see {@link Problem#canBeApplied canBeApplied()}
+     * @see {@link Problem#appliedTo appliedTo()} (for Problems)
+     * @see {@link Constraint#applyTo applyTo()} (for Constraints)
+     */
+    applyTo ( target ) {
+        this.constraints.forEach( constraint => constraint.applyTo( target ) )
+    }
+
+    /**
+     * Apply each constraint in this Problem to a copy of the given `target`,
+     * returning that new copy.  This is analogous to the
+     * {@link Constraint#appliedTo appliedTo() function for Constraints}.  See
+     * that function for more details on how each type of target is treated.
+     * 
+     * @param {LogicConcept|Constraint|CaptureConstraint|CaptureConstraints|Problem} target 
+     *   the object to which this problem should be applied
+     * @returns {LogicConcept|Constraint|CaptureConstraint|CaptureConstraints|Problem}
+     *   a copy of the original `target`, now with this problem applied to it
+     * 
+     * @see {@link Problem#canBeApplied canBeApplied()}
+     * @see {@link Problem#applyTo applyTo()} (for Problems)
+     * @see {@link Constraint#appliedTo appliedTo()} (for Constraints)
+     */
+    appliedTo ( target ) {
+        if ( target instanceof LogicConcept ) {
+            for ( let i = 0 ; i < this.constraints.length ; i++ )
+                if ( target.equals( this.constraints[i].pattern ) )
+                    return this.constraints[i].expression.copy()
+            const copy = target.copy()
+            this.applyTo( copy )
+            return copy
+        } else if ( target instanceof Constraint ) {
+            return new Constraint( this.appliedTo( target.pattern ),
+                                   target.expression )
+        } else if ( target instanceof CaptureConstraint ) {
+            const copy = target.copy()
+            copy.bound = this.appliedTo( copy.bound )
+            copy.free = this.appliedTo( copy.free )
+            return copy
+        } else if ( ( target instanceof CaptureConstraints )
+                 || ( target instanceof Problem ) ) {
+            const copy = target.copy()
+            this.applyTo( copy )
+            return copy
+        } else {
+            throw 'Cannot apply a problem to that kind of target'
+        }
     }
 
     /**
