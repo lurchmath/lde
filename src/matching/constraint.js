@@ -5,6 +5,7 @@ import { Binding } from '../binding.js'
 import { LogicConcept } from '../logic-concept.js'
 import { isAnEFA } from './expression-functions.js'
 import { CaptureConstraint, CaptureConstraints } from './capture-constraint.js'
+import { Problem } from './problem.js'
 
 // Utility function used below.  It means that the LC is an Application type,
 // but not an Expression Function Application.
@@ -257,6 +258,9 @@ export class Constraint {
      *    apply this Constraint to both its bound and free members, in place.
      *  * If the `target` is a {@link CaptureConstraints set of Capture
      *    Constraints}, then just apply the above action to each one.
+     *  * If the `target` is a {@link Problem matching Problem}, apply this
+     *    Constraint to each of its patterns.  (Technically, we make new
+     *    Constraints to replace the old, since Constraints are immutable.)
      * 
      * Because this function operates in-place, it cannot be applied to another
      * Constraint; such objects are to be immutable.  Instead, use the
@@ -273,8 +277,8 @@ export class Constraint {
      * throws an error.  It also throws an error if the target is not one of the
      * two types mentioned above.
      * 
-     * @param {LogicConcept|CaptureConstraint} target the object to which we
-     *   should apply this Constraint, in place
+     * @param {LogicConcept|CaptureConstraint|CaptureConstraints|Problem} target
+     *   the object to which we should apply this Constraint, in place
      * 
      * @see {@link Constraint#canBeApplied canBeApplied()}
      * @see {@link Constraint#appliedTo appliedTo()}
@@ -292,6 +296,11 @@ export class Constraint {
         } else if ( target instanceof CaptureConstraints ) {
             target.constraints.forEach(
                 constraint => this.applyTo( constraint ) )
+        } else if ( target instanceof Problem ) {
+            target.constraints.slice().forEach( constraint => {
+                target.remove( constraint )
+                target.add( this.appliedTo( constraint ) )
+            } )
         } else {
             throw 'Cannot apply a constraint to that kind of target'
         }
@@ -320,9 +329,11 @@ export class Constraint {
      *  * If the `target` is a {@link CaptureConstraints set of Capture
      *    Constraints}, then make a copy, apply this Constraint to the copy, and
      *    return that copy.
+     *  * If the `target` is a {@link Problem matching Problem}, then make a
+     *    copy, apply this Constraint to the copy, and return that copy.
      * 
-     * @param {LogicConcept|Constraint|CaptureConstraint} target the object to
-     *   which we should apply this Constraint, resulting in a copy
+     * @param {LogicConcept|Constraint|CaptureConstraint|CaptureConstraints|Problem} target
+     *   the object to which we should apply this Constraint, resulting in a copy
      * @returns {LogicConcept|Constraint|CaptureConstraint} a new copy of the
      *   `target` with the application of this Constraint having been done
      * 
@@ -344,7 +355,8 @@ export class Constraint {
             copy.bound = this.appliedTo( copy.bound )
             copy.free = this.appliedTo( copy.free )
             return copy
-        } else if ( target instanceof CaptureConstraints ) {
+        } else if ( ( target instanceof CaptureConstraints )
+                 || ( target instanceof Problem ) ) {
             const copy = target.copy()
             this.applyTo( copy )
             return copy

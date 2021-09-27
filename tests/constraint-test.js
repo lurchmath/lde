@@ -275,6 +275,52 @@ describe( 'Constraint', () => {
             .to.equal( true )
         expect( substituted.expression.equals( badTarget.expression ) )
             .to.equal( true )
+        // ensure that Constraints can be applied to Problems in-place
+        let prob = new M.Problem()
+        const E1 = LogicConcept.fromPutdown( '(an appli cation)' )[0]
+        const E2 = LogicConcept.fromPutdown( '(a bin , ding)' )[0]
+        prob.add( P1copy, E1, P2copy, E2 )
+        expect( prob.constraints.length ).to.equal( 2 )
+        expect( prob.constraints.some( constraint =>
+            constraint.pattern.equals( P1copy ) && constraint.expression.equals( E1 )
+        ) ).to.equal( true )
+        expect( prob.constraints.some( constraint =>
+            constraint.pattern.equals( P2copy ) && constraint.expression.equals( E2 )
+        ) ).to.equal( true )
+        expect( () => C.applyTo( prob ) ).not.to.throw()
+        expect( prob.constraints.length ).to.equal( 2 )
+        expect( prob.constraints.some( constraint =>
+            constraint.pattern.equals( newP1 ) && constraint.expression.equals( E1 )
+        ) ).to.equal( true )
+        expect( prob.constraints.some( constraint =>
+            constraint.pattern.equals( newP2 ) && constraint.expression.equals( E2 )
+        ) ).to.equal( true )
+        // ensure that Constraints can be applied to Problems to make copies
+        prob = new M.Problem()
+        prob.add( P1copy, E1, P2copy, E2 )
+        expect( prob.constraints.length ).to.equal( 2 )
+        expect( prob.constraints.some( constraint =>
+            constraint.pattern.equals( P1copy ) && constraint.expression.equals( E1 )
+        ) ).to.equal( true )
+        expect( prob.constraints.some( constraint =>
+            constraint.pattern.equals( P2copy ) && constraint.expression.equals( E2 )
+        ) ).to.equal( true )
+        let probNew
+        expect( () => probNew = C.appliedTo( prob ) ).not.to.throw()
+        expect( prob.constraints.length ).to.equal( 2 )
+        expect( prob.constraints.some( constraint =>
+            constraint.pattern.equals( P1copy ) && constraint.expression.equals( E1 )
+        ) ).to.equal( true )
+        expect( prob.constraints.some( constraint =>
+            constraint.pattern.equals( P2copy ) && constraint.expression.equals( E2 )
+        ) ).to.equal( true )
+        expect( probNew.constraints.length ).to.equal( 2 )
+        expect( probNew.constraints.some( constraint =>
+            constraint.pattern.equals( newP1 ) && constraint.expression.equals( E1 )
+        ) ).to.equal( true )
+        expect( probNew.constraints.some( constraint =>
+            constraint.pattern.equals( newP2 ) && constraint.expression.equals( E2 )
+        ) ).to.equal( true )
     } )
 
     it( 'Should correctly compute complexity levels and names', () => {
