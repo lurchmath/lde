@@ -140,7 +140,7 @@ export class CaptureConstraint {
      * 
      * @see {@link CaptureConstraints#toString toString() for constraint sets}
      */
-     toString () {
+    toString () {
         return `(${this.bound.toPutdown()},${this.free.toPutdown()})`
     }
 
