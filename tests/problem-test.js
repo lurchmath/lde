@@ -1059,4 +1059,12 @@ describe( 'Problem', () => {
         ) ).to.equal( true )
     } )
 
+    xit( 'Should correctly compute capture constraints', () => {
+        // to do
+    } )
+
+    xit( 'Should correctly invalidate the capture constraints cache', () => {
+        // to do
+    } )
+
 } )

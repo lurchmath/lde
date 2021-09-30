@@ -50,7 +50,6 @@ export class Problem {
      */
     constructor ( ...args ) {
         this.constraints = [ ]
-        this.captureConstraints = [ ]
         this.add( ...args )
     }
 
@@ -82,6 +81,10 @@ export class Problem {
      * preserves that order when adding new constraints.  This makes it easy for
      * algorithms to find an easy constraint to process, by taking the first one
      * off the internal list.
+     * 
+     * This also invalidates the capture constraints cache documented in the
+     * {@link Problem#captureConstraints captureConstraints()} function (unless
+     * of course no arguments were passed).
      * 
      * @param  {...any} args constraints to add to this problem, in any of the
      *   forms given above
@@ -128,6 +131,8 @@ export class Problem {
                 already.complexity() >= constraint.complexity() )
             this.constraints.splice(
                 index == -1 ? this.constraints.length : index, 0, constraint )
+            // invalidate capture constraints cache:
+            delete this._captureConstraints
         } )
     }
 
@@ -159,6 +164,10 @@ export class Problem {
      *   a {@link Constraint Constraint} instance, and this function will remove
      *   any constraint equal to that one, if this Problem contains such a copy
      * 
+     * This also invalidates the capture constraints cache documented in the
+     * {@link Problem#captureConstraints captureConstraints()} function (as
+     * long as some constraint was actually removed).
+     * 
      * @see {@link Problem#add add()}
      * @see {@link Problem#empty empty()}
      */
@@ -166,8 +175,12 @@ export class Problem {
         if ( toRemove instanceof Constraint )
             toRemove = this.constraints.findIndex( constraint =>
                 constraint.equals( toRemove ) )
-        if ( /^\d+$/.test( toRemove ) && toRemove < this.length )
+        if ( /^\d+$/.test( toRemove ) && toRemove < this.length ) {
+            // remove the constraint:
             this.constraints.splice( toRemove, 1 )
+            // invalidate the capture constraints cache:
+            delete this._captureConstraints
+        }
     }
 
     /**
@@ -221,13 +234,18 @@ export class Problem {
      * information about it may be computed from the context in which that
      * problem arose, including variable binding constraints, solutions already
      * computed and cached, and more.  This function does not copy any of that
-     * information; it copies only the constraint set.
+     * information; it copies only the constraint set (and if the results of
+     * the {@link Problem#captureConstraints captureConstraints()} function
+     * has been cached, it copies that as well).
      * 
      * @returns {Problem} a shallow copy of this object
      */
     copy () {
         const result = new Problem()
         result.constraints = this.constraints.slice()
+        if ( this._captureConstraints )
+            result._captureConstraints = this._captureConstraints.map(
+                captureConstraint => captureConstraint.copy() )
         return result
     }
 
@@ -339,6 +357,35 @@ export class Problem {
      */
     toString () {
         return `{${this.constraints.map(x=>x.toString()).join(',')}}`
+    }
+
+    /**
+     * Compute the set of capture constraints for this problem and return it.
+     * If it has already been computed and cached, return the cached value.
+     * Note that because {@link CaptureConstraint CaptureConstraints} are
+     * computed from the set of ordinary {@link Constraint Constraints} in a
+     * problem, the cache is invalidated if that set is altered, such as by
+     * {@link Problem#add add()} or {@link Problem#remove remove()}.
+     * 
+     * To see the definition of a capture constraint, refer to
+     * {@link CaptureConstraint the documentation for that class}.  The set of
+     * capture constraints for a Problem is the set of capture constraints for
+     * that Problem's set of patterns.
+     * 
+     * @see {@link Problem#add add()}
+     * @see {@link Problem#remove remove()}
+     * @see {@link CaptureConstraint CaptureConstraint}
+     * @see {@link CaptureConstraints CaptureConstraints}
+     * @see {@link Constraint Constraint}
+     * 
+     * @return {CaptureConstraints} the set of capture constraints generated
+     *   by this Problem's patterns (that is, the patterns in its constraints)
+     */
+    captureConstraints () {
+        if ( !this.hasOwnProperty( '_captureConstraints' ) )
+            this._captureConstraints = new CaptureConstraints(
+                ...this.constraints.map( constraint => constraint.pattern ) )
+        return this._captureConstraints
     }
 
 }
