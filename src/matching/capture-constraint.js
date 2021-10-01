@@ -216,10 +216,27 @@ export class CaptureConstraints {
      * distinct object in memory.
      * 
      * @returns {CaptureConstraints} a shallow copy of this object
+     * 
+     * @see {@link CaptureConstraint#deepCopy deepCopy()}
      */
     copy () {
         const result = new CaptureConstraints()
         result.constraints = this.constraints.slice()
+        return result
+    }
+
+    /**
+     * Create a deep copy of this object.  It will contain copies of the
+     * {@link CaptureConstraint CaptureConstraint} instances that are in this
+     * object.
+     * 
+     * @returns {CaptureConstraints} a deep copy of this object
+     * 
+     * @see {@link CaptureConstraint#copy copy()}
+     */
+    deepCopy () {
+        const result = new CaptureConstraints()
+        result.constraints = this.constraints.map( c => c.copy() )
         return result
     }
 

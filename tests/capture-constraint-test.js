@@ -286,6 +286,29 @@ describe( 'Capture Constraint sets', () => {
         expect( () => Ccopy = C.copy() ).not.to.throw()
         expect( Ccopy.constraints.length ).to.equal( C.constraints.length )
         expect( Ccopy.constraints.length ).to.equal( 2 )
+        expect( Ccopy.constraints[0] ).to.equal( C.constraints[0] )
+        expect( Ccopy.constraints[1] ).to.equal( C.constraints[1] )
+        expect( C ).not.to.equal( Ccopy )
+        expect( C.constraints ).not.to.equal( Ccopy.constraints )
+    } )
+
+    it( 'Should be able to make deep copies', () => {
+        // recreate the constraint set from an earlier test
+        let ccon1, ccon2, ccon3, C
+        ccon1 = new M.CaptureConstraint( new Symbol( 'x' ), new Symbol( 'y' ) )
+        ccon2 = new M.CaptureConstraint( new Symbol( 'a' ), new Symbol( 'y' ) )
+        ccon3 = new M.CaptureConstraint( new Symbol( 'x' ), new Symbol( 'y' ) )
+        expect( () => C = new M.CaptureConstraints( ccon1, ccon2, ccon3 ) )
+            .not.to.throw()
+        expect( C.empty() ).to.equal( false )
+        expect( C.constraints.length ).to.equal( 2 )
+        expect( C.constraints[0].equals( ccon1 ) ).to.equal( true )
+        expect( C.constraints[1].equals( ccon2 ) ).to.equal( true )
+        // make a copy and test various properties
+        let Ccopy
+        expect( () => Ccopy = C.deepCopy() ).not.to.throw()
+        expect( Ccopy.constraints.length ).to.equal( C.constraints.length )
+        expect( Ccopy.constraints.length ).to.equal( 2 )
         expect( Ccopy.constraints[0].equals( C.constraints[0] ) ).to.equal( true )
         expect( Ccopy.constraints[1].equals( C.constraints[1] ) ).to.equal( true )
         expect( C ).not.to.equal( Ccopy )
