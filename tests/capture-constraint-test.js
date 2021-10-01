@@ -218,7 +218,7 @@ describe( 'Capture Constraint sets', () => {
         pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
         pat1.child( 1 ).makeIntoA( M.metavariable ) // outer x
         pat1.index( [ 2, 2, 1, 1 ] ).makeIntoA( M.metavariable ) // inner x
-        pat2 = new Symbol( 'foo' ).makeIntoA( M.metavariable )
+        pat2 = new Symbol( 'foo' ).asA( M.metavariable )
         expect( () => C = new M.CaptureConstraints( pat1, pat2 ) )
             .not.to.throw()
         expect( C.empty() ).to.equal( false )
