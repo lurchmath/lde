@@ -1059,12 +1059,223 @@ describe( 'Problem', () => {
         ) ).to.equal( true )
     } )
 
-    xit( 'Should correctly compute capture constraints', () => {
-        // to do
+    it( 'Should correctly compute and cache capture constraints', () => {
+        // Construct a problem containing two Constraints
+        const pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
+        pat1.child( 1 ).makeIntoA( M.metavariable ) // outer x
+        pat1.index( [ 2, 2, 1, 1 ] ).makeIntoA( M.metavariable ) // inner x
+        const pat2 = new Symbol( 'foo' ).asA( M.metavariable )
+        const C1 = new M.Constraint(
+            pat1,
+            LogicConcept.fromPutdown( '(∀ t , (∃ y , (= (+ t 1) y)))' )[0]
+        )
+        const C2 = new M.Constraint(
+            pat2,
+            LogicConcept.fromPutdown( '(larger thing but not too large)' )[0]
+        )
+        const P = new M.Problem( C1, C2 )
+        // Compute the capture constraints for P and ensure they are as expected
+        let CCs
+        expect( () => CCs = P.captureConstraints() ).not.to.throw()
+        expect( CCs ).to.be.instanceof( M.CaptureConstraints )
+        expect( CCs.empty() ).to.equal( false )
+        expect( CCs.constraints.length ).to.equal( 4 )
+        expect( CCs.constraints[0].equals( new M.CaptureConstraint(
+            new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '∃' )
+        ) ) ).to.equal( true )
+        expect( CCs.constraints[1].equals( new M.CaptureConstraint(
+            new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '=' )
+        ) ) ).to.equal( true )
+        expect( CCs.constraints[2].equals( new M.CaptureConstraint(
+            new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '+' )
+        ) ) ).to.equal( true )
+        expect( CCs.constraints[3].equals( new M.CaptureConstraint(
+            new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '1' )
+        ) ) ).to.equal( true )
+        // Now ask it for the capture constraints again, and ensure the value
+        // was cached, not recomputed--the resulting object is the exact same
+        // object that it was before
+        expect( P.captureConstraints() ).to.equal( CCs )
+
+        // Now do the degenerate case--an empty problem has no capture
+        // constraints, but still caches that value
+        const emptyP = new M.Problem()
+        expect( () => CCs = emptyP.captureConstraints() ).not.to.throw()
+        expect( CCs ).to.be.instanceof( M.CaptureConstraints )
+        expect( CCs.empty() ).to.equal( true )
+        expect( CCs.constraints.length ).to.equal( 0 )
+        expect( emptyP.captureConstraints() ).to.equal( CCs )
     } )
 
-    xit( 'Should correctly invalidate the capture constraints cache', () => {
-        // to do
+    it( 'Should correctly invalidate the capture constraints cache', () => {
+        // Repeat the same first test from the previous function, except at the
+        // end we will invalidate the cache...
+        // 1. construct the test
+        const pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
+        pat1.child( 1 ).makeIntoA( M.metavariable ) // outer x
+        pat1.index( [ 2, 2, 1, 1 ] ).makeIntoA( M.metavariable ) // inner x
+        const pat2 = new Symbol( 'foo' ).asA( M.metavariable )
+        const C1 = new M.Constraint(
+            pat1,
+            LogicConcept.fromPutdown( '(∀ t , (∃ y , (= (+ t 1) y)))' )[0]
+        )
+        const C2 = new M.Constraint(
+            pat2,
+            LogicConcept.fromPutdown( '(larger thing but not too large)' )[0]
+        )
+        const P = new M.Problem( C1, C2 )
+        // 2. compute capture constraints and ensure correctness
+        let CCs
+        expect( () => CCs = P.captureConstraints() ).not.to.throw()
+        expect( CCs ).to.be.instanceof( M.CaptureConstraints )
+        expect( CCs.empty() ).to.equal( false )
+        expect( CCs.constraints.length ).to.equal( 4 )
+        expect( CCs.constraints[0].equals( new M.CaptureConstraint(
+            new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '∃' )
+        ) ) ).to.equal( true )
+        expect( CCs.constraints[1].equals( new M.CaptureConstraint(
+            new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '=' )
+        ) ) ).to.equal( true )
+        expect( CCs.constraints[2].equals( new M.CaptureConstraint(
+            new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '+' )
+        ) ) ).to.equal( true )
+        expect( CCs.constraints[3].equals( new M.CaptureConstraint(
+            new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '1' )
+        ) ) ).to.equal( true )
+        // Here's the new part: Invalidate the cache by removing the simpler
+        // constraint, which has no impact on the capture constraints, but it
+        // will invalidate the cache.
+        expect( P.length ).to.equal( 2 )
+        expect( P._captureConstraints ).to.be.ok // cache exists
+        expect( () => P.remove( C2 ) ).not.to.throw()
+        expect( P.length ).to.equal( 1 )
+        expect( P._captureConstraints ).not.to.be.ok // cache cleared
+        // And yet when we ask for the capture constraints again, they are
+        // recomputed correctly.
+        expect( () => CCs = P.captureConstraints() ).not.to.throw()
+        expect( CCs ).to.be.instanceof( M.CaptureConstraints )
+        expect( CCs.empty() ).to.equal( false )
+        expect( CCs.constraints.length ).to.equal( 4 )
+        expect( CCs.constraints[0].equals( new M.CaptureConstraint(
+            new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '∃' )
+        ) ) ).to.equal( true )
+        expect( CCs.constraints[1].equals( new M.CaptureConstraint(
+            new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '=' )
+        ) ) ).to.equal( true )
+        expect( CCs.constraints[2].equals( new M.CaptureConstraint(
+            new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '+' )
+        ) ) ).to.equal( true )
+        expect( CCs.constraints[3].equals( new M.CaptureConstraint(
+            new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '1' )
+        ) ) ).to.equal( true )
+        // And if we remove yet another constraint, the process repeats, but now
+        // giving us no capture constraints, because the problem is empty.
+        expect( P.length ).to.equal( 1 )
+        expect( P._captureConstraints ).to.be.ok // cache exists
+        expect( () => P.remove( 0 ) ).not.to.throw()
+        expect( P.length ).to.equal( 0 )
+        expect( P._captureConstraints ).not.to.be.ok // cache cleared
+        expect( () => CCs = P.captureConstraints() ).not.to.throw()
+        expect( CCs ).to.be.instanceof( M.CaptureConstraints )
+        expect( CCs.empty() ).to.equal( true )
+        expect( CCs.constraints.length ).to.equal( 0 )
+        expect( P.captureConstraints() ).to.equal( CCs )
+
+        // Now repeat test 2 from the previous function, but this time we'll
+        // subsequently add constraints and expect the cache to be invalidated,
+        // so that recomputing capture constraints takes the new constraints
+        // into account.
+        // first, repeat the old test:
+        const emptyP = new M.Problem()
+        expect( () => CCs = emptyP.captureConstraints() ).not.to.throw()
+        expect( CCs ).to.be.instanceof( M.CaptureConstraints )
+        expect( CCs.empty() ).to.equal( true )
+        expect( CCs.constraints.length ).to.equal( 0 )
+        expect( emptyP.captureConstraints() ).to.equal( CCs )
+        // now, add a constraint:
+        const pat3 = LogicConcept.fromPutdown( '(sum i , (subscript X i))' )[0]
+        pat3.child( 1 ).makeIntoA( M.metavariable ) // outer i
+        pat3.index( [ 2, 2 ] ).makeIntoA( M.metavariable ) // inner i
+        pat3.index( [ 2, 1 ] ).makeIntoA( M.metavariable ) // X
+        const C3 = new M.Constraint(
+            pat3,
+            LogicConcept.fromPutdown( '(sum k , (subscript (union A B) k))' )[0]
+        )
+        expect( emptyP.length ).to.equal( 0 )
+        expect( emptyP._captureConstraints ).to.be.ok // cache exists
+        expect( () => emptyP.add( C3 ) ).not.to.throw()
+        expect( emptyP.length ).to.equal( 1 )
+        expect( emptyP._captureConstraints ).not.to.be.ok // cache cleared
+        // And now when we compute a set of capture constraints, we get the
+        // correct (non-empty) result.
+        expect( () => CCs = emptyP.captureConstraints() ).not.to.throw()
+        expect( CCs ).to.be.instanceof( M.CaptureConstraints )
+        expect( CCs.empty() ).to.equal( false )
+        expect( CCs.constraints.length ).to.equal( 2 )
+        expect( CCs.constraints[0].equals( new M.CaptureConstraint(
+            new Symbol( 'i' ).asA( M.metavariable ), new Symbol( 'subscript' )
+        ) ) ).to.equal( true )
+        expect( CCs.constraints[1].equals( new M.CaptureConstraint(
+            new Symbol( 'i' ).asA( M.metavariable ),
+            new Symbol( 'X' ).asA( M.metavariable )
+        ) ) ).to.equal( true )
+    } )
+
+    it( 'Should not invalidate cache when copying', () => {
+        // We will make this straightforward by testing it with a simple case
+        const pat = LogicConcept.fromPutdown( '(quantifier outer , inner)' )[0]
+        pat.child( 1 ).makeIntoA( M.metavariable ) // outer
+        const prob = new M.Problem( new M.Constraint(
+            pat,
+            LogicConcept.fromPutdown( '(quantifier a , inner)' )[0]
+        ) )
+        // compute capture constraints and compare to expectations
+        let CCs
+        expect( () => CCs = prob.captureConstraints() ).not.to.throw()
+        expect( CCs ).to.be.instanceof( M.CaptureConstraints )
+        expect( CCs.empty() ).to.equal( false )
+        expect( CCs.constraints.length ).to.equal( 1 )
+        expect( CCs.constraints[0].equals( new M.CaptureConstraint(
+            new Symbol( 'outer' ).asA( M.metavariable ), new Symbol( 'inner' )
+        ) ) ).to.equal( true )
+        // make a copy of the problem and ensure that:
+        // 1. the original didn't change its cache at all
+        // 2. the copy has a deep copy of the same cache
+        const probCopy = prob.copy()
+        expect( prob._captureConstraints ).to.equal( CCs )
+        const CCsInCopy = probCopy._captureConstraints
+        expect( CCsInCopy ).to.be.ok
+        expect( CCsInCopy ).not.to.equal( CCs )
+        expect( CCsInCopy.constraints.length ).to.equal( 1 )
+        expect( CCsInCopy.constraints[0].equals( CCs.constraints[0] ) )
+            .to.equal( true )
+        // now make a copy of the original by .without(), which deletes as it
+        // copies, and ensure that:
+        // 1. the original didn't change its cache at all
+        // 2. the copy has no cache at all, because remove() was called in it
+        // 3. the copy computes its capture constraints correctly, if asked
+        const probWO = prob.without( prob.constraints[0] )
+        expect( prob._captureConstraints ).to.be.ok
+        expect( prob._captureConstraints ).to.equal( CCs )
+        expect( probWO._captureConstraints ).not.to.be.ok
+        expect( probWO.captureConstraints() ).to.be.ok
+        expect( probWO.captureConstraints().empty() ).to.equal( true )
+        // now make a copy of probCopy by .plus(), which adds as it
+        // copies, and ensure that:
+        // 1. the original didn't change its cache at all
+        // 2. the copy has no cache at all, because add() was called in it
+        // 3. the copy computes its capture constraints correctly, if asked
+        const probPlus = probCopy.plus( new M.Constraint(
+            new Symbol( 1 ), new Symbol( 2 )
+        ) )
+        expect( probCopy._captureConstraints ).to.be.ok
+        expect( probCopy._captureConstraints ).to.equal( CCsInCopy )
+        expect( probPlus._captureConstraints ).not.to.be.ok
+        const CCsInPlus = probPlus.captureConstraints()
+        expect( CCsInPlus ).to.be.ok
+        expect( CCsInPlus.constraints.length ).to.equal( 1 )
+        expect( CCsInPlus.constraints[0].equals( CCs.constraints[0] ) )
+            .to.equal( true )
     } )
 
 } )

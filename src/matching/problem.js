@@ -244,8 +244,7 @@ export class Problem {
         const result = new Problem()
         result.constraints = this.constraints.slice()
         if ( this._captureConstraints )
-            result._captureConstraints = this._captureConstraints.map(
-                captureConstraint => captureConstraint.copy() )
+            result._captureConstraints = this._captureConstraints.deepCopy()
         return result
     }
 
