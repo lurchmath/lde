@@ -253,7 +253,10 @@ export class Constraint {
      * 
      *  * If the `target` is a {@link LogicConcept LogicConcept}, replace every
      *    instance in it of this Constraint's pattern with a copy of this
-     *    Constraint's expression.
+     *    Constraint's expression.  Note that this cannot succeed if the
+     *    `target` itself is an instance of the pattern, because you cannot
+     *    change a single metavariable in-place in memory.  In this case, an
+     *    error will be thrown.
      *  * If the `target` is a {@link CaptureConstraint CaptureConstraint},
      *    apply this Constraint to both its bound and free members, in place.
      *  * If the `target` is a {@link CaptureConstraints set of Capture
@@ -292,6 +295,8 @@ export class Constraint {
         if ( !this.canBeApplied() )
             throw 'Cannot apply a Constraint whose pattern is not a metavariable'
         if ( target instanceof LogicConcept ) {
+            if ( target.equals( this.pattern ) )
+                throw 'Cannot replace a metavariable in-place'
             target.descendantsSatisfying( d => d.equals( this.pattern )
                                        && d.isA( metavariable )
             ).forEach( d => d.replaceWith( this.expression.copy() ) )
