@@ -261,6 +261,11 @@ export class Constraint {
      *  * If the `target` is a {@link Problem matching Problem}, apply this
      *    Constraint to each of its patterns.  (Technically, we make new
      *    Constraints to replace the old, since Constraints are immutable.)
+     *    Ordinarily, this would invalidate the cache of
+     *    {@link Problem#captureConstraints capture constraints} in the problem,
+     *    but this function actually also applies itself as a substitution to
+     *    the metavariables in both halves of each capture constraint as well,
+     *    thus not only preserving the cache but updating it.
      * 
      * Because this function operates in-place, it cannot be applied to another
      * Constraint; such objects are to be immutable.  Instead, use the
@@ -297,10 +302,15 @@ export class Constraint {
             target.constraints.forEach(
                 constraint => this.applyTo( constraint ) )
         } else if ( target instanceof Problem ) {
+            const savedCache = target._captureConstraints
             target.constraints.slice().forEach( constraint => {
                 target.remove( constraint )
                 target.add( this.appliedTo( constraint ) )
             } )
+            if ( savedCache ) {
+                savedCache.constraints.forEach( cc => this.applyTo( cc ) )
+                target._captureConstraints = savedCache
+            }
         } else {
             throw 'Cannot apply a constraint to that kind of target'
         }

@@ -371,20 +371,44 @@ export class Problem {
      * capture constraints for a Problem is the set of capture constraints for
      * that Problem's set of patterns.
      * 
+     * @return {CaptureConstraints} the set of capture constraints generated
+     *   by this Problem's patterns (that is, the patterns in its constraints)
+     * 
      * @see {@link Problem#add add()}
      * @see {@link Problem#remove remove()}
      * @see {@link CaptureConstraint CaptureConstraint}
      * @see {@link CaptureConstraints CaptureConstraints}
      * @see {@link Constraint Constraint}
-     * 
-     * @return {CaptureConstraints} the set of capture constraints generated
-     *   by this Problem's patterns (that is, the patterns in its constraints)
+     * @see {@link Problem#avoidsCapture avoidsCapture()}
      */
     captureConstraints () {
         if ( !this.hasOwnProperty( '_captureConstraints' ) )
             this._captureConstraints = new CaptureConstraints(
                 ...this.constraints.map( constraint => constraint.pattern ) )
         return this._captureConstraints
+    }
+
+    /**
+     * As we solve a Problem, our solution must not assign metavariables values
+     * that would, when substituted for those metavariables, create any variable
+     * capture (according to the standard definition of that term).  We use a
+     * set of {@link Problem#captureConstraints capture constraints} to keep
+     * track of the ways in which we might create variable capture, and thus
+     * what we must avoid doing.
+     * 
+     * This function returns whether any of this Problem's capture constraints
+     * have been {@link CaptureConstraints#violated violated()}.  If the answer
+     * is false, then this problem may still be able to be solved.  If the
+     * answer is true, then this problem has no solutions.
+     * 
+     * @return {boolean} whether any of this Problem's
+     *   {@link Problem#captureConstraints capture constraints} have been
+     *   {@link CaptureConstraints#violated violated()}
+     * 
+     * @see {@link Problem#captureConstraints captureConstraints()}
+     */
+    avoidsCapture () {
+        return !this.captureConstraints().violated()
     }
 
 }

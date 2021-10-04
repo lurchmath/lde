@@ -1278,4 +1278,77 @@ describe( 'Problem', () => {
             .to.equal( true )
     } )
 
+    it( 'Should know when its capture constraints are violated', () => {
+        // Repeat the first problem and capture constraints setup from an
+        // earlier test.  No capture constraints are violated here.
+        const pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
+        pat1.child( 1 ).makeIntoA( M.metavariable ) // outer x
+        pat1.index( [ 2, 2, 1, 1 ] ).makeIntoA( M.metavariable ) // inner x
+        const pat2 = new Symbol( 'foo' ).asA( M.metavariable )
+        const C1 = new M.Constraint(
+            pat1,
+            LogicConcept.fromPutdown( '(∀ t , (∃ y , (= (+ t 1) y)))' )[0]
+        )
+        const C2 = new M.Constraint(
+            pat2,
+            LogicConcept.fromPutdown( '(larger thing but not too large)' )[0]
+        )
+        const P = new M.Problem( C1, C2 )
+        expect( P.avoidsCapture() ).to.equal( true )
+
+        // What about an empty Problem?  Should definitely avoid capture.
+        const emptyP = new M.Problem()
+        expect( emptyP.avoidsCapture() ).to.equal( true )
+
+        // But if we create a problem that includes variable capture, it should
+        // notice this.  Start with one that doesn't have any capture:
+        const pat3 = LogicConcept.fromPutdown( '(∀ x , P)' )[0]
+        pat3.child( 1 ).makeIntoA( M.metavariable ) // the x
+        pat3.child( 2 ).makeIntoA( M.metavariable ) // the P
+        const uhOh = new M.Problem(
+            pat3, LogicConcept.fromPutdown( '(∀ t, Q)' )[0]
+        )
+        // Ensure its constraints are what you'd expect and it avoids capture:
+        let CCs
+        CCs = uhOh.captureConstraints()
+        expect( CCs.constraints.length ).to.equal( 1 )
+        expect( CCs.constraints[0].equals( new M.CaptureConstraint(
+            new Symbol( 'x' ).asA( M.metavariable ),
+            new Symbol( 'P' ).asA( M.metavariable )
+        ) ) )
+        expect( uhOh.avoidsCapture() ).to.equal( true )
+        // Now make a substitution that could create variable capture, but does
+        // not yet do so, because we have not yet instantiated x:
+        const subst1 = new M.Constraint(
+            new Symbol( 'P' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown( '(f t)' )[0]
+        )
+        subst1.applyTo( uhOh )
+        console.log( uhOh.captureConstraints()+'' )
+        // Ensure the constraints changed appropriately and yet capture has
+        // still not yet happened:
+        CCs = uhOh.captureConstraints()
+        expect( CCs.constraints.length ).to.equal( 1 )
+        expect( CCs.constraints[0].bound.equals(
+            new Symbol( 'x' ).asA( M.metavariable ) ) ).to.equal( true )
+        expect( CCs.constraints[0].free.equals(
+            LogicConcept.fromPutdown( '(f t)' )[0] ) ).to.equal( true )
+        expect( uhOh.avoidsCapture() ).to.equal( true )
+        // Now make a substitution that does create variable capture:
+        const subst2 = new M.Constraint(
+            new Symbol( 'x' ).asA( M.metavariable ),
+            new Symbol( 't' )
+        )
+        subst2.applyTo( uhOh )
+        console.log( uhOh.captureConstraints()+'' )
+        // Ensure the constraints changed appropriately and capture happened:
+        CCs = uhOh.captureConstraints()
+        expect( CCs.constraints.length ).to.equal( 1 )
+        expect( CCs.constraints[0].bound.equals( new Symbol( 't' ) ) )
+            .to.equal( true )
+        expect( CCs.constraints[0].free.equals(
+            LogicConcept.fromPutdown( '(f t)' )[0] ) ).to.equal( true )
+        expect( uhOh.avoidsCapture() ).to.equal( false )
+    } )
+
 } )
