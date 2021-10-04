@@ -411,4 +411,17 @@ export class Problem {
         return !this.captureConstraints().violated()
     }
 
+    *allSolutions ( soFar ) {
+        // Clients call us without an argument; create a new solution, which is
+        // a special type of problem (the kind that canBeApplied()):
+        if ( typeof( soFar ) === 'undefined' ) soFar = new Problem()
+
+        // If this problem is empty, the solution set contains exactly the one
+        // solution we have in soFar, and that's it.
+        if ( this.empty() ) {
+            yield soFar
+            return
+        }
+    }
+
 }

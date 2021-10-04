@@ -977,7 +977,6 @@ describe( 'Problem', () => {
         // repeat same experiment for P3 and P3copy
         expect( () => Prob.applyTo( P3 ) ).not.to.throw()
         expect( P3.equals( P3copy ) ).to.equal( false )
-        console.log( `P3 ${P3} newP3 ${newP3}` )
         expect( P3.equals( newP3 ) ).to.equal( true )
         // make new targets from the backup copies we saved of P1,P2,P3
         let P1_2 = P1copy.copy()
@@ -1324,7 +1323,6 @@ describe( 'Problem', () => {
             LogicConcept.fromPutdown( '(f t)' )[0]
         )
         subst1.applyTo( uhOh )
-        console.log( uhOh.captureConstraints()+'' )
         // Ensure the constraints changed appropriately and yet capture has
         // still not yet happened:
         CCs = uhOh.captureConstraints()
@@ -1340,7 +1338,6 @@ describe( 'Problem', () => {
             new Symbol( 't' )
         )
         subst2.applyTo( uhOh )
-        console.log( uhOh.captureConstraints()+'' )
         // Ensure the constraints changed appropriately and capture happened:
         CCs = uhOh.captureConstraints()
         expect( CCs.constraints.length ).to.equal( 1 )
