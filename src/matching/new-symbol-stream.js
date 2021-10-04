@@ -48,6 +48,23 @@ export class NewSymbolStream {
     }
 
     /**
+     * Create a copy of this stream.  It will yield the same set of symbols that
+     * this one yields, and from the point at which we make the copy, the two
+     * are then independent of one another.  For instance, if this stream would
+     * next yield `v10`, `v11`, `v12`, ..., then a copy will also yield those
+     * same symbols next, but generating a symbol in one of the copies does not
+     * impact the internal state (and thus nor does it impact the future output)
+     * of the other copy.
+     * 
+     * @returns {NewSymbolStream} a copy of this new symbol stream
+     */
+    copy () {
+        const result = new NewSymbolStream()
+        result._lastIndex = this._lastIndex
+        return result
+    }
+
+    /**
      * This function instructs the stream to avoid producing any of the symbols
      * appearing in the `args` list.  Those arguments may be any
      * {@link MathConcept MathConcept}, in which case all descendants of it
