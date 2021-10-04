@@ -1,7 +1,12 @@
 
+import { Application } from "../application.js"
 import { LogicConcept } from "../logic-concept.js"
-import { Constraint } from "./constraint.js"
+import { Constraint, metavariable } from "./constraint.js"
 import { CaptureConstraint, CaptureConstraints } from "./capture-constraint.js"
+import {
+    constantEF, projectionEF, applicationEF
+} from './expression-functions.js'
+import { NewSymbolStream } from "./new-symbol-stream.js"
 
 /**
  * A matching problem is a set of {@link Constraint Constraints} to be solved.
@@ -411,10 +416,15 @@ export class Problem {
         return !this.captureConstraints().violated()
     }
 
-    *allSolutions ( soFar ) {
-        // Clients call us without an argument; create a new solution, which is
-        // a special type of problem (the kind that canBeApplied()):
+    // alters this object in-place, removing and/or adding constraints
+    *allSolutions ( soFar, stream ) {
+        // Clients call us without an argument; we must provide defaults.
+        // A solution is a special type of problem, the kind that canBeApplied().
         if ( typeof( soFar ) === 'undefined' ) soFar = new Problem()
+        if ( typeof( stream ) === 'undefined' ) stream = new NewSymbolStream(
+            ...this.constraints.map( c => c.pattern ),
+            ...this.constraints.map( c => c.expression )
+        )
 
         // If this problem is empty, the solution set contains exactly the one
         // solution we have in soFar, and that's it.
@@ -422,6 +432,119 @@ export class Problem {
             yield soFar
             return
         }
+
+        // But if it isn't empty, then consider the first constraint.  Note that
+        // constraints are ordered so that the easiest to process come first, so
+        // index 0 is the right place to start.
+        const constraint = this.constraints[0]
+        const complexity = constraint.complexity()
+
+        // If that constraint says that this problem is unsolvable, stop now.
+        if ( complexity == 0 ) return
+
+        // If that constraint is already satisfied, remove it and recur on the
+        // rest.  This modifies this object in place.
+        // Removing the constraint will unnecessarily invalidate the cache, so
+        // we manually preserve it for efficiency.
+        if ( complexity == 1 ) {
+            const cache = this._captureConstraints
+            this.remove( 0 )
+            this._captureConstraints = cache
+            yield* this.allSolutions( soFar, stream )
+            return
+        }
+        
+        // If that constraint is a metavariable instantiation, remove it from
+        // the problem, add it to the solution, and apply it to the remaining
+        // constraints.  If doing so violates any capture constraints, stop.
+        // Otherwise, recur on what remains.
+        if ( complexity == 2 ) {
+            this.remove( 0 )
+            constraint.applyTo( this )
+            if ( this.avoidsCapture() )
+            yield* this.allSolutions( soFar.plus( constraint ), stream )
+            return
+        }
+        
+        // If that constraint is one that can be broken up into multiple,
+        // smaller constraints, one for each pair of children from the pattern
+        // and expression, do so, updating this problem object and recurring.
+        // Removing the parent and adding the children will unnecessarily
+        // invalidate the cache, so we manually preserve it for efficiency.
+        if ( complexity == 3 ) {
+            const cache = this._captureConstraints
+            this.remove( 0 )
+            this.add( ...constraint.children() )
+            this._captureConstraints = cache
+            yield* this.allSolutions( soFar, stream )
+            return
+        }
+
+        // Finally, the complicated case.  If the constraint is an expression
+        // function application case, then we may generate multiple solutions,
+        // in all the ways documented below.  But before any of them, we remove
+        // this constraint and lift out its various components, because we know
+        // it is an expression function application constraint.  We also do some
+        // quick sanity checks to be sure the structure is as expected.
+        if ( complexity == 4 ) {
+            const head = constraint.pattern.child( 1 )
+            const args = constraint.pattern.children().slice( 2 )
+            const expr = constraint.expression
+            if ( !head.isA( metavariable ) )
+                throw 'Invalid head of expression function application'
+            if ( args.length == 0 )
+                throw 'Empty argument list in expression function application'
+            // Create a utility function we will use to simplify each case below
+            const problem = this
+            function* instantiateHead ( f ) {
+                const instantiation = new Constraint( head, ef )
+                const copy = instantiation.appliedTo( problem )
+                if ( !copy.avoidsCapture() ) return
+                const cache = copy._captureConstraints
+                copy.constraints.slice().forEach( con => {
+                    const reduced = fullBetaReduce( con.pattern )
+                    if ( !reduced.equals( con.pattern ) ) {
+                        copy.remove( con )
+                        copy.add( new Constraint( reduced, con.expression ) )
+                    }
+                } )
+                copy._captureConstraints = cache
+                yield* copy.allSolutions( soFar.plus( instantiation ),
+                                          stream.copy() )
+            }
+            // Solution method 1: The head becomes instantiated with a constant
+            // function.
+            yield* instantiateHead( constantEF( args.length, expr ) )
+            // Solution method 2: The head becomes instantiated with a
+            // projection function.
+            for ( let i = 0 ; i < args.length ; i++ )
+                yield* instantiateHead( projectionEF( args.length, i ) )
+            // Solution method 3: If the expression is compound, we could
+            // imitate each child using a different expression function,
+            // combining the results into one big answer.  Because we care only
+            // about the children, we do not distinguish bindings from
+            // applications; we use applications for both cases, just as a
+            // wrapper construct.
+            const children = expr.children()
+            if ( children.length > 0 ) {
+                if ( expr instanceof Binding ) {
+                    const cache = this._captureConstraints
+                    const asApp = new Application(
+                        ...expr.children().map( child => child.copy() ) )
+                    this.remove( 0 )
+                    this.add( new Constraint( constraint.pattern, asApp ) )
+                    this._captureConstraints = cache
+                }
+                yield* instantiateHead( applicationEF(
+                    args.length, stream.nextN( children.length ) ) )
+            }
+            // Those are the only three solution methods for the EFA case.
+            return
+        }
+
+        // We should never get here, because complexity should be only 0,1,2,3,
+        // or 4.  So the following is just a sanity check.
+        throw `Invalid value for constraint complexity: ${complexity}`
     }
 
 }

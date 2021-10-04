@@ -1348,4 +1348,72 @@ describe( 'Problem', () => {
         expect( uhOh.avoidsCapture() ).to.equal( false )
     } )
 
+    it( 'Should compute correct solutions to trivial problems', () => {
+        let P, S, expr1, expr2, pat1
+
+        // problem: empty problem
+        // solution set: one solution, the empty solution
+        P = new M.Problem()
+        expect( () => S = Array.from( P.allSolutions() ) ).not.to.throw()
+        expect( S ).to.be.instanceof( Array )
+        expect( S.length ).to.equal( 1 )
+        expect( S[0] ).to.be.instanceof( M.Problem )
+        expect( S[0].empty() ).to.equal( true )
+
+        // problem: one constraint, (expr1,expr1) (no metavars)
+        // solution set: one solution, the empty solution
+        expr1 = LogicConcept.fromPutdown( '(an example)' )[0]
+        P = new M.Problem( expr1, expr1 )
+        expect( () => S = Array.from( P.allSolutions() ) ).not.to.throw()
+        expect( S ).to.be.instanceof( Array )
+        expect( S.length ).to.equal( 1 )
+        expect( S[0] ).to.be.instanceof( M.Problem )
+        expect( S[0].empty() ).to.equal( true )
+        
+        // problem: one constraint, (expr1,expr2) (no metavars, not equal)
+        // solution set: one solution, the empty solution
+        expr2 = new Symbol( 'not_the_same' )
+        P = new M.Problem( expr1, expr2 )
+        expect( () => S = Array.from( P.allSolutions() ) ).not.to.throw()
+        expect( S ).to.be.instanceof( Array )
+        expect( S.length ).to.equal( 0 )
+        
+        // problem: one constraint, (pat1,expr1) (with pat1 a metavar)
+        // solution set: one solution, the solution (pat1,expr1)
+        pat1 = new Symbol( 'foo' ).asA( M.metavariable )
+        P = new M.Problem( pat1, expr1 )
+        expect( () => S = Array.from( P.allSolutions() ) ).not.to.throw()
+        expect( S ).to.be.instanceof( Array )
+        expect( S.length ).to.equal( 1 )
+        expect( S[0] ).to.be.instanceof( M.Problem )
+        expect( S[0].length ).to.equal( 1 )
+        expect( S[0].constraints[0].pattern.equals( pat1 ) ).to.equal( true )
+        expect( S[0].constraints[0].expression.equals( expr1 ) ).to.equal( true )
+
+        // problem: one constraint, but its pattern and expression are both
+        // compound and have the same number of children, thus enabling us to
+        // combine multiple constraints into one; here we choose just one
+        // example of this type, ((expr1 pat1),(expr1 expr2))
+        // solution set: one solution, the solution (pat1,expr2)
+        P = new M.Problem(
+            new Application( expr1.copy(), pat1.copy() ),
+            new Application( expr1.copy(), expr2.copy() )
+        )
+        expect( () => S = Array.from( P.allSolutions() ) ).not.to.throw()
+        expect( S ).to.be.instanceof( Array )
+        expect( S.length ).to.equal( 1 )
+        expect( S[0] ).to.be.instanceof( M.Problem )
+        expect( S[0].length ).to.equal( 1 )
+        expect( S[0].constraints[0].pattern.equals( pat1 ) ).to.equal( true )
+        expect( S[0].constraints[0].expression.equals( expr2 ) ).to.equal( true )
+    } )
+
+    xit( 'Should compute correct solutions to small EFA problems', () => {
+        // to do
+    } )
+
+    xit( 'Should compute correct solutions for the whole database', () => {
+        // to do
+    } )
+
 } )
