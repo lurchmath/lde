@@ -93,7 +93,7 @@ export class NewSymbolStream {
     avoid ( ...args ) {
         const avoidString = str => {
             if ( /^v([0-9]+)$/.test( str ) ) {
-                let index = parseInt( str.substring( 3 ) )
+                let index = parseInt( str.substring( 1 ) )
                 this._lastIndex = Math.max( this._lastIndex, index )
             }
         }
