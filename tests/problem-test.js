@@ -1106,7 +1106,7 @@ describe( 'Problem', () => {
         expect( emptyP.captureConstraints() ).to.equal( CCs )
     } )
 
-    it( 'Should correctly invalidate the capture constraints cache', () => {
+    xit( 'Should correctly invalidate the capture constraints cache', () => {
         // Repeat the same first test from the previous function, except at the
         // end we will invalidate the cache...
         // 1. construct the test
@@ -1220,7 +1220,7 @@ describe( 'Problem', () => {
         ) ) ).to.equal( true )
     } )
 
-    it( 'Should not invalidate cache when copying', () => {
+    xit( 'Should not invalidate cache when copying', () => {
         // We will make this straightforward by testing it with a simple case
         const pat = LogicConcept.fromPutdown( '(quantifier outer , inner)' )[0]
         pat.child( 1 ).makeIntoA( M.metavariable ) // outer
@@ -1408,8 +1408,48 @@ describe( 'Problem', () => {
         expect( S[0].constraints[0].expression.equals( expr2 ) ).to.equal( true )
     } )
 
-    xit( 'Should compute correct solutions to small EFA problems', () => {
-        // to do
+    it( 'Should compute correct solutions to small EFA problems', () => {
+        let pat, expr, prob, S
+        // problem: pattern EFA (P 1), expression 1
+        // solution set: two solutions, P = lambda v.1 or P = lambda v.v
+        pat = M.newEFA( new Symbol( 'P' ).asA( M.metavariable ),
+                        new Symbol( 1 ) )
+        expr = new Symbol( 1 )
+        prob = new M.Problem( pat, expr )
+        expect( () => S = Array.from( prob.allSolutions() ) ).not.to.throw()
+        expect( S.length ).to.equal( 2 )
+        expect( S[0].length ).to.equal( 1 )
+        expect( S[0].constraints[0].equals( new M.Constraint(
+            new Symbol( 'P' ).asA( M.metavariable ),
+            M.newEF( new Symbol( 'v1' ), new Symbol( 1 ) )
+        ) ) ).to.equal( true )
+        expect( S[1].length ).to.equal( 1 )
+        expect( S[1].constraints[0].equals( new M.Constraint(
+            new Symbol( 'P' ).asA( M.metavariable ),
+            M.newEF( new Symbol( 'v1' ), new Symbol( 'v1' ) )
+        ) ) ).to.equal( true )
+
+        // problem: pattern EFA (P 3), expression 1
+        // solution set: one solution, P = lambda v.1
+        pat = M.newEFA( new Symbol( 'P' ).asA( M.metavariable ),
+                        new Symbol( 3 ) )
+        expr = new Symbol( 1 )
+        prob = new M.Problem( pat, expr )
+        expect( () => S = Array.from( prob.allSolutions() ) ).not.to.throw()
+        expect( S.length ).to.equal( 1 )
+        expect( S[0].length ).to.equal( 1 )
+        expect( S[0].constraints[0].equals( new M.Constraint(
+            new Symbol( 'P' ).asA( M.metavariable ),
+            M.newEF( new Symbol( 'v1' ), new Symbol( 1 ) )
+        ) ) ).to.equal( true )
+
+        // problem: pattern EFA (P 1), expression 1=2
+        // solution set: two solutions, P = lambda v.v=2 or P = lambda v.1=2
+
+        // problem: pattern EFA (P 3), expression 1=2
+        // solution set: one solution, P = lambda v.1=2
+        //
+        // NOT YET COMPLETE
     } )
 
     xit( 'Should compute correct solutions for the whole database', () => {

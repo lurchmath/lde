@@ -170,12 +170,18 @@ export class Constraint {
      * @param {Expression} expression any {@link Expression Expression} instance
      *   that contains no instance of a metavariable, so that it can be used as
      *   the expression for this Constraint
+     * @param {boolean} [check=true] whether to perform the check for
+     *   metavariables in the expression.  If this is false, no check is done,
+     *   which can be more efficient in cases where you know the check will
+     *   pass, or can let you create invalid constraints (if you know what you
+     *   are doing!)
      * 
      * @see {@link Constraint#pattern pattern getter}
      * @see {@link Constraint#expression expression getter}
      */
-    constructor ( pattern, expression ) {
-        if ( Constraint.containsAMetavariable( expression ) )
+    constructor ( pattern, expression, check ) {
+        if ( typeof( check ) === 'undefined' ) check = true
+        if ( check && Constraint.containsAMetavariable( expression ) )
             throw 'The expression in a constraint may not contain metavariables'
         this._pattern = pattern
         this._expression = expression
@@ -364,7 +370,7 @@ export class Constraint {
             return copy
         } else if ( target instanceof Constraint ) {
             return new Constraint( this.appliedTo( target.pattern ),
-                                   target.expression )
+                                   target.expression, false )
         } else if ( target instanceof CaptureConstraint ) {
             const copy = target.copy()
             copy.bound = this.appliedTo( copy.bound )

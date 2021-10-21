@@ -36,9 +36,16 @@ export class CaptureConstraint {
      *   constraint at the top of this page
      * @param {Symbol} free the free variable $f$ in the definition of capture
      *   constraint at the top of this page
+     * @param {boolean} [check=true] whether to perform the check that both
+     *   parameters must be symbols.  If this is false, no check is done, which
+     *   can be more efficient in cases where you know the check will pass, or
+     *   can let you create invalid capture constraints (if you know what you
+     *   are doing!)
      */
-    constructor ( bound, free ) {
-        if ( !( bound instanceof Symbol ) || !( free instanceof Symbol ) )
+    constructor ( bound, free, check ) {
+        if ( typeof( check ) === 'undefined' ) check = true
+        if ( check &&
+             ( !( bound instanceof Symbol ) || !( free instanceof Symbol ) ) )
             throw 'CaptureConstraints can only be constructed from two Symbols'
         this.bound = bound
         this.free = free
@@ -69,7 +76,7 @@ export class CaptureConstraint {
      * @returns {CaptureConstraint} a shallow copy of this object
      */
     copy () {
-        return new CaptureConstraint( this.bound, this.free )
+        return new CaptureConstraint( this.bound, this.free, false )
     }
 
     /**

@@ -1,10 +1,11 @@
 
 import { Application } from "../application.js"
+import { Binding } from "../binding.js"
 import { LogicConcept } from "../logic-concept.js"
 import { Constraint, metavariable } from "./constraint.js"
 import { CaptureConstraint, CaptureConstraints } from "./capture-constraint.js"
 import {
-    constantEF, projectionEF, applicationEF
+    constantEF, projectionEF, applicationEF, fullBetaReduce
 } from './expression-functions.js'
 import { NewSymbolStream } from "./new-symbol-stream.js"
 
@@ -87,10 +88,6 @@ export class Problem {
      * algorithms to find an easy constraint to process, by taking the first one
      * off the internal list.
      * 
-     * This also invalidates the capture constraints cache documented in the
-     * {@link Problem#captureConstraints captureConstraints()} function (unless
-     * of course no arguments were passed).
-     * 
      * @param  {...any} args constraints to add to this problem, in any of the
      *   forms given above
      */
@@ -136,8 +133,6 @@ export class Problem {
                 already.complexity() >= constraint.complexity() )
             this.constraints.splice(
                 index == -1 ? this.constraints.length : index, 0, constraint )
-            // invalidate capture constraints cache:
-            delete this._captureConstraints
         } )
     }
 
@@ -169,10 +164,6 @@ export class Problem {
      *   a {@link Constraint Constraint} instance, and this function will remove
      *   any constraint equal to that one, if this Problem contains such a copy
      * 
-     * This also invalidates the capture constraints cache documented in the
-     * {@link Problem#captureConstraints captureConstraints()} function (as
-     * long as some constraint was actually removed).
-     * 
      * @see {@link Problem#add add()}
      * @see {@link Problem#empty empty()}
      */
@@ -180,12 +171,8 @@ export class Problem {
         if ( toRemove instanceof Constraint )
             toRemove = this.constraints.findIndex( constraint =>
                 constraint.equals( toRemove ) )
-        if ( /^\d+$/.test( toRemove ) && toRemove < this.length ) {
-            // remove the constraint:
+        if ( /^\d+$/.test( toRemove ) && toRemove < this.length )
             this.constraints.splice( toRemove, 1 )
-            // invalidate the capture constraints cache:
-            delete this._captureConstraints
-        }
     }
 
     /**
@@ -250,6 +237,9 @@ export class Problem {
         result.constraints = this.constraints.slice()
         if ( this._captureConstraints )
             result._captureConstraints = this._captureConstraints.deepCopy()
+        if ( this._stream )
+            result._stream = this._stream.copy()
+        result._debug = this._debug
         return result
     }
 
@@ -366,10 +356,14 @@ export class Problem {
     /**
      * Compute the set of capture constraints for this problem and return it.
      * If it has already been computed and cached, return the cached value.
+     * 
      * Note that because {@link CaptureConstraint CaptureConstraints} are
      * computed from the set of ordinary {@link Constraint Constraints} in a
-     * problem, the cache is invalidated if that set is altered, such as by
-     * {@link Problem#add add()} or {@link Problem#remove remove()}.
+     * problem, the cache is invalid if that set is altered, such as by
+     * {@link Problem#add add()} or {@link Problem#remove remove()}.  In such a
+     * situation, you should be sure to call
+     * {@link Problem#clearCaptureConstraints clearCaptureConstraints()} to
+     * erase the cache, so the next call to this function will recompute them.
      * 
      * To see the definition of a capture constraint, refer to
      * {@link CaptureConstraint the documentation for that class}.  The set of
@@ -387,10 +381,20 @@ export class Problem {
      * @see {@link Problem#avoidsCapture avoidsCapture()}
      */
     captureConstraints () {
-        if ( !this.hasOwnProperty( '_captureConstraints' ) )
+        if ( !this._captureConstraints )
             this._captureConstraints = new CaptureConstraints(
                 ...this.constraints.map( constraint => constraint.pattern ) )
         return this._captureConstraints
+    }
+
+    /**
+     * Deletes any cached capture constraints computed by
+     * {@link Problem#captureConstraints captureConstraints()}.
+     * 
+     * @see {@link Problem#captureConstraints captureConstraints()}
+     */
+    clearCaptureConstraints () {
+        delete this._captureConstraints
     }
 
     /**
@@ -416,20 +420,86 @@ export class Problem {
         return !this.captureConstraints().violated()
     }
 
+    // For internal use.  Applies beta reduction to all the patterns in all the
+    // problem's constraints.
+    betaReduce () {
+        this.constraints.slice().forEach( con => {
+            const reduced = fullBetaReduce( con.pattern )
+            if ( !reduced.equals( con.pattern ) ) {
+                this.remove( con )
+                this.add( new Constraint( reduced, con.expression ) )
+            }
+        } )
+    }
+
+    // 1. Delete functionality that applies constraints to capture constraints.
+    // 2. Delete functionality that asks if capture constraints are satisfied or
+    //    violated in isolation.
+    // 3. Add functionality that asks if capture constraints are violated in a
+    //    given solution (which is a problem, that is, a constraint set).
+    // 4. Ensure that capture constraints are carried along when copying a
+    //    problem in recursion.
+    // 5. Before returning any solution or recurring to expand any solution,
+    //    check to see if the problem's capture constraints are violated by that
+    //    solution.
+
     // alters this object in-place, removing and/or adding constraints
-    *allSolutions ( soFar, stream ) {
-        // Clients call us without an argument; we must provide defaults.
-        // A solution is a special type of problem, the kind that canBeApplied().
-        if ( typeof( soFar ) === 'undefined' ) soFar = new Problem()
-        if ( typeof( stream ) === 'undefined' ) stream = new NewSymbolStream(
+    *allSolutions () {
+        const dbg = ( ...args ) => { if ( this._debug ) console.log( ...args ) }
+        dbg( `solve ${this} / ${this.constraints.map(x=>x.complexity())}` )
+        // We need our own personal symbol stream that will avoid all symbols in
+        // this matching problem.  If we don't have one yet, create one.
+        if ( !this._stream ) this._stream = new NewSymbolStream(
             ...this.constraints.map( c => c.pattern ),
             ...this.constraints.map( c => c.expression )
         )
+        // Ensure our capture constraints have been computed.
+        this.captureConstraints()
+        // We need utility functions for extending recursively computed
+        // solutions with new constraints.  Here are two.
+        // The first is for adding a (pattern,expression) constraint.
+        const problem = this
+        function* add ( constraint ) {
+            for ( let result of problem.allSolutions() ) {
+                dbg( `\tadding ${constraint} to ${result}` )
+                yield result.plus( constraint )
+            }
+        }
+        // The second is for adding a (pattern,efWithMetavars) constraint.
+        // That case is more complicated.
+        function* addEF ( metavar, expressionFunction, symbols ) {
+            if ( typeof( symbols ) === 'undefined' ) symbols = [ ]
+            const instantiation =
+                new Constraint( metavar, expressionFunction, false )
+            const copy = instantiation.appliedTo( problem )
+            dbg( `try this EF: ${instantiation}` )
+            dbg( `gives this problem: ${copy}` )
+            // if ( !copy.avoidsCapture() ) return
+            copy.betaReduce()
+            dbg( `\t==> ${copy}` )
+            for ( let solution of copy.allSolutions() ) {
+                dbg( `recursive solution: ${solution}` )
+                dbg( `\twill add: ${expressionFunction}` )
+                for ( let symbol of symbols ) {
+                    const constraint = solution.constraints.find(
+                        c => c.pattern.equals( symbol ) )
+                    if ( constraint ) {
+                        solution.remove( constraint )
+                        expressionFunction = constraint.appliedTo( expressionFunction )
+                        dbg( `\t+ ${constraint} == ${expressionFunction}` )
+                    }
+                }
+                expressionFunction = fullBetaReduce( expressionFunction )
+                dbg( `\t==> ${expressionFunction}` )
+                // if ( solution.avoidsCapture() )
+                    yield solution.plus( instantiation )
+            }
+        }
 
-        // If this problem is empty, the solution set contains exactly the one
-        // solution we have in soFar, and that's it.
+        // If this problem is empty, the solution set contains exactly one
+        // entry, the empty solution.  We encode solutions as solved problems.
         if ( this.empty() ) {
-            yield soFar
+            yield new Problem()
             return
         }
 
@@ -444,13 +514,9 @@ export class Problem {
 
         // If that constraint is already satisfied, remove it and recur on the
         // rest.  This modifies this object in place.
-        // Removing the constraint will unnecessarily invalidate the cache, so
-        // we manually preserve it for efficiency.
         if ( complexity == 1 ) {
-            const cache = this._captureConstraints
             this.remove( 0 )
-            this._captureConstraints = cache
-            yield* this.allSolutions( soFar, stream )
+            yield* this.allSolutions()
             return
         }
         
@@ -461,22 +527,18 @@ export class Problem {
         if ( complexity == 2 ) {
             this.remove( 0 )
             constraint.applyTo( this )
-            if ( this.avoidsCapture() )
-            yield* this.allSolutions( soFar.plus( constraint ), stream )
+            // if ( this.avoidsCapture() )
+                yield* add( constraint, this.allSolutions() )
             return
         }
         
         // If that constraint is one that can be broken up into multiple,
         // smaller constraints, one for each pair of children from the pattern
         // and expression, do so, updating this problem object and recurring.
-        // Removing the parent and adding the children will unnecessarily
-        // invalidate the cache, so we manually preserve it for efficiency.
         if ( complexity == 3 ) {
-            const cache = this._captureConstraints
             this.remove( 0 )
             this.add( ...constraint.children() )
-            this._captureConstraints = cache
-            yield* this.allSolutions( soFar, stream )
+            yield* this.allSolutions()
             return
         }
 
@@ -494,50 +556,37 @@ export class Problem {
                 throw 'Invalid head of expression function application'
             if ( args.length == 0 )
                 throw 'Empty argument list in expression function application'
-            // Create a utility function we will use to simplify each case below
-            const problem = this
-            function* instantiateHead ( f ) {
-                const instantiation = new Constraint( head, ef )
-                const copy = instantiation.appliedTo( problem )
-                if ( !copy.avoidsCapture() ) return
-                const cache = copy._captureConstraints
-                copy.constraints.slice().forEach( con => {
-                    const reduced = fullBetaReduce( con.pattern )
-                    if ( !reduced.equals( con.pattern ) ) {
-                        copy.remove( con )
-                        copy.add( new Constraint( reduced, con.expression ) )
-                    }
-                } )
-                copy._captureConstraints = cache
-                yield* copy.allSolutions( soFar.plus( instantiation ),
-                                          stream.copy() )
-            }
-            // Solution method 1: The head becomes instantiated with a constant
-            // function.
-            yield* instantiateHead( constantEF( args.length, expr ) )
-            // Solution method 2: The head becomes instantiated with a
-            // projection function.
+
+            // Solution method 1: Head instantiated with a constant function.
+            dbg( '--1--' )
+            yield* addEF( head, constantEF( args.length, expr ) )
+            
+            // Solution method 2: Head instantiated with a projection function.
+            dbg( '--2--' )
             for ( let i = 0 ; i < args.length ; i++ )
-                yield* instantiateHead( projectionEF( args.length, i ) )
+            yield* addEF( head, projectionEF( args.length, i ) )
+            
             // Solution method 3: If the expression is compound, we could
             // imitate each child using a different expression function,
             // combining the results into one big answer.  Because we care only
             // about the children, we do not distinguish bindings from
             // applications; we use applications for both cases, just as a
             // wrapper construct.
+            dbg( '--3--' )
             const children = expr.children()
             if ( children.length > 0 ) {
                 if ( expr instanceof Binding ) {
-                    const cache = this._captureConstraints
                     const asApp = new Application(
                         ...expr.children().map( child => child.copy() ) )
                     this.remove( 0 )
                     this.add( new Constraint( constraint.pattern, asApp ) )
-                    this._captureConstraints = cache
                 }
-                yield* instantiateHead( applicationEF(
-                    args.length, stream.nextN( children.length ) ) )
-            }
+                const metavars = this._stream.nextN( children.length )
+                    .map( symbol => symbol.asA( metavariable ) )
+                yield* addEF( head, applicationEF( args.length, metavars ),
+                    metavars )
+            } else dbg( 'case 3 does not apply' )
+
             // Those are the only three solution methods for the EFA case.
             return
         }
