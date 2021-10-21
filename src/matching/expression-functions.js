@@ -64,7 +64,7 @@
 import { Symbol } from "../symbol.js"
 import { Binding } from "../binding.js"
 import { Application } from "../application.js"
-import { metavariable } from "./constraint.js"
+import { metavariable } from "./metavariables.js"
 import { NewSymbolStream } from "./new-symbol-stream.js"
 
 // We use this symbol for encoding expression functions as LogicConcepts, as
@@ -281,10 +281,10 @@ const expressionFunctionApplication = new Symbol( 'LDE EFA' )
  *   the expression function in the result; this should be either an Expression
  *   Function (that is, it satisfies
  *   {@link module:ExpressionFunctions.isAnEF isAnEF()}) or a metavariable (that is,
- *   it satisfies `.isA( Constraint.metavariable )`, as defined in
- *   {@link Constraint#metavariable the Constraint class}), because no other
- *   type of {@link Expression Expression} can be applied as an Expression
- *   Function
+ *   it satisfies `.isA( metavariable )`, as defined in
+ *   {@link module:Metavariables.metavariable the Metavariables module}),
+ *   because no other type of {@link Expression Expression} can be applied as an
+ *   Expression Function
  * @param {...Expression} operands the arguments to which `operator` will be
  *   applied
  * @returns {Application} an Expression Function Application encoded as
@@ -324,10 +324,10 @@ export const isAnEFA = expr =>
  * but an actual expression function.  To help distinguish these two
  * possibilities, consider:
  * 
- *  * If `P` is a {@link Constraint.metavariable metavariable} and `x` is a
- *    {@link Symbol Symbol}, we could create an expression function application
- *    with, for example, `newEFA(P,new Symbol(5))`, but we could not evaluate
- *    it, because we do not know the meaning of `P`.
+ *  * If `P` is a {@link module:Metavariables.metavariable metavariable} and `x`
+ *    is a {@link Symbol Symbol}, we could create an expression function
+ *    application with, for example, `newEFA(P,new Symbol(5))`, but we could not
+ *    evaluate it, because we do not know the meaning of `P`.
  *  * If `f` is an expression function, that is, it would pass the test
  *    `isAnEF(f)` defined {@link module:ExpressionFunctions.isAnEF here}, and
  *    `x` is as above, then (assuming the arity of `f` is 1) the expression

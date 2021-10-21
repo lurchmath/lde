@@ -3,6 +3,7 @@ import { Symbol } from '../symbol.js'
 import { Application } from '../application.js'
 import { Binding } from '../binding.js'
 import { LogicConcept } from '../logic-concept.js'
+import { metavariable, containsAMetavariable } from './metavariables.js'
 import { isAnEFA } from './expression-functions.js'
 import { CaptureConstraint, CaptureConstraints } from './capture-constraint.js'
 import { Problem } from './problem.js'
@@ -19,7 +20,7 @@ const predicates = [
     {
         name : 'failure',
         predicate : C => {
-            if ( !Constraint.containsAMetavariable( C.pattern )
+            if ( !containsAMetavariable( C.pattern )
               && !C.pattern.equals( C.expression ) )
                 return true
             if ( isASimpleApplication( C.pattern ) ) {
@@ -38,7 +39,7 @@ const predicates = [
     // success type: Constraints that are already satisfied
     {
         name : 'success',
-        predicate : C => !Constraint.containsAMetavariable( C.pattern )
+        predicate : C => !containsAMetavariable( C.pattern )
             && C.pattern.equals( C.expression )
     },
     // instantiation type: Constraints that are just metavar |--> expression
@@ -71,16 +72,11 @@ const children = predicates[3]
 const EFA = predicates[4]
 
 /**
- * @see {@link Constraint#metavariable metavariable}
- */
-export const metavariable = 'LDE MV'
-
-/**
  * A Constraint is a pattern-expression pair often written $(p,e)$ and used to
  * express the idea that the expression $e$ matches the pattern $p$.  The $e$
  * will be an instance of {@link Expression Expression} and the $p$ will be as
  * well, but it may contain metavariables, as defined
- * {@link Constraint#metavariable here}.
+ * {@link module:Metavariables.metavariable here}.
  * 
  * Note that a Constraint need not be true or satisfiable.  Here are three
  * examples using ordinary mathematical notation.  For the purposes of these
@@ -106,59 +102,9 @@ export const metavariable = 'LDE MV'
 export class Constraint {
 
     /**
-     * Any {@link Symbol Symbol} can be marked as a "metavariable," which means
-     * that it is usable for substitution or pattern matching, when comparing
-     * one expression to another.  For instance, if we compare $a+b$ to
-     * $3x+y^2$, and the $a$ and $b$ are metavariables, then we can see that
-     * $3x+y^2$ has the form $a+b$, demonstrable by substituting
-     * $a\mapsto 3x,b\mapsto y^2$.
-     * 
-     * You can make any symbol into a metavariable using this value, with code
-     * such as `mySymbol.makeIntoA(Constraint.metavariable)`.  Note that the
-     * Constraint module also exports a constant of the same name
-     * (`metavariable`), so if you import that, you can shorten the above code
-     * to `mySymbol.makeIntoA(metavariable)`.
-     * 
-     * Although it is also possible to mark other kinds of
-     * {@link MathConcept MathConcept} instances as a metavariable, that has no
-     * sensible meaning, and will be ignored.  The metavariable flag is only
-     * important on {@link Symbol Symbols}, and thus should be put only there.
-     * 
-     * *WARNING:* JavaScript does not support `static const` members in classes,
-     * so technically this field is writable, even though it should not be
-     * changed.  Do not alter the value of this static member.  If and when
-     * ECMAScript7 supports `static const` members, we will upgrade this to a
-     * `static const` member.
-     * 
-     * @see {@link Constraint#isAPattern isAPattern()}
-     */
-    static metavariable = metavariable
-
-    /**
-     * A pattern is an {@link Expression Expression} that may contain a
-     * metavariable, and hence *all* {@link Expression Expressions} are
-     * patterns, though an {@link Expression Expression} without any
-     * metavariables is a pattern only in a degenerate sense.  But sometimes we
-     * need to know we are working with an {@link Expression Expression} that
-     * does *not* contain a metavariable.  This function is therefore useful.
-     * 
-     * Recall that a metavariable is any {@link Symbol Symbol} that has been
-     * marked as a metavariable as described in the documentation for
-     * {@link Constraint#metavariable metavariable}.
-     * 
-     * @param {LogicConcept} LC the {@link LogicConcept LogicConcept} to test
-     *   for whether it contains any metavariables
-     * @returns {boolean} true if and only if `LC` contains no metavariables
-     * @static
-     */
-    static containsAMetavariable ( LC ) {
-        return LC.hasDescendantSatisfying( d => d.isA( metavariable ) )
-    }
-
-    /**
      * Constructs a new Constraint with the given pattern and expression.
      * Throws an error if `expression` satisfies
-     * {@link Constraint.containsAMetavariable containsAMetavariable()}.
+     * {@link module:Metavariables.containsAMetavariable containsAMetavariable()}.
      * 
      * Constraints are to be treated as immutable.  Do not later alter the
      * pattern or expression of this constraint.  If you need a different
@@ -181,7 +127,7 @@ export class Constraint {
      */
     constructor ( pattern, expression, check ) {
         if ( typeof( check ) === 'undefined' ) check = true
-        if ( check && Constraint.containsAMetavariable( expression ) )
+        if ( check && containsAMetavariable( expression ) )
             throw 'The expression in a constraint may not contain metavariables'
         this._pattern = pattern
         this._expression = expression
@@ -471,8 +417,8 @@ export class Constraint {
      * representation of $e$.
      *
      * It also replaces the overly wordy JSON notation for
-     * {@link Constraint#metavariable metavariables} with a double-underscore,
-     * just to increase brevity and clarity when debugging.
+     * {@link module:Metavariables.metavariable metavariables} with a
+     * double-underscore, just to increase brevity and clarity when debugging.
      * 
      * @returns {string} a string representation of the Constraint, useful in
      *   debugging

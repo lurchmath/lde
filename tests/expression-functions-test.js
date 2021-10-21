@@ -4,7 +4,7 @@ import { Symbol } from '../src/symbol.js'
 import { Application } from '../src/application.js'
 import { Environment } from '../src/environment.js'
 import { LogicConcept } from '../src/logic-concept.js'
-import { metavariable } from '../src/matching/constraint.js'
+import { metavariable } from '../src/matching/metavariables.js'
 
 describe( 'Expression Functions', () => {
 

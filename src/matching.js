@@ -24,7 +24,10 @@
  */
 
 import { NewSymbolStream } from "./matching/new-symbol-stream.js"
-import { Constraint, metavariable } from "./matching/constraint.js"
+import {
+    metavariable, containsAMetavariable
+} from "./matching/metavariables.js"
+import { Constraint } from "./matching/constraint.js"
 import {
     CaptureConstraint, CaptureConstraints
 } from "./matching/capture-constraint.js"
@@ -36,7 +39,7 @@ import { Problem } from "./matching/problem.js"
 
 export default {
     NewSymbolStream,
-    Constraint, metavariable,
+    Constraint, metavariable, containsAMetavariable,
     CaptureConstraint, CaptureConstraints,
     newEF, isAnEF, arityOfEF, applyEF, constantEF, projectionEF, applicationEF,
     newEFA, isAnEFA, canBetaReduce, betaReduce, fullBetaReduce,

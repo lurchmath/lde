@@ -1,5 +1,5 @@
 
-import { metavariable } from './constraint.js'
+import { metavariable } from './metavariables.js'
 import { Symbol } from '../symbol.js'
 import { Binding } from '../binding.js'
 import { LogicConcept } from '../logic-concept.js'
@@ -145,8 +145,9 @@ export class CaptureConstraint {
      * It also replaces some overly wordy notation with briefer notation for
      * ease of reading when debugging:
      * 
-     *  * JSON notation for {@link Constraint#metavariable metavariables} is
-     *    replaced with a double-underscore, as in `v__` for a metavariable `v`
+     *  * JSON notation for {@link module:Metavariables.metavariable metavariables}
+     *    is replaced with a double-underscore, as in `v__` for a metavariable
+     *    `v`
      *  * The EFA symbol `"LDE EFA"` becomes `@`
      *  * The EF symbol `"LDE lambda"` becomes `𝝺`
      * 

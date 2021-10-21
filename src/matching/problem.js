@@ -2,7 +2,8 @@
 import { Application } from "../application.js"
 import { Binding } from "../binding.js"
 import { LogicConcept } from "../logic-concept.js"
-import { Constraint, metavariable } from "./constraint.js"
+import { metavariable } from "./metavariables.js"
+import { Constraint } from "./constraint.js"
 import { CaptureConstraint, CaptureConstraints } from "./capture-constraint.js"
 import {
     constantEF, projectionEF, applicationEF, fullBetaReduce
@@ -14,11 +15,11 @@ import { NewSymbolStream } from "./new-symbol-stream.js"
  * Some problems have just one solution and others have many.  Examples:
  * 
  *  * If we have a single constraint $(f(x,y),k+3)$, with $f,x,y$
- *    {@link Constraint.metavariable metavariables}, then there is a single
- *    solution: $f\mapsto +$, $x\mapsto k$, $y\mapsto 3$.
+ *    {@link module:Metavariables.metavariable metavariables}, then there is a
+ *    single solution: $f\mapsto +$, $x\mapsto k$, $y\mapsto 3$.
  *  * If we have a single constraint $(P(3),3=3)$, with $P$ a
- *    {@link Constraint.metavariable metavariable}, then there are four
- *    solutions, shown below.  Note that the dummy variable used in the
+ *    {@link module:Metavariables.metavariable metavariable}, then there are
+ *    four solutions, shown below.  Note that the dummy variable used in the
  *    $\lambda$ expression is irrelevant; it could be any symbol other than 3.
  *     * $P\mapsto\lambda x.{}3=3$
  *     * $P\mapsto\lambda x.{}x=3$
