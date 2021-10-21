@@ -134,6 +134,14 @@ export class CaptureConstraint {
      * representation of the bound symbol of the constraint and f is the
      * {@link LogicConcept#toPutdown putdown} representation of the free symbol
      * (or expression) of the constraint.
+     *
+     * It also replaces some overly wordy notation with briefer notation for
+     * ease of reading when debugging:
+     * 
+     *  * JSON notation for {@link Constraint#metavariable metavariables} is
+     *    replaced with a double-underscore, as in `v__` for a metavariable `v`
+     *  * The EFA symbol `"LDE EFA"` becomes `@`
+     *  * The EF symbol `"LDE lambda"` becomes `𝝺`
      * 
      * @returns {string} a string representation of the constraint, useful in
      *   debugging
@@ -142,6 +150,9 @@ export class CaptureConstraint {
      */
     toString () {
         return `(${this.bound.toPutdown()},${this.free.toPutdown()})`
+            .replace( / \+\{"_type_LDE MV":true\}\n/g, '__' )
+            .replace( /"LDE EFA"/g, '@' )
+            .replace( /"LDE lambda"/g, '𝝺' )
     }
 
 }

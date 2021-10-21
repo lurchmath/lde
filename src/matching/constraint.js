@@ -463,12 +463,19 @@ export class Constraint {
      * "(P,E)" where P is the {@link LogicConcept#toPutdown putdown}
      * representation of $p$ and E is the {@link LogicConcept#toPutdown putdown}
      * representation of $e$.
+     *
+     * It also replaces the overly wordy JSON notation for
+     * {@link Constraint#metavariable metavariables} with a double-underscore,
+     * just to increase brevity and clarity when debugging.
      * 
      * @returns {string} a string representation of the Constraint, useful in
      *   debugging
      */
     toString () {
         return `(${this.pattern.toPutdown()},${this.expression.toPutdown()})`
+            .replace( / \+\{"_type_LDE MV":true\}\n/g, '__' )
+            .replace( /"LDE EFA"/g, '@' )
+            .replace( /"LDE lambda"/g, '𝝺' )
     }
 
 }
