@@ -1348,6 +1348,145 @@ describe( 'Problem', () => {
         expect( uhOh.avoidsCapture() ).to.equal( false )
     } )
 
+    it( 'Should support substitution in-place', () => {
+        // Let us adopt the convention in the following comments that capital
+        // letters stand for metavariables, and lower-case ones do not.
+        // problem: { (M,foo), ((a b),(c d)), ((x Y , Z),7) }
+        // substitutions: (M,was_m), (Y,was_Y), (Z,was_Z)
+        // result: { (was_M,foo), ((a b),(c d)), ((x was_Y , was_Z),7) }
+        let P, C1, C2, C3, S1, S2, S3
+        C1 = new M.Constraint(
+            new Symbol( 'M' ).asA( M.metavariable ),
+            new Symbol( 'foo' )
+        )
+        C2 = new M.Constraint(
+            LogicConcept.fromPutdown( '(a b)' )[0],
+            LogicConcept.fromPutdown( '(c d)' )[0]
+        )
+        C3 = new M.Constraint(
+            new Binding(
+                new Symbol( 'x' ),
+                new Symbol( 'Y' ).asA( M.metavariable ),
+                new Symbol( 'Z' ).asA( M.metavariable )
+            ),
+            new Symbol( 7 )
+        )
+        P = new M.Problem( C1, C2, C3 )
+        S1 = new M.Substitution(
+            new Symbol( 'M' ).asA( M.metavariable ),
+            new Symbol( 'was_M' )
+        )
+        S2 = new M.Substitution(
+            new Symbol( 'Y' ).asA( M.metavariable ),
+            new Symbol( 'was_Y' )
+        )
+        S3 = new M.Substitution(
+            new Symbol( 'Z' ).asA( M.metavariable ),
+            new Symbol( 'was_Z' )
+        )
+        expect( () => P.substitute( S1, S2, S3 ) ).not.to.throw()
+        expect( P.length ).to.equal( 3 )
+        expect( P.constraints.some( c =>
+            c.pattern.equals( S1.expression )
+         && c.expression.equals( C1.expression ) ) ).to.equal( true )
+        expect( P.constraints.some( c => c.equals( C2 ) ) ).to.equal( true )
+        expect( P.constraints.some( c =>
+            c.pattern.equals(
+                LogicConcept.fromPutdown( '(x was_Y , was_Z)' )[0] )
+         && c.expression.equals( new Symbol( 7 ) ) ) ).to.equal( true )
+        // now repeat the same test, but call substitute() on an array of
+        // substitutions rather than on 3 substitutions separately
+        P = new M.Problem( C1, C2, C3 )
+        expect( () => P.substitute( [ S1, S2, S3 ] ) ).not.to.throw()
+        expect( P.length ).to.equal( 3 )
+        expect( P.constraints.some( c =>
+            c.pattern.equals( S1.expression )
+         && c.expression.equals( C1.expression ) ) ).to.equal( true )
+        expect( P.constraints.some( c => c.equals( C2 ) ) ).to.equal( true )
+        expect( P.constraints.some( c =>
+            c.pattern.equals(
+                LogicConcept.fromPutdown( '(x was_Y , was_Z)' )[0] )
+         && c.expression.equals( new Symbol( 7 ) ) ) ).to.equal( true )
+    } )
+
+    it( 'Should support substitution functionally', () => {
+        // We run the same two tests as in the previous test function,
+        // but this time, we use afterSubstituting() instead of substitute().
+        // Test 1:
+        let P, newP, C1, C2, C3, S1, S2, S3
+        C1 = new M.Constraint(
+            new Symbol( 'M' ).asA( M.metavariable ),
+            new Symbol( 'foo' )
+        )
+        C2 = new M.Constraint(
+            LogicConcept.fromPutdown( '(a b)' )[0],
+            LogicConcept.fromPutdown( '(c d)' )[0]
+        )
+        C3 = new M.Constraint(
+            new Binding(
+                new Symbol( 'x' ),
+                new Symbol( 'Y' ).asA( M.metavariable ),
+                new Symbol( 'Z' ).asA( M.metavariable )
+            ),
+            new Symbol( 7 )
+        )
+        P = new M.Problem( C1, C2, C3 )
+        S1 = new M.Substitution(
+            new Symbol( 'M' ).asA( M.metavariable ),
+            new Symbol( 'was_M' )
+        )
+        S2 = new M.Substitution(
+            new Symbol( 'Y' ).asA( M.metavariable ),
+            new Symbol( 'was_Y' )
+        )
+        S3 = new M.Substitution(
+            new Symbol( 'Z' ).asA( M.metavariable ),
+            new Symbol( 'was_Z' )
+        )
+        expect( () => newP = P.afterSubstituting( S1, S2, S3 ) ).not.to.throw()
+        // ensure that P is just as it was before
+        expect( P.length ).to.equal( 3 )
+        expect( P.constraints.some( c => c.equals( C1 ) ) ).to.equal( true )
+        expect( P.constraints.some( c => c.equals( C2 ) ) ).to.equal( true )
+        expect( P.constraints.some( c => c.equals( C3 ) ) ).to.equal( true )
+        // ensure that newP is just as P was in the previous test function,
+        // but is not the same object as P, nor does it equal P
+        expect( P ).not.to.equal( newP )
+        expect( P.equals( newP ) ).to.equal( false )
+        expect( newP.length ).to.equal( 3 )
+        expect( newP.constraints.some( c =>
+            c.pattern.equals( S1.expression )
+         && c.expression.equals( C1.expression ) ) ).to.equal( true )
+        expect( newP.constraints.some( c => c.equals( C2 ) ) ).to.equal( true )
+        expect( newP.constraints.some( c =>
+            c.pattern.equals(
+                LogicConcept.fromPutdown( '(x was_Y , was_Z)' )[0] )
+         && c.expression.equals( new Symbol( 7 ) ) ) ).to.equal( true )
+        // now repeat the same test, but call afterSubstituting() on an array of
+        // substitutions rather than on 3 substitutions separately
+        P = new M.Problem( C1, C2, C3 )
+        expect( () => newP = P.afterSubstituting( [ S1, S2, S3 ] ) )
+            .not.to.throw()
+        // ensure that P is just as it was before
+        expect( P.length ).to.equal( 3 )
+        expect( P.constraints.some( c => c.equals( C1 ) ) ).to.equal( true )
+        expect( P.constraints.some( c => c.equals( C2 ) ) ).to.equal( true )
+        expect( P.constraints.some( c => c.equals( C3 ) ) ).to.equal( true )
+        // ensure that newP is just as P was in the previous test function,
+        // but is not the same object as P, nor does it equal P
+        expect( P ).not.to.equal( newP )
+        expect( P.equals( newP ) ).to.equal( false )
+        expect( newP.length ).to.equal( 3 )
+        expect( newP.constraints.some( c =>
+            c.pattern.equals( S1.expression )
+         && c.expression.equals( C1.expression ) ) ).to.equal( true )
+        expect( newP.constraints.some( c => c.equals( C2 ) ) ).to.equal( true )
+        expect( newP.constraints.some( c =>
+            c.pattern.equals(
+                LogicConcept.fromPutdown( '(x was_Y , was_Z)' )[0] )
+         && c.expression.equals( new Symbol( 7 ) ) ) ).to.equal( true )
+    } )
+
     it( 'Should compute correct solutions to trivial problems', () => {
         let P, S, expr1, expr2, pat1
 

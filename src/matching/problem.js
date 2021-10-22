@@ -1,4 +1,5 @@
 
+import { Symbol } from '../symbol.js'
 import { Application } from "../application.js"
 import { Binding } from "../binding.js"
 import { LogicConcept } from "../logic-concept.js"
@@ -337,6 +338,57 @@ export class Problem {
         } else {
             throw 'Cannot apply a problem to that kind of target'
         }
+    }
+
+    /**
+     * Alter this object by applying the given
+     * {@link Substitution Substitutions} to it, in-place.
+     * {@link Constraint Constraints} in this Problem whose patterns contain any
+     * of the metavariables on the LHS of any of the given
+     * {@link Substitution Substitutions} will be replaced with new
+     * {@link Constraint Constraints} whose patterns have been altered by those
+     * {@link Substitution Substitutions}.
+     * 
+     * @param  {...Substitution|...Substitution[]} subs one or more
+     *   substitutions to apply to this Problem, or Arrays of substitutions
+     * 
+     * @see {@link Problem#afterSubstituting afterSubstituting()}
+     */
+    substitute ( ...subs ) {
+        // flatten arrays of substitutions into the main list
+        subs = subs.flat()
+        // figure out which constraints in this object actually need processing
+        const metavars = subs.map( s => s.metavariable.text() )
+        const toReplace = this.constraints.filter( c =>
+            c.pattern.hasDescendantSatisfying( d =>
+                ( d instanceof Symbol ) && metavars.includes( d.text() )
+             && d.isA( metavariable ) ) )
+        // remove those constraints
+        toReplace.forEach( c => this.remove( c ) )
+        // compute new patterns for each one by doing substitutions
+        const patternsWrapper = new Application(
+            ...toReplace.map( c => c.pattern.copy() ) )
+        subs.forEach( s => s.applyTo( patternsWrapper ) )
+        // add the new constraints built from the new patterns, same expressions
+        for ( let i = 0 ; i < patternsWrapper.numChildren() ; i++ )
+            this.add( new Constraint( patternsWrapper.child( i ),
+                                      toReplace[i].expression ) )
+    }
+
+    /**
+     * This function behaves the same as
+     * {@link Problem#substitute substitute()}, except that it works on and
+     * returns a copy of the Problem, rather than altering the original.
+     * 
+     * @param  {...Substitution|...Substitution[]} subs one or more
+     *   substitutions to apply, or Arrays of substitutions
+     * 
+     * @see {@link Problem#substitute substitute()}
+     */
+    afterSubstituting ( ...subs ) {
+        const result = this.copy()
+        result.substitute( ...subs )
+        return result
     }
 
     /**
