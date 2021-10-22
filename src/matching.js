@@ -28,6 +28,7 @@ import {
     metavariable, containsAMetavariable
 } from "./matching/metavariables.js"
 import { Constraint } from "./matching/constraint.js"
+import { Substitution } from "./matching/substitution.js"
 import {
     CaptureConstraint, CaptureConstraints
 } from "./matching/capture-constraint.js"
@@ -39,7 +40,7 @@ import { Problem } from "./matching/problem.js"
 
 export default {
     NewSymbolStream,
-    Constraint, metavariable, containsAMetavariable,
+    Constraint, metavariable, containsAMetavariable, Substitution,
     CaptureConstraint, CaptureConstraints,
     newEF, isAnEF, arityOfEF, applyEF, constantEF, projectionEF, applicationEF,
     newEFA, isAnEFA, canBetaReduce, betaReduce, fullBetaReduce,
