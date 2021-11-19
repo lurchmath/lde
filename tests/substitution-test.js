@@ -33,11 +33,11 @@ describe( 'Substitution', () => {
         expect( S.expression ).to.equal ( e2 )
         // if the first argument is anything besides a metavariable, then errors
         expect( () => S = new M.Substitution( e1, m1 ) ).to.throw(
-            /must be a metavariable/ )
+            /Invalid parameters.*constructor/ )
         expect( () => S = new M.Substitution( e2, m2 ) ).to.throw(
-            /must be a metavariable/ )
+            /Invalid parameters.*constructor/ )
         expect( () => S = new M.Substitution( e1, e2 ) ).to.throw(
-            /must be a metavariable/ )
+            /Invalid parameters.*constructor/ )
     } )
 
     it( 'Should support making deep copies', () => {

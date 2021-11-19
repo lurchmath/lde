@@ -2,6 +2,7 @@
 import { metavariable } from './metavariables.js'
 import { Symbol } from '../symbol.js'
 import { LogicConcept } from '../logic-concept.js'
+import { Expression } from '../expression.js'
 
 /**
  * A substitution is a metavariable-expression pair $(m,e)$ that can be used for
@@ -16,26 +17,39 @@ import { LogicConcept } from '../logic-concept.js'
 export class Substitution {
 
     /**
-     * Constructs a new Substitution with the given metavariable and expression.
-     * Throws an error if `metavariable` is not a {@link Symbol Symbol} that
-     * passes the `.isA( metavariable )` test.
+     * Constructs a new Substitution instance from a variety of types of inputs.
+     * See the documentation at the top of this class for the explanation of how
+     * a Substitution instance is a metavariable-expression pair $(m,e)$.
      * 
-     * @param {Symbol} metavar any metavariable, as defined
-     *   {@link module:Metavariables.metavariable here}.  See the documentation
-     *   at the top of this class for explanation of how a Substitution instance
-     *   is a metavariable-expression pair $(m,e)$.  This is the $m$.
-     * @param {Expression} expression any {@link Expression Expression}.  Again,
-     *   see the documentation for the class for the $(m,e)$ concept.  This is
-     *   the $e$.
+     *  * If two inputs are given, a metavariable $m$ and an expression $e$,
+     *    construct a Substitution from the pair $(m,e)$.
+     *  * If one input is given, a {@link Constraint Constraint}, and that
+     *    constraint passes the {@link Constraint#canBeApplied canBeApplied()}
+     *    test, then it can be interpreted as a Substitution.  The constraint
+     *    $(p,e)$ is such that $p$ is a metavariable, and thus if we let $m=p$,
+     *    we have a substitution $(m,e)$.
+     *  * In all other cases, throw an error, because the cases above are the
+     *    only supported cases.
      * 
      * @see {@link Substitution#metavariable metavariable getter}
      * @see {@link Substitution#expression expression getter}
      */
-    constructor ( metavar, expression ) {
-        if ( !( metavar instanceof Symbol ) || !metavar.isA( metavariable ) )
-            throw 'The LHS of a Substitution must be a metavariable'
-        this._metavariable = metavar
-        this._expression = expression
+    constructor ( ...args ) {
+        // Case 1: a single Constraint that can be applied
+        if ( args.length == 1 && ( args[0] instanceof Constraint )
+                              && args[0].canBeApplied() ) {
+            this._metavariable = args[0].pattern
+            this._expression = args[0].expression
+        // Case 2: a metavariable-expression pair
+        } else if ( args.length == 2 && ( args[0] instanceof Symbol )
+                                     && args[0].isA( metavariable )
+                                     && ( args[1] instanceof Expression ) ) {
+            this._metavariable = args[0]
+            this._expression = args[1]
+        // No other cases are supported
+        } else {
+            throw 'Invalid parameters to Substitution constructor'
+        }
     }
 
     /**
