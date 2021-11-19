@@ -8,69 +8,6 @@ import { isAnEFA } from './expression-functions.js'
 import { CaptureConstraint, CaptureConstraints } from './capture-constraint.js'
 import { Problem } from './problem.js'
 
-// Utility function used below.  It means that the LC is an Application type,
-// but not an Expression Function Application.
-const isASimpleApplication = x => ( x instanceof Application ) && !isAnEFA( x )
-// This does not appear documented in the source code documentation, because it
-// is internal to this module.  It is a list of the predicates for classifying
-// constraints, in increasing order of complexity, for use in the rank()
-// function documented in the Constraint class below.
-const predicates = [
-    // failure type: Constraints that can never be satisfied
-    {
-        name : 'failure',
-        predicate : C => {
-            if ( !containsAMetavariable( C.pattern )
-              && !C.pattern.equals( C.expression ) )
-                return true
-            if ( isASimpleApplication( C.pattern ) ) {
-                if ( !( C.expression instanceof Application )
-                  || C.pattern.numChildren() != C.expression.numChildren() )
-                    return true
-            }
-            if ( C.pattern instanceof Binding ) {
-                if ( !( C.expression instanceof Binding )
-                  || C.pattern.numChildren() != C.expression.numChildren() )
-                    return true
-            }
-            return false
-        }
-    },
-    // success type: Constraints that are already satisfied
-    {
-        name : 'success',
-        predicate : C => !containsAMetavariable( C.pattern )
-            && C.pattern.equals( C.expression )
-    },
-    // instantiation type: Constraints that are just metavar |--> expression
-    {
-        name : 'instantiation',
-        predicate : C => C.canBeApplied()
-    },
-    // children type: Constraints that depend on many smaller constraints,
-    // built from the children of this Constraint's pattern and expression
-    {
-        name : 'children',
-        predicate : C => ( isASimpleApplication( C.pattern )
-                        && ( C.expression instanceof Application ) )
-                      || ( ( C.pattern instanceof Binding )
-                        && ( C.expression instanceof Binding ) )
-    },
-    // EFA type: Constraints that can only be satisfied by exploring the many
-    // sub-options coming from an Expression Function Application pattern
-    {
-        name : 'EFA',
-        predicate : C => isAnEFA( C.pattern )
-    }
-    // All Constraints should satisfy one of the categories above.
-    // There are no other possibilities.
-]
-const failure = predicates[0]
-const success = predicates[1]
-const instantiation = predicates[2]
-const children = predicates[3]
-const EFA = predicates[4]
-
 /**
  * A Constraint is a pattern-expression pair often written $(p,e)$ and used to
  * express the idea that the expression $e$ matches the pattern $p$.  The $e$
@@ -363,11 +300,26 @@ export class Constraint {
      * @see {@link Constraint#complexityName complexityName()}
      */
     complexity () {
-        if ( !this.hasOwnProperty( '_complexity' ) ) {
-            let index = predicates.findIndex( obj => obj.predicate( this ) )
-            this._complexity = index
-        }
-        return this._complexity
+        // If the answer is cached, use that:
+        if ( this.hasOwnProperty( '_complexity' ) )
+            return this._complexity
+        // First 3 cases are easy:
+        if ( this.canBeApplied() ) // instantiation type
+            return this._complexity = 2
+        if ( isAnEFA( this.pattern ) ) // EFA type
+            return this._complexity = 4
+        if ( !containsAMetavariable( this.pattern ) ) // success/failure
+            return this._complexity =
+                this.pattern.equals( this.expression ) ? 1 : 0
+        // Now we know the pattern is nonatomic, because it contains no
+        // metavariables, but is also not a lone metavariable.
+        // Since it is not an EFA, it is either a plain Application or Binding.
+        // So the answer is children/failure, depending on if pattern and expr
+        // match on both type (app vs. bin) and # of chlidren.
+        return this._complexity = ( ( this.pattern instanceof Application )
+                                 == ( this.expression instanceof Application ) )
+                               && ( this.pattern.numChildren()
+                                 == this.expression.numChildren() ) ? 3 : 0
     }
 
     /**
@@ -382,7 +334,9 @@ export class Constraint {
      * @see {@link Constraint#complexity complexity()}
      */
     complexityName () {
-        return predicates[this.complexity()].name
+        return [
+            'failure', 'success', 'instantiation', 'children', 'EFA'
+        ][this.complexity()]
     }
 
     /**
@@ -394,17 +348,19 @@ export class Constraint {
      * this constraint to pair up the corresponding children into new Constraint
      * instances.  This function does so, returning them as an array.
      * 
-     * For example, if we have a pattern $p=(a~b~c)$ and an expression
-     * $e=(x~y~z)$ then the Constraint $(p,e)$ has complexity 3, and we can call
-     * this function on it, yielding three new Constraints, $(a,x)$, $(b,y)$,
-     * and $(c,z)$.
+     * For example, if we have a pattern $p=(a~b~c~d)$ and an expression
+     * $e=(w~x~y~z)$ then the Constraint $(p,e)$ has complexity 3, and we can
+     * call this function on it, yielding three new Constraints, $(a,w)$,
+     * $(b,x)$, $(c,y)$ and $(d,z)$.
      * 
      * @returns {...Constraint} all child constraints computed from this
      *   Constraint, as a JavaScript array, in the same order that the children
      *   appear in the pattern (and expression) of this constraint
+     * 
+     * @see {@link Constraint#complexity complexity()}
      */
     children () {
-        if ( this.complexity() != predicates.indexOf( children ) )
+        if ( this.complexity() != 3 ) // if it's not children type
             throw 'Cannot compute children for this type of Constraint'
         return this.pattern.children().map( ( child, index ) =>
             new Constraint( child, this.expression.child( index ) ) )
