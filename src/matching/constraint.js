@@ -50,18 +50,12 @@ export class Constraint {
      * @param {Expression} expression any {@link Expression Expression} instance
      *   that contains no instance of a metavariable, so that it can be used as
      *   the expression for this Constraint
-     * @param {boolean} [check=true] whether to perform the check for
-     *   metavariables in the expression.  If this is false, no check is done,
-     *   which can be more efficient in cases where you know the check will
-     *   pass, or can let you create invalid constraints (if you know what you
-     *   are doing!)
      * 
      * @see {@link Constraint#pattern pattern getter}
      * @see {@link Constraint#expression expression getter}
      */
-    constructor ( pattern, expression, check ) {
-        if ( typeof( check ) === 'undefined' ) check = true
-        if ( check && containsAMetavariable( expression ) )
+    constructor ( pattern, expression ) {
+        if ( containsAMetavariable( expression ) )
             throw 'The expression in a constraint may not contain metavariables'
         this._pattern = pattern
         this._expression = expression
@@ -127,7 +121,7 @@ export class Constraint {
     afterSubstituting ( ...subs ) {
         let newPattern = this.pattern
         subs.forEach( sub => newPattern = sub.appliedTo( newPattern ) )
-        return new Constraint( newPattern, this.expression, false )
+        return new Constraint( newPattern, this.expression )
     }
 
     /**

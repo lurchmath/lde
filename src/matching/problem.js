@@ -525,8 +525,7 @@ export class Problem {
         // That case is more complicated.
         function* addEF ( metavar, expressionFunction, symbols ) {
             if ( typeof( symbols ) === 'undefined' ) symbols = [ ]
-            const instantiation =
-                new Constraint( metavar, expressionFunction, false )
+            const instantiation = new Constraint( metavar, expressionFunction )
             const copy = problem.afterSubstituting(
                 new Substitution( instantiation ) )
             dbg( `try this EF: ${instantiation}` )
