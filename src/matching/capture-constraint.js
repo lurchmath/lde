@@ -80,6 +80,39 @@ export class CaptureConstraint {
     }
 
     /**
+     * Apply the given {@link Substitution Substitutions} to this object, in the
+     * order given, in place.  They will be applied to both the `bound` and
+     * `free` members of this object separately.
+     * 
+     * @param  {...Substitution} subs the {@link Substitution Substitutions} to
+     *   apply
+     */
+    substitute ( ...subs ) {
+        subs.forEach( sub => {
+            this.bound = sub.appliedTo( this.bound )
+            this.free = sub.appliedTo( this.free )
+        } )
+    }
+
+    /**
+     * Acts just like {@link CaptureConstraint#substitute substitute()}, but
+     * does not work in place.  Rather, it makes a copy, applies the
+     * {@link Substitution Substitutions} to the copy, and returns the new
+     * version after substituting.
+     * 
+     * @param  {...Substitution} subs the {@link Substitution Substitutions} to
+     *   apply; these are passed directly to
+     *   {@link CaptureConstraint#substitute substitute()} internally
+     * @returns {CaptureConstraint} a copy of this object, but with the given
+     *   {@link Substitution Substitutions} applied
+     */
+    afterSubstituting ( ...subs ) {
+        const result = this.copy()
+        result.substitute( ...subs )
+        return result
+    }
+
+    /**
      * A capture constraint is complete if neither its bound nor free variables
      * is a metavariable.  If either is a metavariable, its eventual value has
      * not yet been determined (or not yet communicated to this object) and thus

@@ -5,6 +5,7 @@ import { Binding } from "../binding.js"
 import { LogicConcept } from "../logic-concept.js"
 import { metavariable } from "./metavariables.js"
 import { Constraint } from "./constraint.js"
+import { Substitution } from "./substitution.js"
 import { CaptureConstraint, CaptureConstraints } from "./capture-constraint.js"
 import {
     constantEF, projectionEF, applicationEF, fullBetaReduce
@@ -279,7 +280,8 @@ export class Problem {
      * @see {@link Problem#appliedTo appliedTo()}
      */
     canBeApplied () {
-        return this.constraints.every( constraint => constraint.canBeApplied() )
+        return this.constraints.every( constraint =>
+            constraint.isAnInstantiation() )
     }
 
     /**
@@ -296,7 +298,8 @@ export class Problem {
      * @see {@link Constraint#applyTo applyTo()} (for Constraints)
      */
     applyTo ( target ) {
-        this.constraints.forEach( constraint => constraint.applyTo( target ) )
+        this.constraints.forEach( constraint =>
+            new Substitution( constraint ).applyTo( target ) )
     }
 
     /**
@@ -322,21 +325,11 @@ export class Problem {
             const copy = target.copy()
             this.applyTo( copy )
             return copy
-        } else if ( target instanceof Constraint ) {
-            return new Constraint( this.appliedTo( target.pattern ),
-                                   target.expression )
-        } else if ( target instanceof CaptureConstraint ) {
-            const copy = target.copy()
-            copy.bound = this.appliedTo( copy.bound )
-            copy.free = this.appliedTo( copy.free )
-            return copy
-        } else if ( ( target instanceof CaptureConstraints )
-                 || ( target instanceof Problem ) ) {
-            const copy = target.copy()
-            this.applyTo( copy )
-            return copy
         } else {
-            throw 'Cannot apply a problem to that kind of target'
+            let result = target
+            this.constraints.forEach( constraint =>
+                result = new Substitution( constraint ).appliedTo( result ) )
+            return result
         }
     }
 
@@ -355,6 +348,8 @@ export class Problem {
      * @see {@link Problem#afterSubstituting afterSubstituting()}
      */
     substitute ( ...subs ) {
+        // save the capture constraints for processing later
+        const savedCache = this._captureConstraints
         // flatten arrays of substitutions into the main list
         subs = subs.flat()
         // figure out which constraints in this object actually need processing
@@ -363,16 +358,24 @@ export class Problem {
             c.pattern.hasDescendantSatisfying( d =>
                 ( d instanceof Symbol ) && metavars.includes( d.text() )
              && d.isA( metavariable ) ) )
-        // remove those constraints
-        toReplace.forEach( c => this.remove( c ) )
-        // compute new patterns for each one by doing substitutions
-        const patternsWrapper = new Application(
-            ...toReplace.map( c => c.pattern.copy() ) )
-        subs.forEach( s => s.applyTo( patternsWrapper ) )
-        // add the new constraints built from the new patterns, same expressions
-        for ( let i = 0 ; i < patternsWrapper.numChildren() ; i++ )
-            this.add( new Constraint( patternsWrapper.child( i ),
-                                      toReplace[i].expression ) )
+        if ( toReplace.length > 0 ) {
+            // remove those constraints
+            toReplace.forEach( c => this.remove( c ) )
+            // compute new patterns for each one by doing substitutions
+            const patternsWrapper = new Application(
+                ...toReplace.map( c => c.pattern.copy() ) )
+            subs.forEach( s => s.applyTo( patternsWrapper ) )
+            // add the new constraints built from the new patterns, same expressions
+            for ( let i = 0 ; i < patternsWrapper.numChildren() ; i++ )
+                this.add( new Constraint( patternsWrapper.child( i ),
+                                          toReplace[i].expression ) )
+        }
+        // now restore and process the capture constraints
+        if ( savedCache ) {
+            savedCache.constraints.forEach( cc =>
+                subs.forEach( sub => sub.applyTo( cc ) ) )
+            this._captureConstraints = savedCache
+        }
     }
 
     /**
@@ -524,7 +527,8 @@ export class Problem {
             if ( typeof( symbols ) === 'undefined' ) symbols = [ ]
             const instantiation =
                 new Constraint( metavar, expressionFunction, false )
-            const copy = instantiation.appliedTo( problem )
+            const copy = problem.afterSubstituting(
+                new Substitution( instantiation ) )
             dbg( `try this EF: ${instantiation}` )
             dbg( `gives this problem: ${copy}` )
             // if ( !copy.avoidsCapture() ) return
@@ -579,7 +583,7 @@ export class Problem {
         // Otherwise, recur on what remains.
         if ( complexity == 2 ) {
             this.remove( 0 )
-            constraint.applyTo( this )
+            this.substitute( new Substitution( constraint ) )
             // if ( this.avoidsCapture() )
                 yield* add( constraint, this.allSolutions() )
             return

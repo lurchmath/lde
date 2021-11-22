@@ -1,12 +1,9 @@
 
 import { Symbol } from '../symbol.js'
 import { Application } from '../application.js'
-import { Binding } from '../binding.js'
 import { LogicConcept } from '../logic-concept.js'
 import { metavariable, containsAMetavariable } from './metavariables.js'
 import { isAnEFA } from './expression-functions.js'
-import { CaptureConstraint, CaptureConstraints } from './capture-constraint.js'
-import { Problem } from './problem.js'
 
 /**
  * A Constraint is a pattern-expression pair often written $(p,e)$ and used to
@@ -116,6 +113,24 @@ export class Constraint {
     }
 
     /**
+     * Create a copy of this Constraint, except with the given list of
+     * {@link Substitution Substitutions} applied to it, in the order given.
+     * Because Constraint expressions cannot contain metavariables, it is
+     * necessary to apply the {@link Substitution Substitutions} only to the
+     * pattern portion of the Constraint.  The same expression can be reused.
+     * 
+     * @param  {...Substitution} subs the list of
+     *   {@link Substitution Substitutions} to apply
+     * @returns {Constraint} a copy of this Constraint, but with the given
+     *   {@link Substitution Substitutions} applied to its pattern
+     */
+    afterSubstituting ( ...subs ) {
+        let newPattern = this.pattern
+        subs.forEach( sub => newPattern = sub.appliedTo( newPattern ) )
+        return new Constraint( newPattern, this.expression, false )
+    }
+
+    /**
      * If a Constraint's pattern is a single metavariable, then that Constraint
      * can be used as a tool for substitution.  For instance, the Constraint
      * $(A,2)$ can be applied to the expression $A-\frac{A}{B}$ to yield
@@ -130,143 +145,9 @@ export class Constraint {
      * @see {@link Constraint#applyTo applyTo()}
      * @see {@link Constraint#appliedTo appliedTo()}
      */
-    canBeApplied () {
+    isAnInstantiation () {
         return this.pattern instanceof Symbol
             && this.pattern.isA( metavariable )
-    }
-
-    /**
-     * Apply this Constraint, as a substitution instruction, to the given
-     * `target`, in place.  Each type of target is treated differently, as
-     * follows.
-     * 
-     *  * If the `target` is a {@link LogicConcept LogicConcept}, replace every
-     *    instance in it of this Constraint's pattern with a copy of this
-     *    Constraint's expression.  Note that this cannot succeed if the
-     *    `target` itself is an instance of the pattern, because you cannot
-     *    change a single metavariable in-place in memory.  In this case, an
-     *    error will be thrown.
-     *  * If the `target` is a {@link CaptureConstraint CaptureConstraint},
-     *    apply this Constraint to both its bound and free members, in place.
-     *  * If the `target` is a {@link CaptureConstraints set of Capture
-     *    Constraints}, then just apply the above action to each one.
-     *  * If the `target` is a {@link Problem matching Problem}, apply this
-     *    Constraint to each of its patterns.  (Technically, we make new
-     *    Constraints to replace the old, since Constraints are immutable.)
-     *    Ordinarily, this would invalidate the cache of
-     *    {@link Problem#captureConstraints capture constraints} in the problem,
-     *    but this function actually also applies itself as a substitution to
-     *    the metavariables in both halves of each capture constraint as well,
-     *    thus not only preserving the cache but updating it.
-     * 
-     * Because this function operates in-place, it cannot be applied to another
-     * Constraint; such objects are to be immutable.  Instead, use the
-     * {@link Constraint#appliedTo appliedTo()} form, which can operate on
-     * Constraint instances.  Note that if the `target` is a top-level
-     * {@link MathConcept MathConcept} (i.e., has no parent), and is a
-     * metavariable that needs to be replaced by this Constraint, this function
-     * will do nothing, because it replaces things within their parents.  See
-     * {@link Constraint#appliedTo appliedTo()} for what you can use in that
-     * context.
-     * 
-     * If this Constraint does not pass the
-     * {@link Constraint#canBeApplied canBeApplied()} test, then this function
-     * throws an error.  It also throws an error if the target is not one of the
-     * two types mentioned above.
-     * 
-     * @param {LogicConcept|CaptureConstraint|CaptureConstraints|Problem} target
-     *   the object to which we should apply this Constraint, in place
-     * 
-     * @see {@link Constraint#canBeApplied canBeApplied()}
-     * @see {@link Constraint#appliedTo appliedTo()}
-     */
-    applyTo ( target ) {
-        if ( !this.canBeApplied() )
-            throw 'Cannot apply a Constraint whose pattern is not a metavariable'
-        if ( target instanceof LogicConcept ) {
-            if ( target.equals( this.pattern ) )
-                throw 'Cannot replace a metavariable in-place'
-            target.descendantsSatisfying( d => d.equals( this.pattern )
-                                       && d.isA( metavariable )
-            ).forEach( d => d.replaceWith( this.expression.copy() ) )
-        } else if ( target instanceof CaptureConstraint ) {
-            target.bound = this.appliedTo( target.bound )
-            target.free = this.appliedTo( target.free )
-        } else if ( target instanceof CaptureConstraints ) {
-            target.constraints.forEach(
-                constraint => this.applyTo( constraint ) )
-        } else if ( target instanceof Problem ) {
-            const savedCache = target._captureConstraints
-            target.constraints.slice().forEach( constraint => {
-                target.remove( constraint )
-                target.add( this.appliedTo( constraint ) )
-            } )
-            if ( savedCache ) {
-                savedCache.constraints.forEach( cc => this.applyTo( cc ) )
-                target._captureConstraints = savedCache
-            }
-        } else {
-            throw 'Cannot apply a constraint to that kind of target'
-        }
-    }
-
-    /**
-     * Apply this Constraint, as a substitution instruction, to the given
-     * `target`, returning the result as a new object (not altering the
-     * original).  Each type of target is treated differently, as follows.
-     * 
-     *  * If the `target` is a {@link LogicConcept LogicConcept}, create a copy
-     *    of it and then call {@link Constraint#applyTo applyTo()} on the copy,
-     *    returning the copy afterwards.  In other words, this behaves exactly
-     *    like {@link Constraint#applyTo applyTo()}, but instead of operating on
-     *    the `target` in place, it operates on a copy and returns the copy.
-     *  * If the `target` is a Constraint, build a new constraint with the same
-     *    expression as the given Constraint, but with a pattern built by
-     *    running the original Constraint's pattern through this same function,
-     *    as defined in the previous paragraph.  That is, `appliedTo()` run on a
-     *    Constraint $(p,e)$ yields a constraint $(p',e)$, where $p'$ is the
-     *    result of `appliedTo(p)`.
-     *  * If the `target` is a {@link CaptureConstraint CaptureConstraint},
-     *    create a copy of it with bound and free members that have been run
-     *    through this function, each one treated as a
-     *    {@link LogicConcept LogicConcept}.
-     *  * If the `target` is a {@link CaptureConstraints set of Capture
-     *    Constraints}, then make a copy, apply this Constraint to the copy, and
-     *    return that copy.
-     *  * If the `target` is a {@link Problem matching Problem}, then make a
-     *    copy, apply this Constraint to the copy, and return that copy.
-     * 
-     * @param {LogicConcept|Constraint|CaptureConstraint|CaptureConstraints|Problem} target
-     *   the object to which we should apply this Constraint, resulting in a copy
-     * @returns {LogicConcept|Constraint|CaptureConstraint|CaptureConstraints|Problem}
-     *   a new copy of the `target` with the application of this Constraint having been done
-     * 
-     * @see {@link Constraint#canBeApplied canBeApplied()}
-     * @see {@link Constraint#applyTo applyTo()}
-     * @see {@link Constraint#copy copy()}
-     */
-    appliedTo ( target ) {
-        if ( target instanceof LogicConcept ) {
-            if ( target.equals( this.pattern ) ) return this.expression.copy()
-            const copy = target.copy()
-            this.applyTo( copy )
-            return copy
-        } else if ( target instanceof Constraint ) {
-            return new Constraint( this.appliedTo( target.pattern ),
-                                   target.expression, false )
-        } else if ( target instanceof CaptureConstraint ) {
-            const copy = target.copy()
-            copy.bound = this.appliedTo( copy.bound )
-            copy.free = this.appliedTo( copy.free )
-            return copy
-        } else if ( ( target instanceof CaptureConstraints )
-                 || ( target instanceof Problem ) ) {
-            const copy = target.copy()
-            this.applyTo( copy )
-            return copy
-        } else {
-            throw 'Cannot apply a constraint to that kind of target'
-        }
     }
 
     /**
@@ -304,7 +185,7 @@ export class Constraint {
         if ( this.hasOwnProperty( '_complexity' ) )
             return this._complexity
         // First 3 cases are easy:
-        if ( this.canBeApplied() ) // instantiation type
+        if ( this.isAnInstantiation() ) // instantiation type
             return this._complexity = 2
         if ( isAnEFA( this.pattern ) ) // EFA type
             return this._complexity = 4

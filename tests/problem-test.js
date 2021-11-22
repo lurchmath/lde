@@ -1000,8 +1000,7 @@ describe( 'Problem', () => {
         // ensure that Prob cannot be applied in-place to a Constraint
         let badTarget = new M.Constraint( P1.copy(),
             LogicConcept.fromPutdown( '(hello there "friend")' )[0] )
-        expect( () => Prob.applyTo( badTarget ) ).to.throw(
-            /^Cannot apply a constraint to that/ )
+        expect( () => Prob.applyTo( badTarget ) ).to.throw( /^Target.*must be/ )
         // but it is okay to apply not-in-place to a Constraint, thus creating
         // a new, altered copy
         let substituted
@@ -1318,7 +1317,7 @@ describe( 'Problem', () => {
         expect( uhOh.avoidsCapture() ).to.equal( true )
         // Now make a substitution that could create variable capture, but does
         // not yet do so, because we have not yet instantiated x:
-        const subst1 = new M.Constraint(
+        const subst1 = new M.Substitution(
             new Symbol( 'P' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(f t)' )[0]
         )
@@ -1333,7 +1332,7 @@ describe( 'Problem', () => {
             LogicConcept.fromPutdown( '(f t)' )[0] ) ).to.equal( true )
         expect( uhOh.avoidsCapture() ).to.equal( true )
         // Now make a substitution that does create variable capture:
-        const subst2 = new M.Constraint(
+        const subst2 = new M.Substitution(
             new Symbol( 'x' ).asA( M.metavariable ),
             new Symbol( 't' )
         )

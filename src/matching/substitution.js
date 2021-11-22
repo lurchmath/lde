@@ -3,6 +3,7 @@ import { metavariable } from './metavariables.js'
 import { Symbol } from '../symbol.js'
 import { LogicConcept } from '../logic-concept.js'
 import { Expression } from '../expression.js'
+import { Constraint } from './constraint.js'
 
 /**
  * A substitution is a metavariable-expression pair $(m,e)$ that can be used for
@@ -24,10 +25,11 @@ export class Substitution {
      *  * If two inputs are given, a metavariable $m$ and an expression $e$,
      *    construct a Substitution from the pair $(m,e)$.
      *  * If one input is given, a {@link Constraint Constraint}, and that
-     *    constraint passes the {@link Constraint#canBeApplied canBeApplied()}
-     *    test, then it can be interpreted as a Substitution.  The constraint
-     *    $(p,e)$ is such that $p$ is a metavariable, and thus if we let $m=p$,
-     *    we have a substitution $(m,e)$.
+     *    constraint passes the
+     *    {@link Constraint#isAnInstantiation isAnInstantiation()} test, then it
+     *    can be interpreted as a Substitution.  The constraint $(p,e)$ is such
+     *    that $p$ is a metavariable, and thus if we let $m=p$, we have a
+     *    substitution $(m,e)$.
      *  * In all other cases, throw an error, because the cases above are the
      *    only supported cases.
      * 
@@ -37,7 +39,7 @@ export class Substitution {
     constructor ( ...args ) {
         // Case 1: a single Constraint that can be applied
         if ( args.length == 1 && ( args[0] instanceof Constraint )
-                              && args[0].canBeApplied() ) {
+                              && args[0].isAnInstantiation() ) {
             this._metavariable = args[0].pattern
             this._expression = args[0].expression
         // Case 2: a metavariable-expression pair
@@ -97,67 +99,90 @@ export class Substitution {
     }
 
     /**
-     * Apply this Substitution to the given {@link LogicConcept LogicConcept},
-     * in place.  That is, find all subexpressions of the given `LC` that are
-     * {@link MathConcept#equals structurally equal} to the metavariable of this
-     * Substitution, and replace all of them simultaneously with the expression
-     * of this Substitution.
+     * Apply this Substitution to the given `target`, in place.
+     * 
+     *  * If the `target` is a {@link LogicConcept LogicConcept}, find all
+     *    subexpressions of it that are
+     *    {@link MathConcept#equals structurally equal} to the metavariable of
+     *    this Substitution, and replace all of them simultaneously with the
+     *    expression of this Substitution.  (All the documentation after this
+     *    bulleted list is for this case.)
+     *  * If the `target` is any other type of object that has a `substitute`
+     *    method, call that method, passing this Substitution object as an
+     *    argument, and let the `target` handle the details.
+     *  * No other cases are supported, and will throw errors.
      * 
      * The word "simultaneously" is important because if the expression that is
      * inserted as part of the replacement contains any metavariables, they will
      * not be considered for substitution.
      * 
      * Note that there is one case in which this may fail to produce the desired
-     * results:  If `LC` is itself a copy of this Substitution's metavariable,
-     * and has no parent, then it cannot be replaced in-place, due to the nature
-     * of the {@link MathConcept MathConcept} replacement API.  If such a case
-     * may occur, you may prefer to use the
+     * results:  If the `target` is itself a copy of this Substitution's
+     * metavariable, and has no parent, then it cannot be replaced in-place, due
+     * to the nature of the {@link MathConcept MathConcept} replacement API.  If
+     * such a case may occur, you may prefer to use the
      * {@link Substitution#appliedTo appliedTo()} function instead.
      * 
-     * @param {LogicConcept} LC the target to which we should apply this
-     *   Substitution, in place
+     * @param target the target to which we should apply this Substitution, in
+     *   place
      * 
      * @see {@link Substitution#appliedTo appliedTo()}
      */
-    applyTo ( LC ) {
-        if ( !( LC instanceof LogicConcept ) )
-            throw 'Target of applyTo() must be a LogicConcept instance'
-        // Compute the list of metavariables to replace:
-        const toReplace = LC.descendantsSatisfying( d =>
-            d.equals( this._metavariable ) && d.isA( metavariable ) )
-        // Replace them all:
-        toReplace.forEach( d => d.replaceWith( this._expression.copy() ) )
+    applyTo ( target ) {
+        if ( target instanceof LogicConcept ) {
+            // Compute the list of metavariables to replace:
+            const toReplace = target.descendantsSatisfying( d =>
+                d.equals( this._metavariable ) && d.isA( metavariable ) )
+            // Replace them all:
+            toReplace.forEach( d => d.replaceWith( this._expression.copy() ) )
+            return
+        }
+        if ( 'substitute' in target )
+            return target.substitute( this )
+        throw new Error( 'Target of applyTo() must be a LogicConcept '
+                        + 'or have a substitute() method' )
     }
 
     /**
-     * Apply this Substitution to the given {@link LogicConcept LogicConcept},
-     * returning the result as a new instance (not altering the original).
+     * Apply this Substitution to the given `target`, returning the result as a
+     * new instance (not altering the original).
      * 
-     * This is identical to {@link MathConcept#copy making a copy of `LC`} and
-     * then calling {@link Substitution#applyTo applyTo()} on it, except for one
-     * case:  If the `LC` is equal to the metavariable of this Substitution, and
-     * has no parent, then {@link Substitution#applyTo applyTo()} will have no
+     * If the target is a {@link LogicConcept LogicConcept}, this is identical
+     * to {@link MathConcept#copy making a copy of `target`} and then calling
+     * {@link Substitution#applyTo applyTo()} on it, except for one case:  If
+     * the `target` is equal to the metavariable of this Substitution, and has
+     * no parent, then {@link Substitution#applyTo applyTo()} will have no
      * effect, but this routine will return a copy of the Substitution's
      * expression, as expected.
      * 
-     * @param {LogicConcept} LC the object to which we should apply this
-     *   Substitution, resulting in a copy
-     * @returns {LogicConcept} a new copy of the `LC` with the application of
-     *   this Substitution having been done
+     * If the target is not a {@link LogicConcept LogicConcept}, but it
+     * implements the `afterSubstituting()` method, then that method is called
+     * with this Substitution as argument, and its result returned.
+     * 
+     * No other options are supported, and will return an error.
+     * 
+     * @param target the object to which we should apply this Substitution,
+     *   resulting in a copy
+     * @returns a new copy of the `target` with the application of this
+     *   Substitution having been done
      * 
      * @see {@link Substitution#applyTo applyTo()}
      * @see {@link LogicConcept#copy copy()}
      */
-    appliedTo ( LC ) {
-        if ( !( LC instanceof LogicConcept ) )
-            throw 'Target of appliedTo() must be a LogicConcept instance'
-        // Handle the corner case that applyTo() cannot handle:
-        if ( LC.equals( this._metavariable ) && LC.isA( metavariable ) )
-            return this._expression.copy()
-        // Otherwise, just use applyTo() on a copy:
-        const copy = LC.copy()
-        this.applyTo( copy )
-        return copy
+    appliedTo ( target ) {
+        if ( target instanceof LogicConcept ) {
+            // Handle the corner case that applyTo() cannot handle:
+            if ( target.equals( this._metavariable ) && target.isA( metavariable ) )
+                return this._expression.copy()
+            // Otherwise, just use applyTo() on a copy:
+            const copy = target.copy()
+            this.applyTo( copy )
+            return copy
+        }
+        if ( 'afterSubstituting' in target )
+            return target.afterSubstituting( this )
+        throw new Error( 'Target of appliedTo() must be a LogicConcept '
+                       + 'or have an afterSubstituting() method' )
     }
 
     /**

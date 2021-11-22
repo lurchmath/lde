@@ -131,42 +131,42 @@ describe( 'Constraint', () => {
         expect( C.equals( C.copy() ) ).to.equal( true )
     } )
 
-    it( 'Should reliably test whether it can be applied', () => {
+    it( 'Should reliably test whether it is an instantiation', () => {
         let C
-        // a Constraint whose pattern is a single metavariable can be applied
+        // a Constraint whose pattern is a single metavar is an instantiation
         C = new M.Constraint(
             new Symbol( 'example' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(x y z a b c)' )[0]
         )
-        expect( C.canBeApplied() ).to.equal( true )
-        // a Constraint whose pattern is a single symbol cannot be applied,
+        expect( C.isAnInstantiation() ).to.equal( true )
+        // a Constraint whose pattern is a single symbol is not an instantiation
         // if we don't mark that symbol as a metavariable
         C = new M.Constraint(
             new Symbol( 'example' ),
             LogicConcept.fromPutdown( '(x y z a b c)' )[0]
         )
-        expect( C.canBeApplied() ).to.equal( false )
-        // a Constraint whose pattern is anything other than a symbol cannot be
-        // applied, even if we (erroneously) mark that pattern as a metavariable
+        expect( C.isAnInstantiation() ).to.equal( false )
+        // a Constraint whose pattern is anything other than a symbol is not an
+        // instantiation, even if we (erroneously) mark the pattern as a metavar
         C = new M.Constraint(
             LogicConcept.fromPutdown( '(1 2 3)' )[0].asA( M.metavariable ),
             LogicConcept.fromPutdown( '(x y z a b c)' )[0]
         )
-        expect( C.canBeApplied() ).to.equal( false )
+        expect( C.isAnInstantiation() ).to.equal( false )
         C = new M.Constraint(
             LogicConcept.fromPutdown( '[pi const]' )[0].asA( M.metavariable ),
             LogicConcept.fromPutdown( '(x y z a b c)' )[0]
         )
-        expect( C.canBeApplied() ).to.equal( false )
+        expect( C.isAnInstantiation() ).to.equal( false )
         C = new M.Constraint(
             LogicConcept.fromPutdown( '{ { } }' )[0].asA( M.metavariable ),
             LogicConcept.fromPutdown( '(x y z a b c)' )[0]
         )
-        expect( C.canBeApplied() ).to.equal( false )
+        expect( C.isAnInstantiation() ).to.equal( false )
     } )
 
-    it( 'Should apply itself correctly in-place or functionally', () => {
-        // create a Constraint that can be applied
+    it( 'Can become a Substitution that works in-place or functionally', () => {
+        // create a Constraint that is an instantiation
         let X = new Symbol( 'X' ).asA( M.metavariable )
         let C = new M.Constraint(
             X.copy(),
@@ -188,17 +188,19 @@ describe( 'Constraint', () => {
         const newP2 = LogicConcept.fromPutdown( '(𝝺 v , ((exp (- x)) v))' )[0]
         const newP3 = LogicConcept.fromPutdown(
             '{ (exp (- x)) (exp (- x)) (exp (- x)) }' )[0]
+        // Convert C into a Substitution instance so we can use it
+        let S = new M.Substitution( C )
         // apply C to P1 in place and ensure the result is as expected
         // and P1 is no longer equal to P1copy
-        expect( () => C.applyTo( P1 ) ).not.to.throw()
+        expect( () => S.applyTo( P1 ) ).not.to.throw()
         expect( P1.equals( P1copy ) ).to.equal( false )
         expect( P1.equals( newP1 ) ).to.equal( true )
         // repeat same experiment for P2 and P2copy
-        expect( () => C.applyTo( P2 ) ).not.to.throw()
+        expect( () => S.applyTo( P2 ) ).not.to.throw()
         expect( P2.equals( P2copy ) ).to.equal( false )
         expect( P2.equals( newP2 ) ).to.equal( true )
         // repeat same experiment for P3 and P3copy
-        expect( () => C.applyTo( P3 ) ).not.to.throw()
+        expect( () => S.applyTo( P3 ) ).not.to.throw()
         expect( P3.equals( P3copy ) ).to.equal( false )
         expect( P3.equals( newP3 ) ).to.equal( true )
         // make new targets from the backup copies we saved of P1,P2,P3
@@ -208,9 +210,9 @@ describe( 'Constraint', () => {
         // apply C functionally (not in place) to those three, saving the
         // results as new expressions, then ensure that no change took place
         // in any of those originals
-        const applied1 = C.appliedTo( P1_2 )
-        const applied2 = C.appliedTo( P2_2 )
-        const applied3 = C.appliedTo( P3_2 )
+        const applied1 = S.appliedTo( P1_2 )
+        const applied2 = S.appliedTo( P2_2 )
+        const applied3 = S.appliedTo( P3_2 )
         expect( P1copy.equals( P1_2 ) ).to.equal( true )
         expect( P2copy.equals( P2_2 ) ).to.equal( true )
         expect( P3copy.equals( P3_2 ) ).to.equal( true )
@@ -220,21 +222,19 @@ describe( 'Constraint', () => {
         expect( applied1.equals( P1 ) ).to.equal( true )
         expect( applied2.equals( P2 ) ).to.equal( true )
         expect( applied3.equals( P3 ) ).to.equal( true )
-        // ensure that Constraints cannot be applied in-place to other
-        // Constraints
+        // ensure that Substitutions cannot be applied in-place to Constraints
         let badTarget = new M.Constraint( P1.copy(),
             LogicConcept.fromPutdown( '(hello there "friend")' )[0] )
-        expect( () => C.applyTo( badTarget ) ).to.throw(
-            /^Cannot apply a constraint to that/ )
+        expect( () => S.applyTo( badTarget ) ).to.throw( /^Target.*must be/ )
         // but it is okay to apply not-in-place to a Constraint, thus creating
         // a new, altered copy
         let substituted
-        expect( () => substituted = C.appliedTo( badTarget ) ).not.to.throw()
-        expect( substituted.pattern.equals( C.appliedTo( P1.copy() ) ) )
+        expect( () => substituted = S.appliedTo( badTarget ) ).not.to.throw()
+        expect( substituted.pattern.equals( S.appliedTo( P1.copy() ) ) )
             .to.equal( true )
         expect( substituted.expression.equals( badTarget.expression ) )
             .to.equal( true )
-        // ensure that Constraints can be applied to Problems in-place
+        // ensure that Substitutions can be applied to Problems in-place
         let prob = new M.Problem()
         const E1 = LogicConcept.fromPutdown( '(an appli cation)' )[0]
         const E2 = LogicConcept.fromPutdown( '(a bin , ding)' )[0]
@@ -246,7 +246,7 @@ describe( 'Constraint', () => {
         expect( prob.constraints.some( constraint =>
             constraint.pattern.equals( P2copy ) && constraint.expression.equals( E2 )
         ) ).to.equal( true )
-        expect( () => C.applyTo( prob ) ).not.to.throw()
+        expect( () => S.applyTo( prob ) ).not.to.throw()
         expect( prob.constraints.length ).to.equal( 2 )
         expect( prob.constraints.some( constraint =>
             constraint.pattern.equals( newP1 ) && constraint.expression.equals( E1 )
@@ -254,7 +254,7 @@ describe( 'Constraint', () => {
         expect( prob.constraints.some( constraint =>
             constraint.pattern.equals( newP2 ) && constraint.expression.equals( E2 )
         ) ).to.equal( true )
-        // ensure that Constraints can be applied to Problems to make copies
+        // ensure that Substitutions can be applied to Problems to make copies
         prob = new M.Problem()
         prob.add( P1copy, E1, P2copy, E2 )
         expect( prob.constraints.length ).to.equal( 2 )
@@ -265,7 +265,7 @@ describe( 'Constraint', () => {
             constraint.pattern.equals( P2copy ) && constraint.expression.equals( E2 )
         ) ).to.equal( true )
         let probNew
-        expect( () => probNew = C.appliedTo( prob ) ).not.to.throw()
+        expect( () => probNew = S.appliedTo( prob ) ).not.to.throw()
         expect( prob.constraints.length ).to.equal( 2 )
         expect( prob.constraints.some( constraint =>
             constraint.pattern.equals( P1copy ) && constraint.expression.equals( E1 )
