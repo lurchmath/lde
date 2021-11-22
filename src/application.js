@@ -55,6 +55,8 @@ export class Application extends Expression {
      *   constructor throws an error.
      */
     constructor ( operator, ...operands ) {
+        if ( typeof operator == 'undefined' )
+            throw new Error( 'Applications must contain at least one child' )
         if ( !( operator instanceof Expression ) || operands.some( x =>
              !( x instanceof Expression ) ) )
             throw new Error( 'All arguments to the Application constructor '
