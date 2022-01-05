@@ -223,7 +223,7 @@ describe( 'Capture Constraint sets', () => {
         expect( () => C = new M.CaptureConstraints( pat1, pat2 ) )
             .not.to.throw()
         expect( C.empty() ).to.equal( false )
-        expect( C.constraints.length ).to.equal( 4 )
+        expect( C.constraints.length ).to.equal( 5 )
         expect( C.constraints[0].equals( new M.CaptureConstraint(
             new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '∃' )
         ) ) ).to.equal( true )
@@ -234,6 +234,9 @@ describe( 'Capture Constraint sets', () => {
             new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '+' )
         ) ) ).to.equal( true )
         expect( C.constraints[3].equals( new M.CaptureConstraint(
+            new Symbol( 'y' ), new Symbol( 'x' ).asA( M.metavariable )
+        ) ) ).to.equal( true )
+        expect( C.constraints[4].equals( new M.CaptureConstraint(
             new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '1' )
         ) ) ).to.equal( true )
     } )

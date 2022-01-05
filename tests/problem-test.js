@@ -1077,7 +1077,7 @@ describe( 'Problem', () => {
         expect( () => CCs = P.captureConstraints() ).not.to.throw()
         expect( CCs ).to.be.instanceof( M.CaptureConstraints )
         expect( CCs.empty() ).to.equal( false )
-        expect( CCs.constraints.length ).to.equal( 4 )
+        expect( CCs.constraints.length ).to.equal( 5 )
         expect( CCs.constraints[0].equals( new M.CaptureConstraint(
             new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '∃' )
         ) ) ).to.equal( true )
@@ -1088,6 +1088,9 @@ describe( 'Problem', () => {
             new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '+' )
         ) ) ).to.equal( true )
         expect( CCs.constraints[3].equals( new M.CaptureConstraint(
+            new Symbol( 'y' ), new Symbol( 'x' ).asA( M.metavariable )
+        ) ) ).to.equal( true )
+        expect( CCs.constraints[4].equals( new M.CaptureConstraint(
             new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '1' )
         ) ) ).to.equal( true )
         // Now ask it for the capture constraints again, and ensure the value

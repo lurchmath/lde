@@ -317,30 +317,36 @@ export class CaptureConstraints {
      * 
      * @param {Expression} pattern the expression (typically containing
      *   metavariables) to scan for capture constraints
-     * @param {...Symbol} [bound] a list of variables bound above the `pattern`
-     *   being scanned; this pattern is typically used only in recursive calls,
-     *   and clients can ignore it
+     * @param {...Set} [bound] a hierarchy of variables bound above the
+     *   `pattern` being scanned; this parameter is used only in recursion,
+     *   and clients should not use it.
      * 
      * @see {@link CaptureConstraints#add add()}
      */
     scan ( pattern, bound = [ ] ) {
-        if ( pattern instanceof Symbol
-          && !bound.some( bv => bv.equals( pattern ) ) )
-            bound.forEach( bv => {
-                if ( ( bv.isA( metavariable ) || pattern.isA( metavariable ) )
-                  && !bv.equals( pattern ) )
-                    this.add( new CaptureConstraint( bv, pattern ) )
-            } )
+        // Base case: the pattern is a symbol.  Walk up the hierarchy of
+        // bindings until this symbol is bound.  While it isn't, any binding
+        // you come across may generate binding constraints.
+        if ( pattern instanceof Symbol ) {
+            for ( let boundList of bound ) {
+                if ( boundList.some( v => v.equals( pattern ) ) ) break
+                boundList.forEach( bound => {
+                    if ( pattern.isA( metavariable )
+                      || bound.isA( metavariable ) )
+                        this.add( new CaptureConstraint( bound, pattern ) )
+                } )
+            }
+        }
+        // Recursive case: recur on all children, but if this pattern is a
+        // binding, take care to add a layer to the bound variable hierarchy
+        // before recurring.
         let recurOn = pattern.children()
         if ( pattern instanceof Binding ) {
             // process the head not as part of the quantified scope
             this.scan( recurOn.shift(), bound )
             // process everything else as part of the quantified scope later
             bound = bound.slice()
-            pattern.boundVariables().forEach( newBV => {
-                if ( !bound.some( oldBV => oldBV.equals( newBV ) ) )
-                    bound.push( newBV )
-            } )
+            bound.unshift( pattern.boundVariables() )
         }
         recurOn.forEach( child => this.scan( child, bound ) )
     }

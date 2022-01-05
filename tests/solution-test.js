@@ -62,7 +62,7 @@ describe( 'Solution', () => {
         expect( S._captureConstraints )
             .to.be.instanceof( M.CaptureConstraints )
         expect( S._captureConstraints.empty() ).to.equal( false )
-        expect( S._captureConstraints.constraints.length ).to.equal( 4 )
+        expect( S._captureConstraints.constraints.length ).to.equal( 5 )
         expect( S._captureConstraints.constraints[0].equals(
             new M.CaptureConstraint(
                 new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '∃' )
@@ -79,6 +79,11 @@ describe( 'Solution', () => {
             )
         ) ).to.equal( true )
         expect( S._captureConstraints.constraints[3].equals(
+            new M.CaptureConstraint(
+                new Symbol( 'y' ), new Symbol( 'x' ).asA( M.metavariable )
+            )
+        ) ).to.equal( true )
+        expect( S._captureConstraints.constraints[4].equals(
             new M.CaptureConstraint(
                 new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '1' )
             )
@@ -145,8 +150,8 @@ describe( 'Solution', () => {
         expect( S2._captureConstraints )
             .to.be.instanceof( M.CaptureConstraints )
         expect( S1._captureConstraints ).not.equals( S2._captureConstraints )
-        expect( S1._captureConstraints.constraints.length ).equals( 4 )
-        expect( S2._captureConstraints.constraints.length ).equals( 4 )
+        expect( S1._captureConstraints.constraints.length ).equals( 5 )
+        expect( S2._captureConstraints.constraints.length ).equals( 5 )
         expect( S1._captureConstraints.constraints[0].equals(
             S2._captureConstraints.constraints[0] ) ).to.equal( true )
         expect( S1._captureConstraints.constraints[1].equals(
@@ -155,6 +160,8 @@ describe( 'Solution', () => {
             S2._captureConstraints.constraints[2] ) ).to.equal( true )
         expect( S1._captureConstraints.constraints[3].equals(
             S2._captureConstraints.constraints[3] ) ).to.equal( true )
+        expect( S1._captureConstraints.constraints[4].equals(
+            S2._captureConstraints.constraints[4] ) ).to.equal( true )
         // Do they have the same substitutions?  We cannot test that at this
         // point, because we haven't yet implemented adding substitutions to a
         // Solution, but we will test that in the future (TO DO!).
