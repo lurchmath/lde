@@ -1,5 +1,6 @@
 
 import { Binding } from "../binding.js"
+import { Symbol } from "../symbol.js"
 import { metavariable } from "./metavariables.js"
 import { Problem } from "./problem.js"
 import { CaptureConstraints } from "./capture-constraint.js"
@@ -110,6 +111,72 @@ export class Solution {
         result._bound = this._bound
         // Done, return the copy:
         return result
+    }
+
+    /**
+     * Look up the {@link Expression Expression} to which this Solution maps
+     * the given metavariable, and return it (or undefined if there isn't
+     * one).  Recall that Solutions function as sets of
+     * {@link Substitution Substitutions}, that is, as a set of ordered pairs,
+     * and thus as a (partial) function.  This method is therefore just
+     * (partial) function application.
+     * 
+     * @param {Symbol|String} metavariable a metavariable (or just the name of
+     *   a metavariable) to be looked up in this Solution
+     * @return {[Expression]} the {@link Expression Expression} to which this
+     *   Solution maps the given metavariable, or undefined if this solution
+     *   does not map the metavariable to any {@link Expression Expression}
+     */
+    get ( metavariable ) {
+        if ( metavariable instanceof Symbol )
+            metavariable = metavariable.text()
+        return this._substitutions.hasOwnProperty( metavariable ) ?
+            this._substitutions[metavariable].expression : undefined
+    }
+
+    /**
+     * There are three reasons why a {@link Substitution Substitution}
+     * instance may not be able to be added to a given Solution.
+     * 
+     *  1. If the {@link Substitution Substitution}'s metavariable already
+     *     appears in the given Solution, but mapped to a different
+     *     {@link Expression Expression}.  This fails because a
+     *     {@link Substitution Substitution} is a function, and so it cannot
+     *     map the same input to more than one output.
+     *  2. If the {@link Substitution Substitution} maps a metavariable to a
+     *     non-{@link Symbol Symbol}, and yet the metavariable appears as the
+     *     bound variable in a quantifier.  This fails because quantifiers can
+     *     bind only variables, so we cannot replace a bound metavariable with
+     *     anything but another variable.
+     *  3. If applying the given {@link Substitution Substitution} violates
+     *     any one of the {@link CaptureConstraints CaptureConstraints} stored
+     *     in this Solution.  This fails because if we later apply the
+     *     Solution to the original {@link Problem Problem} from which it was
+     *     created, we must variable capture, and those constraints are
+     *     precisely what must be satisfied in order to do so.
+     * 
+     * In any of those three cases, this function returns false.  Otherwise,
+     * it returns true.
+     * 
+     * @param {Substitution} substitution the proposed substitution to be
+     *   added to this object via {@link Solution.add add()}
+     * @returns {boolean} whether adding the proposed `substitution` will
+     *   succeed (as opposed to throw an error)
+     * 
+     * @see {@link Solution.add add()}
+     */
+    canAdd ( substitution ) {
+        const mvName = substitution.metavariable.text()
+        const oldValue = this.get( mvName )
+        const newValue = substitution.expression
+        // Check #1: The metavariable isn't already mapped to something else
+        return ( !oldValue || oldValue.equals( newValue ) )
+        // Check #2: The substitution wouldn't make us try to bind a non-var
+            && ( !this._bound.has( mvName ) || newValue instanceof Symbol )
+        // Check #3: The substitution doesn't violate any capture constraints
+            && !this._captureConstraints.constraints.some( cc =>
+                cc.afterSubstituting( substitution ).violated() )
+        // None of the checks failed, so this whole function returns true.
     }
 
     /**

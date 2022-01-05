@@ -185,4 +185,55 @@ describe( 'Solution', () => {
         // Solution, but we will test that in the future (TO DO!).
     } )
 
+    it( 'Should correctly tell us when we can add Substitutions', () => {
+        // Construct a problem containing the same two Constraints as in the
+        // previous test, and then a solution from it, as before.
+        const pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
+        pat1.child( 1 ).makeIntoA( M.metavariable ) // outer x
+        pat1.index( [ 2, 2, 1, 1 ] ).makeIntoA( M.metavariable ) // inner x
+        const pat2 = new Symbol( 'foo' ).asA( M.metavariable )
+        const C1 = new M.Constraint(
+            pat1,
+            LogicConcept.fromPutdown( '(∀ t , (∃ y , (= (+ t 1) y)))' )[0]
+        )
+        const C2 = new M.Constraint(
+            pat2,
+            LogicConcept.fromPutdown( '(larger thing but not too large)' )[0]
+        )
+        const P = new M.Problem( C1, C2 )
+        const S1 = new M.Solution( P )
+        // Try to add a Substitution that violates rule #1: the metavariable is
+        // already mapped to something else.
+        S1._substitutions['foo'] = new M.Substitution(
+            new Symbol( 'foo' ).asA( M.metavariable ),
+            new Symbol( 'bar' )
+        )
+        expect( S1.canAdd( new M.Substitution(
+            new Symbol( 'foo' ).asA( M.metavariable ),
+            new Symbol( 'baz' )
+        ) ) ).equals( false )
+        delete S1._substitutions['foo'] // cleanup
+        // Try to add a Substitution that violates rule #2: replacing a bound
+        // metavariable with a non-variable.
+        expect( S1.canAdd( new M.Substitution(
+            new Symbol( 'x' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown( '(not atomic)' )[0]
+        ) ) ).equals( false )
+        // Try to add a Substitution that violates rule #3: violating variable
+        // capture constraints
+        expect( S1.canAdd( new M.Substitution(
+            new Symbol( 'x' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown( 'y' )[0]
+        ) ) ).equals( false )
+        // Try to add Substitutions that violate none of the 3 rules.
+        expect( S1.canAdd( new M.Substitution(
+            new Symbol( 'x' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown( 'this_should_work' )[0]
+        ) ) ).equals( true )
+        expect( S1.canAdd( new M.Substitution(
+            new Symbol( 'foo' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown( 'baz' )[0] // since we did cleanup above
+        ) ) ).equals( true )
+    } )
+
 } )
