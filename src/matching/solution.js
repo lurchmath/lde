@@ -1,4 +1,5 @@
 
+import { Binding } from "../binding.js"
 import { metavariable } from "./metavariables.js"
 import { Problem } from "./problem.js"
 import { CaptureConstraints } from "./capture-constraint.js"
@@ -53,6 +54,12 @@ export class Solution {
                 pattern.descendantsSatisfying( d => d.isA( metavariable ) )
                        .map( d => d.text() )
             ).flat( 1 ) )
+            this._bound = new Set( pats.map( pattern =>
+                pattern.descendantsSatisfying( d => d instanceof Binding )
+                       .map( b => b.boundVariables()
+                                   .filter( v => v.isA( metavariable ) )
+                                   .map( mv => mv.text() ) )
+            ).flat( 2 ) )
         }
 
         // We initialize an empty member here, but it is an important one, so
@@ -80,6 +87,9 @@ export class Solution {
      *    removing entries changes only the copy.
      *  * It makes a copy of the {@link CaptureConstraints CaptureConstraints}
      *    set, but as documented in that class, such copies are shallow.
+     *  * It uses the same metavariable and bound metavariable sets as in the
+     *    original object, because those members do not change throughout the
+     *    lifetime of a Solution.
      */
     copy () {
         // Pass skip=true to avoid computing data we're about to provide:
@@ -95,8 +105,9 @@ export class Solution {
                 }
             }
         }
-        result._metavariables = new Set( this._metavariables )
         result._captureConstraints = this._captureConstraints.copy()
+        result._metavariables = this._metavariables
+        result._bound = this._bound
         // Done, return the copy:
         return result
     }

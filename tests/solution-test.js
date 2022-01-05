@@ -25,6 +25,7 @@ describe( 'Solution', () => {
         expect( JSON.equals( S._substitutions, {} ) ).to.equal( true )
         expect( S.hasOwnProperty( '_captureConstraints' ) ).to.equal( false )
         expect( S.hasOwnProperty( '_metavariables' ) ).to.equal( false )
+        expect( S.hasOwnProperty( '_bound' ) ).to.equal( false )
         const P2 = new M.Problem( new M.Constraint(
             LogicConcept.fromPutdown( '(= (+ 1 1) 2)' )[0],
             LogicConcept.fromPutdown( '(= (+ 1 1) 2)' )[0]
@@ -34,6 +35,7 @@ describe( 'Solution', () => {
         expect( JSON.equals( S._substitutions, {} ) ).to.equal( true )
         expect( S.hasOwnProperty( '_captureConstraints' ) ).to.equal( false )
         expect( S.hasOwnProperty( '_metavariables' ) ).to.equal( false )
+        expect( S.hasOwnProperty( '_bound' ) ).to.equal( false )
     } )
 
     it( 'Should correctly construct Solutions from Problems', () => {
@@ -86,6 +88,10 @@ describe( 'Solution', () => {
         expect( S._metavariables.size ).to.equal( 2 )
         expect( S._metavariables.has( 'x' ) ).to.equal( true )
         expect( S._metavariables.has( 'foo' ) ).to.equal( true )
+        // Now ensure that it computed the correct set of bound metavariables
+        expect( S._bound ).to.be.instanceof( Set )
+        expect( S._bound.size ).to.equal( 1 )
+        expect( S._bound.has( 'x' ) ).to.equal( true )
 
         // Now do the degenerate case--an empty problem has no capture
         // constraints, but still caches that value
@@ -101,6 +107,9 @@ describe( 'Solution', () => {
         // Now ensure that it computed the correct set of metavariables
         expect( S._metavariables ).to.be.instanceof( Set )
         expect( S._metavariables.size ).to.equal( 0 )
+        // Now ensure that it computed the correct set of metavariables
+        expect( S._bound ).to.be.instanceof( Set )
+        expect( S._bound.size ).to.equal( 0 )
     } )
 
     it( 'Should make partially-deep copies', () => {
@@ -125,14 +134,10 @@ describe( 'Solution', () => {
         expect( () => S2 = S1.copy() ).not.to.throw()
         // Do they have the same problem instance?  They should.
         expect( S1._problem ).equals( S2._problem )
-        // Do they have the same metavariable set?  It should be the same set
-        // contents, but a different set instance.
-        expect( S1._metavariables ).not.equals( S2._metavariables )
-        const S1metas = Array.from( S1._metavariables )
-        const S2metas = Array.from( S2._metavariables )
-        S1metas.sort()
-        S2metas.sort()
-        expect( JSON.equals( S1metas, S2metas ) ).to.equal( true )
+        // Do they have the same metavariable set?  They should.
+        expect( S1._metavariables ).equals( S2._metavariables )
+        // Do they have the same bound metavariable set?  They should.
+        expect( S1._bound ).equals( S2._bound )
         // Do they have the same capture constraint set?  It should be the
         // same set contents, but a different set instance.
         expect( S1._captureConstraints )
@@ -159,9 +164,8 @@ describe( 'Solution', () => {
         S1 = new M.Solution( emptyP )
         expect( () => S2 = S1.copy() ).not.to.throw()
         expect( S1._problem ).equals( S2._problem )
-        expect( S1._metavariables ).not.equals( S2._metavariables )
-        expect( S1._metavariables.size ).equals( 0 )
-        expect( S2._metavariables.size ).equals( 0 )
+        expect( S1._metavariables ).equals( S2._metavariables )
+        expect( S1._bound ).equals( S2._bound )
         expect( S1._captureConstraints )
             .to.be.instanceof( M.CaptureConstraints )
         expect( S2._captureConstraints )
