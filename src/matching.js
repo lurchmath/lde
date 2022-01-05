@@ -19,6 +19,7 @@
  * @see {@link CaptureConstraints CaptureConstraints class}
  * @see {@link module:ExpressionFunctions ExpressionFunctions module}
  * @see {@link Problem Problem class}
+ * @see {@link Solution Solution class}
  *
  * @module Matching
  */
@@ -37,6 +38,7 @@ import {
     newEFA, isAnEFA, canBetaReduce, betaReduce, fullBetaReduce
 } from '../src/matching/expression-functions.js'
 import { Problem } from "./matching/problem.js"
+import { Solution } from "./matching/solution.js"
 
 export default {
     NewSymbolStream,
@@ -44,5 +46,5 @@ export default {
     CaptureConstraint, CaptureConstraints,
     newEF, isAnEF, arityOfEF, applyEF, constantEF, projectionEF, applicationEF,
     newEFA, isAnEFA, canBetaReduce, betaReduce, fullBetaReduce,
-    Problem
+    Problem, Solution
 }
