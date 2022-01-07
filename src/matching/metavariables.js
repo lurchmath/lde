@@ -1,41 +1,46 @@
 
+import { Symbol } from '../symbol.js'
+
 /**
  * This module defines a constant and function that formalize the concept of a
- * "metavariable."  We often want to treat an expression as a pattern (or an
- * expression scheme) that represents the infinite family of expressions
- * achievable by substituting expressions in for some or all of the symbols in
- * the original expression.
- * 
- * For example, we may sometimes treat $x+y$ as literally the expression $x+y$,
- * but other times we may want to treat it as a general scheme into which we can
- * substitute values, such as replacing $x=3a,y=\sqrt{6}$ to obtain
- * $3a+\sqrt{6}$.
- * 
- * When an expression contains symbols that can be replaced by entire
- * expressions, we call those symbols *metavariables.*  For example, the $x$ and
- * $y$ in the second half of the previous example are metavariables, but the $+$
- * symbol in that same expression was not, even though it (like $x$ and $y$) is
- * a symbol.
+ * "metavariable."  See the documentation for
+ * {@link module:Matching the Matching module} for a definition of
+ * metavariables and how they relate to the concept of matching.
  * 
  * @see {@link module:Metavariables.metavariable metavariable} - for marking
  *   certain symbols as metavariables
  * @see {@link module:Metavariables.containsAMetavariable containsAMetavariable()} - for
  *   testing whether expressions contain metavariables
+ * @see {@link module:Metavariables.metavariablesIn metavariablesIn()} - for
+ *   computing an array of all metavariables within a given expression
+ * @see {@link module:Metavariables.metavariableNamesIn metavariableNamesIn()} - for
+ *   computing a set of all names of metavariables within a given expression
  * 
  * @module Metavariables
  */
 
 /**
- * To facilitate marking some symbols as metavariables (and not others), we
- * declare a string constant that can be used with the
+ * To facilitate marking some {@link Symbol Symbols} as metavariables (in
+ * contrast to any {@link Symbol Symbol} not so marked), we declare a string
+ * constant that can be used with the
  * {@link MathConcept#isA isA()} and {@link MathConcept#asA asA()} and
  * {@link MathConcept#makeIntoA makeIntoA()} functions in the
- * {@link MathConcept MathConcept} class.  For example, to mark a symbol `A` as
- * a metavariable, one can import this module (call it `M`) and then call
- * `A.makeIntoA( M.metavariable )`.  You can later test to see if `A` is a
- * metavariable with `A.isA( M.metavariable )`.
+ * {@link MathConcept MathConcept} class.
+ * 
+ * For example, to mark a symbol `A` as a metavariable, one can import this
+ * module (call it `M`) and then call `A.makeIntoA( M.metavariable )`.  You
+ * can later test to see if `A` is a metavariable with
+ * `A.isA( M.metavariable )`.
+ * 
+ * Note, however, that only {@link Symbol Symbol} instances can be used as
+ * metavariables by {@link module:Matching the matching module}.  Although you
+ * can mark any {@link LogicConcept LogicConcept} as a metavariable this way,
+ * it is useless to do so, and other functions in this module will not
+ * recognize non-{@link Symbol Symbols} as metavariables.
  * 
  * @see {@link module:Metavariables.containsAMetavariable containsAMetavariable()}
+ * @see {@link module:Metavariables.metavariablesIn metavariablesIn()}
+ * @see {@link module:Metavariables.metavariableNamesIn metavariableNamesIn()}
  */
 export const metavariable = 'LDE MV'
 
@@ -57,6 +62,45 @@ export const metavariable = 'LDE MV'
  * @returns {boolean} true if and only if `LC` contains no metavariables
  * @static
  */
-export const containsAMetavariable = LC => {
-    return LC.hasDescendantSatisfying( d => d.isA( metavariable ) )
-}
+export const containsAMetavariable = LC =>
+    LC.hasDescendantSatisfying( d =>
+        ( d instanceof Symbol ) && d.isA( metavariable ) )
+
+/**
+ * Find the ordered list of all descendants of the given
+ * {@link LogicConcept LogicConcept} that are metavariables.
+ * In contrast to
+ * {@link module:Metavariables.metavariableNamesIn metavariableNamesIn()},
+ * this function returns the actual {@link Symbol Symbol} instances, not just
+ * their string names, and thus this list might be longer than what
+ * {@link module:Metavariables.metavariableNamesIn metavariableNamesIn()}
+ * would return on the same input.
+ * 
+ * @param {LogicConcept} LC where to search for metavariables
+ * @returns {Array} a JavaScript array of all {@link Symbol Symbol} instances
+ *   that are descendants of the given `LC` and that pass the
+ *   `s.isA( metavariable )` test.  Note that a
+ *   {@link LogicConcept LogicConcept} is considered a descendant of itself.
+ *   The results appear in tree traversal order.
+ * 
+ * @see {@link module:Metavariables.metavariableNamesIn metavariableNamesIn()}
+ */
+export const metavariablesIn = LC =>
+    LC.descendantsSatisfying( d =>
+        ( d instanceof Symbol ) && d.isA( metavariable ) )
+
+/**
+ * Find the collection of metavariables appearing in the given
+ * {@link LogicConcept LogicConcept}, considering only their names as strings,
+ * not distinguishing one instance of, say, $x$, from another.
+ * Thus the result of this function will be a set that may have fewer elements
+ * than the array that would be returned by
+ * {@link module:Metavariables.metavariablesIn metavariablesIn()} if it were
+ * called on the same input.
+ * 
+ * @param {LogicConcept} LC where to search for metavariable names
+ * @returns {Set} a JavaScript set of strings, each of which is the name of a
+ *   metavariable appearing in the given `LC`
+ */
+export const metavariableNamesIn = LC =>
+    new Set( metavariablesIn( LC ).map( mv => mv.text() ) )

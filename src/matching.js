@@ -163,7 +163,7 @@
 
 import { NewSymbolStream } from "./matching/new-symbol-stream.js"
 import {
-    metavariable, containsAMetavariable
+    metavariable, containsAMetavariable, metavariablesIn, metavariableNamesIn
 } from "./matching/metavariables.js"
 import { Constraint } from "./matching/constraint.js"
 import { Substitution } from "./matching/substitution.js"
@@ -179,8 +179,9 @@ import { Solution } from "./matching/solution.js"
 
 export default {
     NewSymbolStream,
-    Constraint, metavariable, containsAMetavariable, Substitution,
-    CaptureConstraint, CaptureConstraints,
+    Constraint, CaptureConstraint, CaptureConstraints,
+    metavariable, containsAMetavariable, metavariablesIn, metavariableNamesIn,
+    Substitution,
     newEF, isAnEF, arityOfEF, applyEF, constantEF, projectionEF, applicationEF,
     newEFA, isAnEFA, canBetaReduce, betaReduce, fullBetaReduce,
     Problem, Solution
