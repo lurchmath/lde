@@ -14,7 +14,7 @@
     "jsdoc": "^3.6.7",
     "mocha": "^8.3.2",
     "puppeteer": "^5.2.1",
-    "tidy-jsdoc": "^1.4.0"
+    "tidy-jsdoc": "^1.4.1"
   },
   "scripts": {
     "test": "node src/database/generate.js && node --trace-warnings tests/all-in-puppeteer.js",
