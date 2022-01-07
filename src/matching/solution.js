@@ -123,9 +123,10 @@ export class Solution {
      * 
      * @param {Symbol|String} metavariable a metavariable (or just the name of
      *   a metavariable) to be looked up in this Solution
-     * @return {[Expression]} the {@link Expression Expression} to which this
-     *   Solution maps the given metavariable, or undefined if this solution
-     *   does not map the metavariable to any {@link Expression Expression}
+     * @returns {Expression|undefined} the {@link Expression Expression} to
+     *   which this Solution maps the given metavariable, or undefined if this
+     *   solution does not map the metavariable to any
+     *   {@link Expression Expression}
      */
     get ( metavariable ) {
         if ( metavariable instanceof Symbol )
@@ -159,11 +160,11 @@ export class Solution {
      * it returns true.
      * 
      * @param {Substitution} substitution the proposed substitution to be
-     *   added to this object via {@link Solution.add add()}
+     *   added to this object via {@link Solution#add add()}
      * @returns {boolean} whether adding the proposed `substitution` will
      *   succeed (as opposed to throw an error)
      * 
-     * @see {@link Solution.add add()}
+     * @see {@link Solution#add add()}
      */
     canAdd ( substitution ) {
         const mvName = substitution.metavariable.text()
