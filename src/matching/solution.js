@@ -296,4 +296,37 @@ export class Solution {
         return result
     }
 
+    /**
+     * A Solution is satisfied if all its
+     * {@link CaptureConstraints CaptureConstraints} are satisfied.  This
+     * method is a convenience for asking that question.
+     * 
+     * @returns {boolean} whether all
+     *   {@link CaptureConstraints CaptureConstraints} are satisfied
+     * 
+     * @see {@link Solution#complete complete()}
+     */
+    satisfied () {
+        return this._captureConstraints.satisfied()
+    }
+
+    /**
+     * A Solution is complete if all of the metavariables appearing in the
+     * original {@link Problem Problem} (from which the Solution was
+     * constructed) have assignments in this solution, and those assignments
+     * do not include any metavariables.  If a solution is complete, it could
+     * be applied to the original problem's patterns to produce expressions
+     * containing no metavariables.
+     * 
+     * @return {boolean} whether this Solution is complete, as defined above
+     * 
+     * @see {@link Solution#satisfied satisfied()}
+     */
+    complete () {
+        const d = this.domain()
+        return Array.from( this._metavariables ).every( mv => d.has( mv ) )
+            && Array.from( d ).every( mv =>
+                this._substitutions[mv].metavariableNames().size == 0 )
+    }
+
 }

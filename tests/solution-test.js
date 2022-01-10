@@ -265,6 +265,7 @@ describe( 'Solution', () => {
         //  - The domain is the empty set
         //  - Looking up any metavariable yields undefined
         //  - Capture constraints are the 5 we tested earlier
+        //  - Solution is neither satisfied nor complete
         expect( S.domain() ).to.be.instanceOf( Set )
         expect( S.domain().size ).to.equal( 0 )
         expect( S.get( 'foo' ) ).to.be.undefined
@@ -296,6 +297,8 @@ describe( 'Solution', () => {
                 new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '1' )
             )
         ) ).to.equal( true )
+        expect( S.satisfied() ).to.equal( false )
+        expect( S.complete() ).to.equal( false )
         // Now add a Substitution to the Solution; verify that it's allowed.
         // This substitution is the one required by constraint C2:
         // foo -> (larger thing but not too large)
@@ -307,6 +310,7 @@ describe( 'Solution', () => {
         //  - Looking up any metavariable other than foo gives undefined
         //  - Looking up foo yields C2.expression.copy()
         //  - Capture constraints are unchanged, because none mentions foo
+        //  - Solution is neither satisfied nor complete
         expect( S.domain() ).to.be.instanceOf( Set )
         expect( S.domain().size ).to.equal( 1 )
         expect( S.domain().has( 'foo' ) ).to.equal( true )
@@ -340,6 +344,8 @@ describe( 'Solution', () => {
                 new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '1' )
             )
         ) ).to.equal( true )
+        expect( S.satisfied() ).to.equal( false )
+        expect( S.complete() ).to.equal( false )
         // Now add a Substitution to the Solution; verify that it's allowed.
         // This substitution is the one required by constraint C1: x -> t
         expect( () =>
@@ -354,6 +360,7 @@ describe( 'Solution', () => {
         //  - Looking up foo yields C2.expression.copy()
         //  - Looking up x yields t
         //  - Capture constraints all deleted, because all satisfied
+        //  - Solution is both satisfied and complete
         expect( S.domain() ).to.be.instanceOf( Set )
         expect( S.domain().size ).to.equal( 2 )
         expect( S.domain().has( 'foo' ) ).to.equal( true )
@@ -377,6 +384,8 @@ describe( 'Solution', () => {
                 new Symbol( 'y' )
             ) )
         ).to.throw( /Adding an invalid Substitution/ )
+        expect( S.satisfied() ).to.equal( true )
+        expect( S.complete() ).to.equal( true )
     } )
 
     it( 'Should support applying Substitutions to it', () => {
@@ -395,6 +404,7 @@ describe( 'Solution', () => {
             new Symbol( 'Y' ).asA( M.metavariable ),
             temp
         ) )
+        expect( S1.complete() ).to.equal( false )
         // Apply to it the Substitution: Z -> +(W,W)
         temp = LogicConcept.fromPutdown( '(+ W W)' )[0]
         temp.child( 1 ).makeIntoA( M.metavariable )
@@ -409,6 +419,7 @@ describe( 'Solution', () => {
         temp.child( 2 ).child( 1 ).makeIntoA( M.metavariable )
         temp.child( 2 ).child( 2 ).makeIntoA( M.metavariable )
         expect( S1.get( 'Y' ).equals( temp ) ).equals( true )
+        expect( S1.complete() ).to.equal( false )
         // Apply to it the Substitution: W -> k
         sub = new M.Substitution(
             new Symbol( 'W' ).asA( M.metavariable ),
@@ -419,6 +430,7 @@ describe( 'Solution', () => {
         expect( S1.get( 'Y' ).equals(
             LogicConcept.fromPutdown( '(f t (+ k k))' )[0]
         ) ).equals( true )
+        expect( S1.complete() ).to.equal( true )
     } )
 
 } )
