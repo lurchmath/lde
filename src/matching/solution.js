@@ -237,6 +237,32 @@ export class Solution {
     }
 
     /**
+     * One common workflow will be to extend a solution by first making a copy
+     * (using the {@link Solution#copy copy()} function) and then adding a new
+     * {@link Substitution Substitution} to it (using the
+     * {@link Solution#add add()} function).  This function makes that easier
+     * by making it possible to do it with just one function call.  If `S` is
+     * a Solution, then `S.plus(sub)` is a copy of `S`, but after `S.add(sub)`
+     * has been called on it.
+     * 
+     * Note that if you are not certain whether the
+     * {@link Substitution Substitution} can be added, you may need to call
+     * {@link Solution#canAdd canAdd()} first, or this routine will throw an
+     * error.
+     * 
+     * @param {Substitution} sub the substitution to add
+     * @param {boolean} check functions the same as it does in
+     *   {@link Solution#add add()}
+     * @returns {Solution} a {@link Solution#copy copy()} of this object, but
+     *   with `sub` added, via a call to {@link Solution#add add()}
+     */
+    plus ( sub, check = true ) {
+        const result = this.copy()
+        result.add( sub, check )
+        return result
+    }
+
+    /**
      * A Solution can be viewed as a partial function from metavariables to
      * expressions.  That is, it is a finite set
      * $\\{(m_1,e_1),\ldots,(m_n,e_n)\\}$, where each $m_i$ is a metavariable
