@@ -152,8 +152,8 @@ export class Substitution {
     applyTo ( target ) {
         if ( target instanceof LogicConcept ) {
             // Compute the list of metavariables to replace:
-            const toReplace = target.descendantsSatisfying( d =>
-                d.equals( this._metavariable ) && d.isA( metavariable ) )
+            const toReplace = target.descendantsSatisfying(
+                d => d.equals( this._metavariable ) )
             // Replace them all:
             toReplace.forEach( d => d.replaceWith( this._expression.copy() ) )
             return
