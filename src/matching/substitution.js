@@ -210,34 +210,6 @@ export class Substitution {
     }
 
     /**
-     * The string representation of a Substitution $(m,e)$ is simply the string
-     * "(M,E)" where M is the {@link LogicConcept#toPutdown putdown}
-     * representation of $m$ and E is the {@link LogicConcept#toPutdown putdown}
-     * representation of $e$.
-     *
-     * This function also improves brevity and clarity when debugging by making
-     * a few text replacements, as follows:
-     * 
-     *  * The JSON notation for the metavariable attribute is replaced with a
-     *    double underscore, so rather than seeing `'P +{"_type_LDE MV":true}'`,
-     *    you will see simply `P__`.
-     *  * The binder for expression functions, `"LDE lambda"`, is replaced with
-     *    the more compact and intuitive `𝝺`.
-     *  * The symbol for expression function application, `"LDE EFA"`, is
-     *    replaced with the more compact `@`, which can be read as shorthand for
-     *    "apply."
-     * 
-     * @returns {string} a string representation of the Substitution, useful in
-     *   debugging
-     */
-    toString () {
-        return `(${this._metavariable.toPutdown()},${this._expression.toPutdown()})`
-            .replace( / \+\{"_type_LDE MV":true\}\n/g, '__' )
-            .replace( /"LDE EFA"/g, '@' )
-            .replace( /"LDE lambda"/g, '𝝺' )
-    }
-
-    /**
      * Apply a sequence of Substitution instances, in the order given, to the
      * expression of this Substitution instance, in place.
      * 
@@ -284,6 +256,34 @@ export class Substitution {
         const result = this.copy()
         result.substitute( ...subs )
         return result
+    }
+
+    /**
+     * The string representation of a Substitution $(m,e)$ is simply the string
+     * "(M,E)" where M is the {@link LogicConcept#toPutdown putdown}
+     * representation of $m$ and E is the {@link LogicConcept#toPutdown putdown}
+     * representation of $e$.
+     *
+     * This function also improves brevity and clarity when debugging by making
+     * a few text replacements, as follows:
+     * 
+     *  * The JSON notation for the metavariable attribute is replaced with a
+     *    double underscore, so rather than seeing `'P +{"_type_LDE MV":true}'`,
+     *    you will see simply `P__`.
+     *  * The binder for expression functions, `"LDE lambda"`, is replaced with
+     *    the more compact and intuitive `𝝺`.
+     *  * The symbol for expression function application, `"LDE EFA"`, is
+     *    replaced with the more compact `@`, which can be read as shorthand for
+     *    "apply."
+     * 
+     * @returns {string} a string representation of the Substitution, useful in
+     *   debugging
+     */
+     toString () {
+        return `(${this._metavariable.toPutdown()},${this._expression.toPutdown()})`
+            .replace( / \+\{"_type_LDE MV":true\}\n/g, '__' )
+            .replace( /"LDE EFA"/g, '@' )
+            .replace( /"LDE lambda"/g, '𝝺' )
     }
 
 }
