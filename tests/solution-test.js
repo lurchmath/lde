@@ -162,13 +162,24 @@ describe( 'Solution', () => {
             S2._captureConstraints.constraints[3] ) ).to.equal( true )
         expect( S1._captureConstraints.constraints[4].equals(
             S2._captureConstraints.constraints[4] ) ).to.equal( true )
-        // Do they have the same substitutions?  We cannot test that at this
-        // point, because we haven't yet implemented adding substitutions to a
-        // Solution, but we will test that in the future (TO DO!).
+        // Do they have the same substitutions?  In this case, they should
+        // both be empty, but we will consider a case below that's nonempty.
+        expect( S1.domain().size ).equals( 0 )
+        expect( S2.domain().size ).equals( 0 )
 
-        // Repeat the above test with an empty problem also.
+        // Repeat the above test with an empty problem but with some
+        // substitutions.
         const emptyP = new M.Problem()
         S1 = new M.Solution( emptyP )
+        S1.add( new M.Substitution(
+            new Symbol( 'one' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown( '"this is just a string symbol"' )[0]
+        ) )
+        S1.add( new M.Substitution(
+            new Symbol( 'two' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown(
+                '(sqrt + (^ (- x1 x2) 2) (^ (- y1 y2) 2))' )[0]
+        ) )
         expect( () => S2 = S1.copy() ).not.to.throw()
         expect( S1._problem ).equals( S2._problem )
         expect( S1._metavariables ).equals( S2._metavariables )
@@ -180,9 +191,16 @@ describe( 'Solution', () => {
         expect( S1._captureConstraints ).not.equals( S2._captureConstraints )
         expect( S1._captureConstraints.empty() ).to.equal( true )
         expect( S2._captureConstraints.empty() ).to.equal( true )
-        // Do they have the same substitutions?  We cannot test that at this
-        // point, because we haven't yet implemented adding substitutions to a
-        // Solution, but we will test that in the future (TO DO!).
+        expect( S1.domain().size ).equals( 2 )
+        expect( S2.domain().size ).equals( 2 )
+        expect( S2.domain().has( 'one' ) ).equals( true )
+        expect( S2.domain().has( 'two' ) ).equals( true )
+        expect( S2.get( 'one' ).equals(
+            LogicConcept.fromPutdown( '"this is just a string symbol"' )[0]
+        ) ).equals( true )
+        expect( S2.get( 'two' ).equals(
+            LogicConcept.fromPutdown( '(sqrt + (^ (- x1 x2) 2) (^ (- y1 y2) 2))' )[0]
+        ) ).equals( true )
     } )
 
     it( 'Should correctly tell us when we can add Substitutions', () => {
