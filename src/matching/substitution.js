@@ -36,7 +36,7 @@ export class Substitution {
      * @see {@link Substitution#metavariable metavariable getter}
      * @see {@link Substitution#expression expression getter}
      */
-     constructor ( ...args ) {
+    constructor ( ...args ) {
         // Case 1: a single Constraint that can be applied
         if ( args.length == 1 && ( args[0] instanceof Constraint )
                               && args[0].isAnInstantiation() ) {
@@ -128,7 +128,7 @@ export class Substitution {
      * 
      * @see {@link Substitution#appliedTo appliedTo()}
      */
-     applyTo ( target ) {
+    applyTo ( target ) {
         if ( target instanceof LogicConcept ) {
             // Compute the list of metavariables to replace:
             const toReplace = target.descendantsSatisfying( d =>
@@ -169,7 +169,7 @@ export class Substitution {
      * @see {@link Substitution#applyTo applyTo()}
      * @see {@link LogicConcept#copy copy()}
      */
-     appliedTo ( target ) {
+    appliedTo ( target ) {
         if ( target instanceof LogicConcept ) {
             // Handle the corner case that applyTo() cannot handle:
             if ( target.equals( this._metavariable ) && target.isA( metavariable ) )
@@ -206,7 +206,7 @@ export class Substitution {
      * @returns {string} a string representation of the Substitution, useful in
      *   debugging
      */
-     toString () {
+    toString () {
         return `(${this._metavariable.toPutdown()},${this._expression.toPutdown()})`
             .replace( / \+\{"_type_LDE MV":true\}\n/g, '__' )
             .replace( /"LDE EFA"/g, '@' )

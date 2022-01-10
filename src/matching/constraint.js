@@ -10,7 +10,9 @@ import { isAnEFA } from './expression-functions.js'
  * express the idea that the expression $e$ matches the pattern $p$.  The $e$
  * will be an instance of {@link Expression Expression} and the $p$ will be as
  * well, but it may contain metavariables, as defined
- * {@link module:Metavariables.metavariable here}.
+ * {@link module:Metavariables.metavariable here}.  For more information on how
+ * Constraints fit into the work of matching in general, see
+ * {@link module:Matching the documentation for the matching module}.
  * 
  * Note that a Constraint need not be true or satisfiable.  Here are three
  * examples using ordinary mathematical notation.  For the purposes of these
@@ -30,7 +32,7 @@ import { isAnEFA } from './expression-functions.js'
  *    in $p$ into the universal quantifier in $e$.
  * 
  * Typically Constraints are arranged into sets, and there are algorithms for
- * solving sets of Constraints.  See the {@link Problem Problem} class for more
+ * solving sets of Constraints.  See the {@link Problem Problem class} for more
  * details.
  */
 export class Constraint {
