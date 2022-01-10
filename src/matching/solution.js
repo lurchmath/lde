@@ -1,7 +1,7 @@
 
 import { Binding } from "../binding.js"
 import { Symbol } from "../symbol.js"
-import { metavariable } from "./metavariables.js"
+import { metavariable, metavariableNamesIn } from "./metavariables.js"
 import { Problem } from "./problem.js"
 import { CaptureConstraints } from "./capture-constraint.js"
 
@@ -51,10 +51,8 @@ export class Solution {
             const pats = problem.constraints.map(
                 constraint => constraint.pattern )
             this._captureConstraints = new CaptureConstraints( ...pats )
-            this._metavariables = new Set( pats.map( pattern =>
-                pattern.descendantsSatisfying( d => d.isA( metavariable ) )
-                       .map( d => d.text() )
-            ).flat( 1 ) )
+            this._metavariables = pats.map( metavariableNamesIn )
+                .reduce( ( A, B ) => new Set( [ ...A, ...B ] ), new Set() )
             this._bound = new Set( pats.map( pattern =>
                 pattern.descendantsSatisfying( d => d instanceof Binding )
                        .map( b => b.boundVariables()
@@ -64,17 +62,9 @@ export class Solution {
         }
 
         // We initialize an empty member here, but it is an important one, so
-        // we document its format.  The _substitutions object is as follows:
-        // Each key is a metavariable name, as a string.
-        // Each value is an object containing:
-        //  - key "substitution" mapping to a Substitution instance whose
-        //    metavariable is the one in question
-        //    (This isn't redundant; the original key is for fast lookup.)
-        //  - key "metavariables" mapping to the list of metavariables
-        //    appearing in the Expression, for faster substitution
-        //  - key "original" mapping to a boolean that is true iff the
-        //    metavariable for this substitution was one of the originals
-        //    in the problem
+        // we document its format.  The _substitutions object maps metavariable
+        // names to Substitution instances that replace that metavariable.
+        // This isn't redundant; it makes for fast lookup.
         this._substitutions = { }
     }
 
@@ -96,16 +86,10 @@ export class Solution {
         // Pass skip=true to avoid computing data we're about to provide:
         const result = new Solution( this._problem, true )
         // Now provide that data:
-        for ( let metavariable in this._substitutions ) {
-            if ( this._substitutions.hasOwnProperty( metavariable ) ) {
-                const innerObject = this._substitutions[metavariable]
-                result._substitutions[metavariable] = {
-                    substitution : innerObject.substitution,
-                    metavariables : innerObject.metavariables,
-                    original : innerObject.original
-                }
-            }
-        }
+        for ( let metavariable in this._substitutions )
+            if ( this._substitutions.hasOwnProperty( metavariable ) )
+                result._substitutions[metavariable] =
+                    this._substitutions[metavariable]
         result._captureConstraints = this._captureConstraints.copy()
         result._metavariables = this._metavariables
         result._bound = this._bound
@@ -181,6 +165,102 @@ export class Solution {
     }
 
     /**
+     * This method is designed to support the
+     * {@link Substitution#applyTo applyTo()} method in the
+     * {@link Substitution Substitution} class.  See the documentation there
+     * for details.
+     * 
+     * @param  {...Substitution} subs a list of substitutions to apply
+     * 
+     * @see {@link Substitution#applyTo applyTo() in the Substitution class}
+     */
+    substitute ( ...subs ) {
+        subs.forEach( sub => {
+            // Apply sub to each Substitution in this Solution
+            for ( let metavariable in this._substitutions )
+                if ( this._substitutions.hasOwnProperty( metavariable ) )
+                    this._substitutions[metavariable] =
+                        this._substitutions[metavariable].afterSubstituting(
+                            sub )
+            // Apply sub to each Capture Constraint in this Solution
+            this._captureConstraints = new CaptureConstraints(
+                ...this._captureConstraints.constraints.map( cc =>
+                    sub.appliedTo( cc ) ) )
+        } )
+    }
+
+    /**
+     * This method is designed to support the
+     * {@link Substitution#appliedTo appliedTo()} method in the
+     * {@link Substitution Substitution} class.  See the documentation there
+     * for details.
+     * 
+     * @param  {...Substitution} subs a list of substitutions to apply
+     * 
+     * @see {@link Substitution#appliedTo appiedTo() in the Substitution class}
+     */
+    afterSubstituting ( ...subs ) {
+        const result = this.copy()
+        result.substitute( ...subs )
+        return result
+    }
+
+    /**
+     * Add a new {@link Substitution Substitution} to this object.  (Recall
+     * from the definition of this class that it functions as a set of
+     * {@link Substitution Substitutions}.)  Or, if the
+     * {@link Solution#canAdd canAdd()} function fails for the given
+     * {@link Substitution Substitution}, throw an error instead.
+     * 
+     * This also includes applying the given {@link Substitution Substitution}
+     * to the contents of this object before inserting the given
+     * {@link Substitution Substitution} object into this one.
+     * 
+     * @param {Substitution} sub the substitution to add
+     * @param {boolean} check whether to first call
+     *   {@link Solution#canAdd canAdd()} to check whether `substitution` can
+     *   be added (the default) or not to check and just trust the caller,
+     *   thus not throwing an error
+     */
+    add ( sub, check = true ) {
+        // throw an error if the check fails (unless the caller says skip it)
+        if ( check && !this.canAdd( sub ) )
+            throw new Error( 'Adding an invalid Substitution to a Solution' )
+        // modify inner substitutions and capture constraints
+        this.substitute( sub )
+        // add the sub to our list
+        this._substitutions[sub.metavariable.text()] = sub
+        // delete now-satisfied capture constraints
+        this._captureConstraints.constraints =
+            this._captureConstraints.constraints.filter(
+                cc => !cc.satisfied() )
+    }
+
+    /**
+     * A Solution can be viewed as a partial function from metavariables to
+     * expressions.  That is, it is a finite set
+     * $\\{(m_1,e_1),\ldots,(m_n,e_n)\\}$, where each $m_i$ is a metavariable
+     * and each $e_i$ is an expression, and the Solution maps each $m_i$ to
+     * its corresponding $e_i$.  In such a case, the *domain* of the Solution
+     * is the set $\\{m_1,\ldots,m_n\\}$ of metavariables that are in the
+     * mapping.
+     * 
+     * @returns {Set} the set of metavariables in the domain of this
+     *   Solution, when it is viewed as a partial function from
+     *   metavariables to expressions
+     *
+     * @see {@link Solution#restrict restrict()}
+     * @see {@link Solution#restricted restricted()}
+     */
+    domain () {
+        const result = new Set()
+        for ( let metavariable in this._substitutions )
+            if ( this._substitutions.hasOwnProperty( metavariable ) )
+                result.add( metavariable )
+        return result
+    }
+
+    /**
      * Alter this object by removing any internal
      * {@link Substitution Substitution} whose metavariable does not appear in
      * the original {@link Problem Problem} from which this Solution was
@@ -191,12 +271,13 @@ export class Solution {
      * be part of the final solution, since they were only part of the solving
      * process, not the actual solution.
      * 
+     * @see {@link Substitution#domain domain()}
      * @see {@link Substitution#restricted restricted()}
      */
     restrict () {
         for ( let metavariable in this._substitutions )
             if ( this._substitutions.hasOwnProperty( metavariable )
-              && !this._substitutions.original )
+              && !this._metavariables.has( metavariable ) )
                 delete this._substitutions[metavariable]
     }
 
@@ -205,6 +286,7 @@ export class Solution {
      * {@link Substitution#restrict restrict()} having been applied to the
      * copy.
      * 
+     * @see {@link Substitution#domain domain()}
      * @see {@link Substitution#restrict restrict()}
      * @see {@link Substitution#copy copy()}
      */
