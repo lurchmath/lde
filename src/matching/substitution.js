@@ -1,5 +1,5 @@
 
-import { metavariable } from './metavariables.js'
+import { metavariable, metavariableNamesIn } from './metavariables.js'
 import { Symbol } from '../symbol.js'
 import { LogicConcept } from '../logic-concept.js'
 import { Expression } from '../expression.js'
@@ -73,14 +73,31 @@ export class Substitution {
     get expression () { return this._expression }
 
     /**
+     * Get the set of names of metavariables that appear anywhere in the
+     * expression of this substitution.  Caches the result so that once it is
+     * computed, this is fast to compute again.
+     * 
+     * @returns {Set} a Set of strings, equal to the names of all metavariables
+     *   appearing in the expression of this substitution
+     */
+    metavariableNames () {
+        if ( !this.hasOwnProperty( '_metavariableNames' ) )
+            this._metavariableNames = metavariableNamesIn( this._expression )
+        return this._metavariableNames
+    }
+
+    /**
      * Creates a deep copy of this Substitution, that is, its metavariable and
      * expression are copies of the ones in this object.
      * 
      * @returns {Substitution} a deep copy of this Substitution
      */
     copy () {
-        return new Substitution( this._metavariable.copy(),
-                                 this._expression.copy() )
+        const result = new Substitution( this._metavariable.copy(),
+                                         this._expression.copy() )
+        if ( this.hasOwnProperty( '_metavariableNames' ) )
+            result._metavariableNames = new Set( this._metavariableNames )
+        return result
     }
 
     /**
@@ -109,7 +126,10 @@ export class Substitution {
      *    bulleted list is for this case.)
      *  * If the `target` is any other type of object that has a `substitute`
      *    method, call that method, passing this Substitution object as an
-     *    argument, and let the `target` handle the details.
+     *    argument, and let the `target` handle the details.  In particular,
+     *    this class itself
+     *    {@link Substitution#substitute implements a substitute() method}, so
+     *    Substitutions can be applied to one another.
      *  * No other cases are supported, and will throw errors.
      * 
      * The word "simultaneously" is important because if the expression that is
@@ -127,6 +147,7 @@ export class Substitution {
      *   place
      * 
      * @see {@link Substitution#appliedTo appliedTo()}
+     * @see {@link Substitution#substitute substitute()}
      */
     applyTo ( target ) {
         if ( target instanceof LogicConcept ) {
@@ -157,7 +178,10 @@ export class Substitution {
      * 
      * If the target is not a {@link LogicConcept LogicConcept}, but it
      * implements the `afterSubstituting()` method, then that method is called
-     * with this Substitution as argument, and its result returned.
+     * with this Substitution as argument, and its result returned.  In
+     * particular, this class itself
+     * {@link Substitution#afterSubstituting implements an afterSubstituting() method},
+     * so one can apply Substitutions to other Substitutions.
      * 
      * No other options are supported, and will return an error.
      * 
@@ -211,6 +235,55 @@ export class Substitution {
             .replace( / \+\{"_type_LDE MV":true\}\n/g, '__' )
             .replace( /"LDE EFA"/g, '@' )
             .replace( /"LDE lambda"/g, '𝝺' )
+    }
+
+    /**
+     * Apply a sequence of Substitution instances, in the order given, to the
+     * expression of this Substitution instance, in place.
+     * 
+     * For example, if `S1` is a Substitution mapping the metavariable $M$ to
+     * the expression $f(x,Y)$, where $Y$ was another metavariable, and `S2` is
+     * the substitution mapping $Y$ to $5$, then `S1.substitute(S2)` would
+     * alter `S1` in place so that it mapped $M$ to $f(x,5)$.
+     * 
+     * `S.substitute(X1,...,Xn)` is equivalent to `S.substitute(X1)` and then
+     * `S.substitute(X2)` and so forth, in that order.  It is also equivalent
+     * to `X1.applyTo(S)` and then `X2.applyTo(S)` and so forth, in that order.
+     * 
+     * @param  {...Substitution} subs the list of Substitutions to apply to
+     *   this Substitution's expression, in the order given
+     * 
+     * @see {@link Substitute#applyTo applyTo()}
+     * @see {@link Substitute#afterSubstituting afterSubstituting()}
+     */
+    substitute ( ...subs ) {
+        subs.forEach( sub => {
+            if ( !this.metavariableNames().has( sub.metavariable.text() ) )
+                return
+            this._expression = sub.appliedTo( this._expression )
+            this._metavariableNames.delete( sub.metavariable.text() )
+            sub.metavariableNames().forEach( mv =>
+                this._metavariableNames.add( mv ) )
+        } )
+    }
+
+    /**
+     * This function operates just as
+     * {@link Substitution#substitute substitute()} does, but rather than
+     * altering this object in place, it makes a copy, alters the copy, and
+     * returns that copy.
+     * 
+     * @param  {...Substitution} subs the list of Substitutions to apply to
+     *   this Substitution's expression, in the order given
+     * @returns {Substitution} a copy of this Substitution, but with the
+     *   replacements made
+     * 
+     * @see {@link Substitute#substitute substitute()}
+     */
+    afterSubstituting ( ...subs ) {
+        const result = this.copy()
+        result.substitute( ...subs )
+        return result
     }
 
 }

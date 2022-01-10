@@ -48,7 +48,6 @@ describe( 'Substitution', () => {
             (forall n , (= (* n m) (* m n)))
         ` )
         let m1 = new Symbol( 'meta1' ).asA( M.metavariable )
-        let m2 = new Symbol( 'another mv' ).asA( M.metavariable )
         expect( () => S = new M.Substitution( m1, e1 ) ).not.to.throw()
         expect( S ).to.be.instanceOf( M.Substitution )
         // make a copy and ensure it throws no errors
@@ -160,6 +159,100 @@ describe( 'Substitution', () => {
         expect( applied1.equals( P1 ) ).to.equal( true )
         expect( applied2.equals( P2 ) ).to.equal( true )
         expect( applied3.equals( P3 ) ).to.equal( true )
+    } )
+
+    it( 'Should apply itself equally well to other Substitutions', () => {
+        // Create several substitutions
+        let mv1 = new Symbol( 'mv1' ).asA( M.metavariable )
+        let mv2 = new Symbol( 'mv2' ).asA( M.metavariable )
+        let mv3 = new Symbol( 'mv3' ).asA( M.metavariable )
+        let S1 = new M.Substitution(
+            mv1.copy(),
+            LogicConcept.fromPutdown( '(f x y z)' )[0]
+        )
+        let S2 = new M.Substitution(
+            mv2.copy(),
+            new Application(
+                new Symbol( 'foo' ),
+                mv1.copy(),
+                mv3.copy()
+            )
+        )
+        let S3 = new M.Substitution( mv3.copy(), mv1.copy() )
+        // Ensure that all 3 substitutions have the correct set of metavars
+        let mvSet1 = S1.metavariableNames()
+        expect( mvSet1 ).to.be.instanceOf( Set )
+        expect( mvSet1.size ).equals( 0 )
+        let mvSet2 = S2.metavariableNames()
+        expect( mvSet2 ).to.be.instanceOf( Set )
+        expect( mvSet2.size ).equals( 2 )
+        expect( mvSet2.has( 'mv1' ) ).equals( true )
+        expect( mvSet2.has( 'mv3' ) ).equals( true )
+        let mvSet3 = S3.metavariableNames()
+        expect( mvSet3 ).to.be.instanceOf( Set )
+        expect( mvSet3.size ).equals( 1 )
+        expect( mvSet3.has( 'mv1' ) ).equals( true )
+        // Ensure that several substitution applications have no effect:
+        // (These act on metavariables that aren't present in the target.)
+        expect( S2.appliedTo( S1 ) ).not.equals( S1 ) // different obj, but
+        expect( S2.appliedTo( S1 ).equals( S1 ) ).equals( true ) // same content
+        expect( S2.appliedTo( S3 ) ).not.equals( S3 )
+        expect( S2.appliedTo( S3 ).equals( S3 ) ).equals( true )
+        expect( S3.appliedTo( S1 ) ).not.equals( S1 )
+        expect( S3.appliedTo( S1 ).equals( S1 ) ).equals( true )
+        // Ensure that S1 applied to S2 creates the map
+        // mv2 -> (foo (f x y z) mv3)
+        // and that its new set of metavariables is { mv3 }.
+        let test = S1.appliedTo( S2 )
+        expect( test ).not.equals( S2 )
+        expect( test.metavariable.text() ).equals( 'mv2' )
+        expect( test.expression.equals( new Application(
+            new Symbol( 'foo' ),
+            LogicConcept.fromPutdown( '(f x y z)' )[0],
+            mv3.copy()
+        ) ) ).equals( true )
+        expect( test.metavariableNames() ).to.be.instanceOf( Set )
+        expect( test.metavariableNames().size ).equals( 1 )
+        expect( test.metavariableNames().has( 'mv3' ) ).equals( true )
+        // Ensure that S1 applied to S3 creates the map mv3 -> (f x y z)
+        // and that its new set of metavariables is empty.
+        test = S1.appliedTo( S3 )
+        expect( test ).not.equals( S3 )
+        expect( test.metavariable.text() ).equals( 'mv3' )
+        expect( test.expression.equals( LogicConcept.fromPutdown(
+            '(f x y z)' )[0] ) ).equals( true )
+        expect( test.metavariableNames() ).to.be.instanceOf( Set )
+        expect( test.metavariableNames().size ).equals( 0 )
+        // Ensure that S3 applied to S2 creates the map mv2 -> (foo mv1 mv1)
+        // and that its new set of metavariables is { mv1 }
+        test = S3.appliedTo( S2 )
+        expect( test ).not.equals( S2 )
+        expect( test.metavariable.text() ).equals( 'mv2' )
+        expect( test.expression.equals( new Application(
+            new Symbol( 'foo' ), mv1.copy(), mv1.copy()
+        ) ) ).equals( true )
+        expect( test.metavariableNames() ).to.be.instanceOf( Set )
+        expect( test.metavariableNames().size ).equals( 1 )
+        expect( test.metavariableNames().has( 'mv1' ) ).to.equal( true )
+        // Ensure that composing S1.appliedTo(S3.appliedTo(S2)) yields
+        // the map mv2 -> (foo (f x y z) (f x y z))
+        // and that its new set of metavariables is empty
+        test = S1.appliedTo( S3.appliedTo( S2 ) )
+        expect( test ).not.equals( S2 )
+        expect( test.metavariable.text() ).equals( 'mv2' )
+        expect( test.expression.equals( LogicConcept.fromPutdown(
+            '(foo (f x y z) (f x y z))' )[0] ) ).equals( true )
+        expect( test.metavariableNames() ).to.be.instanceOf( Set )
+        expect( test.metavariableNames().size ).equals( 0 )
+        // Ensure that the same thing occurs if we call it via multiple
+        // arguments to afterSubstituting() instead
+        test = S2.afterSubstituting( S3, S1 )
+        expect( test ).not.equals( S2 )
+        expect( test.metavariable.text() ).equals( 'mv2' )
+        expect( test.expression.equals( LogicConcept.fromPutdown(
+            '(foo (f x y z) (f x y z))' )[0] ) ).equals( true )
+        expect( test.metavariableNames() ).to.be.instanceOf( Set )
+        expect( test.metavariableNames().size ).equals( 0 )
     } )
 
 } )
