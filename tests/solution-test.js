@@ -451,4 +451,92 @@ describe( 'Solution', () => {
         expect( S1.complete() ).to.equal( true )
     } )
 
+    it( 'Should correctly restrict its domain when asked', () => {
+        // Construct a problem containing the same two Constraints as in
+        // earlier tests, and then a solution from it, as before.
+        const pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
+        pat1.child( 1 ).makeIntoA( M.metavariable ) // outer x
+        pat1.index( [ 2, 2, 1, 1 ] ).makeIntoA( M.metavariable ) // inner x
+        const pat2 = new Symbol( 'foo' ).asA( M.metavariable )
+        const C1 = new M.Constraint(
+            pat1,
+            LogicConcept.fromPutdown( '(∀ t , (∃ y , (= (+ t 1) y)))' )[0]
+        )
+        const C2 = new M.Constraint(
+            pat2,
+            LogicConcept.fromPutdown( '(larger thing but not too large)' )[0]
+        )
+        const P = new M.Problem( C1, C2 )
+        const S = new M.Solution( P )
+        // Ensure that restricting it now does nothing.
+        expect( S.domain().size ).equals( 0 )
+        let resS = S.restricted()
+        expect( resS.domain().size ).equals( 0 )
+        // Add one Substitution, within the domain of the problem
+        S.add( new M.Substitution(
+            new Symbol( 'foo' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown( '(larger thing but not too large)' )[0]
+        ) )
+        // Ensure that restricting it still does nothing
+        expect( S.domain().size ).equals( 1 )
+        expect( S.domain().has( 'foo' ) ).equals( true )
+        resS = S.restricted()
+        expect( resS.domain().size ).equals( 1 )
+        expect( resS.domain().has( 'foo' ) ).equals( true )
+        expect( S.get( 'foo' ).equals( resS.get( 'foo' ) ) ).equals( true )
+        // Add another Substitution, this time an extraneous one
+        S.add( new M.Substitution(
+            new Symbol( 'bar' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown( '(totally does not belong here)' )[0]
+        ) )
+        // Ensure that restricting it drops the extraneous Substitution
+        expect( S.domain().size ).equals( 2 )
+        expect( S.domain().has( 'foo' ) ).equals( true )
+        expect( S.domain().has( 'bar' ) ).equals( true )
+        resS = S.restricted()
+        expect( resS.domain().size ).equals( 1 )
+        expect( resS.domain().has( 'foo' ) ).equals( true )
+        expect( S.get( 'foo' ).equals( resS.get( 'foo' ) ) ).equals( true )
+        // Add another Substitution, now the other relevant one
+        S.add( new M.Substitution(
+            new Symbol( 'x' ).asA( M.metavariable ),
+            new Symbol( 't' )
+        ) )
+        // Ensure that restricting it drops the extraneous Substitution
+        expect( S.domain().size ).equals( 3 )
+        expect( S.domain().has( 'foo' ) ).equals( true )
+        expect( S.domain().has( 'bar' ) ).equals( true )
+        expect( S.domain().has( 'x' ) ).equals( true )
+        resS = S.restricted()
+        expect( resS.domain().size ).equals( 2 )
+        expect( resS.domain().has( 'foo' ) ).equals( true )
+        expect( S.get( 'foo' ).equals( resS.get( 'foo' ) ) ).equals( true )
+        expect( resS.domain().has( 'x' ) ).equals( true )
+        expect( S.get( 'x' ).equals( resS.get( 'x' ) ) ).equals( true )
+        // Add another Substitution, another extraneous one
+        S.add( new M.Substitution(
+            new Symbol( 'y' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown( '"lorem ipsum"' )[0]
+        ) )
+        // Ensure that restricting it yields the same thing as before
+        expect( S.domain().size ).equals( 4 )
+        expect( S.domain().has( 'foo' ) ).equals( true )
+        expect( S.domain().has( 'bar' ) ).equals( true )
+        expect( S.domain().has( 'x' ) ).equals( true )
+        expect( S.domain().has( 'y' ) ).equals( true )
+        resS = S.restricted()
+        expect( resS.domain().size ).equals( 2 )
+        expect( resS.domain().has( 'foo' ) ).equals( true )
+        expect( S.get( 'foo' ).equals( resS.get( 'foo' ) ) ).equals( true )
+        expect( resS.domain().has( 'x' ) ).equals( true )
+        expect( S.get( 'x' ).equals( resS.get( 'x' ) ) ).equals( true )
+        // Now apply restrict() to S and ensure it works in-place, too
+        S.restrict()
+        expect( S.domain().size ).equals( 2 )
+        expect( S.domain().has( 'foo' ) ).equals( true )
+        expect( resS.get( 'foo' ).equals( S.get( 'foo' ) ) ).equals( true )
+        expect( S.domain().has( 'x' ) ).equals( true )
+        expect( resS.get( 'x' ).equals( S.get( 'x' ) ) ).equals( true )
+    } )
+
 } )
