@@ -6,42 +6,18 @@ import { LogicConcept } from "../logic-concept.js"
 import { metavariable } from "./metavariables.js"
 import { Constraint } from "./constraint.js"
 import { Substitution } from "./substitution.js"
-import { CaptureConstraint, CaptureConstraints } from "./capture-constraint.js"
+import { Solution } from "./solution.js"
 import {
     constantEF, projectionEF, applicationEF, fullBetaReduce
 } from './expression-functions.js'
 import { NewSymbolStream } from "./new-symbol-stream.js"
 
 /**
- * A matching problem is a set of {@link Constraint Constraints} to be solved.
- * Some problems have just one solution and others have many.  Examples:
- * 
- *  * If we have a single constraint $(f(x,y),k+3)$, with $f,x,y$
- *    {@link module:Metavariables.metavariable metavariables}, then there is a
- *    single solution: $f\mapsto +$, $x\mapsto k$, $y\mapsto 3$.
- *  * If we have a single constraint $(P(3),3=3)$, with $P$ a
- *    {@link module:Metavariables.metavariable metavariable}, then there are
- *    four solutions, shown below.  Note that the dummy variable used in the
- *    $\lambda$ expression is irrelevant; it could be any symbol other than 3.
- *     * $P\mapsto\lambda x.{}3=3$
- *     * $P\mapsto\lambda x.{}x=3$
- *     * $P\mapsto\lambda x.{}3=x$
- *     * $P\mapsto\lambda x.{}x=x$
- *
- * With more than one constraint, solving the problem becomes more complex,
- * because all constraints must be satisfied at once, and there may be many
- * metavariables.  It is also important that any solution must avoid variable
- * capture, that is, we cannot assign a metavariable $X\mapsto y$ if performing
- * the substitution $X\mapsto y$ in some pattern would require replacing a free
- * $X$ at a location where $y$ is not free to replace that $X$.
- * 
  * This class expresses a matching problem, that is, a set of matching
  * {@link Constraint Constraints}, and includes an algorithm for solving them
- * simultaneously, producing a list of solutions (which may be empty).  Each
- * solution on the list is also a set of {@link Constraint Constraints}, but
- * each one will have a single metavariable as its pattern, that is, it will
- * pass the {@link Constraint#canBeApplied canBeApplied()} test, and thus it is
- * fully reduced, in the sense that there is no more "solving" work to be done.
+ * simultaneously, producing a list of {@link Solution Solutions} (which may
+ * be empty).  For more information on the concept of matching in general,
+ * see {@link module:Matching the documentation for the Matching module}.
  */
 export class Problem {
 
@@ -224,22 +200,14 @@ export class Problem {
     }
 
     /**
-     * Create a shallow copy of this object, paying attention only to its
-     * constraint set.  Note that while a problem is being solved, various
-     * information about it may be computed from the context in which that
-     * problem arose, including variable binding constraints, solutions already
-     * computed and cached, and more.  This function does not copy any of that
-     * information; it copies only the constraint set (and if the results of
-     * the {@link Problem#captureConstraints captureConstraints()} function
-     * has been cached, it copies that as well).
+     * Create a shallow copy of this object, which will include a shallow copy
+     * of its constraint set.
      * 
      * @returns {Problem} a shallow copy of this object
      */
     copy () {
         const result = new Problem()
         result.constraints = this.constraints.slice()
-        if ( this._captureConstraints )
-            result._captureConstraints = this._captureConstraints.deepCopy()
         if ( this._stream )
             result._stream = this._stream.copy()
         result._debug = this._debug
@@ -248,9 +216,7 @@ export class Problem {
 
     /**
      * Equality of two problems is determined solely by the content of their
-     * constraint sets.  Any other information computed as part of the solution
-     * of the problem, such as variable capture constraints or cached solutions,
-     * are not compared.  This function returns true if and only if the set of
+     * constraint sets.  This function returns true if and only if the set of
      * constraints is the same in both problems.
      * 
      * @param {Problem} other another instance of the Problem class with which
@@ -261,76 +227,6 @@ export class Problem {
         if ( this.constraints.length != other.constraints.length ) return false
         return this.constraints.every( c1 =>
             other.constraints.some( c2 => c1.equals( c2 ) ) )
-    }
-
-    /**
-     * Recall that we can ask, for a {@link Constraint Constraint}, whether it
-     * {@link Constraint#canBeApplied canBeApplied()}, and if it can, then such
-     * {@link Constraint#applyTo application} can be done to many different
-     * types of objects.  We can treat Problems the same way, because they are
-     * sets of constraints.
-     * 
-     * A problem can be applied if every one of its constraints can.  This
-     * function answers that question.
-     * 
-     * @returns {boolean} whether all the {@link Constraint Constraints} in this
-     *   problem {@link Constraint#canBeApplied can be applied}
-     * 
-     * @see {@link Problem#applyTo applyTo()}
-     * @see {@link Problem#appliedTo appliedTo()}
-     */
-    canBeApplied () {
-        return this.constraints.every( constraint =>
-            constraint.isAnInstantiation() )
-    }
-
-    /**
-     * Apply each constraint in this Problem to the given `target`.  This
-     * function therefore makes calls to the {@link Constraint#applyTo applyTo()
-     * function in its Constraints}.  See that function for more details on how
-     * each type of target is treated.
-     * 
-     * @param {LogicConcept|CaptureConstraint|CaptureConstraints|Problem} target
-     *   the object to which this problem should be applied
-     * 
-     * @see {@link Problem#canBeApplied canBeApplied()}
-     * @see {@link Problem#appliedTo appliedTo()} (for Problems)
-     * @see {@link Constraint#applyTo applyTo()} (for Constraints)
-     */
-    applyTo ( target ) {
-        this.constraints.forEach( constraint =>
-            new Substitution( constraint ).applyTo( target ) )
-    }
-
-    /**
-     * Apply each constraint in this Problem to a copy of the given `target`,
-     * returning that new copy.  This is analogous to the
-     * {@link Constraint#appliedTo appliedTo() function for Constraints}.  See
-     * that function for more details on how each type of target is treated.
-     * 
-     * @param {LogicConcept|Constraint|CaptureConstraint|CaptureConstraints|Problem} target 
-     *   the object to which this problem should be applied
-     * @returns {LogicConcept|Constraint|CaptureConstraint|CaptureConstraints|Problem}
-     *   a copy of the original `target`, now with this problem applied to it
-     * 
-     * @see {@link Problem#canBeApplied canBeApplied()}
-     * @see {@link Problem#applyTo applyTo()} (for Problems)
-     * @see {@link Constraint#appliedTo appliedTo()} (for Constraints)
-     */
-    appliedTo ( target ) {
-        if ( target instanceof LogicConcept ) {
-            for ( let i = 0 ; i < this.constraints.length ; i++ )
-                if ( target.equals( this.constraints[i].pattern ) )
-                    return this.constraints[i].expression.copy()
-            const copy = target.copy()
-            this.applyTo( copy )
-            return copy
-        } else {
-            let result = target
-            this.constraints.forEach( constraint =>
-                result = new Substitution( constraint ).appliedTo( result ) )
-            return result
-        }
     }
 
     /**
@@ -403,77 +299,10 @@ export class Problem {
      * @returns {string} a string representation of the Problem, useful in
      *   debugging
      * 
-     * @see {@link Constraint#toString toString() for individual constraints}
+     * @see {@link Constraint#toString toString() for individual Constraints}
      */
     toString () {
         return `{${this.constraints.map(x=>x.toString()).join(',')}}`
-    }
-
-    /**
-     * Compute the set of capture constraints for this problem and return it.
-     * If it has already been computed and cached, return the cached value.
-     * 
-     * Note that because {@link CaptureConstraint CaptureConstraints} are
-     * computed from the set of ordinary {@link Constraint Constraints} in a
-     * problem, the cache is invalid if that set is altered, such as by
-     * {@link Problem#add add()} or {@link Problem#remove remove()}.  In such a
-     * situation, you should be sure to call
-     * {@link Problem#clearCaptureConstraints clearCaptureConstraints()} to
-     * erase the cache, so the next call to this function will recompute them.
-     * 
-     * To see the definition of a capture constraint, refer to
-     * {@link CaptureConstraint the documentation for that class}.  The set of
-     * capture constraints for a Problem is the set of capture constraints for
-     * that Problem's set of patterns.
-     * 
-     * @return {CaptureConstraints} the set of capture constraints generated
-     *   by this Problem's patterns (that is, the patterns in its constraints)
-     * 
-     * @see {@link Problem#add add()}
-     * @see {@link Problem#remove remove()}
-     * @see {@link CaptureConstraint CaptureConstraint}
-     * @see {@link CaptureConstraints CaptureConstraints}
-     * @see {@link Constraint Constraint}
-     * @see {@link Problem#avoidsCapture avoidsCapture()}
-     */
-    captureConstraints () {
-        if ( !this._captureConstraints )
-            this._captureConstraints = new CaptureConstraints(
-                ...this.constraints.map( constraint => constraint.pattern ) )
-        return this._captureConstraints
-    }
-
-    /**
-     * Deletes any cached capture constraints computed by
-     * {@link Problem#captureConstraints captureConstraints()}.
-     * 
-     * @see {@link Problem#captureConstraints captureConstraints()}
-     */
-    clearCaptureConstraints () {
-        delete this._captureConstraints
-    }
-
-    /**
-     * As we solve a Problem, our solution must not assign metavariables values
-     * that would, when substituted for those metavariables, create any variable
-     * capture (according to the standard definition of that term).  We use a
-     * set of {@link Problem#captureConstraints capture constraints} to keep
-     * track of the ways in which we might create variable capture, and thus
-     * what we must avoid doing.
-     * 
-     * This function returns whether any of this Problem's capture constraints
-     * have been {@link CaptureConstraints#violated violated()}.  If the answer
-     * is false, then this problem may still be able to be solved.  If the
-     * answer is true, then this problem has no solutions.
-     * 
-     * @return {boolean} whether any of this Problem's
-     *   {@link Problem#captureConstraints capture constraints} have been
-     *   {@link CaptureConstraints#violated violated()}
-     * 
-     * @see {@link Problem#captureConstraints captureConstraints()}
-     */
-    avoidsCapture () {
-        return !this.captureConstraints().violated()
     }
 
     // For internal use.  Applies beta reduction to all the patterns in all the
@@ -488,74 +317,35 @@ export class Problem {
         } )
     }
 
-    // 1. Delete functionality that applies constraints to capture constraints.
-    // 2. Delete functionality that asks if capture constraints are satisfied or
-    //    violated in isolation.
-    // 3. Add functionality that asks if capture constraints are violated in a
-    //    given solution (which is a problem, that is, a constraint set).
-    // 4. Ensure that capture constraints are carried along when copying a
-    //    problem in recursion.
-    // 5. Before returning any solution or recurring to expand any solution,
-    //    check to see if the problem's capture constraints are violated by that
-    //    solution.
+    *solutions () {
+        const solutionsSeen = [ ]
+        for ( let solution of this.allSolutions( new Solution( this ) ) ) {
+            if ( !solutionsSeen.some( old => old.equals( solution ) ) ) {
+                solutionsSeen.push( solution )
+                yield solution
+            }
+        }
+        return
+    }
 
-    // alters this object in-place, removing and/or adding constraints
-    *allSolutions () {
+    // for internal use only, by *solutions()
+    *allSolutions ( soFar ) {
+
         const dbg = ( ...args ) => { if ( this._debug ) console.log( ...args ) }
         dbg( `solve ${this} / ${this.constraints.map(x=>x.complexity())}` )
+        dbg( `\tw/soFar = ${soFar}` )
+
         // We need our own personal symbol stream that will avoid all symbols in
         // this matching problem.  If we don't have one yet, create one.
         if ( !this._stream ) this._stream = new NewSymbolStream(
             ...this.constraints.map( c => c.pattern ),
             ...this.constraints.map( c => c.expression )
         )
-        // Ensure our capture constraints have been computed.
-        this.captureConstraints()
-        // We need utility functions for extending recursively computed
-        // solutions with new constraints.  Here are two.
-        // The first is for adding a (pattern,expression) constraint.
-        const problem = this
-        function* add ( constraint ) {
-            for ( let result of problem.allSolutions() ) {
-                dbg( `\tadding ${constraint} to ${result}` )
-                yield result.plus( constraint )
-            }
-        }
-        // The second is for adding a (pattern,efWithMetavars) constraint.
-        // That case is more complicated.
-        function* addEF ( metavar, expressionFunction, symbols ) {
-            if ( typeof( symbols ) === 'undefined' ) symbols = [ ]
-            const instantiation = new Constraint( metavar, expressionFunction )
-            const copy = problem.afterSubstituting(
-                new Substitution( instantiation ) )
-            dbg( `try this EF: ${instantiation}` )
-            dbg( `gives this problem: ${copy}` )
-            // if ( !copy.avoidsCapture() ) return
-            copy.betaReduce()
-            dbg( `\t==> ${copy}` )
-            for ( let solution of copy.allSolutions() ) {
-                dbg( `recursive solution: ${solution}` )
-                dbg( `\twill add: ${expressionFunction}` )
-                for ( let symbol of symbols ) {
-                    const constraint = solution.constraints.find(
-                        c => c.pattern.equals( symbol ) )
-                    if ( constraint ) {
-                        solution.remove( constraint )
-                        expressionFunction = constraint.appliedTo( expressionFunction )
-                        dbg( `\t+ ${constraint} == ${expressionFunction}` )
-                    }
-                }
-                expressionFunction = fullBetaReduce( expressionFunction )
-                dbg( `\t==> ${expressionFunction}` )
-                // if ( solution.avoidsCapture() )
-                    yield solution.plus( instantiation )
-            }
-        }
 
         // If this problem is empty, the solution set contains exactly one
-        // entry, the empty solution.  We encode solutions as solved problems.
+        // entry, the soFar solution passed to us.
         if ( this.empty() ) {
-            yield new Problem()
+            yield soFar
             return
         }
 
@@ -572,19 +362,21 @@ export class Problem {
         // rest.  This modifies this object in place.
         if ( complexity == 1 ) {
             this.remove( 0 )
-            yield* this.allSolutions()
+            yield* this.allSolutions( soFar )
             return
         }
         
         // If that constraint is a metavariable instantiation, remove it from
         // the problem, add it to the solution, and apply it to the remaining
-        // constraints.  If doing so violates any capture constraints, stop.
-        // Otherwise, recur on what remains.
+        // constraints.  If doing so is impossible, stop.  Otherwise, recur on
+        // what remains.
         if ( complexity == 2 ) {
-            this.remove( 0 )
-            this.substitute( new Substitution( constraint ) )
-            // if ( this.avoidsCapture() )
-                yield* add( constraint, this.allSolutions() )
+            const newSub = new Substitution( constraint )
+            if ( soFar.canAdd( newSub ) ) {
+                this.remove( 0 )
+                this.substitute( newSub )
+                yield* this.allSolutions( soFar.plus( newSub, false ) )
+            }
             return
         }
         
@@ -594,20 +386,40 @@ export class Problem {
         if ( complexity == 3 ) {
             this.remove( 0 )
             this.add( ...constraint.children() )
-            yield* this.allSolutions()
+            yield* this.allSolutions( soFar )
             return
         }
 
         // Finally, the complicated case.  If the constraint is an expression
         // function application case, then we may generate multiple solutions,
-        // in all the ways documented below.  But before any of them, we remove
-        // this constraint and lift out its various components, because we know
-        // it is an expression function application constraint.  We also do some
-        // quick sanity checks to be sure the structure is as expected.
+        // in all the ways documented below.
         if ( complexity == 4 ) {
+
+            // We need a utility function for extending recursively computed
+            // solutions with new constraints.
+            const problem = this
+            function* addEF ( metavar, expressionFunction ) {
+                const newSub = new Substitution( metavar, expressionFunction )
+                dbg( `try this EF: ${newSub}` )
+                const copy = problem.afterSubstituting( newSub )
+                dbg( `gives this problem: ${copy}` )
+                copy.betaReduce()
+                dbg( `\t==> ${copy}` )
+                for ( let solution of
+                      copy.allSolutions( soFar.plus( newSub ) ) ) {
+                    dbg( `recursive solution: ${solution}` )
+                    yield solution.restricted()
+                }
+            }
+
+            // Remove this constraint and lift out its various components,
+            // because we know it is an expression function application
+            // constraint.
             const head = constraint.pattern.child( 1 )
             const args = constraint.pattern.children().slice( 2 )
             const expr = constraint.expression
+            // Do some quick sanity checks to be sure the structure is as
+            // expected.
             if ( !head.isA( metavariable ) )
                 throw 'Invalid head of expression function application'
             if ( args.length == 0 )
@@ -620,7 +432,7 @@ export class Problem {
             // Solution method 2: Head instantiated with a projection function.
             dbg( '--2--' )
             for ( let i = 0 ; i < args.length ; i++ )
-            yield* addEF( head, projectionEF( args.length, i ) )
+                yield* addEF( head, projectionEF( args.length, i ) )
             
             // Solution method 3: If the expression is compound, we could
             // imitate each child using a different expression function,
@@ -639,8 +451,7 @@ export class Problem {
                 }
                 const metavars = this._stream.nextN( children.length )
                     .map( symbol => symbol.asA( metavariable ) )
-                yield* addEF( head, applicationEF( args.length, metavars ),
-                    metavars )
+                yield* addEF( head, applicationEF( args.length, metavars ) )
             } else dbg( 'case 3 does not apply' )
 
             // Those are the only three solution methods for the EFA case.

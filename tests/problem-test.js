@@ -4,7 +4,7 @@ import { Symbol } from '../src/symbol.js'
 import { LogicConcept } from '../src/logic-concept.js'
 import { Application } from '../src/application.js'
 import { Binding } from '../src/binding.js'
-import { Environment } from '../src/environment.js'
+import Database from '../src/database.js'
 
 describe( 'Problem', () => {
 
@@ -895,461 +895,6 @@ describe( 'Problem', () => {
         expect( P2.constraints[1] ).to.equal( P4.constraints[1] )
     } )
 
-    it( 'Should correctly judge whether it can be applied', () => {
-        // create a Problem that can be applied and check that it can
-        let X = new Symbol( 'X' ).asA( M.metavariable )
-        let Y = new Symbol( 'Y' ).asA( M.metavariable )
-        let C1 = new M.Constraint(
-            X.copy(),
-            LogicConcept.fromPutdown( '(exp (- x))' )[0]
-        )
-        let C2 = new M.Constraint(
-            Y.copy(),
-            LogicConcept.fromPutdown( 'yes +{"color":"yellow"}' )[0]
-        )
-        let C3 = new M.Constraint(
-            new Symbol( 'will not appear' ).asA( M.metavariable ),
-            LogicConcept.fromPutdown( '(so you will never see this)' )[0]
-        )
-        const Prob = new M.Problem( C1, C2, C3 )
-        expect( Prob.canBeApplied() ).to.equal( true )
-        // ensure that empty Problems can be appied
-        expect( new M.Problem().canBeApplied() ).to.equal( true )
-        // create a Constraint that can't be applied and verify that adding it
-        // to either of the above problems spoils their ability to be applied
-        let badC = new M.Constraint( ...LogicConcept.fromPutdown( `
-            (this is not a single metavariable)
-            (nor is this but that does not matter)
-        ` ) )
-        expect( Prob.plus( badC ).canBeApplied() ).to.equal( false )
-        expect( new M.Problem( badC ).canBeApplied() ).to.equal( false )
-    } )
-
-    it( 'Should apply itself correctly in-place or functionally', () => {
-        // create a Problem that can be applied (same as in previous test)
-        let X = new Symbol( 'X' ).asA( M.metavariable )
-        let Y = new Symbol( 'Y' ).asA( M.metavariable )
-        let C1 = new M.Constraint(
-            X.copy(),
-            LogicConcept.fromPutdown( '(exp (- x))' )[0]
-        )
-        let C2 = new M.Constraint(
-            Y.copy(),
-            LogicConcept.fromPutdown( 'yes +{"color":"yellow"}' )[0]
-        )
-        let C3 = new M.Constraint(
-            new Symbol( 'will not appear' ).asA( M.metavariable ),
-            LogicConcept.fromPutdown( '(so you will never see this)' )[0]
-        )
-        const Prob = new M.Problem( C1, C2, C3 )
-        // create three patterns to which to apply it, and copies of each
-        let P1 = new Application( new Symbol( 'f' ), X.copy() )
-        let P2 = new Binding( new Symbol( '𝝺' ), new Symbol( 'v' ),
-            new Application( Y.copy(), new Symbol( 'v' ), X.copy() ) )
-        let P3 = new Environment( X.copy(), Y.copy() )
-        const P1copy = P1.copy()
-        const P2copy = P2.copy()
-        const P3copy = P3.copy()
-        expect( P1.equals( P1copy ) ).to.equal( true )
-        expect( P2.equals( P2copy ) ).to.equal( true )
-        expect( P3.equals( P3copy ) ).to.equal( true )
-        // create expected results after applying the constraint
-        const newP1 = LogicConcept.fromPutdown( '(f (exp (- x)))' )[0]
-        const newP2 = LogicConcept.fromPutdown( `
-            (𝝺 v ,
-                ("yes" +{"color":"yellow"}
-                v (exp (- x)))
-            )
-        ` )[0]
-        const newP3 = LogicConcept.fromPutdown( ` {
-            (exp (- x))
-            "yes" +{"color":"yellow"}
-        } `)[0]
-        // apply Prob to P1 in place and ensure the result is as expected
-        // and P1 is no longer equal to P1copy
-        expect( () => Prob.applyTo( P1 ) ).not.to.throw()
-        expect( P1.equals( P1copy ) ).to.equal( false )
-        expect( P1.equals( newP1 ) ).to.equal( true )
-        // repeat same experiment for P2 and P2copy
-        expect( () => Prob.applyTo( P2 ) ).not.to.throw()
-        expect( P2.equals( P2copy ) ).to.equal( false )
-        expect( P2.equals( newP2 ) ).to.equal( true )
-        // repeat same experiment for P3 and P3copy
-        expect( () => Prob.applyTo( P3 ) ).not.to.throw()
-        expect( P3.equals( P3copy ) ).to.equal( false )
-        expect( P3.equals( newP3 ) ).to.equal( true )
-        // make new targets from the backup copies we saved of P1,P2,P3
-        let P1_2 = P1copy.copy()
-        let P2_2 = P2copy.copy()
-        let P3_2 = P3copy.copy()
-        // apply Prob functionally (not in place) to those three, saving the
-        // results as new expressions, then ensure that no change took place
-        // in any of those originals
-        const applied1 = Prob.appliedTo( P1_2 )
-        const applied2 = Prob.appliedTo( P2_2 )
-        const applied3 = Prob.appliedTo( P3_2 )
-        expect( P1copy.equals( P1_2 ) ).to.equal( true )
-        expect( P2copy.equals( P2_2 ) ).to.equal( true )
-        expect( P3copy.equals( P3_2 ) ).to.equal( true )
-        // then ensure that the results computed this way are the same as the
-        // results computed with the in-place applyTo(), which were verified
-        // above to be correct
-        expect( applied1.equals( P1 ) ).to.equal( true )
-        expect( applied2.equals( P2 ) ).to.equal( true )
-        expect( applied3.equals( P3 ) ).to.equal( true )
-        // ensure that Prob cannot be applied in-place to a Constraint
-        let badTarget = new M.Constraint( P1.copy(),
-            LogicConcept.fromPutdown( '(hello there "friend")' )[0] )
-        expect( () => Prob.applyTo( badTarget ) ).to.throw( /^Target.*must be/ )
-        // but it is okay to apply not-in-place to a Constraint, thus creating
-        // a new, altered copy
-        let substituted
-        expect( () => substituted = Prob.appliedTo( badTarget ) ).not.to.throw()
-        expect( substituted.pattern.equals( Prob.appliedTo( P1.copy() ) ) )
-            .to.equal( true )
-        expect( substituted.expression.equals( badTarget.expression ) )
-            .to.equal( true )
-        // ensure that Prob can be applied to another Problem in-place
-        let probTarget = new M.Problem()
-        const E1 = LogicConcept.fromPutdown( '(an appli cation)' )[0]
-        const E2 = LogicConcept.fromPutdown( '(a bin , ding)' )[0]
-        probTarget.add( P1copy, E1, P2copy, E2 )
-        expect( probTarget.constraints.length ).to.equal( 2 )
-        expect( probTarget.constraints.some( constraint =>
-            constraint.pattern.equals( P1copy ) && constraint.expression.equals( E1 )
-        ) ).to.equal( true )
-        expect( probTarget.constraints.some( constraint =>
-            constraint.pattern.equals( P2copy ) && constraint.expression.equals( E2 )
-        ) ).to.equal( true )
-        expect( () => Prob.applyTo( probTarget ) ).not.to.throw()
-        expect( probTarget.constraints.length ).to.equal( 2 )
-        expect( probTarget.constraints.some( constraint =>
-            constraint.pattern.equals( newP1 ) && constraint.expression.equals( E1 )
-        ) ).to.equal( true )
-        expect( probTarget.constraints.some( constraint =>
-            constraint.pattern.equals( newP2 ) && constraint.expression.equals( E2 )
-        ) ).to.equal( true )
-        // ensure that Prob can be applied to a problem to make a copy
-        probTarget = new M.Problem()
-        probTarget.add( P1copy, E1, P2copy, E2 )
-        expect( probTarget.constraints.length ).to.equal( 2 )
-        expect( probTarget.constraints.some( constraint =>
-            constraint.pattern.equals( P1copy ) && constraint.expression.equals( E1 )
-        ) ).to.equal( true )
-        expect( probTarget.constraints.some( constraint =>
-            constraint.pattern.equals( P2copy ) && constraint.expression.equals( E2 )
-        ) ).to.equal( true )
-        let probNew
-        expect( () => probNew = Prob.appliedTo( probTarget ) ).not.to.throw()
-        expect( probTarget.constraints.length ).to.equal( 2 )
-        expect( probTarget.constraints.some( constraint =>
-            constraint.pattern.equals( P1copy ) && constraint.expression.equals( E1 )
-        ) ).to.equal( true )
-        expect( probTarget.constraints.some( constraint =>
-            constraint.pattern.equals( P2copy ) && constraint.expression.equals( E2 )
-        ) ).to.equal( true )
-        expect( probNew.constraints.length ).to.equal( 2 )
-        expect( probNew.constraints.some( constraint =>
-            constraint.pattern.equals( newP1 ) && constraint.expression.equals( E1 )
-        ) ).to.equal( true )
-        expect( probNew.constraints.some( constraint =>
-            constraint.pattern.equals( newP2 ) && constraint.expression.equals( E2 )
-        ) ).to.equal( true )
-    } )
-
-    it( 'Should correctly compute and cache capture constraints', () => {
-        // Construct a problem containing two Constraints
-        const pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
-        pat1.child( 1 ).makeIntoA( M.metavariable ) // outer x
-        pat1.index( [ 2, 2, 1, 1 ] ).makeIntoA( M.metavariable ) // inner x
-        const pat2 = new Symbol( 'foo' ).asA( M.metavariable )
-        const C1 = new M.Constraint(
-            pat1,
-            LogicConcept.fromPutdown( '(∀ t , (∃ y , (= (+ t 1) y)))' )[0]
-        )
-        const C2 = new M.Constraint(
-            pat2,
-            LogicConcept.fromPutdown( '(larger thing but not too large)' )[0]
-        )
-        const P = new M.Problem( C1, C2 )
-        // Compute the capture constraints for P and ensure they are as expected
-        let CCs
-        expect( () => CCs = P.captureConstraints() ).not.to.throw()
-        expect( CCs ).to.be.instanceof( M.CaptureConstraints )
-        expect( CCs.empty() ).to.equal( false )
-        expect( CCs.constraints.length ).to.equal( 5 )
-        expect( CCs.constraints[0].equals( new M.CaptureConstraint(
-            new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '∃' )
-        ) ) ).to.equal( true )
-        expect( CCs.constraints[1].equals( new M.CaptureConstraint(
-            new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '=' )
-        ) ) ).to.equal( true )
-        expect( CCs.constraints[2].equals( new M.CaptureConstraint(
-            new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '+' )
-        ) ) ).to.equal( true )
-        expect( CCs.constraints[3].equals( new M.CaptureConstraint(
-            new Symbol( 'y' ), new Symbol( 'x' ).asA( M.metavariable )
-        ) ) ).to.equal( true )
-        expect( CCs.constraints[4].equals( new M.CaptureConstraint(
-            new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '1' )
-        ) ) ).to.equal( true )
-        // Now ask it for the capture constraints again, and ensure the value
-        // was cached, not recomputed--the resulting object is the exact same
-        // object that it was before
-        expect( P.captureConstraints() ).to.equal( CCs )
-
-        // Now do the degenerate case--an empty problem has no capture
-        // constraints, but still caches that value
-        const emptyP = new M.Problem()
-        expect( () => CCs = emptyP.captureConstraints() ).not.to.throw()
-        expect( CCs ).to.be.instanceof( M.CaptureConstraints )
-        expect( CCs.empty() ).to.equal( true )
-        expect( CCs.constraints.length ).to.equal( 0 )
-        expect( emptyP.captureConstraints() ).to.equal( CCs )
-    } )
-
-    xit( 'Should correctly invalidate the capture constraints cache', () => {
-        // Repeat the same first test from the previous function, except at the
-        // end we will invalidate the cache...
-        // 1. construct the test
-        const pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
-        pat1.child( 1 ).makeIntoA( M.metavariable ) // outer x
-        pat1.index( [ 2, 2, 1, 1 ] ).makeIntoA( M.metavariable ) // inner x
-        const pat2 = new Symbol( 'foo' ).asA( M.metavariable )
-        const C1 = new M.Constraint(
-            pat1,
-            LogicConcept.fromPutdown( '(∀ t , (∃ y , (= (+ t 1) y)))' )[0]
-        )
-        const C2 = new M.Constraint(
-            pat2,
-            LogicConcept.fromPutdown( '(larger thing but not too large)' )[0]
-        )
-        const P = new M.Problem( C1, C2 )
-        // 2. compute capture constraints and ensure correctness
-        let CCs
-        expect( () => CCs = P.captureConstraints() ).not.to.throw()
-        expect( CCs ).to.be.instanceof( M.CaptureConstraints )
-        expect( CCs.empty() ).to.equal( false )
-        expect( CCs.constraints.length ).to.equal( 4 )
-        expect( CCs.constraints[0].equals( new M.CaptureConstraint(
-            new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '∃' )
-        ) ) ).to.equal( true )
-        expect( CCs.constraints[1].equals( new M.CaptureConstraint(
-            new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '=' )
-        ) ) ).to.equal( true )
-        expect( CCs.constraints[2].equals( new M.CaptureConstraint(
-            new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '+' )
-        ) ) ).to.equal( true )
-        expect( CCs.constraints[3].equals( new M.CaptureConstraint(
-            new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '1' )
-        ) ) ).to.equal( true )
-        // Here's the new part: Invalidate the cache by removing the simpler
-        // constraint, which has no impact on the capture constraints, but it
-        // will invalidate the cache.
-        expect( P.length ).to.equal( 2 )
-        expect( P._captureConstraints ).to.be.ok // cache exists
-        expect( () => P.remove( C2 ) ).not.to.throw()
-        expect( P.length ).to.equal( 1 )
-        expect( P._captureConstraints ).not.to.be.ok // cache cleared
-        // And yet when we ask for the capture constraints again, they are
-        // recomputed correctly.
-        expect( () => CCs = P.captureConstraints() ).not.to.throw()
-        expect( CCs ).to.be.instanceof( M.CaptureConstraints )
-        expect( CCs.empty() ).to.equal( false )
-        expect( CCs.constraints.length ).to.equal( 4 )
-        expect( CCs.constraints[0].equals( new M.CaptureConstraint(
-            new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '∃' )
-        ) ) ).to.equal( true )
-        expect( CCs.constraints[1].equals( new M.CaptureConstraint(
-            new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '=' )
-        ) ) ).to.equal( true )
-        expect( CCs.constraints[2].equals( new M.CaptureConstraint(
-            new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '+' )
-        ) ) ).to.equal( true )
-        expect( CCs.constraints[3].equals( new M.CaptureConstraint(
-            new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '1' )
-        ) ) ).to.equal( true )
-        // And if we remove yet another constraint, the process repeats, but now
-        // giving us no capture constraints, because the problem is empty.
-        expect( P.length ).to.equal( 1 )
-        expect( P._captureConstraints ).to.be.ok // cache exists
-        expect( () => P.remove( 0 ) ).not.to.throw()
-        expect( P.length ).to.equal( 0 )
-        expect( P._captureConstraints ).not.to.be.ok // cache cleared
-        expect( () => CCs = P.captureConstraints() ).not.to.throw()
-        expect( CCs ).to.be.instanceof( M.CaptureConstraints )
-        expect( CCs.empty() ).to.equal( true )
-        expect( CCs.constraints.length ).to.equal( 0 )
-        expect( P.captureConstraints() ).to.equal( CCs )
-
-        // Now repeat test 2 from the previous function, but this time we'll
-        // subsequently add constraints and expect the cache to be invalidated,
-        // so that recomputing capture constraints takes the new constraints
-        // into account.
-        // first, repeat the old test:
-        const emptyP = new M.Problem()
-        expect( () => CCs = emptyP.captureConstraints() ).not.to.throw()
-        expect( CCs ).to.be.instanceof( M.CaptureConstraints )
-        expect( CCs.empty() ).to.equal( true )
-        expect( CCs.constraints.length ).to.equal( 0 )
-        expect( emptyP.captureConstraints() ).to.equal( CCs )
-        // now, add a constraint:
-        const pat3 = LogicConcept.fromPutdown( '(sum i , (subscript X i))' )[0]
-        pat3.child( 1 ).makeIntoA( M.metavariable ) // outer i
-        pat3.index( [ 2, 2 ] ).makeIntoA( M.metavariable ) // inner i
-        pat3.index( [ 2, 1 ] ).makeIntoA( M.metavariable ) // X
-        const C3 = new M.Constraint(
-            pat3,
-            LogicConcept.fromPutdown( '(sum k , (subscript (union A B) k))' )[0]
-        )
-        expect( emptyP.length ).to.equal( 0 )
-        expect( emptyP._captureConstraints ).to.be.ok // cache exists
-        expect( () => emptyP.add( C3 ) ).not.to.throw()
-        expect( emptyP.length ).to.equal( 1 )
-        expect( emptyP._captureConstraints ).not.to.be.ok // cache cleared
-        // And now when we compute a set of capture constraints, we get the
-        // correct (non-empty) result.
-        expect( () => CCs = emptyP.captureConstraints() ).not.to.throw()
-        expect( CCs ).to.be.instanceof( M.CaptureConstraints )
-        expect( CCs.empty() ).to.equal( false )
-        expect( CCs.constraints.length ).to.equal( 2 )
-        expect( CCs.constraints[0].equals( new M.CaptureConstraint(
-            new Symbol( 'i' ).asA( M.metavariable ), new Symbol( 'subscript' )
-        ) ) ).to.equal( true )
-        expect( CCs.constraints[1].equals( new M.CaptureConstraint(
-            new Symbol( 'i' ).asA( M.metavariable ),
-            new Symbol( 'X' ).asA( M.metavariable )
-        ) ) ).to.equal( true )
-    } )
-
-    xit( 'Should not invalidate cache when copying', () => {
-        // We will make this straightforward by testing it with a simple case
-        const pat = LogicConcept.fromPutdown( '(quantifier outer , inner)' )[0]
-        pat.child( 1 ).makeIntoA( M.metavariable ) // outer
-        const prob = new M.Problem( new M.Constraint(
-            pat,
-            LogicConcept.fromPutdown( '(quantifier a , inner)' )[0]
-        ) )
-        // compute capture constraints and compare to expectations
-        let CCs
-        expect( () => CCs = prob.captureConstraints() ).not.to.throw()
-        expect( CCs ).to.be.instanceof( M.CaptureConstraints )
-        expect( CCs.empty() ).to.equal( false )
-        expect( CCs.constraints.length ).to.equal( 1 )
-        expect( CCs.constraints[0].equals( new M.CaptureConstraint(
-            new Symbol( 'outer' ).asA( M.metavariable ), new Symbol( 'inner' )
-        ) ) ).to.equal( true )
-        // make a copy of the problem and ensure that:
-        // 1. the original didn't change its cache at all
-        // 2. the copy has a deep copy of the same cache
-        const probCopy = prob.copy()
-        expect( prob._captureConstraints ).to.equal( CCs )
-        const CCsInCopy = probCopy._captureConstraints
-        expect( CCsInCopy ).to.be.ok
-        expect( CCsInCopy ).not.to.equal( CCs )
-        expect( CCsInCopy.constraints.length ).to.equal( 1 )
-        expect( CCsInCopy.constraints[0].equals( CCs.constraints[0] ) )
-            .to.equal( true )
-        // now make a copy of the original by .without(), which deletes as it
-        // copies, and ensure that:
-        // 1. the original didn't change its cache at all
-        // 2. the copy has no cache at all, because remove() was called in it
-        // 3. the copy computes its capture constraints correctly, if asked
-        const probWO = prob.without( prob.constraints[0] )
-        expect( prob._captureConstraints ).to.be.ok
-        expect( prob._captureConstraints ).to.equal( CCs )
-        expect( probWO._captureConstraints ).not.to.be.ok
-        expect( probWO.captureConstraints() ).to.be.ok
-        expect( probWO.captureConstraints().empty() ).to.equal( true )
-        // now make a copy of probCopy by .plus(), which adds as it
-        // copies, and ensure that:
-        // 1. the original didn't change its cache at all
-        // 2. the copy has no cache at all, because add() was called in it
-        // 3. the copy computes its capture constraints correctly, if asked
-        const probPlus = probCopy.plus( new M.Constraint(
-            new Symbol( 1 ), new Symbol( 2 )
-        ) )
-        expect( probCopy._captureConstraints ).to.be.ok
-        expect( probCopy._captureConstraints ).to.equal( CCsInCopy )
-        expect( probPlus._captureConstraints ).not.to.be.ok
-        const CCsInPlus = probPlus.captureConstraints()
-        expect( CCsInPlus ).to.be.ok
-        expect( CCsInPlus.constraints.length ).to.equal( 1 )
-        expect( CCsInPlus.constraints[0].equals( CCs.constraints[0] ) )
-            .to.equal( true )
-    } )
-
-    it( 'Should know when its capture constraints are violated', () => {
-        // Repeat the first problem and capture constraints setup from an
-        // earlier test.  No capture constraints are violated here.
-        const pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
-        pat1.child( 1 ).makeIntoA( M.metavariable ) // outer x
-        pat1.index( [ 2, 2, 1, 1 ] ).makeIntoA( M.metavariable ) // inner x
-        const pat2 = new Symbol( 'foo' ).asA( M.metavariable )
-        const C1 = new M.Constraint(
-            pat1,
-            LogicConcept.fromPutdown( '(∀ t , (∃ y , (= (+ t 1) y)))' )[0]
-        )
-        const C2 = new M.Constraint(
-            pat2,
-            LogicConcept.fromPutdown( '(larger thing but not too large)' )[0]
-        )
-        const P = new M.Problem( C1, C2 )
-        expect( P.avoidsCapture() ).to.equal( true )
-
-        // What about an empty Problem?  Should definitely avoid capture.
-        const emptyP = new M.Problem()
-        expect( emptyP.avoidsCapture() ).to.equal( true )
-
-        // But if we create a problem that includes variable capture, it should
-        // notice this.  Start with one that doesn't have any capture:
-        const pat3 = LogicConcept.fromPutdown( '(∀ x , P)' )[0]
-        pat3.child( 1 ).makeIntoA( M.metavariable ) // the x
-        pat3.child( 2 ).makeIntoA( M.metavariable ) // the P
-        const uhOh = new M.Problem(
-            pat3, LogicConcept.fromPutdown( '(∀ t, Q)' )[0]
-        )
-        // Ensure its constraints are what you'd expect and it avoids capture:
-        let CCs
-        CCs = uhOh.captureConstraints()
-        expect( CCs.constraints.length ).to.equal( 1 )
-        expect( CCs.constraints[0].equals( new M.CaptureConstraint(
-            new Symbol( 'x' ).asA( M.metavariable ),
-            new Symbol( 'P' ).asA( M.metavariable )
-        ) ) )
-        expect( uhOh.avoidsCapture() ).to.equal( true )
-        // Now make a substitution that could create variable capture, but does
-        // not yet do so, because we have not yet instantiated x:
-        const subst1 = new M.Substitution(
-            new Symbol( 'P' ).asA( M.metavariable ),
-            LogicConcept.fromPutdown( '(f t)' )[0]
-        )
-        subst1.applyTo( uhOh )
-        // Ensure the constraints changed appropriately and yet capture has
-        // still not yet happened:
-        CCs = uhOh.captureConstraints()
-        expect( CCs.constraints.length ).to.equal( 1 )
-        expect( CCs.constraints[0].bound.equals(
-            new Symbol( 'x' ).asA( M.metavariable ) ) ).to.equal( true )
-        expect( CCs.constraints[0].free.equals(
-            LogicConcept.fromPutdown( '(f t)' )[0] ) ).to.equal( true )
-        expect( uhOh.avoidsCapture() ).to.equal( true )
-        // Now make a substitution that does create variable capture:
-        const subst2 = new M.Substitution(
-            new Symbol( 'x' ).asA( M.metavariable ),
-            new Symbol( 't' )
-        )
-        subst2.applyTo( uhOh )
-        // Ensure the constraints changed appropriately and capture happened:
-        CCs = uhOh.captureConstraints()
-        expect( CCs.constraints.length ).to.equal( 1 )
-        expect( CCs.constraints[0].bound.equals( new Symbol( 't' ) ) )
-            .to.equal( true )
-        expect( CCs.constraints[0].free.equals(
-            LogicConcept.fromPutdown( '(f t)' )[0] ) ).to.equal( true )
-        expect( uhOh.avoidsCapture() ).to.equal( false )
-    } )
-
     it( 'Should support substitution in-place', () => {
         // Let us adopt the convention in the following comments that capital
         // letters stand for metavariables, and lower-case ones do not.
@@ -1489,47 +1034,118 @@ describe( 'Problem', () => {
          && c.expression.equals( new Symbol( 7 ) ) ) ).to.equal( true )
     } )
 
+    // Utility function for constructing solution sets
+    // Call like so: solset( problem, [
+    //     { 'metavar1' : 'putdown for expression1', ... }, // solution 1
+    //     ...
+    // ] )
+    const solSet = ( problem, ...sols ) => {
+        return sols.map( sol => {
+            const result = new M.Solution( problem )
+            for ( let mv in sol ) {
+                if ( sol.hasOwnProperty( mv ) ) {
+                    result.add( new M.Substitution(
+                        new Symbol( mv ).asA( M.metavariable ),
+                        sol[mv] instanceof LogicConcept ? sol[mv] :
+                            LogicConcept.fromPutdown( sol[mv] )[0]
+                    ) )
+                }
+            }
+            return result
+        } )
+    }
+    // Utility function for comparing solution sets for equality
+    const solSetsEq = ( set1, set2, debug = true ) => {
+        const set1strs = set1.map( x => `${x}` )
+        const set2strs = set2.map( x => `${x}` )
+        if ( set1.length != set2.length ) {
+            if ( debug ) {
+                console.log( 'Not same length:' )
+                console.log( `\tlength ${set1.length}:` )
+                set1strs.map( x => console.log( `\t\t${x}` ) )
+                console.log( `\tlength ${set2.length}:` )
+                set2strs.map( x => console.log( `\t\t${x}` ) )
+            }
+            return false
+        }
+        if ( !set1.every( sol => sol instanceof M.Solution ) ) {
+            if ( debug ) {
+                console.log( 'Not all are solution instances:' )
+                set1strs.map( x => console.log( `\t\t${x}` ) )
+            }
+            return false
+        }
+        if ( !set2.every( sol => sol instanceof M.Solution ) ) {
+            if ( debug ) {
+                console.log( 'Not all are solution instances:' )
+                set2strs.map( x => console.log( `\t\t${x}` ) )
+            }
+            return false
+        }
+        const missing = set1.find( sol1 =>
+            !set2.some( sol2 => sol1.equals( sol2 ) ) )
+        if ( missing ) {
+            if ( debug ) {
+                console.log( `Missing: ${missing}` )
+                console.log( `\tfrom here:` )
+                set1strs.map( x => console.log( `\t\t${x}` ) )
+                console.log( `\tin here:` )
+                set2strs.map( x => console.log( `\t\t${x}` ) )
+            }
+            return false
+        }
+        return true
+    }
+    // Utility function for creating lambdas
+    const lambda = ( arg, body ) => {
+        if ( !( arg instanceof LogicConcept ) )
+            arg = new Symbol( arg )
+        if ( !( body instanceof LogicConcept ) )
+            body = LogicConcept.fromPutdown( `${body}` )[0]
+        return M.newEF( arg, body )
+    }
+
     it( 'Should compute correct solutions to trivial problems', () => {
         let P, S, expr1, expr2, pat1
 
         // problem: empty problem
         // solution set: one solution, the empty solution
         P = new M.Problem()
-        expect( () => S = Array.from( P.allSolutions() ) ).not.to.throw()
+        expect( () => S = Array.from( P.solutions() ) ).not.to.throw()
         expect( S ).to.be.instanceof( Array )
-        expect( S.length ).to.equal( 1 )
-        expect( S[0] ).to.be.instanceof( M.Problem )
-        expect( S[0].empty() ).to.equal( true )
+        expect( solSetsEq( S, solSet( P,
+            { } // one solution, the empty solution
+        ) ) ).equals( true )
 
         // problem: one constraint, (expr1,expr1) (no metavars)
         // solution set: one solution, the empty solution
         expr1 = LogicConcept.fromPutdown( '(an example)' )[0]
         P = new M.Problem( expr1, expr1 )
-        expect( () => S = Array.from( P.allSolutions() ) ).not.to.throw()
+        expect( () => S = Array.from( P.solutions() ) ).not.to.throw()
         expect( S ).to.be.instanceof( Array )
-        expect( S.length ).to.equal( 1 )
-        expect( S[0] ).to.be.instanceof( M.Problem )
-        expect( S[0].empty() ).to.equal( true )
+        expect( solSetsEq( S, solSet( P,
+            { } // one solution, the empty solution
+        ) ) ).equals( true )
         
         // problem: one constraint, (expr1,expr2) (no metavars, not equal)
         // solution set: one solution, the empty solution
         expr2 = new Symbol( 'not_the_same' )
         P = new M.Problem( expr1, expr2 )
-        expect( () => S = Array.from( P.allSolutions() ) ).not.to.throw()
+        expect( () => S = Array.from( P.solutions() ) ).not.to.throw()
         expect( S ).to.be.instanceof( Array )
-        expect( S.length ).to.equal( 0 )
+        expect( solSetsEq( S, [
+            // no solutions
+        ] ) ).equals( true )
         
         // problem: one constraint, (pat1,expr1) (with pat1 a metavar)
         // solution set: one solution, the solution (pat1,expr1)
         pat1 = new Symbol( 'foo' ).asA( M.metavariable )
         P = new M.Problem( pat1, expr1 )
-        expect( () => S = Array.from( P.allSolutions() ) ).not.to.throw()
+        expect( () => S = Array.from( P.solutions() ) ).not.to.throw()
         expect( S ).to.be.instanceof( Array )
-        expect( S.length ).to.equal( 1 )
-        expect( S[0] ).to.be.instanceof( M.Problem )
-        expect( S[0].length ).to.equal( 1 )
-        expect( S[0].constraints[0].pattern.equals( pat1 ) ).to.equal( true )
-        expect( S[0].constraints[0].expression.equals( expr1 ) ).to.equal( true )
+        expect( solSetsEq( S, solSet( P,
+            { 'foo' : '(an example)' } // one solution
+        ) ) ).equals( true )
 
         // problem: one constraint, but its pattern and expression are both
         // compound and have the same number of children, thus enabling us to
@@ -1540,13 +1156,11 @@ describe( 'Problem', () => {
             new Application( expr1.copy(), pat1.copy() ),
             new Application( expr1.copy(), expr2.copy() )
         )
-        expect( () => S = Array.from( P.allSolutions() ) ).not.to.throw()
+        expect( () => S = Array.from( P.solutions() ) ).not.to.throw()
         expect( S ).to.be.instanceof( Array )
-        expect( S.length ).to.equal( 1 )
-        expect( S[0] ).to.be.instanceof( M.Problem )
-        expect( S[0].length ).to.equal( 1 )
-        expect( S[0].constraints[0].pattern.equals( pat1 ) ).to.equal( true )
-        expect( S[0].constraints[0].expression.equals( expr2 ) ).to.equal( true )
+        expect( solSetsEq( S, solSet( P,
+            { 'foo' : 'not_the_same' } // one solution
+        ) ) ).equals( true )
     } )
 
     it( 'Should compute correct solutions to small EFA problems', () => {
@@ -1557,18 +1171,11 @@ describe( 'Problem', () => {
                         new Symbol( 1 ) )
         expr = new Symbol( 1 )
         prob = new M.Problem( pat, expr )
-        expect( () => S = Array.from( prob.allSolutions() ) ).not.to.throw()
-        expect( S.length ).to.equal( 2 )
-        expect( S[0].length ).to.equal( 1 )
-        expect( S[0].constraints[0].equals( new M.Constraint(
-            new Symbol( 'P' ).asA( M.metavariable ),
-            M.newEF( new Symbol( 'v1' ), new Symbol( 1 ) )
-        ) ) ).to.equal( true )
-        expect( S[1].length ).to.equal( 1 )
-        expect( S[1].constraints[0].equals( new M.Constraint(
-            new Symbol( 'P' ).asA( M.metavariable ),
-            M.newEF( new Symbol( 'v1' ), new Symbol( 'v1' ) )
-        ) ) ).to.equal( true )
+        expect( () => S = Array.from( prob.solutions() ) ).not.to.throw()
+        expect( solSetsEq( S, solSet( prob,
+            { 'P' : lambda( 'v1', 1 ) },
+            { 'P' : lambda( 'v1', 'v1' ) }
+        ) ) ).equals( true )
 
         // problem: pattern EFA (P 3), expression 1
         // solution set: one solution, P = lambda v.1
@@ -1576,25 +1183,127 @@ describe( 'Problem', () => {
                         new Symbol( 3 ) )
         expr = new Symbol( 1 )
         prob = new M.Problem( pat, expr )
-        expect( () => S = Array.from( prob.allSolutions() ) ).not.to.throw()
-        expect( S.length ).to.equal( 1 )
-        expect( S[0].length ).to.equal( 1 )
-        expect( S[0].constraints[0].equals( new M.Constraint(
-            new Symbol( 'P' ).asA( M.metavariable ),
-            M.newEF( new Symbol( 'v1' ), new Symbol( 1 ) )
-        ) ) ).to.equal( true )
+        expect( () => S = Array.from( prob.solutions() ) ).not.to.throw()
+        expect( solSetsEq( S, solSet( prob,
+            { 'P' : lambda( 'v1', 1 ) }
+        ) ) ).equals( true )
 
         // problem: pattern EFA (P 1), expression 1=2
         // solution set: two solutions, P = lambda v.v=2 or P = lambda v.1=2
+        pat = M.newEFA( new Symbol( 'P' ).asA( M.metavariable ),
+                        new Symbol( 1 ) )
+        expr = LogicConcept.fromPutdown( '(= 1 2)' )[0]
+        prob = new M.Problem( pat, expr )
+        expect( () => S = Array.from( prob.solutions() ) ).not.to.throw()
+        expect( solSetsEq( S, solSet( prob,
+            { 'P' : lambda( 'v1', '(= 1 2)' ) },
+            { 'P' : lambda( 'v1', '(= v1 2)' ) }
+        ) ) ).equals( true )
 
         // problem: pattern EFA (P 3), expression 1=2
         // solution set: one solution, P = lambda v.1=2
-        //
-        // NOT YET COMPLETE
+        pat = M.newEFA( new Symbol( 'P' ).asA( M.metavariable ),
+                        new Symbol( 3 ) )
+        expr = LogicConcept.fromPutdown( '(= 1 2)' )[0]
+        prob = new M.Problem( pat, expr )
+        expect( () => S = Array.from( prob.solutions() ) ).not.to.throw()
+        expect( solSetsEq( S, solSet( prob,
+            { 'P' : lambda( 'v1', '(= 1 2)' ) }
+        ) ) ).equals( true )
     } )
 
-    xit( 'Should compute correct solutions for the whole database', () => {
-        // to do
+    it( 'Should compute correct solutions for the whole database', () => {
+        // Get all matching tests from the database
+        const matchingTests = Database.filterByMetadata( metadata =>
+            metadata.testing && metadata.testing.type &&
+            metadata.testing.type == 'matching' )
+        // they are all entitled "/path/to/test N.putdown" for some N,
+        // so sort them by that value of N in increasing order.
+        const getNum = key => {
+            const parts = key.split( ' ' )
+            return parseInt( parts[parts.length-1].split( '.' )[0] )
+        }
+        matchingTests.sort( ( a, b ) => getNum( a ) - getNum( b ) )
+        // Now run each test as follows...
+
+        ////////////
+        //
+        //  FOR NOW, we run just the first few tests to ensure this machinery
+        //  works.  Once we've completed the other to-dos below, we will run
+        //  all of these tests.
+        //
+        ////////////
+
+        matchingTests.slice( 0, 2 ).forEach( key => {
+            // Look up the test with the given key and ensure it has three
+            // parts (metavariable list, problem definition, expected solution
+            // set)
+            const LCs = Database.getLogicConcepts( key )
+            expect( LCs.length ).equals( 3 )
+            // Convert all instances of the problem's metavariables into actual
+            // metavariables (which would be prohibitive in putdown)
+            const metavars = LCs[0].children().slice( 1 )
+            metavars.forEach( mv => {
+                LCs[1].descendantsSatisfying( d => d.equals( mv ) )
+                      .forEach( d => d.makeIntoA( M.metavariable ) )
+                LCs[2].descendantsSatisfying( d => d.equals( mv ) )
+                      .forEach( d => d.makeIntoA( M.metavariable ) )
+            } )
+            // Extract the constraints that define the problem.
+            const constraints = LCs[1].children().slice( 1 )
+            expect( constraints.length % 2 ).equals( 0 )
+            // The tests use the notation (@apply x y) for EFAs,
+            // so we need to find each such expression and convert it into an
+            // actual EFA.
+
+            /////////////////
+            //
+            //  TO DO - see above
+            //
+            /////////////////
+
+            // Finally, construct the actual problem instance.
+            const P = new M.Problem( ...constraints )
+            // Extract the solutions and define the expected solution objects
+            // from them.
+            const solutions = LCs[2].children().slice( 1 ).map( sol => {
+                expect( sol.numChildren() % 2 == 0 ).equals( true )
+                const result = new M.Solution( P )
+                for ( let i = 0 ; i < sol.numChildren() - 1 ; i += 2 ) {
+                    expect( sol.child( i ) ).to.be.instanceOf( Symbol )
+                    expect( sol.child( i ).isA( M.metavariable) )
+                        .equals( true )
+                    result.add( new M.Substitution(
+                        sol.child( i ), sol.child( i + 1 ) ) )
+                }
+                // The tests use the notation (@lambda x , y) for EFs,
+                // so we need to find each such expression and convert it into
+                // an actual EF.
+
+                //////////////////
+                //
+                //  TO DO - see above
+                //
+                //////////////////
+                
+                return result
+            } )
+            // console.log( `===========${key}===========` )
+            // console.log( `Problem:\n${P}` )
+            // console.log( `Solutions:\n`, solutions.map(x=>`\t${x}`).join('\n') )
+
+            ///////////////
+            //
+            //  TO DO - In place of the above debugging spam, add extra args
+            //  to expect() or equals() to print custom debugging details.
+            //
+            ///////////////
+            
+            let computedSols
+            expect( () => computedSols = Array.from( P.solutions() ) )
+                .not.to.throw()
+            expect( solSetsEq( computedSols, solutions ) ).equals( true )
+        } )
     } )
 
 } )

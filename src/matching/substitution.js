@@ -279,7 +279,7 @@ export class Substitution {
      * @returns {string} a string representation of the Substitution, useful in
      *   debugging
      */
-     toString () {
+    toString () {
         return `(${this._metavariable.toPutdown()},${this._expression.toPutdown()})`
             .replace( / \+\{"_type_LDE MV":true\}\n/g, '__' )
             .replace( /"LDE EFA"/g, '@' )

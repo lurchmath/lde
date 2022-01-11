@@ -2,8 +2,10 @@
 import { Binding } from "../binding.js"
 import { Symbol } from "../symbol.js"
 import { metavariable, metavariableNamesIn } from "./metavariables.js"
+import { Substitution } from "./substitution.js"
 import { Problem } from "./problem.js"
 import { CaptureConstraints } from "./capture-constraint.js"
+import { fullBetaReduce, alphaEquivalent } from './expression-functions.js'
 
 /**
  * A Solution is a set of {@link Substitution Substitutions}, together with
@@ -102,18 +104,18 @@ export class Solution {
      * {@link Solution#domain domain()} and, for each metavariable in that
      * domain, they map the metavariable to
      * {@link Substitution Substitution} instances that are
-     * {@link Substitution#equals equal as Substitutions}.
+     * {@link module:ExpressionFunctions.alphaEquivalent $\alpha$-equivalent}.
      * 
      * @param {Solution} other the Solution with which to compare this one
-     * @returns {boolean} whether the two Solutions are structurally equal,
-     *   as defined above
+     * @returns {boolean} whether the two Solutions are equal, as defined above
      */
     equals ( other ) {
         const d1 = Array.from( this.domain() )
         const d2 = other.domain()
         return d1.length == d2.size
             && d1.every( mv => d2.has( mv ) )
-            && d1.every( mv => this.get( mv ).equals( other.get( mv ) ) )
+            && d1.every( mv =>
+                alphaEquivalent( this.get( mv ), other.get( mv ) ) )
     }
 
     /**
@@ -224,6 +226,18 @@ export class Solution {
         return result
     }
 
+    // For internal use.  Applies beta reduction to all the patterns in all the
+    // solution's substitutions.
+    betaReduce () {
+        this.domain().forEach( mv => {
+            const sub = this._substitutions[mv]
+            const reduced = fullBetaReduce( sub.expression )
+            if ( !reduced.equals( sub.expression ) )
+                this._substitutions[mv] = new Substitution(
+                    new Symbol( mv ).asA( metavariable ), reduced )
+        } )
+    }
+
     /**
      * Add a new {@link Substitution Substitution} to this object.  (Recall
      * from the definition of this class that it functions as a set of
@@ -247,6 +261,7 @@ export class Solution {
             throw new Error( 'Adding an invalid Substitution to a Solution' )
         // modify inner substitutions and capture constraints
         this.substitute( sub )
+        this.betaReduce()
         // add the sub to our list
         this._substitutions[sub.metavariable.text()] = sub
         // delete now-satisfied capture constraints
@@ -372,6 +387,24 @@ export class Solution {
         return Array.from( this._metavariables ).every( mv => d.has( mv ) )
             && Array.from( d ).every( mv =>
                 this._substitutions[mv].metavariableNames().size == 0 )
+    }
+
+    /**
+     * The string representation of a Solution is simply the comma-separated
+     * list of string representations of its
+     * {@link Substitution Substitutions},
+     * surrounded by curly brackets to suggest a set.  For example, it might be
+     * "{(A,(- x)),(B,(+ 1 t))}" or "{}".
+     * 
+     * @returns {string} a string representation of the Solution, useful in
+     *   debugging
+     * 
+     * @see {@link Substitution#toString toString() for individual Substitutions}
+     */
+    toString () {
+        const d = Array.from( this.domain() )
+        d.sort()
+        return `{${d.map(x=>this._substitutions[x].toString()).join(',')}}`
     }
 
 }
