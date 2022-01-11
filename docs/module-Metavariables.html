@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Lurch Deductive Engine: </title>
+    <title>Lurch Deductive Engine: Metavariables</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
@@ -33,67 +33,495 @@
 
 <main class="layout-main ">
   <div class="container">
-    <p class="page-kind"></p>
-    <h1 class="page-title"></h1>
-    
-
-
-
-    
-
-
-    <h3> </h3>
-
-
-
-
-
-
-
-
-
-
+    <p class="page-kind">Module</p>
+    <h1 class="page-title">Metavariables</h1>
     
 
 
 
 
-    <section class="readme">
-        <article><h1>The Lurch Deductive Engine (LDE) Source Code Documentation</h1>
-<p>This repository is in the process of rebuilding the LDE, discarding an old
-design and replacing it with a better, updated design.  That work is still in
-progress, and is perhaps 50% complete.</p>
-<p>The navigation menu on the left shows classes and namespaces in alphabetical
-order, but the overview below is more logically organized.</p>
-<h2>Overview</h2>
-<p>Every symbolic math software needs some data structure for storing trees of
-mathematical symbols that represent mathematical meaning.  In the LDE, the
-most generic of these is the <a href="MathConcept.html">MathConcept</a>.</p>
-<p>Later, complex math concepts will be able to be compiled down to a set of
-simpler special cases that can be processed by the LDE.  We call that simpler
-subset the <a href="LogicConcept.html">LogicConcepts</a>.</p>
-<p>Logic concepts come in four types: <a href="Environment.html">Environment</a>,
-<a href="Formula.html">Formula</a>, <a href="Declaration.html">Declaration</a>, and
-<a href="Expression.html">Expression</a>.</p>
-<p>Expressions come in three types: <a href="Symbol.html">Symbol</a>,
-<a href="Application.html">Application</a>, and <a href="Binding.html">Binding</a>.</p>
-<p>There are also some basic tools, including:</p>
-<ul>
-<li>for <a href="Connection.html">connecting</a> math concept instances irrespective of
-tree structure,</li>
-<li>for working with <a href="JSON.html">JSON</a> and
-<a href="global.html#predictableStringify">serializing it</a>.</li>
-</ul>
-<p>And when working in the test suite, feel free to import
-<a href="Database.html">the Database module</a> for access to a library of
-<a href="LogicConcept.html">LogicConcept</a> instances written in putdown notation, with
-corresponding metadata.</p>
-<h2>GitHub</h2>
-<p><a href="http://github.com/lurchmath/lde">Source code</a></p>
-<p><a href="http://github.com/lurchmath/lde/wiki">Design wiki</a></p></article>
-    </section>
+<section>
 
 
+<header class="not-class">
+
+
+    
+        
+            
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+
+
+
+    
+        
+            <div class="description"><p>This module defines a constant and function that formalize the concept of a
+&quot;metavariable.&quot;  See the documentation for
+<a href="module-Matching.html">the Matching module</a> for a definition of
+metavariables and how they relate to the concept of matching.</p></div>
+        
+
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="module-Metavariables.html#.metavariable">metavariable</a> - for marking
+  certain symbols as metavariables</li>
+            
+                <li><a href="module-Metavariables.html#.containsAMetavariable">containsAMetavariable()</a> - for
+  testing whether expressions contain metavariables</li>
+            
+                <li><a href="module-Metavariables.html#.metavariablesIn">metavariablesIn()</a> - for
+  computing an array of all metavariables within a given expression</li>
+            
+                <li><a href="module-Metavariables.html#.metavariableNamesIn">metavariableNamesIn()</a> - for
+  computing a set of all names of metavariables within a given expression</li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_metavariables.js.html">matching/metavariables.js</a><a href="matching_metavariables.js.html#source.4">, line 4</a>
+        </li>
+    </ul>
+
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+     
+
+    
+
+    
+
+
+    
+        <h3 class="subtitle">Members</h3>
+
+        
+            
+
+<article class="member">
+    <div class="method-type">
+        <span class="method-type-signature is-static">static</span><span class="method-type-signature is-constant">constant</span>
+    </div>
+<h4 class="member-name" id=".containsAMetavariable">containsAMetavariable<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>A <em>pattern</em> is an <a href="Expression.html">Expression</a> that <em>may</em> contain a
+metavariable.  Hence <em>all</em> <a href="Expression.html">Expressions</a> are
+patterns, though an <a href="Expression.html">Expression</a> without any
+metavariables is a pattern only in a degenerate sense.  But sometimes we
+need to know we are working with an <a href="Expression.html">Expression</a> that
+does <em>not</em> contain a metavariable, that is, a non-pattern expression.
+This function is useful for detecting that case.</p>
+<p>Recall that a metavariable is any <a href="Symbol.html">Symbol</a> that has been
+marked as a metavariable as described in the documentation for
+<a href="module-Metavariables.html#.metavariable">metavariable</a>.</p>
+</div>
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    <h4>Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_metavariables.js.html">matching/metavariables.js</a><a href="matching_metavariables.js.html#source.65">, line 65</a>
+        </li>
+    </ul>
+
+
+</article>
+        
+            
+
+<article class="member">
+    <div class="method-type">
+        <span class="method-type-signature is-static">static</span><span class="method-type-signature is-constant">constant</span>
+    </div>
+<h4 class="member-name" id=".metavariable">metavariable<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>To facilitate marking some <a href="Symbol.html">Symbols</a> as metavariables (in
+contrast to any <a href="Symbol.html">Symbol</a> not so marked), we declare a string
+constant that can be used with the
+<a href="MathConcept.html#isA">isA()</a> and <a href="MathConcept.html#asA">asA()</a> and
+<a href="MathConcept.html#makeIntoA">makeIntoA()</a> functions in the
+<a href="MathConcept.html">MathConcept</a> class.</p>
+<p>For example, to mark a symbol <code>A</code> as a metavariable, one can import this
+module (call it <code>M</code>) and then call <code>A.makeIntoA( M.metavariable )</code>.  You
+can later test to see if <code>A</code> is a metavariable with
+<code>A.isA( M.metavariable )</code>.</p>
+<p>Note, however, that only <a href="Symbol.html">Symbol</a> instances can be used as
+metavariables by <a href="module-Matching.html">the matching module</a>.  Although you
+can mark any <a href="LogicConcept.html">LogicConcept</a> as a metavariable this way,
+it is useless to do so, and other functions in this module will not
+recognize non-<a href="Symbol.html">Symbols</a> as metavariables.</p>
+</div>
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="module-Metavariables.html#.containsAMetavariable">containsAMetavariable()</a></li>
+            
+                <li><a href="module-Metavariables.html#.metavariablesIn">metavariablesIn()</a></li>
+            
+                <li><a href="module-Metavariables.html#.metavariableNamesIn">metavariableNamesIn()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    <h4>Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_metavariables.js.html">matching/metavariables.js</a><a href="matching_metavariables.js.html#source.45">, line 45</a>
+        </li>
+    </ul>
+
+
+</article>
+        
+            
+
+<article class="member">
+    <div class="method-type">
+        <span class="method-type-signature is-static">static</span><span class="method-type-signature is-constant">constant</span>
+    </div>
+<h4 class="member-name" id=".metavariableNamesIn">metavariableNamesIn<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Find the collection of metavariables appearing in the given
+<a href="LogicConcept.html">LogicConcept</a>, considering only their names as strings,
+not distinguishing one instance of, say, $x$, from another.
+Thus the result of this function will be a set that may have fewer elements
+than the array that would be returned by
+<a href="module-Metavariables.html#.metavariablesIn">metavariablesIn()</a> if it were
+called on the same input.</p>
+</div>
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    <h4>Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_metavariables.js.html">matching/metavariables.js</a><a href="matching_metavariables.js.html#source.105">, line 105</a>
+        </li>
+    </ul>
+
+
+</article>
+        
+            
+
+<article class="member">
+    <div class="method-type">
+        <span class="method-type-signature is-static">static</span><span class="method-type-signature is-constant">constant</span>
+    </div>
+<h4 class="member-name" id=".metavariablesIn">metavariablesIn<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Find the ordered list of all descendants of the given
+<a href="LogicConcept.html">LogicConcept</a> that are metavariables.
+In contrast to
+<a href="module-Metavariables.html#.metavariableNamesIn">metavariableNamesIn()</a>,
+this function returns the actual <a href="Symbol.html">Symbol</a> instances, not just
+their string names, and thus this list might be longer than what
+<a href="module-Metavariables.html#.metavariableNamesIn">metavariableNamesIn()</a>
+would return on the same input.</p>
+</div>
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="module-Metavariables.html#.metavariableNamesIn">metavariableNamesIn()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    <h4>Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_metavariables.js.html">matching/metavariables.js</a><a href="matching_metavariables.js.html#source.88">, line 88</a>
+        </li>
+    </ul>
+
+
+</article>
+        
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
 
 
 
@@ -103,7 +531,7 @@ corresponding metadata.</p>
 
 <footer class="layout-footer">
   <div class="container">
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Tue Jan 11 2022 14:05:34 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Tue Jan 11 2022 14:05:35 GMT+0000 (Coordinated Universal Time)
   </div>
 </footer>
 

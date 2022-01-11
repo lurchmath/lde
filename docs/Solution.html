@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Lurch Deductive Engine: </title>
+    <title>Lurch Deductive Engine: Solution</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
@@ -33,67 +33,2031 @@
 
 <main class="layout-main ">
   <div class="container">
-    <p class="page-kind"></p>
-    <h1 class="page-title"></h1>
-    
-
-
-
-    
-
-
-    <h3> </h3>
-
-
-
-
-
-
-
-
-
-
+    <p class="page-kind">Class</p>
+    <h1 class="page-title">Solution</h1>
     
 
 
 
 
-    <section class="readme">
-        <article><h1>The Lurch Deductive Engine (LDE) Source Code Documentation</h1>
-<p>This repository is in the process of rebuilding the LDE, discarding an old
-design and replacing it with a better, updated design.  That work is still in
-progress, and is perhaps 50% complete.</p>
-<p>The navigation menu on the left shows classes and namespaces in alphabetical
-order, but the overview below is more logically organized.</p>
-<h2>Overview</h2>
-<p>Every symbolic math software needs some data structure for storing trees of
-mathematical symbols that represent mathematical meaning.  In the LDE, the
-most generic of these is the <a href="MathConcept.html">MathConcept</a>.</p>
-<p>Later, complex math concepts will be able to be compiled down to a set of
-simpler special cases that can be processed by the LDE.  We call that simpler
-subset the <a href="LogicConcept.html">LogicConcepts</a>.</p>
-<p>Logic concepts come in four types: <a href="Environment.html">Environment</a>,
-<a href="Formula.html">Formula</a>, <a href="Declaration.html">Declaration</a>, and
-<a href="Expression.html">Expression</a>.</p>
-<p>Expressions come in three types: <a href="Symbol.html">Symbol</a>,
-<a href="Application.html">Application</a>, and <a href="Binding.html">Binding</a>.</p>
-<p>There are also some basic tools, including:</p>
-<ul>
-<li>for <a href="Connection.html">connecting</a> math concept instances irrespective of
-tree structure,</li>
-<li>for working with <a href="JSON.html">JSON</a> and
-<a href="global.html#predictableStringify">serializing it</a>.</li>
+<section>
+
+
+<header class="class">
+
+
+    
+        
+        <!-- <h2>Solution</h2> -->
+
+        
+
+        
+
+        
+            
+            <div class="class-description"><p>A Solution is a set of <a href="Substitution.html">Substitutions</a>, together with
+some other data that helps apply them efficiently.  It can be applied to a
+<a href="LogicConcept.html">LogicConcept</a>, which means that it will apply all of
+its <a href="Substitution.html">Substitutions</a> simultaneously to that
+<a href="LogicConcept.html">LogicConcept</a>.</p>
+<p>A Solution is so named because it can be used to store the solution for a
+matching <a href="Problem.html">Problem</a>.  Hence the <a href="Problem.html">Problem</a> class
+provides methods for computing sets of Solutions, and the constructor for
+this class expects a given <a href="Problem.html">Problem</a>, from which it computes
+and caches information that will improve its own efficiency.  See the
+methods below for details.</p></div>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+
+
+
+    
+        
+
+
+
+
+
+    
+
+
+    
+    <h3 class="subtitle">Constructor</h3>
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="Solution">new Solution<span class="signature">(problem, skip)</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Construct an empty Solution object for the given <code>problem</code>.  Extend it
+later with the <a href="Solution.html#add">add()</a> or
+<a href="Solution.html#plus">plus()</a> method.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">problem</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code><a href="Problem.html">Problem</a></code>
+    </span>
+    
+
+            
+
+            
+
+            
+                
+            
+
+            <div class="param-description"><p>the problem for which the contructed object is
+to be the solution.  The newly constructed object is not yet a
+solution to the given <code>problem</code>, but caches several data about the
+problem so that it is prepared to grow into a solution for it later.
+Those data include the <code>problem</code>'s
+<a href="module-Metavariables.html#.metavariable">metavariables</a> and
+<a href="CaptureConstraints.html">CaptureConstraints</a>.</p></div>
+            
+        </li>
+
+    
+
+        <li>
+            
+                <span class="param-name">skip</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>boolean</code>
+    </span>
+    
+
+            
+
+            
+
+            
+                
+                    <span class="param-default">
+                        false
+                    </span>
+                
+            
+
+            <div class="param-description"><p>Clients should not use this parameter; it is for
+internal use only, to make copying Solution objects more efficient.</p></div>
+            
+        </li>
+
+    
 </ul>
-<p>And when working in the test suite, feel free to import
-<a href="Database.html">the Database module</a> for access to a library of
-<a href="LogicConcept.html">LogicConcept</a> instances written in putdown notation, with
-corresponding metadata.</p>
-<h2>GitHub</h2>
-<p><a href="http://github.com/lurchmath/lde">Source code</a></p>
-<p><a href="http://github.com/lurchmath/lde/wiki">Design wiki</a></p></article>
-    </section>
 
 
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="Solution.html#add">add()</a></li>
+            
+                <li><a href="Solution.html#plus">plus()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_solution.js.html">matching/solution.js</a><a href="matching_solution.js.html#source.22">, line 22</a>
+        </li>
+    </ul>
+
+
+
+    
+    </div>
+
+    
+
+    
+        <h3 class="subsection-title">Classes</h3>
+
+        <dl>
+            <dt><a href="Solution.html">Solution</a></dt>
+            <dd></dd>
+        </dl>
+    
+
+     
+
+    
+
+    
+
+
+    
+
+    
+        <h3 class="subtitle">Methods</h3>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="add">add<span class="signature">(sub, check)</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Add a new <a href="Substitution.html">Substitution</a> to this object.  (Recall
+from the definition of this class that it functions as a set of
+<a href="Substitution.html">Substitutions</a>.)  Or, if the
+<a href="Solution.html#canAdd">canAdd()</a> function fails for the given
+<a href="Substitution.html">Substitution</a>, throw an error instead.</p>
+<p>This also includes applying the given <a href="Substitution.html">Substitution</a>
+to the contents of this object before inserting the given
+<a href="Substitution.html">Substitution</a> object into this one.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">sub</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code><a href="Substitution.html">Substitution</a></code>
+    </span>
+    
+
+            
+
+            
+
+            
+                
+            
+
+            <div class="param-description"><p>the substitution to add</p></div>
+            
+        </li>
+
+    
+
+        <li>
+            
+                <span class="param-name">check</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>boolean</code>
+    </span>
+    
+
+            
+
+            
+
+            
+                
+                    <span class="param-default">
+                        true
+                    </span>
+                
+            
+
+            <div class="param-description"><p>whether to first call
+<a href="Solution.html#canAdd">canAdd()</a> to check whether <code>substitution</code> can
+be added (the default) or not to check and just trust the caller,
+thus not throwing an error</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_solution.js.html">matching/solution.js</a><a href="matching_solution.js.html#source.225">, line 225</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="afterSubstituting">afterSubstituting<span class="signature">(&hellip;subs)</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>This method is designed to support the
+<a href="Substitution.html#appliedTo">appliedTo()</a> method in the
+<a href="Substitution.html">Substitution</a> class.  See the documentation there
+for details.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">subs</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code><a href="Substitution.html">Substitution</a></code>
+    </span>
+    
+
+            
+
+            
+                <span class="param-attributes">
+                
+
+                
+
+                
+                    &lt;repeatable&gt;<br>
+                
+                </span>
+            
+
+            
+
+            <div class="param-description"><p>a list of substitutions to apply</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="Substitution.html#appliedTo">appiedTo() in the Substitution class</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_solution.js.html">matching/solution.js</a><a href="matching_solution.js.html#source.202">, line 202</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="canAdd">canAdd<span class="signature">(substitution)</span><span class="return-type-signature"> &rarr; {boolean}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>There are three reasons why a <a href="Substitution.html">Substitution</a>
+instance may not be able to be added to a given Solution.</p>
+<ol>
+<li>If the <a href="Substitution.html">Substitution</a>'s metavariable already
+appears in the given Solution, but mapped to a different
+<a href="Expression.html">Expression</a>.  This fails because a
+<a href="Substitution.html">Substitution</a> is a function, and so it cannot
+map the same input to more than one output.</li>
+<li>If the <a href="Substitution.html">Substitution</a> maps a metavariable to a
+non-<a href="Symbol.html">Symbol</a>, and yet the metavariable appears as the
+bound variable in a quantifier.  This fails because quantifiers can
+bind only variables, so we cannot replace a bound metavariable with
+anything but another variable.</li>
+<li>If applying the given <a href="Substitution.html">Substitution</a> violates
+any one of the <a href="CaptureConstraints.html">CaptureConstraints</a> stored
+in this Solution.  This fails because if we later apply the
+Solution to the original <a href="Problem.html">Problem</a> from which it was
+created, we must variable capture, and those constraints are
+precisely what must be satisfied in order to do so.</li>
+</ol>
+<p>In any of those three cases, this function returns false.  Otherwise,
+it returns true.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">substitution</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code><a href="Substitution.html">Substitution</a></code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the proposed substitution to be
+added to this object via <a href="Solution.html#add">add()</a></p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="Solution.html#add">add()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>boolean</code>
+            
+            
+                <p>whether adding the proposed <code>substitution</code> will
+succeed (as opposed to throw an error)</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_solution.js.html">matching/solution.js</a><a href="matching_solution.js.html#source.153">, line 153</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="complete">complete<span class="signature">()</span><span class="return-type-signature"> &rarr; {boolean}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>A Solution is complete if all of the metavariables appearing in the
+original <a href="Problem.html">Problem</a> (from which the Solution was
+constructed) have assignments in this solution, and those assignments
+do not include any metavariables.  If a solution is complete, it could
+be applied to the original problem's patterns to produce expressions
+containing no metavariables.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="Solution.html#satisfied">satisfied()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>boolean</code>
+            
+            
+                <p>whether this Solution is complete, as defined above</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_solution.js.html">matching/solution.js</a><a href="matching_solution.js.html#source.351">, line 351</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="copy">copy<span class="signature">()</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Create a copy of this object.  It is not strictly a shallow copy or a
+deep copy; it has the following properties.</p>
+<ul>
+<li>It keeps the same <a href="Substitution.html">Substitution</a> instances
+internally, since these are typically immutable objects anyway, but
+it creates its own set of those instances, so that adding or
+removing entries changes only the copy.</li>
+<li>It makes a copy of the <a href="CaptureConstraints.html">CaptureConstraints</a>
+set, but as documented in that class, such copies are shallow.</li>
+<li>It uses the same metavariable and bound metavariable sets as in the
+original object, because those members do not change throughout the
+lifetime of a Solution.</li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_solution.js.html">matching/solution.js</a><a href="matching_solution.js.html#source.85">, line 85</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="domain">domain<span class="signature">()</span><span class="return-type-signature"> &rarr; {Set}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>A Solution can be viewed as a partial function from metavariables to
+expressions.  That is, it is a finite set
+$\{(m_1,e_1),\ldots,(m_n,e_n)\}$, where each $m_i$ is a metavariable
+and each $e_i$ is an expression, and the Solution maps each $m_i$ to
+its corresponding $e_i$.  In such a case, the <em>domain</em> of the Solution
+is the set $\{m_1,\ldots,m_n\}$ of metavariables that are in the
+mapping.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="Solution.html#restrict">restrict()</a></li>
+            
+                <li><a href="Solution.html#restricted">restricted()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>Set</code>
+            
+            
+                <p>the set of metavariables in the domain of this
+Solution, when it is viewed as a partial function from
+metavariables to expressions</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_solution.js.html">matching/solution.js</a><a href="matching_solution.js.html#source.281">, line 281</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="get">get<span class="signature">(metavariable)</span><span class="return-type-signature"> &rarr; {<a href="Expression.html">Expression</a>|undefined}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Look up the <a href="Expression.html">Expression</a> to which this Solution maps
+the given metavariable, and return it (or undefined if there isn't
+one).  Recall that Solutions function as sets of
+<a href="Substitution.html">Substitutions</a>, that is, as a set of ordered pairs,
+and thus as a (partial) function.  This method is therefore just
+(partial) function application.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">metavariable</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code><a href="Symbol.html">Symbol</a></code>
+    </span>
+    |
+
+    <span class="param-type">
+        <code>String</code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>a metavariable (or just the name of
+a metavariable) to be looked up in this Solution</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>Expression</code>
+            
+                <code>undefined</code>
+            
+            
+                <p>the <a href="Expression.html">Expression</a> to
+which this Solution maps the given metavariable, or undefined if this
+solution does not map the metavariable to any
+<a href="Expression.html">Expression</a></p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_solution.js.html">matching/solution.js</a><a href="matching_solution.js.html#source.115">, line 115</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="plus">plus<span class="signature">(sub, check)</span><span class="return-type-signature"> &rarr; {<a href="Solution.html">Solution</a>}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>One common workflow will be to extend a solution by first making a copy
+(using the <a href="Solution.html#copy">copy()</a> function) and then adding a new
+<a href="Substitution.html">Substitution</a> to it (using the
+<a href="Solution.html#add">add()</a> function).  This function makes that easier
+by making it possible to do it with just one function call.  If <code>S</code> is
+a Solution, then <code>S.plus(sub)</code> is a copy of <code>S</code>, but after <code>S.add(sub)</code>
+has been called on it.</p>
+<p>Note that if you are not certain whether the
+<a href="Substitution.html">Substitution</a> can be added, you may need to call
+<a href="Solution.html#canAdd">canAdd()</a> first, or this routine will throw an
+error.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">sub</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code><a href="Substitution.html">Substitution</a></code>
+    </span>
+    
+
+            
+
+            
+
+            
+                
+            
+
+            <div class="param-description"><p>the substitution to add</p></div>
+            
+        </li>
+
+    
+
+        <li>
+            
+                <span class="param-name">check</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>boolean</code>
+    </span>
+    
+
+            
+
+            
+
+            
+                
+                    <span class="param-default">
+                        true
+                    </span>
+                
+            
+
+            <div class="param-description"><p>functions the same as it does in
+<a href="Solution.html#add">add()</a></p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>Solution</code>
+            
+            
+                <p>a <a href="Solution.html#copy">copy()</a> of this object, but
+with <code>sub</code> added, via a call to <a href="Solution.html#add">add()</a></p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_solution.js.html">matching/solution.js</a><a href="matching_solution.js.html#source.259">, line 259</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="restrict">restrict<span class="signature">()</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Alter this object by removing any internal
+<a href="Substitution.html">Substitution</a> whose metavariable does not appear in
+the original <a href="Problem.html">Problem</a> from which this Solution was
+constructed.</p>
+<p>This is useful because some intermediate computations en route to a
+complete solution sometimes add new metavariables, but they should not
+be part of the final solution, since they were only part of the solving
+process, not the actual solution.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li>domain()</li>
+            
+                <li>restricted()</li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_solution.js.html">matching/solution.js</a><a href="matching_solution.js.html#source.303">, line 303</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="restricted">restricted<span class="signature">()</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Return a copy of this Solution, but with
+restrict() having been applied to the
+copy.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li>domain()</li>
+            
+                <li>restrict()</li>
+            
+                <li><a href="Substitution.html#copy">copy()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_solution.js.html">matching/solution.js</a><a href="matching_solution.js.html#source.319">, line 319</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="satisfied">satisfied<span class="signature">()</span><span class="return-type-signature"> &rarr; {boolean}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>A Solution is satisfied if all its
+<a href="CaptureConstraints.html">CaptureConstraints</a> are satisfied.  This
+method is a convenience for asking that question.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="Solution.html#complete">complete()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>boolean</code>
+            
+            
+                <p>whether all
+<a href="CaptureConstraints.html">CaptureConstraints</a> are satisfied</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_solution.js.html">matching/solution.js</a><a href="matching_solution.js.html#source.335">, line 335</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="substitute">substitute<span class="signature">(&hellip;subs)</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>This method is designed to support the
+<a href="Substitution.html#applyTo">applyTo()</a> method in the
+<a href="Substitution.html">Substitution</a> class.  See the documentation there
+for details.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">subs</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code><a href="Substitution.html">Substitution</a></code>
+    </span>
+    
+
+            
+
+            
+                <span class="param-attributes">
+                
+
+                
+
+                
+                    &lt;repeatable&gt;<br>
+                
+                </span>
+            
+
+            
+
+            <div class="param-description"><p>a list of substitutions to apply</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="Substitution.html#applyTo">applyTo() in the Substitution class</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_solution.js.html">matching/solution.js</a><a href="matching_solution.js.html#source.177">, line 177</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
 
 
 
@@ -103,7 +2067,7 @@ corresponding metadata.</p>
 
 <footer class="layout-footer">
   <div class="container">
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Tue Jan 11 2022 14:05:34 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Tue Jan 11 2022 14:05:35 GMT+0000 (Coordinated Universal Time)
   </div>
 </footer>
 

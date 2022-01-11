@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Lurch Deductive Engine: </title>
+    <title>Lurch Deductive Engine: Substitution</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
@@ -33,67 +33,1530 @@
 
 <main class="layout-main ">
   <div class="container">
-    <p class="page-kind"></p>
-    <h1 class="page-title"></h1>
-    
-
-
-
-    
-
-
-    <h3> </h3>
-
-
-
-
-
-
-
-
-
-
+    <p class="page-kind">Class</p>
+    <h1 class="page-title">Substitution</h1>
     
 
 
 
 
-    <section class="readme">
-        <article><h1>The Lurch Deductive Engine (LDE) Source Code Documentation</h1>
-<p>This repository is in the process of rebuilding the LDE, discarding an old
-design and replacing it with a better, updated design.  That work is still in
-progress, and is perhaps 50% complete.</p>
-<p>The navigation menu on the left shows classes and namespaces in alphabetical
-order, but the overview below is more logically organized.</p>
-<h2>Overview</h2>
-<p>Every symbolic math software needs some data structure for storing trees of
-mathematical symbols that represent mathematical meaning.  In the LDE, the
-most generic of these is the <a href="MathConcept.html">MathConcept</a>.</p>
-<p>Later, complex math concepts will be able to be compiled down to a set of
-simpler special cases that can be processed by the LDE.  We call that simpler
-subset the <a href="LogicConcept.html">LogicConcepts</a>.</p>
-<p>Logic concepts come in four types: <a href="Environment.html">Environment</a>,
-<a href="Formula.html">Formula</a>, <a href="Declaration.html">Declaration</a>, and
-<a href="Expression.html">Expression</a>.</p>
-<p>Expressions come in three types: <a href="Symbol.html">Symbol</a>,
-<a href="Application.html">Application</a>, and <a href="Binding.html">Binding</a>.</p>
-<p>There are also some basic tools, including:</p>
+<section>
+
+
+<header class="class">
+
+
+    
+        
+        <!-- <h2>Substitution</h2> -->
+
+        
+
+        
+
+        
+            
+            <div class="class-description"><p>A substitution is a metavariable-expression pair $(m,e)$ that can be used for
+substitution in other expressions.  (See also the definitions of
+<a href="module-Metavariables.html#.metavariable">metavariable</a> and
+<a href="Expression.html">Expression</a>.)</p>
+<p>For example, if $x$ is a metavariable and $(x,2k-1)$ is a substitution, then
+if we consider the expression $x^2+px$, applying the substitution would yield
+the expression $(2k-1)^2+p(2k-1)$.</p></div>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+
+
+
+    
+        
+
+
+
+
+
+    
+
+
+    
+    <h3 class="subtitle">Constructor</h3>
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="Substitution">new Substitution<span class="signature">()</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Constructs a new Substitution instance from a variety of types of inputs.
+See the documentation at the top of this class for the explanation of how
+a Substitution instance is a metavariable-expression pair $(m,e)$.</p>
 <ul>
-<li>for <a href="Connection.html">connecting</a> math concept instances irrespective of
-tree structure,</li>
-<li>for working with <a href="JSON.html">JSON</a> and
-<a href="global.html#predictableStringify">serializing it</a>.</li>
+<li>If two inputs are given, a metavariable $m$ and an expression $e$,
+construct a Substitution from the pair $(m,e)$.</li>
+<li>If one input is given, a <a href="Constraint.html">Constraint</a>, and that
+constraint passes the
+<a href="Constraint.html#isAnInstantiation">isAnInstantiation()</a> test, then it
+can be interpreted as a Substitution.  The constraint $(p,e)$ is such
+that $p$ is a metavariable, and thus if we let $m=p$, we have a
+substitution $(m,e)$.</li>
+<li>In all other cases, throw an error, because the cases above are the
+only supported cases.</li>
 </ul>
-<p>And when working in the test suite, feel free to import
-<a href="Database.html">the Database module</a> for access to a library of
-<a href="LogicConcept.html">LogicConcept</a> instances written in putdown notation, with
-corresponding metadata.</p>
-<h2>GitHub</h2>
-<p><a href="http://github.com/lurchmath/lde">Source code</a></p>
-<p><a href="http://github.com/lurchmath/lde/wiki">Design wiki</a></p></article>
-    </section>
+</div>
 
 
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="Substitution.html#metavariable">metavariable getter</a></li>
+            
+                <li><a href="Substitution.html#expression">expression getter</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_substitution.js.html">matching/substitution.js</a><a href="matching_substitution.js.html#source.18">, line 18</a>
+        </li>
+    </ul>
+
+
+
+    
+    </div>
+
+    
+
+    
+        <h3 class="subsection-title">Classes</h3>
+
+        <dl>
+            <dt><a href="Substitution.html">Substitution</a></dt>
+            <dd></dd>
+        </dl>
+    
+
+     
+
+    
+
+    
+
+
+    
+        <h3 class="subtitle">Members</h3>
+
+        
+            
+
+<article class="member">
+    <div class="method-type">
+        
+    </div>
+<h4 class="member-name" id="expression">expression<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Getter for the expression provided at construction time.  This function
+is useful for making the expression member act as a read-only member,
+even though no member is really read-only in JavaScript.</p>
+</div>
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    <h4>Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_substitution.js.html">matching/substitution.js</a><a href="matching_substitution.js.html#source.73">, line 73</a>
+        </li>
+    </ul>
+
+
+</article>
+        
+            
+
+<article class="member">
+    <div class="method-type">
+        
+    </div>
+<h4 class="member-name" id="metavariable">metavariable<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Getter for the metavariable provided at construction time.  This function is
+useful for making the metavariable member act as a read-only member, even
+though no member is really read-only in JavaScript.</p>
+</div>
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    <h4>Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_substitution.js.html">matching/substitution.js</a><a href="matching_substitution.js.html#source.64">, line 64</a>
+        </li>
+    </ul>
+
+
+</article>
+        
+    
+
+    
+        <h3 class="subtitle">Methods</h3>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="afterSubstituting">afterSubstituting<span class="signature">(&hellip;subs)</span><span class="return-type-signature"> &rarr; {<a href="Substitution.html">Substitution</a>}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>This function operates just as
+<a href="Substitution.html#substitute">substitute()</a> does, but rather than
+altering this object in place, it makes a copy, alters the copy, and
+returns that copy.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">subs</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code><a href="Substitution.html">Substitution</a></code>
+    </span>
+    
+
+            
+
+            
+                <span class="param-attributes">
+                
+
+                
+
+                
+                    &lt;repeatable&gt;<br>
+                
+                </span>
+            
+
+            
+
+            <div class="param-description"><p>the list of Substitutions to apply to
+this Substitution's expression, in the order given</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li>substitute()</li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>Substitution</code>
+            
+            
+                <p>a copy of this Substitution, but with the
+replacements made</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_substitution.js.html">matching/substitution.js</a><a href="matching_substitution.js.html#source.255">, line 255</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="appliedTo">appliedTo<span class="signature">(target)</span><span class="return-type-signature"> &rarr; {any}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Apply this Substitution to the given <code>target</code>, returning the result as a
+new instance (not altering the original).</p>
+<p>If the target is a <a href="LogicConcept.html">LogicConcept</a>, this is identical
+to <a href="MathConcept.html#copy">making a copy of <code>target</code></a> and then calling
+<a href="Substitution.html#applyTo">applyTo()</a> on it, except for one case:  If
+the <code>target</code> is equal to the metavariable of this Substitution, and has
+no parent, then <a href="Substitution.html#applyTo">applyTo()</a> will have no
+effect, but this routine will return a copy of the Substitution's
+expression, as expected.</p>
+<p>If the target is not a <a href="LogicConcept.html">LogicConcept</a>, but it
+implements the <code>afterSubstituting()</code> method, then that method is called
+with this Substitution as argument, and its result returned.  In
+particular, this class itself
+<a href="Substitution.html#afterSubstituting">implements an afterSubstituting() method</a>,
+so one can apply Substitutions to other Substitutions.</p>
+<p>No other options are supported, and will return an error.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">target</span>
+            
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the object to which we should apply this Substitution,
+resulting in a copy</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="Substitution.html#applyTo">applyTo()</a></li>
+            
+                <li>copy()</li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>any</code>
+            
+            
+                <p>a new copy of the <code>target</code> with the application of this
+Substitution having been done</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_substitution.js.html">matching/substitution.js</a><a href="matching_substitution.js.html#source.196">, line 196</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="applyTo">applyTo<span class="signature">(target)</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Apply this Substitution to the given <code>target</code>, in place.</p>
+<ul>
+<li>If the <code>target</code> is a <a href="LogicConcept.html">LogicConcept</a>, find all
+subexpressions of it that are
+<a href="MathConcept.html#equals">structurally equal</a> to the metavariable of
+this Substitution, and replace all of them simultaneously with the
+expression of this Substitution.  (All the documentation after this
+bulleted list is for this case.)</li>
+<li>If the <code>target</code> is any other type of object that has a <code>substitute</code>
+method, call that method, passing this Substitution object as an
+argument, and let the <code>target</code> handle the details.  In particular,
+this class itself
+<a href="Substitution.html#substitute">implements a substitute() method</a>, so
+Substitutions can be applied to one another.</li>
+<li>No other cases are supported, and will throw errors.</li>
+</ul>
+<p>The word &quot;simultaneously&quot; is important because if the expression that is
+inserted as part of the replacement contains any metavariables, they will
+not be considered for substitution.</p>
+<p>Note that there is one case in which this may fail to produce the desired
+results:  If the <code>target</code> is itself a copy of this Substitution's
+metavariable, and has no parent, then it cannot be replaced in-place, due
+to the nature of the <a href="MathConcept.html">MathConcept</a> replacement API.  If
+such a case may occur, you may prefer to use the
+<a href="Substitution.html#appliedTo">appliedTo()</a> function instead.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">target</span>
+            
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the target to which we should apply this Substitution, in
+place</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="Substitution.html#appliedTo">appliedTo()</a></li>
+            
+                <li><a href="Substitution.html#substitute">substitute()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_substitution.js.html">matching/substitution.js</a><a href="matching_substitution.js.html#source.152">, line 152</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="copy">copy<span class="signature">()</span><span class="return-type-signature"> &rarr; {<a href="Substitution.html">Substitution</a>}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Creates a deep copy of this Substitution, that is, its metavariable and
+expression are copies of the ones in this object.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>Substitution</code>
+            
+            
+                <p>a deep copy of this Substitution</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_substitution.js.html">matching/substitution.js</a><a href="matching_substitution.js.html#source.95">, line 95</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="equals">equals<span class="signature">(other)</span><span class="return-type-signature"> &rarr; {boolean}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Two Substitutions are equal if they have the same metavariable and the
+same expression.  Comparison of metavariables and expressions is done
+using the <a href="MathConcept.html#equals">equals()</a> member of the
+<a href="MathConcept.html">MathConcept</a> class.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">other</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code><a href="Substitution.html">Substitution</a></code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>another instance of this class, to be
+compared with this one for equality</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>boolean</code>
+            
+            
+                <p>whether the two instances are structurally equal</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_substitution.js.html">matching/substitution.js</a><a href="matching_substitution.js.html#source.113">, line 113</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="metavariableNames">metavariableNames<span class="signature">()</span><span class="return-type-signature"> &rarr; {Set}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Get the set of names of metavariables that appear anywhere in the
+expression of this substitution.  Caches the result so that once it is
+computed, this is fast to compute again.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>Set</code>
+            
+            
+                <p>a Set of strings, equal to the names of all metavariables
+appearing in the expression of this substitution</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_substitution.js.html">matching/substitution.js</a><a href="matching_substitution.js.html#source.83">, line 83</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="substitute">substitute<span class="signature">(&hellip;subs)</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Apply a sequence of Substitution instances, in the order given, to the
+expression of this Substitution instance, in place.</p>
+<p>For example, if <code>S1</code> is a Substitution mapping the metavariable $M$ to
+the expression $f(x,Y)$, where $Y$ was another metavariable, and <code>S2</code> is
+the substitution mapping $Y$ to $5$, then <code>S1.substitute(S2)</code> would
+alter <code>S1</code> in place so that it mapped $M$ to $f(x,5)$.</p>
+<p><code>S.substitute(X1,...,Xn)</code> is equivalent to <code>S.substitute(X1)</code> and then
+<code>S.substitute(X2)</code> and so forth, in that order.  It is also equivalent
+to <code>X1.applyTo(S)</code> and then <code>X2.applyTo(S)</code> and so forth, in that order.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">subs</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code><a href="Substitution.html">Substitution</a></code>
+    </span>
+    
+
+            
+
+            
+                <span class="param-attributes">
+                
+
+                
+
+                
+                    &lt;repeatable&gt;<br>
+                
+                </span>
+            
+
+            
+
+            <div class="param-description"><p>the list of Substitutions to apply to
+this Substitution's expression, in the order given</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li>applyTo()</li>
+            
+                <li>afterSubstituting()</li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_substitution.js.html">matching/substitution.js</a><a href="matching_substitution.js.html#source.231">, line 231</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="toString">toString<span class="signature">()</span><span class="return-type-signature"> &rarr; {string}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>The string representation of a Substitution $(m,e)$ is simply the string
+&quot;(M,E)&quot; where M is the <a href="LogicConcept.html#toPutdown">putdown</a>
+representation of $m$ and E is the <a href="LogicConcept.html#toPutdown">putdown</a>
+representation of $e$.</p>
+<p>This function also improves brevity and clarity when debugging by making
+a few text replacements, as follows:</p>
+<ul>
+<li>The JSON notation for the metavariable attribute is replaced with a
+double underscore, so rather than seeing <code>'P +{&quot;_type_LDE MV&quot;:true}'</code>,
+you will see simply <code>P__</code>.</li>
+<li>The binder for expression functions, <code>&quot;LDE lambda&quot;</code>, is replaced with
+the more compact and intuitive <code>𝝺</code>.</li>
+<li>The symbol for expression function application, <code>&quot;LDE EFA&quot;</code>, is
+replaced with the more compact <code>@</code>, which can be read as shorthand for
+&quot;apply.&quot;</li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>string</code>
+            
+            
+                <p>a string representation of the Substitution, useful in
+debugging</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="matching_substitution.js.html">matching/substitution.js</a><a href="matching_substitution.js.html#source.282">, line 282</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
 
 
 
@@ -103,7 +1566,7 @@ corresponding metadata.</p>
 
 <footer class="layout-footer">
   <div class="container">
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Tue Jan 11 2022 14:05:34 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Tue Jan 11 2022 14:05:35 GMT+0000 (Coordinated Universal Time)
   </div>
 </footer>
 
