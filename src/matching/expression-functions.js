@@ -422,3 +422,48 @@ export const fullBetaReduce = expr => {
     }
     return wrapper.popChild()
 }
+
+/**
+ * Two expressions are $\alpha$-equivalent if renaming the bound variables in
+ * one makes it exactly equal to the other.  For example, $\forall x,R(x,2)$ is
+ * $\alpha$-equivalent to $\forall y,R(y,2)$, but not to $\forall y,R(y,y)$.
+ * 
+ * @param {Expression} expr1 the first expression to compare
+ * @param {Expression} expr2 the second expression to compare
+ * @param {NewSymbolStream} [stream] only for use in recursion; clients should
+ *   omit this parameter
+ */
+export const alphaEquivalent = ( expr1, expr2, stream ) => {
+    if ( !stream ) stream = new NewSymbolStream( expr1, expr2 )
+    // base cases:
+    if ( expr1.numChildren() != expr2.numChildren() ) return false
+    if ( expr1.isAtomic() ) return expr1.equals( expr2 )
+    // recursive case 1: children of an application
+    if ( expr1 instanceof Application ) {
+        if ( !( expr2 instanceof Application ) ) return false
+        for ( let i = 0 ; i < expr1.numChildren() ; i++ )
+            if ( !alphaEquivalent( expr1.child( i ), expr2.child( i ),
+                stream ) ) return false
+        return true
+    }
+    // recursive case 2: body of a binding, but only after renaming all
+    // bound variables to standardize the two bodies
+    if ( expr1 instanceof Binding ) {
+        if ( !( expr2 instanceof Binding )
+          || !alphaEquivalent( expr1.head(), expr2.head(), stream ) )
+            return false
+        const bvList1 = expr1.boundVariables()
+        const bvList2 = expr2.boundVariables()
+        const bvListNew = stream.nextN( bvList1.length )
+                                .map( v => new Symbol( v ) )
+        // we use whole exprs here, not just the bodies, so that replacement
+        // always has a parent in which to work:
+        let copy1 = expr1.copy()
+        let copy2 = expr2.copy()
+        for ( let i = 0 ; i < bvList1.length ; i++ ) {
+            copy1.body().replaceFree( bvList1[i], bvListNew[i], copy1.body() )
+            copy2.body().replaceFree( bvList2[i], bvListNew[i], copy2.body() )
+        }
+        return alphaEquivalent( copy1.body(), copy2.body(), stream )
+    }
+}

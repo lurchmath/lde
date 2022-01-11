@@ -640,4 +640,60 @@ describe( 'Expression Functions', () => {
         expect( M.fullBetaReduce( expr ).equals( result ) ).to.equal( true )
     } )
 
+    it( 'Should correctly judge alpha-equivalence', () => {
+        // atomics are equivalent iff they're equal
+        expect( M.alphaEquivalent(
+            LogicConcept.fromPutdown( '1' )[0],
+            LogicConcept.fromPutdown( '1' )[0]
+        ) ).equals( true )
+        expect( M.alphaEquivalent(
+            LogicConcept.fromPutdown( '1' )[0],
+            LogicConcept.fromPutdown( '2' )[0]
+        ) ).equals( false )
+        expect( M.alphaEquivalent(
+            LogicConcept.fromPutdown( 'identifier' )[0],
+            LogicConcept.fromPutdown( 'identifier' )[0]
+        ) ).equals( true )
+        expect( M.alphaEquivalent(
+            LogicConcept.fromPutdown( 'other_identifier' )[0],
+            LogicConcept.fromPutdown( 'identifier' )[0]
+        ) ).equals( false )
+        // bindings can have different bound vars, as long as they correspond
+        expect( M.alphaEquivalent(
+            LogicConcept.fromPutdown( '(∃ x , (> x 10))' )[0],
+            LogicConcept.fromPutdown( '(∃ george , (> george 10))' )[0]
+        ) ).equals( true )
+        expect( M.alphaEquivalent(
+            LogicConcept.fromPutdown( '(∃ x , (> x 10))' )[0],
+            LogicConcept.fromPutdown( '(∃ george , (> george 1000))' )[0]
+        ) ).equals( false )
+        // applications just compare their corresponding children
+        expect( M.alphaEquivalent(
+            LogicConcept.fromPutdown( '(and (= 1 2) (∃ x , (> x 10)))' )[0],
+            LogicConcept.fromPutdown(
+                '(and (= 1 2) (∃ george , (> george 10)))' )[0]
+        ) ).equals( true )
+        expect( M.alphaEquivalent(
+            LogicConcept.fromPutdown( '(x y z)' )[0],
+            LogicConcept.fromPutdown( '(x y zee)' )[0]
+        ) ).equals( false )
+        // now try some larger, more complicated cases, with nested bindings
+        expect( M.alphaEquivalent(
+            LogicConcept.fromPutdown( '((sum 1 10) i , (^ i 2))' )[0],
+            LogicConcept.fromPutdown( '((sum 1 12) i , (^ i 2))' )[0]
+        ) ).equals( false )
+        expect( M.alphaEquivalent(
+            LogicConcept.fromPutdown(
+                '(forall t , (= t ((sum 1 10) i , (^ i 2))))' )[0],
+            LogicConcept.fromPutdown(
+                '(forall u , (= u ((sum 1 10) j , (^ j 2))))' )[0]
+        ) ).equals( true )
+        expect( M.alphaEquivalent(
+            LogicConcept.fromPutdown(
+                '(forall t , (= t ((sum 1 10) i , (^ i 2))))' )[0],
+            LogicConcept.fromPutdown(
+                '(forall j , (= j ((sum 1 10) j , (^ j 2))))' )[0]
+        ) ).equals( false )
+    } )
+
 } )
