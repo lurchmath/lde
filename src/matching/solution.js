@@ -98,6 +98,25 @@ export class Solution {
     }
 
     /**
+     * Two Solutions are equal if they have the same
+     * {@link Solution#domain domain()} and, for each metavariable in that
+     * domain, they map the metavariable to
+     * {@link Substitution Substitution} instances that are
+     * {@link Substitution#equals equal as Substitutions}.
+     * 
+     * @param {Solution} other the Solution with which to compare this one
+     * @returns {boolean} whether the two Solutions are structurally equal,
+     *   as defined above
+     */
+    equals ( other ) {
+        const d1 = Array.from( this.domain() )
+        const d2 = other.domain()
+        return d1.length == d2.size
+            && d1.every( mv => d2.has( mv ) )
+            && d1.every( mv => this.get( mv ).equals( other.get( mv ) ) )
+    }
+
+    /**
      * Look up the {@link Expression Expression} to which this Solution maps
      * the given metavariable, and return it (or undefined if there isn't
      * one).  Recall that Solutions function as sets of

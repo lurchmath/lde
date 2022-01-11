@@ -203,6 +203,73 @@ describe( 'Solution', () => {
         ) ).equals( true )
     } )
 
+    it( 'Should correctly compare instances for equality', () => {
+        // Create some instances to compare:
+        // S1 = an empty solution
+        const emptyP = new M.Problem()
+        const S1 = new M.Solution( emptyP )
+        // S2 = a solution mapping X -> f(y)
+        const S2 = new M.Solution( emptyP )
+        S2.add( new M.Substitution(
+            new Symbol( 'X' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown( '(f y)' )[0]
+        ) )
+        // S3 = a solution mapping X -> f(z)
+        const S3 = new M.Solution( emptyP )
+        S3.add( new M.Substitution(
+            new Symbol( 'X' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown( '(f z)' )[0]
+        ) )
+        // S4 = a solution mapping X -> f(y) and Y -> f(y)
+        const S4 = new M.Solution( emptyP )
+        S4.add( new M.Substitution(
+            new Symbol( 'X' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown( '(f y)' )[0]
+        ) )
+        S4.add( new M.Substitution(
+            new Symbol( 'Y' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown( '(f y)' )[0]
+        ) )
+        // then make several copies
+        const S1copy = S1.copy()
+        const S2copy = S2.copy()
+        const S3copy = S3.copy()
+        const S4copy = S4.copy()
+        // Now compare for equality in all possible ways among S1,...,S4
+        // No two are equal except when comparing a thing to itself.
+        expect( S1.equals( S1 ) ).equals( true )
+        expect( S2.equals( S1 ) ).equals( false )
+        expect( S3.equals( S1 ) ).equals( false )
+        expect( S4.equals( S1 ) ).equals( false )
+        expect( S1.equals( S2 ) ).equals( false )
+        expect( S2.equals( S2 ) ).equals( true )
+        expect( S3.equals( S2 ) ).equals( false )
+        expect( S4.equals( S2 ) ).equals( false )
+        expect( S1.equals( S3 ) ).equals( false )
+        expect( S2.equals( S3 ) ).equals( false )
+        expect( S3.equals( S3 ) ).equals( true )
+        expect( S4.equals( S3 ) ).equals( false )
+        expect( S1.equals( S4 ) ).equals( false )
+        expect( S2.equals( S4 ) ).equals( false )
+        expect( S3.equals( S4 ) ).equals( false )
+        expect( S4.equals( S4 ) ).equals( true )
+        // Now ensure that each thing is equal to its own copy.
+        expect( S1.equals( S1copy ) ).equals( true )
+        expect( S2.equals( S2copy ) ).equals( true )
+        expect( S3.equals( S3copy ) ).equals( true )
+        expect( S4.equals( S4copy ) ).equals( true )
+        // And ensure that if we edit some of them, we can make them euqla to
+        // others that they weren't originally equal to.
+        expect( S4.equals( S2.plus( new M.Substitution(
+            new Symbol( 'Y' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown( '(f y)' )[0]
+        ) ) ) ).equals( true )
+        expect( S2.equals( S1.plus( new M.Substitution(
+            new Symbol( 'X' ).asA( M.metavariable ),
+            LogicConcept.fromPutdown( '(f y)' )[0]
+        ) ) ) ).equals( true )
+    } )
+
     it( 'Should correctly tell us when we can add Substitutions', () => {
         // Construct a problem containing the same two Constraints as in the
         // previous test, and then a solution from it, as before.
