@@ -317,6 +317,16 @@ export class Problem {
         } )
     }
 
+    /**
+     * Compute all solutions to this Problem instance, one at a time, using this
+     * generator function.  This function implements the matching algorithm;
+     * it calls an internal workhorse function, `allSolutions()`, to do the
+     * heavy lifting.  Clients should first populate the Problem instance with
+     * {@link Constraint Constraints} using {@link Problem#add add()}, then call
+     * this function to compute the set of {@link Solution Solutions}.
+     * 
+     * @yields {Solution} the next solution to this Problem
+     */
     *solutions () {
         const solutionsSeen = [ ]
         for ( let solution of this.allSolutions( new Solution( this ) ) ) {
