@@ -1228,18 +1228,20 @@ describe( 'Problem', () => {
 
         ////////////
         //
-        //  FOR NOW, we run just the first few tests to ensure this machinery
-        //  works.  Once we've completed the other to-dos below, we will run
-        //  all of these tests.
+        //  FOR NOW, we run just the first few tests (see "slice" below).
+        //  As we do bug fixes, the number of tests we run will grow,
+        //  until it includes the whole test suite from the database.
+        //  Thus this test function is not yet complete.
         //
         ////////////
 
-        matchingTests.slice( 0, 2 ).forEach( key => {
+        matchingTests.slice( 0, 3 ).forEach( key => {
             // Look up the test with the given key and ensure it has three
             // parts (metavariable list, problem definition, expected solution
             // set)
             const LCs = Database.getLogicConcepts( key )
-            expect( LCs.length ).equals( 3 )
+            expect( LCs.length ).equals( 3,
+                `Malformed test: ${key} had ${LCs.length} LCs instead of 3` )
             // Convert all instances of the problem's metavariables into actual
             // metavariables (which would be prohibitive in putdown)
             const metavars = LCs[0].children().slice( 1 )
@@ -1250,59 +1252,67 @@ describe( 'Problem', () => {
                       .forEach( d => d.makeIntoA( M.metavariable ) )
             } )
             // Extract the constraints that define the problem.
-            const constraints = LCs[1].children().slice( 1 )
-            expect( constraints.length % 2 ).equals( 0 )
+            let constraints = LCs[1].children().slice( 1 )
+            expect( constraints.length % 2 ).equals( 0,
+                `Constraint list of odd length in ${key}: ${LCs[1]}` )
             // The tests use the notation (@apply x y) for EFAs,
             // so we need to find each such expression and convert it into an
             // actual EFA.
-
-            /////////////////
-            //
-            //  TO DO - see above
-            //
-            /////////////////
-
+            const apply = new Symbol( '@apply' )
+            const isEFANotation = lc => ( lc instanceof Application )
+                                     && lc.numChildren() == 3
+                                     && lc.child( 0 ).equals( apply )
+            const convertToEFA = lc => M.newEFA( lc.child( 1 ), lc.child( 2 ) )
+            const wrapper = new Application( ...constraints )
+            wrapper.descendantsSatisfying( isEFANotation )
+                   .map( d => d.replaceWith( convertToEFA( d ) ) )
+            constraints = wrapper.children()
             // Finally, construct the actual problem instance.
             const P = new M.Problem( ...constraints )
             // Extract the solutions and define the expected solution objects
             // from them.
             const solutions = LCs[2].children().slice( 1 ).map( sol => {
-                expect( sol.numChildren() % 2 == 0 ).equals( true )
-                const result = new M.Solution( P )
-                for ( let i = 0 ; i < sol.numChildren() - 1 ; i += 2 ) {
-                    expect( sol.child( i ) ).to.be.instanceOf( Symbol )
-                    expect( sol.child( i ).isA( M.metavariable) )
-                        .equals( true )
-                    result.add( new M.Substitution(
-                        sol.child( i ), sol.child( i + 1 ) ) )
-                }
+                expect( sol.numChildren() % 2 == 0 ).equals( true,
+                    `Expected solution of odd length in ${key}: ${sol}` )
                 // The tests use the notation (@lambda x , y) for EFs,
                 // so we need to find each such expression and convert it into
                 // an actual EF.
-
-                //////////////////
-                //
-                //  TO DO - see above
-                //
-                //////////////////
-                
+                const lambda = new Symbol( '@lambda' )
+                const isEFNotation = lc => ( lc instanceof Binding )
+                                         && lc.boundVariables().length == 1
+                                         && lc.head().equals( lambda )
+                const convertToEF = lc => M.newEF(
+                    ...lc.boundVariables(), lc.body() )
+                sol.descendantsSatisfying( isEFNotation )
+                   .map( d => d.replaceWith( convertToEF( d ) ) )
+                // Now form the parts into a Solution object
+                const result = new M.Solution( P )
+                for ( let i = 0 ; i < sol.numChildren() - 1 ; i += 2 ) {
+                    expect( sol.child( i ) ).to.be.instanceOf( Symbol,
+                        `Expected solution in ${key} has ${sol.child(i)}`
+                      + `where a metavariable belongs` )
+                    expect( sol.child( i ).isA( M.metavariable) )
+                        .equals( true,
+                            `Expected solution in ${key} has ${sol.child(i)}`
+                          + `where a metavariable belongs` )
+                    result.add( new M.Substitution(
+                        sol.child( i ), sol.child( i + 1 ) ) )
+                }
                 return result
             } )
-            // console.log( `===========${key}===========` )
-            // console.log( `Problem:\n${P}` )
-            // console.log( `Solutions:\n`, solutions.map(x=>`\t${x}`).join('\n') )
-
-            ///////////////
-            //
-            //  TO DO - In place of the above debugging spam, add extra args
-            //  to expect() or equals() to print custom debugging details.
-            //
-            ///////////////
-            
+            // Now actually run the matching algorithm
             let computedSols
-            expect( () => computedSols = Array.from( P.solutions() ) )
+            expect( () => computedSols = Array.from( P.solutions() ),
+                `Error when running matching algorithm on ${key}` )
                 .not.to.throw()
-            expect( solSetsEq( computedSols, solutions ) ).equals( true )
+            // And check to see if it gave the expected answer
+            expect( solSetsEq( computedSols, solutions ) ).equals( true,
+                `Solution set not as expected for matching problem ${key}:\n`
+              + `Problem:\n\t${P}\n`
+              + `Expected solutions:\n`
+              + solutions.map( x => `\t${x}\n` ).join( '' )
+              + `Computed solutions:\n`
+              + computedSols.map( x => `\t${x}\n` ).join( '' ) )
         } )
     } )
 
