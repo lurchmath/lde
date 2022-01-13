@@ -10,9 +10,9 @@ testing:
 
 // List the pattern-expression pairs in this matching problem:
 (problem
-	(@apply P 0)                                                                (gte n 0)
-	(forall k , (implies (@apply P k) (SecondOrderMatchingMeta P (plus k 1))))  (forall k , (implies (gte n k) (gte n (plus k 1))))
-	(forall n , (@apply P n))                                                   (forall n , (gte n n))
+	(@apply P 0)                                               (gte n 0)
+	(forall k , (implies (@apply P k) (@apply P (plus k 1))))  (forall k , (implies (gte n k) (gte n (plus k 1))))
+	(forall n , (@apply P n))                                  (forall n , (gte n n))
 )
 
 // List all solutions in this matching problem:

@@ -1247,7 +1247,7 @@ describe( 'Problem', () => {
         //
         ////////////
 
-        matchingTests.slice( 0, 63 ).forEach( key => {
+        matchingTests.slice( 0, 74 ).forEach( key => {
             // Look up the test with the given key and ensure it has three
             // parts (metavariable list, problem definition, expected solution
             // set)
@@ -1288,7 +1288,7 @@ describe( 'Problem', () => {
             constraints = wrapper.children()
             // Finally, construct the actual problem instance.
             const P = new M.Problem( ...constraints )
-            if ( getNum( key ) == 63 ) P._debug = true
+            // if ( getNum( key ) == 63 ) P._debug = true
             // Extract the solutions and define the expected solution objects
             // from them.
             const solutions = LCs[2].children().slice( 1 ).map( sol => {
