@@ -422,7 +422,8 @@ export class Solution {
     toString () {
         const d = Array.from( this.domain() )
         d.sort()
-        return `{${d.map(x=>this._substitutions[x].toString()).join(',')}}`
+        return `{${d.map(x=>this._substitutions[x].toString()).join(',')}}/cc`
+             + this._captureConstraints.toString()
     }
 
 }
