@@ -16,8 +16,12 @@ testing:
 
 // List all solutions in this matching problem:
 (solutions
-	( // solution 1
-		x  a
-		P  (@lambda v , (gt v 3))
-	)
+	// The following would be a solution if we permitted users to deduce
+	// a conclusion that's alpha-equivalent to the explicitly permitted one,
+	// but we actually don't plan to support that, and our matching algorithm
+	// doesn't support it either, so we comment this "solution" out.
+	// (
+	// 	x  a
+	// 	P  (@lambda v , (gt v 3))
+	// )
 )
