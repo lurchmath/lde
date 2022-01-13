@@ -10,7 +10,8 @@ testing:
 
 // List the pattern-expression pairs in this matching problem:
 (problem
-	(w (w X (@apply P X)) (forall x , (@apply P x)))  (w (w k (lt (plus k 1) 5)) (forall s , (lt (plus s 1) 5)))
+	(w   (w X (@apply P X))        (forall x , (@apply P x)))
+	(w   (w k (lt (plus k 1) 5))   (forall s , (lt (plus s 1) 5)))
 )
 
 // List all solutions in this matching problem:
