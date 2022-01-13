@@ -3,12 +3,12 @@ import { Symbol } from '../symbol.js'
 import { Application } from "../application.js"
 import { Binding } from "../binding.js"
 import { LogicConcept } from "../logic-concept.js"
-import { metavariable } from "./metavariables.js"
+import { metavariable, metavariableNamesIn } from "./metavariables.js"
 import { Constraint } from "./constraint.js"
 import { Substitution } from "./substitution.js"
 import { Solution } from "./solution.js"
 import {
-    constantEF, projectionEF, applicationEF, fullBetaReduce
+    constantEF, projectionEF, applicationEF, fullBetaReduce, alphaRenamed
 } from './expression-functions.js'
 import { NewSymbolStream } from "./new-symbol-stream.js"
 
@@ -329,13 +329,60 @@ export class Problem {
      */
     *solutions () {
         const solutionsSeen = [ ]
-        for ( let solution of this.allSolutions( new Solution( this ) ) ) {
+        // Turn every bound variable into a metavariable, to simulate support
+        // for alpha-equivalence during matching.  We will use a proxy Problem
+        // object for this, so that our own set of metavariables (and thus
+        // expected Solution domain) does not get altered.
+        const stream = new NewSymbolStream(
+            ...this.constraints.map( constraint => constraint.pattern ),
+            ...this.constraints.map( constraint => constraint.expression )
+        )
+        const proxy = new Problem()
+        if ( this._debug ) proxy._debug = this._debug
+        this.constraints.forEach( constraint => proxy.add( new Constraint(
+            this.convertAllBoundVarsToMetavars( constraint.pattern, stream ),
+            constraint.expression ) ) )
+        // Now compute the set of all solutions to this Problem, using the
+        // *allSolutions() method of the proxy, but telling each Solution that
+        // it belongs to this problem, which has now been extended with the new
+        // metavariables it needs.
+        for ( let solution of proxy.allSolutions( new Solution( this ) ) ) {
+            // When we find a solution, though, yield it iff we have not seen it
+            // before (nor any other solution to which it's alpha-equivalent):
             if ( !solutionsSeen.some( old => old.equals( solution ) ) ) {
                 solutionsSeen.push( solution )
                 yield solution
             }
         }
+        // For debugging purposes, at the end, show all solutions found.
+        if ( this._debug ) {
+            console.log( 'Final solution set:' )
+            solutionsSeen.map( ( solution, index ) =>
+                console.log( `${index}. ${solution}` ) )
+        }
         return
+    }
+
+    // for internal use only, by *solutions()
+    convertAllBoundVarsToMetavars ( pattern, stream ) {
+        // base case
+        if ( pattern.isAtomic() ) return pattern.copy()
+        // recursive case 1: application
+        if ( pattern instanceof Application )
+            return new Application(
+                ...pattern.children().map( child =>
+                    this.convertAllBoundVarsToMetavars( child, stream ) ) )
+        // recursive case 2: binding
+        const copy = pattern.copy()
+        copy.head().replaceWith( this.convertAllBoundVarsToMetavars(
+            copy.head(), stream ) )
+        copy.body().replaceWith( this.convertAllBoundVarsToMetavars(
+            copy.body(), stream ) )
+        const newBoundVars = copy.boundVariables().map( old =>
+            old.isA( metavariable ) ? old :
+            new Symbol( `${old.text()}_${stream.next().text()}` )
+                .asA( metavariable ) )
+        return alphaRenamed( copy, newBoundVars )
     }
 
     // for internal use only, by *solutions()

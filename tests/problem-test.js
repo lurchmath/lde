@@ -1212,6 +1212,18 @@ describe( 'Problem', () => {
         ) ) ).equals( true )
     } )
 
+    // convenience function for easier debugging of Problems
+    const showProblem = P =>
+        P.constraints.map( ( constraint, index ) =>
+            '\t' + ( index == 0 ? '{ ' : '  ' )
+          + `( ${constraint.pattern.toPutdown()},\n`
+          + `\t    ${constraint.expression.toPutdown()} )`
+          + ( index == P.constraints.length - 1 ? ' }' : ',' )
+        ).join( '\n' )
+        .replace( / \+\{"_type_LDE MV":true\}\n/g, '__' )
+        .replace( /"LDE EFA"/g, '@' )
+        .replace( /"LDE lambda"/g, '𝝺' )
+
     it( 'Should compute correct solutions for the whole database', () => {
         // Get all matching tests from the database
         const matchingTests = Database.filterByMetadata( metadata =>
@@ -1235,7 +1247,7 @@ describe( 'Problem', () => {
         //
         ////////////
 
-        matchingTests.slice( 0, 4 ).forEach( key => {
+        matchingTests.slice( 0, 5 ).forEach( key => {
             // Look up the test with the given key and ensure it has three
             // parts (metavariable list, problem definition, expected solution
             // set)
@@ -1305,13 +1317,13 @@ describe( 'Problem', () => {
             let computedSols
             expect( () => computedSols = Array.from( P.solutions() ),
                 `Error when running matching algorithm on ${key}:\n`
-              + `Problem:\n\t${P}\n`
+              + `Problem:\n${showProblem(P)}\n`
               + `Expected solutions:\n`
               + solutions.map( x => `\t${x}\n` ).join( '' ) ).not.to.throw()
             // And check to see if it gave the expected answer
             expect( solSetsEq( computedSols, solutions ) ).equals( true,
                 `Solution set not as expected for matching problem ${key}:\n`
-              + `Problem:\n\t${P}\n`
+              + `Problem:\n${showProblem(P)}\n`
               + `Expected solutions:\n`
               + solutions.map( x => `\t${x}\n` ).join( '' )
               + `Computed solutions:\n`
