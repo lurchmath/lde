@@ -1,5 +1,5 @@
 
-import { metavariable } from './metavariables.js'
+import { metavariable, containsAMetavariable } from './metavariables.js'
 import { Symbol } from '../symbol.js'
 import { Binding } from '../binding.js'
 import { LogicConcept } from '../logic-concept.js'
@@ -114,10 +114,10 @@ export class CaptureConstraint {
 
     /**
      * A capture constraint is complete if neither its bound nor free variables
-     * is a metavariable.  If either is a metavariable, its eventual value has
-     * not yet been determined (or not yet communicated to this object) and thus
-     * we can't judge everything about it that we might like to (such as
-     * {@link CaptureConstraint#satisfied satisfied()} or
+     * contains a metavariable.  If either contains a metavariable, its eventual
+     * value has not yet been determined (or not yet communicated to this
+     * object) and thus we can't judge everything about it that we might like to
+     * (such as {@link CaptureConstraint#satisfied satisfied()} or
      * {@link CaptureConstraint#violated violated()}).  This function lets us
      * know whethe we have enough information to evaluate such predicates.
      * 
@@ -126,7 +126,8 @@ export class CaptureConstraint {
      * @see {@link CaptureConstraint#violated violated()}
      */
     complete () {
-        return !this.bound.isA( metavariable ) && !this.free.isA( metavariable )
+        return !containsAMetavariable( this.bound )
+            && !containsAMetavariable( this.free )
     }
 
     /**
