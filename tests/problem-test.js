@@ -1235,7 +1235,7 @@ describe( 'Problem', () => {
         //
         ////////////
 
-        matchingTests.slice( 0, 3 ).forEach( key => {
+        matchingTests.slice( 0, 4 ).forEach( key => {
             // Look up the test with the given key and ensure it has three
             // parts (metavariable list, problem definition, expected solution
             // set)
@@ -1269,6 +1269,7 @@ describe( 'Problem', () => {
             constraints = wrapper.children()
             // Finally, construct the actual problem instance.
             const P = new M.Problem( ...constraints )
+            // if ( getNum( key ) == 4 ) P._debug = true
             // Extract the solutions and define the expected solution objects
             // from them.
             const solutions = LCs[2].children().slice( 1 ).map( sol => {
@@ -1303,8 +1304,10 @@ describe( 'Problem', () => {
             // Now actually run the matching algorithm
             let computedSols
             expect( () => computedSols = Array.from( P.solutions() ),
-                `Error when running matching algorithm on ${key}` )
-                .not.to.throw()
+                `Error when running matching algorithm on ${key}:\n`
+              + `Problem:\n\t${P}\n`
+              + `Expected solutions:\n`
+              + solutions.map( x => `\t${x}\n` ).join( '' ) ).not.to.throw()
             // And check to see if it gave the expected answer
             expect( solSetsEq( computedSols, solutions ) ).equals( true,
                 `Solution set not as expected for matching problem ${key}:\n`

@@ -411,6 +411,10 @@ export class Problem {
             function* addEF ( metavar, expressionFunction ) {
                 const newSub = new Substitution( metavar, expressionFunction )
                 dbg( `try this EF: ${newSub}` )
+                if ( !soFar.canAdd( newSub ) ) {
+                    dbg( `\tcannot add to current solution:\n\t${soFar}` )
+                    return
+                }
                 const copy = problem.afterSubstituting( newSub )
                 dbg( `gives this problem: ${copy}` )
                 copy.betaReduce()

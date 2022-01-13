@@ -257,8 +257,26 @@ export class Solution {
      */
     add ( sub, check = true ) {
         // throw an error if the check fails (unless the caller says skip it)
-        if ( check && !this.canAdd( sub ) )
+        if ( check && !this.canAdd( sub ) ) {
+            // redo the check to get error info iff we're doing debugging:
+            if ( this._problem._debug ) {
+                const mvName = sub.metavariable.text()
+                const oldValue = this.get( mvName )
+                const newValue = sub.expression
+                console.log( `Error adding ${this} + ${sub}` )
+                if ( oldValue && !oldValue.equals( newValue ) )
+                    console.log( `\tReason: ${mvName} already |-> ${oldValue}` )
+                else if ( this._bound.has( mvName )
+                      && !( newValue instanceof Symbol ) )
+                    console.log(
+                        `\tReason: can't bind ${mvName} as a variable` )
+                else
+                    console.log(
+                        `\tSome CC was violated: ${this._captureConstraints}` )
+                console.log( new Error().stack )
+            }
             throw new Error( 'Adding an invalid Substitution to a Solution' )
+        }
         // modify inner substitutions and capture constraints
         this.substitute( sub )
         this.betaReduce()
