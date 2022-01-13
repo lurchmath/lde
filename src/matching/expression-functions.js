@@ -424,6 +424,30 @@ export const fullBetaReduce = expr => {
 }
 
 /**
+ * Perform $\alpha$-renaming on a {@link Binding Binding}, producing a new
+ * {@link Binding Binding} that is
+ * {@link module:ExpressionFunctions.alphaEquivalent $\alpha$-equivalent} to
+ * the original, but with different names for the bound variables.
+ * 
+ * @param {Binding} binding the expression in which to do the work
+ * @param {Symbol[]} newBoundVars the list of new variables to use, which must
+ *   have the same length as `binding.boundVariables()`, and which will be
+ *   used to replace those bound variables in the order given (that is, the
+ *   first of `newBoundVars` replaces the first of `binding.boundVariables()`,
+ *   and so on)
+ * @returns {Binding} a copy of the original `binding`, but with the
+ *   $\alpha$-renaming having been performed; the original `binding` is
+ *   unchanged
+ */
+export const alphaRenamed = ( binding, newBoundVars ) => {
+    const result = binding.copy()
+    const body = result.body()
+    binding.boundVariables().forEach( ( oldBoundVar, index ) =>
+        body.replaceFree( oldBoundVar, newBoundVars[index], body ) )
+    return result
+}
+
+/**
  * Two expressions are $\alpha$-equivalent if renaming the bound variables in
  * one makes it exactly equal to the other.  For example, $\forall x,R(x,2)$ is
  * $\alpha$-equivalent to $\forall y,R(y,2)$, but not to $\forall y,R(y,y)$.
@@ -452,18 +476,10 @@ export const alphaEquivalent = ( expr1, expr2, stream ) => {
         if ( !( expr2 instanceof Binding )
           || !alphaEquivalent( expr1.head(), expr2.head(), stream ) )
             return false
-        const bvList1 = expr1.boundVariables()
-        const bvList2 = expr2.boundVariables()
-        const bvListNew = stream.nextN( bvList1.length )
-                                .map( v => new Symbol( v ) )
-        // we use whole exprs here, not just the bodies, so that replacement
-        // always has a parent in which to work:
-        let copy1 = expr1.copy()
-        let copy2 = expr2.copy()
-        for ( let i = 0 ; i < bvList1.length ; i++ ) {
-            copy1.body().replaceFree( bvList1[i], bvListNew[i], copy1.body() )
-            copy2.body().replaceFree( bvList2[i], bvListNew[i], copy2.body() )
-        }
-        return alphaEquivalent( copy1.body(), copy2.body(), stream )
+        const newBoundVars = stream.nextN( expr1.boundVariables().length )
+                                   .map( v => new Symbol( v ) )
+        return alphaEquivalent( alphaRenamed( expr1, newBoundVars ).body(),
+                                alphaRenamed( expr2, newBoundVars ).body(),
+                                stream )
     }
 }
