@@ -470,7 +470,7 @@ export class Problem {
                 copy.betaReduce()
                 dbg( `\t==> ${copy}` )
                 for ( let solution of
-                      copy.allSolutions( soFar.plus( newSub ) ) ) {
+                      copy.allSolutions( soFar.plus( newSub, false ) ) ) {
                     dbg( `recursive solution: ${solution}` )
                     yield solution.restricted()
                 }

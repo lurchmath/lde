@@ -178,7 +178,7 @@ export class Solution {
         // Check #1: The metavariable isn't already mapped to something else
         return ( !oldValue || oldValue.equals( newValue ) )
         // Check #2: The substitution wouldn't make us try to bind a non-var
-            && ( !this._bound.has( mvName ) || newValue instanceof Symbol )
+            && ( !this._bound.has( mvName ) || ( newValue instanceof Symbol ) )
         // Check #3: The substitution doesn't violate any capture constraints
             && !this._captureConstraints.constraints.some( cc =>
                 cc.afterSubstituting( substitution ).violated() )
