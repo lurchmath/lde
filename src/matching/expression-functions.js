@@ -440,7 +440,9 @@ export const fullBetaReduce = expr => {
  *   unchanged
  */
 export const alphaRenamed = ( binding, newBoundVars ) => {
-    const result = binding.copy()
+    const result = new Binding( binding.head().copy(),
+                                ...newBoundVars.map( bv => bv.copy() ),
+                                binding.body().copy() )
     const body = result.body()
     binding.boundVariables().forEach( ( oldBoundVar, index ) =>
         body.replaceFree( oldBoundVar, newBoundVars[index], body ) )
