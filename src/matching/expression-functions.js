@@ -57,6 +57,14 @@
  * it (or any possible $\beta$-reduction inside it) with
  * {@link module:ExpressionFunctions.betaReduce betaReduce()} and
  * {@link module:ExpressionFunctions.fullBetaReduce fullBetaReduce()}.
+ * 
+ * Since we have functions in this module for $\beta$-reduction, we also have
+ * two related to $\alpha$-equivalence.  You can check if two expressions are
+ * $\alpha$-equivalent with
+ * {@link module:ExpressionFunctions.alphaEquivalent alphaEquivalent()} and you
+ * can convert a binding to an $\alpha$-equivalent version of itself by renaming
+ * its variables, using
+ * {@link module:ExpressionFunctions.alphaRenamed alphaRenamed()}.
  *
  * @module ExpressionFunctions
  */
