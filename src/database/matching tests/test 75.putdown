@@ -11,7 +11,7 @@ testing:
 // List the pattern-expression pairs in this matching problem:
 (problem
 	(exists x , (@apply P x))              (exists m , (gt m 0))
-	(forall x , (implies (@apply P x) Q))  (forall n , (implies (gt n 0) (gt -1 0)))
+	(forall x , (implies (@apply P x) Q))  (forall m , (implies (gt m 0) (gt -1 0)))
 	Q                                      (gt -1 0)
 )
 
