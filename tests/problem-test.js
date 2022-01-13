@@ -1247,7 +1247,7 @@ describe( 'Problem', () => {
         //
         ////////////
 
-        matchingTests.slice( 0, 5 ).forEach( key => {
+        matchingTests.slice( 0, 34 ).forEach( key => {
             // Look up the test with the given key and ensure it has three
             // parts (metavariable list, problem definition, expected solution
             // set)
@@ -1258,10 +1258,17 @@ describe( 'Problem', () => {
             // metavariables (which would be prohibitive in putdown)
             const metavars = LCs[0].children().slice( 1 )
             metavars.forEach( mv => {
-                LCs[1].descendantsSatisfying( d => d.equals( mv ) )
-                      .forEach( d => d.makeIntoA( M.metavariable ) )
-                LCs[2].descendantsSatisfying( d => d.equals( mv ) )
-                      .forEach( d => d.makeIntoA( M.metavariable ) )
+                // LCs[1] is of the form (problem pat1 exp1 pat2 exp2 ...)
+                // and thus odd-index things in LCs[1] are patterns
+                LCs[1].descendantsSatisfying(
+                    d => d.equals( mv ) && d.address( LCs[1] )[0] % 2 == 1
+                ).forEach( d => d.makeIntoA( M.metavariable ) )
+                // LCs[2] is of the form (solutions (mv1 exp1 ...) ...)
+                // and thus even-index things in each solution are metavariables
+                LCs[2].descendantsSatisfying(
+                    d => d.equals( mv ) && d.address( LCs[2] ).length == 2
+                      && d.address( LCs[2] )[1] % 2 == 0
+                ).forEach( d => d.makeIntoA( M.metavariable ) )
             } )
             // Extract the constraints that define the problem.
             let constraints = LCs[1].children().slice( 1 )

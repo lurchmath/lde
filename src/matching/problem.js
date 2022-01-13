@@ -343,10 +343,13 @@ export class Problem {
             this.convertAllBoundVarsToMetavars( constraint.pattern, stream ),
             constraint.expression ) ) )
         // Now compute the set of all solutions to this Problem, using the
-        // *allSolutions() method of the proxy, but telling each Solution that
-        // it belongs to this problem, which has now been extended with the new
-        // metavariables it needs.
-        for ( let solution of proxy.allSolutions( new Solution( this ) ) ) {
+        // *allSolutions() method of the proxy, but the metavariables list of
+        // the original problem.
+        const start = new Solution( proxy )
+        start._metavariables = this.constraints.map(
+            constraint => metavariableNamesIn( constraint.pattern )
+        ).reduce( ( A, B ) => new Set( [ ...A, ...B ] ), new Set() )
+        for ( let solution of proxy.allSolutions( start ) ) {
             // When we find a solution, though, yield it iff we have not seen it
             // before (nor any other solution to which it's alpha-equivalent):
             if ( !solutionsSeen.some( old => old.equals( solution ) ) ) {
