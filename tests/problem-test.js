@@ -1238,15 +1238,6 @@ describe( 'Problem', () => {
         matchingTests.sort( ( a, b ) => getNum( a ) - getNum( b ) )
         // Now run each test as follows...
 
-        ////////////
-        //
-        //  FOR NOW, we run just the first few tests (see "slice" below).
-        //  As we do bug fixes, the number of tests we run will grow,
-        //  until it includes the whole test suite from the database.
-        //  Thus this test function is not yet complete.
-        //
-        ////////////
-
         matchingTests.forEach( key => {
             // Look up the test with the given key and ensure it has three
             // parts (metavariable list, problem definition, expected solution
