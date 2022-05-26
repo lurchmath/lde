@@ -254,6 +254,8 @@ export const projectionEF = ( arity, index ) => {
  * @param {integer} arity the number of parameters to give the new function
  * @param {...Symbol|...string} symbols an array of symbols or names of symbols
  *   to be used to construct the function, as documented above
+ * 
+ * @see {@link module:ExpressionFunctions.bindingEF bindingEF()}
  */
 export const applicationEF = ( arity, symbols ) => {
     const parameters = new NewSymbolStream( ...symbols ).nextN( arity )
@@ -261,6 +263,27 @@ export const applicationEF = ( arity, symbols ) => {
         new Application( ...symbols.map( sym =>
             newEFA( sym instanceof Symbol ? sym : new Symbol( sym ),
                     ...parameters.map( p => p.copy() ) ) ) ) )
+}
+
+/**
+ * Construct an object identical to the one constructed by
+ * {@link module:ExpressionFunctions.applicationEF applicationEF}, except add an
+ * attribute marking it as representing a binding instead of a function.
+ * This means that its first child will need to match the head of a binding,
+ * its last child the body, and all in-between children match the bound variables.
+ * Consequently, the `symbols` list must be of length at least 3.
+ * 
+ * @param {integer} arity the number of parameters to give the new function
+ * @param {...Symbol|...string} symbols an array of symbols or names of symbols
+ *   to be used to construct the function, as documented above, and in the
+ *   documentation for {@link module:ExpressionFunctions.applicationEF applicationEF}
+ * 
+ * @see {@link module:ExpressionFunctions.applicationEF applicationEF()}
+ */
+export const bindingEF = ( arity, symbols ) => {
+    const result = applicationEF( arity, symbols )
+    result.setAttribute( 'EF type', 'binding' )
+    return result
 }
 
 // We use this symbol for encoding Expression Function Applications as

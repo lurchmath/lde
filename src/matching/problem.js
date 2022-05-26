@@ -8,7 +8,7 @@ import { Constraint } from "./constraint.js"
 import { Substitution } from "./substitution.js"
 import { Solution } from "./solution.js"
 import {
-    constantEF, projectionEF, applicationEF, fullBetaReduce, alphaRenamed
+    constantEF, projectionEF, applicationEF, bindingEF, fullBetaReduce, alphaRenamed
 } from './expression-functions.js'
 import { NewSymbolStream } from "./new-symbol-stream.js"
 
@@ -508,7 +508,6 @@ export class Problem {
             dbg( '--3--' )
             const children = expr.children()
             if ( children.length > 0 ) {
-                /*
                 if ( expr instanceof Binding ) {
                     const asApp = new Application(
                         ...expr.children().map( child => child.copy() ) )
@@ -516,10 +515,11 @@ export class Problem {
                     this.add( new Constraint( constraint.pattern, asApp ) )
                     dbg( `Converted B->A: ${this}` )
                 }
-                */
                 const metavars = this._stream.nextN( children.length )
                     .map( symbol => symbol.asA( metavariable ) )
-                yield* addEF( head, applicationEF( args.length, metavars ) )
+                yield* addEF( head, expr instanceof Binding ?
+                    bindingEF( args.length, metavars ) :
+                    applicationEF( args.length, metavars ) )
             } else dbg( 'case 3 does not apply' )
 
             // Those are the only three solution methods for the EFA case.
