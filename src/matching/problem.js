@@ -507,12 +507,15 @@ export class Problem {
             dbg( '--3--' )
             const children = expr.children()
             if ( children.length > 0 ) {
+                /*
                 if ( expr instanceof Binding ) {
                     const asApp = new Application(
                         ...expr.children().map( child => child.copy() ) )
                     this.remove( 0 )
                     this.add( new Constraint( constraint.pattern, asApp ) )
+                    dbg( `Converted B->A: ${this}` )
                 }
+                */
                 const metavars = this._stream.nextN( children.length )
                     .map( symbol => symbol.asA( metavariable ) )
                 yield* addEF( head, applicationEF( args.length, metavars ) )
