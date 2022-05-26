@@ -141,51 +141,6 @@ export class Solution {
     }
 
     /**
-     * There are three reasons why a {@link Substitution Substitution}
-     * instance may not be able to be added to a given Solution.
-     * 
-     *  1. If the {@link Substitution Substitution}'s metavariable already
-     *     appears in the given Solution, but mapped to a different
-     *     {@link Expression Expression}.  This fails because a
-     *     {@link Substitution Substitution} is a function, and so it cannot
-     *     map the same input to more than one output.
-     *  2. If the {@link Substitution Substitution} maps a metavariable to a
-     *     non-{@link Symbol Symbol}, and yet the metavariable appears as the
-     *     bound variable in a quantifier.  This fails because quantifiers can
-     *     bind only variables, so we cannot replace a bound metavariable with
-     *     anything but another variable.
-     *  3. If applying the given {@link Substitution Substitution} violates
-     *     any one of the {@link CaptureConstraints CaptureConstraints} stored
-     *     in this Solution.  This fails because if we later apply the
-     *     Solution to the original {@link Problem Problem} from which it was
-     *     created, we must variable capture, and those constraints are
-     *     precisely what must be satisfied in order to do so.
-     * 
-     * In any of those three cases, this function returns false.  Otherwise,
-     * it returns true.
-     * 
-     * @param {Substitution} substitution the proposed substitution to be
-     *   added to this object via {@link Solution#add add()}
-     * @returns {boolean} whether adding the proposed `substitution` will
-     *   succeed (as opposed to throw an error)
-     * 
-     * @see {@link Solution#add add()}
-     */
-    canAdd ( substitution ) {
-        const mvName = substitution.metavariable.text()
-        const oldValue = this.get( mvName )
-        const newValue = substitution.expression
-        // Check #1: The metavariable isn't already mapped to something else
-        return ( !oldValue || oldValue.equals( newValue ) )
-        // Check #2: The substitution wouldn't make us try to bind a non-var
-            && ( !this._bound.has( mvName ) || ( newValue instanceof Symbol ) )
-        // Check #3: The substitution doesn't violate any capture constraints
-            && !this._captureConstraints.constraints.some( cc =>
-                cc.afterSubstituting( substitution ).violated() )
-        // None of the checks failed, so this whole function returns true.
-    }
-
-    /**
      * This method is designed to support the
      * {@link Substitution#applyTo applyTo()} method in the
      * {@link Substitution Substitution} class.  See the documentation there
@@ -242,40 +197,52 @@ export class Solution {
      * Add a new {@link Substitution Substitution} to this object.  (Recall
      * from the definition of this class that it functions as a set of
      * {@link Substitution Substitutions}.)  Or, if the
-     * {@link Solution#canAdd canAdd()} function fails for the given
      * {@link Substitution Substitution}, throw an error instead.
+     * 
+     * The function can fail for any of the following three reasons.
+     * 
+     *  1. If the {@link Substitution Substitution}'s metavariable already
+     *     appears in the given Solution, but mapped to a different
+     *     {@link Expression Expression}.  This fails because a
+     *     {@link Substitution Substitution} is a function, and so it cannot
+     *     map the same input to more than one output.
+     *  2. If the {@link Substitution Substitution} maps a metavariable to a
+     *     non-{@link Symbol Symbol}, and yet the metavariable appears as the
+     *     bound variable in a quantifier.  This fails because quantifiers can
+     *     bind only variables, so we cannot replace a bound metavariable with
+     *     anything but another variable.
+     *  3. If applying the given {@link Substitution Substitution} violates
+     *     any one of the {@link CaptureConstraints CaptureConstraints} stored
+     *     in this Solution.  This fails because if we later apply the
+     *     Solution to the original {@link Problem Problem} from which it was
+     *     created, we must avoid variable capture, and those constraints are
+     *     precisely what must be satisfied in order to do so.
      * 
      * This also includes applying the given {@link Substitution Substitution}
      * to the contents of this object before inserting the given
      * {@link Substitution Substitution} object into this one.
      * 
      * @param {Substitution} sub the substitution to add
-     * @param {boolean} check whether to first call
-     *   {@link Solution#canAdd canAdd()} to check whether `substitution` can
+     * @param {boolean} check whether to check whether `substitution` can
      *   be added (the default) or not to check and just trust the caller,
      *   thus not throwing an error
      */
     add ( sub, check = true ) {
-        // throw an error if the check fails (unless the caller says skip it)
-        if ( check && !this.canAdd( sub ) ) {
-            // redo the check to get error info iff we're doing debugging:
-            if ( this._problem._debug ) {
-                const mvName = sub.metavariable.text()
-                const oldValue = this.get( mvName )
-                const newValue = sub.expression
-                console.log( `Error adding ${this} + ${sub}` )
-                if ( oldValue && !oldValue.equals( newValue ) )
-                    console.log( `\tReason: ${mvName} already |-> ${oldValue}` )
-                else if ( this._bound.has( mvName )
-                      && !( newValue instanceof Symbol ) )
-                    console.log(
-                        `\tReason: can't bind ${mvName} as a variable` )
-                else
-                    console.log(
-                        `\tSome CC was violated: ${this._captureConstraints}` )
-                console.log( new Error().stack )
-            }
-            throw new Error( 'Adding an invalid Substitution to a Solution' )
+        // if we're checking to prevent errors, do so now:
+        if ( check ) {
+            const mvName = sub.metavariable.text()
+            const oldValue = this.get( mvName )
+            const newValue = sub.expression
+            // Check #1: The metavariable isn't already mapped to something else
+            if ( oldValue && !oldValue.equals( newValue ) )
+                throw `Function condition failed for metavariable ${mvName}`
+            // Check #2: The substitution wouldn't make us try to bind a non-var
+            if ( this._bound.has( mvName ) && !( newValue instanceof Symbol ) )
+                throw `Cannot set bound metavariable ${mvName} to a non-symbol`
+            // Check #3: The substitution doesn't violate any capture constraints
+            if ( this._captureConstraints.constraints.some( cc =>
+                    cc.afterSubstituting( sub ).violated() ) )
+                throw `Assignment for ${mvName} would violate capture constraints`
         }
         // modify inner substitutions and capture constraints
         this.substitute( sub )
@@ -297,10 +264,8 @@ export class Solution {
      * a Solution, then `S.plus(sub)` is a copy of `S`, but after `S.add(sub)`
      * has been called on it.
      * 
-     * Note that if you are not certain whether the
-     * {@link Substitution Substitution} can be added, you may need to call
-     * {@link Solution#canAdd canAdd()} first, or this routine will throw an
-     * error.
+     * Note that if the {@link Substitution Substitution} cannot be added, this
+     * routine will throw an error, so you may wish to use `try`/`catch`.
      * 
      * @param {Substitution} sub the substitution to add
      * @param {boolean} check functions the same as it does in
@@ -375,20 +340,6 @@ export class Solution {
     }
 
     /**
-     * A Solution is satisfied if all its
-     * {@link CaptureConstraints CaptureConstraints} are satisfied.  This
-     * method is a convenience for asking that question.
-     * 
-     * @returns {boolean} whether all
-     *   {@link CaptureConstraints CaptureConstraints} are satisfied
-     * 
-     * @see {@link Solution#complete complete()}
-     */
-    satisfied () {
-        return this._captureConstraints.satisfied()
-    }
-
-    /**
      * A Solution is complete if all of the metavariables appearing in the
      * original {@link Problem Problem} (from which the Solution was
      * constructed) have assignments in this solution, and those assignments
@@ -397,8 +348,6 @@ export class Solution {
      * containing no metavariables.
      * 
      * @return {boolean} whether this Solution is complete, as defined above
-     * 
-     * @see {@link Solution#satisfied satisfied()}
      */
     complete () {
         const d = this.domain()

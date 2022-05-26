@@ -432,11 +432,10 @@ export class Problem {
         // what remains.
         if ( complexity == 2 ) {
             const newSub = new Substitution( constraint )
-            if ( soFar.canAdd( newSub ) ) {
-                this.remove( 0 )
-                this.substitute( newSub )
-                yield* this.allSolutions( soFar.plus( newSub, false ) )
-            }
+            try { soFar.add( newSub ) } catch { return }
+            this.remove( 0 )
+            this.substitute( newSub )
+            yield* this.allSolutions( soFar.plus( newSub, false ) )
             return
         }
         
@@ -461,7 +460,10 @@ export class Problem {
             function* addEF ( metavar, expressionFunction ) {
                 const newSub = new Substitution( metavar, expressionFunction )
                 dbg( `try this EF: ${newSub}` )
-                if ( !soFar.canAdd( newSub ) ) {
+                let extended
+                try {
+                    extended = soFar.plus( newSub )
+                } catch {
                     dbg( `\tcannot add to current solution:\n\t${soFar}` )
                     return
                 }
@@ -469,8 +471,7 @@ export class Problem {
                 dbg( `gives this problem: ${copy}` )
                 copy.betaReduce()
                 dbg( `\t==> ${copy}` )
-                for ( let solution of
-                      copy.allSolutions( soFar.plus( newSub, false ) ) ) {
+                for ( let solution of copy.allSolutions( extended ) ) {
                     dbg( `recursive solution: ${solution}` )
                     yield solution.restricted()
                 }

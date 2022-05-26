@@ -297,8 +297,7 @@ describe( 'Solution', () => {
             new Symbol( 'foo' ).asA( M.metavariable ),
             new Symbol( 'baz' )
         )
-        expect( S.canAdd( sub ) ).equals( false )
-        expect( () => S.add( sub ) ).to.throw( /Adding an invalid Subst/ )
+        expect( () => S.add( sub ) ).to.throw( /Function condition failed/ )
         delete S._substitutions['foo'] // cleanup
         // Try to add a Substitution that violates rule #2: replacing a bound
         // metavariable with a non-variable.
@@ -306,26 +305,23 @@ describe( 'Solution', () => {
             new Symbol( 'x' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(not atomic)' )[0]
         )
-        expect( S.canAdd( sub ) ).equals( false )
-        expect( () => S.add( sub ) ).to.throw( /Adding an invalid Subst/ )
+        expect( () => S.add( sub ) ).to.throw( /Cannot set .* to a non-symbol/ )
         // Try to add a Substitution that violates rule #3: violating variable
         // capture constraints
         sub = new M.Substitution(
             new Symbol( 'x' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( 'y' )[0]
         )
-        expect( S.canAdd( sub ) ).equals( false )
-        expect( () => S.add( sub ) ).to.throw( /Adding an invalid Subst/ )
+        expect( () => S.add( sub ) ).to.throw( /would violate capture constraints/ )
         // Try to add Substitutions that violate none of the 3 rules.
-        expect( S.canAdd( new M.Substitution(
+        expect( () => S.plus( new M.Substitution(
             new Symbol( 'x' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( 'this_should_work' )[0]
-        ) ) ).equals( true )
+        ) ) ).not.to.throw()
         sub = new M.Substitution(
             new Symbol( 'foo' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( 'baz' )[0] // since we did cleanup above
         )
-        expect( S.canAdd( sub ) ).equals( true )
         expect( () => S.add( sub ) ).not.to.throw()
     } )
 
@@ -382,7 +378,6 @@ describe( 'Solution', () => {
                 new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '1' )
             )
         ) ).to.equal( true )
-        expect( S.satisfied() ).to.equal( false )
         expect( S.complete() ).to.equal( false )
         // Now add a Substitution to the Solution; verify that it's allowed.
         // This substitution is the one required by constraint C2:
@@ -429,7 +424,6 @@ describe( 'Solution', () => {
                 new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '1' )
             )
         ) ).to.equal( true )
-        expect( S.satisfied() ).to.equal( false )
         expect( S.complete() ).to.equal( false )
         // Now add a Substitution to the Solution; verify that it's allowed.
         // This substitution is the one required by constraint C1: x -> t
@@ -457,7 +451,7 @@ describe( 'Solution', () => {
         expect( S.get( 'y' ) ).to.be.undefined
         expect( S._captureConstraints.constraints.length ).to.equal( 0 )
         // But if we redo all the same stuff as above, except we replace
-        // x with y, we should find that an error is throw, because we
+        // x with y, we should find that an error is thrown, because we
         // violate capture constraints.
         const badS = new M.Solution( P )
         expect( () =>
@@ -468,8 +462,7 @@ describe( 'Solution', () => {
                 new Symbol( 'x' ).asA( M.metavariable ),
                 new Symbol( 'y' )
             ) )
-        ).to.throw( /Adding an invalid Substitution/ )
-        expect( S.satisfied() ).to.equal( true )
+        ).to.throw( /would violate capture constraints/ )
         expect( S.complete() ).to.equal( true )
     } )
 
