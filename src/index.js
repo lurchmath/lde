@@ -9,19 +9,19 @@
  * import( './src/index.js' ).then( module => Lurch = module )
  */
 
-export { predictableStringify } from '../src/utilities.js'
+export { predictableStringify } from './utilities.js'
 
-export { Connection } from '../src/connection.js'
+export { Connection } from './connection.js'
 
-export { MathConcept } from '../src/math-concept.js'
-export { LogicConcept } from '../src/logic-concept.js'
-export { Declaration } from '../src/declaration.js'
-export { Environment } from '../src/environment.js'
-export { Expression } from '../src/expression.js'
-export { Symbol as LurchSymbol } from '../src/symbol.js'
-export { Application } from '../src/application.js'
-export { Binding } from '../src/binding.js'
-export { Formula } from '../src/formula.js'
+export { MathConcept } from './math-concept.js'
+export { LogicConcept } from './logic-concept.js'
+export { Declaration } from './declaration.js'
+export { Environment } from './environment.js'
+export { Expression } from './expression.js'
+export { Symbol as LurchSymbol } from './symbol.js'
+export { Application } from './application.js'
+export { Binding } from './binding.js'
+export { Formula } from './formula.js'
 
-export { default as Database } from '../src/database.js'
-export { default as Matching } from '../src/matching.js'
+export { default as Database } from './database.js'
+export { default as Matching } from './matching.js'
