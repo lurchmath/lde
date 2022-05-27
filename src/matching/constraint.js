@@ -190,13 +190,11 @@ export class Constraint {
                 this.pattern.equals( this.expression ) ? 1 : 0
         // Now we know the pattern is nonatomic, because it contains no
         // metavariables, but is also not a lone metavariable.
-        // Since it is not an EFA, it is either a plain Application or Binding.
-        // So the answer is children/failure, depending on if pattern and expr
-        // match on both type (app vs. bin) and # of chlidren.
-        return this._complexity = ( ( this.pattern instanceof Application )
-                                 == ( this.expression instanceof Application ) )
-                               && ( this.pattern.numChildren()
-                                 == this.expression.numChildren() ) ? 3 : 0
+        // Since it is not an EFA, and we have converted all Bindings to
+        // Applications, it is an Application.  We therefore just check to see
+        // if the # children match, and return children or failure.
+        return this._complexity = this.pattern.numChildren()
+                               == this.expression.numChildren() ? 3 : 0
     }
 
     /**

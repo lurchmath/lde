@@ -290,31 +290,10 @@ describe( 'Constraint', () => {
         C = new M.Constraint( P, E )
         expect( C.complexity() ).to.equal( 0 )
         expect( C.complexityName() ).to.equal( 'failure' )
-        // Application and non-application = failure
-        P = LogicConcept.fromPutdown( '(x y z)' )[0]
-        P.child( 1 ).makeIntoA( M.metavariable )
-        E = LogicConcept.fromPutdown( '(a b , c)' )[0]
-        C = new M.Constraint( P, E )
-        expect( C.complexity() ).to.equal( 0 )
-        expect( C.complexityName() ).to.equal( 'failure' )
-        // Binding and non-binding = failure
-        P = LogicConcept.fromPutdown( '(x y , z)' )[0]
-        P.child( 1 ).makeIntoA( M.metavariable )
-        E = LogicConcept.fromPutdown( '(a b c)' )[0]
-        C = new M.Constraint( P, E )
-        expect( C.complexity() ).to.equal( 0 )
-        expect( C.complexityName() ).to.equal( 'failure' )
         // Applications with different sizes = failure
         P = LogicConcept.fromPutdown( '(x y z)' )[0]
         P.child( 1 ).makeIntoA( M.metavariable )
         E = LogicConcept.fromPutdown( '(a b)' )[0]
-        C = new M.Constraint( P, E )
-        expect( C.complexity() ).to.equal( 0 )
-        expect( C.complexityName() ).to.equal( 'failure' )
-        // Bindings with different sizes = failure
-        P = LogicConcept.fromPutdown( '(x y z , w)' )[0]
-        P.child( 1 ).makeIntoA( M.metavariable )
-        E = LogicConcept.fromPutdown( '(a b , c)' )[0]
         C = new M.Constraint( P, E )
         expect( C.complexity() ).to.equal( 0 )
         expect( C.complexityName() ).to.equal( 'failure' )
@@ -334,13 +313,6 @@ describe( 'Constraint', () => {
         P = LogicConcept.fromPutdown( '(x y z)' )[0]
         P.child( 1 ).makeIntoA( M.metavariable )
         E = LogicConcept.fromPutdown( '(a b c)' )[0]
-        C = new M.Constraint( P, E )
-        expect( C.complexity() ).to.equal( 3 )
-        expect( C.complexityName() ).to.equal( 'children' )
-        // Bindings with same sizes = children
-        P = LogicConcept.fromPutdown( '(x y z , w)' )[0]
-        P.child( 1 ).makeIntoA( M.metavariable )
-        E = LogicConcept.fromPutdown( '(a b c , d)' )[0]
         C = new M.Constraint( P, E )
         expect( C.complexity() ).to.equal( 3 )
         expect( C.complexityName() ).to.equal( 'children' )
@@ -382,26 +354,6 @@ describe( 'Constraint', () => {
         expect( result[2] ).to.be.instanceOf( M.Constraint )
         expect( result[2].pattern.equals( new Symbol( 'z' ) ) ).to.equal( true )
         expect( result[2].expression.equals( new Symbol( 'c' ) ) ).to.equal( true )
-        // Last, consider two bindings of the same size
-        P = LogicConcept.fromPutdown( '(x y z , w)' )[0]
-        P.child( 1 ).makeIntoA( M.metavariable )
-        E = LogicConcept.fromPutdown( '(a b c , d)' )[0]
-        C = new M.Constraint( P, E )
-        expect( () => result = C.children() ).not.to.throw()
-        expect( result.length ).to.equal( 4 )
-        expect( result[0] ).to.be.instanceOf( M.Constraint )
-        expect( result[0].pattern.equals( new Symbol( 'x' ) ) ).to.equal( true )
-        expect( result[0].expression.equals( new Symbol( 'a' ) ) ).to.equal( true )
-        expect( result[1] ).to.be.instanceOf( M.Constraint )
-        expect( result[1].pattern.equals( new Symbol( 'y' ).asA( M.metavariable ) ) )
-            .to.equal( true )
-        expect( result[1].expression.equals( new Symbol( 'b' ) ) ).to.equal( true )
-        expect( result[2] ).to.be.instanceOf( M.Constraint )
-        expect( result[2].pattern.equals( new Symbol( 'z' ) ) ).to.equal( true )
-        expect( result[2].expression.equals( new Symbol( 'c' ) ) ).to.equal( true )
-        expect( result[3] ).to.be.instanceOf( M.Constraint )
-        expect( result[3].pattern.equals( new Symbol( 'w' ) ) ).to.equal( true )
-        expect( result[3].expression.equals( new Symbol( 'd' ) ) ).to.equal( true )
     } )
 
 } )
