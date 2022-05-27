@@ -1,6 +1,7 @@
 
 import { Symbol } from '../symbol.js'
 import { Application } from '../application.js'
+import { Binding } from '../binding.js'
 import { LogicConcept } from '../logic-concept.js'
 import { metavariable, containsAMetavariable } from './metavariables.js'
 import { isAnEFA } from './expression-functions.js'
@@ -144,6 +145,46 @@ export class Constraint {
     isAnInstantiation () {
         return this.pattern instanceof Symbol
             && this.pattern.isA( metavariable )
+    }
+
+    /**
+     * It is not possible to recursively solve a constraint set if some are
+     * bindings, because of one fiddly detail regarding the structure of
+     * binding expressions:  All children of a binding expression, other than
+     * the first and last, must be symbols.  However, when solving, there are
+     * times when we need to replace arbitrary children with expression
+     * functions that will later match those children, which would therefore
+     * be prevented if we followed the requirement that certain children must
+     * always be symbols.  This function helps us solve that problem.
+     * 
+     * It replaces every binding expression `(h v1 ... vn , b)` with an
+     * isomorphic application expression `("LDE binding" h v1 ... vn b)`.  The
+     * corresponding information on bound variables is therefore lost, so this
+     * transformation should be done only after that information has already
+     * been processed, but it will allow us to proceed safely with matching
+     * thereafter.
+     * 
+     * This function recursively performs the transformation described in the
+     * previous paragraph, on both the pattern and expression of this
+     * constraint, in place.
+     * 
+     * @see {@link Solution#restoreBindings restoreBindings() in the Solution
+     *   class}
+     */
+    removeBindings () {
+        const withoutBindings = expression => {
+            if ( expression.isAtomic() ) return expression.copy()
+            if ( expression instanceof Application )
+                return new Application(
+                    ...expression.children().map( withoutBindings ) )
+            if ( expression instanceof Binding )
+                return new Application(
+                    new Symbol( 'LDE binding' ),
+                    ...expression.children().map( withoutBindings ) )
+            throw 'Invalid expression in removeBindings'
+        }
+        this._pattern = withoutBindings( this._pattern )
+        this._expression = withoutBindings( this._expression )
     }
 
     /**
