@@ -1279,7 +1279,7 @@ describe( 'Problem', () => {
             constraints = wrapper.children()
             // Finally, construct the actual problem instance.
             const P = new M.Problem( ...constraints )
-            // if ( getNum( key ) == 75 ) P._debug = true
+            // if ( getNum( key ) == 27 ) P._debug = true
             // Extract the solutions and define the expected solution objects
             // from them.
             const solutions = LCs[2].children().slice( 1 ).map( sol => {
@@ -1290,8 +1290,8 @@ describe( 'Problem', () => {
                 // an actual EF.
                 const lambda = new Symbol( '@lambda' )
                 const isEFNotation = lc => ( lc instanceof Binding )
-                                         && lc.boundVariables().length == 1
-                                         && lc.head().equals( lambda )
+                                        && lc.boundVariables().length == 1
+                                        && lc.head().equals( lambda )
                 const convertToEF = lc => M.newEF(
                     ...lc.boundVariables(), lc.body() )
                 sol.descendantsSatisfying( isEFNotation )
