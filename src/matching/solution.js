@@ -1,11 +1,12 @@
 
+import { Application } from "../application.js"
 import { Binding } from "../binding.js"
 import { Symbol } from "../symbol.js"
 import { metavariable, metavariableNamesIn } from "./metavariables.js"
 import { Substitution } from "./substitution.js"
 import { Problem } from "./problem.js"
 import { CaptureConstraints } from "./capture-constraint.js"
-import { fullBetaReduce, alphaEquivalent } from './expression-functions.js'
+import { fullBetaReduce, alphaEquivalent, isAnEFA } from './expression-functions.js'
 
 /**
  * A Solution is a set of {@link Substitution Substitutions}, together with
@@ -61,6 +62,8 @@ export class Solution {
                                    .filter( v => v.isA( metavariable ) )
                                    .map( mv => mv.text() ) )
             ).flat( 2 ) )
+            this._EFAs = pats.map( pattern =>
+                pattern.descendantsSatisfying( isAnEFA ) ).flat( 1 )
         }
 
         // We initialize an empty member here, but it is an important one, so
@@ -95,6 +98,7 @@ export class Solution {
         result._captureConstraints = this._captureConstraints.copy()
         result._metavariables = this._metavariables
         result._bound = this._bound
+        result._EFAs = this._EFAs
         // Done, return the copy:
         return result
     }
@@ -181,6 +185,47 @@ export class Solution {
         return result
     }
 
+    /**
+     * It is not possible to recursively solve a constraint set if some are
+     * bindings, as documented in {@link Constraint#removeBindings the
+     * removeBindings() function in the Constraint class}.  That function
+     * removes binding expressions to avoid the problem documented there, but
+     * that operation needs to be reversed if a solution is eventually found.
+     * Thus, in this class, we provide this method that does exactly that.
+     * 
+     * It replaces every virtual binding, encoded as an application expression
+     * of the form `("LDE binding" h v1 ... vn b)`, with the corresponding
+     * original binding expression, `(h v1 ... vn , b)`.  It does so in-place
+     * in all of the substitutions in this object.
+     * 
+     * @see {@link Constraint#removeBindings removeBindings() in the Constraint class}
+     */
+    restoreBindings () {
+        const withBindings = expression => {
+            if ( expression.isAtomic() ) return expression.copy()
+            if ( expression instanceof Application ) {
+                const head = expression.firstChild()
+                if ( head instanceof Symbol && head.text() == 'LDE binding' )
+                    return new Binding(
+                        ...expression.children().slice( 1 ).map( withBindings ) )
+                else
+                    return new Application(
+                        ...expression.children().map( withBindings ) )
+            }
+            if ( expression instanceof Binding )
+                return new Binding(
+                    ...expression.children().map( withBindings ) )
+            throw `Invalid expression in restoreBindings: ${expression.toPutdown()}`
+        }
+        for ( let metavarName in this._substitutions ) {
+            if ( this._substitutions.hasOwnProperty( metavarName ) ) {
+                const sub = this._substitutions[metavarName]
+                this._substitutions[metavarName] = new Substitution(
+                    sub.metavariable, withBindings( sub.expression ) )
+            }
+        }
+    }
+
     // For internal use.  Applies beta reduction to all the patterns in all the
     // solution's substitutions.
     betaReduce () {
@@ -191,6 +236,45 @@ export class Solution {
                 this._substitutions[mv] = new Substitution(
                     new Symbol( mv ).asA( metavariable ), reduced )
         } )
+    }
+
+    /**
+     * If we applied the current solution to the original problem, which could
+     * include applying $\beta$-reduction to any instantiated expression
+     * functions, would that result in any variable capture?  For example, if
+     * we had a solution that instantiated $P\mapsto\lambda x.\exists y.f(x)$
+     * and the original problem had $P$ applied to $2+y$, then computing
+     * $P(2+y)$ would result in variable capture.  This function detects
+     * whether there are any such instances, and returns true if and only if
+     * there are.  It expects to be called after all metavariable
+     * instantiations have been computed, i.e., not when the solution is only
+     * partially formed.
+     */
+    betaWouldCapture () {
+        for ( let i = 0 ; i < this._EFAs.length ; i++ ) {
+            const efa = this._EFAs[i]
+            // get the EFA head's instantiation, or move on if there is none
+            const ef = this.get( efa.child( 1 ) )
+            if ( !ef ) continue
+            // for each of its parameters...
+            const parameters = ef.boundVariables()
+            for ( let j = 0 ; j < parameters.length ; j++ ) {
+                // compute what we would plug in for that parameter
+                let argument = efa.child( 2 + j )
+                for ( const metavar in this._substitutions )
+                    if ( this._substitutions.hasOwnProperty( metavar ) )
+                        argument = this._substitutions[metavar].appliedTo(
+                            argument )
+                // is it actually free to replace the parameter, though?
+                const freeToReplace = ef.body().descendantsSatisfying(
+                    d => d.equals( parameters[j] ) && d.isFree( ef.body() )
+                ).every( d => argument.isFreeToReplace( d, ef.body() ) )
+                // if not, we've found a capture example; return true
+                if ( !freeToReplace ) return true
+            }
+        }
+        // no capture examples exist; return false
+        return false
     }
 
     /**

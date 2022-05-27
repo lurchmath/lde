@@ -349,11 +349,15 @@ export class Problem {
         start._metavariables = this.constraints.map(
             constraint => metavariableNamesIn( constraint.pattern )
         ).reduce( ( A, B ) => new Set( [ ...A, ...B ] ), new Set() )
+        proxy.constraints.forEach( constraint => constraint.removeBindings() )
         for ( let solution of proxy.allSolutions( start ) ) {
+            // Is this really a solution?  Only if no capture would occur...
+            solution.restoreBindings()
+            if ( solution.betaWouldCapture() ) continue
             // When we find a solution, though, yield it iff we have not seen it
             // before (nor any other solution to which it's alpha-equivalent):
             if ( !solutionsSeen.some( old => old.equals( solution ) ) ) {
-                solutionsSeen.push( solution )
+                solutionsSeen.push( solution.copy() )
                 yield solution
             }
         }
@@ -470,7 +474,7 @@ export class Problem {
                 const copy = problem.afterSubstituting( newSub )
                 dbg( `gives this problem: ${copy}` )
                 copy.betaReduce()
-                dbg( `\t==> ${copy}` )
+                dbg( `\t=β=>` )
                 for ( let solution of copy.allSolutions( extended ) ) {
                     dbg( `recursive solution: ${solution}` )
                     yield solution.restricted()
