@@ -25,17 +25,17 @@ describe( 'Capture Constraints', () => {
         b = LogicConcept.fromPutdown( '(a b c)' )[0]
         f = new Symbol( 'free' )
         expect( () => CC = new M.CaptureConstraint( b, f ) ).to.throw(
-            /can only be constructed from two Symbols/ )
+            /may be constructed only from two Symbols/ )
         // another that we cannot construct
         b = new Symbol( 'bound' )
         f = new Symbol( '(∀ x , (= x x))' )[0]
         expect( () => CC = new M.CaptureConstraint( b, f ) ).to.throw(
-            /can only be constructed from two Symbols/ )
+            /may be constructed only from two Symbols/ )
         // a final one that we cannot construct
         b = LogicConcept.fromPutdown( '(a b c)' )[0]
         f = new Symbol( '(∀ x , (= x x))' )[0]
         expect( () => CC = new M.CaptureConstraint( b, f ) ).to.throw(
-            /can only be constructed from two Symbols/ )
+            /may be constructed only from two Symbols/ )
     } )
 
     it( 'Should let us make copies and compare for equality', () => {

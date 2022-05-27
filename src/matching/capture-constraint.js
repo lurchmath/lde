@@ -29,7 +29,7 @@ export class CaptureConstraint {
     /**
      * Construct a capture constraint $(b,f)$, as defined above, by specifying
      * the bound and free variables $b$ and $f$, in that order, as parameters.
-     * Although both should be {@link Symbol Symbols}, the latter may be a
+     * Although both should be {@link Symbol Symbols}, either may be a
      * metavariable that is later replaced by an entire expression.
      * 
      * @param {Symbol} bound the bound variable $b$ in the definition of capture
@@ -46,7 +46,7 @@ export class CaptureConstraint {
         if ( typeof( check ) === 'undefined' ) check = true
         if ( check &&
              ( !( bound instanceof Symbol ) || !( free instanceof Symbol ) ) )
-            throw 'CaptureConstraints can only be constructed from two Symbols'
+            throw 'CaptureConstraints may be constructed only from two Symbols'
         this.bound = bound
         this.free = free
     }
@@ -113,13 +113,13 @@ export class CaptureConstraint {
     }
 
     /**
-     * A capture constraint is complete if neither its bound nor free variables
+     * A capture constraint is complete if neither its bound nor free variable
      * contains a metavariable.  If either contains a metavariable, its eventual
      * value has not yet been determined (or not yet communicated to this
      * object) and thus we can't judge everything about it that we might like to
      * (such as {@link CaptureConstraint#satisfied satisfied()} or
      * {@link CaptureConstraint#violated violated()}).  This function lets us
-     * know whethe we have enough information to evaluate such predicates.
+     * know whether we have enough information to evaluate such predicates.
      * 
      * @returns {boolean} true iff this constraint contains no metavariables
      * @see {@link CaptureConstraint#satisfied satisfied()}
