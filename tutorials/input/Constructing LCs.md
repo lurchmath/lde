@@ -1,15 +1,111 @@
 
-## Temporary
+This tutorial covers how to construct {@link LogicConcept Logic Concepts}
+(LCs) in your own code, in a variety of ways.  Other tutorials cover what you
+can do with LC instances once you've created them.
 
-This tutorial file is just a draft to verify that compiling tutorials works.
+## Putdown notation
+
+The standard way to write an LC is in "putdown" notation, the details of which
+are {@link LogicConcept#fromPutdown documented here}.  The following code
+shows how you can use that notation to create LCs, and use that same notation
+to print them as well.
+
+```js
+import { LogicConcept } from './src/index.js'
+
+const threeLCs = LogicConcept.fromPutdown( 'x (f x y) { :A B C }' )
+console.log( threeLCs[0].toPutdown() )
+console.log( threeLCs[1].toPutdown() )
+console.log( threeLCs[2].toPutdown() )
+```
+
+Notice that {@link LogicConcept#fromPutdown fromPutdown()} return an *array*
+of results.  It's very tempting, when constructing just one LC, to forget
+this, and write some code like this:
+
+```js
+// MISTAKE!  DO NOT DO THIS!  SEE THE WARNING ABOVE.
+let x = LogicConcept.fromPutdown( 'x' )  // oops!  x is an array!
+
+// This is the correct way instead:
+x = LogicConcept.fromPutdown( 'x' )[0]  // lift out the first result
+```
+
+But it is also possible to construct specific types of {@link LogicConcept
+Logic Concepts} directly, using constructors for subclasses, as shown below.
+
+## Constructing specific subclasses
+
+The only unexpected thing here is that the `src/index.js` file does not expose
+the {@link Symbol Symbol} class with the name `Symbol`, because there is
+already a `Symbol` concept defined in JavaScript that means something entirely
+different.  So while we do define a {@link Symbol Symbol} class, as you can
+see by following that link to its documentation, we expose it under the name
+`LurchSymbol` instead, so that both the original JavaScript notion and our
+Lurch-specific notion both remain available, neither overwriting the other.
+
+The code below shows how to create every specific type of LC.  We print them
+using the {@link LogicConcept#toPutdown toPutdown()} member function, because
+the generic string representation of JavaScript objects is not useful here.
+
+As you can see, the code is much less concise than creating LCs from putdown
+notation, as above.  Hence this method is less elegant, but sometimes useful
+when you need to put a specific object that you've already created into a new
+LC hierarchy at a specific location.
 
 ```js
 import { LurchSymbol } from './src/index.js'
+
+// Make a rather large symbol
+const S = new LurchSymbol( 'any text can be a symbol' )
+console.log( S.toPutdown() )
 ```
 
-The following code makes a symbol and prints it.  Exciting!
+```js
+import { Application } from './src/index.js'
+
+// Make the mathematical expression f(y)
+const f = new LurchSymbol( 'f' )
+const y = new LurchSymbol( 'y' )
+const A = new Application( f, y )
+console.log( A.toPutdown() )
+```
 
 ```js
-const s1 = new LurchSymbol( 'this is a symbol' )
-console.log( s1 )
+import { Binding } from './src/index.js'
+
+// Make the mathematical expression ∀y.P
+const forall = new LurchSymbol( 'forall' )
+const P = new LurchSymbol( 'P' )
+const B = new Binding( forall, y.copy(), P ) // see comment below
+console.log( B.toPutdown() )
+```
+
+Why did we use `y.copy()` when creating the binding above, rather than just
+`y`?  Note that `y` is a specific symbol that is already sitting in the LC
+tree called `A` declared earlier.  If we were to construct a new
+{@link Binding Binding} `B` containing `y`, then we would necessarily be
+removing `y` from the `A` hierarchy in which it sits to place it inside the
+`B` hierarchy.  Thus we would inadvertently (and somewhat surprisingly) be
+modified just by our creation of `B`!  This is obviously not desired, so we
+make a copy of `y` instead.  This is another pitfall that can be avoided by
+using putdown notation, except of course in those cases where you actually
+want to put a specific instance of `x` into a specific hierarchy.
+
+```js
+import { Declaration } from './src/index.js'
+
+// Make the mathematical phrase "Let y be a constant such that P(y)."
+const D = new Declaration( Declaration.Constant,
+    [ y.copy() ], // can be an array of several variables to declare at once
+    new Application( P.copy(), y.copy() ) )
+console.log( D.toPutdown() )
+```
+
+```js
+import { Environment } from './src/index.js'
+
+// Place copies of the preceding four expressions in an environment
+const E = new Environment( S.copy(), A.copy(), B.copy(), D.copy() )
+console.log( E.toPutdown() )
 ```
