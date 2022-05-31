@@ -38,7 +38,14 @@ export class Environment extends LogicConcept {
      * The conclusions of a LogicConcept include:
      * 
      *  * all of its children that are claim {@link Expression Expressions}
-     *  * all of the conclusions in any of its child Environments, recursively
+     *  * all of the conclusions in any of its child Environments that are
+     *    themselves claims, recursively
+     * 
+     * Thus conclusions are always {@link Expression Expressions} or
+     * {@link Declaration Declarations}, never other Environments.  And for
+     * each one, all the members of its ancestor chain, up to but not
+     * necessarily including the Environment in which this method was called,
+     * will be claims, not givens.
      */
     conclusions () {
         let result = [ ]
