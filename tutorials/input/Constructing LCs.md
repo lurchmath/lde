@@ -7,6 +7,8 @@ can do with LC instances once you've created them:
  * {@tutorial LC tree hierarchies}
  * {@tutorial Serialization and attributes of LCs}
  * {@tutorial Free and bound variables}
+ * {@tutorial Connections among LCs}
+ * {@tutorial Pattern matching}
 
 (Each piece of sample code below is written as if it were a script sitting in
 the root folder of this source code repository, and run from there with the
