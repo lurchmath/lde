@@ -571,7 +571,7 @@ export class LogicConcept extends MathConcept {
                 const Declaration = MathConcept.subclasses.get( 'Declaration' )
                 const type = this.type() == Declaration.Variable ?
                     'var' : 'const'
-                if ( this.expression() ) {
+                if ( this.body() ) {
                     const body = childResults.pop()
                     return finalize(
                         `[${childResults.join( ' ' )} ${type} ${body}]`,

@@ -165,7 +165,7 @@ export class Declaration extends LogicConcept {
         return new Declaration(
             this.type(),
             this.symbols().map( symbol => symbol.copy() ),
-            this.expression() ? this.expression().copy() : undefined
+            this.body() ? this.body().copy() : undefined
         )
     }
 
@@ -217,7 +217,7 @@ export class Declaration extends LogicConcept {
      * @see {@link Declaration#type type()}
      * @see {@link Declaration#symbols symbols()}
      */
-    expression () {
+    body () {
         return this._body == this.lastChild() ? this._body : undefined
     }
 

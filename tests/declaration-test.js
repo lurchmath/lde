@@ -202,21 +202,21 @@ describe( 'Declaration', () => {
     it( 'Should let us query the body of any Declaration', () => {
         // body == L1
         const D1 = new Declaration( Declaration.Variable, x, L1 )
-        expect( D1.expression() ).to.equal( L1 )
+        expect( D1.body() ).to.equal( L1 )
         // body == L2
         const D2 = new Declaration( Declaration.Constant, [ x, y ], L2 )
-        expect( D2.expression() ).to.equal( L2 )
+        expect( D2.body() ).to.equal( L2 )
         // body == L3
         const D3 = new Declaration( Declaration.Variable, x, L3 )
-        expect( D3.expression() ).to.equal( L3 )
+        expect( D3.body() ).to.equal( L3 )
         // body == L4
         const D4 = new Declaration( Declaration.Constant, [ x, y ], L4 )
-        expect( D4.expression() ).to.equal( L4 )
+        expect( D4.body() ).to.equal( L4 )
         // no body provided at construction time
         const D5 = new Declaration( Declaration.Variable, x )
-        expect( D5.expression() ).to.equal( undefined )
+        expect( D5.body() ).to.equal( undefined )
         const D6 = new Declaration( Declaration.Constant, [ x, y ] )
-        expect( D6.expression() ).to.equal( undefined )
+        expect( D6.body() ).to.equal( undefined )
     } )
 
 } )
