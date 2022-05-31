@@ -18,8 +18,8 @@ if ( !fs.existsSync( outputFolder ) ) fs.mkdirSync( outputFolder )
 
 // How to run JavaScript code in an Rmarkdown/Jupyter style.
 // Takes an array of code strings as input, all to be run in the same context.
-const runSnippets = ( snippets, callback ) => {
-    const tmpFile = path.join( thisFolder, 'tutorial-tmp-file.js' )
+const runSnippets = ( snippets, uniqueId, callback ) => {
+    const tmpFile = path.join( thisFolder, `tutorial-tmp-file-${uniqueId}.js` )
     const separator = '---------OUTPUT DIVIDER---------'
     const codeToRun = snippets.join( `\nconsole.log( '${separator}' )\n` )
     fs.writeFileSync( tmpFile, codeToRun )
@@ -77,7 +77,7 @@ const prepareTutorial = ( inFile, callback ) => {
             return console.error( 'Unable to read this tutorial:', inFile )
         let tutorial = String( buffer )
         const snippets = extractSnippets( tutorial )
-        runSnippets( snippets, results => {
+        runSnippets( snippets, path.basename( inFile ), results => {
             results.map( ( output, index ) => {
                 let replacement = `\`\`\`js\n${snippets[index]}\n\`\`\`\n`
                 if ( !/^\s*$/.test( output ) )
