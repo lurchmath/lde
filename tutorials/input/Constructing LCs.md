@@ -1,7 +1,14 @@
 
 This tutorial covers how to construct {@link LogicConcept Logic Concepts}
 (LCs) in your own code, in a variety of ways.  Other tutorials cover what you
-can do with LC instances once you've created them.
+can do with LC instances once you've created them:
+
+ * {@tutorial Methods in each LC subclass}
+
+(Each piece of sample code below is written as if it were a script sitting in
+the root folder of this source code repository, and run from there with the
+command-line tools `node`.  If you place your scripts in another folder, you
+will need to adjust the path in each `import` statement accordingly.)
 
 ## Putdown notation
 
@@ -33,6 +40,11 @@ x = LogicConcept.fromPutdown( 'x' )[0]  // lift out the first result
 
 But it is also possible to construct specific types of {@link LogicConcept
 Logic Concepts} directly, using constructors for subclasses, as shown below.
+
+Of course, if you would like to use the common abbreviation `LC` instead of
+the lengthier `LogicConcept`, you can either assign `const LC = LogicConcept`
+after importing, or use the JavaScript syntax
+`import { LogicConcept as LC } from './src/index.js'` in the first place.
 
 ## Constructing specific subclasses
 
