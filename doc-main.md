@@ -8,6 +8,19 @@ progress, and is perhaps 50% complete.
 The navigation menu on the left shows classes and namespaces in alphabetical
 order, but the overview below is more logically organized.
 
+## Tutorials
+
+Probably the easiest way to get familiar with the classes and methods defined
+in this repository, together with how to use them, is to read the tutorials:
+
+ * {@tutorial Constructing LCs}
+ * {@tutorial Methods in each LC subclass}
+ * {@tutorial LC tree hierarchies}
+ * {@tutorial Serialization and attributes of LCs}
+ * {@tutorial Free and bound variables}
+ * {@tutorial Connections among LCs}
+ * {@tutorial Pattern matching}
+
 ## Foundational classes
 
 Every symbolic math software needs some data structure for storing trees of
