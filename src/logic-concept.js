@@ -174,7 +174,7 @@ export class LogicConcept extends MathConcept {
      *    is written just like a function application but with a comma before
      *    the body.  All children before the body and after the first child
      *    must be {@link Symbol Symbols}, and are the bound variables.
-     *    Example:  `(∀ x, (P x))` means $\forall x, P(x)$.
+     *    Example:  `(∀ x , (P x))` means $\forall x, P(x)$.
      *  * A variable {@link Declaration Declaration} lists the declared
      *    {@link Symbol Symbols} in brackets, followed by the keyword `var`
      *    followed by an optional body that is an assumption made about the
@@ -187,7 +187,7 @@ export class LogicConcept extends MathConcept {
      *    separated by spaces and surrounded in curly brackets.  Example:
      *    `{ child1 child2 etc }`.
      *  * A {@link Formula Formula} (which is a subclass of
-     *    {@link Environment Environment}) by using `{*` and `*}` as the
+     *    {@link Environment Environment}) uses `{*` and `*}` as the
      *    grouping markers instead of undecorated curly brackets.
      *  * Any {@link Environment Environment},
      *    {@link Declaration Declaration}, or

@@ -8,15 +8,15 @@ progress, and is perhaps 50% complete.
 The navigation menu on the left shows classes and namespaces in alphabetical
 order, but the overview below is more logically organized.
 
-## Overview
+## Foundational classes
 
 Every symbolic math software needs some data structure for storing trees of
 mathematical symbols that represent mathematical meaning.  In the LDE, the
-most generic of these is the {@link MathConcept MathConcept}.
+most generic of these is the {@link MathConcept Math Concept}.
 
 Later, complex math concepts will be able to be compiled down to a set of
 simpler special cases that can be processed by the LDE.  We call that simpler
-subset the {@link LogicConcept LogicConcepts}.
+subset the {@link LogicConcept Logic Concepts}, or LCs for short.
 
 Logic concepts come in four types: {@link Environment Environment},
 {@link Formula Formula}, {@link Declaration Declaration}, and
@@ -25,16 +25,22 @@ Logic concepts come in four types: {@link Environment Environment},
 Expressions come in three types: {@link Symbol Symbol},
 {@link Application Application}, and {@link Binding Binding}.
 
-There are also some basic tools, including:
+## Other tools
 
- * for {@link Connection connecting} math concept instances irrespective of
+Other basic tools support the classes above, including:
+
+ * a class for {@link Connection connecting} math concept instances irrespective of
    tree structure,
- * for working with {@link JSON JSON} and
+ * functions for working with {@link JSON JSON} and
    {@link predictableStringify serializing it}.
+
+There is also a host of advanced tools for doing {@link module:Matching pattern
+matching} with {@link LogicConcept Logic Concept} instances.
 
 And when working in the test suite, feel free to import
 {@link Database the Database module} for access to a library of
-{@link LogicConcept LogicConcept} instances written in putdown notation, with
+{@link LogicConcept Logic Concept} instances written in
+{@link LogicConcept#fromPutdown putdown} notation, with
 corresponding metadata.
 
 ## GitHub
