@@ -77,6 +77,7 @@ const prepareTutorial = ( inFile, callback ) => {
             return console.error( 'Unable to read this tutorial:', inFile )
         let tutorial = String( buffer )
         const snippets = extractSnippets( tutorial )
+        if ( snippets.length == 0 ) return callback( tutorial )
         runSnippets( snippets, path.basename( inFile ), results => {
             results.map( ( output, index ) => {
                 let replacement = `\`\`\`js\n${snippets[index]}\n\`\`\`\n`
