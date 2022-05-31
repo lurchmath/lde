@@ -1,7 +1,7 @@
 
 This tutorial assumes you know how to construct LC instances; if not, see
-the tutorial on {@tutorial Constructing LCs}.  It covers the most common
-methods available in each of the common LC subclasses, such as symbols,
+the tutorial on {@tutorial Constructing LCs}.  This tutorial covers the most
+common methods available in each of the common LC subclasses, such as symbols,
 declarations, etc.
 
 (Each piece of sample code below is written as if it were a script sitting in
