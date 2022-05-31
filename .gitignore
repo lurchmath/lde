@@ -2,3 +2,4 @@ node_modules/
 *.swp
 for-reference-only/
 .DS_Store
+tutorials/output/

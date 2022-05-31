@@ -11,7 +11,9 @@
         "exclude": [
             "./src/database/footer.js",
             "./src/database/generate.js",
-            "./jsdoc-add-mathjax.js"
+            "./pre-docs.js",
+            "./post-docs.js",
+            "./examples/input/*.js"
         ]
     }
 }
