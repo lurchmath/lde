@@ -4,6 +4,9 @@ This tutorial covers how to construct {@link LogicConcept Logic Concepts}
 can do with LC instances once you've created them:
 
  * {@tutorial Methods in each LC subclass}
+ * {@tutorial LC tree hierarchies}
+ * {@tutorial Serialization and attributes of LCs}
+ * {@tutorial Free and bound variables}
 
 (Each piece of sample code below is written as if it were a script sitting in
 the root folder of this source code repository, and run from there with the
