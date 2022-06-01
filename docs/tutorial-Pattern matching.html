@@ -44,7 +44,249 @@
 </header>
 
 <article>
-    <p>This tutorial is not yet written.  Check back soon.</p>
+    <p>This tutorial assumes you know how to construct LC instances; if not, see
+the tutorial on <a href="tutorial-Constructing LCs.html">Constructing LCs</a>.  This tutorial covers how to use
+<a href="module-Matching.html">the Matching module</a> to do pattern matching on LCs.  If
+you are unfamiliar with the concept of pattern matching, follow that link to
+the Matching module and read that entire page of documentation first (although
+you can skip the final section, entitled &quot;Technical details&quot;).</p>
+<p>(Each piece of sample code below is written as if it were a script sitting in
+the root folder of this source code repository, and run from there with the
+command-line tools <code>node</code>.  If you place your scripts in another folder, you
+will need to adjust the path in each <code>import</code> statement accordingly.)</p>
+<h2>Constructing patterns and expressions</h2>
+<p>A matching problem is built from a set of pattern-expression pairs.  We thus
+need to be able to construct both patterns and expressions.  Expressions, of
+course, we already know how to construct; they are instance of the subclass
+of <a href="LogicConcept.html">LogicConcept</a> that is called
+<a href="Expression.html">Expression</a>!  More specifically, if you construct an LC
+using the <a href="LogicConcept.html#.fromPutdown">fromPutdown()</a> function and simply
+don't use any of the notation for <a href="Environment.html">Environments</a> or
+<a href="Declaration.html">Declarations</a>, you are guaranteed to get only (an array of)
+<a href="Expression.html">Expressions</a> as the result.</p>
+<br/>
+<hr/>
+<pre class="prettyprint source lang-js"><code>import { LogicConcept } from './src/index.js'
+
+const [ expr1, expr2 ] = LogicConcept.fromPutdown( 'atomic   (not atomic)' )
+console.log( expr1.toPutdown() )
+console.log( expr2.toPutdown() )
+</code></pre>
+<pre class="prettyprint source lang-text"><code>// Console output:
+atomic
+(not atomic)
+</code></pre>
+<hr/>
+<br/>
+<p>To construct a pattern, first build it as an expression, and then mark zero or
+more of its descendants as metavariables.  For example, if you want the
+pattern $f(x)$, where both $f$ and $x$ are metavariables, you could proceed as
+follows.</p>
+<br/>
+<hr/>
+<pre class="prettyprint source lang-js"><code>import { Matching } from './src/index.js'
+
+const pat = LogicConcept.fromPutdown( '(f x)' )[0]
+pat.child( 0 ).makeIntoA( Matching.metavariable )
+pat.child( 1 ).makeIntoA( Matching.metavariable )
+console.log( pat.toPutdown() )
+</code></pre>
+<pre class="prettyprint source lang-text"><code>// Console output:
+(f +{&quot;_type_LDE MV&quot;:true}
+ x +{&quot;_type_LDE MV&quot;:true}
+)
+</code></pre>
+<hr/>
+<br/>
+<p>If you wanted every instance of a certain symbol in a large expression to be
+marked as a metavariable, you could use code like the following to be concise
+about it.</p>
+<br/>
+<hr/>
+<pre class="prettyprint source lang-js"><code>const f = LogicConcept.fromPutdown( 'f' )[0]
+pat.descendantsSatisfying( d => d.equals( f ) )
+   .map( d => d.makeIntoA( Matching.metavariable ) )
+</code></pre>
+<hr/>
+<br/>
+<h2>Building a matching problem</h2>
+<p>A matching problem is a set of constraints.  Let's build a small matching
+problem from just one constraint, the pattern $f(x)$ from above matched with
+the expression <code>expr2</code>, which was <code>(not atomic)</code>.  Since they are both a unary
+function applied to one argument, and both $f$ and $x$ were marked as
+metavariables, the problem should have exactly one solution.</p>
+<br/>
+<hr/>
+<pre class="prettyprint source lang-js"><code>let P = new Matching.Problem( pat, expr2 )
+console.log( P )
+</code></pre>
+<pre class="prettyprint source lang-text"><code>// Console output:
+Problem {
+  constraints: [ Constraint { _pattern: Application, _expression: Application } ]
+}
+</code></pre>
+<hr/>
+<br/>
+<p>Notice that the output above is not so helpful, because it just classifies the
+pattern and expression as instances of the <a href="Application.html">Application</a>
+class, which is accurate but not very specific.  We can get a more helpful and
+more compact rendering of the <a href="Problem.html">Problem</a> using its
+<a href="Problem.html#toString">toString()</a> member function, explicitly or implicitly.</p>
+<br/>
+<hr/>
+<pre class="prettyprint source lang-js"><code>console.log( P.toString() ) // explicit toString() call
+console.log( `P = ${P}` )   // implicit toString() call
+</code></pre>
+<pre class="prettyprint source lang-text"><code>// Console output:
+{((f__ x__),(not atomic))}
+P = {((f__ x__),(not atomic))}
+</code></pre>
+<hr/>
+<br/>
+<p>The notation is mostly straightforward; we have a set <code>{...}</code> of
+<a href="Constraint.html">Constraints</a>, containing just one member, the
+pattern-expression pair ($f(x)$,<code>(not atomic)</code>).  But the notation for $f(x)$
+is not <code>(f x)</code> as one might expect, but rather <code>(f__ x__)</code>, for the following
+reason.  As you can see from earlier output, metavariables are marked as such
+using an attribute that makes their putdown notation cumbersome.  The
+<a href="Problem.html#toString">toString()</a> method for the <a href="Problem.html">Problem</a>
+class replaces that cumbersome notation with a double underscore, to make it
+easy to identify metavariables on sight without taking up much space in the
+output.</p>
+<p>We now have a matching problem that we can ask to solve itself.</p>
+<h2>Solving matching problems</h2>
+<p>Because solving matching problems can be a slow process, it would not be a
+good design if you were forced to compute <em>all</em> solutions at once.  Thus the
+<a href="Problem.html">Problem</a> class gives you the opportunity to compute solutions
+one at a time, and you can stop at any point, using the standard JavaScript
+feature of a &quot;generator.&quot;</p>
+<p>If you're unfamiliar with the idea of generators, you can fall back on the
+simpler method of computing all solutions at once and placing them in a
+standard JavaScript array.  Simply apply the built-in JavaScript
+<code>Array.from()</code> function to convert the solution generator to an array of all
+of its results.  Notice how solutions also have a more helpful output
+notation if you use their <a href="Solution.html#toString">toString()</a> function,
+either implicitly or explicitly.  (Later we will see how to generate
+solutions one at a time.)</p>
+<br/>
+<hr/>
+<pre class="prettyprint source lang-js"><code>let sols = Array.from( P.solutions() )
+console.log( `P -> [${sols}]` )
+</code></pre>
+<pre class="prettyprint source lang-text"><code>// Console output:
+P -> [{(f__,not),(x__,atomic)}/cc{}]
+</code></pre>
+<hr/>
+<br/>
+<p>The above notation means that there is one solution, the substitution function
+expressed as the set of ordered pairs <code>{ (f__,not), (x__,atomic) }</code>.  (The
+suffix <code>/cc{}</code> means that there are no <a href="CaptureConstraints.html">CaptureConstraints</a> that apply to this solution.)</p>
+<p>You can, of course, query the individual components of the
+<a href="Solution.html">Solution</a>}, with its API, as in the following example.</p>
+<br/>
+<hr/>
+<pre class="prettyprint source lang-js"><code>console.log( 'Number of solutions to P:', sols.length )
+const sol1 = sols[0]
+console.log( 'Metavariables in the solution:', sol1.domain() )
+console.log( 'Instantiation for f:', sol1.get( 'f' ).toPutdown() )
+console.log( 'Instantiation for x:', sol1.get( 'x' ).toPutdown() )
+</code></pre>
+<pre class="prettyprint source lang-text"><code>// Console output:
+Number of solutions to P: 1
+Metavariables in the solution: Set(2) { 'x', 'f' }
+Instantiation for f: not
+Instantiation for x: atomic
+</code></pre>
+<hr/>
+<br/>
+<h2>When there are no solutions</h2>
+<p>Of course, we can also form matching problems that have no solutions.  For
+example, the form $f(x)$ would not match the atomic expression <code>expr1</code> above.</p>
+<br/>
+<hr/>
+<pre class="prettyprint source lang-js"><code>sols = new Matching.Problem( pat, expr1 ).solutions()
+console.log( 'Solutions:', Array.from( sols ) )
+</code></pre>
+<pre class="prettyprint source lang-text"><code>// Console output:
+Solutions: []
+</code></pre>
+<hr/>
+<br/>
+<h2>A more complex example</h2>
+<p>The main functionality of <a href="module-Matching.html">the Matching module</a> is
+covered above, but we do a more substantial example here in order to show the
+full functionality and complexity of the module.</p>
+<p>We would like to match the pattern $P(x)$ to the expression $f(a,a)$, but we
+are now no longer considering $P(x)$ to mean &quot;a metavariable $P$ applied to a
+metavariable $x$,&quot; but rather &quot;an expression function $P$ applied to a
+metavariable $x$.&quot;  (Recall the notion of expression functions defined in the
+<a href="module-Matching.html">documentation for the Matching module</a>).  We thus
+cannot simply parse the putdown notation <code>(P x)</code>, flag <code>P</code> and <code>x</code> as
+metavariables, and move on, because that would have the wrong meaning.  There
+is a special function in <a href="module-Matching.html">the Matching module</a> for
+creating expressions like $P(x)$, which do not mean regular function
+application of $P$ to $x$, but application of $P$ as an expression function to
+the expression $x$.  The function is called
+newEFA(), for &quot;new expression function
+application.&quot;</p>
+<br/>
+<hr/>
+<pre class="prettyprint source lang-js"><code>// pattern
+const mvP = LogicConcept.fromPutdown( 'P' )[0].asA( Matching.metavariable )
+const mvx = LogicConcept.fromPutdown( 'x' )[0].asA( Matching.metavariable )
+const Pofx = Matching.newEFA( mvP, mvx )
+
+// expression
+const faa = LogicConcept.fromPutdown( '(f a a)' )[0]
+
+// problem
+P = new Matching.Problem( Pofx, faa )
+console.log( P.toString() )
+</code></pre>
+<pre class="prettyprint source lang-text"><code>// Console output:
+{((@ P__ x__),(f a a))}
+</code></pre>
+<hr/>
+<br/>
+<p>It's a fun puzzle to stop at this point and try to figure out what all the
+valid solutions to this matching problem are!  Once you're ready for the
+spoiler, scroll down.</p>
+<p>We will also use this opportunity to see how to generate solutions one at a
+time, rather than forcing the Matching module to compute all of them before we
+get to see any of them.  We will use a loop, which computes one solution for
+each iteration of the loop, right before that iteration of the loop.  If you
+need only one or two of the solutions, you could use <code>break</code> to terminate the
+loop early, and the remainder of the solutions would not be computed, thus not
+wasting any computation time.</p>
+<br/>
+<hr/>
+<pre class="prettyprint source lang-js"><code>let counter = 0
+for ( let solution of P.solutions() ) {
+    console.log( `Solution ${++counter}: ${solution}` )
+    // For example, if you needed only two solutions, we could do:
+    // if ( counter == 2 ) break
+}
+</code></pre>
+<pre class="prettyprint source lang-text"><code>// Console output:
+Solution 1: {(P__,(𝝺 v1 , (f a a)))}/cc{}
+Solution 2: {(P__,(𝝺 v1 , v1)),(x__,(f a a))}/cc{}
+Solution 3: {(P__,(𝝺 v4 , (v4 a a))),(x__,f)}/cc{}
+Solution 4: {(P__,(𝝺 v4 , (f v4 a))),(x__,a)}/cc{}
+Solution 5: {(P__,(𝝺 v4 , (f a v4))),(x__,a)}/cc{}
+Solution 6: {(P__,(𝝺 v4 , (f v4 v4))),(x__,a)}/cc{}
+</code></pre>
+<hr/>
+<br/>
+<p>To clarify the meaning of the notation used in the output above, we repeat the
+same 6 solutions here, in more natural mathematical notation:</p>
+<ul>
+<li>$P$ could be the constant function that always returns $f(a,a)$</li>
+<li>$P$ could be the identity function and $x$ would be $f(a,a)$</li>
+<li>$P$ could be the function $v\mapsto v(a,a)$ and $x$ would be $f$</li>
+<li>$P$ could be the function $v\mapsto f(v,a)$ and $x$ would be $a$</li>
+<li>$P$ could be the function $v\mapsto f(a,v)$ and $x$ would be $a$</li>
+<li>$P$ could be the function $v\mapsto f(v,v)$ and $x$ would be $a$</li>
+</ul>
 </article>
 
 </section>
@@ -54,7 +296,7 @@
 
 <footer class="layout-footer">
   <div class="container">
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Tue May 31 2022 21:45:01 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Wed Jun 01 2022 15:51:32 GMT+0000 (Coordinated Universal Time)
   </div>
 </footer>
 
