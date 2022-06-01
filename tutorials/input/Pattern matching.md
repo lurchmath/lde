@@ -9,7 +9,10 @@ you can skip the final section, entitled "Technical details").
 (Each piece of sample code below is written as if it were a script sitting in
 the root folder of this source code repository, and run from there with the
 command-line tools `node`.  If you place your scripts in another folder, you
-will need to adjust the path in each `import` statement accordingly.)
+will need to adjust the path in each `import` statement accordingly.  If you
+have not yet set up a copy of this repository with the appropriate Node.js
+version installed, see [our GitHub README](https://github.com/lurchmath/lde),
+which explains how to do so.)
 
 ## Constructing patterns and expressions
 

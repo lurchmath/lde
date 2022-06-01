@@ -58,6 +58,9 @@ corresponding metadata.
 
 ## GitHub
 
-[Source code](http://github.com/lurchmath/lde)
+[Source code](http://github.com/lurchmath/lde) (including a README on how to
+set up your own development environment)
 
-[Design wiki](http://github.com/lurchmath/lde/wiki)
+[Design wiki](http://github.com/lurchmath/lde/wiki) (currently out-of-date; do
+not trust the content of that wiki until it has been updatedm, at which point
+we will update this note to reflect that it has been updated)
