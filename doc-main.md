@@ -53,7 +53,7 @@ matching} with {@link LogicConcept Logic Concept} instances.
 And when working in the test suite, feel free to import
 {@link Database the Database module} for access to a library of
 {@link LogicConcept Logic Concept} instances written in
-{@link LogicConcept#fromPutdown putdown} notation, with
+{@link LogicConcept.fromPutdown putdown} notation, with
 corresponding metadata.
 
 ## GitHub

@@ -45,7 +45,7 @@
  * {@link Expression Expression} expressing the idea that we are applying some
  * Expression Function to a list of arguments.  For example, the application
  * above was $f(3,k)$, but we cannot write this in
- * {@link LogicConcept#fromPutdown putdown notation} as `(f 3 k)` because that
+ * {@link LogicConcept.fromPutdown putdown notation} as `(f 3 k)` because that
  * would be indistinguishable from normal function application.  Thus we need a
  * new symbol.  We define a constant in this module to be `"LDE EFA"` so that we
  * can express $f(3,k)$ as `("LDE EFA" f 3 k)`.  That constant may change in

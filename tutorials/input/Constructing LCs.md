@@ -18,7 +18,7 @@ will need to adjust the path in each `import` statement accordingly.)
 ## Putdown notation
 
 The standard way to write an LC is in "putdown" notation, the details of which
-are {@link LogicConcept#fromPutdown documented here}.  The following code
+are {@link LogicConcept.fromPutdown documented here}.  The following code
 shows how you can use that notation to create LCs, and use that same notation
 to print them as well.
 
@@ -31,7 +31,7 @@ console.log( threeLCs[1].toPutdown() )
 console.log( threeLCs[2].toPutdown() )
 ```
 
-Notice that {@link LogicConcept#fromPutdown fromPutdown()} return an *array*
+Notice that {@link LogicConcept.fromPutdown fromPutdown()} return an *array*
 of results.  It's very tempting, when constructing just one LC, to forget
 this, and write some code like this:
 

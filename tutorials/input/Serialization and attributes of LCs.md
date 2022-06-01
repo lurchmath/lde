@@ -29,7 +29,7 @@ Although large amounts of attribute data are awkward to write in putdown
 notation, it is possible to do so.  The
 {@link LogicConcept#toPutdown toPutdown()} function supports the notation, as
 you can see below.  Refer to the documentation for
-{@link LogicConcept#fromPutdown fromPutdown()} for a full specification of the
+{@link LogicConcept.fromPutdown fromPutdown()} for a full specification of the
 attribute notation.
 
 ```js
