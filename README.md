@@ -8,38 +8,43 @@ That rebuilding is about 50% complete.  Check back later, or just pardon the dus
 
 Choose one of the following 3 methods:
 
- 1. To develop on your own machine using your own version of Node:
-    * This assumes you have already installed [Node.js](https://nodejs.org/en/).
-      In order to run command-line scripts that import the modules defined in
-      this repository, you will need at least version 16 of Node.js.
-    * Clone this repository using the green "Code" button
-      [on GitHub](https://github.com/lurchmath/lde/tree/reboot).
-    * Run `npm install` in your local copy of the repo, which you just cloned.
-    * Edit files using whatever IDE you like.
-    * The first time you [run tests](#running-the-tests), it may take some time
-      to download a copy of the Chromium headless browser for internal use by
-      the [puppeteer](https://pptr.dev/) tool that's used by our tests.
- 2. To use a development container in VS Code:
-    * This assumes that you have already installed the following 3 things.
-       * [VS Code](https://code.visualstudio.com/)
-       * [Docker](https://www.docker.com/) (and set it to run in the background)
-       * VS Code's [Remote Containers Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
-    * Clone this repository using the green "Code" button
-      [on GitHub](https://github.com/lurchmath/lde/tree/reboot).
-    * Open that folder in VS Code, and it should ask if you want to launch the
-      development containier defined therein (which includes appropriate
-      versions of Node, Chromium, and more).  Say yes.
-       * If it doesn't ask, you can always use the tiny green menu in the very
-         bottom left of the VS Code window, which has a `><` icon, and choose
-         the "Reopen in Container" option.
- 3. To use [GitHub Codespaces](https://github.com/features/codespaces):
-    * From the green "Code" button
-      [on GitHub](https://github.com/lurchmath/lde/tree/reboot),
-      choose "Open with Codespaces."
-    * Choose a new codespace if it's your first
-      time doing so, or an existing one if you've done this before.
-    * The Codespace will contain the same configuration as it would if you had
-      used option 2., above, for developing in a container in VS Code locally.
+### Option 1 - Use your own machine and Node.js installation
+
+ * This assumes you have already installed [Node.js](https://nodejs.org/en/).
+   In order to run command-line scripts that import the modules defined in
+   this repository, you will need at least version 16 of Node.js.
+ * Clone this repository using the green "Code" button
+   [on GitHub](https://github.com/lurchmath/lde/tree/reboot).
+ * Run `npm install` in your local copy of the repo, which you just cloned.
+ * Edit files using whatever IDE you like.
+ * The first time you [run tests](#running-the-tests), it may take some time
+   to download a copy of the Chromium headless browser for internal use by
+   the [puppeteer](https://pptr.dev/) tool that's used by our tests.
+
+### Option 2 - Use VS Code and this repository's dev container setup
+
+ * This assumes that you have already installed the following 3 things.
+    * [VS Code](https://code.visualstudio.com/)
+    * [Docker](https://www.docker.com/) (and set it to run in the background)
+    * VS Code's [Remote Containers Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+ * Clone this repository using the green "Code" button
+   [on GitHub](https://github.com/lurchmath/lde/tree/reboot).
+ * Open that folder in VS Code, and it should ask if you want to launch the
+   development containier defined therein (which includes appropriate
+   versions of Node, Chromium, and more).  Say yes.
+    * If it doesn't ask, you can always use the tiny green menu in the very
+      bottom left of the VS Code window, which has a `><` icon, and choose
+      the "Reopen in Container" option.
+
+### Option 3 - Use [GitHub Codespaces](https://github.com/features/codespaces):
+
+ * From the green "Code" button
+   [on GitHub](https://github.com/lurchmath/lde/tree/reboot),
+   choose "Open with Codespaces."
+ * Choose a new codespace if it's your first
+   time doing so, or an existing one if you've done this before.
+ * The Codespace will contain the same configuration as it would if you had
+   used option 2., above, for developing in a container in VS Code locally.
 
 ## Running the tests
 
