@@ -10,6 +10,8 @@ Choose one of the following 3 methods:
 
  1. To develop on your own machine using your own version of Node:
     * This assumes you have already installed [Node.js](https://nodejs.org/en/).
+      In order to run command-line scripts that import the modules defined in
+      this repository, you will need at least version 16 of Node.js.
     * Clone this repository using the green "Code" button
       [on GitHub](https://github.com/lurchmath/lde/tree/reboot).
     * Run `npm install` in your local copy of the repo, which you just cloned.
