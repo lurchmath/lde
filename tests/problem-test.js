@@ -1326,7 +1326,25 @@ describe( 'Problem', () => {
               + solutions.map( x => `\t${x}\n` ).join( '' )
               + `Computed solutions:\n`
               + computedSols.map( x => `\t${x}\n` ).join( '' ) )
-        } )
+            // Also verify that numSolutions() works:
+            expect( P.numSolutions() ).to.equal( solutions.length )
+            // And that isSolvable() works:
+            expect( P.isSolvable() ).to.equal( solutions.length > 0)
+            // And that firstSolution works:
+            if ( solutions.length > 0 ) {
+                // If there are any, firstSolution() should be one of them:
+                expect( solutions.some( solution =>
+                    solution.equals( P.firstSolution() ) ) ).to.equal( true,
+                    `First solution test failed for matching problem ${key}:\n`
+                  + `Problem:\n${showProblem(P)}\n`
+                  + `Full set of expected solutions:\n`
+                  + solutions.map( x => `\t${x}\n` ).join( '' )
+                  + `First computed solution:\n\t${P.firstSolution()}` )
+            } else {
+                // If there aren't any, firstSolution() better be undefined:
+                expect( P.firstSolution() ).to.be.undefined
+            }
+          } )
     } )
 
 } )

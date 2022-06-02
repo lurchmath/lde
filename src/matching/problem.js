@@ -326,6 +326,10 @@ export class Problem {
      * this function to compute the set of {@link Solution Solutions}.
      * 
      * @yields {Solution} the next solution to this Problem
+     * 
+     * {@see Problem#firstSolution firstSolution()}
+     * {@see Problem#isSolvable isSolvable()}
+     * {@see Problem#numSolutions numSolutions()}
      */
     *solutions () {
         const solutionsSeen = [ ]
@@ -533,6 +537,80 @@ export class Problem {
         // We should never get here, because complexity should be only 0,1,2,3,
         // or 4.  So the following is just a sanity check.
         throw `Invalid value for constraint complexity: ${complexity}`
+    }
+
+    /**
+     * Sometimes it is useful to just get one example solution for the
+     * problem, rather than computing all solutions.  Although that can be
+     * done efficiently using the {@link Problem#solutions solutions()}
+     * iterator, this function is a convenience to make it easier.  It returns
+     * either the first solution, as an instance of the {@link Solution
+     * Solution} class, or it returns undefined if the problem has no
+     * solutions.
+     * 
+     * Note that this function operate completely independently of the
+     * {@link Problem#solutions solutions()} iterator, in that if you are
+     * partway through computing the list of solutions with that iterator,
+     * you can still ask for the *first* solution using this function, and it
+     * will give that first solution and will have no effect on the ongoing
+     * iterator.
+     * 
+     * Caching of solutions is not implemented for problems, so the work of
+     * finding and computing the first solution is done again when you call
+     * this function, even if it has been computed in the past.  One could
+     * implement a cache, which would need to be invalidated by functions
+     * like {@link Problem#add add()}, but that has not been done.
+     * 
+     * @returns {Solution} the first solution to this matching problem, or
+     *   `undefined` if the problem has no solutions
+     * 
+     * {@see Problem#solutions solutions()}
+     * {@see Problem#isSolvable isSolvable()}
+     * {@see Problem#numSolutions numSolutions()}
+     */
+    firstSolution () {
+        for ( let solution of this.solutions() ) return solution
+    }
+
+    /**
+     * If you do not need to fetch any solutions, but rather just check to see
+     * whether any exist, this function is more efficient than running the
+     * full {@link Problem#solutions solutions()} iterator, which computes all
+     * possible solutions.  This function returns a boolean, whether any
+     * solutions exist.  Calling `P.isSolvable()` is equivalent to computing
+     * `!!P.firstSolution()`, but is more readable, and more efficient than
+     * computing `P.numSolutions() > 0`.
+     * 
+     * @returns {boolean} `true` if and only if there is at least one solution
+     *   to this matching problem, and `false` otherwise
+     * 
+     * {@see Problem#solutions solutions()}
+     * {@see Problem#firstSolution firstSolution()} (including comments about
+     *   caching)
+     * {@see Problem#numSolutions numSolutions()}
+     */
+    isSolvable () {
+        return !!this.firstSolution()
+    }
+
+    /**
+     * If you do not need the solution set, but just need to know its size,
+     * call this function instead of the {@link Problem#solutions solutions()}
+     * iterator.  Note that the full iterator will be traversed to compute its
+     * size, which is thus the same amount of computational effort as finding
+     * and returning all the solutions, so no time is saved.  This function is
+     * provided for those cases where `P.numSolutions()` is more readable than
+     * computing the full array of solutions and then asking for its length.
+     * 
+     * @returns {integer} the number of solutions to this matching problem
+     * 
+     * {@see Problem#solutions solutions()}
+     * {@see Problem#isSolvable isSolvable()}
+     * {@see Problem#firstSolution firstSolution()} (including comments about
+     *   caching)
+     */
+    numSolutions () {
+        return Array.from( this.solutions() ).length
     }
 
 }
