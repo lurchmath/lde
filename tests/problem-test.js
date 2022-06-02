@@ -6,8 +6,11 @@ import { Application } from '../src/application.js'
 import { Binding } from '../src/binding.js'
 import Database from '../src/database.js'
 
-describe( 'Problem', () => {
+describe( 'Problem', function () {
 
+    // This takes a long time, so increase the timeout threshold.
+    this.timeout( 5000 )
+        
     it( 'Should declare the correct global identifiers', () => {
         expect( M.Problem ).to.be.ok
     } )
