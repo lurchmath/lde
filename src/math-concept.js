@@ -1621,6 +1621,14 @@ export class MathConcept extends EventTarget {
      * A MathConcept is free in an ancestor if none of the MathConcept's free
      * identifiers are bound within that ancestor.
      * 
+     * Note the one rare corner case that the head of a binding (even if it is
+     * a compound expression) is not bound by the binding.  For instance, if
+     * we have an expression like $\sum_{i=a}^b A_i$, then $i$ is bound in
+     * $A_i$, but not in either $a$ or $b$, which are part of the compound head
+     * symbol, written in LISP notation something like `((sum a b) i (A i))`.
+     * This corner case rarely arises, because it would be very confusing for
+     * $i$ to appear free in either $a$ or $b$, but is important to document.
+     * 
      * @param {MathConcept} [inThis] - The ancestor in which the question takes
      *   place, as described above
      * @return {boolean} Whether this MathConcept is free in the specified
@@ -1628,14 +1636,17 @@ export class MathConcept extends EventTarget {
      */
     isFree ( inThis ) {
         // compute the free identifiers in me that an ancestor might bind
-        const freeIdentifierNames = this.freeIdentifierNames()
+        const myFreeSymbols = this.freeIdentifierNames()
         // walk upwards to the appropriate ancestor and see if any bind any of
         // those identifiers; if so, I am not free in that ancestor
-        for ( let ancestor = this ; ancestor ; ancestor = ancestor.parent() ) {
-            if ( ( ancestor instanceof MathConcept.subclasses.get( 'Binding' ) )
-              && freeIdentifierNames.some( name => ancestor.binds( name ) ) )
+        let walk = this
+        while ( walk && walk != inThis ) {
+            const parent = walk.parent()
+            if ( ( parent instanceof MathConcept.subclasses.get( 'Binding' ) )
+              && walk.indexInParent() > 0
+              && myFreeSymbols.some( name => parent.binds( name ) ) )
                 return false
-            if ( ancestor == inThis ) break
+            walk = parent
         }
         // none bound me, so I am free
         return true

@@ -2059,6 +2059,20 @@ describe( 'Bound and free variables', () => {
             [ 'bind', '∀', 'x', [ 'P', 'x' ] ]
         ] )
         expect( predicateLogic2.occursFree( Pofx.copy() ) ).to.equal( true )
+
+        // And test one corner case:  The head expression of a binding is not
+        // part of the scope of the binding.  This is a case that almost never
+        // arises in practice, but should be tested anyway.
+        const notStrange = makeTree( // \sum_{n=1}^k n^2
+            [ 'bind', [ '∑', '1', 'k' ], 'n', [ '^', 'n', '2' ] ] )
+        expect( notStrange.child( 0 ).isFree() ).to.equal( true )
+        expect( notStrange.child( 1 ).isFree() ).to.equal( false )
+        expect( notStrange.child( 2 ).isFree() ).to.equal( false )
+        const strange = makeTree(    // \sum_{n=1}^n n^2
+            [ 'bind', [ '∑', '1', 'n' ], 'n', [ '^', 'n', '2' ] ] )
+        expect( strange.child( 0 ).isFree() ).to.equal( true )
+        expect( strange.child( 1 ).isFree() ).to.equal( false )
+        expect( strange.child( 2 ).isFree() ).to.equal( false )
     } )
 
     it( 'Handles free replacement correctly', () => {
