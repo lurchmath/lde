@@ -2,10 +2,10 @@
 export class SourceMap {
 
     constructor ( sourceText ) {
-        this._source = sourceText
-        this._modified = sourceText
+        this._source = `${sourceText}`
+        this._modified = this._source
         this._nextIndex = 0
-        while ( sourceText.indexOf(
+        while ( this._source.indexOf(
                 SourceMap.markerWithIndex( this._nextIndex ) ) > -1 )
             this._nextIndex
         this._mapping = [ [ 0, this._source.length,

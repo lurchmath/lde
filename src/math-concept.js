@@ -2180,24 +2180,6 @@ export class MathConcept extends EventTarget {
 
     static interpretationKey = 'Interpret as'
 
-    static attemptTextCommand ( operator, ...operands ) {
-        const err = () => {
-            throw new Error(
-                `Invalid command use: \\${operator}{${operands.join('}{')}}` )
-        }
-        // handle label/ref text replacements
-        if ( operator == 'label' || operator == 'ref' ) {
-            if ( operands.length != 1 ) err()
-            return ` +{"${operator}":${JSON.stringify(operands[0])}}`
-        }
-        // handle \begin{proof}...\end{proof} text replacements
-        if ( operator == 'begin' || operator == 'end' ) {
-            if ( operands.length != 1 || operands[0] != 'proof' ) err()
-            return operator == 'begin' ? ' { ' : ' } '
-        }
-        // no other text replacements defined at this time
-    }
-
     static fromSmackdown ( string ) {
         const map = new SourceMap( string )
         // Regular expressions for key features of smackdown:
@@ -2241,24 +2223,16 @@ export class MathConcept extends EventTarget {
                             } )
             }
         }
-        // How to convert that an LC tree to a MathConcept tree:
+        // How to reverse interpret that LC tree back into a MathConcept tree:
         const reverseInterpret = LC => {
+            // If it was created by one of the aspects of smackdown that's not
+            // part of putdown, then create a special MathConcept for it:
             if ( LC.constructor.className == 'Symbol'
-              && SourceMap.isMarker( LC.text() ) ) {
-                const data = map.dataForMarker( LC.text() )
-                switch ( data.type ) {
-                    case 'notation':
-                        return new MathConcept().attr( [ [
-                            MathConcept.interpretationKey,
-                            [ 'notation', data.notation ] ] ] )
-                    case 'command':
-                        return new MathConcept().attr( [ [
-                            MathConcept.interpretationKey,
-                            [ 'command', data.operator, ...data.operands ] ] ] )
-                    default:
-                        throw `Unknown MathConcept type: ${data.type}`
-                }
-            }
+              && SourceMap.isMarker( LC.text() ) )
+                return MathConcept.attemptReverseInterpret(
+                    map.dataForMarker( LC.text() ) )
+            // Otherwise just create a MathConcept that does a simple
+            // imitation of the LogicConcept created from the putdown:
             const result = new MathConcept(
                 ...LC.children().map( reverseInterpret ) )
             result._attributes = LC._attributes.deepCopy()
@@ -2271,39 +2245,73 @@ export class MathConcept extends EventTarget {
             return MathConcept.subclasses.get( 'LogicConcept' )
                 .fromPutdown( map.modified() ).map( reverseInterpret )
         } catch ( e ) {
-            const match = /line ([0-9]+) col ([0-9]+)/.exec( e )
+            // Convert any error containing "line n col m" to use correct #s:
+            const match = /line ([0-9]+) col ([0-9]+)/.exec(
+                e.message ? e.message : e )
             if ( !match ) throw e
-            const [ phrase, line, col ] = match
-            const [ origLine, origCol ] = map.sourceLineAndColumn( line, col )
-            throw `${e}`.replace( phrase, `line ${origLine} col ${origCol}` )
+            const [ origLine, origCol ] =
+                map.sourceLineAndColumn( match[1], match[2] )
+            throw new Error( e.message.replace(
+                match[0], `line ${origLine} col ${origCol}` ) )
         }
+    }
+
+    static attemptTextCommand ( operator, ...operands ) {
+        const err = () => {
+            throw new Error(
+                `Invalid command use: \\${operator}{${operands.join('}{')}}` )
+        }
+        // handle label/ref text replacements
+        if ( operator == 'label' || operator == 'ref' ) {
+            if ( operands.length != 1 ) err()
+            return ` +{"${operator}":${JSON.stringify(operands[0])}}`
+        }
+        // handle \begin{proof}...\end{proof} text replacements
+        if ( operator == 'begin' || operator == 'end' ) {
+            if ( operands.length != 1 || operands[0] != 'proof' ) err()
+            return operator == 'begin' ? ' { ' : ' } '
+        }
+        // no other text replacements defined at this time
+    }
+
+    static attemptReverseInterpret ( data ) {
+        // notation type not yet implemented; this is a placeholder
+        if ( data.type == 'notation' ) return new MathConcept().attr( [
+            [ MathConcept.interpretationKey, [ 'notation', data.notation ] ]
+        ] )
+        // command type not yet implemented; this is a placeholder
+        if ( data.type == 'command' ) return new MathConcept().attr( [
+            [ MathConcept.interpretationKey, [ 'command', data.operator,
+                                                       ...data.operands ] ]
+        ] )
+        // no other types yet implemented
+        throw new Error( `Unknown MathConcept type: ${data.type}` )
     }
 
     interpret () {
         const method = this.getAttribute( MathConcept.interpretationKey )
-        const LC = MathConcept.subclasses.get( 'LogicConcept' ) // temp
-        switch ( method[0] ) {
-            case 'class':
-                const classObject = MathConcept.subclasses.get( method[1] )
-                const result = new classObject(
-                    ...this.children().map( x => x.interpret() ) )
-                for ( let key of this.getAttributeKeys() )
-                    if ( key != MathConcept.interpretationKey )
-                        result.setAttribute( key,
-                            JSON.copy( this.getAttribute( key ) ) )
-                return result
-            case 'notation':
-                return LC.fromPutdown( JSON.stringify(
-                    'notation interpretation not yet implemented: $'
-                  + method[1] + '$' ) )[0]
-            case 'command':
-                return LC.fromPutdown( JSON.stringify(
-                    'command interpretation not yet implemented: \\'
-                  + method[1] + '}{' + method.slice( 2 ).join( '}{' )
-                  + '}' ) )[0]
-            default:
-                throw `Invalid interpretation method: ${method[0]}`
+        const fromPutdown = text =>
+            MathConcept.subclasses.get( 'LogicConcept' ).fromPutdown( text )
+        if ( method[0] == 'class' ) {
+            const classObject = MathConcept.subclasses.get( method[1] )
+            const result = new classObject(
+                ...this.children().map( x => x.interpret() ) )
+            for ( let key of this.getAttributeKeys() )
+                if ( key != MathConcept.interpretationKey )
+                    result.setAttribute( key,
+                        JSON.copy( this.getAttribute( key ) ) )
+            return result
         }
+        if ( method[0] == 'notation' )
+            return fromPutdown( JSON.stringify(
+                'notation interpretation not yet implemented: $'
+              + method[1] + '$' ) )[0]
+        if ( method[0] == 'command' )
+            return fromPutdown( JSON.stringify(
+                'command interpretation not yet implemented: \\'
+                + method[1] + '}{' + method.slice( 2 ).join( '}{' )
+                + '}' ) )[0]
+        throw new Error( `Invalid interpretation method: ${method[0]}` )
     }
 
 }
