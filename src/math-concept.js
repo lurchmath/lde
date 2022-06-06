@@ -2180,6 +2180,24 @@ export class MathConcept extends EventTarget {
 
     static interpretationKey = 'Interpret as'
 
+    static attemptTextCommand ( operator, ...operands ) {
+        const err = () => {
+            throw new Error(
+                `Invalid command use: \\${operator}{${operands.join('}{')}}` )
+        }
+        // handle label/ref text replacements
+        if ( operator == 'label' || operator == 'ref' ) {
+            if ( operands.length != 1 ) err()
+            return ` +{"${operator}":${JSON.stringify(operands[0])}}`
+        }
+        // handle \begin{proof}...\end{proof} text replacements
+        if ( operator == 'begin' || operator == 'end' ) {
+            if ( operands.length != 1 || operands[0] != 'proof' ) err()
+            return operator == 'begin' ? ' { ' : ' } '
+        }
+        // no other text replacements defined at this time
+    }
+
     static fromSmackdown ( string ) {
         const map = new SourceMap( string )
         // Regular expressions for key features of smackdown:
@@ -2204,39 +2222,16 @@ export class MathConcept extends EventTarget {
                 string = string.substring( match[0].length )
                 const command = match[1]
                 const args = match[2].split( '}{' )
-                switch ( command ) {
-                    // replace \label{x} with +{'label':'x'}, same for \ref
-                    case 'label':
-                    case 'ref':
-                        if ( args.length != 1 )
-                            throw `Invalid use of ${command}: ${match[0]}`
-                        map.modify(
-                            map.nextModificationPosition() + commandPos,
-                            match[0].length,
-                            ` +{"${command}":${JSON.stringify(args[0])}}` )
-                        break
-                    // replace \begin{proof}...\end{proof} with  { ... }
-                    case 'begin':
-                    case 'end':
-                        if ( args.length != 1 || args[0] != 'proof' )
-                            throw `Invalid use of ${command}: ${match[0]}`
-                        map.modify(
-                            map.nextModificationPosition() + commandPos,
-                            match[0].length,
-                            command == 'begin' ? ' { ' : ' } ' )
-                        break
-                    // no other commands are processed yet
-                    default:
-                        map.modify(
-                            map.nextModificationPosition() + commandPos,
-                            match[0].length,
-                            map.nextMarker(),
-                            {
+                let replacement =
+                    MathConcept.attemptTextCommand( command, ...args )
+                if ( replacement === undefined )
+                    replacement = map.nextMarker()
+                map.modify( map.nextModificationPosition() + commandPos,
+                            match[0].length, replacement, {
                                 type : 'command',
                                 operator : command,
                                 operands : args
                             } )
-                }
             } else {
                 // some putdown content...
                 // console.log( JSON.stringify( string.substring( 0, notationPos ) ) )
@@ -2244,14 +2239,12 @@ export class MathConcept extends EventTarget {
                 // ...followed by some $...notation...$
                 const match = notationRE.exec( string )
                 string = string.substring( match[0].length )
-                map.modify(
-                    map.nextModificationPosition() + notationPos,
-                    match[0].length,
-                    map.nextMarker(),
-                    {
-                        type : 'notation',
-                        notation : match[0].substring( 1, match[0].length - 1 )
-                    } )
+                map.modify( map.nextModificationPosition() + notationPos,
+                            match[0].length, map.nextMarker(), {
+                                type : 'notation',
+                                notation : match[0].substring( 1,
+                                    match[0].length - 1 )
+                            } )
             }
         }
         // How to convert that an LC tree to a MathConcept tree:
