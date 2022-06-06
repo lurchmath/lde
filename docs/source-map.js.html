@@ -2,19 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Lurch Deductive Engine: Tutorial: LC tree hierarchies</title>
+    <title>Lurch Deductive Engine: source-map.js</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
     <link type="text/css" rel="stylesheet" href="styles/styles.css">
     
-
-    <script>
-        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
-    </script>
-    <script id="MathJax-script" async
-        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
-    </script>
 </head>
 <body>
 
@@ -31,352 +24,492 @@
 </header>
 
 
-<main class="layout-main ">
+<main class="layout-main  layout-content--source">
   <div class="container">
-    <p class="page-kind"></p>
-    <h1 class="page-title">Tutorial: LC tree hierarchies</h1>
-    <section>
-
-<header>
+    <p class="page-kind">source</p>
+    <h1 class="page-title">source-map.js</h1>
     
 
-    <h2>LC tree hierarchies</h2>
-</header>
 
-<article>
-    <p>This tutorial assumes you know how to construct LC instances; if not, see
-the tutorial on <a href="tutorial-Constructing LCs.html">Constructing LCs</a>.  This tutorial covers the
-essential read/write operations available on a hierarchy of nested LC
-structures.</p>
-<p>Every method documented here is actually defined not in the
-<a href="LogicConcept.html">LogicConcept class</a>, but in the
-<a href="MathConcept.html">MathConcept class</a>, which is a more general concept than an
-LC.  Once interpretation of syntax has been built into the LDE, we will use it
-to &quot;interpret&quot; <a href="MathConcept.html">MathConcepts</a> into
-<a href="LogicConcept.html">LogicConcepts</a>.  Although that feature of the LDE has not
-yet been built, the <a href="MathConcept.html">MathConcept class</a> remains the most
-general class from which most others inherit.</p>
-<p>(Each piece of sample code below is written as if it were a script sitting in
-the root folder of this source code repository, and run from there with the
-command-line tools <code>node</code>.  If you place your scripts in another folder, you
-will need to adjust the path in each <code>import</code> statement accordingly.  If you
-have not yet set up a copy of this repository with the appropriate Node.js
-version installed, see <a href="https://github.com/lurchmath/lde">our GitHub README</a>,
-which explains how to do so.)</p>
-<h2>Preparing by building some LCs</h2>
-<p>Let's build a few nested LCs, so that we can use them as recurring examples in
-the code below.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>import { LogicConcept } from './src/index.js'
 
-const famous = LogicConcept.fromPutdown( '(= (+ (^ e (* i pi)) 1) 0)' )[0]
-const env = LogicConcept.fromPutdown( '{ :A B :C D :E F }' )[0]
-</code></pre>
-<hr/>
-<br/>
-<h2>Reading parent, child, and sibling relationships</h2>
-<p>Parents and children can be looked up in the ways you would expect.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>const lhs = famous.child( 1 )
-const rhs = famous.child( 2 )
-console.log( 'LHS:', lhs.toPutdown(), 'RHS:', rhs.toPutdown() )
-console.log( 'LHS parent is whole equation?', lhs.parent() === famous )
-console.log( 'Operator and both sides:', famous.children().map( x => x.toPutdown() ) )
-console.log( 'In total, this many children:', famous.numChildren() )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-LHS: (+ (^ e (* i pi)) 1) RHS: 0
-LHS parent is whole equation? true
-Operator and both sides: [ '=', '(+ (^ e (* i pi)) 1)', '0' ]
-In total, this many children: 3
-</code></pre>
-<hr/>
-<br/>
-<p>There are also convenience functions for getting the first or last child, or
-for getting the array of children without the first or last child.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>console.log( env.firstChild().toPutdown() )
-console.log( env.lastChild().toPutdown() )
-console.log( env.allButFirstChild().map( x => x.toPutdown() ) )
-console.log( env.allButLastChild().map( x => x.toPutdown() ) )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-:A
-F
-[ 'B', ':C', 'D', ':E', 'F' ]
-[ ':A', 'B', ':C', 'D', ':E' ]
-</code></pre>
-<hr/>
-<br/>
-<p>You can also ask for the <a href="MathConcept.html#nextSibling">next</a> or
-<a href="MathConcept.html#previousSibling">previous</a> sibling (child of same parent).</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>const C = env.child( 2 )
-console.log( 'Third child:', C.toPutdown() )
-console.log( 'Right before it:', C.previousSibling().toPutdown() )
-console.log( 'Right after it:', C.nextSibling().toPutdown() )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-Third child: :C
-Right before it: B
-Right after it: D
-</code></pre>
-<hr/>
-<br/>
-<h2>Reading more deeply: descendants and ancestors</h2>
-<p>Parent and child relationships are just one step up or down the LC hierarchy.
-We can represent several steps down into children of children using an array
-of child indices called an <a href="MathConcept.html#address">address</a>.  We look up
-descendants by address using a method called <a href="MathConcept.html#index">index()</a>.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>const pi = famous.index( [ 1, 1, 2, 2 ] )
-console.log( 'Name of that descendant:', pi.toPutdown() )
-console.log( 'Address in the equation:', pi.address() )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-Name of that descendant: pi
-Address in the equation: [ 1, 1, 2, 2 ]
-</code></pre>
-<hr/>
-<br/>
-<p>We can also get a list of all the <a href="MathConcept.html#ancestors">ancestors</a> of a
-descendant LC, in order from bottom upwards.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>console.log( pi.ancestors().map( x => x.toPutdown() ) )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-[
-  'pi',
-  '(* i pi)',
-  '(^ e (* i pi))',
-  '(+ (^ e (* i pi)) 1)',
-  '(= (+ (^ e (* i pi)) 1) 0)'
-]
-</code></pre>
-<hr/>
-<br/>
-<h2>Filtering for only some results</h2>
-<p>It's also common to want to find just those children, descendants, or
-ancestors satisfying a certain condition (whatever that condition may be).
-There are therefore functions
-<a href="MathConcept.html#childrenSatisfying">childrenSatisfying()</a>,
-<a href="MathConcept.html#descendantsSatisfying">descendantsSatisfying()</a>, and
-<a href="MathConcept.html#ancestorsSatisfying">ancestorsSatisfying()</a>, which take a
-unary predicate on LCs as their argument and return results filtered using
-that predicate.  Here is one example.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>// Get every descendants of the famous equation that is atomic.
-const leaves = famous.descendantsSatisfying( x => x.isAtomic() )
-console.log( leaves.map( x => x.toPutdown() ) )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-[
-  '=',  '+', '^',
-  'e',  '*', 'i',
-  'pi', '1', '0'
-]
-</code></pre>
-<hr/>
-<br/>
-<p>Sometimes, you just want to check to see if there exists a child, descendant,
-or ancestor with the given property, rather than fetch all of them.  (It is
-usually more efficient this way, because you can stop looking when you've
-found one, rather than continuing to find all of them and assemble the results
-into an array.)  There are thus corresponding methods
-<a href="MathConcept.html#hasChildSatisfying">hasChildSatisfying()</a>,
-<a href="MathConcept.html#hasDescendantSatisfying">hasDescendantSatisfying()</a>, and
-<a href="MathConcept.html#hasAncestorSatisfying">hasAncestorSatisfying()</a>, which take
-the same unary predicate and return a boolean.</p>
-<h2>Altering the list of children of an LC</h2>
-<p>You can insert and remove children using zero-based indexing.  This modifies
-the original LC in place; it does not create a copy.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>console.log( 'Before:', env.toPutdown() )
-env.removeChild( 2 )
-env.insertChild( new LurchSymbol( 'YO' ), 0 )
-console.log( 'After:', env.toPutdown() )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-Before: { :A B :C D :E F }
-After: { YO :A B D :E F }
-</code></pre>
-<hr/>
-<br/>
-<p>Because one often wants to insert or remove a child from the beginning or
-ending of the list of children, there are four methods whose names correspond
-to the methods of the same names on JavaScript arrays:
-<a href="MathConcept.html#pushChild">pushChild()</a>,
-<a href="MathConcept.html#popChild">popChild()</a>,
-<a href="MathConcept.html#shiftChild">shiftChild()</a>, and
-<a href="MathConcept.html#unshiftChild">unshiftChild()</a>.</p>
-<p>You can also replace all the children at once with a call to
-<a href="MathConcept.html#setChildren">setChildren()</a>, which takes an array of any
-length as argument; it need not be the same number of children.</p>
-<h2>Warning: moving an LC to a new location removes it from its old location!</h2>
-<p>If you use any of the tools described above for inserting a new child into an
-LC, if that child was formerly a child of a different LC, it will be removed
-from its original location before being placed in the new location!  This can
-sometimes be surprising, if you forget that each LC can exist in only one
-location in one LC tree at a time.</p>
-<p>Consider the following example.  The goal is to write the equation
-$6x-5=6x-5$, but using the wrong technique produces an incorrect result.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>import { LurchSymbol, Application } from './src/index.js'
+    
 
-// Construct the term that should appear on each side:
-const term = LogicConcept.fromPutdown( '(- (* 6 x) 5)' )[0]
+<section>
+    <article>
+        <pre id="source" class="source-page line-numbers"><code class="language-js">
+/**
+ * A source map is an object that tracks a specific type of correspondence
+ * between two strings, reminiscent of the source maps used when compiling
+ * or minifying JavaScript code for use in web browsers.  The first string,
+ * called the {@link SourceMap#source source text}, is the original text
+ * (which can be computer code or any other text), and remains unchanged
+ * throughout the life of the source map object.  The second string, called
+ * the {@link SourceMap#modified modified text} begins life equal to the
+ * source text, but can be changed thereafter with
+ * {@link SourceMap#modify modifications/replacements}.
+ * 
+ * The purpose of the source map is to keep track of which sequences of
+ * characters in the source text correspond to which sequences of characters
+ * in the modified text, so that any position in one string can be converted
+ * to the corresponding position in the other string.
+ * 
+ * In a simple example, let's say we have the source text "I wonder what 5+9
+ * equals."  Then we run on that text an algorithm that finds all occurrences
+ * of simple arithmetic expressions and computes them, replacing the original
+ * expression with its result, in this case producing "I wonder what 14
+ * equals."  The source map would represent the following facts:
+ * 
+ *  * Characters 0 through 13 in the source text correspond to characters 0
+ *    through 13 in the modified text.  (They are "I wonder what " in both
+ *    cases.)
+ *  * Characters 14 through 16 in the source text ("5+9") correspond to
+ *    characters 14 through 15 in the modified text ("14").
+ *  * Characters 17 through 24 in the source text correspond to characters 16
+ *    through 23 in the modified text.  (They are " equals." in both cases.)
+ * 
+ * In general, a source map will always be an array of such correspondences,
+ * each of which is a quadruple of integer indices, two into the source text
+ * and two into the modified text.  Such data would be stored internally as
+ * that array of quadruples,
+ * 
+ * ```json
+ * [
+ *     [  0, 13,  0, 13 ],
+ *     [ 14, 16, 14, 15 ],
+ *     [ 17, 24, 16, 23 ]
+ * ]
+ * ```
+ * 
+ * Quadruples at even indices correspond to unmodified sequences of characters
+ * while quadruples at odd indices correspond to modified sequences of
+ * characters.  In the list above, entries 0 and 2 are for unmodified text and
+ * entry 1 is the only modified text.
+ * 
+ * To use this class, the user creates an instance, passing the original
+ * (unmodified) source text.  Then the user can do modifications (that is,
+ * replcements) on the source text by calling {@link SourceMap#modify
+ * modify()}, taking care to make such calls in increasing order of index into
+ * the modified text.  (See documentation for {@link SourceMap#modify
+ * modify()}, below.)  At any point, functions such as
+ * {@link SourceMap#sourcePosition sourcePosition()},
+ * {@link SourceMap#modifiedPosition modifiedPosition()},
+ * {@link SourceMap#sourceLineAndColumn sourceLineAndColumn()}, and
+ * {@link SourceMap#modifiedLineAndColumn modifiedLineAndColumn()} are
+ * available to perform lookup in either direction (source to modified, or the
+ * reverse).
+ */
+export class SourceMap {
 
-// The following step seems correct, but tries to place the same exact term
-// object on both sides of an equation, which is two distinct places in an LC
-// tree, and will not work as expected:
-let equation = new Application( new LurchSymbol( '=' ), term, term )
+    /**
+     * Construct a new source map with the given source text.  The modified
+     * text will be initialized to the same text, and the initial mapping will
+     * map all characters in the source text to their corresponding position
+     * in the modified text, and vice versa.
+     * 
+     * @param {*} sourceText the string to be used as the source text of this
+     *   source map (although any object can be passed, and will be converted
+     *   to a string)
+     * 
+     * @see {@link SourceMap#source source()}
+     * @see {@link SourceMap#modified modified()}
+     */
+    constructor ( sourceText ) {
+        this._source = `${sourceText}`
+        this._modified = this._source
+        this._nextIndex = 0
+        while ( this._source.indexOf(
+                SourceMap.markerWithIndex( this._nextIndex ) ) > -1 )
+            this._nextIndex
+        this._mapping = [ [ 0, this._source.length - 1,
+                            0, this._modified.length - 1 ] ]
+        this._data = { }
+    }
 
-// The (surprising and unintended) result:
-console.log( equation.toPutdown() )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-(= (- (* 6 x) 5))
-</code></pre>
-<hr/>
-<br/>
-<p>The correct way:</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>equation = new Application( new LurchSymbol( '=' ), term, term.copy() )
-console.log( equation.toPutdown() )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-(= (- (* 6 x) 5) (- (* 6 x) 5))
-</code></pre>
-<hr/>
-<br/>
-<h2>Removing and replacing LCs</h2>
-<p>To remove an LC from a hierarchy, simply call its
-<a href="MathConcept.html#remove">remove()</a> method.  Note that this will alter its
-parent (and, indirectly, grandparent, etc.) LC by removing one of its
-descendants.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>console.log( 'Before:', equation.toPutdown() ) // See equation, above.
-term.remove() // Recall that term is the left hand side of the equation.
-console.log( 'After:', equation.toPutdown() )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-Before: (= (- (* 6 x) 5) (- (* 6 x) 5))
-After: (= (- (* 6 x) 5))
-</code></pre>
-<hr/>
-<br/>
-<p>One can remove an LC and <a href="MathConcept.html#replaceWith">replace it</a> with a
-different one all in a single operation, as follows.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>console.log( 'Before:', env.toPutdown() )
-env.child( 4 ).replaceWith( pi.copy() )
-console.log( 'After:', env.toPutdown() )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-Before: { YO :A B D :E F }
-After: { YO :A B D pi F }
-</code></pre>
-<hr/>
-<br/>
-<p>If we had written <code>pi</code> instead of <code>pi.copy()</code>, it would have removed the
-symbol <code>pi</code> from its original place in the <code>famous</code> equation from earlier,
-rendering that equation not false so much as syntactically invalid.</p>
-<h2>Two important relations: earlier/later and accessibility</h2>
-<p>One very important relation among nodes in an LC tree is
-<a href="MathConcept.html#isAccessibleTo">accessibility</a>.  (See that link for the
-official explanation of the concept.)  One can test it in a variety of
-equivalent ways:</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>const c1 = env.firstChild()
-const c2 = env.lastChild()
-console.log( c1.isAccessibleTo( c2 ) )
-console.log( c2.isInTheScopeOf( c1 ) ) // equivalent to previous line
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-true
-true
-</code></pre>
-<hr/>
-<br/>
-<p>You can also get a list of all the things accessible to (or in the scope of)
-a given LC.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>console.log( c2.accessibles().map( x => x.toPutdown() ) )
-console.log( c1.scope().map( x => x.toPutdown() ) )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-[ 'pi', 'D', 'B', ':A', 'YO' ]
-[ 'YO', ':A', 'B', 'D', 'pi', 'F' ]
-</code></pre>
-<hr/>
-<br/>
-<p>The second very important relationship is whether one node appears
-<a href="MathConcept.html#isEarlierThan">earlier than</a> another in (a pre-order
-traversal of) the LC tree in which both sit.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>console.log( c1.isEarlierThan( c2 ) )
-console.log( c1.isLaterThan( env ) ) // children are later than parents
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-true
-true
-</code></pre>
-<hr/>
-<br/>
-<p>You can also ask for the <a href="MathConcept.html#nextInTree">next</a> or
-<a href="MathConcept.html#previousInTree">previous</a> node in a pre-order tree
-traversal.  This sometimes coincides with being the next or previous sibling,
-but not always.  Consider the following example.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>let temp = famous
-while ( temp ) {
-    console.log( temp.toPutdown() )
-    temp = temp.nextInTree()
+    /**
+     * Get the source text given at the time this source map was constructed.
+     * This class provides no API for altering the source text, so it should
+     * be the same any time this function is called.
+     * 
+     * @returns {string} the source text given at construction time
+     */
+    source () { return this._source }
+
+    /**
+     * Get the modified text for this source map.  At construction time, this
+     * will be the same as the source text, but can change via calls to
+     * {@link SourceMap.modify modify()}.
+     * 
+     * @returns {string} the modified text for this source map
+     */
+    modified () { return this._modified }
+
+    /**
+     * As discussed in the documentation for {@link SourceMap#modify
+     * modify()}, modifications must be made in increasing order of position
+     * in the modified text.  Thus at any point, we have a minimum index at
+     * which the next modification could take place, so that it falls after
+     * all modifications made so far.  This function returns that minimum
+     * index.
+     * 
+     * For example, in the source map described at the top of this file (in
+     * which "5+9" became "14" inside the source text), the next viable index
+     * in the modified text where a modification could be made is immediately
+     * after the text "14," that is, at index 16.
+     * 
+     * If no modifications have been made to the source text, this function
+     * will return zero.
+     * 
+     * @returns {integer} the earliest index at which a modification could be
+     *   added to this source map
+     */
+    nextModificationPosition () {
+        return this._mapping[this._mapping.length - 1][2]
+    }
+
+    // For internal use by nextMarker and isMarker
+    static markerText = 'SourceMapMarker'
+
+    // For internal use by nextMarker
+    static markerWithIndex ( index ) {
+        return `${SourceMap.markerText}${index}`
+    }
+
+    /**
+     * See the documentation for {@link SourceMap#modify modify()} and
+     * {@link SourceMap#nextMarker nextMarker()} for an explanation of how
+     * markers can be useful.  This function is a predicate for testing
+     * whether an arbitrary string contains a marker.
+     * 
+     * @param {string} text the text to test whether it is a marker
+     * @returns {boolean} whether the given text is a marker
+     * 
+     * @see {@link SourceMap#nextMarker nextMarker()}
+     * @see {@link SourceMap#dataForMarker dataForMarker()}
+     */
+    static isMarker ( text ) {
+        const marker = SourceMap.markerText
+        return text.substring( 0, marker.length ) == marker
+            &amp;&amp; /^[0-9]+$/.test( text.substring( marker.length ) )
+    }
+
+    /**
+     * See the documentation for {@link SourceMap#modify modify()} for an
+     * explanation of how markers work.  That explanation mentions that it is
+     * useful to have a sequence of markers, each of which is a unique snippet
+     * of text that does not appear anywhere in the original source text.
+     * This function can be used as a generator, returning a different string
+     * each time it is called, none of which appeared in the original source
+     * text.  In that way it can be used to generate markers that can be
+     * passed as the `replacement` parameter to {@link SourceMap#modify
+     * modfiy()}.
+     * 
+     * @returns {string} a new marker
+     * 
+     * @see {@link SourceMap#modify modify()}
+     * @see {@link SourceMap.isMarker isMarker()}
+     * @see {@link SourceMap#dataForMarker dataForMarker()}
+     */
+    nextMarker () {
+        return SourceMap.markerWithIndex( this._nextIndex++ )
+    }
+
+    /**
+     * Source map objects contain both a source text and a modified text,
+     * which are equal at construction time.  But through one or more calls to
+     * this function, the modified text can change, diverging from the source
+     * text.  This function not only makes such modifications, but it records
+     * where they were made, and any data assocaited with them, so that
+     * queries can be made later about correspondences between the source and
+     * modified text, as documented at the top of this file.
+     * 
+     * The first three parameters are straightforward, as documented below.
+     * However, the fourth parameter (which is optional) requires additional
+     * explanation.  When replacing a portion of the source text, it is
+     * sometimes convenient to replace it not with text, but with arbitrary
+     * data.  We support this more advanced usage as follows.
+     * 
+     *  * First, the newly inserted text cannot be arbitrary text, but should
+     *    instead be a special marker that indicates the location where
+     *    non-text data resides.  To create such markers, use the
+     *    {@link SourceMap#nextMarker nextMarker()} function.
+     *  * Second, the fourth parameter (`data`) should be provided, and it can
+     *    be any JavaScript object amenable to JSON encoding, which will be
+     *    stored in this object for later querying.
+     *  * Later, when the client processes the modified text, upon
+     *    encountering a marker (see {@link SourceMap.isMarker isMarker()})
+     *    and desiring to know what data it represents, the client can find
+     *    out with a call to {@link SourceMap#dataForMarker dataForMarker()}.
+     * 
+     * For example, let's say our source text was "Get me employee #16" and
+     * we wanted to replace "employee #16" with the full data for that
+     * employee, which is not text data, but rather something more complex,
+     * such as `{ name:'Henrietta', age:35, ... }`.  Assuming we have that
+     * data in an object `obj`, we could make a call like the following.
+     * 
+     * ```js
+     * sourcemap.modify( 7, 12, sourcemap.nextMarker(), obj )
+     * ```
+     * 
+     * Notes:
+     * 
+     *  1. When passing data as the optional fourth parameter, you must pass
+     *     `sourcemap.nextMarker()` as the third parameter, because data is
+     *     stored internally only associated with markers, and cannot be
+     *     retrieved later otherwise.
+     *  2. The starting index documented below is in the modified text, not
+     *     the source text, but if this is inconvenient for you, simply make
+     *     use of the {@link SourceMap#modifiedPosition modifiedPosition()}
+     *     function to convert what you have to what you need.
+     *  3. Modifications must be made in increasing order of index in the
+     *     modified text.  For example, if you have a replacement to do on
+     *     characters 5 through 10 and another to do on characters 50 through
+     *     70, you must do them in that order, not the reverse.  This class
+     *     does not support modifications in arbitrary order.
+     * 
+     * @param {integer} start the starting index, in the modified text, where
+     *   this next modification should be recorded
+     * @param {integer} length the length of the text to be replaced, starting
+     *   at the index `start`
+     * @param {string} replacement the text with which to replace the chosen
+     *   portion of the source text
+     * @param [Object] data arbitrary JSON data to store in the modified
+     *   text, as documented above
+     */
+    modify ( start, length, replacement, data = { } ) {
+        const end = start + length - 1
+        const last = this._mapping[this._mapping.length-1]
+        const origStart = this.sourcePosition( start )
+        if ( origStart &lt; last[0] || origStart > last[1] )
+            throw new Error( 'Modifications must be done in increasing order' )
+        const origEnd = this.sourcePosition( end )
+        if ( origEnd &lt; last[0] || origEnd > last[1] )
+            throw new Error( 'Modifications must be done in increasing order' )
+        this._mapping.pop()
+        this._mapping.push( [ last[0], origStart - 1, last[2], start - 1 ] )
+        this._mapping.push( [ origStart, origEnd,
+                              start, start + replacement.length - 1 ] )
+        this._mapping.push( [
+            origEnd + 1, last[1], start + replacement.length,
+            last[3] - ( end - start - replacement.length + 1 ) ] )
+        const original = this._modified.substring( start, start + length )
+        this._modified = this._modified.substring( 0, start )
+                       + replacement
+                       + this._modified.substring( start + length )
+        if ( SourceMap.isMarker( replacement ) )
+            this._data[replacement] = { original, ...data }
+    }
+
+    /**
+     * See the documentation for {@link SourceMap#modify modify()} for an
+     * explanation of how markers work.  That explanation mentions that
+     * arbitrary data can be associated with a marker as part of a call to the
+     * {@link SourceMap#modify modify()} function.  To later query the data
+     * associated with a given marker, use this function.
+     * 
+     * @param {string} marker the text for the marker whose data should be
+     *   looked up
+     * @returns {Object} the data associated with the marker, as a JavaScript
+     *   object amenable to JSON encoding
+     * 
+     * @see {@link SourceMap#modify modify()}
+     * @see {@link SourceMap.isMarker isMarker()}
+     * @see {@link SourceMap#nextMarker nextMarker()}
+     */
+    dataForMarker ( marker ) { return this._data[marker] }
+
+    /**
+     * The major purpose of the SourceMap class is to track the correspondence
+     * of character positions between its source text and its modified text.
+     * This function can be used to do a lookup from the latter to the former;
+     * you provide a character position in the modified text and it returns the
+     * corresponding position in the source text.
+     * 
+     * If the character position sits inside a section of modified text, there
+     * may not be an exact correspondence of which character in the source
+     * text relates to it; for example, in the source map mentioned at the top
+     * of this documentation page, which characters in "5+9" correspond to
+     * each character in the text "14?"  In such cases, the first character in
+     * the corresponding *section* is returned.  So both characters in "14"
+     * would be said to correspond to the first character in "5+9."
+     * 
+     * If the character position sits inside a section of unmodified text,
+     * then there is an exact copy of that unmodified text in the source text,
+     * and thus the corresponding position with it will be returned.
+     * 
+     * If an invalid index is provided, undefined is returned.  Indices into
+     * both the source and modified texts are zero-based, so the first valid
+     * index is 0 and the last is the length of the text minus 1.
+     * 
+     * @param {integer} modifiedPosition the position in the modified text for
+     *   which a lookup should be done in the source text
+     * @returns {integer} the position in the source text corresponding to the
+     *   given position in the modified text
+     * 
+     * @see {@link SourceMap#sourceLineAndColumn sourceLineAndColumn}
+     * @see {@link SourceMap#modifiedPosition modifiedPosition}
+     * @see {@link SourceMap#modifiedLineAndColumn modifiedLineAndColumn}
+     */
+    sourcePosition ( modifiedPosition ) {
+        const row = this._mapping.find( row =>
+            row[2] &lt;= modifiedPosition &amp;&amp; modifiedPosition &lt;= row[3] )
+        return row === undefined ? undefined :
+               row[3] - row[2] == row[1] - row[0] ?
+                   row[0] + modifiedPosition - row[2] : row[0]
+    }
+
+    /**
+     * See the documentation for {@link SourceMap#sourcePosition
+     * sourcePosition()}; this function is (approximately) the inverse to that
+     * function.  The only difference is, as documented in that function, we
+     * cannot map precisely each character within a section of modified text,
+     * and thus we map to the first charcter in the corresponding range.  For
+     * example, in the source map mentioned at the top of this page, each
+     * character in the source text "5+9" would map to the first character in
+     * the modified text "14."
+     * 
+     * @param {integer} sourcePosition the position in the source text for
+     *   which a lookup should be done in the modified text
+     * @returns {integer} the position in the modified text corresponding to
+     *   the given position in the source text
+     * 
+     * @see {@link SourceMap#modifiedLineAndColumn modifiedLineAndColumn}
+     * @see {@link SourceMap#sourcePosition sourcePosition}
+     * @see {@link SourceMap#sourceLineAndColumn sourceLineAndColumn}
+     */
+    modifiedPosition ( sourcePosition ) {
+        const row = this._mapping.find( row =>
+            row[0] &lt;= sourcePosition &amp;&amp; sourcePosition &lt;= row[1] )
+        return row === undefined ? undefined :
+               row[3] - row[2] == row[1] - row[0] ?
+                   row[2] + sourcePosition - row[0] : row[2]
+    }
+
+    /**
+     * See the documentation for {@link SourceMap#sourcePosition
+     * sourcePosition()}; this function behaves similarly, except that it
+     * takes as input a line number and column number in the modified text,
+     * and returns a line number and column number in the source text.
+     * 
+     * Unlike character indices, line and column numbers start counting at 1,
+     * so the first character in the text (at index 0) would be in line 1 and
+     * at column 1.
+     * 
+     * @param {integer} line the line number in the modified text whose
+     *   position in the source text should be looked up
+     * @param {integer} column the column number in the modified text whose
+     *   position in the source text should be looked up
+     * @returns {Array} a pair of integers, the line and column number in the
+     *   source text that correspond to the given line and column number in
+     *   the modified text
+     * 
+     * @see {@link SourceMap#sourcePosition sourcePosition}
+     * @see {@link SourceMap#modifiedLineAndColumn modifiedLineAndColumn}
+     * @see {@link SourceMap#modifiedPosition modifiedPosition}
+     */
+    sourceLineAndColumn ( line, column ) {
+        return SourceMap.positionToLineAndColumn(
+            this.sourcePosition( SourceMap.lineAndColumnToPosition(
+                line, column, this._modified ) ),
+            this._source
+        )
+    }
+
+    /**
+     * See the documentation for {@link SourceMap#modifiedPosition
+     * modifiedPosition()}; this function behaves similarly, except that it
+     * takes as input a line number and column number in the source text,
+     * and returns a line number and column number in the modified text.
+     * 
+     * Unlike character indices, line and column numbers start counting at 1,
+     * so the first character in the text (at index 0) would be in line 1 and
+     * at column 1.
+     * 
+     * @param {integer} line the line number in the source text whose position
+     *   in the modified text should be looked up
+     * @param {integer} column the column number in the modified text whose
+     *   position in the source should be looked up
+     * @returns {Array} a pair of integers, the line and column number in the
+     *   modified text that correspond to the given line and column number in
+     *   the source text
+     * 
+     * @see {@link SourceMap#sourceLineAndColumn sourceLineAndColumn}
+     * @see {@link SourceMap#modifiedPosition modifiedPosition}
+     * @see {@link SourceMap#modifiedPosition modifiedPosition}
+     */
+    modifiedLineAndColumn ( line, column ) {
+        return SourceMap.positionToLineAndColumn(
+            this.modifiedPosition( SourceMap.lineAndColumnToPosition(
+                line, column, this._source ) ),
+            this._modified
+        )
+    }
+
+    // For internal use by sourceLineAndColumn and modifiedLineAndColumn
+    static positionToLineAndColumn = ( position, text ) => {
+        if ( position > text.length || position &lt; 0
+          || typeof( position ) != 'number' ) return undefined
+        const start = text.substring( 0, position )
+        const lines = start.split( '\n' )
+        return [ lines.length, lines[lines.length-1].length + 1 ]
+    }
+
+    // For internal use by sourceLineAndColumn and modifiedLineAndColumn
+    static lineAndColumnToPosition = ( line, column, text ) => {
+        const lines = text.split( '\n' )
+        for ( let i = 0, totalSoFar = 0 ; i &lt; lines.length ; i++ ) {
+            const countNewline = i &lt; lines.length - 1 ? 1 : 0
+            if ( i + 1 == line )
+                return column >= 1
+                    &amp;&amp; column &lt;= lines[i].length + countNewline ?
+                       totalSoFar + column - 1 : undefined
+            totalSoFar += lines[i].length + countNewline
+        }
+    }
+
+    /**
+     * A debugging routine useful when working with code in which you care
+     * about the specific character indices and/or line and column numbers.
+     * Call this routine to print the code to the console, with a line and
+     * character number added at the start of each line, using the format
+     * `L_C_:` with the blanks replaced by line and character numbers,
+     * respectively.
+     * 
+     * For example, `"function ( x ) {\n\treturn 3;\n}"` would be printed
+     * as follows.  Note that these are *not* line and *column* numbers,
+     * but rather line numbers and *character indices.*
+     * 
+     * ```
+     * L1C0: function ( x ) {
+     * L2C17:        return 3;
+     * L3C27: }
+     * ```
+     * 
+     * @param {string} code arbitrary text to be displayed on the console
+     *   (typically some kind of code, such as putdown notation or JSON)
+     */
+    static debugCode ( code ) {
+        const lines = code.split( '\n' )
+        for ( let i = 0, totalSoFar = 0 ; i &lt; lines.length ; i++ ) {
+            const line = lines[i]
+            console.log( `L${i+1}C${totalSoFar}: ${line}` )
+            totalSoFar += line.length + 1
+        }
+    }
+
 }
 </code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-(= (+ (^ e (* i pi)) 1) 0)
-=
-(+ (^ e (* i pi)) 1)
-+
-(^ e (* i pi))
-^
-e
-(* i pi)
-*
-i
-pi
-1
-0
-</code></pre>
-<hr/>
-<br/>
-</article>
-
+    </article>
 </section>
+
+
+
 
   </div>
 </main>
 
 <footer class="layout-footer">
   <div class="container">
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.10</a> on Mon Jun 06 2022 21:31:10 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.10</a> on Mon Jun 06 2022 21:31:09 GMT+0000 (Coordinated Universal Time)
   </div>
 </footer>
 

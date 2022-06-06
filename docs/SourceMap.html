@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Lurch Deductive Engine: Tutorial: LC tree hierarchies</title>
+    <title>Lurch Deductive Engine: SourceMap</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
@@ -33,343 +33,2272 @@
 
 <main class="layout-main ">
   <div class="container">
-    <p class="page-kind"></p>
-    <h1 class="page-title">Tutorial: LC tree hierarchies</h1>
-    <section>
-
-<header>
+    <p class="page-kind">Class</p>
+    <h1 class="page-title">SourceMap</h1>
     
 
-    <h2>LC tree hierarchies</h2>
+
+
+
+<section>
+
+
+<header class="class">
+
+
+    
+        
+        <!-- <h2>SourceMap</h2> -->
+
+        
+
+        
+
+        
+            
+            <div class="class-description"><p>A source map is an object that tracks a specific type of correspondence
+between two strings, reminiscent of the source maps used when compiling
+or minifying JavaScript code for use in web browsers.  The first string,
+called the <a href="SourceMap.html#source">source text</a>, is the original text
+(which can be computer code or any other text), and remains unchanged
+throughout the life of the source map object.  The second string, called
+the <a href="SourceMap.html#modified">modified text</a> begins life equal to the
+source text, but can be changed thereafter with
+<a href="SourceMap.html#modify">modifications/replacements</a>.</p>
+<p>The purpose of the source map is to keep track of which sequences of
+characters in the source text correspond to which sequences of characters
+in the modified text, so that any position in one string can be converted
+to the corresponding position in the other string.</p>
+<p>In a simple example, let's say we have the source text &quot;I wonder what 5+9
+equals.&quot;  Then we run on that text an algorithm that finds all occurrences
+of simple arithmetic expressions and computes them, replacing the original
+expression with its result, in this case producing &quot;I wonder what 14
+equals.&quot;  The source map would represent the following facts:</p>
+<ul>
+<li>Characters 0 through 13 in the source text correspond to characters 0
+through 13 in the modified text.  (They are &quot;I wonder what &quot; in both
+cases.)</li>
+<li>Characters 14 through 16 in the source text (&quot;5+9&quot;) correspond to
+characters 14 through 15 in the modified text (&quot;14&quot;).</li>
+<li>Characters 17 through 24 in the source text correspond to characters 16
+through 23 in the modified text.  (They are &quot; equals.&quot; in both cases.)</li>
+</ul>
+<p>In general, a source map will always be an array of such correspondences,
+each of which is a quadruple of integer indices, two into the source text
+and two into the modified text.  Such data would be stored internally as
+that array of quadruples,</p>
+<pre class="prettyprint source lang-json"><code>[
+    [  0, 13,  0, 13 ],
+    [ 14, 16, 14, 15 ],
+    [ 17, 24, 16, 23 ]
+]
+</code></pre>
+<p>Quadruples at even indices correspond to unmodified sequences of characters
+while quadruples at odd indices correspond to modified sequences of
+characters.  In the list above, entries 0 and 2 are for unmodified text and
+entry 1 is the only modified text.</p>
+<p>To use this class, the user creates an instance, passing the original
+(unmodified) source text.  Then the user can do modifications (that is,
+replcements) on the source text by calling <a href="SourceMap.html#modify">modify()</a>, taking care to make such calls in increasing order of index into
+the modified text.  (See documentation for <a href="SourceMap.html#modify">modify()</a>, below.)  At any point, functions such as
+<a href="SourceMap.html#sourcePosition">sourcePosition()</a>,
+<a href="SourceMap.html#modifiedPosition">modifiedPosition()</a>,
+<a href="SourceMap.html#sourceLineAndColumn">sourceLineAndColumn()</a>, and
+<a href="SourceMap.html#modifiedLineAndColumn">modifiedLineAndColumn()</a> are
+available to perform lookup in either direction (source to modified, or the
+reverse).</p></div>
+        
+    
 </header>
 
 <article>
-    <p>This tutorial assumes you know how to construct LC instances; if not, see
-the tutorial on <a href="tutorial-Constructing LCs.html">Constructing LCs</a>.  This tutorial covers the
-essential read/write operations available on a hierarchy of nested LC
-structures.</p>
-<p>Every method documented here is actually defined not in the
-<a href="LogicConcept.html">LogicConcept class</a>, but in the
-<a href="MathConcept.html">MathConcept class</a>, which is a more general concept than an
-LC.  Once interpretation of syntax has been built into the LDE, we will use it
-to &quot;interpret&quot; <a href="MathConcept.html">MathConcepts</a> into
-<a href="LogicConcept.html">LogicConcepts</a>.  Although that feature of the LDE has not
-yet been built, the <a href="MathConcept.html">MathConcept class</a> remains the most
-general class from which most others inherit.</p>
-<p>(Each piece of sample code below is written as if it were a script sitting in
-the root folder of this source code repository, and run from there with the
-command-line tools <code>node</code>.  If you place your scripts in another folder, you
-will need to adjust the path in each <code>import</code> statement accordingly.  If you
-have not yet set up a copy of this repository with the appropriate Node.js
-version installed, see <a href="https://github.com/lurchmath/lde">our GitHub README</a>,
-which explains how to do so.)</p>
-<h2>Preparing by building some LCs</h2>
-<p>Let's build a few nested LCs, so that we can use them as recurring examples in
-the code below.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>import { LogicConcept } from './src/index.js'
+    <div class="container-overview">
 
-const famous = LogicConcept.fromPutdown( '(= (+ (^ e (* i pi)) 1) 0)' )[0]
-const env = LogicConcept.fromPutdown( '{ :A B :C D :E F }' )[0]
-</code></pre>
-<hr/>
-<br/>
-<h2>Reading parent, child, and sibling relationships</h2>
-<p>Parents and children can be looked up in the ways you would expect.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>const lhs = famous.child( 1 )
-const rhs = famous.child( 2 )
-console.log( 'LHS:', lhs.toPutdown(), 'RHS:', rhs.toPutdown() )
-console.log( 'LHS parent is whole equation?', lhs.parent() === famous )
-console.log( 'Operator and both sides:', famous.children().map( x => x.toPutdown() ) )
-console.log( 'In total, this many children:', famous.numChildren() )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-LHS: (+ (^ e (* i pi)) 1) RHS: 0
-LHS parent is whole equation? true
-Operator and both sides: [ '=', '(+ (^ e (* i pi)) 1)', '0' ]
-In total, this many children: 3
-</code></pre>
-<hr/>
-<br/>
-<p>There are also convenience functions for getting the first or last child, or
-for getting the array of children without the first or last child.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>console.log( env.firstChild().toPutdown() )
-console.log( env.lastChild().toPutdown() )
-console.log( env.allButFirstChild().map( x => x.toPutdown() ) )
-console.log( env.allButLastChild().map( x => x.toPutdown() ) )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-:A
-F
-[ 'B', ':C', 'D', ':E', 'F' ]
-[ ':A', 'B', ':C', 'D', ':E' ]
-</code></pre>
-<hr/>
-<br/>
-<p>You can also ask for the <a href="MathConcept.html#nextSibling">next</a> or
-<a href="MathConcept.html#previousSibling">previous</a> sibling (child of same parent).</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>const C = env.child( 2 )
-console.log( 'Third child:', C.toPutdown() )
-console.log( 'Right before it:', C.previousSibling().toPutdown() )
-console.log( 'Right after it:', C.nextSibling().toPutdown() )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-Third child: :C
-Right before it: B
-Right after it: D
-</code></pre>
-<hr/>
-<br/>
-<h2>Reading more deeply: descendants and ancestors</h2>
-<p>Parent and child relationships are just one step up or down the LC hierarchy.
-We can represent several steps down into children of children using an array
-of child indices called an <a href="MathConcept.html#address">address</a>.  We look up
-descendants by address using a method called <a href="MathConcept.html#index">index()</a>.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>const pi = famous.index( [ 1, 1, 2, 2 ] )
-console.log( 'Name of that descendant:', pi.toPutdown() )
-console.log( 'Address in the equation:', pi.address() )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-Name of that descendant: pi
-Address in the equation: [ 1, 1, 2, 2 ]
-</code></pre>
-<hr/>
-<br/>
-<p>We can also get a list of all the <a href="MathConcept.html#ancestors">ancestors</a> of a
-descendant LC, in order from bottom upwards.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>console.log( pi.ancestors().map( x => x.toPutdown() ) )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-[
-  'pi',
-  '(* i pi)',
-  '(^ e (* i pi))',
-  '(+ (^ e (* i pi)) 1)',
-  '(= (+ (^ e (* i pi)) 1) 0)'
-]
-</code></pre>
-<hr/>
-<br/>
-<h2>Filtering for only some results</h2>
-<p>It's also common to want to find just those children, descendants, or
-ancestors satisfying a certain condition (whatever that condition may be).
-There are therefore functions
-<a href="MathConcept.html#childrenSatisfying">childrenSatisfying()</a>,
-<a href="MathConcept.html#descendantsSatisfying">descendantsSatisfying()</a>, and
-<a href="MathConcept.html#ancestorsSatisfying">ancestorsSatisfying()</a>, which take a
-unary predicate on LCs as their argument and return results filtered using
-that predicate.  Here is one example.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>// Get every descendants of the famous equation that is atomic.
-const leaves = famous.descendantsSatisfying( x => x.isAtomic() )
-console.log( leaves.map( x => x.toPutdown() ) )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-[
-  '=',  '+', '^',
-  'e',  '*', 'i',
-  'pi', '1', '0'
-]
-</code></pre>
-<hr/>
-<br/>
-<p>Sometimes, you just want to check to see if there exists a child, descendant,
-or ancestor with the given property, rather than fetch all of them.  (It is
-usually more efficient this way, because you can stop looking when you've
-found one, rather than continuing to find all of them and assemble the results
-into an array.)  There are thus corresponding methods
-<a href="MathConcept.html#hasChildSatisfying">hasChildSatisfying()</a>,
-<a href="MathConcept.html#hasDescendantSatisfying">hasDescendantSatisfying()</a>, and
-<a href="MathConcept.html#hasAncestorSatisfying">hasAncestorSatisfying()</a>, which take
-the same unary predicate and return a boolean.</p>
-<h2>Altering the list of children of an LC</h2>
-<p>You can insert and remove children using zero-based indexing.  This modifies
-the original LC in place; it does not create a copy.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>console.log( 'Before:', env.toPutdown() )
-env.removeChild( 2 )
-env.insertChild( new LurchSymbol( 'YO' ), 0 )
-console.log( 'After:', env.toPutdown() )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-Before: { :A B :C D :E F }
-After: { YO :A B D :E F }
-</code></pre>
-<hr/>
-<br/>
-<p>Because one often wants to insert or remove a child from the beginning or
-ending of the list of children, there are four methods whose names correspond
-to the methods of the same names on JavaScript arrays:
-<a href="MathConcept.html#pushChild">pushChild()</a>,
-<a href="MathConcept.html#popChild">popChild()</a>,
-<a href="MathConcept.html#shiftChild">shiftChild()</a>, and
-<a href="MathConcept.html#unshiftChild">unshiftChild()</a>.</p>
-<p>You can also replace all the children at once with a call to
-<a href="MathConcept.html#setChildren">setChildren()</a>, which takes an array of any
-length as argument; it need not be the same number of children.</p>
-<h2>Warning: moving an LC to a new location removes it from its old location!</h2>
-<p>If you use any of the tools described above for inserting a new child into an
-LC, if that child was formerly a child of a different LC, it will be removed
-from its original location before being placed in the new location!  This can
-sometimes be surprising, if you forget that each LC can exist in only one
-location in one LC tree at a time.</p>
-<p>Consider the following example.  The goal is to write the equation
-$6x-5=6x-5$, but using the wrong technique produces an incorrect result.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>import { LurchSymbol, Application } from './src/index.js'
 
-// Construct the term that should appear on each side:
-const term = LogicConcept.fromPutdown( '(- (* 6 x) 5)' )[0]
 
-// The following step seems correct, but tries to place the same exact term
-// object on both sides of an equation, which is two distinct places in an LC
-// tree, and will not work as expected:
-let equation = new Application( new LurchSymbol( '=' ), term, term )
+    
+        
 
-// The (surprising and unintended) result:
-console.log( equation.toPutdown() )
+
+
+
+
+    
+
+
+    
+    <h3 class="subtitle">Constructor</h3>
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="SourceMap">new SourceMap<span class="signature">(sourceText)</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Construct a new source map with the given source text.  The modified
+text will be initialized to the same text, and the initial mapping will
+map all characters in the source text to their corresponding position
+in the modified text, and vice versa.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">sourceText</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>*</code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the string to be used as the source text of this
+source map (although any object can be passed, and will be converted
+to a string)</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="SourceMap.html#source">source()</a></li>
+            
+                <li><a href="SourceMap.html#modified">modified()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="source-map.js.html">source-map.js</a><a href="source-map.js.html#source.63">, line 63</a>
+        </li>
+    </ul>
+
+
+
+    
+    </div>
+
+    
+
+    
+        <h3 class="subsection-title">Classes</h3>
+
+        <dl>
+            <dt><a href="SourceMap.html">SourceMap</a></dt>
+            <dd></dd>
+        </dl>
+    
+
+     
+
+    
+
+    
+
+
+    
+
+    
+        <h3 class="subtitle">Methods</h3>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    <span class="method-type-signature is-static">static</span>
+    </div>
+
+    <h4 class="method-name" id=".debugCode">debugCode<span class="signature">(code)</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>A debugging routine useful when working with code in which you care
+about the specific character indices and/or line and column numbers.
+Call this routine to print the code to the console, with a line and
+character number added at the start of each line, using the format
+<code>L_C_:</code> with the blanks replaced by line and character numbers,
+respectively.</p>
+<p>For example, <code>&quot;function ( x ) {\n\treturn 3;\n}&quot;</code> would be printed
+as follows.  Note that these are <em>not</em> line and <em>column</em> numbers,
+but rather line numbers and <em>character indices.</em></p>
+<pre class="prettyprint source"><code>L1C0: function ( x ) {
+L2C17:        return 3;
+L3C27: }
 </code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-(= (- (* 6 x) 5))
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">code</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>string</code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>arbitrary text to be displayed on the console
+(typically some kind of code, such as putdown notation or JSON)</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="source-map.js.html">source-map.js</a><a href="source-map.js.html#source.452">, line 452</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    <span class="method-type-signature is-static">static</span>
+    </div>
+
+    <h4 class="method-name" id=".isMarker">isMarker<span class="signature">(text)</span><span class="return-type-signature"> &rarr; {boolean}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>See the documentation for <a href="SourceMap.html#modify">modify()</a> and
+<a href="SourceMap.html#nextMarker">nextMarker()</a> for an explanation of how
+markers can be useful.  This function is a predicate for testing
+whether an arbitrary string contains a marker.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">text</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>string</code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the text to test whether it is a marker</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="SourceMap.html#nextMarker">nextMarker()</a></li>
+            
+                <li><a href="SourceMap.html#dataForMarker">dataForMarker()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>boolean</code>
+            
+            
+                <p>whether the given text is a marker</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="source-map.js.html">source-map.js</a><a href="source-map.js.html#source.151">, line 151</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="dataForMarker">dataForMarker<span class="signature">(marker)</span><span class="return-type-signature"> &rarr; {Object}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>See the documentation for <a href="SourceMap.html#modify">modify()</a> for an
+explanation of how markers work.  That explanation mentions that
+arbitrary data can be associated with a marker as part of a call to the
+<a href="SourceMap.html#modify">modify()</a> function.  To later query the data
+associated with a given marker, use this function.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">marker</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>string</code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the text for the marker whose data should be
+looked up</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="SourceMap.html#modify">modify()</a></li>
+            
+                <li><a href="SourceMap.html#.isMarker">isMarker()</a></li>
+            
+                <li><a href="SourceMap.html#nextMarker">nextMarker()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>Object</code>
+            
+            
+                <p>the data associated with the marker, as a JavaScript
+object amenable to JSON encoding</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="source-map.js.html">source-map.js</a><a href="source-map.js.html#source.280">, line 280</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="modified">modified<span class="signature">()</span><span class="return-type-signature"> &rarr; {string}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Get the modified text for this source map.  At construction time, this
+will be the same as the source text, but can change via calls to
+modify().</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>string</code>
+            
+            
+                <p>the modified text for this source map</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="source-map.js.html">source-map.js</a><a href="source-map.js.html#source.106">, line 106</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="modifiedLineAndColumn">modifiedLineAndColumn<span class="signature">(line, column)</span><span class="return-type-signature"> &rarr; {<a href="Array.html">Array</a>}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>See the documentation for <a href="SourceMap.html#modifiedPosition">modifiedPosition()</a>; this function behaves similarly, except that it
+takes as input a line number and column number in the source text,
+and returns a line number and column number in the modified text.</p>
+<p>Unlike character indices, line and column numbers start counting at 1,
+so the first character in the text (at index 0) would be in line 1 and
+at column 1.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">line</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>integer</code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the line number in the source text whose position
+in the modified text should be looked up</p></div>
+            
+        </li>
+
+    
+
+        <li>
+            
+                <span class="param-name">column</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>integer</code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the column number in the modified text whose
+position in the source should be looked up</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="SourceMap.html#sourceLineAndColumn">sourceLineAndColumn</a></li>
+            
+                <li><a href="SourceMap.html#modifiedPosition">modifiedPosition</a></li>
+            
+                <li><a href="SourceMap.html#modifiedPosition">modifiedPosition</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>Array</code>
+            
+            
+                <p>a pair of integers, the line and column number in the
+modified text that correspond to the given line and column number in
+the source text</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="source-map.js.html">source-map.js</a><a href="source-map.js.html#source.401">, line 401</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="modifiedPosition">modifiedPosition<span class="signature">(sourcePosition)</span><span class="return-type-signature"> &rarr; {integer}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>See the documentation for <a href="SourceMap.html#sourcePosition">sourcePosition()</a>; this function is (approximately) the inverse to that
+function.  The only difference is, as documented in that function, we
+cannot map precisely each character within a section of modified text,
+and thus we map to the first charcter in the corresponding range.  For
+example, in the source map mentioned at the top of this page, each
+character in the source text &quot;5+9&quot; would map to the first character in
+the modified text &quot;14.&quot;</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">sourcePosition</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>integer</code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the position in the source text for
+which a lookup should be done in the modified text</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="SourceMap.html#modifiedLineAndColumn">modifiedLineAndColumn</a></li>
+            
+                <li><a href="SourceMap.html#sourcePosition">sourcePosition</a></li>
+            
+                <li><a href="SourceMap.html#sourceLineAndColumn">sourceLineAndColumn</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>integer</code>
+            
+            
+                <p>the position in the modified text corresponding to
+the given position in the source text</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="source-map.js.html">source-map.js</a><a href="source-map.js.html#source.341">, line 341</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="modify">modify<span class="signature">(start, length, replacement, Object<span class="signature-attributes">opt</span>)</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Source map objects contain both a source text and a modified text,
+which are equal at construction time.  But through one or more calls to
+this function, the modified text can change, diverging from the source
+text.  This function not only makes such modifications, but it records
+where they were made, and any data assocaited with them, so that
+queries can be made later about correspondences between the source and
+modified text, as documented at the top of this file.</p>
+<p>The first three parameters are straightforward, as documented below.
+However, the fourth parameter (which is optional) requires additional
+explanation.  When replacing a portion of the source text, it is
+sometimes convenient to replace it not with text, but with arbitrary
+data.  We support this more advanced usage as follows.</p>
+<ul>
+<li>First, the newly inserted text cannot be arbitrary text, but should
+instead be a special marker that indicates the location where
+non-text data resides.  To create such markers, use the
+<a href="SourceMap.html#nextMarker">nextMarker()</a> function.</li>
+<li>Second, the fourth parameter (<code>data</code>) should be provided, and it can
+be any JavaScript object amenable to JSON encoding, which will be
+stored in this object for later querying.</li>
+<li>Later, when the client processes the modified text, upon
+encountering a marker (see <a href="SourceMap.html#.isMarker">isMarker()</a>)
+and desiring to know what data it represents, the client can find
+out with a call to <a href="SourceMap.html#dataForMarker">dataForMarker()</a>.</li>
+</ul>
+<p>For example, let's say our source text was &quot;Get me employee #16&quot; and
+we wanted to replace &quot;employee #16&quot; with the full data for that
+employee, which is not text data, but rather something more complex,
+such as <code>{ name:'Henrietta', age:35, ... }</code>.  Assuming we have that
+data in an object <code>obj</code>, we could make a call like the following.</p>
+<pre class="prettyprint source lang-js"><code>sourcemap.modify( 7, 12, sourcemap.nextMarker(), obj )
 </code></pre>
-<hr/>
-<br/>
-<p>The correct way:</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>equation = new Application( new LurchSymbol( '=' ), term, term.copy() )
-console.log( equation.toPutdown() )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-(= (- (* 6 x) 5) (- (* 6 x) 5))
-</code></pre>
-<hr/>
-<br/>
-<h2>Removing and replacing LCs</h2>
-<p>To remove an LC from a hierarchy, simply call its
-<a href="MathConcept.html#remove">remove()</a> method.  Note that this will alter its
-parent (and, indirectly, grandparent, etc.) LC by removing one of its
-descendants.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>console.log( 'Before:', equation.toPutdown() ) // See equation, above.
-term.remove() // Recall that term is the left hand side of the equation.
-console.log( 'After:', equation.toPutdown() )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-Before: (= (- (* 6 x) 5) (- (* 6 x) 5))
-After: (= (- (* 6 x) 5))
-</code></pre>
-<hr/>
-<br/>
-<p>One can remove an LC and <a href="MathConcept.html#replaceWith">replace it</a> with a
-different one all in a single operation, as follows.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>console.log( 'Before:', env.toPutdown() )
-env.child( 4 ).replaceWith( pi.copy() )
-console.log( 'After:', env.toPutdown() )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-Before: { YO :A B D :E F }
-After: { YO :A B D pi F }
-</code></pre>
-<hr/>
-<br/>
-<p>If we had written <code>pi</code> instead of <code>pi.copy()</code>, it would have removed the
-symbol <code>pi</code> from its original place in the <code>famous</code> equation from earlier,
-rendering that equation not false so much as syntactically invalid.</p>
-<h2>Two important relations: earlier/later and accessibility</h2>
-<p>One very important relation among nodes in an LC tree is
-<a href="MathConcept.html#isAccessibleTo">accessibility</a>.  (See that link for the
-official explanation of the concept.)  One can test it in a variety of
-equivalent ways:</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>const c1 = env.firstChild()
-const c2 = env.lastChild()
-console.log( c1.isAccessibleTo( c2 ) )
-console.log( c2.isInTheScopeOf( c1 ) ) // equivalent to previous line
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-true
-true
-</code></pre>
-<hr/>
-<br/>
-<p>You can also get a list of all the things accessible to (or in the scope of)
-a given LC.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>console.log( c2.accessibles().map( x => x.toPutdown() ) )
-console.log( c1.scope().map( x => x.toPutdown() ) )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-[ 'pi', 'D', 'B', ':A', 'YO' ]
-[ 'YO', ':A', 'B', 'D', 'pi', 'F' ]
-</code></pre>
-<hr/>
-<br/>
-<p>The second very important relationship is whether one node appears
-<a href="MathConcept.html#isEarlierThan">earlier than</a> another in (a pre-order
-traversal of) the LC tree in which both sit.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>console.log( c1.isEarlierThan( c2 ) )
-console.log( c1.isLaterThan( env ) ) // children are later than parents
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-true
-true
-</code></pre>
-<hr/>
-<br/>
-<p>You can also ask for the <a href="MathConcept.html#nextInTree">next</a> or
-<a href="MathConcept.html#previousInTree">previous</a> node in a pre-order tree
-traversal.  This sometimes coincides with being the next or previous sibling,
-but not always.  Consider the following example.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>let temp = famous
-while ( temp ) {
-    console.log( temp.toPutdown() )
-    temp = temp.nextInTree()
-}
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-(= (+ (^ e (* i pi)) 1) 0)
-=
-(+ (^ e (* i pi)) 1)
-+
-(^ e (* i pi))
-^
-e
-(* i pi)
-*
-i
-pi
-1
-0
-</code></pre>
-<hr/>
-<br/>
+<p>Notes:</p>
+<ol>
+<li>When passing data as the optional fourth parameter, you must pass
+<code>sourcemap.nextMarker()</code> as the third parameter, because data is
+stored internally only associated with markers, and cannot be
+retrieved later otherwise.</li>
+<li>The starting index documented below is in the modified text, not
+the source text, but if this is inconvenient for you, simply make
+use of the <a href="SourceMap.html#modifiedPosition">modifiedPosition()</a>
+function to convert what you have to what you need.</li>
+<li>Modifications must be made in increasing order of index in the
+modified text.  For example, if you have a replacement to do on
+characters 5 through 10 and another to do on characters 50 through
+70, you must do them in that order, not the reverse.  This class
+does not support modifications in arbitrary order.</li>
+</ol>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">start</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>integer</code>
+    </span>
+    
+
+            
+
+            
+                <span class="param-attributes">
+                
+
+                
+
+                
+                </span>
+            
+
+            
+
+            <div class="param-description"><p>the starting index, in the modified text, where
+this next modification should be recorded</p></div>
+            
+        </li>
+
+    
+
+        <li>
+            
+                <span class="param-name">length</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>integer</code>
+    </span>
+    
+
+            
+
+            
+                <span class="param-attributes">
+                
+
+                
+
+                
+                </span>
+            
+
+            
+
+            <div class="param-description"><p>the length of the text to be replaced, starting
+at the index <code>start</code></p></div>
+            
+        </li>
+
+    
+
+        <li>
+            
+                <span class="param-name">replacement</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>string</code>
+    </span>
+    
+
+            
+
+            
+                <span class="param-attributes">
+                
+
+                
+
+                
+                </span>
+            
+
+            
+
+            <div class="param-description"><p>the text with which to replace the chosen
+portion of the source text</p></div>
+            
+        </li>
+
+    
+
+        <li>
+            
+                <span class="param-name">Object</span>
+            
+
+            
+
+            
+                <span class="param-attributes">
+                
+                    &lt;optional&gt;<br>
+                
+
+                
+
+                
+                </span>
+            
+
+            
+
+            <div class="param-description"><p>data arbitrary JSON data to store in the modified
+text, as documented above</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="source-map.js.html">source-map.js</a><a href="source-map.js.html#source.240">, line 240</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="nextMarker">nextMarker<span class="signature">()</span><span class="return-type-signature"> &rarr; {string}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>See the documentation for <a href="SourceMap.html#modify">modify()</a> for an
+explanation of how markers work.  That explanation mentions that it is
+useful to have a sequence of markers, each of which is a unique snippet
+of text that does not appear anywhere in the original source text.
+This function can be used as a generator, returning a different string
+each time it is called, none of which appeared in the original source
+text.  In that way it can be used to generate markers that can be
+passed as the <code>replacement</code> parameter to <a href="SourceMap.html#modify">modfiy()</a>.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="SourceMap.html#modify">modify()</a></li>
+            
+                <li><a href="SourceMap.html#.isMarker">isMarker()</a></li>
+            
+                <li><a href="SourceMap.html#dataForMarker">dataForMarker()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>string</code>
+            
+            
+                <p>a new marker</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="source-map.js.html">source-map.js</a><a href="source-map.js.html#source.174">, line 174</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="nextModificationPosition">nextModificationPosition<span class="signature">()</span><span class="return-type-signature"> &rarr; {integer}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>As discussed in the documentation for <a href="SourceMap.html#modify">modify()</a>, modifications must be made in increasing order of position
+in the modified text.  Thus at any point, we have a minimum index at
+which the next modification could take place, so that it falls after
+all modifications made so far.  This function returns that minimum
+index.</p>
+<p>For example, in the source map described at the top of this file (in
+which &quot;5+9&quot; became &quot;14&quot; inside the source text), the next viable index
+in the modified text where a modification could be made is immediately
+after the text &quot;14,&quot; that is, at index 16.</p>
+<p>If no modifications have been made to the source text, this function
+will return zero.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>integer</code>
+            
+            
+                <p>the earliest index at which a modification could be
+added to this source map</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="source-map.js.html">source-map.js</a><a href="source-map.js.html#source.127">, line 127</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="source">source<span class="signature">()</span><span class="return-type-signature"> &rarr; {string}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Get the source text given at the time this source map was constructed.
+This class provides no API for altering the source text, so it should
+be the same any time this function is called.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>string</code>
+            
+            
+                <p>the source text given at construction time</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="source-map.js.html">source-map.js</a><a href="source-map.js.html#source.97">, line 97</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="sourceLineAndColumn">sourceLineAndColumn<span class="signature">(line, column)</span><span class="return-type-signature"> &rarr; {<a href="Array.html">Array</a>}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>See the documentation for <a href="SourceMap.html#sourcePosition">sourcePosition()</a>; this function behaves similarly, except that it
+takes as input a line number and column number in the modified text,
+and returns a line number and column number in the source text.</p>
+<p>Unlike character indices, line and column numbers start counting at 1,
+so the first character in the text (at index 0) would be in line 1 and
+at column 1.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">line</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>integer</code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the line number in the modified text whose
+position in the source text should be looked up</p></div>
+            
+        </li>
+
+    
+
+        <li>
+            
+                <span class="param-name">column</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>integer</code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the column number in the modified text whose
+position in the source text should be looked up</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="SourceMap.html#sourcePosition">sourcePosition</a></li>
+            
+                <li><a href="SourceMap.html#modifiedLineAndColumn">modifiedLineAndColumn</a></li>
+            
+                <li><a href="SourceMap.html#modifiedPosition">modifiedPosition</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>Array</code>
+            
+            
+                <p>a pair of integers, the line and column number in the
+source text that correspond to the given line and column number in
+the modified text</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="source-map.js.html">source-map.js</a><a href="source-map.js.html#source.371">, line 371</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="sourcePosition">sourcePosition<span class="signature">(modifiedPosition)</span><span class="return-type-signature"> &rarr; {integer}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>The major purpose of the SourceMap class is to track the correspondence
+of character positions between its source text and its modified text.
+This function can be used to do a lookup from the latter to the former;
+you provide a character position in the modified text and it returns the
+corresponding position in the source text.</p>
+<p>If the character position sits inside a section of modified text, there
+may not be an exact correspondence of which character in the source
+text relates to it; for example, in the source map mentioned at the top
+of this documentation page, which characters in &quot;5+9&quot; correspond to
+each character in the text &quot;14?&quot;  In such cases, the first character in
+the corresponding <em>section</em> is returned.  So both characters in &quot;14&quot;
+would be said to correspond to the first character in &quot;5+9.&quot;</p>
+<p>If the character position sits inside a section of unmodified text,
+then there is an exact copy of that unmodified text in the source text,
+and thus the corresponding position with it will be returned.</p>
+<p>If an invalid index is provided, undefined is returned.  Indices into
+both the source and modified texts are zero-based, so the first valid
+index is 0 and the last is the length of the text minus 1.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">modifiedPosition</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>integer</code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the position in the modified text for
+which a lookup should be done in the source text</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="SourceMap.html#sourceLineAndColumn">sourceLineAndColumn</a></li>
+            
+                <li><a href="SourceMap.html#modifiedPosition">modifiedPosition</a></li>
+            
+                <li><a href="SourceMap.html#modifiedLineAndColumn">modifiedLineAndColumn</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>integer</code>
+            
+            
+                <p>the position in the source text corresponding to the
+given position in the modified text</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="source-map.js.html">source-map.js</a><a href="source-map.js.html#source.314">, line 314</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+    
+
+    
+
+    
 </article>
 
 </section>
+
+
+
 
   </div>
 </main>
