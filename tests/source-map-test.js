@@ -128,19 +128,136 @@ on this continent a new nation,
 
 describe( 'SourceMap converting positions, lines, and columns', () => {
 
-    // TO DO:
-    // modify
-    // sourcePosition
-    // modifiedPosition
-    // sourceLineAndColumn
-    // modifiedLineAndColumn
-    
-} )
+    it( 'Should work on a small example', () => {
+        // create the source map
+        const sm = new SourceMap( 'just two\nlines' )
 
-describe( 'SourceMap storing data in markers', () => {
+        // test five positions, two invalid and three valid:
+        expect( sm.sourcePosition( -1 ) ).to.be.undefined
+        expect( sm.sourcePosition( 0 ) ).to.equal( 0 )
+        expect( sm.sourcePosition( 10 ) ).to.equal( 10 )
+        expect( sm.sourcePosition( 13 ) ).to.equal( 13 )
+        expect( sm.sourcePosition( 14 ) ).to.be.undefined
+        // test five positions, two invalid and three valid:
+        expect( sm.modifiedPosition( -1 ) ).to.be.undefined
+        expect( sm.modifiedPosition( 0 ) ).to.equal( 0 )
+        expect( sm.modifiedPosition( 10 ) ).to.equal( 10 )
+        expect( sm.modifiedPosition( 13 ) ).to.equal( 13 )
+        expect( sm.modifiedPosition( 14 ) ).to.be.undefined
+        // test line-col pairs, again, some valid, some invalid:
+        expect( sm.sourceLineAndColumn( 0, 1 ) ).to.be.undefined
+        expect( sm.sourceLineAndColumn( 1, 1 ) ).to.eql( [ 1, 1 ] )
+        expect( sm.sourceLineAndColumn( 1, 9 ) ).to.eql( [ 1, 9 ] )
+        expect( sm.sourceLineAndColumn( 1, 10 ) ).to.be.undefined
+        expect( sm.sourceLineAndColumn( 2, 1 ) ).to.eql( [ 2, 1 ] )
+        expect( sm.sourceLineAndColumn( 2, 5 ) ).to.eql( [ 2, 5 ] )
+        expect( sm.sourceLineAndColumn( 2, 6 ) ).to.be.undefined
+        expect( sm.sourceLineAndColumn( 3, 1 ) ).to.be.undefined
+        // same tests in reverse direction of lookup:
+        expect( sm.modifiedLineAndColumn( 0, 1 ) ).to.be.undefined
+        expect( sm.modifiedLineAndColumn( 1, 1 ) ).to.eql( [ 1, 1 ] )
+        expect( sm.modifiedLineAndColumn( 1, 9 ) ).to.eql( [ 1, 9 ] )
+        expect( sm.modifiedLineAndColumn( 1, 10 ) ).to.be.undefined
+        expect( sm.modifiedLineAndColumn( 2, 1 ) ).to.eql( [ 2, 1 ] )
+        expect( sm.modifiedLineAndColumn( 2, 5 ) ).to.eql( [ 2, 5 ] )
+        expect( sm.modifiedLineAndColumn( 2, 6 ) ).to.be.undefined
+        expect( sm.modifiedLineAndColumn( 3, 1 ) ).to.be.undefined
+
+        // now make a modification!
+        sm.modify( 4, 4, '\nTHREE!' )
+        expect( sm.modified() ).to.equal( 'just\nTHREE!\nlines' )
+        // and re-test all the same stuff, appropriately modified...
+
+        // For reference:
+        //
+        // just two\nlines
+        // 0 2 4 6 8 9 1 1
+        //     \--/    1 3
+        //       |
+        //       V
+        //     /------\
+        // just\nTHREE!\nlines
+        // 0 2 4 5 7 9 1 1 1 1
+        //             1 2 4 6
+
+        expect( sm.sourcePosition( -1 ) ).to.be.undefined
+        expect( sm.sourcePosition( 0 ) ).to.equal( 0 )
+        expect( sm.sourcePosition( 3 ) ).to.equal( 3 )
+        expect( sm.sourcePosition( 4 ) ).to.equal( 4 )
+        expect( sm.sourcePosition( 7 ) ).to.equal( 4 )
+        expect( sm.sourcePosition( 10 ) ).to.equal( 4 )
+        expect( sm.sourcePosition( 13 ) ).to.equal( 10 )
+        expect( sm.sourcePosition( 16 ) ).to.equal( 13 )
+        expect( sm.sourcePosition( 17 ) ).to.be.undefined
+        expect( sm.modifiedPosition( -1 ) ).to.be.undefined
+        expect( sm.modifiedPosition( 0 ) ).to.equal( 0 )
+        expect( sm.modifiedPosition( 3 ) ).to.equal( 3 )
+        expect( sm.modifiedPosition( 4 ) ).to.equal( 4 )
+        expect( sm.modifiedPosition( 7 ) ).to.equal( 4 )
+        expect( sm.modifiedPosition( 8 ) ).to.equal( 11 )
+        expect( sm.modifiedPosition( 11 ) ).to.equal( 14 )
+        expect( sm.modifiedPosition( 13 ) ).to.equal( 16 )
+        expect( sm.modifiedPosition( 14 ) ).to.be.undefined
+        expect( sm.sourceLineAndColumn( 0, 1 ) ).to.be.undefined
+        expect( sm.sourceLineAndColumn( 1, 1 ) ).to.eql( [ 1, 1 ] )
+        expect( sm.sourceLineAndColumn( 1, 4 ) ).to.eql( [ 1, 4 ] )
+        expect( sm.sourceLineAndColumn( 1, 5 ) ).to.eql( [ 1, 5 ] )
+        expect( sm.sourceLineAndColumn( 1, 6 ) ).to.be.undefined
+        expect( sm.sourceLineAndColumn( 2, 1 ) ).to.eql( [ 1, 5 ] )
+        expect( sm.sourceLineAndColumn( 2, 6 ) ).to.eql( [ 1, 5 ] )
+        expect( sm.sourceLineAndColumn( 2, 7 ) ).to.eql( [ 1, 9 ] )
+        expect( sm.sourceLineAndColumn( 2, 8 ) ).to.be.undefined
+        expect( sm.sourceLineAndColumn( 3, 1 ) ).to.eql( [ 2, 1 ] )
+        expect( sm.sourceLineAndColumn( 3, 5 ) ).to.eql( [ 2, 5 ] )
+        expect( sm.sourceLineAndColumn( 3, 6 ) ).to.be.undefined
+        expect( sm.modifiedLineAndColumn( 1, 1 ) ).to.eql( [ 1, 1 ] )
+        expect( sm.modifiedLineAndColumn( 1, 4 ) ).to.eql( [ 1, 4 ] )
+        expect( sm.modifiedLineAndColumn( 1, 5 ) ).to.eql( [ 1, 5 ] )
+        expect( sm.modifiedLineAndColumn( 1, 8 ) ).to.eql( [ 1, 5 ] )
+        expect( sm.modifiedLineAndColumn( 1, 9 ) ).to.eql( [ 2, 7 ] )
+        expect( sm.modifiedLineAndColumn( 1, 10 ) ).to.undefined
+        expect( sm.modifiedLineAndColumn( 2, 1 ) ).to.eql( [ 3, 1 ] )
+        expect( sm.modifiedLineAndColumn( 2, 5 ) ).to.eql( [ 3, 5 ] )
+        expect( sm.modifiedLineAndColumn( 2, 6 ) ).to.be.undefined
+    } )
     
-    // TO DO:
-    // modify
-    // dataForMarker
+    it( 'Should let us store arbitrary data in markers', () => {
+        // create the source map:
+        const sm = new SourceMap( `
+Line 2: __
+Line 3: __
+Line 4: __
+` )
+
+        // double-check what the previous test already did:
+        for ( let i = 0 ; i < sm.source().length ; i++ ) {
+            expect( sm.sourcePosition( i ) ).to.equal( i )
+            expect( sm.modifiedPosition( i ) ).to.equal( i )
+            const pair = SourceMap.positionToLineAndColumn( i, sm.source() )
+            expect( sm.sourceLineAndColumn( ...pair ) ).to.eql( pair )
+            expect( sm.modifiedLineAndColumn( ...pair ) ).to.eql( pair )
+        }
+
+        // replace the 2 blanks on line , then 3, then 4:
+        sm.modify( 9, 2, sm.nextMarker(), { some: 'data', num: 3 } )
+        sm.modify( 34, 2, sm.nextMarker(), { name: 'Alice', dog: 'Hercules' } )
+        sm.modify( 59, 2, sm.nextMarker(), { before: 'x', after: 'y' } )
+        // ensure we got the correct result:
+        expect( sm.modified() ).to.equal( `
+Line 2: SourceMapMarker0
+Line 3: SourceMapMarker1
+Line 4: SourceMapMarker2
+` )
+        // verify that we cannot actually replace things in reverse order:
+        expect( () => sm.modify( 56, 1, 'foo' ) ).to.throw( /order/ )
+
+        // ensure that the markers contain the data they're supposed to:
+        expect( sm.dataForMarker( 'SourceMapMarker0' ) ).to.eql(
+            { some: 'data', num: 3, original: '__' } )
+        expect( sm.dataForMarker( 'SourceMapMarker1' ) ).to.eql(
+            { name: 'Alice', dog: 'Hercules', original: '__' } )
+        expect( sm.dataForMarker( 'SourceMapMarker2' ) ).to.eql(
+            { before: 'x', after: 'y', original: '__' } )
+    } )
 
 } )

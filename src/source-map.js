@@ -82,8 +82,8 @@ export class SourceMap {
         while ( this._source.indexOf(
                 SourceMap.markerWithIndex( this._nextIndex ) ) > -1 )
             this._nextIndex
-        this._mapping = [ [ 0, this._source.length,
-                            0, this._modified.length ] ]
+        this._mapping = [ [ 0, this._source.length - 1,
+                            0, this._modified.length - 1 ] ]
         this._data = { }
     }
 
@@ -419,10 +419,12 @@ export class SourceMap {
     static lineAndColumnToPosition = ( line, column, text ) => {
         const lines = text.split( '\n' )
         for ( let i = 0, totalSoFar = 0 ; i < lines.length ; i++ ) {
+            const countNewline = i < lines.length - 1 ? 1 : 0
             if ( i + 1 == line )
-                return column >= 1 && column <= lines[i].length + 1 ?
-                    totalSoFar + column - 1 : undefined
-            totalSoFar += lines[i].length + 1
+                return column >= 1
+                    && column <= lines[i].length + countNewline ?
+                       totalSoFar + column - 1 : undefined
+            totalSoFar += lines[i].length + countNewline
         }
     }
 
@@ -435,7 +437,8 @@ export class SourceMap {
      * respectively.
      * 
      * For example, `"function ( x ) {\n\treturn 3;\n}"` would be printed
-     * as follows.
+     * as follows.  Note that these are *not* line and *column* numbers,
+     * but rather line numbers and *character indices.*
      * 
      * ```
      * L1C0: function ( x ) {
