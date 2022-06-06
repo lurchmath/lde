@@ -2207,17 +2207,13 @@ export class MathConcept extends EventTarget {
         while ( string.length > 0 ) {
             const notationPos = string.search( notationRE )
             const commandPos = string.search( commandRE )
-            // console.log( `nP ${notationPos} cP ${commandPos}` )
-            if ( notationPos == -1 && commandPos == -1 ) {
+            if ( notationPos == -1 && commandPos == -1 )
                 // remainder of string is all putdown content, so we are done
-                // console.log( JSON.stringify( string ) )
                 break
-            }
-            if ( notationPos == -1 || commandPos < notationPos ) {
-                // some putdown content...
-                // console.log( JSON.stringify( string.substring( 0, commandPos ) ) )
+            if ( notationPos == -1 ||
+                 ( commandPos > -1 && commandPos < notationPos ) ) {
+                // some putdown content followed by a \command{...}...{...}
                 string = string.substring( commandPos )
-                // ...followed by a \command{...}...{...}
                 const match = commandRE.exec( string )
                 string = string.substring( match[0].length )
                 const command = match[1]
@@ -2233,10 +2229,8 @@ export class MathConcept extends EventTarget {
                                 operands : args
                             } )
             } else {
-                // some putdown content...
-                // console.log( JSON.stringify( string.substring( 0, notationPos ) ) )
+                // some putdown content followed by some $...notation...$
                 string = string.substring( notationPos )
-                // ...followed by some $...notation...$
                 const match = notationRE.exec( string )
                 string = string.substring( match[0].length )
                 map.modify( map.nextModificationPosition() + notationPos,
