@@ -2171,4 +2171,218 @@ export class MathConcept extends EventTarget {
         return Connection.transferConnections( this, recipient )
     }
 
+    //////
+    //
+    //  Interpretation and smackdown notation
+    //
+    //////
+
+    static interpretationKey = 'How to interpret'
+
+    static fromSmackdown ( string ) {
+        // Tools for creating replacement markers:
+        let nextMarkerIndex = 0
+        const marker = 'MathConceptCommand'
+        while ( string.indexOf( `${marker}${nextMarkerIndex}` ) > -1 )
+            nextMarkerIndex++
+        const nextMarker = () => `${marker}${nextMarkerIndex++}`
+        const isMarker = text => text.substring( 0, marker.length ) == marker
+            && /^[0-9]+$/.test( text.substring( marker.length ) )
+        // Tools for doing source mapping:
+        // const showCode = code => {
+        //     const lines = code.split( '\n' )
+        //     for ( let i = 0, cumsum = 0 ; i < lines.length ; i++ ) {
+        //         const line = lines[i]
+        //         console.log( `${i+1}. (${cumsum}) ${line}` )
+        //         cumsum += line.length + 1
+        //     }
+        // }
+        const sourceMap = [ [ 0, string.length, 0, string.length ] ]
+        const originalPos = pos => {
+            const row = sourceMap.find( row => row[2] <= pos && pos <= row[3] )
+            return row === undefined ? undefined :
+                   row[3] - row[2] == row[1] - row[0] ? row[0] + pos - row[2] :
+                   row[0]
+        }
+        const trackReplacement = ( start, length, newText ) => {
+            const end = start + length - 1
+            const last = sourceMap[sourceMap.length-1]
+            const origStart = originalPos( start )
+            if ( origStart < last[0] || origStart > last[1] )
+                throw 'Replacements must be done in increasing order'
+            const origEnd = originalPos( end )
+            if ( origEnd < last[0] || origEnd > last[1] )
+                throw 'Replacements must be done in increasing order'
+            sourceMap.pop()
+            sourceMap.push( [ last[0], origStart - 1, last[2], start - 1 ] )
+            sourceMap.push( [ origStart, origEnd,
+                              start, start + newText.length - 1 ] )
+            sourceMap.push( [
+                origEnd + 1, last[1], start + newText.length,
+                last[3] - ( end - start - newText.length + 1 ) ] )
+        }
+        const posToLineCol = ( pos, string ) => {
+            pos = parseInt( pos )
+            if ( pos > string.length || pos < 0 ) return undefined
+            const start = string.substring( 0, pos )
+            const lines = start.split( '\n' )
+            return [ lines.length, lines[lines.length-1].length + 1 ]
+        }
+        const lineColToPos = ( line, col, string ) => {
+            line = parseInt( line )
+            col = parseInt( col )
+            const lines = string.split( '\n' )
+            for ( let i = 0, cumsum = 0 ; i < lines.length ; i++ ) {
+                if ( i + 1 == line )
+                    return col >= 1 && col <= lines[i].length ?
+                        cumsum + col - 1 : undefined
+                cumsum += lines[i].length + 1
+            }
+        }
+        // Later: Source maps should support not just originalPos(), but also
+        // originalLineCol() as well.  This can be implemented only after the
+        // sourceMap support will track the full code of both the original and
+        // new source texts.
+
+        // Regular expressions for key features of smackdown:
+        const notationRE = /\$([^$]*)\$/
+        const commandRE = /\\([a-z]+)\{((?:.|\}\{)*)\}/
+        // Split the text by the above regular expressions, using source maps:
+        const replacements = { }
+        let remaining = string
+        let newString = ''
+        let failsafe = 100
+        while ( remaining.length > 0 ) {
+            const notationPos = remaining.search( notationRE )
+            const commandPos = remaining.search( commandRE )
+            // console.log( `nP ${notationPos} cP ${commandPos}` )
+            if ( notationPos == -1 && commandPos == -1 ) {
+                // remainder of string is all putdown content, so we are done
+                newString += remaining
+                // console.log( JSON.stringify( remaining ) )
+                break
+            }
+            let original, replacement, data = { }
+            if ( notationPos == -1 || commandPos < notationPos ) {
+                // some putdown content...
+                // console.log( JSON.stringify( remaining.substring( 0, commandPos ) ) )
+                newString += remaining.substring( 0, commandPos )
+                remaining = remaining.substring( commandPos )
+                // ...followed by a \command{...}...{...}
+                const match = commandRE.exec( remaining )
+                const command = match[1]
+                const args = match[2].split( '}{' )
+                original = match[0]
+                switch ( command ) {
+                    // replace \label{x} with +{'label':'x'}, same for \ref
+                    case 'label':
+                    case 'ref':
+                        if ( args.length != 1 )
+                            throw `Invalid use of ${command}: ${match[0]}`
+                        replacement = ` +{"${command}":${JSON.stringify(args[0])}}`
+                        break
+                    // replace \begin{proof}...\end{proof} with  { ... }
+                    case 'begin':
+                    case 'end':
+                        if ( args.length != 1 || args[0] != 'proof' )
+                            throw `Invalid use of ${command}: ${match[0]}`
+                        replacement = command == 'begin' ? ' { ' : ' } '
+                        break
+                    // no other commands are processed yet
+                    default:
+                        replacement = nextMarker()
+                        data.type = 'command'
+                        data.operator = command
+                        data.operands = args
+                }
+            } else {
+                // some putdown content...
+                // console.log( JSON.stringify( remaining.substring( 0, notationPos ) ) )
+                newString += remaining.substring( 0, notationPos )
+                remaining = remaining.substring( notationPos )
+                // ...followed by some $...notation...$
+                const match = notationRE.exec( remaining )
+                original = match[0]
+                replacement = nextMarker()
+                data.type = 'notation'
+                data.notation = original.substring( 1, original.length - 1 )
+            }
+            // console.log( `${original} --> ${replacement}` )
+            trackReplacement( newString.length, original.length, replacement )
+            newString += replacement
+            remaining = remaining.substring( original.length )
+            if ( isMarker( replacement ) ) {
+                data.original = original
+                replacements[replacement] = data
+                data = { }
+            }
+            if ( failsafe-- < 0 ) throw 'Infinite loop.'
+        }
+        // The input has been converted to valid putdown; parse it as such:
+        let LCs
+        try {
+            const LC = MathConcept.subclasses.get( 'LogicConcept' )
+            LCs = LC.fromPutdown( newString )
+        } catch ( e ) {
+            const [ match, line, col ] = /line ([0-9]+) col ([0-9]+)/.exec( e )
+            const pos = lineColToPos( line, col, newString )
+            const origPos = originalPos( pos )
+            const [ origLine, origCol ] = posToLineCol( origPos, string )
+            throw `${e}`.replace( match, `line ${origLine} col ${origCol}` )
+        }
+        // How to convert that hierarchy to a MathConcept one:
+        const convert = LC => {
+            if ( LC.constructor.className == 'Symbol'
+              && isMarker( LC.text() ) ) {
+                const data = replacements[LC.text()]
+                switch ( data.type ) {
+                    case 'notation':
+                        return new MathConcept().attr( [ [
+                            MathConcept.interpretationKey,
+                            [ 'notation', data.notation ] ] ] )
+                    case 'command':
+                        return new MathConcept().attr( [ [
+                            MathConcept.interpretationKey,
+                            [ 'command', data.operator, ...data.operands ] ] ] )
+                    default:
+                        throw `Unknown MathConcept type: ${data.type}`
+                }
+            }
+            const result = new MathConcept( ...LC.children().map( convert ) )
+            result._attributes = LC._attributes.deepCopy()
+            result.setAttribute( MathConcept.interpretationKey,
+                                 [ 'class', LC.constructor.className ] )
+            return result
+        }
+        // Use that function and we're done:
+        return LCs.map( convert )
+    }
+
+    interpret () {
+        const method = this.getAttribute( MathConcept.interpretationKey )
+        const LC = MathConcept.subclasses.get( 'LogicConcept' ) // temp
+        switch ( method[0] ) {
+            case 'class':
+                const classObject = MathConcept.subclasses.get( method[1] )
+                const result = new classObject(
+                    ...this.children().map( x => x.interpret() ) )
+                for ( let key of this.getAttributeKeys() )
+                    if ( key != MathConcept.interpretationKey )
+                        result.setAttribute( key,
+                            JSON.copy( this.getAttribute( key ) ) )
+                return result
+            case 'notation':
+                return LC.fromPutdown( JSON.stringify(
+                    'notation interpretation not yet implemented: $'
+                  + method[1] + '$' ) )[0]
+            case 'command':
+                return LC.fromPutdown( JSON.stringify(
+                    'command interpretation not yet implemented: \\'
+                  + method[1] + '}{' + method.slice( 2 ).join( '}{' )
+                  + '}' ) )[0]
+            default:
+                throw `Invalid interpretation method: ${method[0]}`
+        }
+    }
+
 }

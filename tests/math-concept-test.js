@@ -2511,3 +2511,21 @@ describe( 'Sending feedback about MathConcepts', () => {
     } )
 
 } )
+
+describe( 'Smackdown notation', () => {
+
+    it( 'Dummy test to be changed later', () => {
+        console.log( JSON.stringify( MathConcept.fromSmackdown( `
+            // a comment
+            (one expression by itself) \\label{first expr}
+            \\somecommand{foo}{bar}{}{baz} "another expression" $now notation x^2-5$
+            \\begin{proof}
+            { :an :environment (with three children) }
+            // another comment
+            $\\sum_{i=1}^{10}\\frac{i}{5}$ \\ref{1}
+                // that last line contains even more notation
+            \\end{proof}
+        ` ), null, 4 ) )
+    } )
+
+} )
