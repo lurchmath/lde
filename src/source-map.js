@@ -422,7 +422,7 @@ export class SourceMap {
         const lines = text.split( '\n' )
         for ( let i = 0, totalSoFar = 0 ; i < lines.length ; i++ ) {
             if ( i + 1 == line )
-                return column >= 1 && column <= lines[i].length ?
+                return column >= 1 && column <= lines[i].length + 1 ?
                     totalSoFar + column - 1 : undefined
             totalSoFar += lines[i].length + 1
         }
