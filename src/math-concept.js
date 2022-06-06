@@ -2249,8 +2249,8 @@ export class MathConcept extends EventTarget {
             const match = /line ([0-9]+) col ([0-9]+)/.exec(
                 e.message ? e.message : e )
             if ( !match ) throw e
-            const [ origLine, origCol ] =
-                map.sourceLineAndColumn( match[1], match[2] )
+            const [ origLine, origCol ] = map.sourceLineAndColumn(
+                parseInt( match[1] ), parseInt( match[2] ) )
             throw new Error( e.message.replace(
                 match[0], `line ${origLine} col ${origCol}` ) )
         }

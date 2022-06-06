@@ -408,8 +408,8 @@ export class SourceMap {
 
     // For internal use by sourceLineAndColumn and modifiedLineAndColumn
     static positionToLineAndColumn = ( position, text ) => {
-        position = parseInt( position )
-        if ( position > text.length || position < 0 ) return undefined
+        if ( position > text.length || position < 0
+          || typeof( position ) != 'number' ) return undefined
         const start = text.substring( 0, position )
         const lines = start.split( '\n' )
         return [ lines.length, lines[lines.length-1].length + 1 ]
@@ -417,8 +417,6 @@ export class SourceMap {
 
     // For internal use by sourceLineAndColumn and modifiedLineAndColumn
     static lineAndColumnToPosition = ( line, column, text ) => {
-        line = parseInt( line )
-        column = parseInt( column )
         const lines = text.split( '\n' )
         for ( let i = 0, totalSoFar = 0 ; i < lines.length ; i++ ) {
             if ( i + 1 == line )
