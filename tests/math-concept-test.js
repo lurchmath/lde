@@ -2583,6 +2583,8 @@ describe( 'Smackdown notation and interpretation', () => {
     const applicationMC = ( ...children ) =>
         new MathConcept( ...children ).attr( [
             [ MathConcept.interpretationKey, [ 'class', 'Application' ] ] ] )
+    const commandMC = ( cmd, ...args ) => new MathConcept().attr( [
+        [ MathConcept.interpretationKey, [ 'command', cmd, ...args ] ] ] )
     
     it( 'Should support $...$ notation blocks', () => {
         // ---------- one $...$ block all alone
@@ -3030,14 +3032,85 @@ describe( 'Smackdown notation and interpretation', () => {
         ) ).to.equal( true )
     } )
 
-    xit( 'Should give errors when \\label/ref{...} is wrongly used', () => {
-        // test 1: starting a doc with one
-        // test 2: starting an environment with one
-        // test 3: misspelled \label{...} or \ref{...}
-        // test 4: although it's okay to do \label{x} \label{y}, only the y
-        //         will take effect, because it will overwrite the x
-        // test 5: incorrect number of escape slashes before a bracket,
-        //         or other invalid escaping, like \a
+    it( 'Should give errors when \\label/ref{...} is wrongly used', () => {
+        // ---------- cannot start a doc with a label or ref
+        expect(
+            () => MathConcept.fromSmackdown( `
+                \\label{this does not label anything! error}
+                (this is an example expression)
+            ` )
+        ).to.throw( /has no target to modify/ )
+        expect(
+            () => MathConcept.fromSmackdown( `
+                \\ref{this does not modify anything! error}
+                (this is an example expression)
+            ` )
+        ).to.throw( /has no target to modify/ )
+
+        // ---------- cannot start and environment with a label or ref
+        expect(
+            () => MathConcept.fromSmackdown( `
+                \\begin{proof} \\label{this does not label anything! error}
+                (this is an example expression) \\end{proof}
+            ` )
+        ).to.throw( /has no target to modify/ )
+        expect(
+            () => MathConcept.fromSmackdown( `
+                {
+                    {   \\ref{this does not modify anything! error}   }
+                    {   (this is an example expression)               }
+                }
+            ` )
+        ).to.throw( /has no target to modify/ )
+
+        // ---------- misspelled \label{...} or \ref{...} are treated as
+        //            commands that have not yet been implemented
+        const test1 = MathConcept.fromSmackdown( `
+            one_expression \\lable{this should fail}
+        ` )
+        expect( test1 ).to.be.instanceOf( Array )
+        expect( test1.length ).to.equal( 2 )
+        expect( test1[0].equals( symbolMC( 'one_expression' ) ) ).to.equal( true )
+        expect( test1[1].equals( commandMC( 'lable', 'this should fail' ) ) )
+            .to.equal( true )
+        const test2 = MathConcept.fromSmackdown( `
+            what if we... \\raf{like so?}
+        ` )
+        expect( test2 ).to.be.instanceOf( Array )
+        expect( test2.length ).to.equal( 4 )
+        expect( test2[0].equals( symbolMC( 'what' ) ) ).to.equal( true )
+        expect( test2[1].equals( symbolMC( 'if' ) ) ).to.equal( true )
+        expect( test2[2].equals( symbolMC( 'we...' ) ) ).to.equal( true )
+        expect( test2[3].equals( commandMC( 'raf', 'like so?' ) ) )
+            .to.equal( true )
+
+        // ---------- double labeling is a waste; only the second one applies
+        const test3 = MathConcept.fromSmackdown( `
+            label-me! \\label{1} \\label{2}
+        ` )
+        expect( test3 ).to.be.instanceOf( Array )
+        expect( test3.length ).to.equal( 1 )
+        expect( test3[0].equals(
+            symbolMC( 'label-me!' ).attr( [ [ 'label', '2' ] ] )
+        ) ).to.equal( true )
+
+        // ---------- other invalid escaping, like \a
+        expect(
+            () => MathConcept.fromSmackdown(
+                'target \\label{this \\{ is okay}' )
+        ).not.to.throw()
+        expect(
+            () => MathConcept.fromSmackdown(
+                'target \\ref{this \\\\ is okay}' )
+        ).not.to.throw()
+        expect(
+            () => MathConcept.fromSmackdown(
+                'target \\label{this \\x is not okay}' )
+        ).to.throw( /Invalid command notation/ )
+        expect(
+            () => MathConcept.fromSmackdown(
+                'target \\ref{this \\" is not okay}' )
+        ).to.throw( /Invalid command notation/ )
     } )
 
     xit( 'Should support arbitrary \\command{arg1}...{argN}', () => {

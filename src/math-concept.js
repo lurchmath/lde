@@ -2248,6 +2248,8 @@ export class MathConcept extends EventTarget {
             /(?<!\\)(?:\\\\)*\$((?:[^\\$\n\r]|\\\$|\\\\)*)(?:\n|\/\/|$)/
         const commandRE =
             /\\([a-z]+)\{((?:[^{}\\\n\r]|\\\\|\\\}|\\\{|\}\{)*)\}/
+        const badlyEscapedCommandRE =
+            /\\([a-z]+)\{((?:[^{}\\\n\r]|\\.|\}\{)*)\}/
         const unescape = ( text, escapables ) => {
             let result = ''
             escapables += '\\'
@@ -2271,11 +2273,18 @@ export class MathConcept extends EventTarget {
         while ( string.length > 0 ) {
             const notationPos = string.search( notationRE )
             const commandPos = string.search( commandRE )
-            const badPos = string.search( unterminatedNotationRE )
+            const badNPos = string.search( unterminatedNotationRE )
+            const badCPos = string.search( badlyEscapedCommandRE )
             // If there's an unterminated $... then throw an error:
-            if ( badPos > -1 && ( notationPos == -1 || notationPos > badPos ) )
+            if ( badNPos > -1
+              && ( notationPos == -1 || notationPos > badNPos ) )
                 throw new Error( 'Unterminated notation: '
-                               + string.substring( badPos, badPos + 10 ) )
+                               + string.substring( badNPos, badNPos + 10 ) )
+            // If there's an incorrectly formatted \cmd then throw an error:
+            if ( badCPos > -1
+              && ( commandPos == -1 || commandPos > badCPos ) )
+                throw new Error( 'Invalid command notation: '
+                               + string.substring( badCPos, badCPos + 10 ) )
             // If there are no special smackdown features, the putdown is fine:
             if ( notationPos == -1 && commandPos == -1 )
                 break
