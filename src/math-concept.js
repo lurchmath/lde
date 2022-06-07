@@ -2243,8 +2243,27 @@ export class MathConcept extends EventTarget {
     static fromSmackdown ( string ) {
         const map = new SourceMap( string )
         // Regular expressions for key features of smackdown:
-        const notationRE = /(?<!\\)(?:\\\\)*\$((?:[^$]|(?:\\\\)*\\\$)*)\$/
+        const notationRE = /(?<!\\)(?:\\\\)*\$((?:[^\\$]|\\\$|\\\\)*)\$/
         const commandRE = /\\([a-z]+)\{((?:.|(?:\\\\)*\}|(?:\\\\)*\{)*)\}/
+        const unescape = ( text, escapables ) => {
+            let result = ''
+            escapables += '\\'
+            for ( let i = 0 ; i < text.length ; i++ ) {
+                const char = text.charAt( i )
+                if ( char != '\\' ) { result += char } else {
+                    if ( i == text.length - 1 )
+                        throw new Error(
+                            `Backslash at end of escaped text: ${text}` )
+                    const next = text.charAt( i + 1 )
+                    if ( escapables.indexOf( next ) == -1 )
+                        throw new Error(
+                            `Cannot escape this character: ${next}` )
+                    result += next
+                    i++
+                }
+            }
+            return result
+        }
         // Split the text by the above regular expressions, using source maps:
         while ( string.length > 0 ) {
             const notationPos = string.search( notationRE )
@@ -2259,7 +2278,8 @@ export class MathConcept extends EventTarget {
                 const match = commandRE.exec( string )
                 string = string.substring( match[0].length )
                 const command = match[1]
-                const args = match[2].split( '}{' )
+                const args = match[2].split( '}{' ).map(
+                    arg => unescape( arg, '{}' ) )
                 let replacement =
                     MathConcept.attemptTextCommand( command, ...args )
                 if ( replacement === undefined )
@@ -2278,7 +2298,7 @@ export class MathConcept extends EventTarget {
                 map.modify( map.nextModificationPosition() + notationPos,
                             match[0].length, map.nextMarker(), {
                                 type : 'notation',
-                                notation : match[1]
+                                notation : unescape( match[1], '$' )
                             } )
             }
         }
@@ -2287,9 +2307,15 @@ export class MathConcept extends EventTarget {
             // If it was created by one of the aspects of smackdown that's not
             // part of putdown, then create a special MathConcept for it:
             if ( LC.constructor.className == 'Symbol'
-              && SourceMap.isMarker( LC.text() ) )
-                return MathConcept.attemptReverseInterpret(
+              && SourceMap.isMarker( LC.text() ) ) {
+                const result = MathConcept.attemptReverseInterpret(
                     map.dataForMarker( LC.text() ) )
+                for ( let key of LC.getAttributeKeys() )
+                    if ( key != 'symbol text' )
+                        result.setAttribute( key,
+                            JSON.copy( LC.getAttribute( key ) ) )
+                return result
+            }
             // Otherwise just create a MathConcept that does a simple
             // imitation of the LogicConcept created from the putdown:
             const result = new MathConcept(

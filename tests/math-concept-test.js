@@ -2570,12 +2570,80 @@ describe( 'Smackdown notation and interpretation', () => {
         ) ).to.equal( true )
     } )
 
-    xit( 'Should support $...$ notation blocks', () => {
-        // test 1: some $...$ all alone
-        // test 2: some $...$ inside a small bunch of putdown
-        // test 3: several $...$ inside a larger bunch of putdown
-        // test 4: if we have $...$ inside a //-comment, it's ignored
-        // test 5: should handle escapes (\$, \\\$, \\, etc.) correctly
+    const symbolMC = text => new MathConcept().attr( [
+        [ 'symbol text', `${text}` ],
+        [ 'Interpret as', [ 'class', 'Symbol' ] ]
+    ] )
+    const notationMC = notation => new MathConcept().attr( [
+        [ MathConcept.interpretationKey, [ 'notation', notation ] ]
+    ] )
+
+    it( 'Should support $...$ notation blocks', () => {
+        // ---------- one $...$ block all alone
+        const test1 = MathConcept.fromSmackdown( '$notation here$' )
+        expect( test1 ).to.be.instanceOf( Array )
+        expect( test1.length ).to.equal( 1 )
+        expect( test1[0].equals(
+            notationMC( 'notation here' )
+        ) ).to.equal( true )
+        
+        // ---------- one $...$ inside a little putdown
+        const test2 = MathConcept.fromSmackdown(
+            '(- x 5) { $notation here$ 2 }' )
+        expect( test2 ).to.be.instanceOf( Array )
+        expect( test2.length ).to.equal( 2 )
+        expect( test2[0].equals( new MathConcept(
+            symbolMC( '-' ), symbolMC( 'x' ), symbolMC( 5 )
+        ).attr( [
+            [ 'Interpret as', [ 'class', 'Application' ] ]
+        ] ) ) ).to.equal( true )
+        expect( test2[1].equals( new MathConcept(
+            notationMC( 'notation here' ), symbolMC( 2 )
+        ).attr( [
+            [ 'Interpret as', [ 'class', 'Environment' ] ]
+        ] ) ) ).to.equal( true )
+        
+        // ---------- several $...$s inside some putdown
+        const test3 = MathConcept.fromSmackdown(
+            '{ $x^2-1$ :(f x $y-2$) zee } :$z+e+e$' )
+        expect( test3 ).to.be.instanceOf( Array )
+        expect( test3.length ).to.equal( 2 )
+        expect( test3[0].equals( new MathConcept(
+            notationMC( 'x^2-1' ),
+            new MathConcept(
+                symbolMC( 'f' ), symbolMC( 'x' ), notationMC( 'y-2' )
+            ).attr( [ [ 'Interpret as', [ 'class', 'Application' ] ] ] )
+             .asA( 'given' ),
+            symbolMC( 'zee' )
+        ).attr( [
+            [ 'Interpret as', [ 'class', 'Environment' ] ]
+        ] ) ) ).to.equal( true )
+        expect( test3[1].equals( notationMC( 'z+e+e' ).asA( 'given' ) ) )
+            .to.equal( true )
+
+        // ---------- $...$ inside a comment is ignored
+        const test4 = MathConcept.fromSmackdown( `
+            (the dollars to the right should be ignored) // $x^2-1$
+        ` )
+        expect( test4 ).to.be.instanceOf( Array )
+        expect( test4.length ).to.equal( 1 )
+        expect( test4[0].equals(
+            new MathConcept(
+                symbolMC( 'the' ), symbolMC( 'dollars' ), symbolMC( 'to' ),
+                symbolMC( 'the' ), symbolMC( 'right' ), symbolMC( 'should' ),
+                symbolMC( 'be' ), symbolMC( 'ignored' ),
+            ).attr( [ [ 'Interpret as', [ 'class', 'Application' ] ] ] )
+        ) ).to.equal( true )
+
+        // ---------- respect escaping of slashes and $s inside $...$
+        const test5 = MathConcept.fromSmackdown(
+            '$\\$3.50$  $A\\\\B$  $crazy: \\\\\\$\\\\$' )
+        expect( test5 ).to.be.instanceOf( Array )
+        expect( test5.length ).to.equal( 3 )
+        expect( test5[0].equals( notationMC( '$3.50' ) ) ).to.equal( true )
+        expect( test5[1].equals( notationMC( 'A\\B' ) ) ).to.equal( true )
+        expect( test5[2].equals( notationMC( 'crazy: \\$\\' ) ) )
+            .to.equal( true )
     } )
 
     xit( 'Should give errors when $...$ notation is wrongly formed', () => {
