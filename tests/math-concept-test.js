@@ -3270,9 +3270,58 @@ describe( 'Smackdown notation and interpretation', () => {
         ).to.throw( /Cannot escape/ )
     } )
 
-    xit( 'Should let us combine multiple smackdown features', () => {
-        // one large-ish input doc with \label{...}, \ref{...}, \begin{proof},
-        // \end{proof}, some other \command, and more than one $...$
+    it( 'Should let us combine multiple smackdown features', () => {
+        const test1 = MathConcept.fromSmackdown( `
+            :{
+                \\build{some}{ex press ion} \\label{premise-1}
+                :$y>z$ \\ref{premise-2}
+                (> x z)
+            } \\label{rule name here}
+            $notation between environments$ \\label{5}
+            \\begin{proof}
+                maybe I { :(would do some) deduction } here
+                \\label{label for "here"}
+                \\ref{ref for "here"}
+            \\end{proof} \\closing{"command"}{} {$x$}
+        ` )
+        expect( test1 ).to.be.instanceOf( Array )
+        expect( test1.length ).to.equal( 5 )
+        expect( test1[0].equals(
+            environmentMC(
+                commandMC( 'build', 'some', 'ex press ion' ).attr(
+                    [ [ 'label', 'premise-1' ] ] ),
+                notationMC( 'y>z' ).asA( 'given' ).attr(
+                    [ [ 'ref', 'premise-2' ] ] ),
+                applicationMC(
+                    symbolMC( '>' ), symbolMC( 'x' ), symbolMC( 'z' )
+                )
+            ).asA( 'given' ).attr( [ [ 'label', 'rule name here' ] ] )
+        ) ).to.equal( true )
+        expect( test1[1].equals(
+            notationMC( 'notation between environments' ).attr(
+                [ [ 'label', '5' ] ] )
+        ) ).to.equal( true )
+        expect( test1[2].equals(
+            environmentMC(
+                symbolMC( 'maybe' ),
+                symbolMC( 'I' ),
+                environmentMC(
+                    applicationMC( symbolMC( 'would' ), symbolMC( 'do' ),
+                        symbolMC( 'some' ) ).asA( 'given' ),
+                    symbolMC( 'deduction' )
+                ),
+                symbolMC( 'here' ).attr( [
+                    [ 'label', 'label for "here"' ],
+                    [ 'ref', 'ref for "here"' ]
+                ] )
+            )
+        ) ).to.equal( true )
+        expect( test1[3].equals(
+            commandMC( 'closing', '"command"', '' )
+        ) ).to.equal( true )
+        expect( test1[4].equals(
+            environmentMC( notationMC( 'x' ) )
+        ) ).to.equal( true )
     } )
 
 } )
