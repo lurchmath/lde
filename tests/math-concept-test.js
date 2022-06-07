@@ -3113,11 +3113,130 @@ describe( 'Smackdown notation and interpretation', () => {
         ).to.throw( /Invalid command notation/ )
     } )
 
-    xit( 'Should support arbitrary \\command{arg1}...{argN}', () => {
-        // test 1: one in a string all alone, with varying numbers of arguments
-        // test 2: one in a string amidst a few other things
-        // test 3: several commands sprinkled throughout a larger doc
-        // test 4: should handle escapes (\{, \\\}, \\, etc.) correctly
+    it( 'Should support arbitrary \\command{arg1}...{argN}', () => {
+        // ---------- one command alone, with any # of arguments
+        const test1 = MathConcept.fromSmackdown( `
+            \\easy{test}
+        ` )
+        expect( test1 ).to.be.instanceOf( Array )
+        expect( test1.length ).to.equal( 1 )
+        expect( test1[0].equals( commandMC(
+            'easy', 'test'
+        ) ) ).to.equal( true )
+        const test2 = MathConcept.fromSmackdown( `
+            \\any{command}{should work}{}{even empty}{args}
+        ` )
+        expect( test2 ).to.be.instanceOf( Array )
+        expect( test2.length ).to.equal( 1 )
+        expect( test2[0].equals( commandMC(
+            'any', 'command', 'should work', '', 'even empty', 'args'
+        ) ) ).to.equal( true )
+
+        // ---------- same as previous test, but admist other putdown content
+        const test3 = MathConcept.fromSmackdown( `
+            "still a fairly" \\easy{test} { (but there's other stuff too) }
+        ` )
+        expect( test3 ).to.be.instanceOf( Array )
+        expect( test3.length ).to.equal( 3 )
+        expect( test3[0].equals( symbolMC( 'still a fairly' ) ) )
+            .to.equal( true )
+        expect( test3[1].equals( commandMC(
+            'easy', 'test'
+        ) ) ).to.equal( true )
+        expect( test3[2].equals( environmentMC(
+            applicationMC(
+                symbolMC( 'but' ), symbolMC( 'there\'s' ),
+                symbolMC( 'other' ), symbolMC( 'stuff' ), symbolMC( 'too' )
+            )
+        ) ) ).to.equal( true )
+        const test4 = MathConcept.fromSmackdown( `
+            { \\begin{proof} {
+                (deeply nest it)
+                \\lets{try}{}{}{}{many empty args}{}{}{}
+            } \\end{proof} }
+        ` )
+        expect( test4 ).to.be.instanceOf( Array )
+        expect( test4.length ).to.equal( 1 )
+        expect( test4[0].equals( environmentMC( environmentMC( environmentMC(
+            applicationMC(
+                symbolMC( 'deeply' ), symbolMC( 'nest' ), symbolMC( 'it' )
+            ),
+            commandMC(
+                'lets', 'try', '', '', '', 'many empty args', '', '', ''
+            )
+        ) ) ) ) ).to.equal( true )
+
+        // ---------- several commands sprinkled throughout a larger doc
+        const test7 = MathConcept.fromSmackdown( `
+            :{
+                \\create{some}{thing}{here}
+                :A B :C D
+            }
+            \\insert{my}{favorite assumption}
+            \\begin{proof}
+                E F
+                \\embiggen{G}
+                \\embiggen{H}
+            \\end{proof}
+        ` )
+        expect( test7 ).to.be.instanceOf( Array )
+        expect( test7.length ).to.equal( 3 )
+        expect( test7[0].equals(
+            environmentMC(
+                commandMC( 'create', 'some', 'thing', 'here' ),
+                symbolMC( 'A' ).asA( 'given' ),
+                symbolMC( 'B' ),
+                symbolMC( 'C' ).asA( 'given' ),
+                symbolMC( 'D' )
+            ).asA( 'given' )
+        ) ).to.equal( true )
+        expect( test7[1].equals(
+            commandMC( 'insert', 'my', 'favorite assumption' )
+            ) ).to.equal( true )
+        expect( test7[2].equals(
+            environmentMC(
+                symbolMC( 'E' ),
+                symbolMC( 'F' ),
+                commandMC( 'embiggen', 'G' ),
+                commandMC( 'embiggen', 'H' )
+            )
+        ) ).to.equal( true )
+
+        // ---------- should handle escapes (\{, \\\}, \\, etc.) correctly
+        const test8 = MathConcept.fromSmackdown( `
+            :{
+                \\note{the}{escaped curlies: \\{\\}}
+                :A B :C D
+            }
+            \\insert{\\\\\\}}{<-- that's a lotta escaping!}
+            \\begin{proof}
+                E F
+                \\embiggen{\\\\G}
+                \\embiggen{\\\\H}
+            \\end{proof}
+        ` )
+        expect( test8 ).to.be.instanceOf( Array )
+        expect( test8.length ).to.equal( 3 )
+        expect( test8[0].equals(
+            environmentMC(
+                commandMC( 'note', 'the', 'escaped curlies: {}' ),
+                symbolMC( 'A' ).asA( 'given' ),
+                symbolMC( 'B' ),
+                symbolMC( 'C' ).asA( 'given' ),
+                symbolMC( 'D' )
+            ).asA( 'given' )
+        ) ).to.equal( true )
+        expect( test8[1].equals(
+            commandMC( 'insert', '\\}', '<-- that\'s a lotta escaping!' )
+            ) ).to.equal( true )
+        expect( test8[2].equals(
+            environmentMC(
+                symbolMC( 'E' ),
+                symbolMC( 'F' ),
+                commandMC( 'embiggen', '\\G' ),
+                commandMC( 'embiggen', '\\H' )
+            )
+        ) ).to.equal( true )
     } )
 
     xit( 'Should give errors when \\commands are wrongly used', () => {
