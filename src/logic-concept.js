@@ -216,6 +216,8 @@ export class LogicConcept extends MathConcept {
      *   more LogicConcepts
      * @returns {LogicConcept[]} an Array of the LogicConcepts described in
      *   putdown notation in the argument
+     * 
+     * @see {@link MathConcept.fromSmackdown fromSmackdown()}
      */
     static fromPutdown ( string ) {
         // linear string processing tools
