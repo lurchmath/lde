@@ -2243,8 +2243,8 @@ export class MathConcept extends EventTarget {
     static fromSmackdown ( string ) {
         const map = new SourceMap( string )
         // Regular expressions for key features of smackdown:
-        const notationRE = /\$([^$]*)\$/
-        const commandRE = /\\([a-z]+)\{((?:.|\}\{)*)\}/
+        const notationRE = /(?<!\\)(?:\\\\)*\$((?:[^$]|(?:\\\\)*\\\$)*)\$/
+        const commandRE = /\\([a-z]+)\{((?:.|(?:\\\\)*\}|(?:\\\\)*\{)*)\}/
         // Split the text by the above regular expressions, using source maps:
         while ( string.length > 0 ) {
             const notationPos = string.search( notationRE )
@@ -2278,8 +2278,7 @@ export class MathConcept extends EventTarget {
                 map.modify( map.nextModificationPosition() + notationPos,
                             match[0].length, map.nextMarker(), {
                                 type : 'notation',
-                                notation : match[0].substring( 1,
-                                    match[0].length - 1 )
+                                notation : match[1]
                             } )
             }
         }
@@ -2395,8 +2394,14 @@ export class MathConcept extends EventTarget {
             MathConcept.subclasses.get( 'LogicConcept' ).fromPutdown( text )
         if ( method[0] == 'class' ) {
             const classObject = MathConcept.subclasses.get( method[1] )
-            const result = new classObject(
-                ...this.children().map( x => x.interpret() ) )
+            let constructorArgs = this.children().map( x => x.interpret() )
+            if ( this._attributes.has( 'declaration type' ) )
+                constructorArgs = [
+                    Symbol.for( this._attributes.get( 'declaration type' ) ),
+                    constructorArgs.slice( 0, constructorArgs.length - 1 ),
+                    constructorArgs[constructorArgs.length - 1]
+                ]
+            const result = new classObject( ...constructorArgs )
             for ( let key of this.getAttributeKeys() )
                 if ( key != MathConcept.interpretationKey )
                     result.setAttribute( key,

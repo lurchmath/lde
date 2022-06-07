@@ -11,6 +11,9 @@ import { Expression } from '../src/expression.js'
 import { Symbol } from '../src/symbol.js'
 import { Binding } from '../src/binding.js'
 
+// And these are needed for other tests below, such as parsing
+import { Application } from '../src/application.js'
+
 // We need the makeSpy function for convenience testing of callbacks.
 import { makeSpy } from './test-utils.js'
 
@@ -2514,9 +2517,57 @@ describe( 'Sending feedback about MathConcepts', () => {
 
 describe( 'Smackdown notation and interpretation', () => {
 
-    xit( 'Should support all of putdown notation', () => {
-        // steal a few test cases from the putdown suite
-        // ensure they parse and that interpret() gives the same thing putdown would
+    it( 'Should support all of putdown notation', () => {
+        const test1 = MathConcept.fromSmackdown( '(- (^ b 2) (* (* 4 a) c))' )
+        const discriminant = new Application(
+            new Symbol( '-' ),
+            new Application(
+                new Symbol( '^' ), new Symbol( 'b' ), new Symbol( '2' )
+            ),
+            new Application(
+                new Symbol( '*' ),
+                new Application(
+                    new Symbol( '*' ), new Symbol( '4' ), new Symbol( 'a' )
+                ),
+                new Symbol( 'c' )
+            )
+        )
+        expect( test1 ).to.be.instanceof( Array )
+        expect( test1.length ).to.equal( 1 )
+        expect( test1[0].interpret().equals( discriminant ) ).to.equal( true )
+        // -------------
+        const test2 = MathConcept.fromSmackdown( `
+            [
+                x +{"special variable":false}
+                y
+                const
+                (
+                    P
+                    x
+                    y +{"special variable":true}
+                      +{"double special?":"you know it"}
+                )
+            ] +{"modifier at topmost level":"checking in"}
+        ` )
+        expect( test2 ).to.be.instanceof( Array )
+        expect( test2.length ).to.equal( 1 )
+        expect( test2[0].interpret().equals(
+            new Declaration(
+                Declaration.Constant,
+                [
+                    new Symbol( 'x' ).attr( { 'special variable' : false } ),
+                    new Symbol( 'y' )
+                ],
+                new Application(
+                    new Symbol( 'P' ),
+                    new Symbol( 'x' ),
+                    new Symbol( 'y' ).attr( {
+                        'special variable' : true,
+                        'double special?' : 'you know it'
+                    } )
+                )
+            ).attr( { 'modifier at topmost level' : 'checking in' } )
+        ) ).to.equal( true )
     } )
 
     xit( 'Should support $...$ notation blocks', () => {
