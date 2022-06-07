@@ -2247,7 +2247,7 @@ export class MathConcept extends EventTarget {
         const unterminatedNotationRE =
             /(?<!\\)(?:\\\\)*\$((?:[^\\$\n\r]|\\\$|\\\\)*)(?:\n|\/\/|$)/
         const commandRE =
-            /\\([a-z]+)\{((?:[^{}]|(?:\\\\)*\\\}|(?:\\\\)*\\\{)*)\}/
+            /\\([a-z]+)\{((?:[^{}\\\n\r]|\\\\|\\\}|\\\{|\}\{)*)\}/
         const unescape = ( text, escapables ) => {
             let result = ''
             escapables += '\\'
@@ -2365,7 +2365,7 @@ export class MathConcept extends EventTarget {
         // handle label/ref text replacements
         if ( operator == 'label' || operator == 'ref' ) {
             if ( operands.length != 1 ) err()
-            return ` +{"${operator}":${JSON.stringify(operands[0])}}`
+            return ` +{"${operator}":${JSON.stringify(operands[0])}}\n`
         }
         // handle \begin{proof}...\end{proof} text replacements
         if ( operator == 'begin' || operator == 'end' ) {

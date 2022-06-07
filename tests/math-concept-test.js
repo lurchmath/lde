@@ -2839,16 +2839,195 @@ describe( 'Smackdown notation and interpretation', () => {
         ).not.to.throw()
     } )
 
-    xit( 'Should support \\label/ref{...} commands', () => {
-        // test 1: one \label{...} applied to one expression
-        // test 2: one \label{...} applied to one environment
-        // test 3: several \label{...}s sprinkled through a larger putdown doc,
-        //         including some on the next line after the thing they modify
-        // test 4: same as first 3, but with \ref instead
-        // test 5: same as 3, but a combination of labels and refs, including
-        //         some places where \label{...}\ref{...} are applied to the
-        //         same thing, in either order, even with no space between
-        // test 6: should handle escapes (\{, \\\}, \\, etc.) correctly
+    it( 'Should support \\label/ref{...} commands', () => {
+        // ---------- one \label{...} applied to one expression
+        const test1 = MathConcept.fromSmackdown( `
+            one_expression \\label{that's an expression!}
+        ` )
+        expect( test1 ).to.be.instanceOf( Array )
+        expect( test1.length ).to.equal( 1 )
+        expect( test1[0].equals(
+            symbolMC( 'one_expression' ).attr(
+                [ [ 'label', 'that\'s an expression!' ] ] )
+        ) ).to.equal( true )
+
+        // ---------- one \label{...} applied to one environment
+        const test2 = MathConcept.fromSmackdown( `
+            { :one (environment of things) } \\label{that one is an env}
+        ` )
+        expect( test2 ).to.be.instanceOf( Array )
+        expect( test2.length ).to.equal( 1 )
+        expect( test2[0].equals(
+            environmentMC(
+                symbolMC( 'one' ).asA( 'given' ),
+                applicationMC(
+                    symbolMC( 'environment' ), symbolMC( 'of' ), symbolMC( 'things' )
+                )
+            ).attr( [ [ 'label', 'that one is an env' ] ] )
+        ) ).to.equal( true )
+
+        // ---------- several \label{...}s in a larger putdown text
+        const test3 = MathConcept.fromSmackdown( `
+            :{
+                :(> x y) \\label{premise-1}
+                :(> y z) \\label{premise-2}
+                (> x z)
+            } \\label{transitivity of >}
+            \\begin{proof}
+                maybe I would do some deduction here
+                \\label{this modifies "here"}
+            \\end{proof} \\label{my favorite proof}
+        ` )
+        expect( test3 ).to.be.instanceOf( Array )
+        expect( test3.length ).to.equal( 2 )
+        expect( test3[0].equals(
+            environmentMC(
+                applicationMC(
+                    symbolMC( '>' ), symbolMC( 'x' ), symbolMC( 'y' )
+                ).asA( 'given' ).attr( [ [ 'label', 'premise-1' ] ] ),
+                applicationMC(
+                    symbolMC( '>' ), symbolMC( 'y' ), symbolMC( 'z' )
+                ).asA( 'given' ).attr( [ [ 'label', 'premise-2' ] ] ),
+                applicationMC(
+                    symbolMC( '>' ), symbolMC( 'x' ), symbolMC( 'z' )
+                )
+            ).attr( [ [ 'label', 'transitivity of >' ] ] ).asA( 'given' )
+        ) ).to.equal( true )
+        expect( test3[1].equals(
+            environmentMC(
+                symbolMC( 'maybe' ), symbolMC( 'I' ), symbolMC( 'would' ),
+                symbolMC( 'do' ), symbolMC( 'some' ), symbolMC( 'deduction' ),
+                symbolMC( 'here' ).attr(
+                    [ [ 'label', 'this modifies "here"' ] ] ),
+            ).attr( [ [ 'label', 'my favorite proof' ] ] )
+        ) ).to.equal( true )
+        
+        // ---------- repeat test 1 using ref instead of label
+        const test4 = MathConcept.fromSmackdown( `
+            one_expression \\ref{that's an expression!}
+        ` )
+        expect( test4 ).to.be.instanceOf( Array )
+        expect( test4.length ).to.equal( 1 )
+        expect( test4[0].equals(
+            symbolMC( 'one_expression' ).attr(
+                [ [ 'ref', 'that\'s an expression!' ] ] )
+        ) ).to.equal( true )
+
+        // ---------- repeat test 2 using ref instead of label
+        const test5 = MathConcept.fromSmackdown( `
+            { :one (environment of things) } \\ref{that one is an env}
+        ` )
+        expect( test5 ).to.be.instanceOf( Array )
+        expect( test5.length ).to.equal( 1 )
+        expect( test5[0].equals(
+            environmentMC(
+                symbolMC( 'one' ).asA( 'given' ),
+                applicationMC(
+                    symbolMC( 'environment' ), symbolMC( 'of' ), symbolMC( 'things' )
+                )
+            ).attr( [ [ 'ref', 'that one is an env' ] ] )
+        ) ).to.equal( true )
+
+        // ---------- repeat test 3 using ref instead of label
+        const test6 = MathConcept.fromSmackdown( `
+            :{
+                :(> x y) \\ref{premise-1}
+                :(> y z) \\ref{premise-2}
+                (> x z)
+            } \\ref{transitivity of >}
+            \\begin{proof}
+                maybe I would do some deduction here
+                \\ref{this modifies "here"}
+            \\end{proof} \\ref{my favorite proof}
+        ` )
+        expect( test6 ).to.be.instanceOf( Array )
+        expect( test6.length ).to.equal( 2 )
+        expect( test6[0].equals(
+            environmentMC(
+                applicationMC(
+                    symbolMC( '>' ), symbolMC( 'x' ), symbolMC( 'y' )
+                ).asA( 'given' ).attr( [ [ 'ref', 'premise-1' ] ] ),
+                applicationMC(
+                    symbolMC( '>' ), symbolMC( 'y' ), symbolMC( 'z' )
+                ).asA( 'given' ).attr( [ [ 'ref', 'premise-2' ] ] ),
+                applicationMC(
+                    symbolMC( '>' ), symbolMC( 'x' ), symbolMC( 'z' )
+                )
+            ).attr( [ [ 'ref', 'transitivity of >' ] ] ).asA( 'given' )
+        ) ).to.equal( true )
+        expect( test6[1].equals(
+            environmentMC(
+                symbolMC( 'maybe' ), symbolMC( 'I' ), symbolMC( 'would' ),
+                symbolMC( 'do' ), symbolMC( 'some' ), symbolMC( 'deduction' ),
+                symbolMC( 'here' ).attr(
+                    [ [ 'ref', 'this modifies "here"' ] ] ),
+            ).attr( [ [ 'ref', 'my favorite proof' ] ] )
+        ) ).to.equal( true )
+        
+        // ---------- mix of \label/ref{...}s in a large putdown text
+        const test7 = MathConcept.fromSmackdown( `
+            :{
+                :(> x y) \\label{premise-1}
+                :(> y z) \\ref{premise-2}
+                (> x z)
+            } \\label{transitivity of >}
+            \\begin{proof}
+                maybe I would do some deduction here
+                \\label{label for "here"}
+                \\ref{ref for "here"}
+            \\end{proof} \\ref{try no space}\\label{between these}
+        ` )
+        expect( test7 ).to.be.instanceOf( Array )
+        expect( test7.length ).to.equal( 2 )
+        expect( test7[0].equals(
+            environmentMC(
+                applicationMC(
+                    symbolMC( '>' ), symbolMC( 'x' ), symbolMC( 'y' )
+                ).asA( 'given' ).attr( [ [ 'label', 'premise-1' ] ] ),
+                applicationMC(
+                    symbolMC( '>' ), symbolMC( 'y' ), symbolMC( 'z' )
+                ).asA( 'given' ).attr( [ [ 'ref', 'premise-2' ] ] ),
+                applicationMC(
+                    symbolMC( '>' ), symbolMC( 'x' ), symbolMC( 'z' )
+                )
+            ).attr( [ [ 'label', 'transitivity of >' ] ] ).asA( 'given' )
+        ) ).to.equal( true )
+        expect( test7[1].equals(
+            environmentMC(
+                symbolMC( 'maybe' ), symbolMC( 'I' ), symbolMC( 'would' ),
+                symbolMC( 'do' ), symbolMC( 'some' ), symbolMC( 'deduction' ),
+                symbolMC( 'here' ).attr( [
+                    [ 'ref', 'ref for "here"' ],
+                    [ 'label', 'label for "here"' ]
+                ] ),
+            ).attr( [
+                [ 'ref', 'try no space' ],
+                [ 'label', 'between these' ]
+            ] )
+        ) ).to.equal( true )
+
+        // ---------- should handle escapes (\{, \\\}, \\, etc.) correctly
+        const test8 = MathConcept.fromSmackdown( `
+            simple   \\label{plain}
+            things   \\label{open curly: \\{}
+            to       \\ref{close curly: \\}}
+            modify   \\ref{a \\{whole\\} mess of \\\\slashes\\\\ and \\{CURLIES\\}}
+        ` )
+        expect( test8 ).to.be.instanceOf( Array )
+        expect( test8.length ).to.equal( 4 )
+        expect( test8[0].equals(
+            symbolMC( 'simple' ).attr( [ [ 'label', 'plain' ] ] )
+        ) ).to.equal( true )
+        expect( test8[1].equals(
+            symbolMC( 'things' ).attr( [ [ 'label', 'open curly: {' ] ] )
+        ) ).to.equal( true )
+        expect( test8[2].equals(
+            symbolMC( 'to' ).attr( [ [ 'ref', 'close curly: }' ] ] )
+        ) ).to.equal( true )
+        expect( test8[3].equals(
+            symbolMC( 'modify' ).attr(
+                [ [ 'ref', 'a {whole} mess of \\slashes\\ and {CURLIES}' ] ] )
+        ) ).to.equal( true )
     } )
 
     xit( 'Should give errors when \\label/ref{...} is wrongly used', () => {
