@@ -2769,11 +2769,74 @@ describe( 'Smackdown notation and interpretation', () => {
         ) ) ).to.equal( true )
     } )
 
-    xit( 'Should give errors when \\begin/end{proof} is wrongly used', () => {
-        // test 1: misbalanced begin/end
-        // test 2: misspelled \begin{proof} or \end{proof}
-        // test 3: but it's actually okay to balance { with \end{proof}
-        //         or to balance \begin{proof} with }
+    it( 'Should give errors when \\begin/end{proof} is wrongly used', () => {
+        // ---------- misbalanced begin/end
+        expect(
+            () => MathConcept.fromSmackdown( `
+                \\begin{proof}
+                bunch_of_stuff
+                except...
+                no_end_proof--so_sad!
+            ` )
+        ).to.throw( /end of input while still inside/ )
+        expect(
+            () => MathConcept.fromSmackdown( `
+                \\begin{proof} // this one has no match
+                    \\begin{proof} // this one is okay
+                        \\begin{proof} // this one is okay
+                        imagine a proof here
+                        \\end{proof} // closes last begin
+                    } // closes second begin
+                missing close curly here
+            ` )
+        ).to.throw( /end of input while still inside/ )
+        expect(
+            () => MathConcept.fromSmackdown( `
+                \\end{proof}
+                wait...that's not right!
+            ` )
+        ).to.throw( /Mismatched groupers/ )
+        expect(
+            () => MathConcept.fromSmackdown( `
+                \\begin{proof} // this one has no match
+                    \\begin{proof} // this one is okay
+                        we should have another open proof here
+                        imagine a proof here
+                        \\end{proof} // one...
+                    \\end{proof} // two...
+                \\end{proof} // three is too many!
+            ` )
+        ).to.throw( /Mismatched groupers/ )
+        
+        // ---------- misspelled \begin{proof} or \end{proof}
+        expect(
+            () => MathConcept.fromSmackdown( `
+                \\begn{proof}
+                bunch_of_stuff
+                \\end{proof}
+            ` )
+        ).to.throw( /Mismatched groupers/ )
+        expect(
+            () => MathConcept.fromSmackdown( `
+                \\begin{proof}
+                bunch_of_stuff
+                \\ennd{proof}
+            ` )
+        ).to.throw( /end of input while still inside/ )
+
+        // ---------- but it's okay to mix \begin/end{proof}s with curlies
+        expect(
+            () => MathConcept.fromSmackdown( `
+                \\begin{proof} {
+                note that this is two layers deep
+                \\end{proof} }
+            ` )
+        ).not.to.throw()
+        expect(
+            () => MathConcept.fromSmackdown( `
+                { { } \\begin{proof} { } { \\end{proof} \\end{proof} }
+            ` )
+        ).not.to.throw()
     } )
 
     xit( 'Should support \\label/ref{...} commands', () => {
