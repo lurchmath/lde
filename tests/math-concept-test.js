@@ -2512,20 +2512,82 @@ describe( 'Sending feedback about MathConcepts', () => {
 
 } )
 
-describe( 'Smackdown notation', () => {
+describe( 'Smackdown notation and interpretation', () => {
 
-    it( 'Dummy test to be changed later', () => {
-        console.log( JSON.stringify( MathConcept.fromSmackdown( `
-            // a comment
-            (one expression by itself) \\label{first expr}
-            \\somecommand{foo}{bar}{}{baz} "another expression" $now notation x^2-5$
-            \\begin{proof}
-            { :an :environment (with three children) }
-            // another comment
-            $\\sum_{i=1}^{10}\\frac{i}{5}$ \\ref{1}
-                // that last line contains even more notation
-            \\end{proof}
-        ` ), null, 4 ) )
+    xit( 'Should support all of putdown notation', () => {
+        // steal a few test cases from the putdown suite
+        // ensure they parse and that interpret() gives the same thing putdown would
+    } )
+
+    xit( 'Should support $...$ notation blocks', () => {
+        // test 1: some $...$ all alone
+        // test 2: some $...$ inside a small bunch of putdown
+        // test 3: several $...$ inside a larger bunch of putdown
+        // test 4: if we have $...$ inside a //-comment, it's ignored
+        // test 5: should handle escapes (\$, \\\$, \\, etc.) correctly
+    } )
+
+    xit( 'Should give errors when $...$ notation is wrongly formed', () => {
+        // test 1: odd number of $'s
+        // test 2: cannot split $...$ over multiple lines
+        // test 3: incorrect number of escape slashes before a dollar sign,
+        //         or other invalid escaping, like \a
+    } )
+
+    xit( 'Should support \\begin/end{proof} commands', () => {
+        // test 1: some $...$ all alone
+        // test 2: some $...$ inside a small bunch of putdown
+        // test 3: several $...$ inside a larger bunch of putdown
+    } )
+
+    xit( 'Should give errors when \\begin/end{proof} is wrongly used', () => {
+        // test 1: misbalanced begin/end
+        // test 2: misspelled \begin{proof} or \end{proof}
+        // test 3: but it's actually okay to balance { with \end{proof}
+        //         or to balance \begin{proof} with }
+    } )
+
+    xit( 'Should support \\label/ref{...} commands', () => {
+        // test 1: one \label{...} applied to one expression
+        // test 2: one \label{...} applied to one environment
+        // test 3: several \label{...}s sprinkled through a larger putdown doc,
+        //         including some on the next line after the thing they modify
+        // test 4: same as first 3, but with \ref instead
+        // test 5: same as 3, but a combination of labels and refs, including
+        //         some places where \label{...}\ref{...} are applied to the
+        //         same thing, in either order, even with no space between
+        // test 6: should handle escapes (\{, \\\}, \\, etc.) correctly
+    } )
+
+    xit( 'Should give errors when \\label/ref{...} is wrongly used', () => {
+        // test 1: starting a doc with one
+        // test 2: starting an environment with one
+        // test 3: misspelled \label{...} or \ref{...}
+        // test 4: although it's okay to do \label{x} \label{y}, only the y
+        //         will take effect, because it will overwrite the x
+        // test 5: incorrect number of escape slashes before a bracket,
+        //         or other invalid escaping, like \a
+    } )
+
+    xit( 'Should support arbitrary \\command{arg1}...{argN}', () => {
+        // test 1: one in a string all alone, with varying numbers of arguments
+        // test 2: one in a string amidst a few other things
+        // test 3: several commands sprinkled throughout a larger doc
+        // test 4: should handle escapes (\{, \\\}, \\, etc.) correctly
+    } )
+
+    xit( 'Should give errors when \\commands are wrongly used', () => {
+        // test 1: cannot split an argument over multiple lines
+        // test 2: there cannot be any whitespace between \command and {arg1}
+        // test 3: there cannot be any whitespace between arguments
+        // test 4: but you can actually include \{ and \} inside args
+        // test 5: incorrect number of escape slashes before a bracket,
+        //         or other invalid escaping, like \a
+    } )
+
+    xit( 'Should let us combine multiple smackdown features', () => {
+        // one large-ish input doc with \label{...}, \ref{...}, \begin{proof},
+        // \end{proof}, some other \command, and more than one $...$
     } )
 
 } )
