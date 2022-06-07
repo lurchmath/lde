@@ -2651,7 +2651,7 @@ describe( 'Smackdown notation and interpretation', () => {
         // ---------- odd number of $'s
         expect( () => MathConcept.fromSmackdown(
             '$notation$ uh-oh problem next-> $just one dollar!' )
-        ).to.throw( /Unterminated notation/ )
+        ).to.throw( /Invalid notation/ )
 
         // ---------- cannot split $...$ over multiple lines
         expect(
@@ -2659,13 +2659,13 @@ describe( 'Smackdown notation and interpretation', () => {
         ).not.to.throw()
         expect(
             () => MathConcept.fromSmackdown( '$this is \n not okay$' )
-        ).to.throw( /Unterminated notation/ )
+        ).to.throw( /Invalid notation/ )
         expect(
             () => MathConcept.fromSmackdown( `
                 $this is // also
                 not okay$
             ` )
-        ).to.throw( /Unterminated notation/ )
+        ).to.throw( /Invalid notation/ )
 
         // ---------- incorrect number of escape slashes before a dollar sign
         expect(
@@ -2673,13 +2673,13 @@ describe( 'Smackdown notation and interpretation', () => {
         ).not.to.throw()
         expect(
             () => MathConcept.fromSmackdown( '$this is \\\\$ not okay$' )
-        ).to.throw( /Unterminated notation/ )
+        ).to.throw( /Invalid notation/ )
         expect(
             () => MathConcept.fromSmackdown( '$this is \\\\\\$ okay$' )
         ).not.to.throw()
         expect(
             () => MathConcept.fromSmackdown( '$this is \\\\\\\\$ not okay$' )
-        ).to.throw( /Unterminated notation/ )
+        ).to.throw( /Invalid notation/ )
 
         // ---------- other invalid escaping, like \a
         expect(
@@ -2690,10 +2690,10 @@ describe( 'Smackdown notation and interpretation', () => {
         ).not.to.throw()
         expect(
             () => MathConcept.fromSmackdown( '$this is \\x not okay$' )
-        ).to.throw( /Unterminated notation/ )
+        ).to.throw( /Invalid notation/ )
         expect(
             () => MathConcept.fromSmackdown( '$this is \\" not okay$' )
-        ).to.throw( /Unterminated notation/ )
+        ).to.throw( /Invalid notation/ )
     } )
 
     it( 'Should support \\begin/end{proof} commands', () => {
@@ -3106,11 +3106,11 @@ describe( 'Smackdown notation and interpretation', () => {
         expect(
             () => MathConcept.fromSmackdown(
                 'target \\label{this \\x is not okay}' )
-        ).to.throw( /Invalid command notation/ )
+        ).to.throw( /Cannot escape/ )
         expect(
             () => MathConcept.fromSmackdown(
                 'target \\ref{this \\" is not okay}' )
-        ).to.throw( /Invalid command notation/ )
+        ).to.throw( /Cannot escape/ )
     } )
 
     it( 'Should support arbitrary \\command{arg1}...{argN}', () => {
@@ -3239,13 +3239,35 @@ describe( 'Smackdown notation and interpretation', () => {
         ) ).to.equal( true )
     } )
 
-    xit( 'Should give errors when \\commands are wrongly used', () => {
-        // test 1: cannot split an argument over multiple lines
-        // test 2: there cannot be any whitespace between \command and {arg1}
-        // test 3: there cannot be any whitespace between arguments
-        // test 4: but you can actually include \{ and \} inside args
-        // test 5: incorrect number of escape slashes before a bracket,
-        //         or other invalid escaping, like \a
+    it( 'Should give errors when \\commands are wrongly used', () => {
+        // ---------- cannot split an argument over multiple lines
+        expect( () => MathConcept.fromSmackdown( `
+            \\this{will
+            fail}
+        ` ) ).to.throw( /Invalid command/ )
+
+        // ---------- no whitespace allowed between \command and {arg1}
+        expect( () => MathConcept.fromSmackdown( `
+            \\this {will also fail}
+        ` ) ).to.throw( /Invalid command/ )
+
+        // ---------- any invalid escaping, like \a
+        expect(
+            () => MathConcept.fromSmackdown(
+                'foo \\this{will be \\{ okay}' )
+        ).not.to.throw()
+        expect(
+            () => MathConcept.fromSmackdown(
+                'foo \\and{this}{  will  }{also}{be}{\\\\}{okay}' )
+        ).not.to.throw()
+        expect(
+            () => MathConcept.fromSmackdown(
+                'foo \\oh{but}{not}{\\this}' )
+        ).to.throw( /Cannot escape/ )
+        expect(
+            () => MathConcept.fromSmackdown(
+                'foo \\nor{this}{ \\"bad boy\\" }' )
+        ).to.throw( /Cannot escape/ )
     } )
 
     xit( 'Should let us combine multiple smackdown features', () => {

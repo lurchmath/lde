@@ -2244,12 +2244,20 @@ export class MathConcept extends EventTarget {
         const map = new SourceMap( string )
         // Regular expressions for key features of smackdown:
         const notationRE = /(?<!\\)(?:\\\\)*\$((?:[^\\$\n\r]|\\\$|\\\\)*)\$/
-        const unterminatedNotationRE =
-            /(?<!\\)(?:\\\\)*\$((?:[^\\$\n\r]|\\\$|\\\\)*)(?:\n|\/\/|$)/
+        const notationErrors = [
+            // open dollar with no close dollar on the same line:
+            /(?<!\\)(?:\\\\)*\$((?:[^\\$\n\r]|\\\$|\\\\)*)(?:\n|\r|\/\/|$)/
+        ]
         const commandRE =
-            /\\([a-z]+)\{((?:[^{}\\\n\r]|\\\\|\\\}|\\\{|\}\{)*)\}/
-        const badlyEscapedCommandRE =
-            /\\([a-z]+)\{((?:[^{}\\\n\r]|\\.|\}\{)*)\}/
+            /\\([a-z]+)\{((?:[^{}\\\n\r]|\\\\|\\.|\}\{)*)\}/
+        const commandErrors = [
+            // start of command with no ending on the same line:
+            /\\([a-z]+)\{((?:[^{}\\\n\r]|\\.|\}\{)*)(?:\n|\r|\/\/|$)/,
+            // escaping errors:
+            /\\([a-z]+)\{((?:[^{}\\\n\r]|\\.|\}\{)*)\}/,
+            // whitespace after command:
+            /\\([a-z]+)\s/
+        ]
         const unescape = ( text, escapables ) => {
             let result = ''
             escapables += '\\'
@@ -2273,18 +2281,24 @@ export class MathConcept extends EventTarget {
         while ( string.length > 0 ) {
             const notationPos = string.search( notationRE )
             const commandPos = string.search( commandRE )
-            const badNPos = string.search( unterminatedNotationRE )
-            const badCPos = string.search( badlyEscapedCommandRE )
-            // If there's an unterminated $... then throw an error:
-            if ( badNPos > -1
-              && ( notationPos == -1 || notationPos > badNPos ) )
-                throw new Error( 'Unterminated notation: '
-                               + string.substring( badNPos, badNPos + 10 ) )
-            // If there's an incorrectly formatted \cmd then throw an error:
-            if ( badCPos > -1
-              && ( commandPos == -1 || commandPos > badCPos ) )
-                throw new Error( 'Invalid command notation: '
-                               + string.substring( badCPos, badCPos + 10 ) )
+            // If there's a notation error before anything else, quit now:
+            notationErrors.forEach( badRE => {
+                const badPos = string.search( badRE )
+                if ( badPos > -1
+                  && ( notationPos == -1 || notationPos > badPos )
+                  && ( commandPos == -1 || commandPos > badPos ) )
+                    throw new Error( 'Invalid notation: '
+                                   + string.substring( badPos, badPos + 10 ) )
+            } )
+            // If there's a command error before anything else, quit now:
+            commandErrors.forEach( badRE => {
+                const badPos = string.search( badRE )
+                if ( badPos > -1
+                  && ( notationPos == -1 || notationPos > badPos )
+                  && ( commandPos == -1 || commandPos > badPos ) )
+                    throw new Error( 'Invalid command: '
+                                   + string.substring( badPos, badPos + 10 ) )
+            } )
             // If there are no special smackdown features, the putdown is fine:
             if ( notationPos == -1 && commandPos == -1 )
                 break
