@@ -2243,7 +2243,9 @@ export class MathConcept extends EventTarget {
     static fromSmackdown ( string ) {
         const map = new SourceMap( string )
         // Regular expressions for key features of smackdown:
-        const notationRE = /(?<!\\)(?:\\\\)*\$((?:[^\\$]|\\\$|\\\\)*)\$/
+        const notationRE = /(?<!\\)(?:\\\\)*\$((?:[^\\$\n\r]|\\\$|\\\\)*)\$/
+        const unterminatedNotationRE =
+            /(?<!\\)(?:\\\\)*\$((?:[^\\$\n\r]|\\\$|\\\\)*)(?:\n|\/\/|$)/
         const commandRE = /\\([a-z]+)\{((?:.|(?:\\\\)*\}|(?:\\\\)*\{)*)\}/
         const unescape = ( text, escapables ) => {
             let result = ''
@@ -2264,16 +2266,22 @@ export class MathConcept extends EventTarget {
             }
             return result
         }
-        // Split the text by the above regular expressions, using source maps:
+        // Walk through the text using the above regular expressions:
         while ( string.length > 0 ) {
             const notationPos = string.search( notationRE )
             const commandPos = string.search( commandRE )
+            const badPos = string.search( unterminatedNotationRE )
+            // If there's an unterminated $... then throw an error:
+            if ( badPos > -1 && ( notationPos == -1 || notationPos > badPos ) )
+                throw new Error( 'Unterminated notation: '
+                               + string.substring( badPos, badPos + 10 ) )
+            // If there are no special smackdown features, the putdown is fine:
             if ( notationPos == -1 && commandPos == -1 )
-                // remainder of string is all putdown content, so we are done
                 break
+            // If the next thing is (some putdown and then) a command, then
+            // process (the putdown and then) that command next:
             if ( notationPos == -1 ||
                  ( commandPos > -1 && commandPos < notationPos ) ) {
-                // some putdown content followed by a \command{...}...{...}
                 string = string.substring( commandPos )
                 const match = commandRE.exec( string )
                 string = string.substring( match[0].length )
@@ -2290,17 +2298,18 @@ export class MathConcept extends EventTarget {
                                 operator : command,
                                 operands : args
                             } )
-            } else {
-                // some putdown content followed by some $...notation...$
-                string = string.substring( notationPos )
-                const match = notationRE.exec( string )
-                string = string.substring( match[0].length )
-                map.modify( map.nextModificationPosition() + notationPos,
-                            match[0].length, map.nextMarker(), {
-                                type : 'notation',
-                                notation : unescape( match[1], '$' )
-                            } )
+                continue
             }
+            // So the next thing is (some putdown and then) $...$ notation,
+            // so we will process (the putdown and then) that notation:
+            string = string.substring( notationPos )
+            const match = notationRE.exec( string )
+            string = string.substring( match[0].length )
+            map.modify( map.nextModificationPosition() + notationPos,
+                        match[0].length, map.nextMarker(), {
+                            type : 'notation',
+                            notation : unescape( match[1], '$' )
+                        } )
         }
         // How to reverse interpret that LC tree back into a MathConcept tree:
         const reverseInterpret = LC => {

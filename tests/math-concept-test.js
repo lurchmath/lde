@@ -2646,11 +2646,53 @@ describe( 'Smackdown notation and interpretation', () => {
             .to.equal( true )
     } )
 
-    xit( 'Should give errors when $...$ notation is wrongly formed', () => {
-        // test 1: odd number of $'s
-        // test 2: cannot split $...$ over multiple lines
-        // test 3: incorrect number of escape slashes before a dollar sign,
-        //         or other invalid escaping, like \a
+    it( 'Should give errors when $...$ notation is wrongly formed', () => {
+        // ---------- odd number of $'s
+        expect( () => MathConcept.fromSmackdown(
+            '$notation$ uh-oh problem next-> $just one dollar!' )
+        ).to.throw( /Unterminated notation/ )
+
+        // ---------- cannot split $...$ over multiple lines
+        expect(
+            () => MathConcept.fromSmackdown( '$this is okay$' )
+        ).not.to.throw()
+        expect(
+            () => MathConcept.fromSmackdown( '$this is \n not okay$' )
+        ).to.throw( /Unterminated notation/ )
+        expect(
+            () => MathConcept.fromSmackdown( `
+                $this is // also
+                not okay$
+            ` )
+        ).to.throw( /Unterminated notation/ )
+
+        // ---------- incorrect number of escape slashes before a dollar sign
+        expect(
+            () => MathConcept.fromSmackdown( '$this is \\$ okay$' )
+        ).not.to.throw()
+        expect(
+            () => MathConcept.fromSmackdown( '$this is \\\\$ not okay$' )
+        ).to.throw( /Unterminated notation/ )
+        expect(
+            () => MathConcept.fromSmackdown( '$this is \\\\\\$ okay$' )
+        ).not.to.throw()
+        expect(
+            () => MathConcept.fromSmackdown( '$this is \\\\\\\\$ not okay$' )
+        ).to.throw( /Unterminated notation/ )
+
+        // ---------- other invalid escaping, like \a
+        expect(
+            () => MathConcept.fromSmackdown( '$this is \\$ okay$' )
+        ).not.to.throw()
+        expect(
+            () => MathConcept.fromSmackdown( '$this is \\\\ okay$' )
+        ).not.to.throw()
+        expect(
+            () => MathConcept.fromSmackdown( '$this is \\x not okay$' )
+        ).to.throw( /Unterminated notation/ )
+        expect(
+            () => MathConcept.fromSmackdown( '$this is \\" not okay$' )
+        ).to.throw( /Unterminated notation/ )
     } )
 
     xit( 'Should support \\begin/end{proof} commands', () => {
