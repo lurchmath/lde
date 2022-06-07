@@ -2246,7 +2246,8 @@ export class MathConcept extends EventTarget {
         const notationRE = /(?<!\\)(?:\\\\)*\$((?:[^\\$\n\r]|\\\$|\\\\)*)\$/
         const unterminatedNotationRE =
             /(?<!\\)(?:\\\\)*\$((?:[^\\$\n\r]|\\\$|\\\\)*)(?:\n|\/\/|$)/
-        const commandRE = /\\([a-z]+)\{((?:.|(?:\\\\)*\}|(?:\\\\)*\{)*)\}/
+        const commandRE =
+            /\\([a-z]+)\{((?:[^{}]|(?:\\\\)*\\\}|(?:\\\\)*\\\{)*)\}/
         const unescape = ( text, escapables ) => {
             let result = ''
             escapables += '\\'

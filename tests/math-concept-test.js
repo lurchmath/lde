@@ -2572,12 +2572,18 @@ describe( 'Smackdown notation and interpretation', () => {
 
     const symbolMC = text => new MathConcept().attr( [
         [ 'symbol text', `${text}` ],
-        [ 'Interpret as', [ 'class', 'Symbol' ] ]
+        [ MathConcept.interpretationKey, [ 'class', 'Symbol' ] ]
     ] )
     const notationMC = notation => new MathConcept().attr( [
         [ MathConcept.interpretationKey, [ 'notation', notation ] ]
     ] )
-
+    const environmentMC = ( ...children ) =>
+        new MathConcept( ...children ).attr( [
+            [ MathConcept.interpretationKey, [ 'class', 'Environment' ] ] ] )
+    const applicationMC = ( ...children ) =>
+        new MathConcept( ...children ).attr( [
+            [ MathConcept.interpretationKey, [ 'class', 'Application' ] ] ] )
+    
     it( 'Should support $...$ notation blocks', () => {
         // ---------- one $...$ block all alone
         const test1 = MathConcept.fromSmackdown( '$notation here$' )
@@ -2592,32 +2598,25 @@ describe( 'Smackdown notation and interpretation', () => {
             '(- x 5) { $notation here$ 2 }' )
         expect( test2 ).to.be.instanceOf( Array )
         expect( test2.length ).to.equal( 2 )
-        expect( test2[0].equals( new MathConcept(
+        expect( test2[0].equals( applicationMC(
             symbolMC( '-' ), symbolMC( 'x' ), symbolMC( 5 )
-        ).attr( [
-            [ 'Interpret as', [ 'class', 'Application' ] ]
-        ] ) ) ).to.equal( true )
-        expect( test2[1].equals( new MathConcept(
+        ) ) ).to.equal( true )
+        expect( test2[1].equals( environmentMC(
             notationMC( 'notation here' ), symbolMC( 2 )
-        ).attr( [
-            [ 'Interpret as', [ 'class', 'Environment' ] ]
-        ] ) ) ).to.equal( true )
+        ) ) ).to.equal( true )
         
         // ---------- several $...$s inside some putdown
         const test3 = MathConcept.fromSmackdown(
             '{ $x^2-1$ :(f x $y-2$) zee } :$z+e+e$' )
         expect( test3 ).to.be.instanceOf( Array )
         expect( test3.length ).to.equal( 2 )
-        expect( test3[0].equals( new MathConcept(
+        expect( test3[0].equals( environmentMC(
             notationMC( 'x^2-1' ),
-            new MathConcept(
+            applicationMC(
                 symbolMC( 'f' ), symbolMC( 'x' ), notationMC( 'y-2' )
-            ).attr( [ [ 'Interpret as', [ 'class', 'Application' ] ] ] )
-             .asA( 'given' ),
+            ).asA( 'given' ),
             symbolMC( 'zee' )
-        ).attr( [
-            [ 'Interpret as', [ 'class', 'Environment' ] ]
-        ] ) ) ).to.equal( true )
+        ) ) ).to.equal( true )
         expect( test3[1].equals( notationMC( 'z+e+e' ).asA( 'given' ) ) )
             .to.equal( true )
 
@@ -2628,11 +2627,11 @@ describe( 'Smackdown notation and interpretation', () => {
         expect( test4 ).to.be.instanceOf( Array )
         expect( test4.length ).to.equal( 1 )
         expect( test4[0].equals(
-            new MathConcept(
+            applicationMC(
                 symbolMC( 'the' ), symbolMC( 'dollars' ), symbolMC( 'to' ),
                 symbolMC( 'the' ), symbolMC( 'right' ), symbolMC( 'should' ),
                 symbolMC( 'be' ), symbolMC( 'ignored' ),
-            ).attr( [ [ 'Interpret as', [ 'class', 'Application' ] ] ] )
+            )
         ) ).to.equal( true )
 
         // ---------- respect escaping of slashes and $s inside $...$
@@ -2695,10 +2694,79 @@ describe( 'Smackdown notation and interpretation', () => {
         ).to.throw( /Unterminated notation/ )
     } )
 
-    xit( 'Should support \\begin/end{proof} commands', () => {
-        // test 1: some $...$ all alone
-        // test 2: some $...$ inside a small bunch of putdown
-        // test 3: several $...$ inside a larger bunch of putdown
+    it( 'Should support \\begin/end{proof} commands', () => {
+        // ---------- one \begin/end{proof} pair with one LC inside
+        const test1 = MathConcept.fromSmackdown( `
+            \\begin{proof} contents \\end{proof}
+        ` )
+        expect( test1 ).to.be.instanceOf( Array )
+        expect( test1.length ).to.equal( 1 )
+        expect( test1[0].equals( environmentMC(
+            symbolMC( 'contents' )
+        ) ) ).to.equal( true )
+
+        // ---------- one \begin/end{proof} pair inside another environment
+        const test2 = MathConcept.fromSmackdown( `
+            {
+                :{ :A :B (and A B) }
+                \\begin{proof}
+                    :C
+                    :D
+                    (and C D)
+                \\end{proof}
+            }
+        ` )
+        expect( test2 ).to.be.instanceOf( Array )
+        expect( test2.length ).to.equal( 1 )
+        expect( test2[0].equals( environmentMC(
+            environmentMC(
+                symbolMC( 'A' ).asA( 'given' ),
+                symbolMC( 'B' ).asA( 'given' ),
+                applicationMC(
+                    symbolMC( 'and' ), symbolMC( 'A' ), symbolMC( 'B' )
+                )
+            ).asA( 'given' ),
+            environmentMC(
+                symbolMC( 'C' ).asA( 'given' ),
+                symbolMC( 'D' ).asA( 'given' ),
+                applicationMC(
+                    symbolMC( 'and' ), symbolMC( 'C' ), symbolMC( 'D' )
+                )
+            )
+        ) ) ).to.equal( true )
+
+        // ---------- several proofs inside a larger putdown document
+        const test3 = MathConcept.fromSmackdown( `
+            {
+                :\\begin{proof}
+                    :A :B (and A B)
+                \\end{proof}
+                \\begin{proof}
+                    :C
+                    :\\begin{proof} not_the_right_thing \\end{proof}
+                    (and C D)
+                \\end{proof}
+            }
+        ` )
+        expect( test3 ).to.be.instanceOf( Array )
+        expect( test3.length ).to.equal( 1 )
+        expect( test3[0].equals( environmentMC(
+            environmentMC(
+                symbolMC( 'A' ).asA( 'given' ),
+                symbolMC( 'B' ).asA( 'given' ),
+                applicationMC(
+                    symbolMC( 'and' ), symbolMC( 'A' ), symbolMC( 'B' )
+                )
+            ).asA( 'given' ),
+            environmentMC(
+                symbolMC( 'C' ).asA( 'given' ),
+                environmentMC( symbolMC( 'not_the_right_thing' ) )
+                    .asA( 'given' ),
+                applicationMC(
+                    symbolMC( 'and' ), symbolMC( 'C' ), symbolMC( 'D' )
+                )
+            )
+        ) ) ).to.equal( true )
     } )
 
     xit( 'Should give errors when \\begin/end{proof} is wrongly used', () => {
