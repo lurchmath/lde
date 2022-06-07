@@ -2178,8 +2178,68 @@ export class MathConcept extends EventTarget {
     //
     //////
 
+    // for internal use by fromSmackdown(), interpret(), and
+    // attemptReverseInterpret()
     static interpretationKey = 'Interpret as'
 
+    /**
+     * MathConcept trees can be represented using a notation called
+     * "smackdown," which is a superset of the "putdown" notation used to
+     * represent LogicConcepts, {@link LogicConcept.fromPutdown as documented
+     * here}.  (Both of these are, of course, plays on the name of the famous
+     * format "markdown" by John Gruber.)
+     * 
+     * Smackdown supports all notation used in putdown (so readers may wish to
+     * begin learning about smackdown by following the link above to first
+     * learn about putdown) plus the following additional features:
+     * 
+     *  * The notation `$...$` can be used to represent a {@link LogicConcept
+     *    LogicConcept}, for example, `$x^2-1$`.  The use of dollar signs is
+     *    intentionally reminiscent of $\LaTeX$ notation for in-line math.
+     *     * Note!  `$x^2-1$` is merely an example stating that mathematics
+     *       *of some sort* can be placed between the dollar signs; it is
+     *       *not* an indication that the specific notation `x^2-1` is
+     *       supported.
+     *     * At present, *no* notation is supported, and any text between
+     *       dollar signs is simply stored as a {@link MathConcept
+     *       MathConcept} instance with attribute "Interpret as" set to
+     *       `["notation","X"]`, where X is the contents of the `$...$`
+     *       (without the dollar signs)---e.g., `["notation","x^2-1"]`.
+     *     * We will later add support for defining custom mathematical
+     *       notation for use in `$...$` expressions, and then create a more
+     *       robust way to {@link MathConcept#interpret interpret()}
+     *       MathConcept trees into {@link LogicConcept LogicConcepts}, which
+     *       will parse such notation to create real expressions.
+     *     * To include a literal `$` inside a `$...$` section, escape it as
+     *       `\$`.
+     *  * The notation `\command{argument1}...{argumentN}` is also
+     *    intentionally reminiscent of $\LaTeX$ notation, and has an analogous
+     *    meaning: some command applied to a sequence of $N$ arguments.  For
+     *    now, only the following commands are supported.
+     *     * `\begin{proof}` and `\end{proof}` are replaced with ` { ` and
+     *       ` } `, respectively, so that they can be used to construct {@link
+     *       Environment Environments}, which is the meaning one would expect.
+     *     * `\label{X}` is interpreted as if it were putdown notation for
+     *       adding a JSON attribute to the preceding {@link LogicConcept
+     *       LogicConcept}, associating the key "label" with the value X.
+     *     * `\ref{X}` is exactly like the previous, but using attribute key
+     *       "ref" instead of "label."
+     *     * Any other command is stored as a {@link MathConcept MathConcept}
+     *       instance with attribute "Interpret as" having the form
+     *       `["command",...]`, for example, `\foo{bar}{baz}` would become
+     *       `["command","foo","bar","baz"]`.
+     * 
+     * The two notations given above will work hand-in-hand more over time.
+     * Specifically, we will create types of `\command`s that can define new
+     * notation to appear inside `$...$` blocks.
+     * 
+     * For now, this routine fully supports parsing smackdown notation, but
+     * does not yet obey a robust set of commands, only those shown above.
+     * 
+     * @param {string} string the smackdown code to be interpreted
+     * @returns {MathConcept[]} an array of MathConcept instances, the meaning
+     *   of the smackdown code provided as input
+     */
     static fromSmackdown ( string ) {
         const map = new SourceMap( string )
         // Regular expressions for key features of smackdown:
@@ -2256,6 +2316,12 @@ export class MathConcept extends EventTarget {
         }
     }
 
+    // For internal use by fromSmackdown().
+    // Briefly, its purpose:  Take the operator and operands from some
+    // smackdown command of the form \operator{operand1}...{operandN} and
+    // return either a text replacement that obeys the command, or undefined
+    // to indicate that the command in question is not a simple
+    // text-replacement command.
     static attemptTextCommand ( operator, ...operands ) {
         const err = () => {
             throw new Error(
@@ -2274,6 +2340,11 @@ export class MathConcept extends EventTarget {
         // no other text replacements defined at this time
     }
 
+    // For internal use by fromSmackdown().
+    // Briefly, its purpose:  Take a data object associated with some section
+    // of the smackdown source and build a corresponding MathConcept instance
+    // X such that X.interpret() yields the meaning of the given data, as a
+    // LogicConcept instance.
     static attemptReverseInterpret ( data ) {
         // notation type not yet implemented; this is a placeholder
         if ( data.type == 'notation' ) return new MathConcept().attr( [
@@ -2288,6 +2359,36 @@ export class MathConcept extends EventTarget {
         throw new Error( `Unknown MathConcept type: ${data.type}` )
     }
 
+    /**
+     * This function is a temporary placeholder.  Later, a sophisticated
+     * interpretation mechanism will be developed to convert a user's
+     * representation of their document into a hierarchy of
+     * {@link LogicConcept LogicConcept} instances.  For now, we have this
+     * simple version in which many features are not yet implemented.  Its
+     * behavior is as follows.
+     * 
+     *  1. The method of interpretation that should be followed is extracted
+     *     from the "Interpret as" attribute of this object.  If there is no
+     *     such attribute, an error is thrown.  The attribute value should be
+     *     an array, call it $[a_1,\ldots,a_n]$, where $a_1$ is the method of
+     *     interpretation and each other $a_i$ is some parameter to it.
+     *  2. If $a_1$ is "class" then $a_2$ must be the name of some subclass of
+     *     {@link LogicConcept LogicConcept}, and this routine will contruct a
+     *     new instance of that class, copy all this object's attributes to
+     *     it, and give it a children list built by recursively interpreting
+     *     this MathConcept's children.
+     *  3. If $a_1$ is "notation" or "command" then a single {@link Symbol
+     *     Symbol} will be created whose text content states that support for
+     *     interpreting the notation or command in question has not yet been
+     *     implemented.
+     *  4. If $a_1$ is anything else, an error is thrown.
+     * 
+     * @returns {LogicConcept} the meaning of this MathConcept, subject to the
+     *   limitations documented above
+     * 
+     * @see {@link MathConcept.fromSmackdown fromSmackdown()} (which creates
+     *   MathConcept hierarchies intended for interpretation)
+     */
     interpret () {
         const method = this.getAttribute( MathConcept.interpretationKey )
         const fromPutdown = text =>
