@@ -1,0 +1,35 @@
+---
+testing:
+  type: multi-matching
+---
+
+// Declare the metavariables in this matching problem:
+(metavariables a b P)
+
+// List the pattern-then-expressions tuples in this multi-matching problem:
+(problem
+    (constraint  (= a b)
+                 (> (squared 5) (squared x))
+                 (= (+ 3 1) 4)
+                 (= x 4)
+                 (= y 3)  )
+    (constraint  (@apply P a)
+                 (> (squared 5) (squared x))
+                 (= (+ 3 1) 4)
+                 (= x 4)
+                 (= y 3)  )
+    (constraint  (@apply P b)
+                 (> (squared 5) (squared 4))  )
+)
+
+// List all solutions in this matching problem:
+// (Note that each one comes with a list of indices,
+// followed by a metavariable assignment.)
+(solutions
+    (2 0 0)
+    (
+        a  x
+        b  4
+        P  (@lambda v , (> (squared 5) (squared v)))
+    )
+)

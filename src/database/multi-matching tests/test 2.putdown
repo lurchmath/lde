@@ -1,0 +1,30 @@
+---
+testing:
+  type: multi-matching
+---
+
+// Declare the metavariables in this matching problem:
+(metavariables P x t)
+
+// List the pattern-then-expressions tuples in this multi-matching problem:
+(problem
+    (constraint  (forall x , (@apply P x))
+                 (> 5 n)
+                 (forall k , (happier k 7))
+                 (forall q , (= (+ q r) t))
+                 (exists foo , bar)  )
+    (constraint  (@apply P t)
+                 (= (+ 9 r) t)  )
+)
+
+// List all solutions in this matching problem:
+// (Note that each one comes with a list of indices,
+// followed by a metavariable assignment.)
+(solutions
+    (2 0)
+    (
+        x  q
+        t  9
+	    P  (@lambda v , (= (+ v r) t))
+    )
+)

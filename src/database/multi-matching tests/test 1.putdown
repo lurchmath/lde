@@ -1,0 +1,24 @@
+---
+testing:
+  type: multi-matching
+---
+
+// Declare the metavariables in this matching problem:
+(metavariables x y)
+
+// List the pattern-then-expressions tuples in this multi-matching problem:
+(problem
+    (constraint  (and x y)    (and 1 2)  (and 3 4)  )
+    (constraint  (and 3 y)    (and 1 4)  (and 3 2)  )
+)
+
+// List all solutions in this matching problem:
+// (Note that each one comes with a list of indices,
+// followed by a metavariable assignment.)
+(solutions
+    (0 1)
+    (
+        x  1
+	    y  2
+    )
+)
