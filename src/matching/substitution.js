@@ -191,7 +191,7 @@ export class Substitution {
      *   Substitution having been done
      * 
      * @see {@link Substitution#applyTo applyTo()}
-     * @see {@link LogicConcept#copy copy()}
+     * @see {@link MathConcept#copy copy()}
      */
     appliedTo ( target ) {
         if ( target instanceof LogicConcept ) {

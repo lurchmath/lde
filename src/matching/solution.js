@@ -244,11 +244,15 @@ export class Solution {
      * functions, would that result in any variable capture?  For example, if
      * we had a solution that instantiated $P\mapsto\lambda x.\exists y.f(x)$
      * and the original problem had $P$ applied to $2+y$, then computing
-     * $P(2+y)$ would result in variable capture.  This function detects
-     * whether there are any such instances, and returns true if and only if
-     * there are.  It expects to be called after all metavariable
-     * instantiations have been computed, i.e., not when the solution is only
-     * partially formed.
+     * $P(2+y)$ would result in variable capture.
+     * 
+     * This function detects whether there are any such instances, and returns
+     * true if and only if there are.  It expects to be called after all
+     * metavariable instantiations have been computed, i.e., not when the
+     * solution is only partially formed.
+     * 
+     * @returns {boolean} whether $\beta$-reduction would cause variable
+     *   capture
      */
     betaWouldCapture () {
         for ( let i = 0 ; i < this._EFAs.length ; i++ ) {
@@ -281,7 +285,7 @@ export class Solution {
      * Add a new {@link Substitution Substitution} to this object.  (Recall
      * from the definition of this class that it functions as a set of
      * {@link Substitution Substitutions}.)  Or, if the
-     * {@link Substitution Substitution}, throw an error instead.
+     * {@link Substitution Substitution} fails, throw an error instead.
      * 
      * The function can fail for any of the following three reasons.
      * 
@@ -374,7 +378,8 @@ export class Solution {
      * 
      * @returns {Set} the set of metavariables in the domain of this
      *   Solution, when it is viewed as a partial function from
-     *   metavariables to expressions
+     *   metavariables to expressions; the set contains the *name* of each
+     *   metavariable as a string, not as a {@link Symbol Symbol} instance
      *
      * @see {@link Solution#restrict restrict()}
      * @see {@link Solution#restricted restricted()}

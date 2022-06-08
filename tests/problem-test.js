@@ -1287,7 +1287,7 @@ describe( 'Problem', function () {
             // from them.
             const solutions = LCs[2].children().slice( 1 ).map( sol => {
                 expect( sol.numChildren() % 2 == 0 ).equals( true,
-                    `Expected solution of odd length in ${key}: ${sol}` )
+                    `Expected solution of even length in ${key}: ${sol}` )
                 // The tests use the notation (@lambda x , y) for EFs,
                 // so we need to find each such expression and convert it into
                 // an actual EF.
@@ -1304,11 +1304,11 @@ describe( 'Problem', function () {
                 for ( let i = 0 ; i < sol.numChildren() - 1 ; i += 2 ) {
                     expect( sol.child( i ) ).to.be.instanceOf( Symbol,
                         `Expected solution in ${key} has ${sol.child(i)}`
-                      + `where a metavariable belongs` )
+                      + ` where a metavariable belongs` )
                     expect( sol.child( i ).isA( M.metavariable) )
                         .equals( true,
                             `Expected solution in ${key} has ${sol.child(i)}`
-                          + `where a metavariable belongs` )
+                          + ` where a metavariable belongs` )
                     result.add( new M.Substitution(
                         sol.child( i ), sol.child( i + 1 ) ) )
                 }
