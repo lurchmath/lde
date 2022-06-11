@@ -730,7 +730,7 @@ const putdownDatabase = [
         "type": "multi-matching"
       }
     },
-    "content": "\n// Declare the metavariables in this matching problem:\n(metavariables x y)\n\n// List the pattern-then-expressions tuples in this multi-matching problem:\n(problem\n    (constraint  (and x y)    (and 1 2)  (and 3 4)  )\n    (constraint  (and 3 y)    (and 1 4)  (and 3 2)  )\n)\n\n// List all solutions in this matching problem:\n// (Note that each one comes with a list of indices,\n// followed by a metavariable assignment.)\n(solutions\n    (0 1)\n    (\n        x  1\n\t    y  2\n    )\n)\n"
+    "content": "\n// Declare the metavariables in this matching problem:\n(metavariables x y)\n\n// List the pattern-then-expressions tuples in this multi-matching problem:\n(problem\n    (constraint  (and x y)    (and 1 2)  (and 3 4)  )\n    (constraint  (and 3 y)    (and 1 4)  (and 3 2)  )\n)\n\n// List all solutions in this matching problem:\n// (Note that each one comes with a list of indices,\n// followed by a metavariable assignment.)\n(solutions\n    (0 1)\n    (\n        x  1\n        y  2\n    )\n)\n"
   },
   {
     "filename": "/multi-matching tests/test 2.putdown",
@@ -739,7 +739,7 @@ const putdownDatabase = [
         "type": "multi-matching"
       }
     },
-    "content": "\n// Declare the metavariables in this matching problem:\n(metavariables P x t)\n\n// List the pattern-then-expressions tuples in this multi-matching problem:\n(problem\n    (constraint  (forall x , (@apply P x))\n                 (> 5 n)\n                 (forall k , (happier k 7))\n                 (forall q , (= (+ q r) t))\n                 (exists foo , bar)  )\n    (constraint  (@apply P t)\n                 (= (+ 9 r) t)  )\n)\n\n// List all solutions in this matching problem:\n// (Note that each one comes with a list of indices,\n// followed by a metavariable assignment.)\n(solutions\n    (2 0)\n    (\n        x  q\n        t  9\n\t    P  (@lambda v , (= (+ v r) t))\n    )\n)\n"
+    "content": "\n// Declare the metavariables in this matching problem:\n(metavariables P x t)\n\n// List the pattern-then-expressions tuples in this multi-matching problem:\n(problem\n    (constraint  (forall x , (@apply P x))\n                 (> 5 n)\n                 (forall k , (happier k 7))\n                 (forall q , (= (+ q r) t))\n                 (exists foo , bar)  )\n    (constraint  (@apply P t)\n                 (= (+ 9 r) t)  )\n)\n\n// List all solutions in this matching problem:\n// (Note that each one comes with a list of indices,\n// followed by a metavariable assignment.)\n(solutions\n    (2 0)\n    (\n        x  q\n        t  9\n        P  (@lambda v , (= (+ v r) t))\n    )\n)\n"
   },
   {
     "filename": "/multi-matching tests/test 3.putdown",
