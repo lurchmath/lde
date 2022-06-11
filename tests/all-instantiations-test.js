@@ -12,39 +12,6 @@ describe( 'Multiple pattern instantiations', () => {
         expect( Matching.allInstantiations ).to.be.ok
     } )
 
-    // const isFakeMetavar = expr =>
-    //     expr instanceof Symbol && expr.text().endsWith( '__' )
-    // const asAPattern = expr => {
-    //     if ( isFakeMetavar( expr ) )
-    //         return new Symbol(
-    //             expr.text().substring( 0, expr.text().length - 2 )
-    //         ).asA( Matching.metavariable )
-    //     expr.descendantsSatisfying( isFakeMetavar ).map( d =>
-    //         d.replaceWith( asAPattern( d ) ) )
-    //     return expr
-    // }
-    // const expressions = putdown => LogicConcept.fromPutdown( putdown )
-    // const patterns = putdown => expressions( putdown ).map( asAPattern )
-
-    // it( 'RENAME THIS TEST LATER -- THIS IS AN EXPERIMENT', () => {
-    //     let result = Array.from( Matching.allInstantiations(
-    //         patterns( '(^ x__ y__)  (^ 3 y__)' ),
-    //         [
-    //             expressions( '(^ 1 2)  (^ 3 4)' ),
-    //             expressions( '(^ 1 4)  (^ 3 2)' )
-    //         ], null, true
-    //     ) )
-    //     expect( result.length ).to.equal( 1 )
-    //     expect( result[0].expressionIndices ).to.eql( { 0: 0, 1: 1 } )
-    //     expect( Array.from( result[0].solution.domain() ).length ).to.equal( 2 )
-    //     expect( result[0].solution.domain().has( 'x' ) ).to.equal( true )
-    //     expect( result[0].solution.domain().has( 'y' ) ).to.equal( true )
-    //     expect( result[0].solution.get( 'x' ).equals( new Symbol( 1 ) ) )
-    //         .to.equal( true )
-    //     expect( result[0].solution.get( 'y' ).equals( new Symbol( 2 ) ) )
-    //         .to.equal( true )
-    // } )
-
     it( 'Should compute correct solutions for the whole database', () => {
         // Get all matching tests from the database
         const matchingTests = Database.filterByMetadata( metadata =>
