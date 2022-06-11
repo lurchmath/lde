@@ -2239,6 +2239,8 @@ export class MathConcept extends EventTarget {
      * @param {string} string the smackdown code to be interpreted
      * @returns {MathConcept[]} an array of MathConcept instances, the meaning
      *   of the smackdown code provided as input
+     * 
+     * @see {@@link MathConcept#toSmackdown toSmackdown()}
      */
     static fromSmackdown ( string ) {
         const map = new SourceMap( string )
@@ -2446,6 +2448,7 @@ export class MathConcept extends EventTarget {
      * 
      * @see {@link MathConcept.fromSmackdown fromSmackdown()} (which creates
      *   MathConcept hierarchies intended for interpretation)
+     * @see {@@link MathConcept#toSmackdown toSmackdown()}
      */
     interpret () {
         const method = this.getAttribute( MathConcept.interpretationKey )
@@ -2477,6 +2480,62 @@ export class MathConcept extends EventTarget {
                 + method[1] + '}{' + method.slice( 2 ).join( '}{' )
                 + '}' ) )[0]
         throw new Error( `Invalid interpretation method: ${method[0]}` )
+    }
+
+    /**
+     * This function reverses the operation of
+     * {@link MathConcept.fromSmackdown fromSmackdown()}.  It requires this
+     * MathConcept to be of the particular form created by that function; it
+     * cannot operate on arbitrary MathConcepts, because not all can be
+     * represented by smackdown notation.  (For instance, a MathConcept
+     * created by a call to `new MathConcept()` is too vague to be
+     * representable using smackdown notation.)
+     * 
+     * @returns {string} smackdown notation for this MathConcept
+     * 
+     * @see {@link MathConcept.fromSmackdown fromSmackdown()}
+     * @see {@link MathConcept#interpret interpret()}
+     */
+    toSmackdown () {
+        const LurchSymbol = MathConcept.subclasses.get( 'Symbol' )
+        const prePutdown = mc => {
+            const method = mc.getAttribute( MathConcept.interpretationKey )
+            if ( method[0] == 'class' ) {
+                const classObject = MathConcept.subclasses.get( method[1] )
+                let constructorArgs = mc.children().map( prePutdown )
+                if ( mc._attributes.has( 'declaration type' ) )
+                    constructorArgs = [
+                        Symbol.for( mc._attributes.get( 'declaration type' ) ),
+                        constructorArgs.slice( 0, constructorArgs.length - 1 ),
+                        constructorArgs[constructorArgs.length - 1]
+                    ]
+                const result = new classObject( ...constructorArgs )
+                for ( let key of mc.getAttributeKeys() )
+                    if ( key != MathConcept.interpretationKey )
+                        result.setAttribute( key,
+                            JSON.copy( mc.getAttribute( key ) ) )
+                return result
+            }
+            if ( method[0] == 'notation' ) {
+                const result = new LurchSymbol( 'temp' )
+                const notation = '$' + method[1].replace( /\\/g, '\\\\' )
+                                                .replace( /\$/g, '\\$' ) + '$'
+                result.toPutdown = () => notation
+                return result
+            }
+            if ( method[0] == 'command' ) {
+                const result = new LurchSymbol( 'temp' )
+                const operator = method[1]
+                const operands = method.slice( 2 ).map( operand =>
+                    operand.replace( /\{/g, '\\{' ).replace( /\}/g, '\\}' ) )
+                result.toPutdown = () =>
+                    `\\${operator}{${operands.join('}{')}}`
+                return result
+            }
+            throw new Error( 'Cannot convert to smackdown: '
+                           + JSON.stringify( mc.toJSON() ) )
+        }
+        return prePutdown( this ).toPutdown()
     }
 
 }

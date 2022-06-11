@@ -2585,6 +2585,11 @@ describe( 'Smackdown notation and interpretation', () => {
             [ MathConcept.interpretationKey, [ 'class', 'Application' ] ] ] )
     const commandMC = ( cmd, ...args ) => new MathConcept().attr( [
         [ MathConcept.interpretationKey, [ 'command', cmd, ...args ] ] ] )
+    const declarationMC = ( type, syms, body ) =>
+        new MathConcept( ...syms, body ).attr( [
+            [ MathConcept.interpretationKey, [ 'class', 'Declaration'] ],
+            [ 'declaration type',
+              typeof( type ) == 'symbol' ? Symbol.keyFor( type ) : type ] ] )
     
     it( 'Should support $...$ notation blocks', () => {
         // ---------- one $...$ block all alone
@@ -3322,6 +3327,94 @@ describe( 'Smackdown notation and interpretation', () => {
         expect( test1[4].equals(
             environmentMC( notationMC( 'x' ) )
         ) ).to.equal( true )
+    } )
+
+    const smackCheck = ( mc, smackdown ) => {
+        expect( mc instanceof MathConcept ).to.equal( true,
+            `This is not a MathConcept: ${mc}` )
+        expect( mc.toSmackdown() ).to.equal( smackdown,
+            `Generated smackdown: ${mc.toSmackdown()}\n` 
+          + `Expected smackdown:  ${smackdown}` )
+        let mcs, recreated
+        expect( () =>
+            mcs = MathConcept.fromSmackdown( smackdown ),
+            `Threw error interpreting: ${smackdown}`
+        ).not.to.throw()
+        expect( mcs.length ).to.equal( 1,
+            `Wrong number of MathConcepts: ${mcs.length}` )
+        expect( () => {
+            recreated = mcs[0].toSmackdown()
+        }, `Threw error smackdowning this: ${mcs[0]}` ).not.to.throw()
+        expect( recreated ).to.equal( smackdown,
+            `Recreated smackdown: ${recreated}\n`
+          + `Original smackdown:  ${smackdown}` )
+    }
+
+    it( 'Should create smackdown notation as well', () => {
+        // empty environment
+        smackCheck( environmentMC(), '{ }' )
+        // symbols alone
+        smackCheck( symbolMC( 'foo' ), 'foo' )
+        smackCheck( symbolMC( '1 2 3' ), '"1 2 3"' )
+        // declaration alone, with body
+        smackCheck(
+            declarationMC(
+                Declaration.Variable,
+                [ symbolMC( 'x' ) ],
+                applicationMC(
+                    symbolMC( '=' ),
+                    symbolMC( 'x' ),
+                    symbolMC( 'x' )
+                )
+            ),
+            '[x var (= x x)]'
+        )
+        // nested applications
+        smackCheck(
+            applicationMC(
+                symbolMC( '+' ),
+                symbolMC( '1' ),
+                applicationMC(
+                    symbolMC( '*' ),
+                    symbolMC( '2' ),
+                    symbolMC( '3' )
+                )
+            ).asA( 'given' ),
+            ':(+ 1 (* 2 3))'
+        )
+        // notation in an environment
+        smackCheck(
+            environmentMC(
+                symbolMC( 'x' ),
+                notationMC( 'y' )
+            ),
+            '{ x $y$ }'
+        )
+        // command alone
+        smackCheck(
+            commandMC( 'one', 'two', '{three}', '', 'four!' ),
+            '\\one{two}{\\{three\\}}{}{four!}'
+        )
+        // many things all together, nested
+        smackCheck(
+            environmentMC(
+                environmentMC(
+                    commandMC( 'define', 'some', 'notation here' ),
+                    notationMC( 'use that $notation$ here!' ),
+                    environmentMC( symbolMC( 'Q' ) )
+                ).asA( 'given' ),
+                applicationMC( symbolMC( 'or' ),
+                               symbolMC( 'P' ), symbolMC( 'Q' ) )
+            ),
+            `{
+  :{
+    \\define{some}{notation here}
+    $use that \\$notation\\$ here!$
+    { Q }
+  }
+  (or P Q)
+}`
+        )
     } )
 
 } )
