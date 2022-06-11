@@ -1,5 +1,5 @@
 
-import { Symbol } from '../symbol.js'
+import { Symbol as LurchSymbol } from '../symbol.js'
 import { Application } from "../application.js"
 import { Binding } from "../binding.js"
 import { LogicConcept } from "../logic-concept.js"
@@ -252,7 +252,7 @@ export class Problem {
         const metavars = subs.map( s => s.metavariable.text() )
         const toReplace = this.constraints.filter( c =>
             c.pattern.hasDescendantSatisfying( d =>
-                ( d instanceof Symbol ) && metavars.includes( d.text() )
+                ( d instanceof LurchSymbol ) && metavars.includes( d.text() )
              && d.isA( metavariable ) ) )
         if ( toReplace.length > 0 ) {
             // remove those constraints
@@ -391,7 +391,7 @@ export class Problem {
             copy.body(), stream ) )
         const newBoundVars = copy.boundVariables().map( old =>
             old.isA( metavariable ) ? old :
-            new Symbol( `${old.text()}_${stream.next().text()}` )
+            new LurchSymbol( `${old.text()}_${stream.next().text()}` )
                 .asA( metavariable ) )
         return alphaRenamed( copy, newBoundVars )
     }

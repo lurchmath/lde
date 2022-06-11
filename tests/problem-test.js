@@ -1,6 +1,6 @@
 
 import M from '../src/matching.js'
-import { Symbol } from '../src/symbol.js'
+import { Symbol as LurchSymbol } from '../src/symbol.js'
 import { LogicConcept } from '../src/logic-concept.js'
 import { Application } from '../src/application.js'
 import { Binding } from '../src/binding.js'
@@ -27,8 +27,8 @@ describe( 'Problem', function () {
         // start with a new P and add two different constraints by P.add(C1,C2)
         P = new M.Problem()
         C1 = new M.Constraint(
-            new Symbol( 'A' ).asA( M.metavariable ),
-            new Symbol( 5 )
+            new LurchSymbol( 'A' ).asA( M.metavariable ),
+            new LurchSymbol( 5 )
         )
         C2 = new M.Constraint( ...LogicConcept.fromPutdown( `
             (- 12 (+ k 1))
@@ -42,7 +42,8 @@ describe( 'Problem', function () {
         expect( P.constraints.some( C => C.equals( C1 ) ) ).to.equal( true )
         expect( P.constraints.some( C => C.equals( C2 ) ) ).to.equal( true )
         // add two more the same way, but one is a duplicate
-        C3 = new M.Constraint( new Symbol( 'x' ), new Symbol( 'z' ) )
+        C3 = new M.Constraint( new LurchSymbol( 'x' ),
+                               new LurchSymbol( 'z' ) )
         C4 = C2.copy()
         expect( () => P.add( C3, C4 ) ).not.to.throw()
         // test length and empty status of problem
@@ -57,8 +58,8 @@ describe( 'Problem', function () {
         // starting afresh, add two different constraints by P.add([C1,C2])
         P = new M.Problem()
         C1 = new M.Constraint(
-            new Symbol( 'A' ).asA( M.metavariable ),
-            new Symbol( 5 )
+            new LurchSymbol( 'A' ).asA( M.metavariable ),
+            new LurchSymbol( 5 )
         )
         C2 = new M.Constraint( ...LogicConcept.fromPutdown( `
             (- 12 (+ k 1))
@@ -72,7 +73,8 @@ describe( 'Problem', function () {
         expect( P.constraints.some( C => C.equals( C1 ) ) ).to.equal( true )
         expect( P.constraints.some( C => C.equals( C2 ) ) ).to.equal( true )
         // add two more the same way, but one is a duplicate
-        C3 = new M.Constraint( new Symbol( 'x' ), new Symbol( 'z' ) )
+        C3 = new M.Constraint( new LurchSymbol( 'x' ),
+                               new LurchSymbol( 'z' ) )
         C4 = C2.copy()
         expect( () => P.add( [ C3, C4 ] ) ).not.to.throw()
         // test length and empty status of problem
@@ -86,8 +88,8 @@ describe( 'Problem', function () {
 
         // starting afresh, add two different constraints by P.add(p1,e1,p2,e2)
         P = new M.Problem()
-        p1 = new Symbol( 'A' ).asA( M.metavariable ),
-        e1 = new Symbol( 5 )
+        p1 = new LurchSymbol( 'A' ).asA( M.metavariable ),
+        e1 = new LurchSymbol( 5 )
         p2 = LogicConcept.fromPutdown( '(- 12 (+ k 1))' )[0]
         e2 = LogicConcept.fromPutdown( '(- 3 (+ K 11))' )[0]
         expect( () => P.add( p1, e1, p2, e2 ) ).not.to.throw()
@@ -100,8 +102,8 @@ describe( 'Problem', function () {
         expect( P.constraints.some( C => C.equals( C1 ) ) ).to.equal( true )
         expect( P.constraints.some( C => C.equals( C2 ) ) ).to.equal( true )
         // add one more the same way, it is a duplicate
-        p3 = new Symbol( 'A' ).asA( M.metavariable )
-        e3 = new Symbol( 5 )
+        p3 = new LurchSymbol( 'A' ).asA( M.metavariable )
+        e3 = new LurchSymbol( 5 )
         P.add( p3, e3 )
         // test length and empty status of problem
         expect( P.empty() ).to.equal( false )
@@ -111,8 +113,8 @@ describe( 'Problem', function () {
         expect( P.constraints.some( C => C.equals( C2 ) ) ).to.equal( true )
         // add three more the same way, new ones, but they're all equal
         p4 = new Application(
-            new Symbol( 'f' ).asA( M.metavariable ),
-            new Symbol( 1 ), new Symbol( 2 ), new Symbol( 3 )
+            new LurchSymbol( 'f' ).asA( M.metavariable ),
+            new LurchSymbol( 1 ), new LurchSymbol( 2 ), new LurchSymbol( 3 )
         )
         e4 = LogicConcept.fromPutdown( '(∃ u v , (= (* (- u) (- v)) 0))' )[0]
         p5 = p4.copy()
@@ -131,8 +133,8 @@ describe( 'Problem', function () {
 
         // starting afresh, add two different constraints by P.add([p1,e1,p2,e2])
         P = new M.Problem()
-        p1 = new Symbol( 'A' ).asA( M.metavariable ),
-        e1 = new Symbol( 5 )
+        p1 = new LurchSymbol( 'A' ).asA( M.metavariable ),
+        e1 = new LurchSymbol( 5 )
         p2 = LogicConcept.fromPutdown( '(- 12 (+ k 1))' )[0]
         e2 = LogicConcept.fromPutdown( '(- 3 (+ K 11))' )[0]
         expect( () => P.add( [ p1, e1, p2, e2 ] ) ).not.to.throw()
@@ -145,8 +147,8 @@ describe( 'Problem', function () {
         expect( P.constraints.some( C => C.equals( C1 ) ) ).to.equal( true )
         expect( P.constraints.some( C => C.equals( C2 ) ) ).to.equal( true )
         // add one more the same way, it is a duplicate
-        p3 = new Symbol( 'A' ).asA( M.metavariable )
-        e3 = new Symbol( 5 )
+        p3 = new LurchSymbol( 'A' ).asA( M.metavariable )
+        e3 = new LurchSymbol( 5 )
         P.add( p3, e3 )
         // test length and empty status of problem
         expect( P.empty() ).to.equal( false )
@@ -156,8 +158,8 @@ describe( 'Problem', function () {
         expect( P.constraints.some( C => C.equals( C2 ) ) ).to.equal( true )
         // add three more the same way, new ones, but they're all equal
         p4 = new Application(
-            new Symbol( 'f' ).asA( M.metavariable ),
-            new Symbol( 1 ), new Symbol( 2 ), new Symbol( 3 )
+            new LurchSymbol( 'f' ).asA( M.metavariable ),
+            new LurchSymbol( 1 ), new LurchSymbol( 2 ), new LurchSymbol( 3 )
         )
         e4 = LogicConcept.fromPutdown( '(∃ u v , (= (* (- u) (- v)) 0))' )[0]
         p5 = p4.copy()
@@ -176,8 +178,8 @@ describe( 'Problem', function () {
 
         // starting afresh, add two different constraints by P.add([[p1,e1],[p2,e2]]])
         P = new M.Problem()
-        p1 = new Symbol( 'A' ).asA( M.metavariable ),
-        e1 = new Symbol( 5 )
+        p1 = new LurchSymbol( 'A' ).asA( M.metavariable ),
+        e1 = new LurchSymbol( 5 )
         p2 = LogicConcept.fromPutdown( '(- 12 (+ k 1))' )[0]
         e2 = LogicConcept.fromPutdown( '(- 3 (+ K 11))' )[0]
         expect( () => P.add( [ [ p1, e1 ], [ p2, e2 ] ] ) ).not.to.throw()
@@ -190,8 +192,8 @@ describe( 'Problem', function () {
         expect( P.constraints.some( C => C.equals( C1 ) ) ).to.equal( true )
         expect( P.constraints.some( C => C.equals( C2 ) ) ).to.equal( true )
         // add two more the same way, but one is a duplicate
-        p3 = new Symbol( 'x' )
-        e3 = new Symbol( 'z' )
+        p3 = new LurchSymbol( 'x' )
+        e3 = new LurchSymbol( 'z' )
         p4 = p2.copy()
         e4 = e2.copy()
         expect( () => P.add( [ [ p3, e3 ], [ p4, e4 ] ] ) ).not.to.throw()
@@ -211,14 +213,14 @@ describe( 'Problem', function () {
         let P, C1, C2, C3, C4, p1, e1, p2, e2, p3, e3, p4, e4, p5, e5, p6, e6
         // construct P = new Problem( C1, C2, C3, C4 ), but C4 is a repeat of C2
         C1 = new M.Constraint(
-            new Symbol( 'A' ).asA( M.metavariable ),
-            new Symbol( 5 )
+            new LurchSymbol( 'A' ).asA( M.metavariable ),
+            new LurchSymbol( 5 )
         )
         C2 = new M.Constraint( ...LogicConcept.fromPutdown( `
             (- 12 (+ k 1))
             (- 3 (+ K 11))
         ` ) )
-        C3 = new M.Constraint( new Symbol( 'x' ), new Symbol( 'z' ) )
+        C3 = new M.Constraint( new LurchSymbol( 'x' ), new LurchSymbol( 'z' ) )
         C4 = C2.copy()
         expect( () => P = new M.Problem( C1, C2, C3, C4 ) ).not.to.throw()
         // test length and empty status of problem
@@ -232,14 +234,14 @@ describe( 'Problem', function () {
 
         // same as previous test, but using new Problem( [ C1, C2, C3, C4 ] )
         C1 = new M.Constraint(
-            new Symbol( 'A' ).asA( M.metavariable ),
-            new Symbol( 5 )
+            new LurchSymbol( 'A' ).asA( M.metavariable ),
+            new LurchSymbol( 5 )
         )
         C2 = new M.Constraint( ...LogicConcept.fromPutdown( `
             (- 12 (+ k 1))
             (- 3 (+ K 11))
         ` ) )
-        C3 = new M.Constraint( new Symbol( 'x' ), new Symbol( 'z' ) )
+        C3 = new M.Constraint( new LurchSymbol( 'x' ), new LurchSymbol( 'z' ) )
         C4 = C2.copy()
         expect( () => P = new M.Problem( [ C1, C2, C3, C4 ] ) ).not.to.throw()
         // test length and empty status of problem
@@ -255,15 +257,15 @@ describe( 'Problem', function () {
         // but p3,e3 is the same as p1,e1
         // and p4,e4 through p6,e6 are all just repeats of p4,e4
         // for a total of just 3 unique constraints: p1,e1, p2,e2, p4,e4
-        p1 = new Symbol( 'A' ).asA( M.metavariable ),
-        e1 = new Symbol( 5 )
+        p1 = new LurchSymbol( 'A' ).asA( M.metavariable ),
+        e1 = new LurchSymbol( 5 )
         p2 = LogicConcept.fromPutdown( '(- 12 (+ k 1))' )[0]
         e2 = LogicConcept.fromPutdown( '(- 3 (+ K 11))' )[0]
-        p3 = new Symbol( 'A' ).asA( M.metavariable )
-        e3 = new Symbol( 5 )
+        p3 = new LurchSymbol( 'A' ).asA( M.metavariable )
+        e3 = new LurchSymbol( 5 )
         p4 = new Application(
-            new Symbol( 'f' ).asA( M.metavariable ),
-            new Symbol( 1 ), new Symbol( 2 ), new Symbol( 3 )
+            new LurchSymbol( 'f' ).asA( M.metavariable ),
+            new LurchSymbol( 1 ), new LurchSymbol( 2 ), new LurchSymbol( 3 )
         )
         e4 = LogicConcept.fromPutdown( '(∃ u v , (= (* (- u) (- v)) 0))' )[0]
         p5 = p4.copy()
@@ -284,15 +286,15 @@ describe( 'Problem', function () {
 
         // same as previous test, but using:
         // new Problem( [ p1, e1, p2, e2, p3, e3, p4, e4, p5, e5, p6, e6 ] )
-        p1 = new Symbol( 'A' ).asA( M.metavariable ),
-        e1 = new Symbol( 5 )
+        p1 = new LurchSymbol( 'A' ).asA( M.metavariable ),
+        e1 = new LurchSymbol( 5 )
         p2 = LogicConcept.fromPutdown( '(- 12 (+ k 1))' )[0]
         e2 = LogicConcept.fromPutdown( '(- 3 (+ K 11))' )[0]
-        p3 = new Symbol( 'A' ).asA( M.metavariable )
-        e3 = new Symbol( 5 )
+        p3 = new LurchSymbol( 'A' ).asA( M.metavariable )
+        e3 = new LurchSymbol( 5 )
         p4 = new Application(
-            new Symbol( 'f' ).asA( M.metavariable ),
-            new Symbol( 1 ), new Symbol( 2 ), new Symbol( 3 )
+            new LurchSymbol( 'f' ).asA( M.metavariable ),
+            new LurchSymbol( 1 ), new LurchSymbol( 2 ), new LurchSymbol( 3 )
         )
         e4 = LogicConcept.fromPutdown( '(∃ u v , (= (* (- u) (- v)) 0))' )[0]
         p5 = p4.copy()
@@ -314,12 +316,12 @@ describe( 'Problem', function () {
 
         // same as first test, but breaking each constraint into its p,e
         // components, and using the syntax new Problem( [ [ p1, e1 ], ... ] )
-        p1 = new Symbol( 'A' ).asA( M.metavariable ),
-        e1 = new Symbol( 5 )
+        p1 = new LurchSymbol( 'A' ).asA( M.metavariable ),
+        e1 = new LurchSymbol( 5 )
         p2 = LogicConcept.fromPutdown( '(- 12 (+ k 1))' )[0]
         e2 = LogicConcept.fromPutdown( '(- 3 (+ K 11))' )[0]
-        p3 = new Symbol( 'x' )
-        e3 = new Symbol( 'z' )
+        p3 = new LurchSymbol( 'x' )
+        e3 = new LurchSymbol( 'z' )
         p4 = p2.copy()
         e4 = e2.copy()
         expect( () => P = new M.Problem( [
@@ -345,14 +347,14 @@ describe( 'Problem', function () {
         // same as first test from previous function, except we create problems
         // iteratively using .plus()
         C1 = new M.Constraint(
-            new Symbol( 'A' ).asA( M.metavariable ),
-            new Symbol( 5 )
+            new LurchSymbol( 'A' ).asA( M.metavariable ),
+            new LurchSymbol( 5 )
         )
         C2 = new M.Constraint( ...LogicConcept.fromPutdown( `
             (- 12 (+ k 1))
             (- 3 (+ K 11))
         ` ) )
-        C3 = new M.Constraint( new Symbol( 'x' ), new Symbol( 'z' ) )
+        C3 = new M.Constraint( new LurchSymbol( 'x' ), new LurchSymbol( 'z' ) )
         C4 = C2.copy()
         // an empty problem
         expect( () => P1 = new M.Problem() ).not.to.throw()
@@ -392,14 +394,14 @@ describe( 'Problem', function () {
 
         // same as previous test, but using new Problem( [ constraints... ] )
         C1 = new M.Constraint(
-            new Symbol( 'A' ).asA( M.metavariable ),
-            new Symbol( 5 )
+            new LurchSymbol( 'A' ).asA( M.metavariable ),
+            new LurchSymbol( 5 )
         )
         C2 = new M.Constraint( ...LogicConcept.fromPutdown( `
             (- 12 (+ k 1))
             (- 3 (+ K 11))
         ` ) )
-        C3 = new M.Constraint( new Symbol( 'x' ), new Symbol( 'z' ) )
+        C3 = new M.Constraint( new LurchSymbol( 'x' ), new LurchSymbol( 'z' ) )
         C4 = C2.copy()
         // an empty problem
         expect( () => P1 = new M.Problem() ).not.to.throw()
@@ -442,15 +444,15 @@ describe( 'Problem', function () {
         // but p3,e3 is the same as p1,e1
         // and p4,e4 through p6,e6 are all just repeats of p4,e4
         // for a total of just 3 unique constraints: p1,e1, p2,e2, p4,e4
-        p1 = new Symbol( 'A' ).asA( M.metavariable ),
-        e1 = new Symbol( 5 )
+        p1 = new LurchSymbol( 'A' ).asA( M.metavariable ),
+        e1 = new LurchSymbol( 5 )
         p2 = LogicConcept.fromPutdown( '(- 12 (+ k 1))' )[0]
         e2 = LogicConcept.fromPutdown( '(- 3 (+ K 11))' )[0]
-        p3 = new Symbol( 'A' ).asA( M.metavariable )
-        e3 = new Symbol( 5 )
+        p3 = new LurchSymbol( 'A' ).asA( M.metavariable )
+        e3 = new LurchSymbol( 5 )
         p4 = new Application(
-            new Symbol( 'f' ).asA( M.metavariable ),
-            new Symbol( 1 ), new Symbol( 2 ), new Symbol( 3 )
+            new LurchSymbol( 'f' ).asA( M.metavariable ),
+            new LurchSymbol( 1 ), new LurchSymbol( 2 ), new LurchSymbol( 3 )
         )
         e4 = LogicConcept.fromPutdown( '(∃ u v , (= (* (- u) (- v)) 0))' )[0]
         p5 = p4.copy()
@@ -493,15 +495,15 @@ describe( 'Problem', function () {
         expect( P4.constraints.some( C => C.equals( C3 ) ) ).to.equal( true )
 
         // same as previous test, but using array argument to .plus()
-        p1 = new Symbol( 'A' ).asA( M.metavariable ),
-        e1 = new Symbol( 5 )
+        p1 = new LurchSymbol( 'A' ).asA( M.metavariable ),
+        e1 = new LurchSymbol( 5 )
         p2 = LogicConcept.fromPutdown( '(- 12 (+ k 1))' )[0]
         e2 = LogicConcept.fromPutdown( '(- 3 (+ K 11))' )[0]
-        p3 = new Symbol( 'A' ).asA( M.metavariable )
-        e3 = new Symbol( 5 )
+        p3 = new LurchSymbol( 'A' ).asA( M.metavariable )
+        e3 = new LurchSymbol( 5 )
         p4 = new Application(
-            new Symbol( 'f' ).asA( M.metavariable ),
-            new Symbol( 1 ), new Symbol( 2 ), new Symbol( 3 )
+            new LurchSymbol( 'f' ).asA( M.metavariable ),
+            new LurchSymbol( 1 ), new LurchSymbol( 2 ), new LurchSymbol( 3 )
         )
         e4 = LogicConcept.fromPutdown( '(∃ u v , (= (* (- u) (- v)) 0))' )[0]
         p5 = p4.copy()
@@ -545,12 +547,12 @@ describe( 'Problem', function () {
 
         // same as first test, but breaking each constraint into its p,e
         // components, and using .plus( [ [ p1, e1 ], ... ] )
-        p1 = new Symbol( 'A' ).asA( M.metavariable ),
-        e1 = new Symbol( 5 )
+        p1 = new LurchSymbol( 'A' ).asA( M.metavariable ),
+        e1 = new LurchSymbol( 5 )
         p2 = LogicConcept.fromPutdown( '(- 12 (+ k 1))' )[0]
         e2 = LogicConcept.fromPutdown( '(- 3 (+ K 11))' )[0]
-        p3 = new Symbol( 'x' )
-        e3 = new Symbol( 'z' )
+        p3 = new LurchSymbol( 'x' )
+        e3 = new LurchSymbol( 'z' )
         p4 = p2.copy()
         e4 = e2.copy()
         C1 = new M.Constraint( p1, e1 )
@@ -598,7 +600,7 @@ describe( 'Problem', function () {
         // create several constraints, at least one of each complexity level,
         // and more than one of some complexity levels.
         let C1, C2, C3, C4, C5, C6, C7
-        C1 = new M.Constraint( new Symbol( 1 ), new Symbol( 2 ) )
+        C1 = new M.Constraint( new LurchSymbol( 1 ), new LurchSymbol( 2 ) )
         C2 = new M.Constraint( ...LogicConcept.fromPutdown( `
             (this thingy here is just)
             ("not equal to" this (other thingy) here)
@@ -609,7 +611,7 @@ describe( 'Problem', function () {
             (one large , (expression "and its" (twin twin) sister))
         ` ) )
         C5 = new M.Constraint(
-            new Symbol( 'metavar' ).asA( M.metavariable ),
+            new LurchSymbol( 'metavar' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(instantiation of that metavar)' )[0]
         )
         C6 = new M.Constraint( ...LogicConcept.fromPutdown( `
@@ -618,7 +620,8 @@ describe( 'Problem', function () {
         ` ) )
         C6.pattern.child( 1 ).makeIntoA( M.metavariable )
         C7 = new M.Constraint(
-            M.newEFA( new Symbol( 'P' ).asA( M.metavariable ), new Symbol( 2 ) ),
+            M.newEFA( new LurchSymbol( 'P' ).asA( M.metavariable ),
+                      new LurchSymbol( 2 ) ),
             LogicConcept.fromPutdown( '(("some") (structure))' )[0]
         )
         expect( C1.complexity() ).to.equal( 0 )
@@ -692,7 +695,7 @@ describe( 'Problem', function () {
     it( 'Should remove constraints correctly, even using without()', () => {
         // re-use the same set of 7 constraints from the previous test function
         let C1, C2, C3, C4, C5, C6, C7
-        C1 = new M.Constraint( new Symbol( 1 ), new Symbol( 2 ) )
+        C1 = new M.Constraint( new LurchSymbol( 1 ), new LurchSymbol( 2 ) )
         C2 = new M.Constraint( ...LogicConcept.fromPutdown( `
             (this thingy here is just)
             ("not equal to" this (other thingy) here)
@@ -703,7 +706,7 @@ describe( 'Problem', function () {
             (one large , (expression "and its" (twin twin) sister))
         ` ) )
         C5 = new M.Constraint(
-            new Symbol( 'metavar' ).asA( M.metavariable ),
+            new LurchSymbol( 'metavar' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(instantiation of that metavar)' )[0]
         )
         C6 = new M.Constraint( ...LogicConcept.fromPutdown( `
@@ -712,7 +715,8 @@ describe( 'Problem', function () {
         ` ) )
         C6.pattern.child( 1 ).makeIntoA( M.metavariable )
         C7 = new M.Constraint(
-            M.newEFA( new Symbol( 'P' ).asA( M.metavariable ), new Symbol( 2 ) ),
+            M.newEFA( new LurchSymbol( 'P' ).asA( M.metavariable ),
+                      new LurchSymbol( 2 ) ),
             LogicConcept.fromPutdown( '(("some") (structure))' )[0]
         )
         // build one of the large problems from the previous test function,
@@ -800,7 +804,7 @@ describe( 'Problem', function () {
     it( 'Should compare problems for equality correctly', () => {
         // re-use the same set of 7 constraints from the previous test function
         let C1, C2, C3, C4, C5, C6, C7
-        C1 = new M.Constraint( new Symbol( 1 ), new Symbol( 2 ) )
+        C1 = new M.Constraint( new LurchSymbol( 1 ), new LurchSymbol( 2 ) )
         C2 = new M.Constraint( ...LogicConcept.fromPutdown( `
             (this thingy here is just)
             ("not equal to" this (other thingy) here)
@@ -811,7 +815,7 @@ describe( 'Problem', function () {
             (one large , (expression "and its" (twin twin) sister))
         ` ) )
         C5 = new M.Constraint(
-            new Symbol( 'metavar' ).asA( M.metavariable ),
+            new LurchSymbol( 'metavar' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(instantiation of that metavar)' )[0]
         )
         C6 = new M.Constraint( ...LogicConcept.fromPutdown( `
@@ -820,7 +824,8 @@ describe( 'Problem', function () {
         ` ) )
         C6.pattern.child( 1 ).makeIntoA( M.metavariable )
         C7 = new M.Constraint(
-            M.newEFA( new Symbol( 'P' ).asA( M.metavariable ), new Symbol( 2 ) ),
+            M.newEFA( new LurchSymbol( 'P' ).asA( M.metavariable ),
+                      new LurchSymbol( 2 ) ),
             LogicConcept.fromPutdown( '(("some") (structure))' )[0]
         )
         // make several problems with various combinations of the constraints
@@ -861,14 +866,15 @@ describe( 'Problem', function () {
     it( 'Should make shallow copies correctly', () => {
         // re-use a few of the constraints from the previous test function
         let C1, C2, C3, C4
-        C1 = new M.Constraint( new Symbol( 1 ), new Symbol( 2 ) )
+        C1 = new M.Constraint( new LurchSymbol( 1 ), new LurchSymbol( 2 ) )
         C2 = new M.Constraint( ...LogicConcept.fromPutdown( 'same same' ) )
         C3 = new M.Constraint(
-            new Symbol( 'metavar' ).asA( M.metavariable ),
+            new LurchSymbol( 'metavar' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(instantiation of that metavar)' )[0]
         )
         C4 = new M.Constraint(
-            M.newEFA( new Symbol( 'P' ).asA( M.metavariable ), new Symbol( 2 ) ),
+            M.newEFA( new LurchSymbol( 'P' ).asA( M.metavariable ),
+                      new LurchSymbol( 2 ) ),
             LogicConcept.fromPutdown( '(("some") (structure))' )[0]
         )
         // make some problems using those constraints
@@ -906,8 +912,8 @@ describe( 'Problem', function () {
         // result: { (was_M,foo), ((a b),(c d)), ((x was_Y , was_Z),7) }
         let P, C1, C2, C3, S1, S2, S3
         C1 = new M.Constraint(
-            new Symbol( 'M' ).asA( M.metavariable ),
-            new Symbol( 'foo' )
+            new LurchSymbol( 'M' ).asA( M.metavariable ),
+            new LurchSymbol( 'foo' )
         )
         C2 = new M.Constraint(
             LogicConcept.fromPutdown( '(a b)' )[0],
@@ -915,24 +921,24 @@ describe( 'Problem', function () {
         )
         C3 = new M.Constraint(
             new Binding(
-                new Symbol( 'x' ),
-                new Symbol( 'Y' ).asA( M.metavariable ),
-                new Symbol( 'Z' ).asA( M.metavariable )
+                new LurchSymbol( 'x' ),
+                new LurchSymbol( 'Y' ).asA( M.metavariable ),
+                new LurchSymbol( 'Z' ).asA( M.metavariable )
             ),
-            new Symbol( 7 )
+            new LurchSymbol( 7 )
         )
         P = new M.Problem( C1, C2, C3 )
         S1 = new M.Substitution(
-            new Symbol( 'M' ).asA( M.metavariable ),
-            new Symbol( 'was_M' )
+            new LurchSymbol( 'M' ).asA( M.metavariable ),
+            new LurchSymbol( 'was_M' )
         )
         S2 = new M.Substitution(
-            new Symbol( 'Y' ).asA( M.metavariable ),
-            new Symbol( 'was_Y' )
+            new LurchSymbol( 'Y' ).asA( M.metavariable ),
+            new LurchSymbol( 'was_Y' )
         )
         S3 = new M.Substitution(
-            new Symbol( 'Z' ).asA( M.metavariable ),
-            new Symbol( 'was_Z' )
+            new LurchSymbol( 'Z' ).asA( M.metavariable ),
+            new LurchSymbol( 'was_Z' )
         )
         expect( () => P.substitute( S1, S2, S3 ) ).not.to.throw()
         expect( P.length ).to.equal( 3 )
@@ -943,7 +949,7 @@ describe( 'Problem', function () {
         expect( P.constraints.some( c =>
             c.pattern.equals(
                 LogicConcept.fromPutdown( '(x was_Y , was_Z)' )[0] )
-         && c.expression.equals( new Symbol( 7 ) ) ) ).to.equal( true )
+         && c.expression.equals( new LurchSymbol( 7 ) ) ) ).to.equal( true )
         // now repeat the same test, but call substitute() on an array of
         // substitutions rather than on 3 substitutions separately
         P = new M.Problem( C1, C2, C3 )
@@ -956,7 +962,7 @@ describe( 'Problem', function () {
         expect( P.constraints.some( c =>
             c.pattern.equals(
                 LogicConcept.fromPutdown( '(x was_Y , was_Z)' )[0] )
-         && c.expression.equals( new Symbol( 7 ) ) ) ).to.equal( true )
+         && c.expression.equals( new LurchSymbol( 7 ) ) ) ).to.equal( true )
     } )
 
     it( 'Should support substitution functionally', () => {
@@ -965,8 +971,8 @@ describe( 'Problem', function () {
         // Test 1:
         let P, newP, C1, C2, C3, S1, S2, S3
         C1 = new M.Constraint(
-            new Symbol( 'M' ).asA( M.metavariable ),
-            new Symbol( 'foo' )
+            new LurchSymbol( 'M' ).asA( M.metavariable ),
+            new LurchSymbol( 'foo' )
         )
         C2 = new M.Constraint(
             LogicConcept.fromPutdown( '(a b)' )[0],
@@ -974,24 +980,24 @@ describe( 'Problem', function () {
         )
         C3 = new M.Constraint(
             new Binding(
-                new Symbol( 'x' ),
-                new Symbol( 'Y' ).asA( M.metavariable ),
-                new Symbol( 'Z' ).asA( M.metavariable )
+                new LurchSymbol( 'x' ),
+                new LurchSymbol( 'Y' ).asA( M.metavariable ),
+                new LurchSymbol( 'Z' ).asA( M.metavariable )
             ),
-            new Symbol( 7 )
+            new LurchSymbol( 7 )
         )
         P = new M.Problem( C1, C2, C3 )
         S1 = new M.Substitution(
-            new Symbol( 'M' ).asA( M.metavariable ),
-            new Symbol( 'was_M' )
+            new LurchSymbol( 'M' ).asA( M.metavariable ),
+            new LurchSymbol( 'was_M' )
         )
         S2 = new M.Substitution(
-            new Symbol( 'Y' ).asA( M.metavariable ),
-            new Symbol( 'was_Y' )
+            new LurchSymbol( 'Y' ).asA( M.metavariable ),
+            new LurchSymbol( 'was_Y' )
         )
         S3 = new M.Substitution(
-            new Symbol( 'Z' ).asA( M.metavariable ),
-            new Symbol( 'was_Z' )
+            new LurchSymbol( 'Z' ).asA( M.metavariable ),
+            new LurchSymbol( 'was_Z' )
         )
         expect( () => newP = P.afterSubstituting( S1, S2, S3 ) ).not.to.throw()
         // ensure that P is just as it was before
@@ -1011,7 +1017,7 @@ describe( 'Problem', function () {
         expect( newP.constraints.some( c =>
             c.pattern.equals(
                 LogicConcept.fromPutdown( '(x was_Y , was_Z)' )[0] )
-         && c.expression.equals( new Symbol( 7 ) ) ) ).to.equal( true )
+         && c.expression.equals( new LurchSymbol( 7 ) ) ) ).to.equal( true )
         // now repeat the same test, but call afterSubstituting() on an array of
         // substitutions rather than on 3 substitutions separately
         P = new M.Problem( C1, C2, C3 )
@@ -1034,7 +1040,7 @@ describe( 'Problem', function () {
         expect( newP.constraints.some( c =>
             c.pattern.equals(
                 LogicConcept.fromPutdown( '(x was_Y , was_Z)' )[0] )
-         && c.expression.equals( new Symbol( 7 ) ) ) ).to.equal( true )
+         && c.expression.equals( new LurchSymbol( 7 ) ) ) ).to.equal( true )
     } )
 
     // Utility function for constructing solution sets
@@ -1048,7 +1054,7 @@ describe( 'Problem', function () {
             for ( let mv in sol ) {
                 if ( sol.hasOwnProperty( mv ) ) {
                     result.add( new M.Substitution(
-                        new Symbol( mv ).asA( M.metavariable ),
+                        new LurchSymbol( mv ).asA( M.metavariable ),
                         sol[mv] instanceof LogicConcept ? sol[mv] :
                             LogicConcept.fromPutdown( sol[mv] )[0]
                     ) )
@@ -1102,7 +1108,7 @@ describe( 'Problem', function () {
     // Utility function for creating lambdas
     const lambda = ( arg, body ) => {
         if ( !( arg instanceof LogicConcept ) )
-            arg = new Symbol( arg )
+            arg = new LurchSymbol( arg )
         if ( !( body instanceof LogicConcept ) )
             body = LogicConcept.fromPutdown( `${body}` )[0]
         return M.newEF( arg, body )
@@ -1132,7 +1138,7 @@ describe( 'Problem', function () {
         
         // problem: one constraint, (expr1,expr2) (no metavars, not equal)
         // solution set: one solution, the empty solution
-        expr2 = new Symbol( 'not_the_same' )
+        expr2 = new LurchSymbol( 'not_the_same' )
         P = new M.Problem( expr1, expr2 )
         expect( () => S = Array.from( P.solutions() ) ).not.to.throw()
         expect( S ).to.be.instanceof( Array )
@@ -1142,7 +1148,7 @@ describe( 'Problem', function () {
         
         // problem: one constraint, (pat1,expr1) (with pat1 a metavar)
         // solution set: one solution, the solution (pat1,expr1)
-        pat1 = new Symbol( 'foo' ).asA( M.metavariable )
+        pat1 = new LurchSymbol( 'foo' ).asA( M.metavariable )
         P = new M.Problem( pat1, expr1 )
         expect( () => S = Array.from( P.solutions() ) ).not.to.throw()
         expect( S ).to.be.instanceof( Array )
@@ -1170,9 +1176,9 @@ describe( 'Problem', function () {
         let pat, expr, prob, S
         // problem: pattern EFA (P 1), expression 1
         // solution set: two solutions, P = lambda v.1 or P = lambda v.v
-        pat = M.newEFA( new Symbol( 'P' ).asA( M.metavariable ),
-                        new Symbol( 1 ) )
-        expr = new Symbol( 1 )
+        pat = M.newEFA( new LurchSymbol( 'P' ).asA( M.metavariable ),
+                        new LurchSymbol( 1 ) )
+        expr = new LurchSymbol( 1 )
         prob = new M.Problem( pat, expr )
         expect( () => S = Array.from( prob.solutions() ) ).not.to.throw()
         expect( solSetsEq( S, solSet( prob,
@@ -1182,9 +1188,9 @@ describe( 'Problem', function () {
 
         // problem: pattern EFA (P 3), expression 1
         // solution set: one solution, P = lambda v.1
-        pat = M.newEFA( new Symbol( 'P' ).asA( M.metavariable ),
-                        new Symbol( 3 ) )
-        expr = new Symbol( 1 )
+        pat = M.newEFA( new LurchSymbol( 'P' ).asA( M.metavariable ),
+                        new LurchSymbol( 3 ) )
+        expr = new LurchSymbol( 1 )
         prob = new M.Problem( pat, expr )
         expect( () => S = Array.from( prob.solutions() ) ).not.to.throw()
         expect( solSetsEq( S, solSet( prob,
@@ -1193,8 +1199,8 @@ describe( 'Problem', function () {
 
         // problem: pattern EFA (P 1), expression 1=2
         // solution set: two solutions, P = lambda v.v=2 or P = lambda v.1=2
-        pat = M.newEFA( new Symbol( 'P' ).asA( M.metavariable ),
-                        new Symbol( 1 ) )
+        pat = M.newEFA( new LurchSymbol( 'P' ).asA( M.metavariable ),
+                        new LurchSymbol( 1 ) )
         expr = LogicConcept.fromPutdown( '(= 1 2)' )[0]
         prob = new M.Problem( pat, expr )
         expect( () => S = Array.from( prob.solutions() ) ).not.to.throw()
@@ -1205,8 +1211,8 @@ describe( 'Problem', function () {
 
         // problem: pattern EFA (P 3), expression 1=2
         // solution set: one solution, P = lambda v.1=2
-        pat = M.newEFA( new Symbol( 'P' ).asA( M.metavariable ),
-                        new Symbol( 3 ) )
+        pat = M.newEFA( new LurchSymbol( 'P' ).asA( M.metavariable ),
+                        new LurchSymbol( 3 ) )
         expr = LogicConcept.fromPutdown( '(= 1 2)' )[0]
         prob = new M.Problem( pat, expr )
         expect( () => S = Array.from( prob.solutions() ) ).not.to.throw()
@@ -1271,7 +1277,7 @@ describe( 'Problem', function () {
             // The tests use the notation (@apply x y) for EFAs,
             // so we need to find each such expression and convert it into an
             // actual EFA.
-            const apply = new Symbol( '@apply' )
+            const apply = new LurchSymbol( '@apply' )
             const isEFANotation = lc => ( lc instanceof Application )
                                      && lc.numChildren() == 3
                                      && lc.child( 0 ).equals( apply )
@@ -1291,7 +1297,7 @@ describe( 'Problem', function () {
                 // The tests use the notation (@lambda x , y) for EFs,
                 // so we need to find each such expression and convert it into
                 // an actual EF.
-                const lambda = new Symbol( '@lambda' )
+                const lambda = new LurchSymbol( '@lambda' )
                 const isEFNotation = lc => ( lc instanceof Binding )
                                         && lc.boundVariables().length == 1
                                         && lc.head().equals( lambda )
@@ -1302,7 +1308,7 @@ describe( 'Problem', function () {
                 // Now form the parts into a Solution object
                 const result = new M.Solution( P )
                 for ( let i = 0 ; i < sol.numChildren() - 1 ; i += 2 ) {
-                    expect( sol.child( i ) ).to.be.instanceOf( Symbol,
+                    expect( sol.child( i ) ).to.be.instanceOf( LurchSymbol,
                         `Expected solution in ${key} has ${sol.child(i)}`
                       + ` where a metavariable belongs` )
                     expect( sol.child( i ).isA( M.metavariable) )

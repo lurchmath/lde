@@ -1,7 +1,7 @@
 
 import { MathConcept } from './math-concept.js'
 import { Expression } from './expression.js'
-import { Symbol } from './symbol.js'
+import { Symbol as LurchSymbol } from './symbol.js'
 
 /**
  * Many mathematical expressions include "dummy variables," also called "bound
@@ -128,7 +128,7 @@ export class Binding extends Expression {
         if ( boundVars.length === 0 )
             throw new Error( 'A Binding constructor requires at least one '
                            + 'bound variable' )
-        if ( !boundVars.every( v => v instanceof Symbol ) )
+        if ( !boundVars.every( v => v instanceof LurchSymbol ) )
             throw new Error( 'Every bound variable given to a Binding '
                            + 'constructor must be a Symbol instance' )
         super( head, ...boundVars, body )
@@ -205,7 +205,7 @@ export class Binding extends Expression {
      */
     boundVariableNames () {
         return this.boundVariables().map( v =>
-            v instanceof Symbol ? v.text() : undefined )
+            v instanceof LurchSymbol ? v.text() : undefined )
     }
 
     /**
@@ -219,7 +219,7 @@ export class Binding extends Expression {
      *   the given name
      */
     binds ( symbol ) {
-        if ( symbol instanceof Symbol ) symbol = symbol.text()
+        if ( symbol instanceof LurchSymbol ) symbol = symbol.text()
         return this.boundVariableNames().includes( String( symbol ) )
     }
 

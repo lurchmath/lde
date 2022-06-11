@@ -1,7 +1,7 @@
 
 import { Application } from '../src/application.js'
 import { Expression } from '../src/expression.js'
-import { Symbol } from '../src/symbol.js'
+import { Symbol as LurchSymbol } from '../src/symbol.js'
 
 describe( 'Application', () => {
 
@@ -13,9 +13,9 @@ describe( 'Application', () => {
         // Construct a few objects for use in the test below.
         let E1 = new Expression
         let E2 = new Expression
-        let f = new Symbol( 'f' )
-        let x = new Symbol( 'x' )
-        let y = new Symbol( 'y' )
+        let f = new LurchSymbol( 'f' )
+        let x = new LurchSymbol( 'x' )
+        let y = new LurchSymbol( 'y' )
         // Try to construct Application instance with non-Expression arguments,
         // and verify that an error is thrown in each case.
         expect( () => { new Application( 5 ) } ).to.throw()
@@ -29,9 +29,9 @@ describe( 'Application', () => {
         // Construct a few objects for use in the test below.
         let E1 = new Expression
         let E2 = new Expression
-        let f = new Symbol( 'f' )
-        let x = new Symbol( 'x' )
-        let y = new Symbol( 'y' )
+        let f = new LurchSymbol( 'f' )
+        let x = new LurchSymbol( 'x' )
+        let y = new LurchSymbol( 'y' )
         // Try to construct Application instance with non-Expression arguments,
         // and verify that no error is thrown in each case.
         expect( () => { new Application( E1 ) } ).not.to.throw()
@@ -47,9 +47,9 @@ describe( 'Application', () => {
         // Otherwise you remove the same instance from earlier parents.
         let E1 = new Expression
         let E2 = new Expression
-        let f = new Symbol( 'f' )
-        let x = new Symbol( 'x' )
-        let y = new Symbol( 'y' )
+        let f = new LurchSymbol( 'f' )
+        let x = new LurchSymbol( 'x' )
+        let y = new LurchSymbol( 'y' )
         let A1 = new Application( E1 )
         let A2 = new Application( E1.copy(), E2 )
         let A3 = new Application( f )

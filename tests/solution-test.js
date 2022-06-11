@@ -1,5 +1,5 @@
 
-import { Symbol } from '../src/symbol.js'
+import { Symbol as LurchSymbol } from '../src/symbol.js'
 import { LogicConcept } from '../src/logic-concept.js'
 import M from '../src/matching.js'
 
@@ -43,7 +43,7 @@ describe( 'Solution', () => {
         const pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
         pat1.child( 1 ).makeIntoA( M.metavariable ) // outer x
         pat1.index( [ 2, 2, 1, 1 ] ).makeIntoA( M.metavariable ) // inner x
-        const pat2 = new Symbol( 'foo' ).asA( M.metavariable )
+        const pat2 = new LurchSymbol( 'foo' ).asA( M.metavariable )
         const C1 = new M.Constraint(
             pat1,
             LogicConcept.fromPutdown( '(∀ t , (∃ y , (= (+ t 1) y)))' )[0]
@@ -65,27 +65,32 @@ describe( 'Solution', () => {
         expect( S._captureConstraints.constraints.length ).to.equal( 5 )
         expect( S._captureConstraints.constraints[0].equals(
             new M.CaptureConstraint(
-                new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '∃' )
+                new LurchSymbol( 'x' ).asA( M.metavariable ),
+                new LurchSymbol( '∃' )
             )
         ) ).to.equal( true )
         expect( S._captureConstraints.constraints[1].equals(
             new M.CaptureConstraint(
-                new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '=' )
+                new LurchSymbol( 'x' ).asA( M.metavariable ),
+                new LurchSymbol( '=' )
             )
         ) ).to.equal( true )
         expect( S._captureConstraints.constraints[2].equals(
             new M.CaptureConstraint(
-                new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '+' )
+                new LurchSymbol( 'x' ).asA( M.metavariable ),
+                new LurchSymbol( '+' )
             )
         ) ).to.equal( true )
         expect( S._captureConstraints.constraints[3].equals(
             new M.CaptureConstraint(
-                new Symbol( 'y' ), new Symbol( 'x' ).asA( M.metavariable )
+                new LurchSymbol( 'y' ),
+                new LurchSymbol( 'x' ).asA( M.metavariable )
             )
         ) ).to.equal( true )
         expect( S._captureConstraints.constraints[4].equals(
             new M.CaptureConstraint(
-                new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '1' )
+                new LurchSymbol( 'x' ).asA( M.metavariable ),
+                new LurchSymbol( '1' )
             )
         ) ).to.equal( true )
         // Now ensure that it computed the correct set of metavariables
@@ -123,7 +128,7 @@ describe( 'Solution', () => {
         const pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
         pat1.child( 1 ).makeIntoA( M.metavariable ) // outer x
         pat1.index( [ 2, 2, 1, 1 ] ).makeIntoA( M.metavariable ) // inner x
-        const pat2 = new Symbol( 'foo' ).asA( M.metavariable )
+        const pat2 = new LurchSymbol( 'foo' ).asA( M.metavariable )
         const C1 = new M.Constraint(
             pat1,
             LogicConcept.fromPutdown( '(∀ t , (∃ y , (= (+ t 1) y)))' )[0]
@@ -172,11 +177,11 @@ describe( 'Solution', () => {
         const emptyP = new M.Problem()
         S1 = new M.Solution( emptyP )
         S1.add( new M.Substitution(
-            new Symbol( 'one' ).asA( M.metavariable ),
+            new LurchSymbol( 'one' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '"this is just a string symbol"' )[0]
         ) )
         S1.add( new M.Substitution(
-            new Symbol( 'two' ).asA( M.metavariable ),
+            new LurchSymbol( 'two' ).asA( M.metavariable ),
             LogicConcept.fromPutdown(
                 '(sqrt + (^ (- x1 x2) 2) (^ (- y1 y2) 2))' )[0]
         ) )
@@ -211,23 +216,23 @@ describe( 'Solution', () => {
         // S2 = a solution mapping X -> f(y)
         const S2 = new M.Solution( emptyP )
         S2.add( new M.Substitution(
-            new Symbol( 'X' ).asA( M.metavariable ),
+            new LurchSymbol( 'X' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(f y)' )[0]
         ) )
         // S3 = a solution mapping X -> f(z)
         const S3 = new M.Solution( emptyP )
         S3.add( new M.Substitution(
-            new Symbol( 'X' ).asA( M.metavariable ),
+            new LurchSymbol( 'X' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(f z)' )[0]
         ) )
         // S4 = a solution mapping X -> f(y) and Y -> f(y)
         const S4 = new M.Solution( emptyP )
         S4.add( new M.Substitution(
-            new Symbol( 'X' ).asA( M.metavariable ),
+            new LurchSymbol( 'X' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(f y)' )[0]
         ) )
         S4.add( new M.Substitution(
-            new Symbol( 'Y' ).asA( M.metavariable ),
+            new LurchSymbol( 'Y' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(f y)' )[0]
         ) )
         // then make several copies
@@ -261,11 +266,11 @@ describe( 'Solution', () => {
         // And ensure that if we edit some of them, we can make them euqla to
         // others that they weren't originally equal to.
         expect( S4.equals( S2.plus( new M.Substitution(
-            new Symbol( 'Y' ).asA( M.metavariable ),
+            new LurchSymbol( 'Y' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(f y)' )[0]
         ) ) ) ).equals( true )
         expect( S2.equals( S1.plus( new M.Substitution(
-            new Symbol( 'X' ).asA( M.metavariable ),
+            new LurchSymbol( 'X' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(f y)' )[0]
         ) ) ) ).equals( true )
     } )
@@ -276,7 +281,7 @@ describe( 'Solution', () => {
         const pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
         pat1.child( 1 ).makeIntoA( M.metavariable ) // outer x
         pat1.index( [ 2, 2, 1, 1 ] ).makeIntoA( M.metavariable ) // inner x
-        const pat2 = new Symbol( 'foo' ).asA( M.metavariable )
+        const pat2 = new LurchSymbol( 'foo' ).asA( M.metavariable )
         const C1 = new M.Constraint(
             pat1,
             LogicConcept.fromPutdown( '(∀ t , (∃ y , (= (+ t 1) y)))' )[0]
@@ -290,36 +295,36 @@ describe( 'Solution', () => {
         // Try to add a Substitution that violates rule #1: the metavariable is
         // already mapped to something else.
         S._substitutions['foo'] = new M.Substitution(
-            new Symbol( 'foo' ).asA( M.metavariable ),
-            new Symbol( 'bar' )
+            new LurchSymbol( 'foo' ).asA( M.metavariable ),
+            new LurchSymbol( 'bar' )
         )
         let sub = new M.Substitution(
-            new Symbol( 'foo' ).asA( M.metavariable ),
-            new Symbol( 'baz' )
+            new LurchSymbol( 'foo' ).asA( M.metavariable ),
+            new LurchSymbol( 'baz' )
         )
         expect( () => S.add( sub ) ).to.throw( /Function condition failed/ )
         delete S._substitutions['foo'] // cleanup
         // Try to add a Substitution that violates rule #2: replacing a bound
         // metavariable with a non-variable.
         sub = new M.Substitution(
-            new Symbol( 'x' ).asA( M.metavariable ),
+            new LurchSymbol( 'x' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(not atomic)' )[0]
         )
         expect( () => S.add( sub ) ).to.throw( /Cannot set .* to a non-symbol/ )
         // Try to add a Substitution that violates rule #3: violating variable
         // capture constraints
         sub = new M.Substitution(
-            new Symbol( 'x' ).asA( M.metavariable ),
+            new LurchSymbol( 'x' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( 'y' )[0]
         )
         expect( () => S.add( sub ) ).to.throw( /would violate capture constraints/ )
         // Try to add Substitutions that violate none of the 3 rules.
         expect( () => S.plus( new M.Substitution(
-            new Symbol( 'x' ).asA( M.metavariable ),
+            new LurchSymbol( 'x' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( 'this_should_work' )[0]
         ) ) ).not.to.throw()
         sub = new M.Substitution(
-            new Symbol( 'foo' ).asA( M.metavariable ),
+            new LurchSymbol( 'foo' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( 'baz' )[0] // since we did cleanup above
         )
         expect( () => S.add( sub ) ).not.to.throw()
@@ -331,7 +336,7 @@ describe( 'Solution', () => {
         const pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
         pat1.child( 1 ).makeIntoA( M.metavariable ) // outer x
         pat1.index( [ 2, 2, 1, 1 ] ).makeIntoA( M.metavariable ) // inner x
-        const pat2 = new Symbol( 'foo' ).asA( M.metavariable )
+        const pat2 = new LurchSymbol( 'foo' ).asA( M.metavariable )
         const C1 = new M.Constraint(
             pat1,
             LogicConcept.fromPutdown( '(∀ t , (∃ y , (= (+ t 1) y)))' )[0]
@@ -355,27 +360,32 @@ describe( 'Solution', () => {
         expect( S._captureConstraints.constraints.length ).to.equal( 5 )
         expect( S._captureConstraints.constraints[0].equals(
             new M.CaptureConstraint(
-                new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '∃' )
+                new LurchSymbol( 'x' ).asA( M.metavariable ),
+                new LurchSymbol( '∃' )
             )
         ) ).to.equal( true )
         expect( S._captureConstraints.constraints[1].equals(
             new M.CaptureConstraint(
-                new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '=' )
+                new LurchSymbol( 'x' ).asA( M.metavariable ),
+                new LurchSymbol( '=' )
             )
         ) ).to.equal( true )
         expect( S._captureConstraints.constraints[2].equals(
             new M.CaptureConstraint(
-                new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '+' )
+                new LurchSymbol( 'x' ).asA( M.metavariable ),
+                new LurchSymbol( '+' )
             )
         ) ).to.equal( true )
         expect( S._captureConstraints.constraints[3].equals(
             new M.CaptureConstraint(
-                new Symbol( 'y' ), new Symbol( 'x' ).asA( M.metavariable )
+                new LurchSymbol( 'y' ),
+                new LurchSymbol( 'x' ).asA( M.metavariable )
             )
         ) ).to.equal( true )
         expect( S._captureConstraints.constraints[4].equals(
             new M.CaptureConstraint(
-                new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '1' )
+                new LurchSymbol( 'x' ).asA( M.metavariable ),
+                new LurchSymbol( '1' )
             )
         ) ).to.equal( true )
         expect( S.complete() ).to.equal( false )
@@ -401,27 +411,32 @@ describe( 'Solution', () => {
         expect( S._captureConstraints.constraints.length ).to.equal( 5 )
         expect( S._captureConstraints.constraints[0].equals(
             new M.CaptureConstraint(
-                new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '∃' )
+                new LurchSymbol( 'x' ).asA( M.metavariable ),
+                new LurchSymbol( '∃' )
             )
         ) ).to.equal( true )
         expect( S._captureConstraints.constraints[1].equals(
             new M.CaptureConstraint(
-                new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '=' )
+                new LurchSymbol( 'x' ).asA( M.metavariable ),
+                new LurchSymbol( '=' )
             )
         ) ).to.equal( true )
         expect( S._captureConstraints.constraints[2].equals(
             new M.CaptureConstraint(
-                new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '+' )
+                new LurchSymbol( 'x' ).asA( M.metavariable ),
+                new LurchSymbol( '+' )
             )
         ) ).to.equal( true )
         expect( S._captureConstraints.constraints[3].equals(
             new M.CaptureConstraint(
-                new Symbol( 'y' ), new Symbol( 'x' ).asA( M.metavariable )
+                new LurchSymbol( 'y' ),
+                new LurchSymbol( 'x' ).asA( M.metavariable )
             )
         ) ).to.equal( true )
         expect( S._captureConstraints.constraints[4].equals(
             new M.CaptureConstraint(
-                new Symbol( 'x' ).asA( M.metavariable ), new Symbol( '1' )
+                new LurchSymbol( 'x' ).asA( M.metavariable ),
+                new LurchSymbol( '1' )
             )
         ) ).to.equal( true )
         expect( S.complete() ).to.equal( false )
@@ -429,8 +444,8 @@ describe( 'Solution', () => {
         // This substitution is the one required by constraint C1: x -> t
         expect( () =>
             S.add( new M.Substitution(
-                new Symbol( 'x' ).asA( M.metavariable ),
-                new Symbol( 't' )
+                new LurchSymbol( 'x' ).asA( M.metavariable ),
+                new LurchSymbol( 't' )
             ) )
         ).not.to.throw()
         // Verify the new state:
@@ -447,7 +462,8 @@ describe( 'Solution', () => {
         expect( S.get( 'foo' ) ).to.be.instanceOf( LogicConcept )
         expect( S.get( 'foo' ).equals( C2.expression ) ).to.equal( true )
         expect( S.get( 'x' ) ).to.be.instanceOf( LogicConcept )
-        expect( S.get( 'x' ).equals( new Symbol( 't' ) ) ).to.equal( true )
+        expect( S.get( 'x' ).equals( new LurchSymbol( 't' ) ) )
+            .to.equal( true )
         expect( S.get( 'y' ) ).to.be.undefined
         expect( S._captureConstraints.constraints.length ).to.equal( 0 )
         // But if we redo all the same stuff as above, except we replace
@@ -459,8 +475,8 @@ describe( 'Solution', () => {
         ).not.to.throw()
         expect( () =>
             badS.add( new M.Substitution(
-                new Symbol( 'x' ).asA( M.metavariable ),
-                new Symbol( 'y' )
+                new LurchSymbol( 'x' ).asA( M.metavariable ),
+                new LurchSymbol( 'y' )
             ) )
         ).to.throw( /would violate capture constraints/ )
         expect( S.complete() ).to.equal( true )
@@ -473,13 +489,13 @@ describe( 'Solution', () => {
         const emptyP = new M.Problem()
         const S1 = new M.Solution( emptyP )
         S1.add( new M.Substitution(
-            new Symbol( 'X' ).asA( M.metavariable ),
-            new Symbol( '3' )
+            new LurchSymbol( 'X' ).asA( M.metavariable ),
+            new LurchSymbol( '3' )
         ) )
         let temp = LogicConcept.fromPutdown( '(f t Z)' )[0]
         temp.child( 2 ).makeIntoA( M.metavariable )
         S1.add( new M.Substitution(
-            new Symbol( 'Y' ).asA( M.metavariable ),
+            new LurchSymbol( 'Y' ).asA( M.metavariable ),
             temp
         ) )
         expect( S1.complete() ).to.equal( false )
@@ -488,11 +504,12 @@ describe( 'Solution', () => {
         temp.child( 1 ).makeIntoA( M.metavariable )
         temp.child( 2 ).makeIntoA( M.metavariable )
         let sub = new M.Substitution(
-            new Symbol( 'Z' ).asA( M.metavariable ),
+            new LurchSymbol( 'Z' ).asA( M.metavariable ),
             temp
         )
         sub.applyTo( S1 )
-        expect( S1.get( 'X' ).equals( new Symbol( '3' ) ) ).equals( true )
+        expect( S1.get( 'X' ).equals( new LurchSymbol( '3' ) ) )
+            .to.equal( true )
         temp = LogicConcept.fromPutdown( '(f t (+ W W))' )[0]
         temp.child( 2 ).child( 1 ).makeIntoA( M.metavariable )
         temp.child( 2 ).child( 2 ).makeIntoA( M.metavariable )
@@ -500,11 +517,12 @@ describe( 'Solution', () => {
         expect( S1.complete() ).to.equal( false )
         // Apply to it the Substitution: W -> k
         sub = new M.Substitution(
-            new Symbol( 'W' ).asA( M.metavariable ),
-            new Symbol( 'k' )
+            new LurchSymbol( 'W' ).asA( M.metavariable ),
+            new LurchSymbol( 'k' )
         )
         sub.applyTo( S1 )
-        expect( S1.get( 'X' ).equals( new Symbol( '3' ) ) ).equals( true )
+        expect( S1.get( 'X' ).equals( new LurchSymbol( '3' ) ) )
+            .to.equal( true )
         expect( S1.get( 'Y' ).equals(
             LogicConcept.fromPutdown( '(f t (+ k k))' )[0]
         ) ).equals( true )
@@ -517,7 +535,7 @@ describe( 'Solution', () => {
         const pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
         pat1.child( 1 ).makeIntoA( M.metavariable ) // outer x
         pat1.index( [ 2, 2, 1, 1 ] ).makeIntoA( M.metavariable ) // inner x
-        const pat2 = new Symbol( 'foo' ).asA( M.metavariable )
+        const pat2 = new LurchSymbol( 'foo' ).asA( M.metavariable )
         const C1 = new M.Constraint(
             pat1,
             LogicConcept.fromPutdown( '(∀ t , (∃ y , (= (+ t 1) y)))' )[0]
@@ -534,7 +552,7 @@ describe( 'Solution', () => {
         expect( resS.domain().size ).equals( 0 )
         // Add one Substitution, within the domain of the problem
         S.add( new M.Substitution(
-            new Symbol( 'foo' ).asA( M.metavariable ),
+            new LurchSymbol( 'foo' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(larger thing but not too large)' )[0]
         ) )
         // Ensure that restricting it still does nothing
@@ -546,7 +564,7 @@ describe( 'Solution', () => {
         expect( S.get( 'foo' ).equals( resS.get( 'foo' ) ) ).equals( true )
         // Add another Substitution, this time an extraneous one
         S.add( new M.Substitution(
-            new Symbol( 'bar' ).asA( M.metavariable ),
+            new LurchSymbol( 'bar' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(totally does not belong here)' )[0]
         ) )
         // Ensure that restricting it drops the extraneous Substitution
@@ -559,8 +577,8 @@ describe( 'Solution', () => {
         expect( S.get( 'foo' ).equals( resS.get( 'foo' ) ) ).equals( true )
         // Add another Substitution, now the other relevant one
         S.add( new M.Substitution(
-            new Symbol( 'x' ).asA( M.metavariable ),
-            new Symbol( 't' )
+            new LurchSymbol( 'x' ).asA( M.metavariable ),
+            new LurchSymbol( 't' )
         ) )
         // Ensure that restricting it drops the extraneous Substitution
         expect( S.domain().size ).equals( 3 )
@@ -575,7 +593,7 @@ describe( 'Solution', () => {
         expect( S.get( 'x' ).equals( resS.get( 'x' ) ) ).equals( true )
         // Add another Substitution, another extraneous one
         S.add( new M.Substitution(
-            new Symbol( 'y' ).asA( M.metavariable ),
+            new LurchSymbol( 'y' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '"lorem ipsum"' )[0]
         ) )
         // Ensure that restricting it yields the same thing as before

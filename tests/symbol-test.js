@@ -1,5 +1,5 @@
 
-import { Symbol } from '../src/symbol.js'
+import { Symbol as LurchSymbol } from '../src/symbol.js'
 import { MathConcept } from '../src/math-concept.js'
 import { LogicConcept } from '../src/logic-concept.js'
 import { Expression } from '../src/expression.js'
@@ -7,58 +7,58 @@ import { Expression } from '../src/expression.js'
 describe( 'Symbol', () => {
 
     it( 'Should declare the relevant global identifiers', () => {
-        expect( Symbol ).to.be.ok
+        expect( LurchSymbol ).to.be.ok
     } )
 
     it( 'Should let us query the text given at construction time', () => {
         // Create the same symbols as above and query the text in each.
         // It should be exactly the same as was provided at construction time.
-        let S = new Symbol( 'hello' )
+        let S = new LurchSymbol( 'hello' )
         expect( S.text() ).to.equal( 'hello' )
-        S = new Symbol( '1' )
+        S = new LurchSymbol( '1' )
         expect( S.text() ).to.equal( '1' )
-        S = new Symbol( 'Four score and seven years ago' )
+        S = new LurchSymbol( 'Four score and seven years ago' )
         expect( S.text() ).to.equal( 'Four score and seven years ago' )
-        S = new Symbol( 'αβγδε' )
+        S = new LurchSymbol( 'αβγδε' )
         expect( S.text() ).to.equal( 'αβγδε' )
-        S = new Symbol( 'x₁' )
+        S = new LurchSymbol( 'x₁' )
         expect( S.text() ).to.equal( 'x₁' )
-        S = new Symbol( { } )
+        S = new LurchSymbol( { } )
         expect( S.text() ).to.equal( '[object Object]' )
-        S = new Symbol( [ ] )
+        S = new LurchSymbol( [ ] )
         expect( S.text() ).to.equal( 'undefined' )
-        S = new Symbol
+        S = new LurchSymbol
         expect( S.text() ).to.equal( 'undefined' )
     } )
 
     it( 'Should have a toString() representation equal to its text', () => {
         // Exactly the same test as the previous, but with toString() instead
-        let S = new Symbol( 'hello' )
+        let S = new LurchSymbol( 'hello' )
         expect( S.toString() ).to.equal( 'hello' )
-        S = new Symbol( '1' )
+        S = new LurchSymbol( '1' )
         expect( S.toString() ).to.equal( '1' )
-        S = new Symbol( 'Four score and seven years ago' )
+        S = new LurchSymbol( 'Four score and seven years ago' )
         expect( S.toString() ).to.equal( 'Four score and seven years ago' )
-        S = new Symbol( 'αβγδε' )
+        S = new LurchSymbol( 'αβγδε' )
         expect( S.toString() ).to.equal( 'αβγδε' )
-        S = new Symbol( 'x₁' )
+        S = new LurchSymbol( 'x₁' )
         expect( S.toString() ).to.equal( 'x₁' )
-        S = new Symbol( { } )
+        S = new LurchSymbol( { } )
         expect( S.toString() ).to.equal( '[object Object]' )
-        S = new Symbol( [ ] )
+        S = new LurchSymbol( [ ] )
         expect( S.toString() ).to.equal( 'undefined' )
-        S = new Symbol
+        S = new LurchSymbol
         expect( S.toString() ).to.equal( 'undefined' )
     } )
 
     it( 'Should respect the "evaluate as" field to compute value()', () => {
         // Create five symbols and ensure that none of them has a defined
         // value, because we set no "evaluate as" attribute on any of them.
-        let S1 = new Symbol( 'hello' )
-        let S2 = new Symbol( '548' )
-        let S3 = new Symbol( '-578.12379' )
-        let S4 = new Symbol( '9.3257268e31' )
-        let S5 = new Symbol( 'Infinity' )
+        let S1 = new LurchSymbol( 'hello' )
+        let S2 = new LurchSymbol( '548' )
+        let S3 = new LurchSymbol( '-578.12379' )
+        let S4 = new LurchSymbol( '9.3257268e31' )
+        let S5 = new LurchSymbol( 'Infinity' )
         expect( S1.value() ).to.be.undefined
         expect( S2.value() ).to.be.undefined
         expect( S3.value() ).to.be.undefined
@@ -114,12 +114,12 @@ describe( 'Symbol', () => {
 
     it( 'Should let us copy Symbols, retaining their content', () => {
         // This just ensures that copying a Symbol copies its text faithfully.
-        let S1 = new Symbol( 'some text here' )
-        let S2 = new Symbol( '***' )
+        let S1 = new LurchSymbol( 'some text here' )
+        let S2 = new LurchSymbol( '***' )
         let S3 = S1.copy()
         let S4 = S2.copy()
-        expect( S3 ).to.be.instanceof( Symbol )
-        expect( S4 ).to.be.instanceof( Symbol )
+        expect( S3 ).to.be.instanceof( LurchSymbol )
+        expect( S4 ).to.be.instanceof( LurchSymbol )
         expect( S3.numChildren() ).to.equal( 0 )
         expect( S4.numChildren() ).to.equal( 0 )
         expect( S3.text() ).to.equal( S1.text() )
@@ -130,7 +130,7 @@ describe( 'Symbol', () => {
 
     it( 'Should not let us add children to a Symbol instance', () => {
         // Create an instance for testing and ensure it has no children
-        let S = new Symbol( 'S' )
+        let S = new LurchSymbol( 'S' )
         expect( S.numChildren() ).to.equal( 0 )
         // Try to add a child of various types, and ensure that at no point
         // does it actually work
@@ -146,7 +146,7 @@ describe( 'Symbol', () => {
         S.insertChild( tryThis )
         expect( S.numChildren() ).to.equal( 0 )
         expect( tryThis.parent() ).to.equal( null )
-        tryThis = new Symbol( 'tt' )
+        tryThis = new LurchSymbol( 'tt' )
         S.insertChild( tryThis )
         expect( S.numChildren() ).to.equal( 0 )
         expect( tryThis.parent() ).to.equal( null )
@@ -163,7 +163,7 @@ describe( 'Symbol', () => {
         S.pushChild( tryThis )
         expect( S.numChildren() ).to.equal( 0 )
         expect( tryThis.parent() ).to.equal( null )
-        tryThis = new Symbol( 'tt' )
+        tryThis = new LurchSymbol( 'tt' )
         S.pushChild( tryThis )
         expect( S.numChildren() ).to.equal( 0 )
         expect( tryThis.parent() ).to.equal( null )

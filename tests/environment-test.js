@@ -1,6 +1,6 @@
 
 import { Environment } from '../src/environment.js'
-import { Symbol } from '../src/symbol.js'
+import { Symbol as LurchSymbol } from '../src/symbol.js'
 
 describe( 'Environment', () => {
 
@@ -24,15 +24,15 @@ describe( 'Conclusions', () => {
     let A, B, C, D, E, _A, _B, _C, _D, _E
 
     beforeEach( () => {
-        A = new Symbol( 'A' )
-        B = new Symbol( 'B' )
-        C = new Symbol( 'C' )
-        D = new Symbol( 'D' )
+        A = new LurchSymbol( 'A' )
+        B = new LurchSymbol( 'B' )
+        C = new LurchSymbol( 'C' )
+        D = new LurchSymbol( 'D' )
         E = ( ...args ) => new Environment( ...args )
-        _A = new Symbol( 'A' ).asA( 'given' )
-        _B = new Symbol( 'B' ).asA( 'given' )
-        _C = new Symbol( 'C' ).asA( 'given' )
-        _D = new Symbol( 'D' ).asA( 'given' )
+        _A = new LurchSymbol( 'A' ).asA( 'given' )
+        _B = new LurchSymbol( 'B' ).asA( 'given' )
+        _C = new LurchSymbol( 'C' ).asA( 'given' )
+        _D = new LurchSymbol( 'D' ).asA( 'given' )
         _E = ( ...args ) => E( ...args ).makeIntoA( 'given' )
     } )
   

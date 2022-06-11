@@ -1,5 +1,5 @@
 
-import { Symbol } from '../symbol.js'
+import { Symbol as LurchSymbol } from '../symbol.js'
 
 /**
  * This module defines a constant and function that formalize the concept of a
@@ -64,7 +64,7 @@ export const metavariable = 'LDE MV'
  */
 export const containsAMetavariable = LC =>
     LC.hasDescendantSatisfying( d =>
-        ( d instanceof Symbol ) && d.isA( metavariable ) )
+        ( d instanceof LurchSymbol ) && d.isA( metavariable ) )
 
 /**
  * Find the ordered list of all descendants of the given
@@ -87,7 +87,7 @@ export const containsAMetavariable = LC =>
  */
 export const metavariablesIn = LC =>
     LC.descendantsSatisfying( d =>
-        ( d instanceof Symbol ) && d.isA( metavariable ) )
+        ( d instanceof LurchSymbol ) && d.isA( metavariable ) )
 
 /**
  * Find the collection of metavariables appearing in the given

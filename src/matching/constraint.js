@@ -1,5 +1,5 @@
 
-import { Symbol } from '../symbol.js'
+import { Symbol as LurchSymbol } from '../symbol.js'
 import { Application } from '../application.js'
 import { Binding } from '../binding.js'
 import { LogicConcept } from '../logic-concept.js'
@@ -143,7 +143,7 @@ export class Constraint {
      * @see {@link Constraint#appliedTo appliedTo()}
      */
     isAnInstantiation () {
-        return this.pattern instanceof Symbol
+        return this.pattern instanceof LurchSymbol
             && this.pattern.isA( metavariable )
     }
 
@@ -179,7 +179,7 @@ export class Constraint {
                     ...expression.children().map( withoutBindings ) )
             if ( expression instanceof Binding )
                 return new Application(
-                    new Symbol( 'LDE binding' ),
+                    new LurchSymbol( 'LDE binding' ),
                     ...expression.children().map( withoutBindings ) )
             throw 'Invalid expression in removeBindings'
         }

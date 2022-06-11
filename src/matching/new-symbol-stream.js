@@ -1,6 +1,6 @@
 
 import { MathConcept } from "../math-concept.js"
-import { Symbol } from "../symbol.js"
+import { Symbol as LurchSymbol } from "../symbol.js"
 
 /**
  * In many situations, it's useful to be able to create new symbols, which
@@ -101,7 +101,7 @@ export class NewSymbolStream {
             if ( typeof( arg ) == 'string' )
                 avoidString( arg )
             else if ( arg instanceof MathConcept )
-                arg.descendantsSatisfying( d => d instanceof Symbol )
+                arg.descendantsSatisfying( d => d instanceof LurchSymbol )
                    .forEach( symbol => avoidString( symbol.text() ) )
         } )
     }
@@ -126,7 +126,7 @@ export class NewSymbolStream {
      *   the {@link NewSymbolStream#avoid avoid()} function.
      * @see {@link NewSymbolStream#nextN nextN()}
      */
-    next () { return new Symbol( `v${++this._lastIndex}` ) }
+    next () { return new LurchSymbol( `v${++this._lastIndex}` ) }
 
     /**
      * Produce new symbols from this stream.  The stream guarantees that

@@ -2,7 +2,7 @@
 import { LogicConcept } from '../src/logic-concept.js'
 import { Binding } from '../src/binding.js'
 import { Expression } from '../src/expression.js'
-import { Symbol } from '../src/symbol.js'
+import { Symbol as LurchSymbol } from '../src/symbol.js'
 
 describe( 'Binding', () => {
 
@@ -13,9 +13,9 @@ describe( 'Binding', () => {
     let f, x, y, E1, E2, E3, LC1, LC2
     beforeEach( () => {
         // Construct a few objects for use in the tests below.
-        f = new Symbol( 'f' )
-        x = new Symbol( 'x' )
-        y = new Symbol( 'y' )
+        f = new LurchSymbol( 'f' )
+        x = new LurchSymbol( 'x' )
+        y = new LurchSymbol( 'y' )
         E1 = new Expression
         E2 = new Expression
         E3 = new Expression

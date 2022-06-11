@@ -1,6 +1,6 @@
 
 import { metavariable, metavariableNamesIn } from './metavariables.js'
-import { Symbol } from '../symbol.js'
+import { Symbol as LurchSymbol } from '../symbol.js'
 import { LogicConcept } from '../logic-concept.js'
 import { Expression } from '../expression.js'
 import { Constraint } from './constraint.js'
@@ -43,7 +43,7 @@ export class Substitution {
             this._metavariable = args[0].pattern
             this._expression = args[0].expression
         // Case 2: a metavariable-expression pair
-        } else if ( args.length == 2 && ( args[0] instanceof Symbol )
+        } else if ( args.length == 2 && ( args[0] instanceof LurchSymbol )
                                      && args[0].isA( metavariable )
                                      && ( args[1] instanceof Expression ) ) {
             this._metavariable = args[0]

@@ -1,5 +1,5 @@
 
-import { Symbol } from '../src/symbol.js'
+import { Symbol as LurchSymbol } from '../src/symbol.js'
 import { LogicConcept } from '../src/logic-concept.js'
 import M from '../src/matching.js'
 
@@ -47,25 +47,25 @@ describe( 'NewSymbolStream', () => {
         let N = new M.NewSymbolStream
         let sym, syms
         expect( () => sym = N.next() ).not.to.throw()
-        expect( sym ).to.be.instanceOf( Symbol )
+        expect( sym ).to.be.instanceOf( LurchSymbol )
         expect( sym.text() ).to.equal( 'v1' )
         expect( () => sym = N.next() ).not.to.throw()
-        expect( sym ).to.be.instanceOf( Symbol )
+        expect( sym ).to.be.instanceOf( LurchSymbol )
         expect( sym.text() ).to.equal( 'v2' )
         expect( () => sym = N.next() ).not.to.throw()
-        expect( sym ).to.be.instanceOf( Symbol )
+        expect( sym ).to.be.instanceOf( LurchSymbol )
         expect( sym.text() ).to.equal( 'v3' )
         expect( () => syms = N.nextN( 5 ) ).not.to.throw()
         expect( syms ).to.be.instanceOf( Array )
-        expect( syms[0] ).to.be.instanceOf( Symbol )
+        expect( syms[0] ).to.be.instanceOf( LurchSymbol )
         expect( syms[0].text() ).to.equal( 'v4' )
-        expect( syms[1] ).to.be.instanceOf( Symbol )
+        expect( syms[1] ).to.be.instanceOf( LurchSymbol )
         expect( syms[1].text() ).to.equal( 'v5' )
-        expect( syms[2] ).to.be.instanceOf( Symbol )
+        expect( syms[2] ).to.be.instanceOf( LurchSymbol )
         expect( syms[2].text() ).to.equal( 'v6' )
-        expect( syms[3] ).to.be.instanceOf( Symbol )
+        expect( syms[3] ).to.be.instanceOf( LurchSymbol )
         expect( syms[3].text() ).to.equal( 'v7' )
-        expect( syms[4] ).to.be.instanceOf( Symbol )
+        expect( syms[4] ).to.be.instanceOf( LurchSymbol )
         expect( syms[4].text() ).to.equal( 'v8' )
     } )
 
@@ -76,13 +76,13 @@ describe( 'NewSymbolStream', () => {
         N.avoid( 'v2', 'v3', 'x', 'y' )
         let cannotBeThese = [ 'v2', 'v3', 'x', 'y' ]
         expect( () => sym = N.next() ).not.to.throw()
-        expect( sym ).to.be.instanceOf( Symbol )
+        expect( sym ).to.be.instanceOf( LurchSymbol )
         expect( cannotBeThese ).not.to.have.members( [ sym.text() ] )
         expect( () => sym = N.next() ).not.to.throw()
-        expect( sym ).to.be.instanceOf( Symbol )
+        expect( sym ).to.be.instanceOf( LurchSymbol )
         expect( cannotBeThese ).not.to.have.members( [ sym.text() ] )
         expect( () => sym = N.next() ).not.to.throw()
-        expect( sym ).to.be.instanceOf( Symbol )
+        expect( sym ).to.be.instanceOf( LurchSymbol )
         expect( cannotBeThese ).not.to.have.members( [ sym.text() ] )
         // avoid three LogicConcepts, with many symbols inside them
         N = new M.NewSymbolStream( ...LogicConcept.fromPutdown( `
@@ -98,13 +98,13 @@ describe( 'NewSymbolStream', () => {
             'noo', 'v3', 'v4', 'V5', 'this_is_not_v6'
         ]
         expect( () => sym = N.next() ).not.to.throw()
-        expect( sym ).to.be.instanceOf( Symbol )
+        expect( sym ).to.be.instanceOf( LurchSymbol )
         expect( cannotBeThese ).not.to.have.members( [ sym.text() ] )
         expect( () => sym = N.next() ).not.to.throw()
-        expect( sym ).to.be.instanceOf( Symbol )
+        expect( sym ).to.be.instanceOf( LurchSymbol )
         expect( cannotBeThese ).not.to.have.members( [ sym.text() ] )
         expect( () => sym = N.next() ).not.to.throw()
-        expect( sym ).to.be.instanceOf( Symbol )
+        expect( sym ).to.be.instanceOf( LurchSymbol )
         expect( cannotBeThese ).not.to.have.members( [ sym.text() ] )
     } )
 

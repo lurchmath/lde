@@ -1,5 +1,5 @@
 
-import { Symbol } from '../src/symbol.js'
+import { Symbol as LurchSymbol } from '../src/symbol.js'
 import { Application } from '../src/application.js'
 import { Binding } from '../src/binding.js'
 import { Environment } from '../src/environment.js'
@@ -19,8 +19,8 @@ describe( 'Substitution', () => {
             (+ 1 2)
             (forall n , (= (* n m) (* m n)))
         ` )
-        let m1 = new Symbol( 'meta1' ).makeIntoA( M.metavariable )
-        let m2 = new Symbol( 'another mv' ).makeIntoA( M.metavariable )
+        let m1 = new LurchSymbol( 'meta1' ).makeIntoA( M.metavariable )
+        let m2 = new LurchSymbol( 'another mv' ).makeIntoA( M.metavariable )
         expect( () => S = new M.Substitution( m1, e1 ) ).not.to.throw()
         expect( S ).to.be.instanceOf( M.Substitution )
         // in here, we also test the getters for metavar and expression, briefly
@@ -47,7 +47,7 @@ describe( 'Substitution', () => {
             (+ 1 2)
             (forall n , (= (* n m) (* m n)))
         ` )
-        let m1 = new Symbol( 'meta1' ).asA( M.metavariable )
+        let m1 = new LurchSymbol( 'meta1' ).asA( M.metavariable )
         expect( () => S = new M.Substitution( m1, e1 ) ).not.to.throw()
         expect( S ).to.be.instanceOf( M.Substitution )
         // make a copy and ensure it throws no errors
@@ -66,39 +66,39 @@ describe( 'Substitution', () => {
     it( 'Should correctly compute equality for two instances', () => {
         // a Substitution is equal to one that looks exactly the same
         expect( new M.Substitution(
-            new Symbol( 'X' ).asA( M.metavariable ),
+            new LurchSymbol( 'X' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(sqrt (+ (^ x 2) (^ y 2)))' )[0]
         ).equals( new M.Substitution(
-            new Symbol( 'X' ).asA( M.metavariable ),
+            new LurchSymbol( 'X' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(sqrt (+ (^ x 2) (^ y 2)))' )[0]
         ) ) ).to.equal( true )
         // two Substitutions are not equal if their metavariables differ
         expect( new M.Substitution(
-            new Symbol( 'X' ).asA( M.metavariable ),
+            new LurchSymbol( 'X' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(sqrt (+ (^ x 2) (^ y 2)))' )[0]
         ).equals( new M.Substitution(
-            new Symbol( 'Y' ).asA( M.metavariable ),
+            new LurchSymbol( 'Y' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(sqrt (+ (^ x 2) (^ y 2)))' )[0]
         ) ) ).to.equal( false )
         // two Substitutions are not equal if their expressions differ
         expect( new M.Substitution(
-            new Symbol( 'X' ).asA( M.metavariable ),
+            new LurchSymbol( 'X' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(sqrt (+ (^ x 2) (^ y 2)))' )[0]
         ).equals( new M.Substitution(
-            new Symbol( 'X' ).asA( M.metavariable ),
-            new Symbol( 'y' )
+            new LurchSymbol( 'X' ).asA( M.metavariable ),
+            new LurchSymbol( 'y' )
         ) ) ).to.equal( false )
         // two Substitutions are not equal if both parts differ
         expect( new M.Substitution(
-            new Symbol( 'X' ).asA( M.metavariable ),
+            new LurchSymbol( 'X' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(sqrt (+ (^ x 2) (^ y 2)))' )[0]
         ).equals( new M.Substitution(
-            new Symbol( 'Y' ).asA( M.metavariable ),
-            new Symbol( 'y' )
+            new LurchSymbol( 'Y' ).asA( M.metavariable ),
+            new LurchSymbol( 'y' )
         ) ) ).to.equal( false )
         // a Substitution is equal to a copy of itself
         let S = new M.Substitution(
-            new Symbol( 'X' ).asA( M.metavariable ),
+            new LurchSymbol( 'X' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(sqrt (+ (^ x 2) (^ y 2)))' )[0]
         )
         expect( S.equals( S.copy() ) ).to.equal( true )
@@ -106,15 +106,15 @@ describe( 'Substitution', () => {
 
     it( 'Should apply itself correctly in-place or functionally', () => {
         // create a Substitution
-        let X = new Symbol( 'X' ).asA( M.metavariable )
+        let X = new LurchSymbol( 'X' ).asA( M.metavariable )
         let S = new M.Substitution(
             X.copy(),
             LogicConcept.fromPutdown( '(exp (- x))' )[0]
         )
         // create three patterns to which to apply it, and copies of each
-        let P1 = new Application( new Symbol( 'f' ), X.copy() )
-        let P2 = new Binding( new Symbol( '𝝺' ), new Symbol( 'v' ),
-            new Application( X.copy(), new Symbol( 'v' ) ) )
+        let P1 = new Application( new LurchSymbol( 'f' ), X.copy() )
+        let P2 = new Binding( new LurchSymbol( '𝝺' ), new LurchSymbol( 'v' ),
+            new Application( X.copy(), new LurchSymbol( 'v' ) ) )
         let P3 = new Environment( X.copy(), X.copy(), X.copy() )
         const P1copy = P1.copy()
         const P2copy = P2.copy()
@@ -163,9 +163,9 @@ describe( 'Substitution', () => {
 
     it( 'Should apply itself equally well to other Substitutions', () => {
         // Create several substitutions
-        let mv1 = new Symbol( 'mv1' ).asA( M.metavariable )
-        let mv2 = new Symbol( 'mv2' ).asA( M.metavariable )
-        let mv3 = new Symbol( 'mv3' ).asA( M.metavariable )
+        let mv1 = new LurchSymbol( 'mv1' ).asA( M.metavariable )
+        let mv2 = new LurchSymbol( 'mv2' ).asA( M.metavariable )
+        let mv3 = new LurchSymbol( 'mv3' ).asA( M.metavariable )
         let S1 = new M.Substitution(
             mv1.copy(),
             LogicConcept.fromPutdown( '(f x y z)' )[0]
@@ -173,7 +173,7 @@ describe( 'Substitution', () => {
         let S2 = new M.Substitution(
             mv2.copy(),
             new Application(
-                new Symbol( 'foo' ),
+                new LurchSymbol( 'foo' ),
                 mv1.copy(),
                 mv3.copy()
             )
@@ -207,7 +207,7 @@ describe( 'Substitution', () => {
         expect( test ).not.equals( S2 )
         expect( test.metavariable.text() ).equals( 'mv2' )
         expect( test.expression.equals( new Application(
-            new Symbol( 'foo' ),
+            new LurchSymbol( 'foo' ),
             LogicConcept.fromPutdown( '(f x y z)' )[0],
             mv3.copy()
         ) ) ).equals( true )
@@ -229,7 +229,7 @@ describe( 'Substitution', () => {
         expect( test ).not.equals( S2 )
         expect( test.metavariable.text() ).equals( 'mv2' )
         expect( test.expression.equals( new Application(
-            new Symbol( 'foo' ), mv1.copy(), mv1.copy()
+            new LurchSymbol( 'foo' ), mv1.copy(), mv1.copy()
         ) ) ).equals( true )
         expect( test.metavariableNames() ).to.be.instanceOf( Set )
         expect( test.metavariableNames().size ).equals( 1 )

@@ -8,7 +8,7 @@ import { LogicConcept } from '../src/logic-concept.js'
 import { Declaration } from '../src/declaration.js'
 import { Environment } from '../src/environment.js'
 import { Expression } from '../src/expression.js'
-import { Symbol } from '../src/symbol.js'
+import { Symbol as LurchSymbol } from '../src/symbol.js'
 import { Binding } from '../src/binding.js'
 
 // And these are needed for other tests below, such as parsing
@@ -1966,7 +1966,7 @@ describe( 'Bound and free variables', () => {
             } else {
                 return new Expression( ...arg.map( makeTree ) )
             }
-        } else return new Symbol( arg )
+        } else return new LurchSymbol( arg )
     }
 
     it( 'Should correctly compute the free identifiers in a MathConcept', () => {
@@ -1980,7 +1980,7 @@ describe( 'Bound and free variables', () => {
         const forgotToMarkBinding = makeTree(
             [ '∀', 'x', 'y', [ 'P', 'x', 'y' ] ] )
         const notEnoughChildren = makeTree( [ '∑', 'body' ] )
-        const atomic = new Symbol( 'atomic' )
+        const atomic = new LurchSymbol( 'atomic' )
         // compute the list of free identifiers in each one, sort them (if
         // needed) so that the result is in a canonical order, and compare to
         // the correct answer in each case
@@ -2038,10 +2038,10 @@ describe( 'Bound and free variables', () => {
         expect( x3.isFree() ).to.equal( false )
         expect( predicateLogic1.occursFree( x1.copy() ) ).to.equal( true )
         // all other symbols all occur free
-        expect( predicateLogic1.occursFree( new Symbol( 'and' ) ) ).to.equal( true )
-        expect( predicateLogic1.occursFree( new Symbol( 'P' ) ) ).to.equal( true )
-        expect( predicateLogic1.occursFree( new Symbol( 'Q' ) ) ).to.equal( true )
-        expect( predicateLogic1.occursFree( new Symbol( '∀' ) ) ).to.equal( true )
+        expect( predicateLogic1.occursFree( new LurchSymbol( 'and' ) ) ).to.equal( true )
+        expect( predicateLogic1.occursFree( new LurchSymbol( 'P' ) ) ).to.equal( true )
+        expect( predicateLogic1.occursFree( new LurchSymbol( 'Q' ) ) ).to.equal( true )
+        expect( predicateLogic1.occursFree( new LurchSymbol( '∀' ) ) ).to.equal( true )
         // P(x) occurs free but Q(x) does not
         const Pofx = predicateLogic1.child( 1 )
         const Qofx = predicateLogic1.index( [ 2, 2 ] )
@@ -2106,15 +2106,15 @@ describe( 'Bound and free variables', () => {
         // free s in it; in that case, we get no change
         let test
         test = sum.copy()
-        test.replaceFree( new Symbol( 's' ), gofx )
+        test.replaceFree( new LurchSymbol( 's' ), gofx )
         const temp = makeTree( [ 'bind', '∑', 'TEMP', [ 'f', [ 'g', 'x' ] ] ] )
         temp.child( 1 ).replaceWith( makeTree( [ 'g', 'x' ] ) )
         expect( test.equals( temp ) ).to.equal( true )
         test = sum.copy()
-        test.replaceFree( new Symbol( 's' ), hofs )
+        test.replaceFree( new LurchSymbol( 's' ), hofs )
         expect( test.equals( sum ) ).to.equal( true )
         test = sum.copy()
-        test.replaceFree( new Symbol( 's' ), Exxeqy )
+        test.replaceFree( new LurchSymbol( 's' ), Exxeqy )
         let compare = makeTree(
             [ 'bind', '∑', 'TEMP',
                 [ 'f', [ 'bind', '∃', 'x', [ '=', 'x', 'y' ] ] ] ] )
@@ -2152,13 +2152,13 @@ describe( 'Bound and free variables', () => {
         // so if we ask it to replace x wherever it's free to do so, then only
         // the first x changes when the replacement contains a free x
         test = predicateLogic.copy()
-        test.replaceFree( new Symbol( 'x' ), gofx )
+        test.replaceFree( new LurchSymbol( 'x' ), gofx )
         compare = makeTree(
             [ 'and', [ 'P', [ 'g', 'x' ] ], [ 'bind', '∀', 'x', [ 'P', 'x' ] ] ]
         )
         expect( test.equals( compare ) ).to.equal( true )
         test = predicateLogic.copy()
-        test.replaceFree( new Symbol( 'x' ), hofs )
+        test.replaceFree( new LurchSymbol( 'x' ), hofs )
         compare = makeTree(
             [ 'and', [ 'P', [ 'h', 's' ] ],
                      [ 'bind', '∀', 'TEMP', [ 'P', [ 'h', 's' ] ] ] ]
@@ -2166,7 +2166,7 @@ describe( 'Bound and free variables', () => {
         compare.index( [ 2, 1 ] ).replaceWith( makeTree( [ 'h', 's' ] ) )
         expect( test.equals( compare ) ).to.equal( true )
         test = predicateLogic.copy()
-        test.replaceFree( new Symbol( 'x' ), Exxeqy )
+        test.replaceFree( new LurchSymbol( 'x' ), Exxeqy )
         compare = makeTree( [
             'and',
             [ 'P', [ 'bind', '∃', 'x', [ '=', 'x', 'y' ] ] ],
@@ -2185,7 +2185,7 @@ describe( 'Bound and free variables', () => {
         // the inThis parameter
         // First, try with inThis == the quantifier, which should give no change:
         test = predicateLogic.copy()
-        test.replaceFree( new Symbol( 'x' ), gofx, test.child( 2 ) )
+        test.replaceFree( new LurchSymbol( 'x' ), gofx, test.child( 2 ) )
         compare = makeTree(
             [ 'and', [ 'P', [ 'g', 'x' ] ], [ 'bind', '∀', 'x', [ 'P', 'x' ] ] ]
         )
@@ -2194,7 +2194,7 @@ describe( 'Bound and free variables', () => {
         // only the first child of the quantifier is considered bound, so two
         // replacements should happen instead of just one:
         test = predicateLogic.copy()
-        test.replaceFree( new Symbol( 'x' ), gofx, test.index( [ 2, 2 ] ) )
+        test.replaceFree( new LurchSymbol( 'x' ), gofx, test.index( [ 2, 2 ] ) )
         compare = makeTree(
             [ 'and', [ 'P', [ 'g', 'x' ] ],
                      [ 'bind', '∀', 'x', [ 'P', [ 'g', 'x' ] ] ] ]
@@ -2520,16 +2520,16 @@ describe( 'Smackdown notation and interpretation', () => {
     it( 'Should support all of putdown notation', () => {
         const test1 = MathConcept.fromSmackdown( '(- (^ b 2) (* (* 4 a) c))' )
         const discriminant = new Application(
-            new Symbol( '-' ),
+            new LurchSymbol( '-' ),
             new Application(
-                new Symbol( '^' ), new Symbol( 'b' ), new Symbol( '2' )
+                new LurchSymbol( '^' ), new LurchSymbol( 'b' ), new LurchSymbol( '2' )
             ),
             new Application(
-                new Symbol( '*' ),
+                new LurchSymbol( '*' ),
                 new Application(
-                    new Symbol( '*' ), new Symbol( '4' ), new Symbol( 'a' )
+                    new LurchSymbol( '*' ), new LurchSymbol( '4' ), new LurchSymbol( 'a' )
                 ),
-                new Symbol( 'c' )
+                new LurchSymbol( 'c' )
             )
         )
         expect( test1 ).to.be.instanceof( Array )
@@ -2555,13 +2555,13 @@ describe( 'Smackdown notation and interpretation', () => {
             new Declaration(
                 Declaration.Constant,
                 [
-                    new Symbol( 'x' ).attr( { 'special variable' : false } ),
-                    new Symbol( 'y' )
+                    new LurchSymbol( 'x' ).attr( { 'special variable' : false } ),
+                    new LurchSymbol( 'y' )
                 ],
                 new Application(
-                    new Symbol( 'P' ),
-                    new Symbol( 'x' ),
-                    new Symbol( 'y' ).attr( {
+                    new LurchSymbol( 'P' ),
+                    new LurchSymbol( 'x' ),
+                    new LurchSymbol( 'y' ).attr( {
                         'special variable' : true,
                         'double special?' : 'you know it'
                     } )

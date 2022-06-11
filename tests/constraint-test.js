@@ -1,5 +1,5 @@
 
-import { Symbol } from '../src/symbol.js'
+import { Symbol as LurchSymbol } from '../src/symbol.js'
 import { Application } from '../src/application.js'
 import { Binding } from '../src/binding.js'
 import { Environment } from '../src/environment.js'
@@ -64,7 +64,7 @@ describe( 'Constraint', () => {
         expect( () => C = new M.Constraint( P, E ) ).to.throw(
             'may not contain metavariables' )
         // even just one metavariable is problematic in the expression
-        E = new Symbol( 'oh well' ).asA( M.metavariable )
+        E = new LurchSymbol( 'oh well' ).asA( M.metavariable )
         expect( () => C = new M.Constraint( P, E ) ).to.throw(
             'may not contain metavariables' )
     } )
@@ -92,40 +92,40 @@ describe( 'Constraint', () => {
     it( 'Should correctly compute equality for two instances', () => {
         // a constraint is equal to one that looks exactly the same
         expect( new M.Constraint(
-            new Symbol( 'X' ).asA( M.metavariable ),
+            new LurchSymbol( 'X' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(sqrt (+ (^ x 2) (^ y 2)))' )[0]
         ).equals( new M.Constraint(
-            new Symbol( 'X' ).asA( M.metavariable ),
+            new LurchSymbol( 'X' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(sqrt (+ (^ x 2) (^ y 2)))' )[0]
         ) ) ).to.equal( true )
         // two constraints are not equal if their patterns differ, even if just
         // by an attribute, such as whether one is a metavariable
         expect( new M.Constraint(
-            new Symbol( 'X' ).asA( M.metavariable ),
+            new LurchSymbol( 'X' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(sqrt (+ (^ x 2) (^ y 2)))' )[0]
         ).equals( new M.Constraint(
-            new Symbol( 'X' ),
+            new LurchSymbol( 'X' ),
             LogicConcept.fromPutdown( '(sqrt (+ (^ x 2) (^ y 2)))' )[0]
         ) ) ).to.equal( false )
         // two constraints are not equal if their expressions differ
         expect( new M.Constraint(
-            new Symbol( 'X' ).asA( M.metavariable ),
+            new LurchSymbol( 'X' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(sqrt (+ (^ x 2) (^ y 2)))' )[0]
         ).equals( new M.Constraint(
-            new Symbol( 'X' ).asA( M.metavariable ),
-            new Symbol( 'y' )
+            new LurchSymbol( 'X' ).asA( M.metavariable ),
+            new LurchSymbol( 'y' )
         ) ) ).to.equal( false )
         // two constraints are not equal if both pattern and expression differ
         expect( new M.Constraint(
-            new Symbol( 'X' ).asA( M.metavariable ),
+            new LurchSymbol( 'X' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(sqrt (+ (^ x 2) (^ y 2)))' )[0]
         ).equals( new M.Constraint(
-            new Symbol( 'X' ),
-            new Symbol( 'y' )
+            new LurchSymbol( 'X' ),
+            new LurchSymbol( 'y' )
         ) ) ).to.equal( false )
         // a constraint is equal to a copy of itself
         let C = new M.Constraint(
-            new Symbol( 'X' ).asA( M.metavariable ),
+            new LurchSymbol( 'X' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(sqrt (+ (^ x 2) (^ y 2)))' )[0]
         )
         expect( C.equals( C.copy() ) ).to.equal( true )
@@ -135,14 +135,14 @@ describe( 'Constraint', () => {
         let C
         // a Constraint whose pattern is a single metavar is an instantiation
         C = new M.Constraint(
-            new Symbol( 'example' ).asA( M.metavariable ),
+            new LurchSymbol( 'example' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( '(x y z a b c)' )[0]
         )
         expect( C.isAnInstantiation() ).to.equal( true )
         // a Constraint whose pattern is a single symbol is not an instantiation
         // if we don't mark that symbol as a metavariable
         C = new M.Constraint(
-            new Symbol( 'example' ),
+            new LurchSymbol( 'example' ),
             LogicConcept.fromPutdown( '(x y z a b c)' )[0]
         )
         expect( C.isAnInstantiation() ).to.equal( false )
@@ -222,15 +222,15 @@ describe( 'Constraint', () => {
 
     it( 'Can become a Substitution that works in-place or functionally', () => {
         // create a Constraint that is an instantiation
-        let X = new Symbol( 'X' ).asA( M.metavariable )
+        let X = new LurchSymbol( 'X' ).asA( M.metavariable )
         let C = new M.Constraint(
             X.copy(),
             LogicConcept.fromPutdown( '(exp (- x))' )[0]
         )
         // create three patterns to which to apply it, and copies of each
-        let P1 = new Application( new Symbol( 'f' ), X.copy() )
-        let P2 = new Binding( new Symbol( '𝝺' ), new Symbol( 'v' ),
-            new Application( X.copy(), new Symbol( 'v' ) ) )
+        let P1 = new Application( new LurchSymbol( 'f' ), X.copy() )
+        let P2 = new Binding( new LurchSymbol( '𝝺' ), new LurchSymbol( 'v' ),
+            new Application( X.copy(), new LurchSymbol( 'v' ) ) )
         let P3 = new Environment( X.copy(), X.copy(), X.copy() )
         const P1copy = P1.copy()
         const P2copy = P2.copy()
@@ -359,7 +359,7 @@ describe( 'Constraint', () => {
         expect( C.complexity() ).to.equal( 1 )
         expect( C.complexityName() ).to.equal( 'success' )
         // Metavariable pattern = instantiation
-        P = new Symbol( 'A' ).asA( M.metavariable )
+        P = new LurchSymbol( 'A' ).asA( M.metavariable )
         E = LogicConcept.fromPutdown( '(a b)' )[0]
         C = new M.Constraint( P, E )
         expect( C.complexity() ).to.equal( 2 )
@@ -372,7 +372,8 @@ describe( 'Constraint', () => {
         expect( C.complexity() ).to.equal( 3 )
         expect( C.complexityName() ).to.equal( 'children' )
         // Exprssion Function Application pattern = EFA
-        P = M.newEFA( new Symbol( 'P' ).asA( M.metavariable ), new Symbol( 'x' ) )
+        P = M.newEFA( new LurchSymbol( 'P' ).asA( M.metavariable ),
+                      new LurchSymbol( 'x' ) )
         E = LogicConcept.fromPutdown( '(a b c d)' )[0]
         C = new M.Constraint( P, E )
         expect( C.complexity() ).to.equal( 4 )
@@ -387,7 +388,8 @@ describe( 'Constraint', () => {
         E = LogicConcept.fromPutdown( '(b c)' )[0]
         C = new M.Constraint( P, E )
         expect( () => C.children() ).to.throw( /^Cannot compute.*this type/ )
-        P = M.newEFA( new Symbol( 'P' ).asA( M.metavariable ), new Symbol( 'x' ) )
+        P = M.newEFA( new LurchSymbol( 'P' ).asA( M.metavariable ),
+                      new LurchSymbol( 'x' ) )
         E = LogicConcept.fromPutdown( '(a b c d)' )[0]
         C = new M.Constraint( P, E )
         expect( () => C.children() ).to.throw( /^Cannot compute.*this type/ )
@@ -400,15 +402,20 @@ describe( 'Constraint', () => {
         expect( () => result = C.children() ).not.to.throw()
         expect( result.length ).to.equal( 3 )
         expect( result[0] ).to.be.instanceOf( M.Constraint )
-        expect( result[0].pattern.equals( new Symbol( 'x' ) ) ).to.equal( true )
-        expect( result[0].expression.equals( new Symbol( 'a' ) ) ).to.equal( true )
+        expect( result[0].pattern.equals(
+            new LurchSymbol( 'x' ) ) ).to.equal( true )
+        expect( result[0].expression.equals(
+            new LurchSymbol( 'a' ) ) ).to.equal( true )
         expect( result[1] ).to.be.instanceOf( M.Constraint )
-        expect( result[1].pattern.equals( new Symbol( 'y' ).asA( M.metavariable ) ) )
-            .to.equal( true )
-        expect( result[1].expression.equals( new Symbol( 'b' ) ) ).to.equal( true )
+        expect( result[1].pattern.equals(
+            new LurchSymbol( 'y' ).asA( M.metavariable ) ) ).to.equal( true )
+        expect( result[1].expression.equals(
+            new LurchSymbol( 'b' ) ) ).to.equal( true )
         expect( result[2] ).to.be.instanceOf( M.Constraint )
-        expect( result[2].pattern.equals( new Symbol( 'z' ) ) ).to.equal( true )
-        expect( result[2].expression.equals( new Symbol( 'c' ) ) ).to.equal( true )
+        expect( result[2].pattern.equals(
+            new LurchSymbol( 'z' ) ) ).to.equal( true )
+        expect( result[2].expression.equals(
+            new LurchSymbol( 'c' ) ) ).to.equal( true )
     } )
 
 } )

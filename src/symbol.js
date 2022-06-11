@@ -12,9 +12,14 @@ import { Expression } from './expression.js'
  * the symbol.  For more information on this datum, see the constructor.
  * 
  * Note:  It is unfortunate that we have a class named Symbol in our
- * ontology while JavaScript also has a class named Symbol.  When there is a
- * need to use both in the same namespace (which occasionally arises, but not
- * often), we will import this class using the alias `LurchSymbol` instead.
+ * ontology while JavaScript also has a class named Symbol.  We therefore
+ * always import this class using code like the following, to ensure no
+ * conflicts in the global scope would prevent us from accessing the original
+ * JavaScript Symbol functionality, which we occasionally need.
+ * 
+ * ```js
+ * import { Symbol as LurchSymbol } from './symbol.js'
+ * ```
  */
 export class Symbol extends Expression {
     

@@ -2,7 +2,7 @@
 import Matching from '../src/matching.js'
 import { Binding } from '../src/binding.js'
 import { Application } from '../src/application.js'
-import { Symbol } from '../src/symbol.js'
+import { Symbol as LurchSymbol } from '../src/symbol.js'
 import Database from '../src/database.js'
 
 describe( 'Multiple pattern instantiations', () => {
@@ -95,7 +95,7 @@ describe( 'Multiple pattern instantiations', () => {
             // The tests use the notation (@apply x y) for EFAs,
             // so we need to find each such expression and convert it into an
             // actual EFA.
-            const apply = new Symbol( '@apply' )
+            const apply = new LurchSymbol( '@apply' )
             const isEFANotation = lc => ( lc instanceof Application )
                                      && lc.numChildren() == 3
                                      && lc.child( 0 ).equals( apply )
@@ -129,7 +129,7 @@ describe( 'Multiple pattern instantiations', () => {
                     // The tests use the notation (@lambda x , y) for EFs,
                     // so we need to find each such expression and convert it into
                     // an actual EF.
-                    const lambda = new Symbol( '@lambda' )
+                    const lambda = new LurchSymbol( '@lambda' )
                     const isEFNotation = lc => ( lc instanceof Binding )
                                             && lc.boundVariables().length == 1
                                             && lc.head().equals( lambda )
@@ -140,7 +140,7 @@ describe( 'Multiple pattern instantiations', () => {
                     // Now form the parts into a mapping
                     const result = { }
                     for ( let i = 0 ; i < child.numChildren() - 1 ; i += 2 ) {
-                        expect( child.child( i ) ).to.be.instanceOf( Symbol,
+                        expect( child.child( i ) ).to.be.instanceOf( LurchSymbol,
                             `Expected solution in ${key} has ${child.child(i)}`
                           + ` where a metavariable belongs` )
                         expect( child.child( i ).isA( Matching.metavariable) )

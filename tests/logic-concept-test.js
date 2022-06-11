@@ -9,7 +9,7 @@ import { Formula } from '../src/formula.js'
 import { Declaration } from '../src/declaration.js'
 import { Application } from '../src/application.js'
 import { Binding } from '../src/binding.js'
-import { Symbol } from '../src/symbol.js'
+import { Symbol as LurchSymbol } from '../src/symbol.js'
 
 // We need the makeSpy function for convenience testing of callbacks.
 import { makeSpy } from './test-utils.js'
@@ -206,7 +206,7 @@ describe( 'Reading putdown notation', () => {
             const test = LogicConcept.fromPutdown( inText )
             expect( test ).to.be.instanceof( Array )
             expect( test.length ).to.equal( 1 )
-            expect( test[0] ).to.be.instanceOf( Symbol )
+            expect( test[0] ).to.be.instanceOf( LurchSymbol )
             expect( test[0].text() ).to.equal( outText )
         }
         mustParseToASymbol( 'x' )
@@ -225,7 +225,7 @@ describe( 'Reading putdown notation', () => {
             const test = LogicConcept.fromPutdown( string )
             expect( test ).to.be.instanceof( Array )
             expect( test.length ).to.equal( 1 )
-            expect( test[0] ).to.be.instanceOf( Symbol )
+            expect( test[0] ).to.be.instanceOf( LurchSymbol )
             expect( test[0].text() ).to.equal( meaning )
         }
         mustParseAsString( '"this is some text"',
@@ -262,20 +262,20 @@ describe( 'Reading putdown notation', () => {
         test = LogicConcept.fromPutdown( 'x y z' )
         expect( test ).to.be.instanceof( Array )
         expect( test.length ).to.equal( 3 )
-        expect( test[0] ).to.be.instanceOf( Symbol )
+        expect( test[0] ).to.be.instanceOf( LurchSymbol )
         expect( test[0].text() ).to.equal( 'x' )
-        expect( test[1] ).to.be.instanceOf( Symbol )
+        expect( test[1] ).to.be.instanceOf( LurchSymbol )
         expect( test[1].text() ).to.equal( 'y' )
-        expect( test[2] ).to.be.instanceOf( Symbol )
+        expect( test[2] ).to.be.instanceOf( LurchSymbol )
         expect( test[2].text() ).to.equal( 'z' )
         test = LogicConcept.fromPutdown( '\n"LITERALLY ANYTHING"\n\n∉ ∅' )
         expect( test ).to.be.instanceof( Array )
         expect( test.length ).to.equal( 3 )
-        expect( test[0] ).to.be.instanceOf( Symbol )
+        expect( test[0] ).to.be.instanceOf( LurchSymbol )
         expect( test[0].text() ).to.equal( 'LITERALLY ANYTHING' )
-        expect( test[1] ).to.be.instanceOf( Symbol )
+        expect( test[1] ).to.be.instanceOf( LurchSymbol )
         expect( test[1].text() ).to.equal( '∉' )
-        expect( test[2] ).to.be.instanceOf( Symbol )
+        expect( test[2] ).to.be.instanceOf( LurchSymbol )
         expect( test[2].text() ).to.equal( '∅' )
     } )
 
@@ -287,9 +287,9 @@ describe( 'Reading putdown notation', () => {
         expect( test.length ).to.equal( 1 )
         expect( test[0].equals(
             new Application(
-                new Symbol( '+' ),
-                new Symbol( '1' ),
-                new Symbol( '2' )
+                new LurchSymbol( '+' ),
+                new LurchSymbol( '1' ),
+                new LurchSymbol( '2' )
             )
         ) ).to.equal( true )
         // ----------
@@ -297,25 +297,23 @@ describe( 'Reading putdown notation', () => {
         expect( test ).to.be.instanceof( Array )
         expect( test.length ).to.equal( 3 )
         expect( test[0].equals(
-            new Application( new Symbol( 'f' ), new Symbol( 'x' ) )
+            new Application( new LurchSymbol( 'f' ), new LurchSymbol( 'x' ) )
         ) ).to.equal( true )
-        expect( test[1].equals( new Symbol( 'hello!' ) ) ).to.equal( true )
+        expect( test[1].equals( new LurchSymbol( 'hello!' ) ) ).to.equal( true )
         expect( test[2].equals(
-            new Application( new Application( new Symbol( 'n' ) ) )
+            new Application( new Application( new LurchSymbol( 'n' ) ) )
         ) ).to.equal( true )
         // ----------
         test = LogicConcept.fromPutdown( '(- (^ b 2) (* (* 4 a) c))' )
         const discriminant = new Application(
-            new Symbol( '-' ),
+            new LurchSymbol( '-' ),
+            new Application( new LurchSymbol( '^' ), new LurchSymbol( 'b' ),
+                             new LurchSymbol( '2' ) ),
             new Application(
-                new Symbol( '^' ), new Symbol( 'b' ), new Symbol( '2' )
-            ),
-            new Application(
-                new Symbol( '*' ),
-                new Application(
-                    new Symbol( '*' ), new Symbol( '4' ), new Symbol( 'a' )
-                ),
-                new Symbol( 'c' )
+                new LurchSymbol( '*' ),
+                new Application( new LurchSymbol( '*' ),
+                    new LurchSymbol( '4' ), new LurchSymbol( 'a' ) ),
+                new LurchSymbol( 'c' )
             )
         )
         expect( test ).to.be.instanceof( Array )
@@ -341,9 +339,9 @@ describe( 'Reading putdown notation', () => {
         expect( test.length ).to.equal( 1 )
         expect( test[0].equals(
             new Binding(
-                new Symbol( '∀' ),
-                new Symbol( 'x' ),
-                new Symbol( 'P' )
+                new LurchSymbol( '∀' ),
+                new LurchSymbol( 'x' ),
+                new LurchSymbol( 'P' )
             )
         ) ).to.equal( true )
         // ----------
@@ -356,21 +354,21 @@ describe( 'Reading putdown notation', () => {
         expect( test.length ).to.equal( 1 )
         expect( test[0].equals(
             new Binding(
-                new Symbol( '∃' ),
-                new Symbol( 'alpha' ),
-                new Symbol( 'beta' ),
-                new Symbol( 'gamma' ),
+                new LurchSymbol( '∃' ),
+                new LurchSymbol( 'alpha' ),
+                new LurchSymbol( 'beta' ),
+                new LurchSymbol( 'gamma' ),
                 new Application(
-                    new Symbol( '=' ),
+                    new LurchSymbol( '=' ),
                     new Application(
-                        new Symbol( '+' ),
-                        new Symbol( 'alpha' ),
-                        new Symbol( 'beta' )
+                        new LurchSymbol( '+' ),
+                        new LurchSymbol( 'alpha' ),
+                        new LurchSymbol( 'beta' )
                     ),
                     new Application(
-                        new Symbol( '*' ),
-                        new Symbol( '2' ),
-                        new Symbol( 'gamma' )
+                        new LurchSymbol( '*' ),
+                        new LurchSymbol( '2' ),
+                        new LurchSymbol( 'gamma' )
                     )
                 )
             )
@@ -381,13 +379,11 @@ describe( 'Reading putdown notation', () => {
         expect( test.length ).to.equal( 1 )
         expect( test[0].equals(
             new Binding(
-                new Application(
-                    new Symbol( '∑' ), new Symbol( '1' ), new Symbol( 'n' )
-                ),
-                new Symbol( 'i' ),
-                new Application(
-                    new Symbol( '^' ), new Symbol( 'i' ), new Symbol( '2' )
-                ),
+                new Application( new LurchSymbol( '∑' ),
+                    new LurchSymbol( '1' ), new LurchSymbol( 'n' ) ),
+                new LurchSymbol( 'i' ),
+                new Application( new LurchSymbol( '^' ),
+                    new LurchSymbol( 'i' ), new LurchSymbol( '2' ) ),
             )
         ) ).to.equal( true )
     } )
@@ -399,10 +395,10 @@ describe( 'Reading putdown notation', () => {
         expect( test ).to.be.instanceof( Array )
         expect( test.length ).to.equal( 2 )
         expect( test[0].equals(
-            new Declaration( Declaration.Variable, new Symbol( 'x' ) )
+            new Declaration( Declaration.Variable, new LurchSymbol( 'x' ) )
         ) ).to.equal( true )
         expect( test[1].equals(
-            new Declaration( Declaration.Variable, new Symbol( 'y' ) )
+            new Declaration( Declaration.Variable, new LurchSymbol( 'y' ) )
         ) ).to.equal( true )
         // ----------
         test = LogicConcept.fromPutdown( '[pi e 0 1 2 3 const]' )
@@ -411,12 +407,12 @@ describe( 'Reading putdown notation', () => {
         expect( test[0].equals(
             new Declaration(
                 Declaration.Constant, [
-                    new Symbol( 'pi' ),
-                    new Symbol( 'e' ),
-                    new Symbol( '0' ),
-                    new Symbol( '1' ),
-                    new Symbol( '2' ),
-                    new Symbol( '3' )
+                    new LurchSymbol( 'pi' ),
+                    new LurchSymbol( 'e' ),
+                    new LurchSymbol( '0' ),
+                    new LurchSymbol( '1' ),
+                    new LurchSymbol( '2' ),
+                    new LurchSymbol( '3' )
                 ]
             )
         ) ).to.equal( true )
@@ -431,11 +427,11 @@ describe( 'Reading putdown notation', () => {
         expect( test[0].equals(
             new Declaration(
                 Declaration.Variable,
-                new Symbol( 'x' ),
+                new LurchSymbol( 'x' ),
                 new Application(
-                    new Symbol( '∈' ),
-                    new Symbol( 'x' ),
-                    new Symbol( 'Z' )
+                    new LurchSymbol( '∈' ),
+                    new LurchSymbol( 'x' ),
+                    new LurchSymbol( 'Z' )
                 )
             )
         ) ).to.equal( true )
@@ -446,17 +442,17 @@ describe( 'Reading putdown notation', () => {
         expect( test[0].equals(
             new Declaration(
                 Declaration.Variable,
-                new Symbol( 'x' ),
+                new LurchSymbol( 'x' ),
                 new Environment(
                     new Application(
-                        new Symbol( '∈' ),
-                        new Symbol( 'x' ),
-                        new Symbol( 'Z' )
+                        new LurchSymbol( '∈' ),
+                        new LurchSymbol( 'x' ),
+                        new LurchSymbol( 'Z' )
                     ),
                     new Application(
-                        new Symbol( '>' ),
-                        new Symbol( 'x' ),
-                        new Symbol( '5' )
+                        new LurchSymbol( '>' ),
+                        new LurchSymbol( 'x' ),
+                        new LurchSymbol( '5' )
                     )
                 )
             )
@@ -468,11 +464,11 @@ describe( 'Reading putdown notation', () => {
         expect( test[0].equals(
             new Declaration(
                 Declaration.Constant,
-                new Symbol( 'pi' ),
+                new LurchSymbol( 'pi' ),
                 new Declaration(
                     Declaration.Variable,
-                    new Symbol( 'm' ),
-                    new Symbol( 'n' )
+                    new LurchSymbol( 'm' ),
+                    new LurchSymbol( 'n' )
                 )
             )
         ) ).to.equal( true )
@@ -485,20 +481,20 @@ describe( 'Reading putdown notation', () => {
         expect( test[0].equals(
             new Declaration(
                 Declaration.Constant,
-                new Symbol( 'pi' ),
+                new LurchSymbol( 'pi' ),
                 new Application(
-                    new Symbol( 'something about circles' ),
-                    new Symbol( 'pi' )
+                    new LurchSymbol( 'something about circles' ),
+                    new LurchSymbol( 'pi' )
                 )
             )
         ) ).to.equal( true )
         expect( test[1].equals(
             new Declaration(
                 Declaration.Constant,
-                new Symbol( 'e' ),
+                new LurchSymbol( 'e' ),
                 new Application(
-                    new Symbol( 'something about limits' ),
-                    new Symbol( 'e' )
+                    new LurchSymbol( 'something about limits' ),
+                    new LurchSymbol( 'e' )
                 )
             )
         ) ).to.equal( true )
@@ -512,9 +508,9 @@ describe( 'Reading putdown notation', () => {
         expect( test.length ).to.equal( 1 )
         expect( test[0].equals(
             new Environment(
-                new Symbol( 'A' ),
-                new Symbol( 'B' ),
-                new Symbol( 'C' )
+                new LurchSymbol( 'A' ),
+                new LurchSymbol( 'B' ),
+                new LurchSymbol( 'C' )
             )
         ) ).to.equal( true )
         // ----------
@@ -532,11 +528,12 @@ describe( 'Reading putdown notation', () => {
         expect( test.length ).to.equal( 1 )
         expect( test[0].equals(
             new Environment(
-                new Application( new Symbol( 'x' ), new Symbol( 'y' ) ),
-                new Declaration( Declaration.Variable, new Symbol( 'z' ) ),
-                new Environment(
-                    new Application( new Application( new Symbol( 'QQ' ) ) )
-                )
+                new Application( new LurchSymbol( 'x' ),
+                                 new LurchSymbol( 'y' ) ),
+                new Declaration( Declaration.Variable,
+                                 new LurchSymbol( 'z' ) ),
+                new Environment( new Application( new Application(
+                    new LurchSymbol( 'QQ' ) ) ) )
             )
         ) ).to.equal( true )
         // console.log( JSON.stringify( test[0].toJSON(), null, 4 ) )
@@ -550,9 +547,9 @@ describe( 'Reading putdown notation', () => {
         expect( test.length ).to.equal( 1 )
         expect( test[0].equals(
             new Environment(
-                new Symbol( 'A' ),
-                new Symbol( 'B' ).asA( 'given' ),
-                new Symbol( 'C' )
+                new LurchSymbol( 'A' ),
+                new LurchSymbol( 'B' ).asA( 'given' ),
+                new LurchSymbol( 'C' )
             )
         ) ).to.equal( true )
         // ----------
@@ -576,12 +573,12 @@ describe( 'Reading putdown notation', () => {
         expect( test[0].equals(
             new Environment(
                 new Application(
-                    new Symbol( 'x' ), new Symbol( 'y' )
+                    new LurchSymbol( 'x' ), new LurchSymbol( 'y' )
                 ).asA( 'given' ),
-                new Declaration( Declaration.Variable, new Symbol( 'z' ) ),
+                new Declaration( Declaration.Variable, new LurchSymbol( 'z' ) ),
                 new Environment(
                     new Application(
-                        new Application( new Symbol( 'QQ' ) )
+                        new Application( new LurchSymbol( 'QQ' ) )
                     ).asA( 'given' )
                 )
             )
@@ -596,9 +593,9 @@ describe( 'Reading putdown notation', () => {
         expect( test.length ).to.equal( 1 )
         expect( test[0].equals(
             new Formula(
-                new Symbol( 'A' ),
-                new Symbol( 'B' ).asA( 'given' ),
-                new Symbol( 'C' )
+                new LurchSymbol( 'A' ),
+                new LurchSymbol( 'B' ).asA( 'given' ),
+                new LurchSymbol( 'C' )
             )
         ) ).to.equal( true )
         // ----------
@@ -608,9 +605,9 @@ describe( 'Reading putdown notation', () => {
         expect( test[0].equals(
             new Formula( new Formula ).asA( 'given' )
         ) ).to.equal( true )
-        expect( test[1].equals( new Symbol( 't' ) ) ).to.equal( true )
+        expect( test[1].equals( new LurchSymbol( 't' ) ) ).to.equal( true )
         expect( test[2].equals(
-            new Symbol( 'v' ).asA( 'given' )
+            new LurchSymbol( 'v' ).asA( 'given' )
         ) ).to.equal( true )
     } )
 
@@ -624,9 +621,9 @@ describe( 'Reading putdown notation', () => {
         expect( test.length ).to.equal( 1 )
         expect( test[0].equals(
             new Formula(
-                new Symbol( 'A' ),
-                new Symbol( 'B' ).asA( 'given' ),
-                new Symbol( 'C' )
+                new LurchSymbol( 'A' ),
+                new LurchSymbol( 'B' ).asA( 'given' ),
+                new LurchSymbol( 'C' )
             )
         ) ).to.equal( true )
         // ----------
@@ -642,16 +639,18 @@ describe( 'Reading putdown notation', () => {
             new Declaration(
                 Declaration.Variable,
                 [
-                    new Symbol( 'a' ),
-                    new Symbol( 'b' ),
-                    new Symbol( 'c' )
+                    new LurchSymbol( 'a' ),
+                    new LurchSymbol( 'b' ),
+                    new LurchSymbol( 'c' )
                 ]
             )
         ) ).to.equal( true )
         expect( test[1].equals(
             new Application(
-                new Application( new Symbol( 'a' ), new Symbol( 'b' ) ),
-                new Application( new Symbol( 'b' ), new Symbol( 'c' ) )
+                new Application( new LurchSymbol( 'a' ),
+                                 new LurchSymbol( 'b' ) ),
+                new Application( new LurchSymbol( 'b' ),
+                                 new LurchSymbol( 'c' ) )
             )
         ) ).to.equal( true )
     } )
@@ -664,9 +663,9 @@ describe( 'Reading putdown notation', () => {
         expect( test.length ).to.equal( 1 )
         expect( test[0].equals(
             new Environment(
-                new Symbol( 'A' ),
-                new Symbol( 'B' ).attr( { "foo" : 7, "bar" : "!" } ),
-                new Symbol( 'C' )
+                new LurchSymbol( 'A' ),
+                new LurchSymbol( 'B' ).attr( { "foo" : 7, "bar" : "!" } ),
+                new LurchSymbol( 'C' )
             )
         ) ).to.equal( true )
         // ----------
@@ -689,13 +688,14 @@ describe( 'Reading putdown notation', () => {
             new Declaration(
                 Declaration.Constant,
                 [
-                    new Symbol( 'x' ).attr( { 'special variable' : false } ),
-                    new Symbol( 'y' )
+                    new LurchSymbol( 'x' ).attr(
+                        { 'special variable' : false } ),
+                    new LurchSymbol( 'y' )
                 ],
                 new Application(
-                    new Symbol( 'P' ),
-                    new Symbol( 'x' ),
-                    new Symbol( 'y' ).attr( {
+                    new LurchSymbol( 'P' ),
+                    new LurchSymbol( 'x' ),
+                    new LurchSymbol( 'y' ).attr( {
                         'special variable' : true,
                         'double special?' : 'you know it'
                     } )
@@ -861,43 +861,46 @@ describe( 'Writing putdown notation', () => {
     const lastTestLC = () => testLCs.last()
         
     it( 'Should correctly represent any kind of Symbol', () => {
-        expect( new Symbol( 'x' ).toPutdown() ).to.equal( 'x' )
-        expect( new Symbol( 'one more thing' ).toPutdown() )
+        expect( new LurchSymbol( 'x' ).toPutdown() ).to.equal( 'x' )
+        expect( new LurchSymbol( 'one more thing' ).toPutdown() )
             .to.equal( '"one more thing"' )
-        expect( new Symbol( '"""""' ).toPutdown() )
+        expect( new LurchSymbol( '"""""' ).toPutdown() )
             .to.equal( '"\\"\\"\\"\\"\\""' )
-        expect( new Symbol( '{}(){*@@@*}' ).toPutdown() )
+        expect( new LurchSymbol( '{}(){*@@@*}' ).toPutdown() )
             .to.equal( '"{}(){*@@@*}"' )
-        expect( new Symbol( 'even\nmultiple\nlines' ).toPutdown() )
+        expect( new LurchSymbol( 'even\nmultiple\nlines' ).toPutdown() )
             .to.equal( '"even\\nmultiple\\nlines"' )
     } )
 
     it( 'Should correctly represent nested Applications', () => {
         let test
         // simple one
-        test = new Application( new Symbol( 'f' ), new Symbol( 'x' ) )
+        test = new Application( new LurchSymbol( 'f' ),
+                                new LurchSymbol( 'x' ) )
         expect( test.toPutdown() ).to.equal( '(f x)' )
         // nested one
         const discriminant = new Application(
-            new Symbol( '-' ),
+            new LurchSymbol( '-' ),
             new Application(
-                new Symbol( '^' ), new Symbol( 'b' ), new Symbol( '2' )
+                new LurchSymbol( '^' ), new LurchSymbol( 'b' ),
+                new LurchSymbol( '2' )
             ),
             new Application(
-                new Symbol( '*' ),
+                new LurchSymbol( '*' ),
                 new Application(
-                    new Symbol( '*' ), new Symbol( '4' ), new Symbol( 'a' )
+                    new LurchSymbol( '*' ), new LurchSymbol( '4' ),
+                    new LurchSymbol( 'a' )
                 ),
-                new Symbol( 'c' )
+                new LurchSymbol( 'c' )
             )
         )
         expect( discriminant.toPutdown() )
             .to.equal( '(- (^ b 2) (* (* 4 a) c))' )
         // long one--no line breaks, because it's not an Environment
         test = new Application(
-            new Symbol( 'one really huge function name' ),
-            new Symbol( 'one really huge argument name' ),
-            new Symbol( 'another really huge argument name' )
+            new LurchSymbol( 'one really huge function name' ),
+            new LurchSymbol( 'one really huge argument name' ),
+            new LurchSymbol( 'another really huge argument name' )
         )
         expect( test.toPutdown() ).to.equal(
             '("one really huge function name"'
@@ -910,19 +913,19 @@ describe( 'Writing putdown notation', () => {
         let test
         // simple one
         test = new Binding(
-            new Symbol( '∀' ),
-            new Symbol( 'x' ),
-            new Symbol( 'P' )
+            new LurchSymbol( '∀' ),
+            new LurchSymbol( 'x' ),
+            new LurchSymbol( 'P' )
         )
         expect( test.toPutdown() ).to.equal( '(∀ x , P)' )
         // nested one
         test = new Binding(
-            new Symbol( '∀' ),
-            new Symbol( 'x' ),
+            new LurchSymbol( '∀' ),
+            new LurchSymbol( 'x' ),
             new Binding(
-                new Symbol( '∃' ),
-                new Symbol( 'y' ),
-                new Symbol( 'Some relationship of x and y' )
+                new LurchSymbol( '∃' ),
+                new LurchSymbol( 'y' ),
+                new LurchSymbol( 'Some relationship of x and y' )
             )
         )
         expect( test.toPutdown() ).to.equal(
@@ -933,33 +936,32 @@ describe( 'Writing putdown notation', () => {
         let test
         // summation
         test = new Binding(
-            new Application(
-                new Symbol( '∑' ), new Symbol( '1' ), new Symbol( 'n' )
-            ),
-            new Symbol( 'i' ),
-            new Application(
-                new Symbol( '^' ), new Symbol( 'i' ), new Symbol( '2' )
-            ),
+            new Application( new LurchSymbol( '∑' ),
+                             new LurchSymbol( '1' ), new LurchSymbol( 'n' ) ),
+            new LurchSymbol( 'i' ),
+            new Application( new LurchSymbol( '^' ),
+                             new LurchSymbol( 'i' ), new LurchSymbol( '2' ) ),
         )
         expect( test.toPutdown() ).to.equal( '((∑ 1 n) i , (^ i 2))' )
         // predicate logic
         test = new Application(
-            new Symbol( 'or' ),
+            new LurchSymbol( 'or' ),
             new Binding(
-                new Symbol( '∀' ),
-                new Symbol( 'x' ),
-                new Application( new Symbol( 'P' ), new Symbol( 'x' ) )
+                new LurchSymbol( '∀' ),
+                new LurchSymbol( 'x' ),
+                new Application( new LurchSymbol( 'P' ),
+                                 new LurchSymbol( 'x' ) )
             ),
             new Binding(
-                new Symbol( '∀' ),
-                new Symbol( 't' ),
-                new Symbol( 'u' ),
-                new Symbol( 'v' ),
+                new LurchSymbol( '∀' ),
+                new LurchSymbol( 't' ),
+                new LurchSymbol( 'u' ),
+                new LurchSymbol( 'v' ),
                 new Application(
-                    new Symbol( 'K' ),
-                    new Symbol( 't' ),
-                    new Symbol( 'u' ),
-                    new Symbol( 'v' )
+                    new LurchSymbol( 'K' ),
+                    new LurchSymbol( 't' ),
+                    new LurchSymbol( 'u' ),
+                    new LurchSymbol( 'v' )
                 )
             )
         )
@@ -970,14 +972,14 @@ describe( 'Writing putdown notation', () => {
     it( 'Should correctly represent Declarations without bodies', () => {
         let test
         test = new Declaration( Declaration.Variable, [
-            new Symbol( 'Sunil' ),
-            new Symbol( 'Henry' ),
-            new Symbol( 'Rodrigo' )
+            new LurchSymbol( 'Sunil' ),
+            new LurchSymbol( 'Henry' ),
+            new LurchSymbol( 'Rodrigo' )
         ] )
         expect( test.toPutdown() ).to.equal( '[Sunil Henry Rodrigo var]' )
         test = new Declaration(
             Declaration.Constant,
-            new Symbol( 'The Greek letter π' )
+            new LurchSymbol( 'The Greek letter π' )
         )
         expect( test.toPutdown() ).to.equal( '["The Greek letter π" const]' )
     } )
@@ -986,37 +988,39 @@ describe( 'Writing putdown notation', () => {
         let test
         // symbol body
         test = new Declaration( Declaration.Variable, [
-            new Symbol( 'Sunil' ),
-            new Symbol( 'Henry' )
-        ], new Symbol( 'Helmut' ) )
+            new LurchSymbol( 'Sunil' ),
+            new LurchSymbol( 'Henry' )
+        ], new LurchSymbol( 'Helmut' ) )
         expect( test.toPutdown() ).to.equal( '[Sunil Henry var Helmut]' )
         // application body
         test = new Declaration(
             Declaration.Constant,
-            new Symbol( 'π' ),
-            new Application( new Symbol( 'Let\'s Eat' ), new Symbol( 'π' ) )
+            new LurchSymbol( 'π' ),
+            new Application( new LurchSymbol( 'Let\'s Eat' ),
+                             new LurchSymbol( 'π' ) )
         )
         expect( test.toPutdown() ).to.equal( '[π const ("Let\'s Eat" π)]' )
         // binding body
         test = new Declaration(
             Declaration.Constant,
-            new Symbol( '0' ),
+            new LurchSymbol( '0' ),
             new Binding(
-                new Symbol( '∀' ), new Symbol( 'n' ), new Symbol( "n>=0" )
+                new LurchSymbol( '∀' ), new LurchSymbol( 'n' ),
+                new LurchSymbol( "n>=0" )
             )
         )
         expect( test.toPutdown() ).to.equal( '[0 const (∀ n , n>=0)]' )
         // compound body
         test = new Declaration(
             Declaration.Constant,
-            new Symbol( '0' ),
+            new LurchSymbol( '0' ),
             new Binding(
-                new Symbol( '∀' ),
-                new Symbol( 'n' ),
+                new LurchSymbol( '∀' ),
+                new LurchSymbol( 'n' ),
                 new Application(
-                    new Symbol( '>=' ),
-                    new Symbol( 'n' ),
-                    new Symbol( '0' )
+                    new LurchSymbol( '>=' ),
+                    new LurchSymbol( 'n' ),
+                    new LurchSymbol( '0' )
                 )
             )
         )
@@ -1057,39 +1061,40 @@ describe( 'Writing putdown notation', () => {
         let test
         // tiny example
         test = new Environment(
-            new Symbol( 'If this' ).asA( 'given' ),
-            new Symbol( 'then that' )
+            new LurchSymbol( 'If this' ).asA( 'given' ),
+            new LurchSymbol( 'then that' )
         )
         expect( test.toPutdown() ).to.equal( '{ :"If this" "then that" }' )
         // universal introduction rule from predicate logic
         test = new Environment(
-            new Declaration( Declaration.Variable, new Symbol( 'x' ) )
+            new Declaration( Declaration.Variable, new LurchSymbol( 'x' ) )
                 .asA( 'given' ),
-            new Application( new Symbol( 'P' ), new Symbol( 'x' ) )
+            new Application( new LurchSymbol( 'P' ), new LurchSymbol( 'x' ) )
                 .asA( 'given' ),
             new Binding(
-                new Symbol( '∀' ),
-                new Symbol( 'x' ),
-                new Application( new Symbol( 'P' ), new Symbol( 'x' ) )
+                new LurchSymbol( '∀' ),
+                new LurchSymbol( 'x' ),
+                new Application( new LurchSymbol( 'P' ),
+                                 new LurchSymbol( 'x' ) )
             )
         )
         expect( test.toPutdown() ).to.equal(
             '{ :[x var] :(P x) (∀ x , (P x)) }' )
         // example with large content that must be broken over multiple lines
         test = new Environment(
-            new Symbol( 'this is a long symbol name' ).asA( 'given' ),
-            new Symbol( 'this is also a long symbol name' ),
+            new LurchSymbol( 'this is a long symbol name' ).asA( 'given' ),
+            new LurchSymbol( 'this is also a long symbol name' ),
             new Application(
-                new Symbol( 'beaucoup de longness, dude' ),
-                new Symbol( 'longedy long long longmeister' ),
-                new Symbol( 'short' )
+                new LurchSymbol( 'beaucoup de longness, dude' ),
+                new LurchSymbol( 'longedy long long longmeister' ),
+                new LurchSymbol( 'short' )
             ).asA( 'given' ),
             new Environment(
-                new Symbol( 'beaucoup de longness, dude' ),
-                new Symbol( 'longedy long long longmeister' ).asA( 'given' ),
-                new Symbol( 'short' )
+                new LurchSymbol( 'beaucoup de longness, dude' ),
+                new LurchSymbol( 'longedy long long longmeister' ).asA( 'given' ),
+                new LurchSymbol( 'short' )
             ).asA( 'given' ),
-            new Symbol( 'also short' )
+            new LurchSymbol( 'also short' )
         )
         expect( test.toPutdown() ).to.equal(
             '{\n'
@@ -1140,39 +1145,40 @@ describe( 'Writing putdown notation', () => {
         let test
         // tiny example
         test = new Formula(
-            new Symbol( 'If this' ).asA( 'given' ),
-            new Symbol( 'then that' )
+            new LurchSymbol( 'If this' ).asA( 'given' ),
+            new LurchSymbol( 'then that' )
         )
         expect( test.toPutdown() ).to.equal( '{* :"If this" "then that" *}' )
         // universal introduction rule from predicate logic
         test = new Formula(
-            new Declaration( Declaration.Variable, new Symbol( 'x' ) )
+            new Declaration( Declaration.Variable, new LurchSymbol( 'x' ) )
                 .asA( 'given' ),
-            new Application( new Symbol( 'P' ), new Symbol( 'x' ) )
+            new Application( new LurchSymbol( 'P' ), new LurchSymbol( 'x' ) )
                 .asA( 'given' ),
             new Binding(
-                new Symbol( '∀' ),
-                new Symbol( 'x' ),
-                new Application( new Symbol( 'P' ), new Symbol( 'x' ) )
+                new LurchSymbol( '∀' ),
+                new LurchSymbol( 'x' ),
+                new Application( new LurchSymbol( 'P' ),
+                                 new LurchSymbol( 'x' ) )
             )
         )
         expect( test.toPutdown() ).to.equal(
             '{* :[x var] :(P x) (∀ x , (P x)) *}' )
         // example with large content that must be broken over multiple lines
         test = new Formula(
-            new Symbol( 'this is a long symbol name' ).asA( 'given' ),
-            new Symbol( 'this is also a long symbol name' ),
+            new LurchSymbol( 'this is a long symbol name' ).asA( 'given' ),
+            new LurchSymbol( 'this is also a long symbol name' ),
             new Application(
-                new Symbol( 'beaucoup de longness, dude' ),
-                new Symbol( 'longedy long long longmeister' ),
-                new Symbol( 'short' )
+                new LurchSymbol( 'beaucoup de longness, dude' ),
+                new LurchSymbol( 'longedy long long longmeister' ),
+                new LurchSymbol( 'short' )
             ).asA( 'given' ),
             new Environment(
-                new Symbol( 'beaucoup de longness, dude' ),
-                new Symbol( 'longedy long long longmeister' ).asA( 'given' ),
-                new Symbol( 'short' )
+                new LurchSymbol( 'beaucoup de longness, dude' ),
+                new LurchSymbol( 'longedy long long longmeister' ).asA( 'given' ),
+                new LurchSymbol( 'short' )
             ).asA( 'given' ),
-            new Symbol( 'also short' )
+            new LurchSymbol( 'also short' )
         )
         expect( test.toPutdown() ).to.equal(
             '{*\n'
@@ -1192,23 +1198,23 @@ describe( 'Writing putdown notation', () => {
     it( 'Should correctly add attributes to any kind of output', () => {
         let test
         // symbol with attributes
-        test = new Symbol( 'x' ).attr( { 'color' : 'purple' } )
+        test = new LurchSymbol( 'x' ).attr( { 'color' : 'purple' } )
         expect( test.toPutdown() ).to.equal( 'x +{"color":"purple"}\n' )
         // application with attributes in various places
         test = new Application(
-            new Symbol( 'x' ).attr( { 'type' : 'cloud' } ),
-            new Symbol( 'y' )
+            new LurchSymbol( 'x' ).attr( { 'type' : 'cloud' } ),
+            new LurchSymbol( 'y' )
         ).attr( { 'altitude' : '10000ft' } )
         expect( test.toPutdown() ).to.equal(
             '(x +{"type":"cloud"}\n y) +{"altitude":"10000ft"}\n' )
         // binding with attributes in various places
         test = new Binding(
-            new Symbol( 'Disjoint Union' ).attr( { 1 : 2, 3 : 4 } ),
-            new Symbol( 'i' ),
+            new LurchSymbol( 'Disjoint Union' ).attr( { 1 : 2, 3 : 4 } ),
+            new LurchSymbol( 'i' ),
             new Application(
-                new Symbol( 'indexing' ),
-                new Symbol( 'S' ),
-                new Symbol( 'i' )
+                new LurchSymbol( 'indexing' ),
+                new LurchSymbol( 'S' ),
+                new LurchSymbol( 'i' )
             )
         )
         expect( test.toPutdown() ).to.equal(
@@ -1218,10 +1224,10 @@ describe( 'Writing putdown notation', () => {
           + ' i , (indexing S i))' )
         // environment with attributes in many places
         test = new Environment(
-            new Symbol( 'A' ).attr( { 'City' : 'Boston' } ).asA( 'given' ),
+            new LurchSymbol( 'A' ).attr( { 'City' : 'Boston' } ).asA( 'given' ),
             new Environment(
-                new Symbol( 'B' ).asA( 'given' ),
-                new Symbol( 'C' ).attr(
+                new LurchSymbol( 'B' ).asA( 'given' ),
+                new LurchSymbol( 'C' ).attr(
                     { 'Time' : 'Early', 'Weather' : 'Nice' } )
             ).asA( 'given' )
         ).attr( { 'State' : 'MA' } )

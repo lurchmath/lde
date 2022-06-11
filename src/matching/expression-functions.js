@@ -69,7 +69,7 @@
  * @module ExpressionFunctions
  */
 
-import { Symbol } from "../symbol.js"
+import { Symbol as LurchSymbol } from "../symbol.js"
 import { Binding } from "../binding.js"
 import { Application } from "../application.js"
 import { metavariable } from "./metavariables.js"
@@ -77,7 +77,7 @@ import { NewSymbolStream } from "./new-symbol-stream.js"
 
 // We use this symbol for encoding expression functions as LogicConcepts, as
 // described above.
-const expressionFunction = new Symbol( 'LDE lambda' )
+const expressionFunction = new LurchSymbol( 'LDE lambda' )
 
 /**
  * Creates a new expression function, encoded as a
@@ -174,14 +174,14 @@ export const applyEF = ( ef, ...args ) => {
         throw 'Incorrect number of arguments given to expression function'
     // if it's a projection function, replaceWith() won't work correctly
     const parameters = ef.boundVariables().map( bv => bv.text() )
-    if ( ef.body() instanceof Symbol ) {
+    if ( ef.body() instanceof LurchSymbol ) {
         const paramIndex = parameters.indexOf( ef.body().text() )
         if ( paramIndex > -1 ) return args[paramIndex].copy()
     }
     // otherwise we actually have to do replacement within a copy of the body
     const result = ef.body().copy()
     result.descendantsSatisfying(
-        d => ( d instanceof Symbol ) && d.isFree( result )
+        d => ( d instanceof LurchSymbol ) && d.isFree( result )
     ).forEach( sym => {
         const paramIndex = parameters.indexOf( sym.text() )
         if ( paramIndex > -1 ) sym.replaceWith( args[paramIndex].copy() )
@@ -261,7 +261,7 @@ export const applicationEF = ( arity, symbols ) => {
     const parameters = new NewSymbolStream( ...symbols ).nextN( arity )
     return newEF( ...parameters,
         new Application( ...symbols.map( sym =>
-            newEFA( sym instanceof Symbol ? sym : new Symbol( sym ),
+            newEFA( sym instanceof LurchSymbol ? sym : new LurchSymbol( sym ),
                     ...parameters.map( p => p.copy() ) ) ) ) )
 }
 
@@ -288,7 +288,7 @@ export const bindingEF = ( arity, symbols ) => {
 
 // We use this symbol for encoding Expression Function Applications as
 // LogicConcepts, as described above.
-const expressionFunctionApplication = new Symbol( 'LDE EFA' )
+const expressionFunctionApplication = new LurchSymbol( 'LDE EFA' )
 
 /**
  * Creates a new Expression Function Application, encoded as an
@@ -510,7 +510,7 @@ export const alphaEquivalent = ( expr1, expr2, stream ) => {
           || !alphaEquivalent( expr1.head(), expr2.head(), stream ) )
             return false
         const newBoundVars = stream.nextN( expr1.boundVariables().length )
-                                   .map( v => new Symbol( v ) )
+                                   .map( v => new LurchSymbol( v ) )
         return alphaEquivalent( alphaRenamed( expr1, newBoundVars ).body(),
                                 alphaRenamed( expr2, newBoundVars ).body(),
                                 stream )

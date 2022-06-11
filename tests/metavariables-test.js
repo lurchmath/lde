@@ -1,5 +1,5 @@
 
-import { Symbol } from '../src/symbol.js'
+import { Symbol as LurchSymbol } from '../src/symbol.js'
 import { Application } from '../src/application.js'
 import { Environment } from '../src/environment.js'
 import { LogicConcept } from '../src/logic-concept.js'
@@ -14,11 +14,11 @@ describe( 'Metavariables module', () => {
 
     it( 'Should let us mark metavariables, and it can detect them', () => {
         // test with just symbols
-        const A = new Symbol( 'A' )
-        const B = new Symbol( 'β₁' )
-        const C = new Symbol( 'C c see sea sí sim' )
-        const D = new Symbol( 'd' )
-        const E = new Symbol( '∃' )
+        const A = new LurchSymbol( 'A' )
+        const B = new LurchSymbol( 'β₁' )
+        const C = new LurchSymbol( 'C c see sea sí sim' )
+        const D = new LurchSymbol( 'd' )
+        const E = new LurchSymbol( '∃' )
         expect( A.isA( M.metavariable ) ).to.equal( false )
         expect( B.isA( M.metavariable ) ).to.equal( false )
         expect( C.isA( M.metavariable ) ).to.equal( false )
@@ -52,11 +52,11 @@ describe( 'Metavariables module', () => {
 
     it( 'Should find metavariables in larger expressions', () => {
         // build expressions like those in the previous test
-        const A = new Symbol( 'A' ).asA( M.metavariable )
-        const B = new Symbol( 'β₁' ).asA( M.metavariable )
-        const C = new Symbol( 'C c see sea sí sim' )
-        const D = new Symbol( 'd' ).asA( M.metavariable )
-        const E = new Symbol( '∃' )
+        const A = new LurchSymbol( 'A' ).asA( M.metavariable )
+        const B = new LurchSymbol( 'β₁' ).asA( M.metavariable )
+        const C = new LurchSymbol( 'C c see sea sí sim' )
+        const D = new LurchSymbol( 'd' ).asA( M.metavariable )
+        const E = new LurchSymbol( '∃' )
         const big1 = new Application( A, B, C )
         const big2 = new Environment( C, D, E )
         const big3 = new LogicConcept( big1, big1.copy() )

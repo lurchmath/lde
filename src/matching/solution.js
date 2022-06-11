@@ -1,7 +1,7 @@
 
 import { Application } from "../application.js"
 import { Binding } from "../binding.js"
-import { Symbol } from "../symbol.js"
+import { Symbol as LurchSymbol } from "../symbol.js"
 import { metavariable, metavariableNamesIn } from "./metavariables.js"
 import { Substitution } from "./substitution.js"
 import { Problem } from "./problem.js"
@@ -138,7 +138,7 @@ export class Solution {
      *   {@link Expression Expression}
      */
     get ( metavariable ) {
-        if ( metavariable instanceof Symbol )
+        if ( metavariable instanceof LurchSymbol )
             metavariable = metavariable.text()
         return this._substitutions.hasOwnProperty( metavariable ) ?
             this._substitutions[metavariable].expression : undefined
@@ -205,7 +205,7 @@ export class Solution {
             if ( expression.isAtomic() ) return expression.copy()
             if ( expression instanceof Application ) {
                 const head = expression.firstChild()
-                if ( head instanceof Symbol && head.text() == 'LDE binding' )
+                if ( head instanceof LurchSymbol && head.text() == 'LDE binding' )
                     return new Binding(
                         ...expression.children().slice( 1 ).map( withBindings ) )
                 else
@@ -234,7 +234,7 @@ export class Solution {
             const reduced = fullBetaReduce( sub.expression )
             if ( !reduced.equals( sub.expression ) )
                 this._substitutions[mv] = new Substitution(
-                    new Symbol( mv ).asA( metavariable ), reduced )
+                    new LurchSymbol( mv ).asA( metavariable ), reduced )
         } )
     }
 
@@ -325,7 +325,8 @@ export class Solution {
             if ( oldValue && !oldValue.equals( newValue ) )
                 throw `Function condition failed for metavariable ${mvName}`
             // Check #2: The substitution might make us try to bind a non-var
-            if ( this._bound.has( mvName ) && !( newValue instanceof Symbol ) )
+            if ( this._bound.has( mvName )
+              && !( newValue instanceof LurchSymbol ) )
                 throw `Cannot set bound metavariable ${mvName} to a non-symbol`
             // Check #3: The substitution might violate a capture constraint
             if ( this._captureConstraints.constraints.some( cc =>

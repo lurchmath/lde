@@ -1,6 +1,6 @@
 
 import { metavariable, containsAMetavariable } from './metavariables.js'
-import { Symbol } from '../symbol.js'
+import { Symbol as LurchSymbol } from '../symbol.js'
 import { Binding } from '../binding.js'
 import { LogicConcept } from '../logic-concept.js'
 import { Constraint } from './constraint.js'
@@ -45,7 +45,8 @@ export class CaptureConstraint {
     constructor ( bound, free, check ) {
         if ( typeof( check ) === 'undefined' ) check = true
         if ( check &&
-             ( !( bound instanceof Symbol ) || !( free instanceof Symbol ) ) )
+             ( !( bound instanceof LurchSymbol )
+            || !( free instanceof LurchSymbol ) ) )
             throw 'CaptureConstraints may be constructed only from two Symbols'
         this.bound = bound
         this.free = free
@@ -328,7 +329,7 @@ export class CaptureConstraints {
         // Base case: the pattern is a symbol.  Walk up the hierarchy of
         // bindings until this symbol is bound.  While it isn't, any binding
         // you come across may generate binding constraints.
-        if ( pattern instanceof Symbol ) {
+        if ( pattern instanceof LurchSymbol ) {
             for ( let boundList of bound ) {
                 if ( boundList.some( v => v.equals( pattern ) ) ) break
                 boundList.forEach( bound => {
