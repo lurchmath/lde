@@ -106,7 +106,7 @@ Why did we use `y.copy()` when creating the binding above, rather than just
 tree called `A` declared earlier.  If we were to construct a new
 {@link Binding Binding} `B` containing `y`, then we would necessarily be
 removing `y` from the `A` hierarchy in which it sits to place it inside the
-`B` hierarchy.  Thus we would inadvertently (and somewhat surprisingly) be
+`B` hierarchy.  Thus `A` would inadvertently (and somewhat surprisingly) be
 modified just by our creation of `B`!  This is obviously not desired, so we
 make a copy of `y` instead.  This is another pitfall that can be avoided by
 using putdown notation, except of course in those cases where you actually

@@ -123,7 +123,7 @@ suffix `/cc{}` means that there are no {@link CaptureConstraints
 CaptureConstraints} that apply to this solution.)
 
 You can, of course, query the individual components of the
-{@link Solution Solution}}, with its API, as in the following example.
+{@link Solution Solution}, with its API, as in the following example.
 
 ```js
 console.log( 'Number of solutions to P:', sols.length )
@@ -160,7 +160,7 @@ is a special function in {@link module:Matching the Matching module} for
 creating expressions like $P(x)$, which do not mean regular function
 application of $P$ to $x$, but application of $P$ as an expression function to
 the expression $x$.  The function is called
-{@link module:Matching.newEFA newEFA()}, for "new expression function
+{@link module:ExpressionFunctions.newEFA newEFA()}, for "new expression function
 application."
 
 ```js
