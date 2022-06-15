@@ -2,8 +2,6 @@
 import { MathConcept } from './math-concept.js'
 import { LogicConcept } from './logic-concept.js'
 import { Symbol as LurchSymbol } from './symbol.js'
-import { Expression } from './expression.js'
-import { Environment } from './environment.js'
 import { Formula } from './formula.js'
 
 /**
@@ -121,7 +119,7 @@ export class Declaration extends LogicConcept {
      *   be placed inside an {@link Environment Environment} to conjoin them.
      * @see {@link Declaration#type type()}
      * @see {@link Declaration#symbols symbols()}
-     * @see {@link Declaration#expression expression()}
+     * @see {@link Declaration#body body()}
     */
     constructor ( type, symbols, body ) {
         if ( arguments.length > 3 )
@@ -179,7 +177,7 @@ export class Declaration extends LogicConcept {
      *   {@link Declaration.Types type of declaration}, such as variable or
      *   constant
      * @see {@link Declaration#symbols symbols()}
-     * @see {@link Declaration#expression expression()}
+     * @see {@link Declaration#body body()}
      */
     type () { return Symbol.for( this.getAttribute( 'declaration type' ) ) }
 
@@ -194,7 +192,7 @@ export class Declaration extends LogicConcept {
      * @returns {Symbol[]} An array of {@link Symbol Symbol} instances, those
      *   symbols being declared by this object
      * @see {@link Declaration#type type()}
-     * @see {@link Declaration#expression expression()}
+     * @see {@link Declaration#body body()}
      */
     symbols () {
         return this._body ? this.allButLastChild() : this.children()
