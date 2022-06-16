@@ -55,7 +55,7 @@ console.log( env.toPutdown() )
 
 ## Where connections live
 
-Connections exist in the LC hierarchy only as attributes stored in the IDs
+Connections exist in the LC hierarchy only as attributes stored in the LCs
 themselves.  That is, if you want to know whether there's a connection from an
 LC $A$ to an LC $B$, you look at the attributes of $A$ and $B$ and see if they
 contain data about a connection between the two LCs.  There are, of course, a
