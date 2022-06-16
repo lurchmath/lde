@@ -27,6 +27,13 @@ export const predictableStringify = ( obj ) => {
 }
 
 /**
+ * The functions documented below extend the built-in JSON functionality of
+ * Node and/or the browser.
+ * 
+ * @namespace JSON
+ */
+
+/**
  * Whether two objects that are amenable to JSON encoding are structurally
  * equal.
  * 
@@ -63,8 +70,6 @@ JSON.equals = ( x, y ) => {
     return true
 }
 
-/** @class JSON */
-
 /**
  * A deep copy of a JSON structure, as another JSON structure.
  * 
@@ -81,6 +86,13 @@ JSON.equals = ( x, y ) => {
 JSON.copy = json => JSON.parse( JSON.stringify( json ) )
 
 /**
+ * The function below extends the built-in EventTarget class with new
+ * functionality.
+ * 
+ * @class EventTarget
+ */
+
+/**
  * Extend the EventTarget prototype with a convenience method for emitting new
  * events.  Mimics the function of the same name from node.js, but here in the
  * browser.
@@ -93,6 +105,12 @@ EventTarget.prototype.emit = function ( type, details = { } ) {
 }
 
 /**
+ * The function below extends the built-in Map class with new functionality.
+ * 
+ * @class Map
+ */
+
+/**
  * Extend the built-in JavaScript `Map` class with a deep copy method.  This
  * works only for Maps whose keys and values are all JSON-encodable.
  * 
@@ -101,6 +119,12 @@ EventTarget.prototype.emit = function ( type, details = { } ) {
 Map.prototype.deepCopy = function () {
     return new Map( JSON.copy( [ ...this ] ) )
 }
+
+/**
+ * The functions below extend the built-in Array class with new functionality.
+ * 
+ * @class Array
+ */
 
 /**
  * Return a shallow copy of the array, but without one (specified) element.
