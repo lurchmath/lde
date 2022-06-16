@@ -17,7 +17,7 @@
   },
   "scripts": {
     "test": "node src/database/generate.js && node --trace-warnings tests/all-in-puppeteer.js",
-    "docs": "rm -f tutorials/output/*.md && node pre-docs.js && rm -rf docs && jsdoc src/* -d docs -R doc-main.md -c jsdoc-conf.json -u tutorials/output/ && node post-docs.js",
+    "docs": "rm -f tutorials/output/*.md && node scripts/pre-docs.js && rm -rf docs && jsdoc src/* -d docs -R doc-main.md -c jsdoc-conf.json -u tutorials/output/ && node scripts/post-docs.js",
     "build-db": "node src/database/generate.js",
     "show-docs": "open docs/index.html",
     "test-server": "node src/database/generate.js && node tests/test-server.cjs"

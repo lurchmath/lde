@@ -11,20 +11,21 @@ import { exec } from 'child_process'
 
 // Find all folders that are relevant here.
 const thisFolder = path.dirname( import.meta.url.substring( 7 ) )
-const inputFolder = path.join( thisFolder, 'tutorials', 'input' )
-const outputFolder = path.join( thisFolder, 'tutorials', 'output' )
+const rootFolder = path.join( thisFolder, '..' )
+const inputFolder = path.join( rootFolder, 'tutorials', 'input' )
+const outputFolder = path.join( rootFolder, 'tutorials', 'output' )
 if ( !fs.existsSync( inputFolder ) ) fs.mkdirSync( inputFolder )
 if ( !fs.existsSync( outputFolder ) ) fs.mkdirSync( outputFolder )
 
 // How to run JavaScript code in an Rmarkdown/Jupyter style.
 // Takes an array of code strings as input, all to be run in the same context.
 const runSnippets = ( snippets, uniqueId, callback ) => {
-    const tmpFile = path.join( thisFolder, `tutorial-tmp-file-${uniqueId}.js` )
+    const tmpFile = path.join( rootFolder, `tutorial-tmp-file-${uniqueId}.js` )
     const separator = '---------OUTPUT DIVIDER---------'
     const codeToRun = snippets.join( `\nconsole.log( '${separator}' )\n` )
     fs.writeFileSync( tmpFile, codeToRun )
     let output = ''
-    exec( `cd '${thisFolder}' && node '${tmpFile}'`, ( error, stdout, stderr ) => {
+    exec( `cd '${rootFolder}' && node '${tmpFile}'`, ( error, stdout, stderr ) => {
         if ( stdout ) output += stdout
         if ( stderr ) output += stderr
     } ).on( 'close', () => {

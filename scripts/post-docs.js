@@ -20,7 +20,7 @@ const MathJaxCode = `
 
 // Read all files in the docs folder
 const docsFolder = path.join( path.dirname(
-    import.meta.url.substring( 7 ) ), 'docs' )
+    import.meta.url.substring( 7 ) ), '..', 'docs' )
 fs.readdir( docsFolder, ( err, files ) => {
     if ( err )
         return console.error(
