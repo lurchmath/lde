@@ -2,12 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Lurch Deductive Engine: environment.js</title>
+    <title>Lurch Deductive Engine: EventTarget</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
     <link type="text/css" rel="stylesheet" href="styles/styles.css">
     
+
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+    </script>
 </head>
 <body>
 
@@ -24,82 +31,327 @@
 </header>
 
 
-<main class="layout-main  layout-content--source">
+<main class="layout-main ">
   <div class="container">
-    <p class="page-kind">source</p>
-    <h1 class="page-title">environment.js</h1>
+    <p class="page-kind">Class</p>
+    <h1 class="page-title">EventTarget</h1>
     
 
 
 
-    
 
 <section>
-    <article>
-        <pre id="source" class="source-page line-numbers"><code class="language-js">
-import { MathConcept } from './math-concept.js'
-import { LogicConcept } from './logic-concept.js'
-import { Expression } from './expression.js'
-import { Declaration } from './declaration.js'
 
-/**
- * An Environment in Lurch is a wrapper that can enclose any sequence of
- * {@link LogicConcept LogicConcepts}, and creates a variable scope in doing
- * so.  This can be useful for many purposes, including:
- * 
- *  * Delimiting exercises in a text from the rest of the text, so that
- *    variables declared in those exercises do not remain in scope for the
- *    rest of the text.
- *  * Nesting subproofs within a proof so that it is clear where assumptions
- *    and variable declarations are (and are not) in force.
- *  * Marking the boundaries of theorems, proofs, definitions, axioms, and
- *    other important structures that form a single, cohesive unit.
- * 
- * This class inherits its constructor from its parent class; to create an
- * environment wrapping a sequence `L_1` through `L_n` of
- * {@link LogicConcept LogicConcepts}, just call
- * `new Environment( L1, ..., Ln )`.
- */
-export class Environment extends LogicConcept {
+
+<header class="class">
+
+
     
-    static className = MathConcept.addSubclass( 'Environment', Environment )
+        
+        <!-- <h2>EventTarget</h2> -->
 
-    /**
-     * Any {@link LogicConcept} can be marked as a "given," meaning that it is
-     * to be seen as a hypothesis/assumption within its context.  Any
-     * {@link LogicConcept} not so marked is viewed as a "claim," meaning that
-     * it is an assertion/statement of truth, within its context.  For this,
-     * we use the attribute functions built into the {@link MathConcept}
-     * class, including {@link MathConcept#isA isA()},
-     * {@link MathConcept#asA asA()}, and so on.
-     * 
-     * The conclusions of a LogicConcept include:
-     * 
-     *  * all of its children that are claim {@link Expression Expressions}
-     *  * all of the conclusions in any of its child Environments that are
-     *    themselves claims, recursively
-     * 
-     * Thus conclusions are always {@link Expression Expressions} or
-     * {@link Declaration Declarations}, never other Environments.  And for
-     * each one, all the members of its ancestor chain, up to but not
-     * necessarily including the Environment in which this method was called,
-     * will be claims, not givens.
-     */
-    conclusions () {
-        let result = [ ]
-        this.children().forEach( child => {
-            if ( child.isA( 'given' ) ) return
-            if ( child instanceof Expression || child instanceof Declaration )
-                result.push( child ) // guaranteed to be outermost expr/decl
-            else if ( child instanceof Environment )
-                result = result.concat( child.conclusions() )
-        } )
-        return result
-    }
+        
 
-}
-</code></pre>
+        
+
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+
+
+
+    
+        
+
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="EventTarget">new EventTarget<span class="signature">()</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>The function below extends the built-in EventTarget class with new
+functionality.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="utilities.js.html">utilities.js</a><a href="utilities.js.html#source.88">, line 88</a>
+        </li>
+    </ul>
+
+
+
+    
+    </div>
+
+    
+
+    
+
+     
+
+    
+
+    
+
+
+    
+
+    
+        <h3 class="subtitle">Methods</h3>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="emit">emit<span class="signature">(type, details)</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Extend the EventTarget prototype with a convenience method for emitting new
+events.  Mimics the function of the same name from node.js, but here in the
+browser.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">type</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>string</code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>The type of event being emitted, as a string name</p></div>
+            
+        </li>
+
+    
+
+        <li>
+            
+                <span class="param-name">details</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>object</code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>Any additional fields to copy into the Event object</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="utilities.js.html">utilities.js</a><a href="utilities.js.html#source.103">, line 103</a>
+        </li>
+    </ul>
+
+
+
     </article>
+
+        
+    
+
+    
+
+    
+</article>
+
 </section>
 
 
