@@ -9,7 +9,7 @@ import Database from '../src/database.js'
 describe( 'Problem', function () {
 
     // This takes a long time, so increase the timeout threshold.
-    this.timeout( 5000 )
+    this.timeout( 10000 )
         
     it( 'Should declare the correct global identifiers', () => {
         expect( M.Problem ).to.be.ok
