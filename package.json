@@ -20,7 +20,8 @@
     "docs": "rm -f tutorials/output/*.md && node scripts/pre-docs.js && rm -rf docs && jsdoc src/* -d docs -R doc-main.md -c jsdoc-conf.json -u tutorials/output/ && node scripts/post-docs.js",
     "build-db": "node src/database/generate.js",
     "show-docs": "open docs/index.html",
-    "test-server": "node src/database/generate.js && node tests/test-server.cjs"
+    "test-server": "node src/database/generate.js && node tests/test-server.cjs",
+    "lode": "node scripts/lode.js"
   },
   "repository": {
     "type": "git",
@@ -31,5 +32,8 @@
   "bugs": {
     "url": "https://github.com/lurchmath/lde/issues"
   },
-  "homepage": "https://github.com/lurchmath/lde#readme"
+  "homepage": "https://github.com/lurchmath/lde#readme",
+  "dependencies": {
+    "algebrite": "^1.4.0"
+  }
 }
