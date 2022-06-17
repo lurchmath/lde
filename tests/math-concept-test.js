@@ -1275,7 +1275,17 @@ describe( 'MathConcept order relations', () => {
         expect( DA.accessibles() ).to.eql( [ C, B, A ] )
         expect( DB.accessibles() ).to.eql( [ DA, C, B, A ] )
         expect( DAA.accessibles() ).to.eql( [ C, B, A ] )
-        // Repeat previous experiment, now with reflexivity
+        // Repeat some of the above tests, but now limited to certain ancestors
+        expect( BB.accessibles( false, root ) ).to.eql( [ BA, A ] )
+        expect( BB.accessibles( false, A ) ).to.eql( [ BA, A ] )
+        expect( BB.accessibles( false, B ) ).to.eql( [ BA ] )
+        expect( BB.accessibles( false, BB ) ).to.eql( [ ] )
+        expect( DB.accessibles( false, root ) ).to.eql( [ DA, C, B, A ] )
+        expect( DB.accessibles( false, B ) ).to.eql( [ DA, C, B, A ] )
+        expect( DB.accessibles( false, D ) ).to.eql( [ DA ] )
+        expect( DB.accessibles( false, DA ) ).to.eql( [ DA, C, B, A ] )
+        expect( DB.accessibles( false, DB ) ).to.eql( [ ] )
+        // Repeat earlier experiment, now with reflexivity
         expect( root.accessibles( true ) ).to.eql( [ root ] )
         expect( A.accessibles( true ) ).to.eql( [ A ] )
         expect( B.accessibles( true ) ).to.eql( [ B, A ] )
@@ -1286,6 +1296,16 @@ describe( 'MathConcept order relations', () => {
         expect( DA.accessibles( true ) ).to.eql( [ DA, C, B, A ] )
         expect( DB.accessibles( true ) ).to.eql( [ DB, DA, C, B, A ] )
         expect( DAA.accessibles( true ) ).to.eql( [ DAA, C, B, A ] )
+        // Repeat some earlier tests, but now both limited and reflexive
+        expect( BB.accessibles( true, root ) ).to.eql( [ BB, BA, A ] )
+        expect( BB.accessibles( true, A ) ).to.eql( [ BB, BA, A ] )
+        expect( BB.accessibles( true, B ) ).to.eql( [ BB, BA ] )
+        expect( BB.accessibles( true, BB ) ).to.eql( [ ] )
+        expect( DB.accessibles( true, root ) ).to.eql( [ DB, DA, C, B, A ] )
+        expect( DB.accessibles( true, B ) ).to.eql( [ DB, DA, C, B, A ] )
+        expect( DB.accessibles( true, D ) ).to.eql( [ DB, DA ] )
+        expect( DB.accessibles( true, DA ) ).to.eql( [ DB, DA, C, B, A ] )
+        expect( DB.accessibles( true, DB ) ).to.eql( [ ] )
         // Verify scope lists for all MathConcepts, without reflexivity
         expect( root.scope() ).to.eql( [ root ] )
         expect( A.scope() ).to.eql( [ A, B, BA, BB, C, D, DA, DAA, DB ] )
