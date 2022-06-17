@@ -2240,7 +2240,7 @@ export class MathConcept extends EventTarget {
      * @returns {MathConcept[]} an array of MathConcept instances, the meaning
      *   of the smackdown code provided as input
      * 
-     * @see {@@link MathConcept#toSmackdown toSmackdown()}
+     * @see {@link MathConcept#toSmackdown toSmackdown()}
      */
     static fromSmackdown ( string ) {
         const map = new SourceMap( string )
@@ -2448,7 +2448,7 @@ export class MathConcept extends EventTarget {
      * 
      * @see {@link MathConcept.fromSmackdown fromSmackdown()} (which creates
      *   MathConcept hierarchies intended for interpretation)
-     * @see {@@link MathConcept#toSmackdown toSmackdown()}
+     * @see {@link MathConcept#toSmackdown toSmackdown()}
      */
     interpret () {
         const method = this.getAttribute( MathConcept.interpretationKey )
