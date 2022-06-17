@@ -2477,7 +2477,7 @@ export class MathConcept extends EventTarget {
         if ( method[0] == 'command' )
             return fromPutdown( JSON.stringify(
                 'command interpretation not yet implemented: \\'
-                + method[1] + '}{' + method.slice( 2 ).join( '}{' )
+                + method[1] + '{' + method.slice( 2 ).join( '}{' )
                 + '}' ) )[0]
         throw new Error( `Invalid interpretation method: ${method[0]}` )
     }
