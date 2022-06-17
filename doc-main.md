@@ -1,4 +1,4 @@
- 
+
 # The Lurch Deductive Engine (LDE) Source Code Documentation
 
 This repository is in the process of rebuilding the LDE, discarding an old
@@ -20,7 +20,8 @@ in this repository, together with how to use them, is to read the tutorials:
  * {@tutorial Free and bound variables}
  * {@tutorial Connections among LCs}
  * {@tutorial Pattern matching}
-
+ * {@tutorial Lurch Node REPL}
+ 
 ## Foundational classes
 
 Every symbolic math software needs some data structure for storing trees of
