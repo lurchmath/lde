@@ -822,7 +822,7 @@ describe( 'MathConcept lookup', () => {
         expect( root.index( [ 0, 1 ] ) ).to.equal( AB )
         expect( root.index( [ 0, 0, 0 ] ) ).to.equal( AAA )
         expect( root.index( [ 2 ] ) ).to.equal( undefined )
-        expect( root.index( [ -1 ] ) ).to.equal( undefined )
+        expect( root.index( [ -1 ] ) ).to.equal( B )
         expect( root.index( [ 0, 2 ] ) ).to.equal( undefined )
         expect( root.index( [ 0, 0, 'hi' ] ) ).to.equal( undefined )
         expect( A.index( [ ] ) ).to.equal( A )
@@ -848,6 +848,82 @@ describe( 'MathConcept lookup', () => {
         expect( B.index( [ 0 ] ) ).to.equal( undefined )
         expect( B.index( [ 1 ] ) ).to.equal( undefined )
         expect( B.index( [ 0, 0 ] ) ).to.equal( undefined )
+        
+        // do the same tests for .child()
+        expect( root.child( ) ).to.equal( root )
+        expect( root.child( 0 ) ).to.equal( A )
+        expect( root.child( 1 ) ).to.equal( B )
+        expect( root.child( 0, 0 ) ).to.equal( AA )
+        expect( root.child( 0, 1 ) ).to.equal( AB )
+        expect( root.child( 0, 0, 0 ) ).to.equal( AAA )
+        expect( root.child( 2 ) ).to.equal( undefined )
+        expect( root.child( -1 ) ).to.equal( B )
+        expect( root.child( 0, 2 ) ).to.equal( undefined )
+        expect( root.child( 0, 0, 'hi' ) ).to.equal( undefined )
+        expect( A.child( ) ).to.equal( A )
+        expect( A.child( 0 ) ).to.equal( AA )
+        expect( A.child( 1 ) ).to.equal( AB )
+        expect( A.child( 0, 0 ) ).to.equal( AAA )
+        expect( A.child( 2 ) ).to.equal( undefined )
+        expect( A.child( 0, 1 ) ).to.equal( undefined )
+        expect( A.child( 'x', 'y' ) ).to.equal( undefined )
+        expect( AA.child( ) ).to.equal( AA )
+        expect( AA.child( 0 ) ).to.equal( AAA )
+        expect( AA.child( 1 ) ).to.equal( undefined )
+        expect( AA.child( 0, 0 ) ).to.equal( undefined )
+        expect( AAA.child( ) ).to.equal( AAA )
+        expect( AAA.child( 0 ) ).to.equal( undefined )
+        expect( AAA.child( 1 ) ).to.equal( undefined )
+        expect( AAA.child( 0, 0 ) ).to.equal( undefined )
+        expect( AB.child( ) ).to.equal( AB )
+        expect( AB.child( 0 ) ).to.equal( undefined )
+        expect( AB.child( 1 ) ).to.equal( undefined )
+        expect( AB.child( 0, 0 ) ).to.equal( undefined )
+        expect( B.child( ) ).to.equal( B )
+        expect( B.child( 0 ) ).to.equal( undefined )
+        expect( B.child( 1 ) ).to.equal( undefined )
+        expect( B.child( 0, 0 ) ).to.equal( undefined )
+
+        // edge cases and negative indices
+        expect( root.child( 2 ) ).to.be.undefined
+        expect( root.child( -1 ) ).to.equal( B )
+        expect( root.child( -2 ) ).to.equal( A )
+        expect( root.child( -3 ) ).to.be.undefined
+        expect( root.child( -2, 0 ) ).to.equal( AA )
+        expect( root.child( -2, 1 ) ).to.equal( AB )
+        expect( root.child( -2, -1 ) ).to.equal( AB )
+        expect( root.child( -2, -2 ) ).to.equal( AA )
+        expect( root.child( -2, 0, 0 ) ).to.equal( AAA )
+        expect( root.child( -2, 0, -1 ) ).to.equal( AAA )
+        expect( root.child( -2, 0, 1 ) ).to.be.undefined
+        expect( root.child( -2, 1, 0 ) ).to.be.undefined
+        expect( A.child( -1 ) ).to.equal( AB )
+        expect( A.child( -2 ) ).to.equal( AA )
+        expect( A.child( -3 ) ).to.be.undefined
+        expect( A.child( -2, 0 ) ).to.equal( AAA )
+        expect( A.child( -2, -1 ) ).to.equal( AAA )
+        expect( A.child( -2, 1 ) ).to.be.undefined
+        // same for index
+        expect( root.index( [ 2 ] ) ).to.be.undefined
+        expect( root.index( [ -1 ] ) ).to.equal( B )
+        expect( root.index( [ -2 ] ) ).to.equal( A )
+        expect( root.index( [ -3 ] ) ).to.be.undefined
+        expect( root.index( [ -2, 0 ] ) ).to.equal( AA )
+        expect( root.index( [ -2, 1 ] ) ).to.equal( AB )
+        expect( root.index( [ -2, -1 ] ) ).to.equal( AB )
+        expect( root.index( [ -2, -2 ] ) ).to.equal( AA )
+        expect( root.index( [ -2, 0, 0 ] ) ).to.equal( AAA )
+        expect( root.index( [ -2, 0, -1 ] ) ).to.equal( AAA )
+        expect( root.index( [ -2, 0, 1 ] ) ).to.be.undefined
+        expect( root.index( [ -2, 1, 0 ] ) ).to.be.undefined
+        expect( A.index( [ -1 ] ) ).to.equal( AB )
+        expect( A.index( [ -2 ] ) ).to.equal( AA )
+        expect( A.index( [ -3 ] ) ).to.be.undefined
+        expect( A.index( [ -2, 0 ] ) ).to.equal( AAA )
+        expect( A.index( [ -2, -1 ] ) ).to.equal( AAA )
+        expect( A.index( [ -2, 1 ] ) ).to.be.undefined
+        
+
     } )
 
     it( 'Correctly computes ancestor chains', () => {
