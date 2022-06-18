@@ -108,13 +108,14 @@ export class Expression extends LogicConcept {
      * 
      * @param {MathConcept} ancestor - the context in which this query is
      *   being made
+     * @returns {boolean} whether this expression is a conclusion in the given
+     *   `ancestor`
+     * 
+     * @see {@link LogicConcept#hasOnlyClaimAncestors hasOnlyClaimAncestors()}
      */
     isAConclusionIn ( ancestor ) {
         if ( !( this.parent() instanceof Environment ) ) return false
-        for ( let walk = this ; walk && walk != ancestor ;
-                walk = walk.parent() )
-            if ( walk.isA( 'given' ) ) return false
-        return true
+        return this.hasOnlyClaimAncestors( ancestor )
     }
 
     /**

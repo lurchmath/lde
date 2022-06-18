@@ -120,6 +120,43 @@ describe( 'Dirty flags for LogicConcepts', () => {
 
 } )
 
+describe( 'Non-expression "conclusions"', () => {
+
+    it( 'Should correctly detect when an LC has all claim ancestors', () => {
+        // Note that the hasOnlyClaimAncestors function is also used as the
+        // internal implementation of isAConclusionIn, which is tested
+        // extensively in environment-test.js.  So this is a more brief test.
+        let A = new LurchSymbol( 'A' )
+        let X = new Environment( A )
+        expect( A.hasOnlyClaimAncestors( A ) ).to.equal( true )
+        expect( A.hasOnlyClaimAncestors( X ) ).to.equal( true )
+        expect( A.hasOnlyClaimAncestors() ).to.equal( true )
+        X.makeIntoA( 'given' )
+        expect( A.hasOnlyClaimAncestors( A ) ).to.equal( true )
+        expect( A.hasOnlyClaimAncestors( X ) ).to.equal( true )
+        expect( A.hasOnlyClaimAncestors() ).to.equal( false )
+        let B = new LurchSymbol( 'B' )
+        let Y = new Environment( B )
+        X.pushChild( Y )
+        expect( A.hasOnlyClaimAncestors( A ) ).to.equal( true )
+        expect( A.hasOnlyClaimAncestors( X ) ).to.equal( true )
+        expect( A.hasOnlyClaimAncestors() ).to.equal( false )
+        expect( Y.hasOnlyClaimAncestors( Y ) ).to.equal( true )
+        expect( Y.hasOnlyClaimAncestors( X ) ).to.equal( true )
+        expect( Y.hasOnlyClaimAncestors() ).to.equal( false )
+        expect( B.hasOnlyClaimAncestors( B ) ).to.equal( true )
+        expect( B.hasOnlyClaimAncestors( Y ) ).to.equal( true )
+        expect( B.hasOnlyClaimAncestors( X ) ).to.equal( true )
+        expect( B.hasOnlyClaimAncestors() ).to.equal( false )
+        Y.makeIntoA( 'given' )
+        expect( B.hasOnlyClaimAncestors( B ) ).to.equal( true )
+        expect( B.hasOnlyClaimAncestors( Y ) ).to.equal( true )
+        expect( B.hasOnlyClaimAncestors( X ) ).to.equal( false )
+        expect( B.hasOnlyClaimAncestors() ).to.equal( false )
+    } )
+
+} )
+
 describe( 'Sending feedback about LogicConcepts', () => {
 
     let L
