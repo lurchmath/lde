@@ -314,6 +314,29 @@ export class MathConcept extends EventTarget {
     }
 
     /**
+     * Copy all the attributes from another MathConcept instance to this one.
+     * The attributes are copied deeply, so that if the values are arrays or
+     * objects, they are not shared between the two MathConcepts.  The
+     * attributes are copied using {@link MathConcept#attr attr()}, which calls
+     * {@link MathConcept#setAttribute setAttribute()} on each key separately,
+     * thus possibly generating many pairs of
+     * {@link MathConcept#willBeChanged willBeChanged} and
+     * {@link MathConcept#wasChanged wasChanged} events.
+     * 
+     * If this MathConcept shares some attribute keys with the one passed as the
+     * parameter, the attributes of `mathConcept` will overwrite the attributes
+     * already in this object.
+     * 
+     * @param {MathConcept} mathConcept - another MathConcept instance from
+     *   which to copy all of its attributes
+     * @return {MathConcept} this object, for method chaining, as in
+     *   {@link MathConcpet#attr attr()}
+     */
+    copyAttributesFrom ( mathConcept ) {
+        return this.attr( mathConcept._attributes.deepCopy() )
+    }
+
+    /**
      * MathConcepts can be categorized into types with simple string labels.
      * For instance, we might want to say that some MathConcepts are assumptions,
      * and flag that using an attribute.  Some of these attributes have meanings

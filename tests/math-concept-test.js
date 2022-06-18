@@ -1569,6 +1569,60 @@ describe( 'MathConcept attributes', () => {
         }
     } )
 
+    it( 'Can be copied from one instance to another', () => {
+        // build two objects to use for testing
+        const target = new MathConcept()
+        const source = new MathConcept().attr( {
+            'name' : 'Jean', 'job' : 'Baptiste', 'year' : [ 'AD', '30' ]
+        } )
+        // ensure target has no attrs, source has 3
+        expect( target.hasAttribute( 'name' ) ).to.equal( false )
+        expect( target.hasAttribute( 'job' ) ).to.equal( false )
+        expect( target.hasAttribute( 'year' ) ).to.equal( false )
+        // copy and ensure they all moved, but non-atomic attributes were
+        // deep copied, not shallow copied
+        target.copyAttributesFrom( source )
+        expect( target.hasAttribute( 'name' ) ).to.equal( true )
+        expect( target.hasAttribute( 'job' ) ).to.equal( true )
+        expect( target.hasAttribute( 'year' ) ).to.equal( true )
+        expect( target.getAttribute( 'name' ) ).to.equal(
+            source.getAttribute( 'name' ) )
+        expect( target.getAttribute( 'job' ) ).to.equal(
+            source.getAttribute( 'job' ) )
+        expect( target.getAttribute( 'year' ) )
+            .to.eql( source.getAttribute( 'year' ) )
+        expect( target.getAttribute( 'year' ) )
+            .not.to.equal( source.getAttribute( 'year' ) )
+        // make another one to copy from and do the copying
+        const newSource = new MathConcept().attr(
+            { 'job' : [ 'Baptist', 'Nomad', 'Prophet' ] } )
+        target.copyAttributesFrom( newSource )
+        // ensure updates took place (now two had to be deep copied)
+        expect( target.getAttribute( 'name' ) )
+            .to.equal( source.getAttribute( 'name' ) )
+        expect( target.getAttribute( 'job' ) )
+            .to.eql( newSource.getAttribute( 'job' ) )
+        expect( target.getAttribute( 'job' ) )
+            .not.to.equal( newSource.getAttribute( 'job' ) )
+        expect( target.getAttribute( 'job' ) )
+            .not.to.eql( source.getAttribute( 'job' ) )
+        expect( target.getAttribute( 'year' ) )
+            .to.eql( source.getAttribute( 'year' ) )
+        expect( target.getAttribute( 'year' ) )
+            .not.to.equal( source.getAttribute( 'year' ) )
+        // one last test, copy between the two sources
+        source.copyAttributesFrom( newSource )
+        expect( source.getAttribute( 'name' ) ).to.equal( 'Jean' )
+        expect( source.getAttribute( 'job' ) )
+            .to.eql( newSource.getAttribute( 'job' ) )
+        expect( source.getAttribute( 'job' ) ).not.to.eql( 'Baptiste' )
+        expect( source.getAttribute( 'year' ) ).to.eql( [ 'AD', '30' ] )
+        expect( newSource.hasAttribute( 'name' ) ).to.equal( false )
+        expect( newSource.hasAttribute( 'year' ) ).to.equal( false )
+        expect( newSource.getAttribute( 'job' ) ).to.eql(
+            [ 'Baptist', 'Nomad', 'Prophet' ] )
+    } )
+
     it( 'Has working convenience functions for typing/categorization ', () => {
         // build a few MathConcepts for testing
         const S1 = new MathConcept
