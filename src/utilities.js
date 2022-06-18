@@ -150,3 +150,135 @@ Array.prototype.without = function ( index ) {
  *   empty
  */
 Array.prototype.last = function () { return this[this.length-1] }
+
+/**
+ * The functions below extend the built-in Set class with new functionality.
+ * 
+ * @class Set
+ */
+
+/**
+ * In mathematics, two sets $A$ and $B$ are equal if and only if
+ * $\forall x,(x\in A\text{ iff }x\in B)$.  That is, they have exactly the same
+ * members.  This function implements that definition.
+ * 
+ * @param {Set} other the set to compare with this one for equality
+ * @returns {boolean} whether the two sets have exactly the same elements
+ */
+Set.prototype.equals = function ( other ) {
+    return this.size == other.size && this.isSubset( other )
+}
+
+/**
+ * The usual set-theoretic union of two sets, this one and any other, passed as
+ * the first parameter.
+ * 
+ * @param {Set} other the set with which to union this one
+ * @returns {Set} the union of this set with the other
+ * 
+ * @see {@link Set#intersection intersection()}
+ * @see {@link Set#difference difference()}
+ * @see {@link Set#symmetricDifference symmetricDifference()}
+ */
+Set.prototype.union = function ( other ) {
+    return new Set( [ ...this, ...other ] )
+}
+
+/**
+ * Construct a subset of this set, using precisely those elements that pass the
+ * given predicate.  This is analogous to taking a set $S$ and forming a subset
+ * as we do with the mathematical notation $\\\{x\in S\mid P(x)\\\}$.
+ * 
+ * NOTE:  This is *not* the "is a subset of" relation!  This is a tool for
+ * *computing* subsets.  If you'd like to check whether one set is a subset of
+ * another, see {@link Set#isSubset isSubset()}.
+ * 
+ * @param {function} predicate the predicate that elements must pass in order to
+ *   be included in the subset; it will be evaluated on every element of this
+ *   set and should return a boolean
+ * @returns {Set} the subset of this set containing just those elements that
+ *   satisfy the given predicate
+ * 
+ * @see {@link Set#isSubset isSubset()}
+ * @see {@link Set#isSuperset isSuperset()}
+ */
+Set.prototype.subset = function ( predicate ) {
+    return new Set( [ ...this ].filter( predicate ) )
+}
+
+/**
+ * The usual set-theoretic intersection of two sets, this one and any other,
+ * passed as the first parameter.
+ * 
+ * @param {Set} other the set with which to intersect this one
+ * @returns {Set} the intersection of this set with the other
+ * 
+ * @see {@link Set#union union()}
+ * @see {@link Set#difference difference()}
+ * @see {@link Set#symmetricDifference symmetricDifference()}
+ */
+Set.prototype.intersection = function ( other ) {
+    return this.subset( x => other.has( x ) )
+}
+
+/**
+ * The usual set-theoretic difference of two sets, this one minus the other set
+ * passed as the first parameter.
+ * 
+ * @param {Set} other the set to subtract from this one
+ * @returns {Set} the difference, this set minus the other
+ * 
+ * @see {@link Set#union union()}
+ * @see {@link Set#intersection intersection()}
+ * @see {@link Set#symmetricDifference symmetricDifference()}
+ */
+Set.prototype.difference = function ( other ) {
+    return this.subset( x => !other.has( x ) )
+}
+
+/**
+ * The usual set-theoretic symmetric difference of two sets, this one and any
+ * other, passed as the first parameter.  The symmetric difference of sets $A$
+ * and $B$, in usual mathematical notation, is $(A-B)\cup(B-A)$.
+ * 
+ * @param {Set} other the set with which to compute the symmetric difference
+ *   with this one
+ * @returns {Set} the symmetric difference of this set with the other
+ * 
+ * @see {@link Set#union union()}
+ * @see {@link Set#intersection intersection()}
+ * @see {@link Set#difference difference()}
+ */
+Set.prototype.symmetricDifference = function ( other ) {
+    return new Set( [ ...this.difference( other ),
+                      ...other.difference( this ) ] )
+}
+
+/**
+ * The usual $\subseteq$ relation from mathematics.  Test whether this set is a
+ * subset of the `other` passed as a parameter, returning true/false.
+ * 
+ * @param {Set} other the set to be tested for whether this set is a subset of
+ *   it
+ * @returns {boolean} whether this set is a subset of `other`
+ * 
+ * @see {@link Set#subset subset()} (for constructing subsets)
+ * @see {@link Set#isSuperset isSuperset()}
+ */
+Set.prototype.isSubset = function ( other ) {
+    return [ ...this ].every( x => other.has( x ) )
+}
+
+/**
+ * The usual $\supseteq$ relation from mathematics.  Test whether this set is a
+ * superset of the `other` passed as a parameter, returning true/false.
+ * 
+ * @param {Set} other the set to be tested for whether this set is a superset of
+ *   it
+ * @returns {boolean} whether this set is a superset of `other`
+ * 
+ * @see {@link Set#isSubset isSubset()}
+ */
+Set.prototype.isSuperset = function ( other ) {
+    return other.isSubset( this )
+}

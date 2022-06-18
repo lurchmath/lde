@@ -1259,11 +1259,17 @@ export class MathConcept extends EventTarget {
      * previous siblings of its parent, the previous siblings of its
      * grandparent, and so on, where each node yielded
      * {@link MathConcept#isLaterThan isLaterThan()} all nodes yielded thereafter.
-     *
+     * You can limit the list to only those accessibles within a given ancestor
+     * by using the `inThis` parameter, documented below.
+     * 
      * @param {boolean} reflexive - Functions analogously to the `reflexive`
      *   parameter for {@link MathConcept#isAccessibleTo isAccessibleTo()}; that
      *   is, do we include this MathConcept on its list of accessibles?  The
      *   default value is false.
+     * @param {MathConcept} inThis - The container MathConcept in which to list
+     *   accessibles.  No accessible outside this ancestor will be returned.
+     *   (If this is not actually an ancestor, it is ignored, and all accessibles
+     *   are returned, which is the default.)
      * @yields {MathConcept} Each MathConcept accessible to this one, beginning with
      *   the one closest to this one (often its previous sibling) and proceeding
      *   back through the hierarchy, so that each new result is accessible to
@@ -1271,15 +1277,18 @@ export class MathConcept extends EventTarget {
      * @see {@link MathConcept#isAccessibleTo isAccessibleTo()}
      * @see {@link MathConcept#accessibles accessibles()}
      */
-    *accessiblesIterator ( reflexive = false ) {
+    *accessiblesIterator ( reflexive = false, inThis = null ) {
+        // return myself if reflexive, unless I'm the limiting ancestor
+        if ( inThis == this ) return
         if ( reflexive ) yield this
-        const previous = this.previousSibling()
-        if ( previous ) { // yield previous sibling and all its accessibles
+        // yield all previous siblings of myself
+        for ( let previous = this.previousSibling() ; previous ;
+              previous = previous.previousSibling() )
             yield previous
-            yield* previous.accessiblesIterator()
-        } else { // defer computation to parent, if any
-            if ( this._parent ) yield* this._parent.accessiblesIterator()
-        }
+        // if there is no parent, or we are not allowed to use it, we're done
+        if ( !this._parent || this._parent == inThis ) return
+        // otherwise, recur on the parent
+        yield* this._parent.accessiblesIterator( false, inThis )
     }
 
     /**
@@ -1291,14 +1300,17 @@ export class MathConcept extends EventTarget {
      * @param {boolean} reflexive - Passed directly to
      *   {@link MathConcept#accessiblesIterator accessiblesIterator()}; see that
      *   function for more information
+     * @param {MathConcept} inThis - Passed directly to
+     *   {@link MathConcept#accessiblesIterator accessiblesIterator()}; see that
+     *   function for more information
      * @return {MathConcept[]} All MathConcepts accessible to this one, with the
      *   latest (closest to this MathConcept) first, proceeding on to the earliest
      *   at the end of the array
      * @see {@link MathConcept#accessiblesIterator accessiblesIterator()}
      * @see {@link MathConcept#isAccessibleTo isAccessibleTo()}
      */
-    accessibles ( reflexive = false ) {
-        return Array.from( this.accessiblesIterator( reflexive ) )
+    accessibles ( reflexive = false, inThis = null ) {
+        return Array.from( this.accessiblesIterator( reflexive, inThis ) )
     }
 
     /**
@@ -2242,8 +2254,8 @@ export class MathConcept extends EventTarget {
      * @param {string} string the smackdown code to be interpreted
      * @returns {MathConcept[]} an array of MathConcept instances, the meaning
      *   of the smackdown code provided as input
-     *
-     * @see {@@link MathConcept#toSmackdown toSmackdown()}
+     * 
+     * @see {@link MathConcept#toSmackdown toSmackdown()}
      */
     static fromSmackdown ( string ) {
         const map = new SourceMap( string )
@@ -2451,7 +2463,7 @@ export class MathConcept extends EventTarget {
      *
      * @see {@link MathConcept.fromSmackdown fromSmackdown()} (which creates
      *   MathConcept hierarchies intended for interpretation)
-     * @see {@@link MathConcept#toSmackdown toSmackdown()}
+     * @see {@link MathConcept#toSmackdown toSmackdown()}
      */
     interpret () {
         const method = this.getAttribute( MathConcept.interpretationKey )
@@ -2480,7 +2492,7 @@ export class MathConcept extends EventTarget {
         if ( method[0] == 'command' )
             return fromPutdown( JSON.stringify(
                 'command interpretation not yet implemented: \\'
-                + method[1] + '}{' + method.slice( 2 ).join( '}{' )
+                + method[1] + '{' + method.slice( 2 ).join( '}{' )
                 + '}' ) )[0]
         throw new Error( `Invalid interpretation method: ${method[0]}` )
     }
