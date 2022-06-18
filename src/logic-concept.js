@@ -64,6 +64,34 @@ export class LogicConcept extends MathConcept {
         super.markDirty( on, propagate )
     }
 
+    /**
+     * Whether a LogicConcept has an ancestor chain that is all claims is often
+     * a crucial query.  It is a large part of the definition of
+     * {@link Expression#isAConclusionIn conclusions}, for example, but can also
+     * be applied to {@link Environment Environments} and other LogicConcepts.
+     * 
+     * This function returns true if this LogicConcept or any of its ancestors
+     * is marked as a given (using the {@link MathConcept#isA isA()} function),
+     * up to but not including the ancestor passed as the `inThis` parameter.
+     * If that parameter is omitted, all ancestors up to and including the
+     * topmost are searched, and if any is a given, this function returns false.
+     * Otherwise it returns true.
+     * 
+     * @param {LogicConcept} [inThis] - the ancestor in which to perfrom this
+     *   test, which can be omitted to mean the top-level
+     *   {@link MathConcept MathConcept} in the hierarchy
+     * @returns {boolean} whether this LogicConcept has only claim ancestors,
+     *   up to but not including the given ancestor `inThis`
+     * 
+     * @see {@link Expression#isAConclusionIn isAConclusionIn()}
+     */
+    hasOnlyClaimAncestors ( inThis ) {
+        for ( let walk = this ; walk && walk != inThis ;
+                walk = walk.parent() )
+            if ( walk.isA( 'given' ) ) return false
+        return true
+    }
+
     //////
     //
     //  Feedback functions

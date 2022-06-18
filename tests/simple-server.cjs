@@ -15,8 +15,8 @@ const startServer = ( options = { } ) => {
         port : port,
         verbose : true
     }, options ) // But update them with the actual options given.
-    // Start the server:
-    http.createServer( ( req, res ) => {
+    // Create the server:
+    const server = http.createServer( ( req, res ) => {
         const parsedUrl = url.parse( req.url )
         let pathname = `.${parsedUrl.pathname}`
         const ext = path.parse( pathname ).ext
@@ -67,7 +67,21 @@ const startServer = ( options = { } ) => {
             } )
         } )
 
-    } ).listen( options.port )
+    } )
+    // Start the server, or give a useful error if you can't:
+    server.on( 'error', err => {
+        if ( /address already in use/.test( `${err}` ) ) {
+            console.log( `
+Cannot launch test server in which to run unit tests:
+A test server is already running on port ${options.port}.
+Perhaps you have one running in another terminal?
+            ` )
+            process.exit()
+        } else {
+            throw err
+        }
+    } )
+    server.listen( options.port )
     if ( options.verbose )
         console.log( `Listening on port ${port}` )
 }

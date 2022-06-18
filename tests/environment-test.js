@@ -10,15 +10,6 @@ describe( 'Environment', () => {
 
 } )
 
-///////////////
-//
-//  NOTE:
-//
-//  Some tests in this module have been copied over from old code,
-//  then commented out until they're needed in the future.
-//
-///////////////
-
 describe( 'Conclusions', () => {
 
     let A, B, C, D, E, _A, _B, _C, _D, _E
@@ -38,7 +29,6 @@ describe( 'Conclusions', () => {
   
     it( 'should say the conclusions in { A } are only A', () => {
         let X = E( A )
-        // expect( X.toString() ).to.equal( '{ A }' )
         let Y = X.conclusions()
         expect( Y ).to.have.length( 1 )
         expect( Y ).to.contain( A )
@@ -47,7 +37,6 @@ describe( 'Conclusions', () => {
   
     it( 'should say the conclusions in { A B } are A and B', () => {
         let X = E( A, B )
-        // expect( X.toString() ).to.equal( '{ A B }' )
         let Y = X.conclusions()
         expect( Y ).to.have.length( 2 )
         expect( Y ).to.contain( A )
@@ -58,7 +47,6 @@ describe( 'Conclusions', () => {
   
     it( 'should say the conclusions in { A { B } } are A and B', () => {
         let X = E( A, E( B ) )
-        // expect( X.toString() ).to.equal( '{ A { B } }' )
         let Y = X.conclusions()
         expect( Y ).to.have.length( 2 )
         expect( Y ).to.contain( A )
@@ -69,7 +57,6 @@ describe( 'Conclusions', () => {
   
     it( 'should say the conclusions in :{ A B } are A and B', () => {
         let X = _E( A, B )
-        // expect( X.toString() ).to.equal( ':{ A B }' )
         let Y = X.conclusions()
         expect( Y ).to.have.length( 2 )
         expect( Y ).to.contain( A )
@@ -80,7 +67,6 @@ describe( 'Conclusions', () => {
   
     it( 'should say the conclusions in :{ :A B } are only B', () => {
         let X = _E( _A, B )
-        // expect( X.toString() ).to.equal( ':{ :A B }' )
         let Y = X.conclusions()
         expect( Y ).to.have.length( 1 )
         expect( Y ).to.contain( B )
@@ -90,7 +76,6 @@ describe( 'Conclusions', () => {
   
     it( 'should say the conclusions in :{ A :B } are only A', () => {
         let X = _E( A, _B )
-        // expect( X.toString() ).to.equal( ':{ A :B }' )
         let Y = X.conclusions()
         expect( Y ).to.have.length( 1 )
         expect( Y ).to.contain( A )
@@ -100,7 +85,6 @@ describe( 'Conclusions', () => {
   
     it( 'should say there are no conclusions in :{ :A :B }', () => {
         let X = _E( _A, _B )
-        // expect( X.toString() ).to.equal( ':{ :A :B }' )
         let Y = X.conclusions()
         expect( Y ).to.eql( [ ] )
         expect( _A.isAConclusionIn( X ) ).to.equal( false )
@@ -109,7 +93,6 @@ describe( 'Conclusions', () => {
   
     it( 'should say the conclusions in { { A } } are only A', () => {
         let X = E( E( A ) )
-        // expect( X.toString() ).to.equal( '{ { A } }' )
         let Y = X.conclusions()
         expect( Y ).to.have.length( 1 )
         expect( Y ).to.contain( A )
@@ -118,7 +101,6 @@ describe( 'Conclusions', () => {
   
     it( 'should say there are no conclusions in { :{ A } }', () => {
         let X = E( _E( A ) )
-        // expect( X.toString() ).to.equal( '{ :{ A } }' )
         let Y = X.conclusions()
         expect( Y ).to.eql( [ ] )
         expect( A.isAConclusionIn( X ) ).to.equal( false )
@@ -126,7 +108,6 @@ describe( 'Conclusions', () => {
   
     it( 'should say there are no conclusions in { { :A } }', () => {
         let X = E( E( _A ) )
-        // expect( X.toString() ).to.equal( '{ { :A } }' )
         let Y = X.conclusions()
         expect( Y ).to.eql( [ ] )
         expect( _A.isAConclusionIn( X ) ).to.equal( false )
@@ -134,7 +115,6 @@ describe( 'Conclusions', () => {
   
     it( 'should say the conclusions in { { :A B } } are only B', () => {
         let X = E( E( _A, B ) )
-        // expect( X.toString() ).to.equal( '{ { :A B } }' )
         let Y = X.conclusions()
         expect( Y ).to.have.length( 1 )
         expect( Y ).to.contain( B )
@@ -144,7 +124,6 @@ describe( 'Conclusions', () => {
   
     it( 'should say the conclusions in { { :A B } C } are B and C', () => {
         let X = E( E( _A, B ), C )
-        // expect( X.toString() ).to.equal( '{ { :A B } C }' )
         let Y = X.conclusions()
         expect( Y ).to.have.length( 2 )
         expect( Y ).to.contain( B )
@@ -156,7 +135,6 @@ describe( 'Conclusions', () => {
   
     it( 'should say the conclusions in { :{ :A B } C } are only C', () => {
         let X = E( _E( _A, B ), C )
-        // expect( X.toString() ).to.equal( '{ :{ :A B } C }' )
         let Y = X.conclusions()
         expect( Y ).to.have.length( 1 )
         expect( Y ).to.contain( C )
@@ -167,7 +145,6 @@ describe( 'Conclusions', () => {
   
     it( 'should say the conclusions in { { { :A B } :{ :C D } } :D } are only B', () => {
         let X = E( E( E( _A, B ), _E( _C, D ) ), _D )
-        // expect( X.toString() ).to.equal( '{ { { :A B } :{ :C D } } :D }' )
         let Y = X.conclusions()
         expect( Y ).to.have.length( 1 )
         expect( Y ).to.contain( B )
@@ -180,7 +157,6 @@ describe( 'Conclusions', () => {
   
     it( 'should say the conclusions in { { :{ :A B } { C :D } } D } are C and D', () => {
         let X = E( E( _E( _A, B ), E( C, _D ) ), D )
-        // expect( X.toString() ).to.equal( '{ { :{ :A B } { C :D } } D }' )
         let Y = X.conclusions()
         expect( Y ).to.have.length( 2 )
         expect( Y ).to.contain( C )
