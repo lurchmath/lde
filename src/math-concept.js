@@ -460,10 +460,10 @@ export class MathConcept extends EventTarget {
      * @see {@link MathConcept#lastChild lastChild()}
      */
     child ( ...indices ) {
-      return indices.reduce( (x,n) =>
-             x=x.children()[n < 0 ? this.children().length + n : n],this)
+        return indices.reduce( (x,n) =>
+               typeof(x)=='undefined' ? undefined :
+                 x.children()[n < 0 ? x.children().length + n : n],this)
     }
-
     /**
      * The number of children of this MathConcept
      * @return {number} A nonnegative integer indicating the number of children
