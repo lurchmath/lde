@@ -6,12 +6,12 @@ import { SourceMap } from './source-map.js'
  * The MathConcept class, an n-ary tree of MathConcept instances, using functions
  * like {@link MathConcept#parent parent()} and {@link MathConcept#children children()}
  * to navigate the tree.
- * 
+ *
  * In many ways, this is an abstract base class.  Yes, you can construct instances of
  * it, and the test suite does so to verify that all the features herein work.  But in
  * actual applications, it will primarily (perhaps exclusively) be subclasses of this
  * class that are instantiated.  There are two such types of subclasses:
- * 
+ *
  *  1. LogicConcepts, which the LDE knows how to process for validating variable
  *     scoping and correctness of logical inference
  *  2. MathConcepts that are lot merely logical, and thus can be arbitrarily complex
@@ -20,7 +20,7 @@ import { SourceMap } from './source-map.js'
  *     This algorithmic breakdown is implemented in the
  *     {@link MathConcept#interpretation interpretation()} function, which in this
  *     abstract base class returns simply an empty list, meaning "no LogicConcepts."
- * 
+ *
  * This second category of subclasses is not intended to be fully specified, but can
  * grow and change over time, as new classes in that category are developed.
  */
@@ -31,7 +31,7 @@ export class MathConcept extends EventTarget {
     //  Constructor
     //
     //////
-    
+
     /**
      * Create a new MathConcept.  Any argument that is not a MathConcept is ignored.
      * @constructor
@@ -61,9 +61,9 @@ export class MathConcept extends EventTarget {
      * MathConcept changes and thus needs to be reprocessed (such as interpreted
      * or validated) to reflect those most recent changes, it may be marked
      * dirty until such processing takes place.
-     * 
+     *
      * MathConcept instances are constructed with their dirty flag set to false.
-     * 
+     *
      * @return {boolean} Whether this MathConcept is currently marked dirty
      * @see {@link MathConcept#markDirty markDirty()}
      */
@@ -72,7 +72,7 @@ export class MathConcept extends EventTarget {
     /**
      * Setter for the "dirty" flag of this MathConcept.  For information on the
      * meaning of the flag, see {@link MathConcept#isDirty isDirty()}.
-     * 
+     *
      * @param {boolean} [on=true] Whether to mark it dirty (true)
      *   or clean (false).  If this value is not boolean, it will be converted
      *   to one (with the `!!` idiom).
@@ -100,10 +100,10 @@ export class MathConcept extends EventTarget {
      * Every MathConcept stores a dictionary of attributes as key-value pairs.
      * All keys should be strings (or they will be converted into strings) and
      * their associated values must be amenable to a JSON encoding.
-     * 
+     *
      * This function looks up and returns the value of an attribute in this
      * MathConcept, the one with the given `key`.
-     * 
+     *
      * @param {*} key - name of the attribute to look up
      * @param {*} defaultValue - the value that should be returned if the `key`
      *   does not appear as the name of an attribute in this MathConcept
@@ -122,7 +122,7 @@ export class MathConcept extends EventTarget {
      * Get the list of keys used in the attributes dictionary within this
      * MathConcept.  For more details on the MathConcept attribution system, see the
      * documentation for {@link MathConcept#getAttribute getAttribute()}.
-     * 
+     *
      * Each key must be atomic and will be converted into a string if it is not
      * already one.
      * @return {Array} A list of values used as keys
@@ -147,15 +147,15 @@ export class MathConcept extends EventTarget {
     /**
      * For details on how MathConcepts store attributes, see the documentation for
      * the {@link MathConcept#getAttribute getAttribute()} function.
-     * 
+     *
      * This function stores a new key-value pair in the MathConcept's attribute
      * dictionary.  See the restrictions on keys and values in the documentation
      * linked to above.  Calling this function overwrites any old value that was
      * stored under the given `key`.
-     * 
+     *
      * The change events are fired only if the new value is different from the
      * old value, according to `JSON.equals()`.
-     * 
+     *
      * @fires MathConcept#willBeChanged
      * @fires MathConcept#wasChanged
      * @param {*} key - The key that indexes the key-value pair we are about to
@@ -171,7 +171,7 @@ export class MathConcept extends EventTarget {
             /**
              * An event of this type is fired in a MathConcept immediately before
              * one of that MathConcept's attributes is changed.
-             * 
+             *
              * @event MathConcept#willBeChanged
              * @type {Object}
              * @property {MathConcept} concept - The MathConcept emitting the
@@ -198,7 +198,7 @@ export class MathConcept extends EventTarget {
             /**
              * An event of this type is fired in a MathConcept immediately after
              * one of that MathConcept's attributes is changed.
-             * 
+             *
              * @event MathConcept#wasChanged
              * @type {Object}
              * @property {MathConcept} concept - The MathConcept emitting the
@@ -227,17 +227,17 @@ export class MathConcept extends EventTarget {
     /**
      * For details on how MathConcepts store attributes, see the documentation for
      * the {@link MathConcept#getAttribute getAttribute()} function.
-     * 
+     *
      * This function removes zero or more key-value pairs from the MathConcept's
      * attribute dictionary.  See the restrictions on keys and values in the
      * documentation linked to above.
-     * 
+     *
      * The change events are fired only if the given keys are actually currently
      * in use by some key-value pairs in the MathConcept.  If you pass multiple
      * keys to be removed, each will generate a separate pair of
      * {@link MathConcept#willBeChanged willBeChanged} and
      * {@link MathConcept#wasChanged wasChanged} events.
-     * 
+     *
      * @fires MathConcept#willBeChanged
      * @fires MathConcept#wasChanged
      * @param {Array} keys - The list of keys indicating which key-value pairs
@@ -276,15 +276,15 @@ export class MathConcept extends EventTarget {
      * a convenient form of repeated calls to
      * {@link MathConcept#setAttribute setAttribute()}, and returns the MathConcept
      * for ease of use in method chaining.
-     * 
+     *
      * Example use: `const S = new MathConcept().attr( { k1 : 'v1', k2 : 'v2' } )`
-     * 
+     *
      * Because this calls {@link MathConcept#setAttribute setAttribute()} zero or
      * more times, as dictated by the contents of `attributes`, it may result in
      * multiple firings of the events
      * {@link MathConcept#willBeChanged willBeChanged} and
      * {@link MathConcept#wasChanged wasChanged}.
-     * 
+     *
      * @param {Object|Map|Array} attributes - A collection of key-value pairs to
      *   add to this MathConcept's attributes.  This can be a JavaScript Object,
      *   with keys and values in the usual `{'key':value,...}` form, a
@@ -320,18 +320,18 @@ export class MathConcept extends EventTarget {
      * that may be respected by methods in this class or its subclasses, but the
      * client is free to use any type names they wish.  A MathConcept may have
      * zero, one, or more types.
-     * 
+     *
      * This convenience function, together with
      * {@link MathConcept#makeIntoA makeIntoA()} and {@link MathConcept#asA asA()},
      * makes it easy to use the MathConcept's attributes to store such
      * information.
-     * 
+     *
      * Note that the word "type" is being used in the informal, English sense,
      * here.  There is no intended or implied reference to mathematical types,
      * variable types in programming languages, or type theory in general.
      * This suite of functions is for adding boolean flags to MathConcepts in an
      * easy way.
-     * 
+     *
      * @param {string} type - The type we wish to query
      * @return {boolean} Whether this MathConcept has that type
      * @see {@link MathConcept#makeIntoA makeIntoA()}
@@ -343,11 +343,11 @@ export class MathConcept extends EventTarget {
     /**
      * For a full explanation of the typing features afforded by this function,
      * see the documentation for {@link MathConcept#isA isA()}.
-     * 
+     *
      * This function adds the requested type to the MathConcept's attributes and
      * returns the MathConcept itself, for use in method chaining, as in
      * `S.makeIntoA( 'fruit' ).setAttribute( 'color', 'green' )`.
-     * 
+     *
      * @param {string} type - The type to add to this MathConcept
      * @return {MathConcept} This MathConcept, after the change has been made to it
      * @see {@link MathConcept#isA isA()}
@@ -362,14 +362,14 @@ export class MathConcept extends EventTarget {
     /**
      * For a full explanation of the typing features afforded by this function,
      * see the documentation for {@link MathConcept#isA isA()}.
-     * 
+     *
      * This function removes the requested type to the MathConcept's attributes
      * and returns the MathConcept itself, for use in method chaining, as in
      * `S.unmakeIntoA( 'fruit' ).setAttribute( 'sad', true )`.
-     * 
+     *
      * Admittedly, this is a pretty bad name for a function, but it is the
      * reverse of {@link MathConcept#makeIntoA makeIntoA()}, so there you go.
-     * 
+     *
      * @param {string} type - The type to remove from this MathConcept
      * @return {MathConcept} This MathConcept, after the change has been made to it
      * @see {@link MathConcept#isA isA()}
@@ -384,7 +384,7 @@ export class MathConcept extends EventTarget {
     /**
      * Create a copy of this MathConcept, but with the given type added, using
      * {@link MathConcept#makeIntoA makeIntoA()}.
-     * 
+     *
      * @param {string} type - The type to add to the copy
      * @return {MathConcept} A copy of this MathConcept, with the given type added
      * @see {@link MathConcept#isA isA()}
@@ -397,7 +397,7 @@ export class MathConcept extends EventTarget {
     //  Functions querying tree structure
     //
     //////
-    
+
     /**
      * This MathConcept's parent MathConcept, that is, the one enclosing it, if any
      * @return {MathConcept} This MathConcept's parent node, or null if there isn't one
@@ -408,10 +408,10 @@ export class MathConcept extends EventTarget {
 
     /**
      * An array containing this MathConcept's children, in the correct order.
-     * 
+     *
      * To get a specific child, it is more efficient to use the
      * {@link MathConcept.child()} function instead.
-     * 
+     *
      * @return {MathConcept[]} A shallow copy of the MathConcept's children array
      * @see {@link MathConcept#parent parent()}
      * @see {@link MathConcept#child child()}
@@ -424,11 +424,11 @@ export class MathConcept extends EventTarget {
 
     /**
      * Get the child of this MathConcept at index i.
-     * 
+     *
      * If the index is invalid (that is, it is anything other than one of
      * {0,1,...,n-1\} if there are n children) then undefined will be
      * returned instead.
-     * 
+     *
      * @param {number} i - The index of the child being fetched
      * @return {MathConcept} The child at the given index, or undefined if none
      * @see {@link MathConcept#parent parent()}
@@ -436,7 +436,10 @@ export class MathConcept extends EventTarget {
      * @see {@link MathConcept#firstChild firstChild()}
      * @see {@link MathConcept#lastChild lastChild()}
      */
-    child ( i ) { return this._children[i] }
+    child ( ...indices ) {
+      return indices.reduce( (x,n) =>
+             x=x.children()[n < 0 ? this.children().length + n : n],this)
+    }
 
     /**
      * The number of children of this MathConcept
@@ -449,7 +452,7 @@ export class MathConcept extends EventTarget {
     /**
      * Returns the value `i` such that `this.parent().child(i)` is this object,
      * provided that this MathConcept has a parent.
-     * 
+     *
      * @return {number} The index of this MathConcept in its parent's children list
      * @see {@link MathConcept#parent parent()}
      * @see {@link MathConcept#child child()}
@@ -534,9 +537,9 @@ export class MathConcept extends EventTarget {
      * My address within the given ancestor, as a sequence of indices
      * `[i1,i2,...,in]` such that `ancestor.child(i1).child(i2)....child(in)` is
      * this MathConcept.
-     * 
+     *
      * This is a kind of inverse to {@link MathConcept#index index()}.
-     * 
+     *
      * @param {MathConcept} [ancestor] - The ancestor in which to compute my
      *   address, which defaults to my highest ancestor.  If this argument is
      *   not actually an ancestor of this MathConcept, then we treat it as if it
@@ -557,11 +560,11 @@ export class MathConcept extends EventTarget {
      * Performs repeated child indexing to find a specific descendant.  If the
      * address given as input is the array `[i1,i2,...,in]`, then this returns
      * `this.child(i1).child(i2)....child(in)`.
-     * 
+     *
      * If the given address is the empty array, the result is this MathConcept.
-     * 
+     *
      * This is a kind of inverse to {@link MathConcept#address address()}.
-     * 
+     *
      * @param {number[]} address - A sequence of nonnegative indices, as
      *   described in the documentation for address()
      * @return {MathConcept} A descendant MathConcept, following the definition
@@ -570,7 +573,7 @@ export class MathConcept extends EventTarget {
      * @see {@link MathConcept#address address()}
      */
     index ( address ) {
-        if ( !( address instanceof Array ) ) return undefined
+        if ( !( address instanceof Array ) ) return undefined        
         if ( address.length == 0 ) return this
         const nextStep = this.child( address[0] )
         if ( !( nextStep instanceof MathConcept ) ) return undefined
@@ -587,7 +590,7 @@ export class MathConcept extends EventTarget {
      * The list of children of this MathConcept that satisfy the given predicate,
      * in the same order that they appear as children.  Obviously, not all
      * children may be included in the result, depending on the predicate.
-     * 
+     *
      * @param {function(MathConcept):boolean} predicate - The predicate to use for
      *   testing children
      * @return {MathConcept[]} The array of children satisfying the given predicate
@@ -601,7 +604,7 @@ export class MathConcept extends EventTarget {
      * Whether this MathConcept has any children satisfying the given predicate.
      * The predicate will be evaluated on each child in order until one passes
      * or all fail; it may not be evaluated on all children, if not needed.
-     * 
+     *
      * @param {function(MathConcept):boolean} predicate - The predicate to use for
      *   testing children
      * @return {boolean} True if and only if some child satisfies the given predicate
@@ -613,7 +616,7 @@ export class MathConcept extends EventTarget {
     /**
      * An iterator over all descendants of this MathConcept, in a pre-order tree
      * traversal.
-     * 
+     *
      * @yields {MathConcept} This MathConcept, then its first child, and so on down
      *   that branch of the tree, and onward in a pre-order traversal
      * @see {@link MathConcept#descendantsSatisfying descendantsSatisfying()}
@@ -628,11 +631,11 @@ export class MathConcept extends EventTarget {
      * An array of those descendants of this MathConcept that satisfy the given
      * predicate.  These are not copies, but the actual descendants; if you
      * alter one, it changes the hierarchy beneath this MathConcept.
-     * 
+     *
      * Note that this MathConcept counts as a descendant of itself.  To exclude
      * this MathConcept from consideration, simply change your predicate, as in
      * `X.descendantsSatisfying( d => X != d && predicate(d) )`.
-     * 
+     *
      * @param {function(MathConcept):boolean} predicate - The predicate to use for
      *   testing descendants
      * @return {MathConcept[]} A list of descendants of this MathConcept, precisely
@@ -654,11 +657,11 @@ export class MathConcept extends EventTarget {
      * The predicate will be evaluated on each descendant in depth-first order
      * until one passes or all fail; it may not be evaluated on all descendants,
      * if not needed.
-     * 
+     *
      * Note that this MathConcept counts as a descendant of itself.  To ignore
      * this MathConcept, simply change the predicate to do so, as in
      * `X.descendantsSatisfying( d => X != d && predicate(d) )`.
-     * 
+     *
      * @param {function(MathConcept):boolean} predicate - The predicate to use for
      *   testing descendants
      * @return {boolean} True if and only if some descendant satisfies the given predicate
@@ -675,7 +678,7 @@ export class MathConcept extends EventTarget {
     /**
      * An iterator through all the ancestors of this MathConcept, starting with
      * itself as the first (trivial) ancestor, and walking upwards from there.
-     * 
+     *
      * @yields {MathConcept} This MathConcept, then its parent, grandparent, etc.
      * @see {@link MathConcept#ancestors ancestors()}
      * @see {@link MathConcept#parent parent()}
@@ -690,19 +693,19 @@ export class MathConcept extends EventTarget {
      * array is the exact contents of
      * {@link MathConcept#ancestorsIterator ancestorsIterator()}, but in array
      * form rather than as an iterator.
-     * 
+     *
      * @return {MathConcept[]} An array beginning with this MathConcept, then its
      *   parent, grandparent, etc.
      * @see {@link MathConcept#ancestorsIterator ancestorsIterator()}
      * @see {@link MathConcept#parent parent()}
      */
     ancestors () { return Array.from( this.ancestorsIterator() ) }
-    
+
     /**
      * Find all ancestors of this MathConcept satisfying the given predicate.
      * Note that this MathConcept counts as a trivial ancestor of itself, so if
      * you don't want that, modify your predicate to exclude it.
-     * 
+     *
      * @param {function(MathConcept):boolean} predicate - Predicate to evaluate on
      *   each ancestor
      * @return {MathConcept[]} The ancestors satisfying the predicate, which may
@@ -721,7 +724,7 @@ export class MathConcept extends EventTarget {
     /**
      * Whether this MathConcept has an ancestor (including itself) satisfying the
      * given predicate.
-     * 
+     *
      * @param {function(MathConcept):boolean} predicate - Predicate to evaluate on
      *   each ancestor
      * @return {boolean} Whether an ancestor satisfying the given predicate
@@ -744,18 +747,18 @@ export class MathConcept extends EventTarget {
 
     /**
      * Insert a child into this MathConcept's list of children.
-     * 
+     *
      * Any children at the given index or later will be moved one index later to
      * make room for the new insertion.  The index can be anything from 0 to the
      * number of children (inclusive); this last value means insert at the end
      * of the children array.  The default insertion index is the beginning of
      * the array.
-     * 
+     *
      * If the child to be inserted is an ancestor of this MathConcept, then we
      * remove this MathConcept from its parent, to obey the insertion command given
      * while still maintaining acyclicity in the tree structure.  If the child to
      * be inserted is this node itself, this function does nothing.
-     * 
+     *
      * @param {MathConcept} child - the child to insert
      * @param {number} atIndex - the index at which the new child will be
      * @fires MathConcept#willBeInserted
@@ -781,7 +784,7 @@ export class MathConcept extends EventTarget {
         /**
          * An event of this type is fired in a MathConcept immediately before that
          * MathConcept is inserted as a child within a new parent.
-         * 
+         *
          * @event MathConcept#willBeInserted
          * @type {Object}
          * @property {MathConcept} child - The MathConcept emitting the event, which
@@ -803,7 +806,7 @@ export class MathConcept extends EventTarget {
         /**
          * An event of this type is fired in a MathConcept immediately after that
          * MathConcept is inserted as a child within a new parent.
-         * 
+         *
          * @event MathConcept#wasInserted
          * @type {Object}
          * @property {MathConcept} child - The MathConcept emitting the event, which
@@ -825,7 +828,7 @@ export class MathConcept extends EventTarget {
      * If this MathConcept has a parent, remove this from its parent's child list
      * and set our parent pointer to null, thus severing the relationship.  If
      * this has no parent, do nothing.
-     * 
+     *
      * @fires MathConcept#willBeRemoved
      * @see {@link MathConcept#parent parent()}
      * @see {@link MathConcept#removeChild removeChild()}
@@ -840,7 +843,7 @@ export class MathConcept extends EventTarget {
              * from a simple removal, or it might be the first step in a
              * re-parenting process that ends up with the MathConcept as the child
              * of a new parent.
-             * 
+             *
              * @event MathConcept#willBeRemoved
              * @type {Object}
              * @property {MathConcept} child - The MathConcept emitting the event,
@@ -863,7 +866,7 @@ export class MathConcept extends EventTarget {
              * from a simple removal, or it might be the first step in a
              * re-parenting process that ends up with the MathConcept as the child
              * of a new parent.
-             * 
+             *
              * @event MathConcept#wasRemoved
              * @type {Object}
              * @property {MathConcept} child - The MathConcept emitting the event,
@@ -885,7 +888,7 @@ export class MathConcept extends EventTarget {
     /**
      * Calls {@link MathConcept#remove remove()} on the child with index `i`.
      * Does nothing if the index is invalid.
-     * 
+     *
      * @param {number} i - the index of the child to remove
      * @see {@link MathConcept#remove remove()}
      * @see {@link MathConcept#child child()}
@@ -900,13 +903,13 @@ export class MathConcept extends EventTarget {
     /**
      * Replace this MathConcept, exactly where it sits in its parent MathConcept,
      * with the given one, thus deparenting this one.
-     * 
+     *
      * For example, if `A` is a child of `B` and we call `B.replaceWith(C)`,
      * then `C` will now be a child of `A` at the same index that `B` formerly
      * occupied, and `B` will now have no parent.  If `C` had a parent before,
      * it will have been removed from it (thus decreasing that parent's number
      * of children by one).
-     * 
+     *
      * @param {MathConcept} other - the MathConcept with which to replace this one
      * @see {@link MathConcept#remove remove()}
      * @see {@link MathConcept#child child()}
@@ -953,7 +956,7 @@ export class MathConcept extends EventTarget {
      * Append a new child to the end of this MathConcept's list of children.  This
      * is equivalent to a call to `insertChild()` with the length of the current
      * children array as the index at which to insert.
-     * 
+     *
      * @param {MathConcept} child - The new MathConcept to append
      * @see {@link MathConcept#popChild popChild()}
      * @see {@link MathConcept#unshiftChild unshiftChild()}
@@ -965,7 +968,7 @@ export class MathConcept extends EventTarget {
      * This is equivalent to a call to `insertChild()` with the default second
      * parameter (i.e., insert at index zero), and thus this function is here
      * only for convenience, to fit with shiftChild().
-     * 
+     *
      * @param {MathConcept} child - The new MathConcept to prepend
      * @see {@link MathConcept#shiftChild shiftChild()}
      * @see {@link MathConcept#pushChild pushChild()}
@@ -974,15 +977,15 @@ export class MathConcept extends EventTarget {
 
     /**
      * Replace the entire children array of this MathConcept with a new one.
-     * 
+     *
      * This is equivalent to removing all the current children of this MathConcept
      * in order from lowest index to highest, then inserting all the children in
      * the given array, again from lowest index to highest.
-     * 
+     *
      * The intent is not for any of the elements of the given array to be
      * ancestors or descendants of one another, but even if they are, the action
      * taken here still follows the explanation given in the previous paragraph.
-     * 
+     *
      * @param {MathConcept[]} children - New list of children
      * @see {@link MathConcept#children children()}
      * @see {@link MathConcept#removeChild removeChild()}
@@ -1008,10 +1011,10 @@ export class MathConcept extends EventTarget {
      * call the first "earlier than" the other MathConcept, because we will use
      * MathConcept hierarchies to represent documents, and first in a pre-order
      * tree traversal would then mean earlier in the document.
-     * 
+     *
      * Note that this is a strict ordering, so a MathConcept is not earlier than
      * itself.
-     * 
+     *
      * @param {MathConcept} other - The MathConcept with which to compare this one.
      *   (The result is undefined if this is not a MathConcept.)
      * @return {boolean} Whether this MathConcept is earlier than the other, or
@@ -1049,7 +1052,7 @@ export class MathConcept extends EventTarget {
      * This is the opposite of {@link MathConcept#isEarlierThan isEarlierThan()}.
      * We have `A.isLaterThan(B)` if and only if `B.isEarlierThan(A)`.  This is
      * therefore just a convenience function.
-     * 
+     *
      * @param {MathConcept} other - The MathConcept with which to compare this one.
      *   (The result is undefined if this is not a MathConcept.)
      * @return {boolean} Whether this MathConcept is later than the other, or
@@ -1068,15 +1071,15 @@ export class MathConcept extends EventTarget {
      * Finds the next node in the same tree as this one, where "next" is defined
      * in terms of a pre-order tree traversal.  If there is no such node, this
      * will return undefined.
-     * 
+     *
      * Therefore this function also returns the earliest node later than this
      * one, in the sense of {@link MathConcept#isEarlierThan isEarlierThan()} and
      * {@link MathConcept#isLaterThan isLaterThan()}.
-     * 
+     *
      * For example, in a parent node with several atomic children, the next node
      * of the parent is the first child, and the next node of each child is the
      * one after, but the last child has no next node.
-     * 
+     *
      * @return {MathConcept} The next node in pre-order traversal after this one
      * @see {@link MathConcept#isEarlierThan isEarlierThan()}
      * @see {@link MathConcept#isLaterThan isLaterThan()}
@@ -1101,16 +1104,16 @@ export class MathConcept extends EventTarget {
      * Finds the previous node in the same tree as this one, where "previous" is
      * defined in terms of a pre-order tree traversal.  If there is no such
      * node, this will return undefined.
-     * 
+     *
      * Therefore this function also returns the latest node earlierr than this
      * one, in the sense of {@link MathConcept#isEarlierThan isEarlierThan()} and
      * {@link MathConcept#isLaterThan isLaterThan()}.
-     * 
+     *
      * This is the reverse of {@link MathConcept#nextInTree nextInTree()}, in the
      * sense that `X.nextInTree().previousInTree()` and
      * `X.previousInTree().nextInTree()` will, in general, be `X`, unless one of
      * the computations involved is undefined.
-     * 
+     *
      * @return {MathConcept} The previous node in pre-order traversal before this
      *   one
      * @see {@link MathConcept#nextInTree nextInTree()}
@@ -1134,7 +1137,7 @@ export class MathConcept extends EventTarget {
     /**
      * An iterator that walks through the entire tree from this node onward, in
      * a pre-order tree traversal, yielding each node in turn.
-     * 
+     *
      * @param {boolean} inThisTreeOnly - Set this to true to limit the iterator
      *   to return only descendants of this MathConcept.  Set it to false to
      *   permit the iterator to proceed outside of this tree into its context,
@@ -1169,7 +1172,7 @@ export class MathConcept extends EventTarget {
      * The same as {@link MathConcept#preOrderIterator preOrderIterator()}, but
      * already computed into array form for convenience (usually at a cost of
      * efficiency).
-     * 
+     *
      * @param {boolean} inThisTreeOnly - Has the same meaning as it does in
      *   {@link MathConcept#preOrderIterator preOrderIterator()}
      * @return {MathConcept[]} The array containing a pre-order tree traversal
@@ -1192,14 +1195,14 @@ export class MathConcept extends EventTarget {
      * "in the scope of" an earlier one, or equivalently, the earlier one "is
      * accessible to" the later one, if the nesting of intermediate MathConcepts
      * permits it in the usual way.
-     * 
+     *
      * More specifically, a MathConcept `X` is in the scope of precisely the
      * following other MathConcepts: all of `X`'s previous siblings, all of
      * `X.parent()`'s previous siblings (if `X.parent()` exists), all of
      * `X.parent().parent()`'s previous siblings (if `X.parent().parent()`
      * exists), and so on.  In particular, a MathConcept is not in its own scope,
      * nor in the scope of any of its other ancestors.
-     * 
+     *
      * The one exception to what's stated above is the reflexive case, whether
      * `X.isAccessibleTo(X)`.  By default, this is false, because we typically
      * think of `X.isAccessibleTo(Y)` as answering the question, "Can `Y`
@@ -1209,7 +1212,7 @@ export class MathConcept extends EventTarget {
      * that variable.  So we provide the second parameter, `reflexive`, for
      * customizing this behavior, and we have that, for any boolean value `b`,
      * `X.isAccessibleTo(Y,b)` if and only if `Y.isInTheScopeOf(X,b)`.
-     * 
+     *
      * @param {MathConcept} other - The MathConcept to which we're asking whether
      *   the current one is accessible.  If this parameter is not a MathConcept,
      *   the result is undefined.
@@ -1234,7 +1237,7 @@ export class MathConcept extends EventTarget {
      * {@link MathConcept#isInTheScopeOf isInTheScopeOf()} appears in the
      * documentation for {@link MathConcept#isAccessibleTo isAccessibleTo()}.
      * Refer there for details.
-     * 
+     *
      * @param {MathConcept} other - The MathConcept in whose scope we're asking
      *   whether this one lies.  If this parameter is not a MathConcept, the
      *   result is undefined.
@@ -1251,7 +1254,7 @@ export class MathConcept extends EventTarget {
     /**
      * For a definition of accessibility, refer to the documentation for the
      * {@link MathConcept#isAccessibleTo isAccessibleTo()} function.
-     * 
+     *
      * In short, the accessibles of a node are its previous siblings, the
      * previous siblings of its parent, the previous siblings of its
      * grandparent, and so on, where each node yielded
@@ -1293,7 +1296,7 @@ export class MathConcept extends EventTarget {
      * {@link MathConcept#accessiblesIterator accessiblesIterator()}, but put into
      * an array rather than an iterator, for convenience, possibly at the cost
      * of efficiency.
-     * 
+     *
      * @param {boolean} reflexive - Passed directly to
      *   {@link MathConcept#accessiblesIterator accessiblesIterator()}; see that
      *   function for more information
@@ -1313,12 +1316,12 @@ export class MathConcept extends EventTarget {
     /**
      * For a definition of scope, refer to the documentation for the
      * {@link MathConcept#isAccessibleTo isAccessibleTo()} function.
-     * 
+     *
      * In short, the scope of a node is itself, all of its later siblings, and
      * all their descendants, where each node yielded by the iterator
      * {@link MathConcept#isEarlierThan isEarlierThan()} all nodes yielded
      * thereafter.
-     * 
+     *
      * @param {boolean} reflexive - Functions analogously to the `reflexive`
      *   parameter for {@link MathConcept#isInTheScopeOf isInTheScopeOf()}; that
      *   is, do we include this MathConcept on its list of things in its scope?
@@ -1344,7 +1347,7 @@ export class MathConcept extends EventTarget {
      * The full contents of {@link MathConcept#scopeIterator scopeIterator()}, but
      * put into an array rather than an iterator, for convenience, possibly at
      * the cost of efficiency.
-     * 
+     *
      * @param {boolean} reflexive - Passed directly to
      *   {@link MathConcept#scopeIterator scopeIterator()}; see that function for
      *   more information
@@ -1369,14 +1372,14 @@ export class MathConcept extends EventTarget {
      * concepts into lower-level concepts that are only logical.  For example,
      * in mathematics, we my write A=B=C, but logically, this is two separate
      * statements, A=B and B=C.
-     * 
+     *
      * The interpretation function defined here can be used by any subclass to
      * implement its specific means of interpretation of mathematical concepts
      * into logical ones.  In this abstract base class, the default is simply
      * to return an empty list, meaning "no logic concepts."  Subclasses should
      * override this with an implementation specific to their actual mathematical
      * meaning.
-     * 
+     *
      * @return {LogicConcept[]} The ordered list of LogicConcepts whose combined
      *   meaning is equal to the meaning of this MathConcept
      */
@@ -1394,11 +1397,11 @@ export class MathConcept extends EventTarget {
      * hierarchy.  We cannot reconstitute an object from its serialized state if
      * we do not know which class to construct.  So we track all subclasses of
      * this class in a single static map, here.
-     * 
+     *
      * This class and each of its subclasses should add themselves to this map
      * and save the corresponding name in a static `className` variable in their
      * class.
-     * 
+     *
      * @see {@link MathConcept#className className}
      * @see {@link MathConcept.addSubclass addSubclass}
      */
@@ -1408,10 +1411,10 @@ export class MathConcept extends EventTarget {
      * Adds a subclass to the static {@link MathConcept#subclasses subclasses} map
      * tracked by this object, for use in reconsituting objects correctly from
      * their serialized forms.
-     * 
+     *
      * This method should be called once per subclass of `MathConcept`.  To see
      * how, see the code that initializes {@link MathConcept#className className}.
-     * 
+     *
      * @param {string} name - The name of the class, as it appears in code
      * @param {class} classObject - The class itself, such as `MathConcept`, or
      *   any of its subclasses, that is, the JavaScript object used when
@@ -1429,7 +1432,7 @@ export class MathConcept extends EventTarget {
     /**
      * The name of this class, as a JavaScript string.  For the MathConcept class,
      * this is, of course, `"MathConcept"`, but for subclasses, it will vary.
-     * 
+     *
      * See the code initializing this member to see how subclasses should
      * initialize their `className` members.  This is used in deserialization,
      * to correctly reconstitute objects of the appropriate class.
@@ -1442,12 +1445,12 @@ export class MathConcept extends EventTarget {
      * A deep copy of this MathConcept.  It will have no subtree in common with
      * this one, and yet it will satisfy an {@link MathConcept#equals equals()}
      * check with this MathConcept.
-     * 
+     *
      * In order to ensure that the copy has the same class as the original (even
      * if that is a proper subclass of MathConcept), this function depends upon
      * that subclass's having registered itself with the
      * {@link MathConcept#subclasses subclasses} static member.
-     * 
+     *
      * @return {MathConcept} A deep copy
      * @see {@link MathConcept#equals equals()}
      * @see {@link MathConcept#subclasses subclasses}
@@ -1465,7 +1468,7 @@ export class MathConcept extends EventTarget {
      * Whether this MathConcept is structurally equal to the one passed as
      * parameter.  In particular, this means that this function will return
      * true if and only if all the following are true.
-     * 
+     *
      *  * `other` is an instance of the MathConcept class
      *  * `other` has the same set of attribute keys as this instance
      *  * each of those keys maps to the same data in each instance (where
@@ -1475,8 +1478,8 @@ export class MathConcept extends EventTarget {
      *  * each of `other`'s children passes a recursive
      *    {@link MathConcept#equals equals()} check with the corresponding
      *    child of this instance
-     * 
-     * @param {MathConcept} other 
+     *
+     * @param {MathConcept} other
      * @returns {boolean} true if and only if this MathConcept equals `other`
      * @see {@link MathConcept#copy copy()}
      */
@@ -1512,23 +1515,23 @@ export class MathConcept extends EventTarget {
      * Note that the result of this function is *not* a string, but is ready to
      * be converted into one through `JSON.stringify()` or (preferably),
      * {@link predictableStringify predictableStringify()}.
-     * 
+     *
      * The resulting object has some of its attributes directly re-used (not
      * copied) from within this MathConcept (notably the values of many
      * attributes), for the sake of efficiency.  Thus you should *not* modify
      * the contents of the returned MathConcept.  If you want a completely
      * independent copy, call `JSON.copy()` on the return value.
-     * 
+     *
      * The particular classes of this MathConcept and any of its children are
      * stored in the result, so that a deep copy of this MathConcept can be
      * recreated from that object using {@link Strucure.fromJSON fromJSON()}.
-     * 
+     *
      * If the serialized result will later be deserialized after the original
      * has been destroyed, then you may wish to preserve the unique IDs of each
      * MathConcept in the hierarchy in the serialization.  But if the original
      * will still exist, you may not.  Thus the parameter lets you choose which
      * of these behaviors you need.  By default, IDs are included.
-     * 
+     *
      * @param {boolean} includeIDs - Whether to include the IDs of the
      *   MathConcept and its descendants in the serialized form (as part of the
      *   MathConcept's attributes)
@@ -1551,10 +1554,10 @@ export class MathConcept extends EventTarget {
     /**
      * Deserialize the data in the argument, producing a new MathConcept instance
      * (or, more specifically, sometimes an instance of one of its subclasses).
-     * 
+     *
      * Note that because this function is static, clients access it as
      * `MathConcept.fromJSON(...)`.
-     * 
+     *
      * @param {Object} data - A JavaScript Object of the form produced by
      *   {@link MathConcept#toJSON toJSON()}
      * @return {MathConcept} A new MathConcept instance (which may actually be an
@@ -1576,7 +1579,7 @@ export class MathConcept extends EventTarget {
      * its children.  This produces LISP-like results, although they will
      * contain only parentheses if all are MathConcept instances.  But
      * subclasses can override this method to specialize it.
-     * 
+     *
      * @return {string} A simple string representation
      * @see {@link MathConcept#toJSON toJSON()}
      */
@@ -1598,13 +1601,13 @@ export class MathConcept extends EventTarget {
      * `A.binds( X.text() )`.  This function returns an array of
      * all identifier names that appear within this MathConcept and, at the
      * point where they appear, are free in this ancestor MathConcept.
-     * 
+     *
      * If, instead of just the names of the identifiers, you wish to have the
      * identifier MathConcepts themselves, you can couple the
      * {@link MathConcept#isFree isFree()} function with the
      * {@link MathConcept#descendantsSatisfying descendantsSatisfying()}
      * function to achieve that.
-     * 
+     *
      * @return {string[]} An array of names of free identifiers appearing as
      *   descendants of this MathConcept
      * @see {@link Binding#binds binds()}
@@ -1630,10 +1633,10 @@ export class MathConcept extends EventTarget {
      * Is this MathConcept free in one of its ancestors?  If the ancestor is not
      * specified, it defaults to the MathConcept's topmost ancestor.  Otherwise,
      * you can specify it with the parameter.
-     * 
+     *
      * A MathConcept is free in an ancestor if none of the MathConcept's free
      * identifiers are bound within that ancestor.
-     * 
+     *
      * Note the one rare corner case that the head of a binding (even if it is
      * a compound expression) is not bound by the binding.  For instance, if
      * we have an expression like $\sum_{i=a}^b A_i$, then $i$ is bound in
@@ -1641,7 +1644,7 @@ export class MathConcept extends EventTarget {
      * symbol, written in LISP notation something like `((sum a b) i (A i))`.
      * This corner case rarely arises, because it would be very confusing for
      * $i$ to appear free in either $a$ or $b$, but is important to document.
-     * 
+     *
      * @param {MathConcept} [inThis] - The ancestor in which the question takes
      *   place, as described above
      * @return {boolean} Whether this MathConcept is free in the specified
@@ -1669,7 +1672,7 @@ export class MathConcept extends EventTarget {
      * Does a copy of the given MathConcept `concept` occur free anywhere in this
      * MathConcept?  More specifically, is there a descendant D of this MathConcept
      * such that `D.equals( concept )` and `D.isFree( inThis )`?
-     * 
+     *
      * @param {MathConcept} concept - This function looks for copies of this
      *   MathConcept
      * @param {MathConcept} [inThis] - The notion of "free" is relative to this
@@ -1715,7 +1718,7 @@ export class MathConcept extends EventTarget {
      * free to replace that instance.  Each instance is judged separately, so
      * there may be any number of replacements, from zero up to the number of
      * free occurrences of `original`.
-     * 
+     *
      * @param {MathConcept} original - Replace copies of this MathConcept with
      *   copies of `replacement`
      * @param {MathConcept} replacement - Replace copies of `original` with
@@ -1744,14 +1747,14 @@ export class MathConcept extends EventTarget {
      * globally unique ID.  We therefore need a global place to store the
      * mapping of IDs to instances, and thus we create this Map in the MathConcept
      * class.
-     * 
+     *
      * Each key in the map is an ID and the corresponding value is the instance
      * with that ID.  Each ID is a string.
-     * 
+     *
      * This data structure should not be accessed by clients; it is private to
      * this class.  Use {@link MathConcept.instanceWithID instanceWithID()} and
      * {@link MathConcept#trackIDs trackIDs()} instead.
-     * 
+     *
      * @see {@link MathConcept.instanceWithID instanceWithID()}
      * @see {@link MathConcept#trackIDs trackIDs()}
      */
@@ -1763,14 +1766,14 @@ export class MathConcept extends EventTarget {
      * {@link MathConcept#IDs IDs}, by the function
      * {@link MathConcept#trackIDs trackIDs()}.  If it has not been so recorded,
      * then this function will not find the instance and will return undefined.
-     * 
+     *
      * Note that because this function is static, clients access it as
      * `MathConcept.instanceWithID("...")`.
-     * 
+     *
      * @param {string} id - The MathConcept ID to look up
      * @return {MathConcept} The MathConcept that has the given ID, if any, or
      *   undefined if no MathConcept has the given ID
-     * 
+     *
      * @see {@link MathConcept#IDs IDs}
      * @see {@link MathConcept#trackIDs trackIDs()}
      */
@@ -1780,9 +1783,9 @@ export class MathConcept extends EventTarget {
      * The ID of this MathConcept, if it has one, or undefined otherwise.  An ID
      * is always a string; this is ensured by the
      * {@link MathConcept#setId setId()} function.
-     * 
+     *
      * @return {string} The ID of this MathConcept, or undefined if there is none
-     * 
+     *
      * @see {@link MathConcept#setId setID()}
      */
     ID () { return this.getAttribute( '_id' ) }
@@ -1794,10 +1797,10 @@ export class MathConcept extends EventTarget {
      * tracked, call {@link MathConcept#trackIDs trackIDs()}, and if that has
      * already been called, then to change a MathConcept's ID assignment, call
      * {@link MathConcept#changeID changeID()}.
-     * 
+     *
      * @param {string} id - The new ID to assign.  If this is not a string, it
      *   will be converted into one.
-     * 
+     *
      * @see {@link MathConcept#ID ID()}
      * @see {@link MathConcept#trackIDs trackIDs()}
      * @see {@link MathConcept#changeID changeID()}
@@ -1809,27 +1812,27 @@ export class MathConcept extends EventTarget {
      * this MathConcept's ID with this MathConcept instance itself.  If the
      * parameter is set to true (the default), then do the same recursively to
      * all of its descendants.
-     * 
+     *
      * Calling this function then enables you to call
      * {@link MathConcept.instanceWithID instanceWithID()} on any of the IDs of a
      * descendant and get that descendant in return.  Note that this does not
      * check to see if a MathConcept with the given ID has already been recorded;
      * it will overwrite any past data in the {@link MathConcept#IDs IDs} mapping.
-     * 
+     *
      * This function also makes a call to
      * {@link MathConcept#trackConnections trackConnections()}, because IDs are
      * required in order for connections to exist, and enabling IDs almost
      * always coincides with enabling connections as well.
-     * 
+     *
      * **Important:**
      * To prevent memory leaks, whenever a MathConcept hierarchy is no longer used
      * by the client, you should call {@link MathConcept#untrackIDs untrackIDs()}
      * on it.
-     * 
+     *
      * @param {boolean} recursive - Whether to recursively track IDs of all
      *   child, grandchild, etc. MathConcepts.  (If false, only this MathConcept's
      *   ID is tracked, not those of its descendants.)
-     * 
+     *
      * @see {@link MathConcept#IDs IDs}
      * @see {@link MathConcept#untrackIDs untrackIDs()}
      * @see {@link MathConcept#trackConnections trackConnections()}
@@ -1846,15 +1849,15 @@ export class MathConcept extends EventTarget {
      * reverse of {@link MathConcept#trackIDs trackIDs()}, and should always be
      * called once the client is finished using a MathConcept, to prevent memory
      * leaks.
-     * 
+     *
      * Because connections use the ID system, any connections that this
      * MathConcept is a part of will also be severed, by a call to
      * {@link MathConcept#removeConnections removeConnections()}.
-     * 
+     *
      * @param {boolean} recursive - Whether to recursively apply this function
      *   to all child, grandchild, etc. MathConcepts.  (If false, only this
      *   MathConcept's ID is untracked, not those of its descendants.)
-     * 
+     *
      * @see {@link MathConcept#IDs IDs}
      * @see {@link MathConcept#trackIDs trackIDs()}
      * @see {@link MathConcept#clearIDs clearIDs()}
@@ -1868,11 +1871,11 @@ export class MathConcept extends EventTarget {
     /**
      * Check whether this MathConcept's ID is currently tracked and associated
      * with this MathConcept itself.
-     * 
+     *
      * @return {boolean} Whether the ID of this MathConcept is currently tracked
      *   by the global {@link MathConcept#IDs IDs} mapping *and* that it is
      *   associated, by that mapping, with this MathConcept
-     * 
+     *
      * @see {@link MathConcept#IDs IDs}
      * @see {@link MathConcept#trackIDs trackIDs()}
      */
@@ -1886,14 +1889,14 @@ export class MathConcept extends EventTarget {
      * descendants.  This does not change anything about the global
      * {@link MathConcept#IDs IDs} mapping, so if this MathConcept's IDs are
      * tracked, you should call {@link MathConcept#untrackIDs untrackIDs()} first.
-     * 
+     *
      * Because connections use the ID system, any connections that this
      * MathConcept is a part of will also be severed, by a call to
      * {@link MathConcept#removeConnections removeConnections()}.
-     * 
+     *
      * @param {boolean} recursive - Whether to clear IDs from all descendants of
      *   this MathConcept as well
-     * 
+     *
      * @see {@link MathConcept#IDs IDs}
      * @see {@link MathConcept#untrackIDs untrackIDs()}
      */
@@ -1909,17 +1912,17 @@ export class MathConcept extends EventTarget {
      * changes the ID and updates that mapping if needed all in one action, to
      * make it easy for the client to change a MathConcept's ID, just by calling
      * this function.
-     * 
+     *
      * If for some reason the change was not possible, then this function will
      * take no action and return false.  Possible reasons include:
      *  * the old ID isn't tracked in the {@link MathConcept#IDs IDs} mapping
      *  * the new ID is already associated with another MathConcept
      *  * the new ID is the same as the old ID
-     * 
+     *
      * This function also updates *other* MathConcepts that connect to this one,
      * changing their connections to use this MathConcept's new ID, so that all
      * connections are preserved across the use of this function.
-     * 
+     *
      * @param {string} newID - The ID to use as the replacement for this
      *   MathConcept's existing ID.  It will be treated as a string if it is not
      *   already one.
@@ -1956,10 +1959,10 @@ export class MathConcept extends EventTarget {
      * feedback messages to its clients, the LDE can override this
      * implementation with a real one, and all calls that use this central
      * channel will then be correctly routed.
-     * 
+     *
      * Documentation will be forthcoming later about the required form and
      * content of the `feedbackData` parameter.
-     * 
+     *
      * @param {Object} feedbackData - Any data that can be encoded using
      *   `JSON.stringify()` (or
      *   {@link predictableStringify predictableStringify()}), to be transmitted
@@ -1969,14 +1972,14 @@ export class MathConcept extends EventTarget {
     static feedback ( feedbackData ) {
         console.log( 'MathConcept class feedback not implemented:', feedbackData )
     }
-    
+
     /**
      * Send feedback on this particular MathConcept instance.  This takes the
      * given feedback data, adds to it the fact that this particular instance is
      * the subject of the feedback (by using its {@link MathConcept#id id()},
      * and then asks the static {@link MathConcept.feedback feedback()} function
      * to send that feedback to the LDE.
-     * 
+     *
      * @param {Object} feedbackData - Any data that can be encoded using
      *   `JSON.stringify()` (or
      *   {@link predictableStringify predictableStringify()}), to be transmitted
@@ -1996,7 +1999,7 @@ export class MathConcept extends EventTarget {
 
     /**
      * Get the IDs of all connections into or out of this MathConcept.
-     * 
+     *
      * @return {string[]} An array of all the IDs of all the connections into or
      *   out of this MathConcept.  These unique IDs can be used to get a
      *   {@link Connection Connection} object; see that class's
@@ -2011,10 +2014,10 @@ export class MathConcept extends EventTarget {
             key.substring( 0, 13 ) == '_conn source ' )
         .map( key => key.substring( 13 ) )
     }
-    
+
     /**
      * Get the IDs of all connections into this MathConcept.
-     * 
+     *
      * @return {string[]} An array of all the IDs of all the connections into
      *   this MathConcept.  These unique IDs can be used to get a
      *   {@link Connection Connection} object; see that class's
@@ -2028,10 +2031,10 @@ export class MathConcept extends EventTarget {
             key.substring( 0, 13 ) == '_conn source ' )
         .map( key => key.substring( 13 ) )
     }
-    
+
     /**
      * Get the IDs of all connections out of this MathConcept.
-     * 
+     *
      * @return {string[]} An array of all the IDs of all the connections out of
      *   this MathConcept.  These unique IDs can be used to get a
      *   {@link Connection Connection} object; see that class's
@@ -2051,7 +2054,7 @@ export class MathConcept extends EventTarget {
      * {@link Connection Connection} instances.  This function simply maps the
      * {@link Connection.withID withID()} function over the result of
      * {@link MathConcept#getConnectionIDs getConnectionIDs()}.
-     * 
+     *
      * @return {Connection[]} An array of all the Connections into or out of
      *   this MathConcept.
      * @see {@link MathConcept#getConnectionIDs getConnectionIDs()}
@@ -2065,7 +2068,7 @@ export class MathConcept extends EventTarget {
      * {@link Connection Connection} instances.  This function simply maps the
      * {@link Connection.withID withID()} function over the result of
      * {@link MathConcept#getConnectionIDsIn getConnectionIDsIn()}.
-     * 
+     *
      * @return {Connection[]} An array of all the Connections into this
      *   MathConcept.
      * @see {@link MathConcept#getConnectionIDsIn getConnectionIDsIn()}
@@ -2079,7 +2082,7 @@ export class MathConcept extends EventTarget {
      * {@link Connection Connection} instances.  This function simply maps the
      * {@link Connection.withID withID()} function over the result of
      * {@link MathConcept#getConnectionIDsOut getConnectionIDsOut()}.
-     * 
+     *
      * @return {Connection[]} An array of all the Connections out of this
      *   MathConcept.
      * @see {@link MathConcept#getConnectionIDsOut getConnectionIDsOut()}
@@ -2093,7 +2096,7 @@ export class MathConcept extends EventTarget {
      * attaching some data to the connection as well.  This function just calls
      * {@link Connection.create Connection.create()}, and is thus here just for
      * convenience.
-     * 
+     *
      * @param {MathConcept} target - The target of the new connection
      * @param {string} connectionID - The unique ID to use for the new
      *   connection we are to create
@@ -2119,10 +2122,10 @@ export class MathConcept extends EventTarget {
      * MathConcepts on the other end of each connection.  For documentation on the
      * data format for this stored data, see the {@link Connection Connection}
      * class.
-     * 
+     *
      * This function simply runs {@link Connection#remove remove()} on every
      * connection in {@link MathConcept#getConnections getConnections()}.
-     * 
+     *
      * @see {@link Connection#remove remove()}
      * @see {@link MathConcept#getConnections getConnections()}
      */
@@ -2139,13 +2142,13 @@ export class MathConcept extends EventTarget {
      * {@link Connection.IDs IDs member of the Connection class} all the IDs of
      * the connections in any given MathConcept hierarchy.  This function does so.
      * In that way, it is very similar to {@link MathConcept#trackIDs trackIDs()}.
-     * 
+     *
      * Connections are processed only at the source node, so that we do not
      * process each one twice.  Thus any connection into this MathConcept from
      * outside will not be processed by this function, but connections from this
      * one out or among this one's descendants in either direction will be
      * processed.
-     * 
+     *
      * @return {boolean} True if and only if every connection ID that appers in
      *   this MathConcept and its descendants was able to be added to the global
      *   mapping in {@link Connection.IDs IDs}.  If any fail (because the ID was
@@ -2171,11 +2174,11 @@ export class MathConcept extends EventTarget {
      * When replacing a MathConcept in a hierarchy with another, we often want to
      * transfer all connections that went into or out of the old MathConcept to
      * its replacement instead.  This function performs that task.
-     * 
+     *
      * This function is merely a convenient interface that just calls
      * {@link Connection.transferConnections Connection.transferConnections()}
      * on your behalf.
-     * 
+     *
      * @param {MathConcept} recipient - The MathConcept to which to transfer all of
      *   this one's connections
      * @see {@link Connection.transferConnections Connection.transferConnections()}
@@ -2200,11 +2203,11 @@ export class MathConcept extends EventTarget {
      * represent LogicConcepts, {@link LogicConcept.fromPutdown as documented
      * here}.  (Both of these are, of course, plays on the name of the famous
      * format "markdown" by John Gruber.)
-     * 
+     *
      * Smackdown supports all notation used in putdown (so readers may wish to
      * begin learning about smackdown by following the link above to first
      * learn about putdown) plus the following additional features:
-     * 
+     *
      *  * The notation `$...$` can be used to represent a {@link LogicConcept
      *    LogicConcept}, for example, `$x^2-1$`.  The use of dollar signs is
      *    intentionally reminiscent of $\LaTeX$ notation for in-line math.
@@ -2240,14 +2243,14 @@ export class MathConcept extends EventTarget {
      *       instance with attribute "Interpret as" having the form
      *       `["command",...]`, for example, `\foo{bar}{baz}` would become
      *       `["command","foo","bar","baz"]`.
-     * 
+     *
      * The two notations given above will work hand-in-hand more over time.
      * Specifically, we will create types of `\command`s that can define new
      * notation to appear inside `$...$` blocks.
-     * 
+     *
      * For now, this routine fully supports parsing smackdown notation, but
      * does not yet obey a robust set of commands, only those shown above.
-     * 
+     *
      * @param {string} string the smackdown code to be interpreted
      * @returns {MathConcept[]} an array of MathConcept instances, the meaning
      *   of the smackdown code provided as input
@@ -2438,7 +2441,7 @@ export class MathConcept extends EventTarget {
      * {@link LogicConcept LogicConcept} instances.  For now, we have this
      * simple version in which many features are not yet implemented.  Its
      * behavior is as follows.
-     * 
+     *
      *  1. The method of interpretation that should be followed is extracted
      *     from the "Interpret as" attribute of this object.  If there is no
      *     such attribute, an error is thrown.  The attribute value should be
@@ -2454,10 +2457,10 @@ export class MathConcept extends EventTarget {
      *     interpreting the notation or command in question has not yet been
      *     implemented.
      *  4. If $a_1$ is anything else, an error is thrown.
-     * 
+     *
      * @returns {LogicConcept} the meaning of this MathConcept, subject to the
      *   limitations documented above
-     * 
+     *
      * @see {@link MathConcept.fromSmackdown fromSmackdown()} (which creates
      *   MathConcept hierarchies intended for interpretation)
      * @see {@link MathConcept#toSmackdown toSmackdown()}
@@ -2502,9 +2505,9 @@ export class MathConcept extends EventTarget {
      * represented by smackdown notation.  (For instance, a MathConcept
      * created by a call to `new MathConcept()` is too vague to be
      * representable using smackdown notation.)
-     * 
+     *
      * @returns {string} smackdown notation for this MathConcept
-     * 
+     *
      * @see {@link MathConcept.fromSmackdown fromSmackdown()}
      * @see {@link MathConcept#interpret interpret()}
      */
