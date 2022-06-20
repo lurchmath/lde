@@ -2,7 +2,6 @@
 import { MathConcept } from './math-concept.js'
 import { LogicConcept } from './logic-concept.js'
 import { Symbol as LurchSymbol } from './symbol.js'
-import { Formula } from './formula.js'
 
 /**
  * In mathematics, we declare new variables and constants regularly, when we
@@ -28,9 +27,6 @@ import { Formula } from './formula.js'
  * "Let $x\in A$ be arbitrary," the type is a variable declaration, the list
  * of symbols contains just one entry, $x$, and the body is the statement
  * $x\in A$ being made about $x$.
- * 
- * The body of a declaration can be any LogicConcept that does not include
- * (at any level of depth) a {@link Formula Formula}.
  */
 export class Declaration extends LogicConcept {
     
@@ -113,10 +109,10 @@ export class Declaration extends LogicConcept {
      *   single symbol is passed, it will be treated as an array of just one
      *   symbol.
      * @param {LogicConcept} [body] - An optional body of the declaration, as
-     *   described above.  The body may be any {@link LogicConcept LogicConcept}
-     *   that does not contain a {@link Formula Formula}.  If a declaration
-     *   comes with several assumptions about the declared variables, they can
-     *   be placed inside an {@link Environment Environment} to conjoin them.
+     *   described above.  The body may be any
+     *   {@link LogicConcept LogicConcept}.  If a declaration comes with several
+     *   assumptions about the declared variables, they can be placed inside an
+     *   {@link Environment Environment} to conjoin them.
      * @see {@link Declaration#type type()}
      * @see {@link Declaration#symbols symbols()}
      * @see {@link Declaration#body body()}
@@ -138,8 +134,6 @@ export class Declaration extends LogicConcept {
             if ( !( body instanceof LogicConcept ) )
                 throw 'Optional third parameter to Declaration constructor, '
                     + 'if provided, must be a LogicConcept'
-            if ( body.hasDescendantSatisfying( d => d instanceof Formula ) )
-                throw 'Body of a Declaration may not contain a Formula'
             super( ...symbols, body )
         } else {
             super( ...symbols )

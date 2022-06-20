@@ -214,9 +214,6 @@ export class LogicConcept extends MathConcept {
      *  * An {@link Environment Environment} is written with its children
      *    separated by spaces and surrounded in curly brackets.  Example:
      *    `{ child1 child2 etc }`.
-     *  * A {@link Formula Formula} (which is a subclass of
-     *    {@link Environment Environment}) uses `{*` and `*}` as the
-     *    grouping markers instead of undecorated curly brackets.
      *  * Any {@link Environment Environment},
      *    {@link Declaration Declaration}, or
      *    {@link Expression#isOutermost outermost Expression} can be marked
@@ -265,7 +262,7 @@ export class LogicConcept extends MathConcept {
         }
         // parsing data
         const groupers =
-            [ [ '{*', '*}' ], [ '{', '}' ], [ '(', ')' ], [ '[', ']' ] ]
+            [ [ '{', '}' ], [ '(', ')' ], [ '[', ']' ] ]
         const openGroupRE = /^\{\*|^\{|^\(|^\[/
         const closeGroupRE = /^\*\}|^\}|^\)|^\]/
         const stringRE = /^"(?:[^"\\\n]|\\"|\\\\)*"|^'(?:[^'\\\n]|\\'|\\\\)*'/
@@ -328,8 +325,6 @@ export class LogicConcept extends MathConcept {
                 if ( outer == '(' && inner != '(' )
                     problem( 'Expressions can contain only Symbols or '
                            + 'other Expressions' )
-                if ( inner == '{*' && allOpenGroupers().includes( '[' ) )
-                    problem( 'Declaration bodies cannot contain Formulas' )
                 save()
                 shiftNext()
             // handle close groupers
@@ -497,12 +492,8 @@ export class LogicConcept extends MathConcept {
                 children = applyModifiers( children )
                 // now all children are LogicConcepts, so we can build them
                 // into whatever compound object is appropriate by tree.type:
-                // Formulas
-                if ( tree.type == '{* *}' ) {
-                    const Formula = MathConcept.subclasses.get( 'Formula' )
-                    return new Formula( ...children )
                 // Environments
-                } else if ( tree.type == '{ }' ) {
+                if ( tree.type == '{ }' ) {
                     const Environment =
                         MathConcept.subclasses.get( 'Environment' )
                     return new Environment( ...children )
@@ -616,12 +607,6 @@ export class LogicConcept extends MathConcept {
                              isTooBig( envInside ) ?
                              `{\n${indent(childResults.join( '\n' ))}\n}` :
                              `{ ${envInside} }` )
-            case 'Formula':
-                const forInside = childResults.join( ' ' )
-                return finalize( forInside == '' ? '{* *}' :
-                             isTooBig( forInside ) ?
-                             `{*\n${indent(childResults.join( '\n' ))}\n*}` :
-                             `{* ${forInside} *}` )
             default:
                 throw 'Cannot convert this class to putdown: '
                     + this.constructor.className

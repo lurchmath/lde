@@ -5,7 +5,6 @@ import { LogicConcept } from '../src/logic-concept.js'
 // And these are needed for other tests below, such as parsing
 import { MathConcept } from '../src/math-concept.js'
 import { Environment } from '../src/environment.js'
-import { Formula } from '../src/formula.js'
 import { Declaration } from '../src/declaration.js'
 import { Application } from '../src/application.js'
 import { Binding } from '../src/binding.js'
@@ -622,42 +621,16 @@ describe( 'Reading putdown notation', () => {
         ) ).to.equal( true )
     } )
 
-    it( 'Should support formula environments with or without givens', () => {
-        let test
-        // ----------
-        test = LogicConcept.fromPutdown( '{* A :B C *}' )
-        expect( test ).to.be.instanceof( Array )
-        expect( test.length ).to.equal( 1 )
-        expect( test[0].equals(
-            new Formula(
-                new LurchSymbol( 'A' ),
-                new LurchSymbol( 'B' ).asA( 'given' ),
-                new LurchSymbol( 'C' )
-            )
-        ) ).to.equal( true )
-        // ----------
-        test = LogicConcept.fromPutdown( ':{*{**}*}t:v' )
-        expect( test ).to.be.instanceof( Array )
-        expect( test.length ).to.equal( 3 )
-        expect( test[0].equals(
-            new Formula( new Formula ).asA( 'given' )
-        ) ).to.equal( true )
-        expect( test[1].equals( new LurchSymbol( 't' ) ) ).to.equal( true )
-        expect( test[2].equals(
-            new LurchSymbol( 'v' ).asA( 'given' )
-        ) ).to.equal( true )
-    } )
-
     it( 'Should let us add comments to the end of any line', () => {
         let test
         // ----------
         test = LogicConcept.fromPutdown( `
-            {* A :B C *} // just putting a comment here. { { x y } }
+            { A :B C } // just putting a comment here. { { x y } }
         ` )
         expect( test ).to.be.instanceof( Array )
         expect( test.length ).to.equal( 1 )
         expect( test[0].equals(
-            new Formula(
+            new Environment(
                 new LurchSymbol( 'A' ),
                 new LurchSymbol( 'B' ).asA( 'given' ),
                 new LurchSymbol( 'C' )
@@ -859,27 +832,18 @@ describe( 'Reading putdown notation', () => {
         } ).to.throw( /^Incorrectly formed string literal/ )
         // must end all groups before the end of the text to be parsed
         expect( () => {
-            LogicConcept.fromPutdown( '{* { (3 5 7) k }' )
-        } ).to.throw( /^Reached end of input while still inside [{][*]/ )
-        expect( () => {
-            LogicConcept.fromPutdown( '{ {* thing *} } (((x)) uh-oh problem' )
+            LogicConcept.fromPutdown( '{ { thing } } (((x)) uh-oh problem' )
         } ).to.throw( /^Reached end of input while still inside \(/ )
         // all incorrect types of nesting
         expect( () => {
             LogicConcept.fromPutdown( '(f x { y })' )
         } ).to.throw( /^Expressions can contain only/ )
         expect( () => {
-            LogicConcept.fromPutdown( '(g {* z *} t)' )
+            LogicConcept.fromPutdown( '(g { z } t)' )
         } ).to.throw( /^Expressions can contain only/ )
         expect( () => {
             LogicConcept.fromPutdown( '([a var] (b c))' )
         } ).to.throw( /^Expressions can contain only/ )
-        expect( () => {
-            LogicConcept.fromPutdown( '[pi const {* uh oh formula *}]' )
-        } ).to.throw( /^Declaration bodies cannot contain Formulas/ )
-        expect( () => {
-            LogicConcept.fromPutdown( '[pi const { foo {* inner formula *} }]' )
-        } ).to.throw( /^Declaration bodies cannot contain Formulas/ )
         // all other invalid ways to form a larger structure
         expect( () => {
             LogicConcept.fromPutdown( '[(x y) const]' )
@@ -1145,90 +1109,6 @@ describe( 'Writing putdown notation', () => {
           + '  }\n'
           + '  "also short"\n'
           + '}'
-        )
-    } )
-
-    it( 'Should correctly represent small (but nested) Formulas', () => {
-        let test
-        test = new Formula
-        expect( test.toPutdown() ).to.equal( '{* *}' )
-        test = new Formula( new Environment, new Environment )
-        expect( test.toPutdown() ).to.equal( '{* { } { } *}' )
-        test = new Formula( new Environment( new Environment ) )
-        expect( test.toPutdown() ).to.equal( '{* { { } } *}' )
-        test = new Formula(
-            new Environment().asA( 'given' ),
-            new Environment
-        )
-        expect( test.toPutdown() ).to.equal( '{* :{ } { } *}' )
-        test = new Formula(
-            new Environment,
-            new Environment().asA( 'given' )
-        )
-        expect( test.toPutdown() ).to.equal( '{* { } :{ } *}' )
-        test = new Environment(
-            new Formula().asA( 'given' ),
-            new Formula().asA( 'given' )
-        )
-        expect( test.toPutdown() ).to.equal( '{ :{* *} :{* *} }' )
-        test = new Formula(
-            new Environment,
-            new Environment
-        ).asA( 'given' )
-        expect( test.toPutdown() ).to.equal( ':{* { } { } *}' )
-    } )
-
-    it( 'Should correctly represent Formulas with content', () => {
-        let test
-        // tiny example
-        test = new Formula(
-            new LurchSymbol( 'If this' ).asA( 'given' ),
-            new LurchSymbol( 'then that' )
-        )
-        expect( test.toPutdown() ).to.equal( '{* :"If this" "then that" *}' )
-        // universal introduction rule from predicate logic
-        test = new Formula(
-            new Declaration( Declaration.Variable, new LurchSymbol( 'x' ) )
-                .asA( 'given' ),
-            new Application( new LurchSymbol( 'P' ), new LurchSymbol( 'x' ) )
-                .asA( 'given' ),
-            new Binding(
-                new LurchSymbol( '∀' ),
-                new LurchSymbol( 'x' ),
-                new Application( new LurchSymbol( 'P' ),
-                                 new LurchSymbol( 'x' ) )
-            )
-        )
-        expect( test.toPutdown() ).to.equal(
-            '{* :[x var] :(P x) (∀ x , (P x)) *}' )
-        // example with large content that must be broken over multiple lines
-        test = new Formula(
-            new LurchSymbol( 'this is a long symbol name' ).asA( 'given' ),
-            new LurchSymbol( 'this is also a long symbol name' ),
-            new Application(
-                new LurchSymbol( 'beaucoup de longness, dude' ),
-                new LurchSymbol( 'longedy long long longmeister' ),
-                new LurchSymbol( 'short' )
-            ).asA( 'given' ),
-            new Environment(
-                new LurchSymbol( 'beaucoup de longness, dude' ),
-                new LurchSymbol( 'longedy long long longmeister' ).asA( 'given' ),
-                new LurchSymbol( 'short' )
-            ).asA( 'given' ),
-            new LurchSymbol( 'also short' )
-        )
-        expect( test.toPutdown() ).to.equal(
-            '{*\n'
-          + '  :"this is a long symbol name"\n'
-          + '  "this is also a long symbol name"\n'
-          + '  :("beaucoup de longness, dude" "longedy long long longmeister" short)\n'
-          + '  :{\n'
-          + '    "beaucoup de longness, dude"\n'
-          + '    :"longedy long long longmeister"\n'
-          + '    short\n'
-          + '  }\n'
-          + '  "also short"\n'
-          + '*}'
         )
     } )
 
