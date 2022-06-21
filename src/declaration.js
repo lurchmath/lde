@@ -17,6 +17,12 @@ import { Symbol as LurchSymbol } from './symbol.js'
  * declaration.  For instance, in the declaration "Let $x\in A$ be arbitrary,"
  * the list of symbols contains just one entry, $x$, and the body is the
  * statement being made about $x$, which is $x\in A$.
+ * 
+ * Unlike {@link Expression Expressions} and {@link Environment Environments},
+ * Declarations do not respect the "given" attribute.  A Declaration marked with
+ * such an attribute will not use that attribute in any algorithm, such as when
+ * validating the correctness of a deduction, or rendering a text-based form of
+ * the Declaration (such as {@link LogicConcept#toPutdown putdown}).
  */
 export class Declaration extends LogicConcept {
     
@@ -95,10 +101,12 @@ export class Declaration extends LogicConcept {
      * @see {@link LogicConcept#equals equals()}
      */
     copy () {
-        return new Declaration(
+        const result = new Declaration(
             this.symbols().map( symbol => symbol.copy() ),
             this.body() ? this.body().copy() : undefined
         )
+        result._attributes = this._attributes.deepCopy()
+        return result
     }
 
     /**
