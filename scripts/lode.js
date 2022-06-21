@@ -14,7 +14,7 @@
 // NOTE: keeping all imports must be at the top of the file
 import repl from 'repl'
 // load everything from index.js
-import * as Lurch from '../src/index.mjs'
+import * as Lurch from '../src/index.js'
 // load Algebrite
 import Algebrite from 'algebrite'
 // load SAT
