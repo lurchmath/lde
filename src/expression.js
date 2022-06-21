@@ -27,24 +27,28 @@ import { Environment } from './environment.js'
  * larger structures that appear in mathematical writing, such as a proof,
  * or a section, or an axiom, or an exercise.
  * 
- * There are three types of Expressions:
+ * There are two types of Expressions:
  * 
- *  1. A {@link Symbol}, which is atomic (a one-node tree), and can contain
- *     any mathematical symbol, such as $x$, $5$, $e$, $\pi$, $B_4$, etc.
- *     (Note that notation here is in math form just for the documentation;
- *     actual symbols may use a different style, such as `B_4`.)
- *  2. An {@link Application} of a function or operator to zero or more
- *     arguments, as in the example of $3 + k$, above, which applies $+$ to
- *     the arguments $3$ and $k$.  Applications are not atomic.
- *  3. A {@link Binding}, which applies a quantifier or ranged operator to
- *     a body, using a bound variable.  There are many examples of this in
- *     mathematics, including indexed sums and products, existential and
- *     universal quantifiers, and more.  Bindings are not atomic.
+ *  1. Atomic expressions, also called {@link Symbol Symbols}, which can
+ *     represent any mathematical symbol, such as $x$, $5$, $e$, $\pi$, $B_4$,
+ *     etc.  (Note that notation here is in math form just for the
+ *     documentation; actual symbols may use a different style, such as `B_4`.)
+ *  2. Compound expressions, also called {@link Application Applications},
+ *     because they represent the application of a function or operator to zero
+ *     or more arguments, as in the example of $3 + k$, above, which applies $+$
+ *     to the arguments $3$ and $k$.
  * 
  * We do not define these further here; see the documentation of each of
  * the classes linked to above for details.  The Expression class is an
  * abstract base class, and every instance should be an instance of one of
- * those three subclasses.
+ * those two subclasses.
+ * 
+ * Every expression (and in fact every {@link MathConcept MathConcept}) can bind
+ * symbols.  Thus if one wishes to express, for example, the mathematical notion
+ * of $\forall x,2<x^2$, one would create an application of the $\forall$ symbol
+ * to the Expression $2<x^2$, and in that inner Expression, mark $x$ as bound.
+ * To learn more about binding symbols, refer to the appropriate
+ * {@link MathConcept#boundSymbols functions in the MathConcept class}.
  */
 export class Expression extends LogicConcept {
     
@@ -140,10 +144,10 @@ export class Expression extends LogicConcept {
      * 
      * This initial implementation provides support for *none* of the types of
      * valuation described above, because each is best implemented in one of
-     * this class's subclasses ({@link Symbol}, {@link Application}, or
-     * {@link Binding}) instead.  A stub is implemented here as a pure virtual
-     * method, to guarantee that the function exists for all Expression
-     * instances and returns undefined by default.
+     * this class's subclasses ({@link Symbol} or {@link Application}) instead.
+     * A stub is implemented here as a pure virtual method, to guarantee that
+     * the function exists for all Expression instances and returns undefined by
+     * default.
      * 
      * @returns {*} any basic JavaScript value representing this Expression,
      *   or undefined if it there is no such value
