@@ -857,10 +857,6 @@ describe( 'Reading putdown notation', () => {
 
 describe( 'Writing putdown notation', () => {
 
-    let testLCs = [ ]
-    const addTestLC = testLC => testLCs.push( testLC )
-    const lastTestLC = () => testLCs.last()
-        
     it( 'Should correctly represent any kind of Symbol', () => {
         expect( new LurchSymbol( 'x' ).toPutdown() ).to.equal( 'x' )
         expect( new LurchSymbol( 'one more thing' ).toPutdown() )

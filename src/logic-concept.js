@@ -297,7 +297,6 @@ export class LogicConcept extends MathConcept {
                 if ( isOpenGrouper( stack[i] ) ) return stack[i]
             return
         }
-        const allOpenGroupers = () => stack.filter( isOpenGrouper )
         // tokenize and do a little parsing
         while ( string.length > 0 ) {
             // skip comments and whitespace
