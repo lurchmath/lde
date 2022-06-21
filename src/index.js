@@ -21,7 +21,6 @@ export { Expression } from './expression.js'
 export { Symbol as LurchSymbol } from './symbol.js'
 export { Application } from './application.js'
 export { Binding } from './binding.js'
-export { Formula } from './formula.js'
 
 export { default as Database } from './database.js'
 export { default as Matching } from './matching.js'

@@ -5,9 +5,9 @@ names:
  - "vE"
 ---
 
-{*
+{
     :(or A B)
     :(implies A C)
     :(implies B C)
     C
-*}
+}

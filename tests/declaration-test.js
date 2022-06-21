@@ -4,7 +4,6 @@ import { Expression } from '../src/expression.js'
 import { Symbol as LurchSymbol } from '../src/symbol.js'
 import { LogicConcept } from '../src/logic-concept.js'
 import { Environment } from '../src/environment.js'
-import { Formula } from '../src/formula.js'
 
 describe( 'Declaration', () => {
 
@@ -192,11 +191,6 @@ describe( 'Declaration', () => {
                 [ 5 ] )
         } ).to.throw(
             /^Optional third parameter.*LogicConcept$/ )
-        // can't contain a Formula
-        expect( () => {
-            const D = new Declaration( Declaration.Variable, x,
-                new Environment( new Formula ) )
-        } ).to.throw( /^Body of a Declaration.*a Formula/ )
     } )
 
     it( 'Should let us query the body of any Declaration', () => {
