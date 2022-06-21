@@ -509,25 +509,15 @@ export class Problem {
             
             // Solution method 3: If the expression is compound, we could
             // imitate each child using a different expression function,
-            // combining the results into one big answer.  Because we care only
-            // about the children, we do not distinguish bindings from
-            // applications; we use applications for both cases, just as a
-            // wrapper construct.
+            // combining the results into one big answer.  Because we have
+            // already converted bindings to applications with removeBindings(),
+            // we know this case will involve only applications.
             dbg( '--3--' )
             const children = expr.children()
             if ( children.length > 0 ) {
-                if ( expr instanceof Binding ) {
-                    const asApp = new Application(
-                        ...expr.children().map( child => child.copy() ) )
-                    this.remove( 0 )
-                    this.add( new Constraint( constraint.pattern, asApp ) )
-                    dbg( `Converted B->A: ${this}` )
-                }
                 const metavars = this._stream.nextN( children.length )
                     .map( symbol => symbol.asA( metavariable ) )
-                yield* addEF( head, expr instanceof Binding ?
-                    bindingEF( args.length, metavars ) :
-                    applicationEF( args.length, metavars ) )
+                yield* addEF( head, applicationEF( args.length, metavars ) )
             } else dbg( 'case 3 does not apply' )
 
             // Those are the only three solution methods for the EFA case.
