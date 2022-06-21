@@ -2246,7 +2246,7 @@ describe( 'Bound and free variables', () => {
         // in the sum, any child can be replaced iff the new thing has no free s
         for ( let i = 0 ; i < 3 ; i++ ) {
             expect( gofx.isFreeToReplace( sum.child( i ) ) ).to.equal( true )
-            expect( hofs.isFreeToReplace( sum.child( i ) ) ).to.equal( false )
+            expect( hofs.isFreeToReplace( sum.child( i ) ) ).to.equal( i == 0 )
             expect( Pofy.isFreeToReplace( sum.child( i ) ) ).to.equal( true )
             expect( xto2.isFreeToReplace( sum.child( i ) ) ).to.equal( true )
             expect( Exxeqy.isFreeToReplace( sum.child( i ) ) ).to.equal( true )

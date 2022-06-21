@@ -1816,12 +1816,15 @@ export class MathConcept extends EventTarget {
         // this implementation is an exact copy of isFree(), with one exception:
         // while the free identifiers are computed from this MathConcept, freeness
         // is computed from original.
-        const freeIdentifierNames = this.freeIdentifierNames()
-        for ( let ancestor = original ; ancestor ; ancestor = ancestor.parent() ) {
-            if ( ( ancestor instanceof MathConcept.subclasses.get( 'Binding' ) )
-              && freeIdentifierNames.some( name => ancestor.binds( name ) ) )
+        const freeSymbols = this.freeIdentifierNames()
+        let walk = original
+        while ( walk && walk != inThis ) {
+            const parent = walk.parent()
+            if ( ( parent instanceof MathConcept.subclasses.get( 'Binding' ) )
+              && walk.indexInParent() > 0
+              && freeSymbols.some( name => parent.binds( name ) ) )
                 return false
-            if ( ancestor == inThis ) break
+            walk = parent
         }
         return true
     }
