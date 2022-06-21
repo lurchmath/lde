@@ -14,7 +14,7 @@ import { SourceMap } from './source-map.js'
  *
  *  1. LogicConcepts, which the LDE knows how to process for validating variable
  *     scoping and correctness of logical inference
- *  2. MathConcepts that are lot merely logical, and thus can be arbitrarily complex
+ *  2. MathConcepts that are not merely logical, and thus can be arbitrarily complex
  *     (such as a chain of equations, or a set of exercises), but which can be broken
  *     down into many LogicConcepts algorithmically, for processing by the LDE.
  *     This algorithmic breakdown is implemented in the
@@ -2552,10 +2552,15 @@ export class MathConcept extends EventTarget {
      * This function is a temporary placeholder.  Later, a sophisticated
      * interpretation mechanism will be developed to convert a user's
      * representation of their document into a hierarchy of
-     * {@link LogicConcept LogicConcept} instances.  For now, we have this
-     * simple version in which many features are not yet implemented.  Its
-     * behavior is as follows.
+     * {@link LogicConcept LogicConcept} instances.
+     * 
+     * (In fact, we will actually use the
+     * {@link MathConcept#interpret interpret()} function when we do so, and
+     * remove this one.  That one is the official permanent interpretation API.)
      *
+     * For now, we have this simple version in which many features are not yet
+     * implemented.  Its behavior is as follows.
+     * 
      *  1. The method of interpretation that should be followed is extracted
      *     from the "Interpret as" attribute of this object.  If there is no
      *     such attribute, an error is thrown.  The attribute value should be
