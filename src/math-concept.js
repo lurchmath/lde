@@ -1619,6 +1619,97 @@ export class MathConcept extends EventTarget {
     //////
 
     /**
+     * Any MathConcept can, in addition to its tree structure, bind a list of
+     * {@link Symbol Symbols}, in the usual sense of that word from logic and
+     * theoretical computer science.  That is, the symbols are marked as "bound"
+     * inside the tree, and symbols not marked as "bound" are considered "free."
+     * 
+     * There is a host of functions (some of which are referenced below) for
+     * doing the usual computations about freeness of expressions in other
+     * expressions, symbols free to replace other symbols, etc.
+     * 
+     * The list of bound symbol names is stored as an attribute of this object,
+     * under the key `"bound symbols"`.  The list is ordered, although not all
+     * applications may care about the order.
+     * 
+     * @returns {string[]} the ordered list of names of symbols bound in this
+     *   object
+     * 
+     * @see {@link MathConcept#binds binds()}
+     * @see {@link MathConcept#freeSymbols freeSymbols()}
+     * @see {@link MathConcept#occursFree occursFree()}
+     * @see {@link MathConcept#isFree isFree()}
+     * @see {@link MathConcept#isFreeToReplace isFreeToReplace()}
+     * @see {@link MathConcept#replaceFree replaceFree()}
+     */
+    boundSymbols () { return this.getAttribute( 'bound symbols' ) }
+
+    /**
+     * See the documentation for {@link MathConcept#boundSymbols boundSymbols()}
+     * for an overview of the notion of binding.  This function sets the list of
+     * symbol names bound by this MathConcept.  It replaces any old list that
+     * was there before, so if your intent is instead to add new symbols to the
+     * old list, use code such as
+     * `M.bindSymbols( [ a, b, c, ...M.boundSymbols() ] )`.  You can therefore
+     * erase all bindings by simply calling `M.bindSymbols()`.
+     * 
+     * The names you pass will be stored as an array, in case the order is
+     * relevant in your application, although most applications treat this as a
+     * set.  If any of the names is not a string, it will be converted to one.
+     * 
+     * @param {...string} names - the names (as strings) of the symbols to bind
+     */
+    bindSymbols ( ...names ) {
+        this.setAttribute( 'bound symbols', names.map( name => `${name}` ) )
+    }
+
+    /**
+     * Test whether this MathConcept binds a symbol with a given name.
+     * 
+     * @param {any} symbol - the symbol to test whether it's bound; this can
+     *   be a string containing the symbol name, or a {@link Symbol} instance
+     *   (which will be converted to its {@link Symbol#text text()}), or
+     *   anything else, which will be converted to a string
+     * @returns {boolean} whether this MathConcept binds a symbol with the given
+     *   name
+     */
+    binds ( symbol ) {
+        if ( symbol instanceof LurchSymbol ) symbol = symbol.text()
+        return this.boundSymbols().includes( String( symbol ) )
+    }
+
+    /**
+     * A {@link Symbol} $X$ is free in an ancestor $Y$ if and only if no
+     * MathConcept that is an ancestor $A$ of $X$ inside of (or equal to) $Y$
+     * satisfies `A.binds( X.text() )`.  This function returns an array of all
+     * symbol names that appear within this MathConcept and, at the point where
+     * they appear, are free in this ancestor MathConcept.
+     *
+     * If, instead of just the names of the identifiers, you wish to have the
+     * identifier MathConcepts themselves, you can couple the
+     * {@link MathConcept#isFree isFree()} function with the
+     * {@link MathConcept#descendantsSatisfying descendantsSatisfying()}
+     * function to achieve that.
+     *
+     * @return {string[]} an array of names of free symbols appearing as
+     *   descendants of this MathConcept
+     * @see {@link MathConcept#binds binds()}
+     * @see {@link MathConcept#boundSymbols boundSymbols()}
+     */
+    freeSymbols () {
+        // a single identifier is free in itself
+        if ( this instanceof MathConcept.subclasses.get( 'Symbol' ) )
+            return [ this.text() ]
+        // otherwise we collect all the free variables in all children...
+        const result = new Set
+        this.children().forEach( child =>
+            child.freeSymbols().forEach( name => result.add( name ) ) )
+        // ...excepting any that this MathConcept binds
+        this.boundSymbols().forEach( name => result.delete( name ) )
+        return Array.from( result )
+    }
+
+    /**
      * A {@link Symbol} X is free in an ancestor Y if and only if no MathConcept
      * that is an ancestor A of X inside of (or equal to) Y satisfies
      * `A.binds( X.text() )`.  This function returns an array of
