@@ -2134,15 +2134,15 @@ describe( 'Bound and free variables', () => {
         // compute the list of free identifiers in each one, sort them (if
         // needed) so that the result is in a canonical order, and compare to
         // the correct answer in each case
-        expect( forall.freeIdentifierNames().sort() ).to.eql( [ 'P', '∀' ] )
-        expect( exists.freeIdentifierNames().sort() ).to.eql( [ '0', '>', '∃' ] )
-        expect( sum.freeIdentifierNames().sort() ).to.eql(
+        expect( forall.freeSymbolNames().sort() ).to.eql( [ 'P', '∀' ] )
+        expect( exists.freeSymbolNames().sort() ).to.eql( [ '0', '>', '∃' ] )
+        expect( sum.freeSymbolNames().sort() ).to.eql(
             [ '1', '2', '^', 'n', '∑' ] )
-        expect( forgotToMarkBinding.freeIdentifierNames().sort() ).to.eql(
+        expect( forgotToMarkBinding.freeSymbolNames().sort() ).to.eql(
             [ 'P', 'x', 'y', '∀' ] )
-        expect( notEnoughChildren.freeIdentifierNames().sort() ).to.eql(
+        expect( notEnoughChildren.freeSymbolNames().sort() ).to.eql(
             [ 'body', '∑' ] )
-        expect( atomic.freeIdentifierNames().sort() ).to.eql( [ 'atomic' ] )
+        expect( atomic.freeSymbolNames().sort() ).to.eql( [ 'atomic' ] )
     } )
 
     it( 'Should judge freeness of sub-MathConcepts correctly', () => {

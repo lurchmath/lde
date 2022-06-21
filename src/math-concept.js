@@ -1737,29 +1737,30 @@ export class MathConcept extends EventTarget {
     /**
      * A {@link Symbol} X is free in an ancestor Y if and only if no MathConcept
      * that is an ancestor A of X inside of (or equal to) Y satisfies
-     * `A.binds( X.text() )`.  This function returns an array of
-     * all identifier names that appear within this MathConcept and, at the
-     * point where they appear, are free in this ancestor MathConcept.
+     * `A.binds( X.text() )`.  This function returns an array of all symbol
+     * names that appear within this MathConcept and, at the point where they
+     * appear, are free in this ancestor MathConcept.
      *
-     * If, instead of just the names of the identifiers, you wish to have the
-     * identifier MathConcepts themselves, you can couple the
+     * If, instead of just the names of the symbols, you wish to have the
+     * {@link Symbol Symbol} instances themselves, you can couple the
      * {@link MathConcept#isFree isFree()} function with the
      * {@link MathConcept#descendantsSatisfying descendantsSatisfying()}
      * function to achieve that.
      *
-     * @return {string[]} An array of names of free identifiers appearing as
+     * @return {string[]} an array of names of free symbols appearing as
      *   descendants of this MathConcept
+     * 
      * @see {@link Binding#binds binds()}
      * @see {@link Binding#boundVariables boundVariables()}
      */
-    freeIdentifierNames () {
-        // a single identifier is free in itself
+    freeSymbolNames () {
+        // a single symbol is free in itself
         if ( this instanceof MathConcept.subclasses.get( 'Symbol' ) )
             return [ this.text() ]
         // otherwise we collect all the free variables in all children...
         const result = new Set
         this.children().forEach( child =>
-            child.freeIdentifierNames().forEach( name =>
+            child.freeSymbolNames().forEach( name =>
                 result.add( name ) ) )
         // ...excepting any that this MathConcept binds
         if ( this instanceof MathConcept.subclasses.get( 'Binding' ) )
@@ -1791,7 +1792,7 @@ export class MathConcept extends EventTarget {
      */
     isFree ( inThis ) {
         // compute the free identifiers in me that an ancestor might bind
-        const myFreeSymbols = this.freeIdentifierNames()
+        const myFreeSymbols = this.freeSymbolNames()
         // walk upwards to the appropriate ancestor and see if any bind any of
         // those identifiers; if so, I am not free in that ancestor
         let walk = this
@@ -1841,7 +1842,7 @@ export class MathConcept extends EventTarget {
         // this implementation is an exact copy of isFree(), with one exception:
         // while the free identifiers are computed from this MathConcept, freeness
         // is computed from original.
-        const freeSymbols = this.freeIdentifierNames()
+        const freeSymbols = this.freeSymbolNames()
         let walk = original
         while ( walk && walk != inThis ) {
             const parent = walk.parent()
