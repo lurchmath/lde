@@ -341,6 +341,9 @@ export class LogicConcept extends MathConcept {
                     problem( 'Cannot end an environment with a colon' )
                 // handle meaning of a declaration, or errors it might contain:
                 if ( group.type == '[ ]' ) {
+                    // 1. cannot mark a declaration as given
+                    if ( isLast( givenRE ) )
+                        problem( 'Cannot mark a declaration as given' )
                     // 1. not enough children
                     if ( group.contents.length == 0 )
                         problem( 'Empty declarations are not permitted' )
@@ -544,7 +547,9 @@ export class LogicConcept extends MathConcept {
         const isTooBig = text => /\n/.test( text ) || text.length > 50
         const childResults = this.children().map( child => child.toPutdown() )
         const Environment = MathConcept.subclasses.get( 'Environment' )
-        const given = ( ( !this.parent()
+        const Declaration = MathConcept.subclasses.get( 'Declaration' )
+        const given = ( !( this instanceof Declaration )
+                     && ( !this.parent()
                        || this.parent() instanceof Environment )
                      && this.isA( 'given' ) ) ? ':' : ''
         const finalize = ( text, skip = [ ] ) => {
@@ -578,7 +583,6 @@ export class LogicConcept extends MathConcept {
                 const body = childResults.pop()
                 return finalize( `(${childResults.join( ' ' )} , ${body})` )
             case 'Declaration':
-                const Declaration = MathConcept.subclasses.get( 'Declaration' )
                 if ( this.body() ) {
                     const body = childResults.pop()
                     return finalize(

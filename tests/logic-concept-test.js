@@ -826,6 +826,13 @@ describe( 'Reading putdown notation', () => {
         expect( () => {
             LogicConcept.fromPutdown( '[{x y} const]' )
         } ).to.throw( /^Not every entry.*was a Symbol/ )
+        // declarations may not be marked with a given attribute
+        expect( () => {
+            LogicConcept.fromPutdown( ':[f g h]' )
+        } ).to.throw( /^Cannot mark a declaration as given/ )
+        expect( () => {
+            LogicConcept.fromPutdown( '{ [x] :[y] (x y) }' )
+        } ).to.throw( /^Cannot mark a declaration as given/ )
     } )
 
 } )
@@ -1035,7 +1042,7 @@ describe( 'Writing putdown notation', () => {
         expect( test.toPutdown() ).to.equal( '{ :"If this" "then that" }' )
         // universal introduction rule from predicate logic
         test = new Environment(
-            new Declaration( new LurchSymbol( 'x' ) ).asA( 'given' ),
+            new Declaration( new LurchSymbol( 'x' ) ),
             new Application( new LurchSymbol( 'P' ), new LurchSymbol( 'x' ) )
                 .asA( 'given' ),
             new Binding(
@@ -1046,7 +1053,7 @@ describe( 'Writing putdown notation', () => {
             )
         )
         expect( test.toPutdown() ).to.equal(
-            '{ :[x] :(P x) (∀ x , (P x)) }' )
+            '{ [x] :(P x) (∀ x , (P x)) }' )
         // example with large content that must be broken over multiple lines
         test = new Environment(
             new LurchSymbol( 'this is a long symbol name' ).asA( 'given' ),
@@ -1125,6 +1132,18 @@ describe( 'Writing putdown notation', () => {
           + '  }\n'
           + '} +{"State":"MA"}\n' )
         // we could do other tests here but this is a pretty good start
+    } )
+
+    it( 'Should not render Declarations with a given attribute', () => {
+        // Declaration with a given ignores that attribute when rendering
+        let test = new Declaration(
+            [ new LurchSymbol( 'x' ), new LurchSymbol( 'y' ) ],
+            new Application( new LurchSymbol( 'P' ),
+                             new LurchSymbol( 'x' ),
+                             new LurchSymbol( 'y' ) )
+        ).attr( { 'altitude' : '10000ft' } ).asA( 'given' )
+        expect( test.toPutdown() ).to.equal(
+            '[x y , (P x y)] +{"altitude":"10000ft"}\n' ) // notice: no ":"
     } )
 
 } )
