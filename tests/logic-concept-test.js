@@ -424,25 +424,25 @@ describe( 'Reading putdown notation', () => {
         ) ).to.equal( true )
     } )
 
-    it( 'Should support var/const declarations without bodies', () => {
+    it( 'Should support declarations without bodies', () => {
         let test
         // ----------
-        test = LogicConcept.fromPutdown( '[x var] [y var]' )
+        test = LogicConcept.fromPutdown( '[x] [y]' )
         expect( test ).to.be.instanceof( Array )
         expect( test.length ).to.equal( 2 )
         expect( test[0].equals(
-            new Declaration( Declaration.Variable, new LurchSymbol( 'x' ) )
+            new Declaration( new LurchSymbol( 'x' ) )
         ) ).to.equal( true )
         expect( test[1].equals(
-            new Declaration( Declaration.Variable, new LurchSymbol( 'y' ) )
+            new Declaration( new LurchSymbol( 'y' ) )
         ) ).to.equal( true )
         // ----------
-        test = LogicConcept.fromPutdown( '[pi e 0 1 2 3 const]' )
+        test = LogicConcept.fromPutdown( '[pi e 0 1 2 3]' )
         expect( test ).to.be.instanceof( Array )
         expect( test.length ).to.equal( 1 )
         expect( test[0].equals(
             new Declaration(
-                Declaration.Constant, [
+                [
                     new LurchSymbol( 'pi' ),
                     new LurchSymbol( 'e' ),
                     new LurchSymbol( '0' ),
@@ -454,15 +454,14 @@ describe( 'Reading putdown notation', () => {
         ) ).to.equal( true )
     } )
 
-    it( 'Should support var/const declarations with bodies', () => {
+    it( 'Should support declarations with bodies', () => {
         let test
         // ----------
-        test = LogicConcept.fromPutdown( '[x var (∈ x Z)]' )
+        test = LogicConcept.fromPutdown( '[x , (∈ x Z)]' )
         expect( test ).to.be.instanceof( Array )
         expect( test.length ).to.equal( 1 )
         expect( test[0].equals(
             new Declaration(
-                Declaration.Variable,
                 new LurchSymbol( 'x' ),
                 new Application(
                     new LurchSymbol( '∈' ),
@@ -472,12 +471,11 @@ describe( 'Reading putdown notation', () => {
             )
         ) ).to.equal( true )
         // ----------
-        test = LogicConcept.fromPutdown( `[x var { (∈ x Z) (> x 5) }]` )
+        test = LogicConcept.fromPutdown( `[x , { (∈ x Z) (> x 5) }]` )
         expect( test ).to.be.instanceof( Array )
         expect( test.length ).to.equal( 1 )
         expect( test[0].equals(
             new Declaration(
-                Declaration.Variable,
                 new LurchSymbol( 'x' ),
                 new Environment(
                     new Application(
@@ -494,15 +492,13 @@ describe( 'Reading putdown notation', () => {
             )
         ) ).to.equal( true )
         // ----------
-        test = LogicConcept.fromPutdown( `[pi const [m n var]]` )
+        test = LogicConcept.fromPutdown( `[pi , [m n]]` )
         expect( test ).to.be.instanceof( Array )
         expect( test.length ).to.equal( 1 )
         expect( test[0].equals(
             new Declaration(
-                Declaration.Constant,
                 new LurchSymbol( 'pi' ),
                 new Declaration(
-                    Declaration.Variable,
                     new LurchSymbol( 'm' ),
                     new LurchSymbol( 'n' )
                 )
@@ -510,13 +506,12 @@ describe( 'Reading putdown notation', () => {
         ) ).to.equal( true )
         // ----------
         test = LogicConcept.fromPutdown(
-            '[pi const ("something about circles" pi)]'
-          + '[e  const ("something about limits"  e)]' )
+            '[pi , ("something about circles" pi)]'
+          + '[e  , ("something about limits"  e)]' )
         expect( test ).to.be.instanceof( Array )
         expect( test.length ).to.equal( 2 )
         expect( test[0].equals(
             new Declaration(
-                Declaration.Constant,
                 new LurchSymbol( 'pi' ),
                 new Application(
                     new LurchSymbol( 'something about circles' ),
@@ -526,7 +521,6 @@ describe( 'Reading putdown notation', () => {
         ) ).to.equal( true )
         expect( test[1].equals(
             new Declaration(
-                Declaration.Constant,
                 new LurchSymbol( 'e' ),
                 new Application(
                     new LurchSymbol( 'something about limits' ),
@@ -559,15 +553,14 @@ describe( 'Reading putdown notation', () => {
         expect( test[1].equals( new Environment ) ).to.equal( true )
         expect( test[2].equals( new Environment ) ).to.equal( true )
         // ----------
-        test = LogicConcept.fromPutdown( '{ (x y) [z var] { ((QQ)) }}' )
+        test = LogicConcept.fromPutdown( '{ (x y) [z] { ((QQ)) }}' )
         expect( test ).to.be.instanceof( Array )
         expect( test.length ).to.equal( 1 )
         expect( test[0].equals(
             new Environment(
                 new Application( new LurchSymbol( 'x' ),
                                  new LurchSymbol( 'y' ) ),
-                new Declaration( Declaration.Variable,
-                                 new LurchSymbol( 'z' ) ),
+                new Declaration( new LurchSymbol( 'z' ) ),
                 new Environment( new Application( new Application(
                     new LurchSymbol( 'QQ' ) ) ) )
             )
@@ -603,7 +596,7 @@ describe( 'Reading putdown notation', () => {
             new Environment().asA( 'given' )
         ) ).to.equal( true )
         // ----------
-        test = LogicConcept.fromPutdown( '{ :(x y) [z var] { :((QQ)) }}' )
+        test = LogicConcept.fromPutdown( '{ :(x y) [z] { :((QQ)) }}' )
         expect( test ).to.be.instanceof( Array )
         expect( test.length ).to.equal( 1 )
         expect( test[0].equals(
@@ -611,7 +604,7 @@ describe( 'Reading putdown notation', () => {
                 new Application(
                     new LurchSymbol( 'x' ), new LurchSymbol( 'y' )
                 ).asA( 'given' ),
-                new Declaration( Declaration.Variable, new LurchSymbol( 'z' ) ),
+                new Declaration( new LurchSymbol( 'z' ) ),
                 new Environment(
                     new Application(
                         new Application( new LurchSymbol( 'QQ' ) )
@@ -638,7 +631,7 @@ describe( 'Reading putdown notation', () => {
         ) ).to.equal( true )
         // ----------
         test = LogicConcept.fromPutdown( `
-            [a b c var] // Let a, b, c be arbitrary.
+            [a b c] // Let a, b, c be arbitrary.
             ((a b) (b c)) // No one knows what this even means.
             // Here's a line with only comments!  Haha!
             // Another, because, why not?
@@ -647,7 +640,6 @@ describe( 'Reading putdown notation', () => {
         expect( test.length ).to.equal( 2 )
         expect( test[0].equals(
             new Declaration(
-                Declaration.Variable,
                 [
                     new LurchSymbol( 'a' ),
                     new LurchSymbol( 'b' ),
@@ -683,7 +675,7 @@ describe( 'Reading putdown notation', () => {
             [
                 x +{"special variable":false}
                 y
-                const
+                ,
                 (
                     P
                     x
@@ -696,7 +688,6 @@ describe( 'Reading putdown notation', () => {
         expect( test.length ).to.equal( 1 )
         expect( test[0].equals(
             new Declaration(
-                Declaration.Constant,
                 [
                     new LurchSymbol( 'x' ).attr(
                         { 'special variable' : false } ),
@@ -727,7 +718,7 @@ describe( 'Reading putdown notation', () => {
             LogicConcept.fromPutdown( '{ +{"one":2}\n}' )
         } ).to.throw( /^Attribute JSON has no target to modify/ )
         expect( () => {
-            LogicConcept.fromPutdown( '[ +{"one":2}\nx var ]' )
+            LogicConcept.fromPutdown( '[ +{"one":2}\nx ]' )
         } ).to.throw( /^Attribute JSON has no target to modify/ )
         expect( () => {
             LogicConcept.fromPutdown( '( +{"one":2}\nx )' )
@@ -743,40 +734,34 @@ describe( 'Reading putdown notation', () => {
         expect( () => {
             LogicConcept.fromPutdown( '{ a b : }' )
         } ).to.throw( /^Cannot end an environment with a colon/ )
-        // cannot put more than one var/const in a declaration
+        // cannot put more than one comma in a declaration
         expect( () => {
-            LogicConcept.fromPutdown( '{ [x var] [y var var] }' )
-        } ).to.throw( /^A declaration must have exactly one var\/const/ )
+            LogicConcept.fromPutdown( '{ [x] [y , z , w] }' )
+        } ).to.throw( /^A declaration can have at most one comma/ )
         expect( () => {
-            LogicConcept.fromPutdown( '{ [x const const] }' )
-        } ).to.throw( /^A declaration must have exactly one var\/const/ )
+            LogicConcept.fromPutdown( '{ [x , a b c , ] }' )
+        } ).to.throw( /^A declaration can have at most one comma/ )
+        // cannot have a declaration begin/end with a comma
         expect( () => {
-            LogicConcept.fromPutdown( '{ [x var] [y const var] }' )
-        } ).to.throw( /^A declaration must have exactly one var\/const/ )
-        // must put at least one var/const in a declaration
+            LogicConcept.fromPutdown( '{ [x] [y z ,] }' )
+        } ).to.throw( /^Misplaced comma/ )
         expect( () => {
-            LogicConcept.fromPutdown( '{ [x] [y var] }' )
-        } ).to.throw( /^A declaration must have exactly one var\/const/ )
+            LogicConcept.fromPutdown( '{ [, a b c] }' )
+        } ).to.throw( /^Misplaced comma/ )
+        // must put at least one thing in a declaration
         expect( () => {
-            LogicConcept.fromPutdown( '{ [x] }' )
-        } ).to.throw( /^A declaration must have exactly one var\/const/ )
+            LogicConcept.fromPutdown( '{ [] }' )
+        } ).to.throw( /^Empty declarations are not permitted/ )
         expect( () => {
-            LogicConcept.fromPutdown( '{ [x const] [y] }' )
-        } ).to.throw( /^A declaration must have exactly one var\/const/ )
-        // must put at least two things in a declaration
+            LogicConcept.fromPutdown( '{ x y z } []' )
+        } ).to.throw( /^Empty declarations are not permitted/ )
+        // must put at most one thing after the comma in a declaration
         expect( () => {
-            LogicConcept.fromPutdown( '{ [var] }' )
-        } ).to.throw( /^A declaration must have at least 2 children/ )
+            LogicConcept.fromPutdown( '{ [x , y z] }' )
+        } ).to.throw( /^Misplaced comma inside declaration/ )
         expect( () => {
-            LogicConcept.fromPutdown( '{ x y z } [const]' )
-        } ).to.throw( /^A declaration must have at least 2 children/ )
-        // must put at most one thing after the var/const in a declaration
-        expect( () => {
-            LogicConcept.fromPutdown( '{ [x var y z] }' )
-        } ).to.throw( /^Var\/const appears too early in declaration/ )
-        expect( () => {
-            LogicConcept.fromPutdown( '(P x y) [xanadu const yeti zed]' )
-        } ).to.throw( /^Var\/const appears too early in declaration/ )
+            LogicConcept.fromPutdown( '(P x y) [xanadu , yeti zed]' )
+        } ).to.throw( /^Misplaced comma inside declaration/ )
         // may not write an empty application, ()
         expect( () => {
             LogicConcept.fromPutdown( '(P x y () z)' )
@@ -809,20 +794,10 @@ describe( 'Reading putdown notation', () => {
         expect( () => {
             LogicConcept.fromPutdown( '{ :A ::B (and A B) }' )
         } ).to.throw( /^Cannot put two colons in a row/ )
-        // can't write a comma outside of an expression
+        // can't write a comma outside of an expression or declaration
         expect( () => {
             LogicConcept.fromPutdown( '{ ∀ x, (≤ x infty) }' )
-        } ).to.throw( /^Cannot put a comma outside an expression/ )
-        expect( () => {
-            LogicConcept.fromPutdown( '[ ∀ x, (≤ x infty) var ]' )
-        } ).to.throw( /^Cannot put a comma outside an expression/ )
-        // can't write var/const unless you're in a declaration
-        expect( () => {
-            LogicConcept.fromPutdown( '{ (one two) var }' )
-        } ).to.throw( /^Cannot put var\/const outside a declaration/ )
-        expect( () => {
-            LogicConcept.fromPutdown( '{ three } (four const five)' )
-        } ).to.throw( /^Cannot put var\/const outside a declaration/ )
+        } ).to.throw( /^Comma belongs only in expression or declaration/ )
         // must end your string literal before a newline shows up
         expect( () => {
             LogicConcept.fromPutdown( '"one\ntwo"' )
@@ -842,7 +817,7 @@ describe( 'Reading putdown notation', () => {
             LogicConcept.fromPutdown( '(g { z } t)' )
         } ).to.throw( /^Expressions can contain only/ )
         expect( () => {
-            LogicConcept.fromPutdown( '([a var] (b c))' )
+            LogicConcept.fromPutdown( '([a] (b c))' )
         } ).to.throw( /^Expressions can contain only/ )
         // all other invalid ways to form a larger structure
         expect( () => {
@@ -968,48 +943,44 @@ describe( 'Writing putdown notation', () => {
 
     it( 'Should correctly represent Declarations without bodies', () => {
         let test
-        test = new Declaration( Declaration.Variable, [
+        test = new Declaration( [
             new LurchSymbol( 'Sunil' ),
             new LurchSymbol( 'Henry' ),
             new LurchSymbol( 'Rodrigo' )
         ] )
-        expect( test.toPutdown() ).to.equal( '[Sunil Henry Rodrigo var]' )
+        expect( test.toPutdown() ).to.equal( '[Sunil Henry Rodrigo]' )
         test = new Declaration(
-            Declaration.Constant,
             new LurchSymbol( 'The Greek letter π' )
         )
-        expect( test.toPutdown() ).to.equal( '["The Greek letter π" const]' )
+        expect( test.toPutdown() ).to.equal( '["The Greek letter π"]' )
     } )
 
     it( 'Should correctly represent Declarations any valid body', () => {
         let test
         // symbol body
-        test = new Declaration( Declaration.Variable, [
+        test = new Declaration( [
             new LurchSymbol( 'Sunil' ),
             new LurchSymbol( 'Henry' )
         ], new LurchSymbol( 'Helmut' ) )
-        expect( test.toPutdown() ).to.equal( '[Sunil Henry var Helmut]' )
+        expect( test.toPutdown() ).to.equal( '[Sunil Henry , Helmut]' )
         // application body
         test = new Declaration(
-            Declaration.Constant,
             new LurchSymbol( 'π' ),
             new Application( new LurchSymbol( 'Let\'s Eat' ),
                              new LurchSymbol( 'π' ) )
         )
-        expect( test.toPutdown() ).to.equal( '[π const ("Let\'s Eat" π)]' )
+        expect( test.toPutdown() ).to.equal( '[π , ("Let\'s Eat" π)]' )
         // binding body
         test = new Declaration(
-            Declaration.Constant,
             new LurchSymbol( '0' ),
             new Binding(
                 new LurchSymbol( '∀' ), new LurchSymbol( 'n' ),
                 new LurchSymbol( "n>=0" )
             )
         )
-        expect( test.toPutdown() ).to.equal( '[0 const (∀ n , n>=0)]' )
+        expect( test.toPutdown() ).to.equal( '[0 , (∀ n , n>=0)]' )
         // compound body
         test = new Declaration(
-            Declaration.Constant,
             new LurchSymbol( '0' ),
             new Binding(
                 new LurchSymbol( '∀' ),
@@ -1021,7 +992,7 @@ describe( 'Writing putdown notation', () => {
                 )
             )
         )
-        expect( test.toPutdown() ).to.equal( '[0 const (∀ n , (>= n 0))]' )
+        expect( test.toPutdown() ).to.equal( '[0 , (∀ n , (>= n 0))]' )
     } )
 
     it( 'Should correctly represent small (but nested) Environments', () => {
@@ -1064,8 +1035,7 @@ describe( 'Writing putdown notation', () => {
         expect( test.toPutdown() ).to.equal( '{ :"If this" "then that" }' )
         // universal introduction rule from predicate logic
         test = new Environment(
-            new Declaration( Declaration.Variable, new LurchSymbol( 'x' ) )
-                .asA( 'given' ),
+            new Declaration( new LurchSymbol( 'x' ) ).asA( 'given' ),
             new Application( new LurchSymbol( 'P' ), new LurchSymbol( 'x' ) )
                 .asA( 'given' ),
             new Binding(
@@ -1076,7 +1046,7 @@ describe( 'Writing putdown notation', () => {
             )
         )
         expect( test.toPutdown() ).to.equal(
-            '{ :[x var] :(P x) (∀ x , (P x)) }' )
+            '{ :[x] :(P x) (∀ x , (P x)) }' )
         // example with large content that must be broken over multiple lines
         test = new Environment(
             new LurchSymbol( 'this is a long symbol name' ).asA( 'given' ),

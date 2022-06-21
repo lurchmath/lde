@@ -2495,9 +2495,8 @@ export class MathConcept extends EventTarget {
         if ( method[0] == 'class' ) {
             const classObject = MathConcept.subclasses.get( method[1] )
             let constructorArgs = this.children().map( x => x.interpret() )
-            if ( this._attributes.has( 'declaration type' ) )
+            if ( method[1] == 'Declaration' )
                 constructorArgs = [
-                    Symbol.for( this._attributes.get( 'declaration type' ) ),
                     constructorArgs.slice( 0, constructorArgs.length - 1 ),
                     constructorArgs[constructorArgs.length - 1]
                 ]
@@ -2541,9 +2540,8 @@ export class MathConcept extends EventTarget {
             if ( method[0] == 'class' ) {
                 const classObject = MathConcept.subclasses.get( method[1] )
                 let constructorArgs = mc.children().map( prePutdown )
-                if ( mc._attributes.has( 'declaration type' ) )
+                if ( method[1] == 'Declaration' )
                     constructorArgs = [
-                        Symbol.for( mc._attributes.get( 'declaration type' ) ),
                         constructorArgs.slice( 0, constructorArgs.length - 1 ),
                         constructorArgs[constructorArgs.length - 1]
                     ]

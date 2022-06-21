@@ -8,100 +8,42 @@ import { Symbol as LurchSymbol } from './symbol.js'
  * write text such as, "Let $n$ be any integer," or "So let $k$ be the unique
  * value making $f(k)=t-1$ hold."  We call these Declarations.
  * 
- * They come in two types:
+ * We do not distinguish different types of declaration (variable, constant,
+ * operator, symbol, etc.) but treat all declarations as behaving the same.
  * 
- *  * A variable declaration is the kind where the declared symbols are to be
- *    used as variables, typically at the beginning of a subproof that will
- *    justify a universal statement.  For instance, "Let $x\in A$ be
- *    arbitrary."
- *  * A constant declaration is the kind where the declared symbols are not
- *    intended to vary in meaning throughout the subsequent discussion.  These
- *    symbols are often global in scope and are inappropriate for use in
- *    quantifiers.  For instance, the declaration of the symbol 0 in the Peano
- *    axioms is a constant declaration.
- * 
- * Each Declaration instance has a type (variable or constant), a list of
- * symbols being declared (which are instances of the {@link Symbol Symbol}
- * class), and optionally a body that stipulates some fact about the symbols
- * that is being stated by the declaration.  For instance, in the declaration
- * "Let $x\in A$ be arbitrary," the type is a variable declaration, the list
- * of symbols contains just one entry, $x$, and the body is the statement
- * $x\in A$ being made about $x$.
+ * Each Declaration instance has a list of symbols being declared (which are
+ * instances of the {@link Symbol Symbol} class), and optionally a body that
+ * stipulates some fact about the symbols that is being stated by the
+ * declaration.  For instance, in the declaration "Let $x\in A$ be arbitrary,"
+ * the list of symbols contains just one entry, $x$, and the body is the
+ * statement being made about $x$, which is $x\in A$.
  */
 export class Declaration extends LogicConcept {
     
     static className = MathConcept.addSubclass( 'Declaration', Declaration )
 
     /**
-     * A class-level constant that functions like an enum.
-     * When constructing a Declaration, pass as the first argument either
-     * this value or {@link Declaration.Constant the Constant type} instead.
+     * Construct a declaration.  The first argument must be either the
+     * {@link Symbol Symbol} to be declared or an array of one or more
+     * {@link Symbol Symbols} to be declared.  The optional final argument is
+     * the body of the declaration.
      * 
-     * Passing this as the declaration type indicates that the constructed
-     * Declaration declares one or more variables, rather than one or more
-     * constants.
+     * In mathematics, we often declare symbols with certain conditions, such as
+     * "Let $x$ be any real number greater than $N$."  In that sentence, we are
+     * declaring a variable $x$ and imposing on it a two-part condition (a
+     * conjunction), that $x$ is a real number and it is greater than $N$.  Thus
+     * the body of the declaration would be that mathematical expression,
+     * $x\in\mathbb{R}\wedge x>N$.  Or it could be formulated as an
+     * {@link Environment Environment} with two claims, which are
+     * $x\in\mathbb{R}$ and $x>N$.
      * 
-     * Example: `new Declaration( Declaration.Variable, x )`
-     */
-    static Variable = Symbol.for( 'Variable' )
-    /**
-     * A class-level constant that functions like an enum.
-     * When constructing a Declaration, pass as the first argument either
-     * this value or {@link Declaration.Variable the Variable type} instead.
-     * 
-     * Passing this as the declaration type indicates that the constructed
-     * Declaration declares one or more constants, rather than one or more
-     * variables.
-     * 
-     * Example: `new Declaration( Declaration.Constant, pi )`
-     */
-    static Constant = Symbol.for( 'Constant' )
-    /**
-     * An array containing all valid options for the first parameter to the
-     * Declaration constructor, collecting all the constants in the
-     * makeshift enum, including:
-     * 
-     *  * {@link Declaration.Variable Variable}
-     *  * {@link Declaration.Constant Constant}
-     */
-    static Types = [
-        Declaration.Variable,
-        Declaration.Constant
-    ]
-
-    /**
-     * Construct a variable or constant declaration.  You must provide a flag
-     * as the first argument indicating the type of declaration
-     * ({@link Declaration.Variable variable} or
-     * {@link Declaration.Constant constant}), and then the second argument
-     * must be either the {@link Symbol Symbol} to be declared or an array of
-     * one or more {@link Symbol Symbols} to be declared.  The optional final
-     * argument is the body of the declaration.
-     * 
-     * In mathematics, we often declare variables or constants with certain
-     * conditions, such as "Let $x$ be any real number greater than $N$."  In
-     * that sentence, we are declaring a variable $x$ and imposing on it a
-     * two-part condition (a conjunction), that $x$ is a real number and it is
-     * greater than $N$.  Thus the body of the declaration would be that
-     * mathematical expression, $x\in\mathbb{R}\wedge x>N$.  Or it could be
-     * formulated as an {@link Environment Environment} with two claims, which
-     * are $x\in\mathbb{R}$ and $x>N$.
-     * 
-     * However, it is also possible to declare variables with no conditions
+     * However, it is also possible to declare symbols with no conditions
      * attached, as in the mathematical statement "Let $x$ be arbitrary."  So
      * the body of a declaration is optional.
      * 
      * The resulting Declaration instance will have as its children list the
      * list of symbols it declares followed by the body, if a body is present.
      * 
-     * @param {Symbol} type - Must be one of the valid types listed in the
-     *   array {@link Declaration.Types Declaration.Types}, indicating whether
-     *   this declaration is intended to declare variables or constants.  Note
-     *   that this must be a JavaScript `Symbol` instance, not an instance of
-     *   the {@link Symbol Symbol} class defined in this repository.  See
-     *   {@link Declaration.Variable Variable} and
-     *   {@link Declaration.Constant Constant} for example calls to this
-     *   constructor using those values.
      * @param {Symbol|Symbol[]} symbols - Either a single
      *   {@link Symbol Symbol} instance or an array of Symbol instances.  Note
      *   that this must be a Symbol in the sense of the class defined in this
@@ -113,16 +55,14 @@ export class Declaration extends LogicConcept {
      *   {@link LogicConcept LogicConcept}.  If a declaration comes with several
      *   assumptions about the declared variables, they can be placed inside an
      *   {@link Environment Environment} to conjoin them.
-     * @see {@link Declaration#type type()}
+     * 
      * @see {@link Declaration#symbols symbols()}
      * @see {@link Declaration#body body()}
     */
-    constructor ( type, symbols, body ) {
-        if ( arguments.length > 3 )
-            throw 'Too many arguments to Declaration constructor: '
-                + `expected 3, got ${arguments.length}`
-        if ( !Declaration.Types.includes( type ) )
-            throw `Invalid declaration type: ${String(type)}`
+    constructor ( symbols, body ) {
+        if ( arguments.length > 2 )
+            throw new Error( 'Too many arguments to Declaration constructor: '
+                + `expected 2, got ${arguments.length}` )
         if ( symbols instanceof LurchSymbol ) symbols = [ symbols ]
         if ( !( symbols instanceof Array ) )
             throw 'Second argument to Declaration constructor must be '
@@ -139,7 +79,6 @@ export class Declaration extends LogicConcept {
             super( ...symbols )
         }
         this._body = body
-        this.setAttribute( 'declaration type', Symbol.keyFor( type ) )
     }
 
     /**
@@ -147,33 +86,20 @@ export class Declaration extends LogicConcept {
      * for {@link LogicConcept LogicConcepts} because that method assumes that
      * the arguments the constructor requires are the
      * {@link LogicConcept LogicConcept}'s children.  But in this case, we
-     * have an extra first parameter for the Declaration type.
+     * may need to collect several children into an array, passed as the first
+     * parameter.
      * 
      * @returns {Declaration} a structural copy of this object
+     * 
      * @see {@link LogicConcept#copy copy()}
      * @see {@link LogicConcept#equals equals()}
      */
     copy () {
         return new Declaration(
-            this.type(),
             this.symbols().map( symbol => symbol.copy() ),
             this.body() ? this.body().copy() : undefined
         )
     }
-
-    /**
-     * Return the type of declaration, which is the first argument passed to
-     * the constructor.  It will be one of the items in
-     * {@link Declaration.Types the list of types}.
-     * 
-     * @returns {Symbol} A JavaScript Symbol (not a Lurch
-     *   {@link Symbol Symbol} instance) representing the
-     *   {@link Declaration.Types type of declaration}, such as variable or
-     *   constant
-     * @see {@link Declaration#symbols symbols()}
-     * @see {@link Declaration#body body()}
-     */
-    type () { return Symbol.for( this.getAttribute( 'declaration type' ) ) }
 
     /**
      * Return the array of {@link Symbol Symbols} provided to this object at
@@ -185,7 +111,7 @@ export class Declaration extends LogicConcept {
      * 
      * @returns {Symbol[]} An array of {@link Symbol Symbol} instances, those
      *   symbols being declared by this object
-     * @see {@link Declaration#type type()}
+     * 
      * @see {@link Declaration#body body()}
      */
     symbols () {
@@ -206,7 +132,7 @@ export class Declaration extends LogicConcept {
      *   construction time, if there was one, or undefined if not.
      *   If there was one, it is guaranteed to be an instance of the
      *   {@link LogicConcept LogicConcept} class.
-     * @see {@link Declaration#type type()}
+     *
      * @see {@link Declaration#symbols symbols()}
      */
     body () {

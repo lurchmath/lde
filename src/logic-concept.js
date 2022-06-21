@@ -269,7 +269,6 @@ export class LogicConcept extends MathConcept {
         const commentRE = /^\/\/.*\n/
         const givenRE = /^:/
         const bindingRE = /^,/
-        const declarationRE = /^var\b|^const\b/
         const attributesRE = /^[+][{].*(?:\n|$)/
         const whitespaceRE = /^\s/
         const symbolRE = /^(?:(?!,|\(|\)|\{|\}|\[|\]|:)\S)+/
@@ -310,10 +309,9 @@ export class LogicConcept extends MathConcept {
                 } catch ( e ) {
                     problem( 'Invalid JSON attribute: ' + e.message )
                 }
-                // can't modify a comma, colon, var/const, or nothing
+                // can't modify a comma, colon, or nothing
                 if ( stack.length == 0 || isLast( givenRE )
-                  || isLast( bindingRE ) || isLast( declarationRE )
-                  || isOpenGrouper( stack.last() ) )
+                  || isLast( bindingRE ) || isOpenGrouper( stack.last() ) )
                     problem( 'Attribute JSON has no target to modify' )
                 save( { type : 'attributes', data : json } )
                 shiftNext()
@@ -343,25 +341,26 @@ export class LogicConcept extends MathConcept {
                     problem( 'Cannot end an environment with a colon' )
                 // handle meaning of a declaration, or errors it might contain:
                 if ( group.type == '[ ]' ) {
-                    // 1. wrong number of var/const in a declaration
-                    if ( group.contents.filter( x =>
-                            declarationRE.test( x ) ).length != 1 )
-                        problem( 'A declaration must have '
-                               + 'exactly one var/const' )
-                    // 2. not enough children
-                    if ( group.contents.length <= 1 )
-                        problem( 'A declaration must have at least 2 children' )
-                    // 3. wrong placement of var/const in a declaration
-                    if ( declarationRE.test( group.contents[n-1] ) ) {
-                        group.declarationType = group.contents.pop()
-                        group.hasBody = false
-                    } else if ( declarationRE.test( group.contents[n-2] ) ) {
-                        const body = group.contents.pop()
-                        group.declarationType = group.contents.pop()
-                        group.contents.push( body )
+                    // 1. not enough children
+                    if ( group.contents.length == 0 )
+                        problem( 'Empty declarations are not permitted' )
+                    // 2. More than one comma is invalid syntax
+                    const numCommas = group.contents.filter( x =>
+                        exactMatch( bindingRE, x ) ).length
+                    if ( numCommas > 1 )
+                        problem( 'A declaration can have at most one comma' )
+                    // 3. If 2nd-to-last item (but not item #0) is a comma,
+                    //    declaration has a body
+                    if ( n >= 3
+                      && exactMatch( bindingRE, group.contents[n-2] ) ) {
                         group.hasBody = true
+                        group.contents = group.contents.without( n-2 )
+                    // 4. If some other item is a comma, it's misplaced.
+                    } else if ( numCommas > 0 ) {
+                        problem( 'Misplaced comma inside declaration' )
+                    // 5. No item is a comma, so it's a no-body binding.
                     } else {
-                        problem( 'Var/const appears too early in declaration' )
+                        group.hasBody = false
                     }
                 }
                 // handle meaning of an expr, or errors it might contain:
@@ -375,7 +374,7 @@ export class LogicConcept extends MathConcept {
                     if ( numCommas > 1 )
                         problem( 'An expression can have at most one comma' )
                     // 3. If 2nd-to-last item (but not item #0) is a comma,
-                    // group is either a binding or a declaration
+                    //    group is a binding
                     if ( n >= 3
                       && exactMatch( bindingRE, group.contents[n-2] ) ) {
                         group.isBinding = true
@@ -406,15 +405,9 @@ export class LogicConcept extends MathConcept {
                 save()
                 shiftNext()
             } else if ( isNext( bindingRE ) ) {
-                // make sure it's inside an expression
-                if ( lastOpenGrouper() != '(' )
-                    problem( 'Cannot put a comma outside an expression' )
-                save()
-                shiftNext()
-            } else if ( isNext( declarationRE ) ) {
-                // make sure it's inside a declaration
-                if ( lastOpenGrouper() != '[' )
-                    problem( 'Cannot put var/const outside a declaration' )
+                // make sure it's inside an expression or declaration
+                if ( lastOpenGrouper() != '(' && lastOpenGrouper() != '[' )
+                    problem( 'Comma belongs only in expression or declaration' )
                 save()
                 shiftNext()
             } else if ( isNext( symbolRE ) ) {
@@ -511,13 +504,10 @@ export class LogicConcept extends MathConcept {
                 } else if ( tree.type == '[ ]' ) {
                     const Declaration =
                         MathConcept.subclasses.get( 'Declaration' )
-                    const type = tree.declarationType == 'var' ?
-                        Declaration.Variable : Declaration.Constant
                     return tree.hasBody ?
-                        new Declaration( type,
-                            children.slice( 0, -1 ),
-                            children.last() ) :
-                        new Declaration( type, children )
+                        new Declaration( children.slice( 0, -1 ),
+                                         children.last() ) :
+                        new Declaration( children )
                 // This should never happen:
                 } else {
                     problem( 'Unknown group type: ' + tree.type )
@@ -589,16 +579,12 @@ export class LogicConcept extends MathConcept {
                 return finalize( `(${childResults.join( ' ' )} , ${body})` )
             case 'Declaration':
                 const Declaration = MathConcept.subclasses.get( 'Declaration' )
-                const type = this.type() == Declaration.Variable ?
-                    'var' : 'const'
                 if ( this.body() ) {
                     const body = childResults.pop()
                     return finalize(
-                        `[${childResults.join( ' ' )} ${type} ${body}]`,
-                        [ 'declaration type' ] )
+                        `[${childResults.join( ' ' )} , ${body}]` )
                 } else {
-                    return finalize( `[${childResults.join( ' ' )} ${type}]`,
-                        [ 'declaration type' ] )
+                    return finalize( `[${childResults.join( ' ' )}]` )
                 }
             case 'Environment':
                 const envInside = childResults.join( ' ' )

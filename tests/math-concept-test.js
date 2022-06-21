@@ -2690,7 +2690,7 @@ describe( 'Smackdown notation and interpretation', () => {
             [
                 x +{"special variable":false}
                 y
-                const
+                ,
                 (
                     P
                     x
@@ -2703,7 +2703,6 @@ describe( 'Smackdown notation and interpretation', () => {
         expect( test2.length ).to.equal( 1 )
         expect( test2[0].interpret().equals(
             new Declaration(
-                Declaration.Constant,
                 [
                     new LurchSymbol( 'x' ).attr( { 'special variable' : false } ),
                     new LurchSymbol( 'y' )
@@ -2735,11 +2734,9 @@ describe( 'Smackdown notation and interpretation', () => {
             [ MathConcept.interpretationKey, [ 'class', 'Application' ] ] ] )
     const commandMC = ( cmd, ...args ) => new MathConcept().attr( [
         [ MathConcept.interpretationKey, [ 'command', cmd, ...args ] ] ] )
-    const declarationMC = ( type, syms, body ) =>
+    const declarationMC = ( syms, body ) =>
         new MathConcept( ...syms, body ).attr( [
-            [ MathConcept.interpretationKey, [ 'class', 'Declaration'] ],
-            [ 'declaration type',
-              typeof( type ) == 'symbol' ? Symbol.keyFor( type ) : type ] ] )
+            [ MathConcept.interpretationKey, [ 'class', 'Declaration'] ] ] )
     
     it( 'Should support $...$ notation blocks', () => {
         // ---------- one $...$ block all alone
@@ -3509,7 +3506,6 @@ describe( 'Smackdown notation and interpretation', () => {
         // declaration alone, with body
         smackCheck(
             declarationMC(
-                Declaration.Variable,
                 [ symbolMC( 'x' ) ],
                 applicationMC(
                     symbolMC( '=' ),
@@ -3517,7 +3513,7 @@ describe( 'Smackdown notation and interpretation', () => {
                     symbolMC( 'x' )
                 )
             ),
-            '[x var (= x x)]'
+            '[x , (= x x)]'
         )
         // nested applications
         smackCheck(
