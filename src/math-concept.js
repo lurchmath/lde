@@ -1619,21 +1619,31 @@ export class MathConcept extends EventTarget {
     //////
 
     /**
-     * Any MathConcept can, in addition to its tree structure, bind a list of
-     * {@link Symbol Symbols}, in the usual sense of that word from logic and
-     * theoretical computer science.  That is, the symbols are marked as "bound"
-     * inside the tree, and symbols not marked as "bound" are considered "free."
+     * Any MathConcept can bind a list of {@link Symbol Symbols}, in the usual
+     * sense of that word from logic and theoretical computer science.  That is,
+     * the symbols are marked as "bound" inside the tree (as are any other
+     * symbols of the same name), but all symbols of other names are considered
+     * "free."
      * 
      * There is a host of functions (some of which are referenced below) for
      * doing the usual computations about freeness of expressions in other
      * expressions, symbols free to replace other symbols, etc.
      * 
-     * The list of bound symbol names is stored as an attribute of this object,
-     * under the key `"bound symbols"`.  The list is ordered, although not all
-     * applications may care about the order.
+     * The structure of a MathConcept that binds $n$ different symbols is as
+     * follows.  The first $n$ children of the MathConcept are instances of the
+     * bound symbols (as {@link Symbol Symbol} objects) and an attribute is
+     * added to the MathConcept with key `"binds"` and value $n$.  The meaning
+     * of the MathConcept can be viewed as just children $n+1$ through the end,
+     * except with the first $n$ symbols bound in them.
      * 
-     * @returns {string[]} the ordered list of names of symbols bound in this
-     *   object
+     * For example, the expression $\forall x,2<x^2$ might be represented as a
+     * tree with a structure like `(forall (x (< 2 (^ x 2))))`, and in the first
+     * child of that structure, we would set `"binds"` to 1, so that
+     * `(x (< 2 (^ x 2)))` actually has the meaning `(< 2 (^ x 2))`, but with
+     * `x` bound.
+     * 
+     * @returns {Symbol[]} the ordered list of {@link Symbol Symbols} bound in
+     *   this object; the exact instances are returned, not copies
      * 
      * @see {@link MathConcept#binds binds()}
      * @see {@link MathConcept#freeSymbols freeSymbols()}
@@ -1642,25 +1652,40 @@ export class MathConcept extends EventTarget {
      * @see {@link MathConcept#isFreeToReplace isFreeToReplace()}
      * @see {@link MathConcept#replaceFree replaceFree()}
      */
-    boundSymbols () { return this.getAttribute( 'bound symbols' ) }
+    boundSymbols () {
+        const numBound = this.getAttribute( 'binds' )
+        if ( typeof( numBound ) != 'number'
+          || numBound < 0 || numBound >= this.numChildren() )
+            return [ ]
+        return this.children().slice( 0, numBound )
+    }
 
     /**
      * See the documentation for {@link MathConcept#boundSymbols boundSymbols()}
-     * for an overview of the notion of binding.  This function sets the list of
-     * symbol names bound by this MathConcept.  It replaces any old list that
-     * was there before, so if your intent is instead to add new symbols to the
-     * old list, use code such as
-     * `M.bindSymbols( [ a, b, c, ...M.boundSymbols() ] )`.  You can therefore
-     * erase all bindings by simply calling `M.bindSymbols()`.
+     * for an overview of the notion of binding.  This function sets the number
+     * of {@link Symbol Symbols} bound in the object, but before calling it, you
+     * must ensure that the first `num` children of this MathConcept are indeed
+     * instances of class {@link Symbol Symbol}, or this function will do
+     * nothing.
      * 
-     * The names you pass will be stored as an array, in case the order is
-     * relevant in your application, although most applications treat this as a
-     * set.  If any of the names is not a string, it will be converted to one.
+     * If you want to bind a new symbol, you can do so by calling
+     * {@link MathConcept#insertChild insertChild()} to add it as a child, then
+     * calling this function to increase the number of bound
+     * {@link Symbol Symbols}.  If you want to remove a bound symbol, you can do
+     * so by calling {@link MathConcept#removeChild removeChild()}, then calling
+     * this function to decrease the number of bound {@link Symbol Symbols}.  Or
+     * you can add or remove multiple children, then call this function to
+     * update the final number of bound {@link Symbol Symbols}.
      * 
-     * @param {...string} names - the names (as strings) of the symbols to bind
+     * @param {number} num - the number of {@link Symbol Symbols} to bind
      */
-    bindSymbols ( ...names ) {
-        this.setAttribute( 'bound symbols', names.map( name => `${name}` ) )
+    bindSymbols ( num ) {
+        if ( typeof( num ) != 'number' || num < 0 || num >= this.numChildren() )
+            return
+        for ( let i = 0 ; i < num ; i++ )
+            if ( !( this.child( i ) instanceof LurchSymbol ) )
+                return
+        this.setAttribute( 'binds', num )
     }
 
     /**
@@ -1675,7 +1700,7 @@ export class MathConcept extends EventTarget {
      */
     binds ( symbol ) {
         if ( symbol instanceof LurchSymbol ) symbol = symbol.text()
-        return this.boundSymbols().includes( String( symbol ) )
+        return this.boundSymbols().some( bound => bound.text() == symbol )
     }
 
     /**
