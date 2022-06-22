@@ -40,6 +40,8 @@ const rpl = repl.start({
               writer: ( expr ) => {
                 if (expr instanceof LogicConcept) {
                    return '\x1B[1;34m'+expr.toPutdown()+'\x1B[0m'
+                } else if (expr instanceof MathConcept) {
+                   return '\x1B[1;34m'+expr.toSmackdown()+'\x1B[0m'
                 } else { 
                    return util.inspect(expr,
                       { customInspect:false,
@@ -56,6 +58,7 @@ global.compute = Algebrite.run
 global.satSolve = satSolve
 global.chalk = chalk
 global.lc = (s) => { return LogicConcept.fromPutdown(s)[0] }
+global.mc = (s) => { return MathConcept.fromSmackdown(s)[0] }
 global.print = console.log
 global.inspect = (x,d=null) => {
       console.log(util.inspect(x,
@@ -77,12 +80,13 @@ rpl.defineCommand(
 `
 ${heading('Lode Features')}
   Lode is the Node.js REPL with all of the modules in index.js loaded at the
-  start. If the expression on the input line is an LC, its .toPutdown form is
-  printed on the next line instead of the usual default (util.inspect). In
-  addition, it provides the following.
+  start. If the expression on the input line is an LC (resp. MC), its putdown
+  (resp. smackdown) form is printed on the next line instead of the usual default
+  (util.inspect). In addition, it provides the following.
 
   ${heading('Syntactic sugar')}
-    ${item('lc(s)')}         : constructs an LC from the putDown string s
+    ${item('lc(s)')}         : constructs an LC from the putdown string s
+    ${item('mc(s)')}         : constructs an MC from the smackdown string s
     ${item('print(s)')}      : prints s to the console
     ${item('inspect(x,d)')}  : prints the object structure of x to depth d. If d is
                     omitted the default is Infinity

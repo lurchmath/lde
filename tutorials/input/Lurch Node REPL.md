@@ -43,13 +43,16 @@ Welcome to 𝕃𝕠𝕕𝕖 - the Lurch Node app
 '{ :Hello (World !) }'
 ▶︎
 ```
-Since creating and viewing LogicConcepts in Putdown notation is often what we want, $\lode$ provides a shortcut for constructing LCs and displays LCs in Putdown notation by default.
+Since creating and viewing LogicConcepts in putdown notation is often what we want, $\lode$ provides a shortcut for constructing LCs and displays LCs in Putdown notation by default.
 ```
 ▶︎ LogicConcept.fromPutdown(`{ :Hello ( World ! ) }`)[0].toPutdown()
 '{ :Hello (World !) }'
 ▶︎ lc(`{ :Hello ( World ! ) }`)  // constructs the same thing
 { :Hello (World !) }
 ```
+There is a similar feature for {@link MathConcept MathConcepts} using 
+{@link MathConcept#toSmackdown smackdown}.
+
 $\lode$ also loads [Algebrite]{@link 'http://algebrite.org'}.
 So you can do numerical and algebraic calculations such as these (see the
 [Algebrite documentation]{@link http://algebrite.org/docs/latest-stable/reference.html}
