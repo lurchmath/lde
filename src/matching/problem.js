@@ -1,7 +1,7 @@
 
 import { Symbol as LurchSymbol } from '../symbol.js'
 import { Application } from "../application.js"
-import { Binding } from "../binding.js"
+import { BindingExpression } from "../binding-expression.js"
 import { LogicConcept } from "../logic-concept.js"
 import { metavariable, metavariableNamesIn } from "./metavariables.js"
 import { Constraint } from "./constraint.js"
@@ -384,12 +384,12 @@ export class Problem {
                 ...pattern.children().map( child =>
                     this.convertAllBoundVarsToMetavars( child, stream ) ) )
         // recursive case 2: binding
+        if ( !( pattern instanceof BindingExpression ) )
+            throw new Error( `Invalid pattern: ${pattern}` )
         const copy = pattern.copy()
-        copy.head().replaceWith( this.convertAllBoundVarsToMetavars(
-            copy.head(), stream ) )
         copy.body().replaceWith( this.convertAllBoundVarsToMetavars(
             copy.body(), stream ) )
-        const newBoundVars = copy.boundVariables().map( old =>
+        const newBoundVars = copy.boundSymbols().map( old =>
             old.isA( metavariable ) ? old :
             new LurchSymbol( `${old.text()}_${stream.next().text()}` )
                 .asA( metavariable ) )

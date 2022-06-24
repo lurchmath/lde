@@ -198,11 +198,13 @@ export class LogicConcept extends MathConcept {
      *  * An {@link Application Application} is written using LISP notation.
      *    Function application requires at least one argument (no empty paren
      *    pairs).  For example, you might write $\sin x$ as `(sin x)`.
-     *  * A {@link Binding Binding} expression (quantifier, summation, etc.)
-     *    is written just like a function application but with a comma before
-     *    the body.  All children before the body and after the first child
-     *    must be {@link Symbol Symbols}, and are the bound variables.
-     *    Example:  `(∀ x , (P x))` means $\forall x, P(x)$.
+     *  * A {@link BindingExpression BindingExpression} is written as a series
+     *    of {@link Symbol Symbols}, separated by commas, followed by another
+     *    comma, and then the body expression.  All children before the body and
+     *    after the first child must be {@link Symbol Symbols}, and are the
+     *    bound variables.  Example:  `x , (P x)` means $P(x)$ with $x$ bound.
+     *    Consequently, could write, for example, `(∀ x , (P x))` to mean the
+     *    application of the `∀` symbol to the binding `x , (P x)`.
      *  * A variable {@link Declaration Declaration} lists the declared
      *    {@link Symbol Symbols} in brackets, followed by the keyword `var`
      *    followed by an optional body that is an assumption made about the
@@ -282,7 +284,7 @@ export class LogicConcept extends MathConcept {
             return match && match[0].length == str.length
         }
         // stack management
-        const stack = [ ]
+        let stack = [ ]
         const save = x => stack.push( x || match[0] )
         const restore = () => {
             let result = [ ]
@@ -295,6 +297,45 @@ export class LogicConcept extends MathConcept {
             for ( let i = stack.length - 1 ; i >= 0 ; i-- )
                 if ( isOpenGrouper( stack[i] ) ) return stack[i]
             return
+        }
+        // tool for processing commas into bindings
+        const handleCommas = group => {
+            // groups may not begin or end with commas
+            if ( exactMatch( bindingRE, group.contents[0] ) )
+                problem( 'Group begins with a comma' )
+            let i = group.contents.length - 1
+            if ( exactMatch( bindingRE, group.contents.last() ) )
+                problem( 'Group ends with a comma' )
+            // this routine ensures that bound things are symbols
+            const checkSymbol = text => {
+                if ( !exactMatch( stringRE, text )
+                  && !exactMatch( symbolRE, text ) )
+                    problem( 'Attempt to bind non-symbol: ' + text )
+            }
+            // process all "v1 , ... vn , body" segments inside this group
+            while ( i > 0 ) {
+                if ( exactMatch( bindingRE, group.contents[i] ) ) {
+                    checkSymbol( group.contents[i-1] )
+                    let innerContents = [ group.contents[i-1],
+                                          group.contents[i+1] ]
+                    let firstComma = i
+                    while ( firstComma > 2
+                         && exactMatch( bindingRE,
+                                        group.contents[firstComma-2] ) ) {
+                        firstComma -= 2
+                        checkSymbol( group.contents[firstComma-1] )
+                        innerContents.unshift( group.contents[firstComma-1] )
+                    }
+                    group.contents.splice( firstComma-1, i+1, {
+                        type : group.type,
+                        contents : innerContents,
+                        isBinding : true
+                    } )
+                    i = firstComma - 1
+                } else {
+                    i--
+                }
+            }
         }
         // tokenize and do a little parsing
         while ( string.length > 0 ) {
@@ -368,27 +409,15 @@ export class LogicConcept extends MathConcept {
                 }
                 // handle meaning of an expr, or errors it might contain:
                 if ( group.type == '( )' ) {
-                    // 1. Empty expression is invalid syntax
+                    // Empty expression is invalid syntax
                     if ( group.contents.length == 0 )
                         problem( 'Empty applications are not permitted' )
-                    // 2. More than one comma is invalid syntax
-                    const numCommas = group.contents.filter( x =>
-                        exactMatch( bindingRE, x ) ).length
-                    if ( numCommas > 1 )
-                        problem( 'An expression can have at most one comma' )
-                    // 3. If 2nd-to-last item (but not item #0) is a comma,
-                    //    group is a binding
-                    if ( n >= 3
-                      && exactMatch( bindingRE, group.contents[n-2] ) ) {
-                        group.isBinding = true
-                        group.contents = group.contents.without( n-2 )
-                    // 4. If some other item is a comma, it's misplaced.
-                    } else if ( numCommas > 0 ) {
-                        problem( 'Misplaced comma inside expression' )
-                    // 5. No item is a comma, so it's an application.
-                    } else {
-                        group.isBinding = false
-                    }
+                    // Non-empty is good...process any interior bindings
+                    handleCommas( group )
+                }
+                // handle meaning of an env:
+                if ( group.type == '{ }' ) {
+                    handleCommas( group )
                 }
                 save( group )
                 shiftNext()
@@ -408,9 +437,9 @@ export class LogicConcept extends MathConcept {
                 save()
                 shiftNext()
             } else if ( isNext( bindingRE ) ) {
-                // make sure it's inside an expression or declaration
-                if ( lastOpenGrouper() != '(' && lastOpenGrouper() != '[' )
-                    problem( 'Comma belongs only in expression or declaration' )
+                // make sure it's not after another comma
+                if ( isLast( bindingRE ) )
+                    problem( 'Cannot put two commas in a row' )
                 save()
                 shiftNext()
             } else if ( isNext( symbolRE ) ) {
@@ -430,6 +459,10 @@ export class LogicConcept extends MathConcept {
         if ( unclosed.length > 0 )
             problem( 'Reached end of input while still inside '
                 + unclosed.join( ' and ' ) )
+        // there may be "v1 , ... vn , body" sequences at the top level
+        const virtualGroup = { type : '{ }', contents : stack }
+        handleCommas( virtualGroup )
+        stack = virtualGroup.contents
         // how to process a sequence of tokens and apply modifiers to siblings
         const applyModifiers = sequence => {
             let i = 0
@@ -495,9 +528,9 @@ export class LogicConcept extends MathConcept {
                 // Expressions
                 } else if ( tree.type == '( )' ) {
                     if ( tree.isBinding ) {
-                        const Binding =
-                            MathConcept.subclasses.get( 'Binding' )
-                        return new Binding( ...children )
+                        const BindingExpression =
+                            MathConcept.subclasses.get( 'BindingExpression' )
+                        return new BindingExpression( ...children )
                     } else {
                         const Application =
                             MathConcept.subclasses.get( 'Application' )
@@ -579,9 +612,8 @@ export class LogicConcept extends MathConcept {
                 return result
             case 'Application':
                 return finalize( `(${childResults.join( ' ' )})` )
-            case 'Binding':
-                const body = childResults.pop()
-                return finalize( `(${childResults.join( ' ' )} , ${body})` )
+            case 'BindingExpression':
+                return finalize( childResults.join( ' , ' ) )
             case 'Declaration':
                 if ( this.body() ) {
                     const body = childResults.pop()

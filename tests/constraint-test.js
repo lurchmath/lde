@@ -1,7 +1,7 @@
 
 import { Symbol as LurchSymbol } from '../src/symbol.js'
 import { Application } from '../src/application.js'
-import { Binding } from '../src/binding.js'
+import { BindingExpression } from '../src/binding-expression.js'
 import { Environment } from '../src/environment.js'
 import { LogicConcept } from '../src/logic-concept.js'
 import M from '../src/matching.js'
@@ -186,10 +186,10 @@ describe( 'Constraint', () => {
         C2.removeBindings()
         expect( C2.equals( copy ) ).to.equal( false )
         expect( C2.pattern.equals( LogicConcept.fromPutdown(
-            '("LDE binding" forall x (P x))'
+            '(forall ("LDE binding" x (P x)))'
         )[0] ) ).to.equal( true )
         expect( C2.expression.equals( LogicConcept.fromPutdown(
-            '(and ("LDE binding" exists y (Q y 3)) (R z))'
+            '(and (exists ("LDE binding" y (Q y 3))) (R z))'
         )[0] ) ).to.equal( true )
         // create a Constraint with a nested binding in its pattern;
         // ensure the expansion takes place recursively/nested
@@ -202,7 +202,7 @@ describe( 'Constraint', () => {
         C3.removeBindings()
         expect( C3.equals( copy ) ).to.equal( false )
         expect( C3.pattern.equals( LogicConcept.fromPutdown(
-            '("LDE binding" forall x ("LDE binding" exists y (> x y)))'
+            '(forall ("LDE binding" x (exists ("LDE binding" y (> x y)))))'
         )[0] ) ).to.equal( true )
         expect( C3.expression.equals( copy.expression ) ).to.equal( true )
         // same test as previous, but put it in the expression instead
@@ -216,7 +216,7 @@ describe( 'Constraint', () => {
         expect( C4.equals( copy ) ).to.equal( false )
         expect( C4.pattern.equals( copy.pattern ) ).to.equal( true )
         expect( C4.expression.equals( LogicConcept.fromPutdown(
-            '("LDE binding" forall x ("LDE binding" exists y (> x y)))'
+            '(forall ("LDE binding" x (exists ("LDE binding" y (> x y)))))'
         )[0] ) ).to.equal( true )
     } )
 
@@ -229,8 +229,16 @@ describe( 'Constraint', () => {
         )
         // create three patterns to which to apply it, and copies of each
         let P1 = new Application( new LurchSymbol( 'f' ), X.copy() )
-        let P2 = new Binding( new LurchSymbol( '𝝺' ), new LurchSymbol( 'v' ),
-            new Application( X.copy(), new LurchSymbol( 'v' ) ) )
+        let P2 = new Application(
+            new LurchSymbol( '𝝺' ),
+            new BindingExpression(
+                new LurchSymbol( 'v' ),
+                new Application(
+                    X.copy(),
+                    new LurchSymbol( 'v' )
+                )
+            )
+        )
         let P3 = new Environment( X.copy(), X.copy(), X.copy() )
         const P1copy = P1.copy()
         const P2copy = P2.copy()

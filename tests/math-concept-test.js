@@ -9,7 +9,7 @@ import { Declaration } from '../src/declaration.js'
 import { Environment } from '../src/environment.js'
 import { Expression } from '../src/expression.js'
 import { Symbol as LurchSymbol } from '../src/symbol.js'
-import { Binding } from '../src/binding.js'
+import { BindingExpression } from '../src/binding-expression.js'
 
 // And these are needed for other tests below, such as parsing
 import { Application } from '../src/application.js'
@@ -2112,9 +2112,9 @@ describe( 'Bound and free variables', () => {
     const makeTree = ( arg ) => {
         if ( arg instanceof Array ) {
             if ( arg[0] == 'bind' ) {
-                return new Binding( ...arg.slice( 1 ).map( makeTree ) )
+                return new BindingExpression( ...arg.slice( 1 ).map( makeTree ) )
             } else {
-                return new Expression( ...arg.map( makeTree ) )
+                return new Application( ...arg.map( makeTree ) )
             }
         } else return new LurchSymbol( arg )
     }
@@ -2122,11 +2122,11 @@ describe( 'Bound and free variables', () => {
     it( 'Should correctly compute the free identifiers in a MathConcept', () => {
         // create some valid Bindings in which to detect free identifiers
         const forall = makeTree(
-            [ 'bind', '∀', 'x', 'y', [ 'P', 'x', 'y' ] ] ) // ∀x,y, P(x,y)
+            [ '∀', [ 'bind', 'x', 'y', [ 'P', 'x', 'y' ] ] ] ) // ∀x,y, P(x,y)
         const exists = makeTree(
-            [ 'bind', '∃', 'a', [ '>', 'a', 0 ] ] ) // ∃a, a>0
+            [ '∃', [ 'bind', 'a', [ '>', 'a', 0 ] ] ] ) // ∃a, a>0
         const sum = makeTree(
-            [ 'bind', [ '∑', 1, 'n' ], 'i', [ '^', 'i', 2 ] ] ) // ∑_{i=1}^n i^2
+            [ '∑', 1, 'n', [ 'bind', 'i', [ '^', 'i', 2 ] ] ] ) // ∑_{i=1}^n i^2
         const forgotToMarkBinding = makeTree(
             [ '∀', 'x', 'y', [ 'P', 'x', 'y' ] ] )
         const notEnoughChildren = makeTree( [ '∑', 'body' ] )
@@ -2148,39 +2148,41 @@ describe( 'Bound and free variables', () => {
     it( 'Should judge freeness of sub-MathConcepts correctly', () => {
         // test isFree() and occursFree() on all the subexpressions of a small
         // summation expression
-        const sum = makeTree( [ 'bind', '∑', 's', [ 'f', 's' ] ] ) // ∑_s f(s)
+        const sum = makeTree( [ '∑', [ 'bind', 's', [ 'f', 's' ] ] ] ) // ∑_s f(s)
         // test with assumed top-level ancestor
-        expect( sum.child( 1 ).isFree() ).to.equal( false ) // first s
-        expect( sum.child( 2 ).isFree() ).to.equal( false ) // f(s)
-        expect( sum.index( [ 2, 1 ] ).isFree() ).to.equal( false ) // second s
+        expect( sum.child( 1, 0 ).isFree() ).to.equal( false ) // first s
+        expect( sum.child( 1, 1 ).isFree() ).to.equal( false ) // f(s)
+        expect( sum.child( 1, 1, 0 ).isFree() ).to.equal( true ) // f
+        expect( sum.child( 1, 1, 1 ).isFree() ).to.equal( false ) // second s
         // test with explicit top-level ancestor
-        expect( sum.child( 1 ).isFree( sum ) ).to.equal( false ) // first s
-        expect( sum.child( 2 ).isFree( sum ) ).to.equal( false ) // f(s)
-        expect( sum.index( [ 2, 1 ] ).isFree( sum ) ).to.equal( false ) // second s
+        expect( sum.child( 1, 0 ).isFree( sum ) ).to.equal( false ) // first s
+        expect( sum.child( 1, 1 ).isFree( sum ) ).to.equal( false ) // f(s)
+        expect( sum.child( 1, 1, 0 ).isFree( sum ) ).to.equal( true ) // f
+        expect( sum.child( 1, 1, 1 ).isFree( sum ) ).to.equal( false ) // second s
         // test with an inner ancestor, to change the answer
-        expect( sum.child( 1 ).isFree( sum.child( 1 ) ) ).to.equal( true )
-        expect( sum.child( 2 ).isFree( sum.child( 2 ) ) ).to.equal( true )
-        expect( sum.index( [ 2, 1 ] ).isFree( sum.child( 2 ) ) ).to.equal( true )
+        expect( sum.child( 1, 0 ).isFree( sum.child( 1, 0 ) ) ).to.equal( true )
+        expect( sum.child( 1, 1 ).isFree( sum.child( 1, 1 ) ) ).to.equal( true )
+        expect( sum.child( 1, 1, 1 ).isFree( sum.child( 1, 1 ) ) ).to.equal( true )
         // and all occursFree() checks should also be false w/no inThis specified
-        const s = sum.child( 1 ).copy()
-        const fofs = sum.child( 2 ).copy()
+        const s = sum.child( 1, 0 ).copy()
+        const fofs = sum.child( 1, 1 ).copy()
         expect( sum.occursFree( s ) ).to.equal( false )
         expect( sum.occursFree( fofs ) ).to.equal( false )
         // but can be true if the ancestor is specified as the f(s)
-        expect( sum.occursFree( s, sum.child( 2 ) ) ).to.equal( true )
-        expect( sum.occursFree( fofs, sum.child( 2 ) ) ).to.equal( true )
+        expect( sum.occursFree( s, sum.child( 1, 1 ) ) ).to.equal( true )
+        expect( sum.occursFree( fofs, sum.child( 1, 1 ) ) ).to.equal( true )
 
         // test isFree() and occursFree() on some subexpressions of a small
         // predicate logic expression
         const predicateLogic1 = makeTree( [ // P(x) ^ ∀x,Q(x)
             'and',
             [ 'P', 'x' ],
-            [ 'bind', '∀', 'x', [ 'Q', 'x' ] ]
+            [ '∀', [ 'bind', 'x', [ 'Q', 'x' ] ] ]
         ] )
         // one x is free, the others are not, but thus x does occur free
         const x1 = predicateLogic1.index( [ 1, 1 ] )
-        const x2 = predicateLogic1.index( [ 2, 1 ] )
-        const x3 = predicateLogic1.index( [ 2, 2, 1 ] )
+        const x2 = predicateLogic1.index( [ 2, 1, 0 ] )
+        const x3 = predicateLogic1.index( [ 2, 1, 1, 1 ] )
         expect( x1.equals( x2 ) ).to.equal( true )
         expect( x1.equals( x3 ) ).to.equal( true )
         expect( x1.isFree() ).to.equal( true )
@@ -2194,7 +2196,7 @@ describe( 'Bound and free variables', () => {
         expect( predicateLogic1.occursFree( new LurchSymbol( '∀' ) ) ).to.equal( true )
         // P(x) occurs free but Q(x) does not
         const Pofx = predicateLogic1.child( 1 )
-        const Qofx = predicateLogic1.index( [ 2, 2 ] )
+        const Qofx = predicateLogic1.index( [ 2, 1, 1 ] )
         expect( predicateLogic1.occursFree( Pofx.copy() ) ).to.equal( true )
         expect( predicateLogic1.occursFree( Qofx.copy() ) ).to.equal( false )
         // x2, x3, and Qofx become free if we consider a lower ancestor
@@ -2209,32 +2211,18 @@ describe( 'Bound and free variables', () => {
         const predicateLogic2 = makeTree( [ // P(x) ^ ∀x,P(x)
             'and',
             [ 'P', 'x' ],
-            [ 'bind', '∀', 'x', [ 'P', 'x' ] ]
+            [ '∀', [ 'bind', 'x', [ 'P', 'x' ] ] ]
         ] )
         expect( predicateLogic2.occursFree( Pofx.copy() ) ).to.equal( true )
-
-        // And test one corner case:  The head expression of a binding is not
-        // part of the scope of the binding.  This is a case that almost never
-        // arises in practice, but should be tested anyway.
-        const notStrange = makeTree( // \sum_{n=1}^k n^2
-            [ 'bind', [ '∑', '1', 'k' ], 'n', [ '^', 'n', '2' ] ] )
-        expect( notStrange.child( 0 ).isFree() ).to.equal( true )
-        expect( notStrange.child( 1 ).isFree() ).to.equal( false )
-        expect( notStrange.child( 2 ).isFree() ).to.equal( false )
-        const strange = makeTree(    // \sum_{n=1}^n n^2
-            [ 'bind', [ '∑', '1', 'n' ], 'n', [ '^', 'n', '2' ] ] )
-        expect( strange.child( 0 ).isFree() ).to.equal( true )
-        expect( strange.child( 1 ).isFree() ).to.equal( false )
-        expect( strange.child( 2 ).isFree() ).to.equal( false )
     } )
 
     it( 'Handles free replacement correctly', () => {
         // recreate some of the same expressions used in the previous test
-        const sum = makeTree( [ 'bind', '∑', 's', [ 'f', 's' ] ] ) // ∑_s f(s)
+        const sum = makeTree( [ '∑', [ 'bind', 's', [ 'f', 's' ] ] ] ) // ∑_s f(s)
         const predicateLogic = makeTree( [ // P(x) ^ ∀x,P(x)
             'and',
             [ 'P', 'x' ],
-            [ 'bind', '∀', 'x', [ 'P', 'x' ] ]
+            [ '∀', [ 'bind', 'x', [ 'P', 'x' ] ] ]
         ] )
         // now create several expressions that have various free variables in
         // them, for replacement-testing purposes
@@ -2242,23 +2230,32 @@ describe( 'Bound and free variables', () => {
         const hofs = makeTree( [ 'h', 's' ] )
         const Pofy = makeTree( [ 'P', 'y' ] )
         const xto2 = makeTree( [ '^', 'x', '2' ] )
-        const Exxeqy = makeTree( [ 'bind', '∃', 'x', [ '=', 'x', 'y' ] ] )
+        const Exxeqy = makeTree( [ '∃', [ 'bind', 'x', [ '=', 'x', 'y' ] ] ] )
         // in the sum, any child can be replaced iff the new thing has no free s
-        for ( let i = 0 ; i < 3 ; i++ ) {
-            expect( gofx.isFreeToReplace( sum.child( i ) ) ).to.equal( true )
-            expect( hofs.isFreeToReplace( sum.child( i ) ) ).to.equal( i == 0 )
-            expect( Pofy.isFreeToReplace( sum.child( i ) ) ).to.equal( true )
-            expect( xto2.isFreeToReplace( sum.child( i ) ) ).to.equal( true )
-            expect( Exxeqy.isFreeToReplace( sum.child( i ) ) ).to.equal( true )
-        }
+        expect( gofx.isFreeToReplace( sum.child( 0 ) ) ).to.equal( true )
+        expect( hofs.isFreeToReplace( sum.child( 0 ) ) ).to.equal( true )
+        expect( Pofy.isFreeToReplace( sum.child( 0 ) ) ).to.equal( true )
+        expect( xto2.isFreeToReplace( sum.child( 0 ) ) ).to.equal( true )
+        expect( Exxeqy.isFreeToReplace( sum.child( 0 ) ) ).to.equal( true )
+        expect( gofx.isFreeToReplace( sum.child( 1 ) ) ).to.equal( true )
+        expect( hofs.isFreeToReplace( sum.child( 1 ) ) ).to.equal( true )
+        expect( Pofy.isFreeToReplace( sum.child( 1 ) ) ).to.equal( true )
+        expect( xto2.isFreeToReplace( sum.child( 1 ) ) ).to.equal( true )
+        expect( Exxeqy.isFreeToReplace( sum.child( 1 ) ) ).to.equal( true )
+        expect( gofx.isFreeToReplace( sum.child( 1, 1 ) ) ).to.equal( true )
+        expect( hofs.isFreeToReplace( sum.child( 1, 1 ) ) ).to.equal( false )
+        expect( Pofy.isFreeToReplace( sum.child( 1, 1 ) ) ).to.equal( true )
+        expect( xto2.isFreeToReplace( sum.child( 1, 1 ) ) ).to.equal( true )
+        expect( Exxeqy.isFreeToReplace( sum.child( 1, 1 ) ) ).to.equal( true )
         // so if we ask it to replace all free occurrences of s, we will get a
         // completely transformed expression, as long as the replacement has no
         // free s in it; in that case, we get no change
         let test
         test = sum.copy()
         test.replaceFree( new LurchSymbol( 's' ), gofx )
-        const temp = makeTree( [ 'bind', '∑', 'TEMP', [ 'f', [ 'g', 'x' ] ] ] )
-        temp.child( 1 ).replaceWith( makeTree( [ 'g', 'x' ] ) )
+        const temp = sum.copy()
+        temp.child( 1, 0 ).replaceWith( gofx.copy() )
+        temp.child( 1, 1, 1 ).replaceWith( gofx.copy() )
         expect( test.equals( temp ) ).to.equal( true )
         test = sum.copy()
         test.replaceFree( new LurchSymbol( 's' ), hofs )
@@ -2266,10 +2263,10 @@ describe( 'Bound and free variables', () => {
         test = sum.copy()
         test.replaceFree( new LurchSymbol( 's' ), Exxeqy )
         let compare = makeTree(
-            [ 'bind', '∑', 'TEMP',
-                [ 'f', [ 'bind', '∃', 'x', [ '=', 'x', 'y' ] ] ] ] )
-        compare.child( 1 ).replaceWith(
-            makeTree( [ 'bind', '∃', 'x', [ '=', 'x', 'y' ] ] ) )
+            [ '∑', [ 'bind', 'TEMP',
+                [ 'f', [ '∃', [ 'bind', 'x', [ '=', 'x', 'y' ] ] ] ] ] ] )
+        compare.child( 1, 0 ).replaceWith( makeTree(
+            [ '∃', [ 'bind', 'x', [ '=', 'x', 'y' ] ] ] ) )
         expect( test.equals( compare ) ).to.equal( true )
         // in the predicate logic expression, the first x can be replaced by
         // anything, but the second x can be replaced only by things with no
@@ -2280,7 +2277,7 @@ describe( 'Bound and free variables', () => {
         expect( Pofy.isFreeToReplace( pl1x1 ) ).to.equal( true )
         expect( xto2.isFreeToReplace( pl1x1 ) ).to.equal( true )
         expect( Exxeqy.isFreeToReplace( pl1x1 ) ).to.equal( true )
-        const pl1x2 = predicateLogic.index( [ 2, 2, 1 ] )
+        const pl1x2 = predicateLogic.index( [ 2, 1, 0 ] )
         expect( gofx.isFreeToReplace( pl1x2 ) ).to.equal( false )
         expect( hofs.isFreeToReplace( pl1x2 ) ).to.equal( true )
         expect( Pofy.isFreeToReplace( pl1x2 ) ).to.equal( true )
@@ -2293,7 +2290,7 @@ describe( 'Bound and free variables', () => {
         expect( Pofy.isFreeToReplace( pl1Pofx1 ) ).to.equal( true )
         expect( xto2.isFreeToReplace( pl1Pofx1 ) ).to.equal( true )
         expect( Exxeqy.isFreeToReplace( pl1Pofx1 ) ).to.equal( true )
-        const pl1Pofx2 = predicateLogic.index( [ 2, 2 ] )
+        const pl1Pofx2 = predicateLogic.index( [ 2, 1, 1 ] )
         expect( gofx.isFreeToReplace( pl1Pofx2 ) ).to.equal( false )
         expect( hofs.isFreeToReplace( pl1Pofx2 ) ).to.equal( true )
         expect( Pofy.isFreeToReplace( pl1Pofx2 ) ).to.equal( true )
@@ -2304,31 +2301,34 @@ describe( 'Bound and free variables', () => {
         test = predicateLogic.copy()
         test.replaceFree( new LurchSymbol( 'x' ), gofx )
         compare = makeTree(
-            [ 'and', [ 'P', [ 'g', 'x' ] ], [ 'bind', '∀', 'x', [ 'P', 'x' ] ] ]
+            [ 'and', [ 'P', [ 'g', 'x' ] ],
+                     [ '∀', [ 'bind', 'x', [ 'P', 'x' ] ] ] ]
         )
         expect( test.equals( compare ) ).to.equal( true )
         test = predicateLogic.copy()
         test.replaceFree( new LurchSymbol( 'x' ), hofs )
         compare = makeTree(
             [ 'and', [ 'P', [ 'h', 's' ] ],
-                     [ 'bind', '∀', 'TEMP', [ 'P', [ 'h', 's' ] ] ] ]
+                     [ '∀', [ 'bind', 'TEMP', [ 'P', [ 'h', 's' ] ] ] ] ]
         )
-        compare.index( [ 2, 1 ] ).replaceWith( makeTree( [ 'h', 's' ] ) )
+        compare.child( 2, 1, 0 ).replaceWith( makeTree( [ 'h', 's' ] ) )
         expect( test.equals( compare ) ).to.equal( true )
         test = predicateLogic.copy()
         test.replaceFree( new LurchSymbol( 'x' ), Exxeqy )
         compare = makeTree( [
             'and',
-            [ 'P', [ 'bind', '∃', 'x', [ '=', 'x', 'y' ] ] ],
+            [ 'P', [ '∃', [ 'bind', 'x', [ '=', 'x', 'y' ] ] ] ],
             [
-                'bind',
                 '∀',
-                'TEMP',
-                [ 'P', [ 'bind', '∃', 'x', [ '=', 'x', 'y' ] ] ]
+                [
+                    'bind',
+                    'TEMP',
+                    [ 'P', [ '∃', [ 'bind', 'x', [ '=', 'x', 'y' ] ] ] ]
+                ]
             ]
         ] )
-        compare.index( [ 2, 1 ] ).replaceWith( makeTree(
-            [ 'bind', '∃', 'x', [ '=', 'x', 'y' ] ] ) )
+        compare.child( 2, 1, 0 ).replaceWith( makeTree(
+            [ '∃', [ 'bind', 'x', [ '=', 'x', 'y' ] ] ] ) )
         expect( test.equals( compare ) ).to.equal( true )
         // if we relativize where it should look for "freeness," then even
         // replacements containing x free can be used, depending on the value of
@@ -2337,17 +2337,18 @@ describe( 'Bound and free variables', () => {
         test = predicateLogic.copy()
         test.replaceFree( new LurchSymbol( 'x' ), gofx, test.child( 2 ) )
         compare = makeTree(
-            [ 'and', [ 'P', [ 'g', 'x' ] ], [ 'bind', '∀', 'x', [ 'P', 'x' ] ] ]
+            [ 'and', [ 'P', [ 'g', 'x' ] ],
+                     [ '∀', [ 'bind', 'x', [ 'P', 'x' ] ] ] ]
         )
         expect( test.equals( compare ) ).to.equal( true )
         // Next, try with inThis == the quantifier body, which should mean that
         // only the first child of the quantifier is considered bound, so two
         // replacements should happen instead of just one:
         test = predicateLogic.copy()
-        test.replaceFree( new LurchSymbol( 'x' ), gofx, test.index( [ 2, 2 ] ) )
+        test.replaceFree( new LurchSymbol( 'x' ), gofx, test.index( [ 2, 1, 1 ] ) )
         compare = makeTree(
             [ 'and', [ 'P', [ 'g', 'x' ] ],
-                     [ 'bind', '∀', 'x', [ 'P', [ 'g', 'x' ] ] ] ]
+                     [ '∀', [ 'bind', 'x', [ 'P', [ 'g', 'x' ] ] ] ] ]
         )
         expect( test.equals( compare ) ).to.equal( true )
     } )

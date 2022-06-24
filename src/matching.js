@@ -172,7 +172,8 @@ import {
 } from "./matching/capture-constraint.js"
 import {
     newEF, isAnEF, arityOfEF, applyEF, constantEF, projectionEF, applicationEF,
-    newEFA, isAnEFA, canBetaReduce, betaReduce, fullBetaReduce, alphaEquivalent
+    newEFA, isAnEFA, canBetaReduce, betaReduce, fullBetaReduce, alphaEquivalent,
+    bodyOfEF, parametersOfEF
 } from '../src/matching/expression-functions.js'
 import { Problem } from "./matching/problem.js"
 import { Solution } from "./matching/solution.js"
@@ -185,6 +186,7 @@ export default {
     Substitution,
     newEF, isAnEF, arityOfEF, applyEF, constantEF, projectionEF, applicationEF,
     newEFA, isAnEFA, canBetaReduce, betaReduce, fullBetaReduce, alphaEquivalent,
+    bodyOfEF, parametersOfEF,
     Problem, Solution,
     allInstantiations
 }

@@ -1,7 +1,7 @@
 
 import Matching from '../src/matching.js'
-import { Binding } from '../src/binding.js'
 import { Application } from '../src/application.js'
+import { BindingExpression } from '../src/binding-expression.js'
 import { Symbol as LurchSymbol } from '../src/symbol.js'
 import Database from '../src/database.js'
 
@@ -93,15 +93,19 @@ describe( 'Multiple pattern instantiations', () => {
                     const last = expectedSols[expectedSols.length-1]
                     expect( child.numChildren() % 2 == 0 ).equals( true,
                         `Expected solution of even length in ${key}: ${child}` )
-                    // The tests use the notation (@lambda x , y) for EFs,
+                    // The tests use the notation (@lambda (x , y)) for EFs,
                     // so we need to find each such expression and convert it into
                     // an actual EF.
                     const lambda = new LurchSymbol( '@lambda' )
-                    const isEFNotation = lc => ( lc instanceof Binding )
-                                            && lc.boundVariables().length == 1
-                                            && lc.head().equals( lambda )
+                    const isEFNotation = lc =>
+                        ( lc instanceof Application )
+                     && lc.numChildren() == 2
+                     && lc.firstChild().equals( lambda )
+                     && ( lc.lastChild() instanceof BindingExpression )
+                     && lc.lastChild().boundSymbols().length == 1
                     const convertToEF = lc => Matching.newEF(
-                        ...lc.boundVariables(), lc.body() )
+                        ...lc.lastChild().boundSymbols(),
+                        lc.lastChild().lastChild() )
                     child.descendantsSatisfying( isEFNotation )
                         .map( d => d.replaceWith( convertToEF( d ) ) )
                     // Now form the parts into a mapping

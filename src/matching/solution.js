@@ -1,12 +1,13 @@
 
 import { Application } from "../application.js"
-import { Binding } from "../binding.js"
+import { BindingExpression } from "../binding-expression.js"
 import { Symbol as LurchSymbol } from "../symbol.js"
 import { metavariable, metavariableNamesIn } from "./metavariables.js"
 import { Substitution } from "./substitution.js"
 import { Problem } from "./problem.js"
 import { CaptureConstraints } from "./capture-constraint.js"
-import { fullBetaReduce, alphaEquivalent, isAnEFA } from './expression-functions.js'
+import { fullBetaReduce, alphaEquivalent, isAnEFA, bodyOfEF, parametersOfEF }
+    from './expression-functions.js'
 
 /**
  * A Solution is a set of {@link Substitution Substitutions}, together with
@@ -57,8 +58,8 @@ export class Solution {
             this._metavariables = pats.map( metavariableNamesIn )
                 .reduce( ( A, B ) => new Set( [ ...A, ...B ] ), new Set() )
             this._bound = new Set( pats.map( pattern =>
-                pattern.descendantsSatisfying( d => d instanceof Binding )
-                       .map( b => b.boundVariables()
+                pattern.descendantsSatisfying( d => d.binds() )
+                       .map( b => b.boundSymbols()
                                    .filter( v => v.isA( metavariable ) )
                                    .map( mv => mv.text() ) )
             ).flat( 2 ) )
@@ -206,14 +207,14 @@ export class Solution {
             if ( expression instanceof Application ) {
                 const head = expression.firstChild()
                 if ( head instanceof LurchSymbol && head.text() == 'LDE binding' )
-                    return new Binding(
+                    return new BindingExpression(
                         ...expression.children().slice( 1 ).map( withBindings ) )
                 else
                     return new Application(
                         ...expression.children().map( withBindings ) )
             }
-            if ( expression instanceof Binding )
-                return new Binding(
+            if ( expression instanceof BindingExpression )
+                return new BindingExpression(
                     ...expression.children().map( withBindings ) )
             throw `Invalid expression in restoreBindings: ${expression.toPutdown()}`
         }
@@ -261,7 +262,7 @@ export class Solution {
             const ef = this.get( efa.child( 1 ) )
             if ( !ef ) continue
             // for each of its parameters...
-            const parameters = ef.boundVariables()
+            const parameters = parametersOfEF( ef )
             for ( let j = 0 ; j < parameters.length ; j++ ) {
                 // compute what we would plug in for that parameter
                 let argument = efa.child( 2 + j )
@@ -270,9 +271,10 @@ export class Solution {
                         argument = this._substitutions[metavar].appliedTo(
                             argument )
                 // is it actually free to replace the parameter, though?
-                const freeToReplace = ef.body().descendantsSatisfying(
-                    d => d.equals( parameters[j] ) && d.isFree( ef.body() )
-                ).every( d => argument.isFreeToReplace( d, ef.body() ) )
+                const body = bodyOfEF( ef )
+                const freeToReplace = body.descendantsSatisfying(
+                    d => d.equals( parameters[j] ) && d.isFree( body )
+                ).every( d => argument.isFreeToReplace( d, body ) )
                 // if not, we've found a capture example; return true
                 if ( !freeToReplace ) return true
             }

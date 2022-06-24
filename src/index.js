@@ -20,7 +20,7 @@ export { Environment } from './environment.js'
 export { Expression } from './expression.js'
 export { Symbol as LurchSymbol } from './symbol.js'
 export { Application } from './application.js'
-export { Binding } from './binding.js'
+export { BindingExpression } from './binding-expression.js'
 
 export { default as Database } from './database.js'
 export { default as Matching } from './matching.js'

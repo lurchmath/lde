@@ -28,7 +28,7 @@
  * {@link LogicConcept.fromPutdown putdown} notation so that we can express
  * them as {@link LogicConcept LogicConcepts}.  We define a constant in this
  * module to be `"LDE lambda"` so that we can express the $f$ from above as
- * `("LDE lambda" v_1 v_2 , (+ v_1 (cos (+ v_2 1))))`.
+ * `("LDE lambda" v_1 , v_2 , (+ v_1 (cos (+ v_2 1))))`.
  * That constant may change in later versions of the LDE, so clients should not
  * hard-code that name into their code, but instead use
  * {@link module:ExpressionFunctions.newEF newEF()} and
@@ -70,8 +70,8 @@
  */
 
 import { Symbol as LurchSymbol } from "../symbol.js"
-import { Binding } from "../binding.js"
 import { Application } from "../application.js"
+import { BindingExpression } from "../binding-expression.js"
 import { metavariable } from "./metavariables.js"
 import { NewSymbolStream } from "./new-symbol-stream.js"
 
@@ -88,20 +88,21 @@ const expressionFunction = new LurchSymbol( 'LDE lambda' )
  * For example, if `x` and `y` are {@link Symbol Symbol} instances with the
  * names "x" and "y" and `B` is an Application, such as `(+ x y)`, then
  * `newEF(x,y,B)` will be the {@link Expression Expression}
- * `("LDE lambda" x y , (+ x y))`.
+ * `("LDE lambda" (x y , (+ x y)))`.
  * 
  * @param  {...Expression} args a list of {@link Expression Expressions} to use
  *   in forming the expression function, which must begin with one or more
  *   {@link Symbol Symbol} instances followed by exactly one
  *   {@link Expression Expression} of any type, representing the arguments
  *   and the body of the function, respectively
- * @returns {Binding} an Expression Function encoded as described in the
+ * @returns {Application} an Expression Function encoded as described in the
  *   documentation at the top of this file
  * 
  * @see {@link module:ExpressionFunctions.isAnEF isAnEF()}
  */
 export const newEF = ( ...args ) =>
-    new Binding( expressionFunction.copy(), ...args )
+    new Application( expressionFunction.copy(),
+                     new BindingExpression( ...args ) )
 
 /**
  * Test whether the given {@link Expression Expression} encodes an Expression
@@ -114,8 +115,10 @@ export const newEF = ( ...args ) =>
  * 
  * @see {@link module:ExpressionFunctions.newEF newEF()}
  */
-export const isAnEF = expr =>
-    expr instanceof Binding && expr.head().equals( expressionFunction )
+export const isAnEF = expr => expr instanceof Application
+                           && expr.numChildren() == 2
+                           && expr.firstChild().equals( expressionFunction )
+                           && expr.lastChild().binds()
 
 /**
  * Compute the arity of a given expression function.  If `ef` is not an
@@ -129,11 +132,54 @@ export const isAnEF = expr =>
  * 
  * @see {@link module:ExpressionFunctions.isAnEF isAnEF()}
  * @see {@link module:ExpressionFunctions.applyEF applyEF()}
+ * @see {@link module:ExpressionFunctions.parametersOfEF parametersOfEF()}
  */
 export const arityOfEF = ef => {
     if ( !isAnEF( ef ) )
-        throw 'arityOfEF requires an expression function as first argument'
-    return ef.boundVariables().length
+        throw new Error( 'arityOfEF requires an expression function as first argument' )
+    return ef.lastChild().numChildren() - 1
+}
+
+/**
+ * Get the list of parameters for a given expression function.  If `ef` is not
+ * an expression function (as judged by
+ * {@link module:ExpressionFunctions.isAnEF isAnEF()}) then an error is thrown.
+ * Otherwise, an array of its parameters is returned, the exact descendants that
+ * are {@link Symbol Symbol} instances.
+ * 
+ * @param {Expression} ef the expression function whose parameters are to be
+ *   returned
+ * @returns {Symbol[]} the parameter list of `ef`
+ * 
+ * @see {@link module:ExpressionFunctions.isAnEF isAnEF()}
+ * @see {@link module:ExpressionFunctions.applyEF applyEF()}
+ * @see {@link module:ExpressionFunctions.arityOfEF arityOfEF()}
+ * @see {@link module:ExpressionFunctions.bodyOfEF bodyOfEF()}
+ */
+export const parametersOfEF = ef => {
+    if ( !isAnEF( ef ) )
+        throw new Error( 'parametersOfEF requires an expression function as first argument' )
+    return ef.lastChild().boundSymbols()
+}
+
+/**
+ * Get the body of a given expression function.  If `ef` is not an expression
+ * function (as judged by
+ * {@link module:ExpressionFunctions.isAnEF isAnEF()}) then an error is thrown.
+ * Otherwise, its function body returned, which is one of its descendants.
+ * 
+ * @param {Expression} ef the expression function whose body is to be returned
+ * @returns {Expression} the body of `ef`
+ * 
+ * @see {@link module:ExpressionFunctions.isAnEF isAnEF()}
+ * @see {@link module:ExpressionFunctions.applyEF applyEF()}
+ * @see {@link module:ExpressionFunctions.arityOfEF arityOfEF()}
+ * @see {@link module:ExpressionFunctions.parametersOfEF parametersOfEF()}
+ */
+ export const bodyOfEF = ef => {
+    if ( !isAnEF( ef ) )
+        throw new Error( 'bodyOfEF requires an expression function as first argument' )
+    return ef.lastChild().lastChild()
 }
 
 /**
@@ -173,19 +219,18 @@ export const applyEF = ( ef, ...args ) => {
     if ( args.length != arityOfEF( ef ) )
         throw 'Incorrect number of arguments given to expression function'
     // if it's a projection function, replaceWith() won't work correctly
-    const parameters = ef.boundVariables().map( bv => bv.text() )
-    if ( ef.body() instanceof LurchSymbol ) {
-        const paramIndex = parameters.indexOf( ef.body().text() )
-        if ( paramIndex > -1 ) return args[paramIndex].copy()
+    const parameters = ef.lastChild().boundSymbolNames()
+    const lookup = symbol => {
+        const paramIndex = parameters.indexOf( symbol.text() )
+        return paramIndex > -1 ? args[paramIndex].copy() : symbol.copy()
     }
+    const body = bodyOfEF( ef )
+    if ( body instanceof LurchSymbol ) return lookup( body )
     // otherwise we actually have to do replacement within a copy of the body
-    const result = ef.body().copy()
+    const result = body.copy()
     result.descendantsSatisfying(
         d => ( d instanceof LurchSymbol ) && d.isFree( result )
-    ).forEach( sym => {
-        const paramIndex = parameters.indexOf( sym.text() )
-        if ( paramIndex > -1 ) sym.replaceWith( args[paramIndex].copy() )
-    } )
+    ).forEach( sym => sym.replaceWith( lookup( sym ) ) )
     return result
 }
 
@@ -326,8 +371,7 @@ const expressionFunctionApplication = new LurchSymbol( 'LDE EFA' )
 export const newEFA = ( operator, ...operands ) => {
     if ( operator.isA( metavariable ) && operands.length == 0 )
         throw 'Expression Function Applications require at least one argument'
-    if ( isAnEF( operator )
-      && operands.length != operator.boundVariables().length )
+    if ( isAnEF( operator ) && operands.length != arityOfEF( operator ) )
         throw 'Expression Function applied to the wrong number of arguments'
     return new Application( expressionFunctionApplication.copy(),
         operator, ...operands )
@@ -455,28 +499,32 @@ export const fullBetaReduce = expr => {
 }
 
 /**
- * Perform $\alpha$-renaming on a {@link Binding Binding}, producing a new
- * {@link Binding Binding} that is
+ * Perform $\alpha$-renaming on a {@link MathConcept#binds binding}, producing a
+ * new {@link MathConcept MathConcept} that is
  * {@link module:ExpressionFunctions.alphaEquivalent $\alpha$-equivalent} to
  * the original, but with different names for the bound variables.
  * 
- * @param {Binding} binding the expression in which to do the work
- * @param {Symbol[]} newBoundVars the list of new variables to use, which must
- *   have the same length as `binding.boundVariables()`, and which will be
- *   used to replace those bound variables in the order given (that is, the
- *   first of `newBoundVars` replaces the first of `binding.boundVariables()`,
- *   and so on)
- * @returns {Binding} a copy of the original `binding`, but with the
+ * If you pass an argument to the `binding` parameter that does not pass the
+ * {@link MathConcept#binds binds()} test, the result of this function is
+ * undefined.
+ * 
+ * @param {MathConcept} binding the MathConcept in which to do the work
+ * @param {Symbol[]} newBoundSyms the list of new variables to use, which must
+ *   have the same length as {@link MathConcept#boundSymbols
+ *   `binding.boundSymbols()`}, and which will be used to replace those bound
+ *   symbols in the order given (that is, the first of `newBoundSyms` replaces
+ *   the first of `binding.boundSymbols()`, and so on)
+ * @returns {MathConcept} a copy of the original `binding`, but with the
  *   $\alpha$-renaming having been performed; the original `binding` is
  *   unchanged
  */
-export const alphaRenamed = ( binding, newBoundVars ) => {
-    const result = new Binding( binding.head().copy(),
-                                ...newBoundVars.map( bv => bv.copy() ),
-                                binding.body().copy() )
-    const body = result.body()
-    binding.boundVariables().forEach( ( oldBoundVar, index ) =>
-        body.replaceFree( oldBoundVar, newBoundVars[index], body ) )
+export const alphaRenamed = ( binding, newBoundSyms ) => {
+    const result = binding.copy()
+    const body = result.lastChild()
+    result.boundSymbols().forEach( ( oldBoundVar, index ) => {
+        body.replaceFree( oldBoundVar, newBoundSyms[index], body )
+        oldBoundVar.replaceWith( newBoundSyms[index] )
+    } )
     return result
 }
 
@@ -492,27 +540,23 @@ export const alphaRenamed = ( binding, newBoundVars ) => {
  */
 export const alphaEquivalent = ( expr1, expr2, stream ) => {
     if ( !stream ) stream = new NewSymbolStream( expr1, expr2 )
-    // base cases:
-    if ( expr1.numChildren() != expr2.numChildren() ) return false
+    // atomic case:
     if ( expr1.isAtomic() ) return expr1.equals( expr2 )
-    // recursive case 1: children of an application
-    if ( expr1 instanceof Application ) {
-        if ( !( expr2 instanceof Application ) ) return false
+    // easy cases:
+    if ( expr1.numChildren() != expr2.numChildren() ) return false
+    if ( expr1.binds() != expr2.binds() ) return false
+    // compound case 1: no symbols bound
+    if ( !expr1.binds() ) {
         for ( let i = 0 ; i < expr1.numChildren() ; i++ )
             if ( !alphaEquivalent( expr1.child( i ), expr2.child( i ),
-                stream ) ) return false
+                                   stream ) ) return false
         return true
     }
-    // recursive case 2: body of a binding, but only after renaming all
+    // compound case 2: recur on body, but only after renaming all
     // bound variables to standardize the two bodies
-    if ( expr1 instanceof Binding ) {
-        if ( !( expr2 instanceof Binding )
-          || !alphaEquivalent( expr1.head(), expr2.head(), stream ) )
-            return false
-        const newBoundVars = stream.nextN( expr1.boundVariables().length )
-                                   .map( v => new LurchSymbol( v ) )
-        return alphaEquivalent( alphaRenamed( expr1, newBoundVars ).body(),
-                                alphaRenamed( expr2, newBoundVars ).body(),
-                                stream )
-    }
+    const newBoundVars = stream.nextN( expr1.boundSymbols().length )
+                               .map( v => new LurchSymbol( v ) )
+    return alphaEquivalent( alphaRenamed( expr1, newBoundVars ).lastChild(),
+                            alphaRenamed( expr2, newBoundVars ).lastChild(),
+                            stream )
 }

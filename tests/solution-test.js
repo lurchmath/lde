@@ -41,8 +41,8 @@ describe( 'Solution', () => {
     it( 'Should correctly construct Solutions from Problems', () => {
         // Construct a problem containing two Constraints
         const pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
-        pat1.child( 1 ).makeIntoA( M.metavariable ) // outer x
-        pat1.index( [ 2, 2, 1, 1 ] ).makeIntoA( M.metavariable ) // inner x
+        pat1.child( 1, 0 ).makeIntoA( M.metavariable ) // outer x
+        pat1.child( 1, 1, 1, 1, 1, 1 ).makeIntoA( M.metavariable ) // inner x
         const pat2 = new LurchSymbol( 'foo' ).asA( M.metavariable )
         const C1 = new M.Constraint(
             pat1,
@@ -55,6 +55,7 @@ describe( 'Solution', () => {
         const P = new M.Problem( C1, C2 )
         // Create a solution for this problem and ensure that it worked
         let S
+        try { S = new M.Solution( P ) } catch ( e ) { console.log( e ) }
         expect( () => S = new M.Solution( P ) ).not.to.throw()
         expect( S._problem ).to.equal( P )
         expect( JSON.equals( S._substitutions, {} ) ).to.equal( true )
@@ -126,8 +127,8 @@ describe( 'Solution', () => {
         // Construct a problem containing the same two Constraints as in the
         // previous test, and then a solution from it, as before.
         const pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
-        pat1.child( 1 ).makeIntoA( M.metavariable ) // outer x
-        pat1.index( [ 2, 2, 1, 1 ] ).makeIntoA( M.metavariable ) // inner x
+        pat1.child( 1, 0 ).makeIntoA( M.metavariable ) // outer x
+        pat1.child( 1, 1, 1, 1, 1, 1 ).makeIntoA( M.metavariable ) // inner x
         const pat2 = new LurchSymbol( 'foo' ).asA( M.metavariable )
         const C1 = new M.Constraint(
             pat1,
@@ -279,8 +280,8 @@ describe( 'Solution', () => {
         // Construct a problem containing the same two Constraints as in the
         // previous test, and then a solution from it, as before.
         const pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
-        pat1.child( 1 ).makeIntoA( M.metavariable ) // outer x
-        pat1.index( [ 2, 2, 1, 1 ] ).makeIntoA( M.metavariable ) // inner x
+        pat1.child( 1, 0 ).makeIntoA( M.metavariable ) // outer x
+        pat1.child( 1, 1, 1, 1, 1, 1 ).makeIntoA( M.metavariable ) // inner x
         const pat2 = new LurchSymbol( 'foo' ).asA( M.metavariable )
         const C1 = new M.Constraint(
             pat1,
@@ -334,8 +335,8 @@ describe( 'Solution', () => {
         // Construct a problem containing the same two Constraints as in the
         // previous test, and then a solution from it, as before.
         const pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
-        pat1.child( 1 ).makeIntoA( M.metavariable ) // outer x
-        pat1.index( [ 2, 2, 1, 1 ] ).makeIntoA( M.metavariable ) // inner x
+        pat1.child( 1, 0 ).makeIntoA( M.metavariable ) // outer x
+        pat1.child( 1, 1, 1, 1, 1, 1 ).makeIntoA( M.metavariable ) // inner x
         const pat2 = new LurchSymbol( 'foo' ).asA( M.metavariable )
         const C1 = new M.Constraint(
             pat1,
@@ -533,8 +534,8 @@ describe( 'Solution', () => {
         // Construct a problem containing the same two Constraints as in
         // earlier tests, and then a solution from it, as before.
         const pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
-        pat1.child( 1 ).makeIntoA( M.metavariable ) // outer x
-        pat1.index( [ 2, 2, 1, 1 ] ).makeIntoA( M.metavariable ) // inner x
+        pat1.child( 1, 0 ).makeIntoA( M.metavariable ) // outer x
+        pat1.child( 1, 1, 1, 1, 1, 1 ).makeIntoA( M.metavariable ) // inner x
         const pat2 = new LurchSymbol( 'foo' ).asA( M.metavariable )
         const C1 = new M.Constraint(
             pat1,
