@@ -565,9 +565,21 @@ export class LogicConcept extends MathConcept {
      * produces an object that {@link MathConcept#equals equals()} the
      * original.
      * 
+     * @param {Function} [formatter] - an optional function that takes three
+     *   arguments and returns the desired corresponding text output for them.
+     *   This can be used to greatly customize the output of this function.  By
+     *   default, the formatter used produces standard putdown.  If you use a
+     *   different formatter, you can customize your putdown with colors, HTML
+     *   tags, etc., as needed.  The three arguments are (1) the LC whose
+     *   putdown is being computed, (2) the putdown string computed for it so
+     *   far, with no attributes attached, and (3) the array of keys of
+     *   attributes that should be included in the output.  The formatter
+     *   function is responsible for creating the corresponding JSON for these
+     *   attributes.
+     * 
      * @returns {String} putdown notation for this LogicConcept instance
      */
-    toPutdown () {
+    toPutdown ( formatter ) {
         // Although normally it would make sense to use the dynamic dispatch
         // built into the JavaScript language to accompish this task, we will
         // reinvent the wheel a little bit here just in order to keep this
@@ -583,20 +595,26 @@ export class LogicConcept extends MathConcept {
                      && ( !this.parent()
                        || this.parent() instanceof Environment )
                      && this.isA( 'given' ) ) ? ':' : ''
+        if ( !formatter ) formatter = ( lc, putdown, keys ) => {
+            const attrText = key => '+{' + JSON.stringify(key) + ':'
+                + JSON.stringify(lc.getAttribute(key)) + '}\n'
+            if ( keys.length == 0 )
+                return putdown
+            else if ( keys.length == 1 )
+                return putdown + ' ' + attrText( keys[0] )
+            else
+                return putdown + '\n    '
+                     + keys.map( attrText ).join( '    ' )
+        }
         const finalize = ( text, skip = [ ] ) => {
-            let attributes = [ ]
+            let keys = [ ]
             skip.push( '_type_given' ) // bad style, but concise
             for ( let key of this.getAttributeKeys() )
                 if ( !skip.includes( key ) )
-                    attributes.push( '+{' + JSON.stringify( key ) + ':'
-                        + JSON.stringify( this.getAttribute( key ) ) + '}' )
-            if ( attributes.length == 0 )
-                attributes = ''
-            else if ( attributes.length == 1 )
-                attributes = ` ${attributes[0]}\n`
-            else
-                attributes = `\n    ${attributes.join('\n    ')}\n`
-            return given + text.replace( /\n\s*\n/g, '\n' ) + attributes
+                    keys.push( key )
+            return formatter( this,
+                              given + text.replace( /\n\s*\n/g, '\n' ),
+                              keys )
         }
         switch ( this.constructor.className ) {
             case 'Symbol':
