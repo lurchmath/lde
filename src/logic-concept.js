@@ -311,22 +311,21 @@ export class LogicConcept extends MathConcept {
             for ( let i = group.contents.length - 1 ; i >= 0 ; i-- ) {
                 if ( exactMatch( bindingRE, group.contents[i] ) ) {
                     const lhs = group.contents[i-1]
+                    const rhs = group.contents[i+1]
                     // unary case: symbol , body
                     if ( isSymbol( lhs ) ) {
-                        group.contents.splice( i-1, i+1, {
-                            type : group.type,
-                            contents : [ group.contents[i-1],
-                                         group.contents[i+1] ],
+                        group.contents.splice( i-1, 3, {
+                            type : rhs.type ? rhs.type : '( )',
+                            contents : [ lhs, rhs ],
                             isBinding : true
                         } )
                     // n-ary case: ( symbols... ) , body
                     } else if ( lhs.type == '( )'
                              && lhs.hasOwnProperty( 'contents' )
                              && lhs.contents.every( isSymbol ) ) {
-                        group.contents.splice( i-1, i+1, {
-                            type : group.type,
-                            contents : [ ...lhs.contents,
-                                         group.contents[i+1] ],
+                        group.contents.splice( i-1, 3, {
+                            type : rhs.type ? rhs.type : '( )',
+                            contents : [ ...lhs.contents, rhs ],
                             isBinding : true
                         } )
                     // error case: you can't do anything else , body
