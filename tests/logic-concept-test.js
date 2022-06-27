@@ -395,6 +395,41 @@ describe( 'Reading putdown notation', () => {
                 new LurchSymbol( '∃' ),
                 new BindingExpression(
                     new LurchSymbol( 'alpha' ),
+                    new BindingExpression(
+                        new LurchSymbol( 'beta' ),
+                        new BindingExpression(
+                            new LurchSymbol( 'gamma' ),
+                            new Application(
+                                new LurchSymbol( '=' ),
+                                new Application(
+                                    new LurchSymbol( '+' ),
+                                    new LurchSymbol( 'alpha' ),
+                                    new LurchSymbol( 'beta' )
+                                ),
+                                new Application(
+                                    new LurchSymbol( '*' ),
+                                    new LurchSymbol( '2' ),
+                                    new LurchSymbol( 'gamma' )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        ) ).to.equal( true )
+        // ----------
+        test = LogicConcept.fromPutdown( `
+            (∃ ( alpha beta gamma ) ,
+                (= (+ alpha beta)
+                   (* 2 gamma) ) )
+        ` )
+        expect( test ).to.be.instanceof( Array )
+        expect( test.length ).to.equal( 1 )
+        expect( test[0].equals(
+            new Application(
+                new LurchSymbol( '∃' ),
+                new BindingExpression(
+                    new LurchSymbol( 'alpha' ),
                     new LurchSymbol( 'beta' ),
                     new LurchSymbol( 'gamma' ),
                     new Application(
@@ -904,7 +939,7 @@ describe( 'Writing putdown notation', () => {
             )
         )
         expect( test.toPutdown() ).to.equal( '(∀ x , P)' )
-        // nested one
+        // nested one with operators and applications
         test = new Application(
             new LurchSymbol( '∀' ),
             new BindingExpression(
@@ -920,6 +955,30 @@ describe( 'Writing putdown notation', () => {
         )
         expect( test.toPutdown() ).to.equal(
             '(∀ x , (∃ y , "Some relationship of x and y"))' )
+        // nested one with no operators or applications
+        test = new Application(
+            new LurchSymbol( '∀' ),
+            new BindingExpression(
+                new LurchSymbol( 'x' ),
+                new BindingExpression(
+                    new LurchSymbol( 'y' ),
+                    new LurchSymbol( 'Some relationship of x and y' )
+                )
+            )
+        )
+        expect( test.toPutdown() ).to.equal(
+            '(∀ x , y , "Some relationship of x and y")' )
+        // multi-arg binding so the LHS will be grouped
+        test = new Application(
+            new LurchSymbol( '∀' ),
+            new BindingExpression(
+                new LurchSymbol( 'x' ),
+                new LurchSymbol( 'y' ),
+                new LurchSymbol( 'Some relationship of x and y' )
+            )
+        )
+        expect( test.toPutdown() ).to.equal(
+            '(∀ (x y) , "Some relationship of x and y")' )
     } )
 
     it( 'Should correctly represent combined Applications & Bindings', () => {
@@ -968,7 +1027,7 @@ describe( 'Writing putdown notation', () => {
             )
         )
         expect( test.toPutdown() ).to.equal(
-            '(or (∀ x , (P x)) (∀ t , u , v , (K t u v)))' )
+            '(or (∀ x , (P x)) (∀ (t u v) , (K t u v)))' )
     } )
 
     it( 'Should correctly represent Declarations without bodies', () => {

@@ -263,8 +263,7 @@ export class LogicConcept extends MathConcept {
             string = string.substring( match[0].length )
         }
         // parsing data
-        const groupers =
-            [ [ '{', '}' ], [ '(', ')' ], [ '[', ']' ] ]
+        const groupers = [ [ '{', '}' ], [ '(', ')' ], [ '[', ']' ] ]
         const openGroupRE = /^\{\*|^\{|^\(|^\[/
         const closeGroupRE = /^\*\}|^\}|^\)|^\]/
         const stringRE = /^"(?:[^"\\\n]|\\"|\\\\)*"|^'(?:[^'\\\n]|\\'|\\\\)*'/
@@ -303,37 +302,37 @@ export class LogicConcept extends MathConcept {
             // groups may not begin or end with commas
             if ( exactMatch( bindingRE, group.contents[0] ) )
                 problem( 'Group begins with a comma' )
-            let i = group.contents.length - 1
             if ( exactMatch( bindingRE, group.contents.last() ) )
                 problem( 'Group ends with a comma' )
-            // this routine ensures that bound things are symbols
-            const checkSymbol = text => {
-                if ( !exactMatch( stringRE, text )
-                  && !exactMatch( symbolRE, text ) )
-                    problem( 'Attempt to bind non-symbol: ' + text )
-            }
-            // process all "v1 , ... vn , body" segments inside this group
-            while ( i > 0 ) {
+            // utility function
+            const isSymbol = x => typeof( x ) == 'string' &&
+                ( exactMatch( stringRE, x ) || exactMatch( symbolRE, x ) )
+            // process all "sym , body" segments inside this group
+            for ( let i = group.contents.length - 1 ; i >= 0 ; i-- ) {
                 if ( exactMatch( bindingRE, group.contents[i] ) ) {
-                    checkSymbol( group.contents[i-1] )
-                    let innerContents = [ group.contents[i-1],
-                                          group.contents[i+1] ]
-                    let firstComma = i
-                    while ( firstComma > 2
-                         && exactMatch( bindingRE,
-                                        group.contents[firstComma-2] ) ) {
-                        firstComma -= 2
-                        checkSymbol( group.contents[firstComma-1] )
-                        innerContents.unshift( group.contents[firstComma-1] )
+                    const lhs = group.contents[i-1]
+                    // unary case: symbol , body
+                    if ( isSymbol( lhs ) ) {
+                        group.contents.splice( i-1, i+1, {
+                            type : group.type,
+                            contents : [ group.contents[i-1],
+                                         group.contents[i+1] ],
+                            isBinding : true
+                        } )
+                    // n-ary case: ( symbols... ) , body
+                    } else if ( lhs.type == '( )'
+                             && lhs.hasOwnProperty( 'contents' )
+                             && lhs.contents.every( isSymbol ) ) {
+                        group.contents.splice( i-1, i+1, {
+                            type : group.type,
+                            contents : [ ...lhs.contents,
+                                         group.contents[i+1] ],
+                            isBinding : true
+                        } )
+                    // error case: you can't do anything else , body
+                    } else {
+                        problem( 'Invalid left hand side of binding' )
                     }
-                    group.contents.splice( firstComma-1, i+1, {
-                        type : group.type,
-                        contents : innerContents,
-                        isBinding : true
-                    } )
-                    i = firstComma - 1
-                } else {
-                    i--
                 }
             }
         }
@@ -613,7 +612,10 @@ export class LogicConcept extends MathConcept {
             case 'Application':
                 return finalize( `(${childResults.join( ' ' )})` )
             case 'BindingExpression':
-                return finalize( childResults.join( ' , ' ) )
+                const last = childResults.pop()
+                const first = childResults.length > 1 ?
+                    '(' + childResults.join( ' ' ) + ')' : childResults[0]
+                return finalize( first + ' , ' + last )
             case 'Declaration':
                 if ( this.body() ) {
                     const body = childResults.pop()
