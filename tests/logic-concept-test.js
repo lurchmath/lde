@@ -767,6 +767,9 @@ describe( 'Reading putdown notation', () => {
         expect( () => {
             LogicConcept.fromPutdown( '( +{"one":2}\nx )' )
         } ).to.throw( /^Attribute JSON has no target to modify/ )
+        expect( () => {
+            LogicConcept.fromPutdown( '( x , +{"one":2}\ny )' )
+        } ).to.throw( /^Attribute JSON has no target to modify/ )
         // you must match your groupers
         expect( () => {
             LogicConcept.fromPutdown( '( ]' )
