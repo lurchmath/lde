@@ -469,6 +469,56 @@ describe( 'Reading putdown notation', () => {
         ) ).to.equal( true )
     } )
 
+    it( 'Should support bindings with attributes after', () => {
+        let test
+        // ---------- attribute applied to a binding
+        test = LogicConcept.fromPutdown( 'x , (P x) +{ "color": "green" }' )
+        expect( test ).to.be.instanceof( Array )
+        expect( test.length ).to.equal( 1 )
+        expect( test[0].equals(
+            new BindingExpression(
+                new LurchSymbol( 'x' ),
+                new Application(
+                    new LurchSymbol( 'P' ),
+                    new LurchSymbol( 'x' )
+                )
+            ).attr( { color : 'green' } )
+        ) ).to.equal( true )
+        // ---------- same thing inside something larger
+        test = LogicConcept.fromPutdown(
+            '{'
+          + '  (∀ x , (P x) +{ "color": "green" }\n)'
+          + '  (∃ x , (Q x)) +{ "color": "blue" }\n'
+          + '}'
+        )
+        expect( test ).to.be.instanceof( Array )
+        expect( test.length ).to.equal( 1 )
+        expect( test[0].equals(
+            new Environment(
+                new Application(
+                    new LurchSymbol( '∀' ),
+                    new BindingExpression(
+                        new LurchSymbol( 'x' ),
+                        new Application(
+                            new LurchSymbol( 'P' ),
+                            new LurchSymbol( 'x' )
+                        )
+                    ).attr( { color : 'green' } )
+                ),
+                new Application(
+                    new LurchSymbol( '∃' ),
+                    new BindingExpression(
+                        new LurchSymbol( 'x' ),
+                        new Application(
+                            new LurchSymbol( 'Q' ),
+                            new LurchSymbol( 'x' )
+                        )
+                    )
+                ).attr( { color : 'blue' } )
+            )
+        ) ).to.equal( true )
+    } )
+
     it( 'Should support declarations without bodies', () => {
         let test
         // ---------- two declarations
@@ -1267,6 +1317,33 @@ describe( 'Writing putdown notation', () => {
           + ' b +{"_type_metavariable":true}\n'
           + ' , body +{"_type_something":true}\n'
           + ']'
+        )
+        // binding with attribute on the binding itself (not its wrapper)
+        test = new BindingExpression(
+            new LurchSymbol( 'A' ),
+            new Application(
+                new LurchSymbol( 'subscript' ),
+                new LurchSymbol( 'A' ),
+                new LurchSymbol( 'i' )
+            )
+        ).attr( { style : 'fancy' } )
+        expect( test.toPutdown() ).to.equal(
+            'A , (subscript A i) +{"style":"fancy"}\n'
+        )
+        // binding with attribute on the wrapper around the binding
+        test = new Application(
+            new LurchSymbol( '⋃' ),
+            new BindingExpression(
+                new LurchSymbol( 'A' ),
+                new Application(
+                    new LurchSymbol( 'subscript' ),
+                    new LurchSymbol( 'A' ),
+                    new LurchSymbol( 'i' )
+                )
+            )
+        ).attr( { style : 'fancy' } )
+        expect( test.toPutdown() ).to.equal(
+            '(⋃ A , (subscript A i)) +{"style":"fancy"}\n'
         )
         // we could do other tests here but this is a pretty good start
     } )
