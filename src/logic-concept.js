@@ -383,24 +383,24 @@ export class LogicConcept extends MathConcept {
                     // 1. cannot mark a declaration as given
                     if ( isLast( givenRE ) )
                         problem( 'Cannot mark a declaration as given' )
-                    // 1. not enough children
+                    // 2. not enough children
                     if ( group.contents.length == 0 )
                         problem( 'Empty declarations are not permitted' )
-                    // 2. More than one comma is invalid syntax
+                    // 3. More than one comma is invalid syntax
                     const numCommas = group.contents.filter( x =>
                         exactMatch( bindingRE, x ) ).length
                     if ( numCommas > 1 )
                         problem( 'A declaration can have at most one comma' )
-                    // 3. If 2nd-to-last item (but not item #0) is a comma,
+                    // 4. If 2nd-to-last item (but not item #0) is a comma,
                     //    declaration has a body
                     if ( n >= 3
                       && exactMatch( bindingRE, group.contents[n-2] ) ) {
                         group.hasBody = true
                         group.contents = group.contents.without( n-2 )
-                    // 4. If some other item is a comma, it's misplaced.
+                    // 5. If some other item is a comma, it's misplaced.
                     } else if ( numCommas > 0 ) {
                         problem( 'Misplaced comma inside declaration' )
-                    // 5. No item is a comma, so it's a no-body binding.
+                    // 6. No item is a comma, so it's a no-body binding.
                     } else {
                         group.hasBody = false
                     }
