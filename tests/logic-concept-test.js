@@ -861,10 +861,10 @@ describe( 'Reading putdown notation', () => {
         } ).to.throw( /^Expressions can contain only/ )
         // all other invalid ways to form a larger structure
         expect( () => {
-            LogicConcept.fromPutdown( '[(x y) const]' )
+            LogicConcept.fromPutdown( '[(x y) c]' )
         } ).to.throw( /^Not every entry.*was a Symbol/ )
         expect( () => {
-            LogicConcept.fromPutdown( '[{x y} const]' )
+            LogicConcept.fromPutdown( '[x {y c}]' )
         } ).to.throw( /^Not every entry.*was a Symbol/ )
         // declarations may not be marked with a given attribute
         expect( () => {
