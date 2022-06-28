@@ -533,9 +533,15 @@ export class LogicConcept extends MathConcept {
                 // into whatever compound object is appropriate by tree.type:
                 // Environments
                 if ( tree.type == '{ }' ) {
-                    const Environment =
-                        MathConcept.subclasses.get( 'Environment' )
-                    return new Environment( ...children )
+                    if ( tree.isBinding ) {
+                        const BindingEnvironment =
+                            MathConcept.subclasses.get( 'BindingEnvironment' )
+                        return new BindingEnvironment( ...children )
+                    } else {
+                        const Environment =
+                            MathConcept.subclasses.get( 'Environment' )
+                        return new Environment( ...children )
+                    }
                 // Expressions
                 } else if ( tree.type == '( )' ) {
                     if ( tree.isBinding ) {
@@ -642,6 +648,7 @@ export class LogicConcept extends MathConcept {
             case 'Application':
                 return finalize( `(${childResults.join( ' ' )})` )
             case 'BindingExpression':
+            case 'BindingEnvironment':
                 const last = childResults.pop()
                 const first = childResults.length > 1 ?
                     '(' + childResults.join( ' ' ) + ')' : childResults[0]

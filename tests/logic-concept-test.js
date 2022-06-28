@@ -8,6 +8,7 @@ import { Environment } from '../src/environment.js'
 import { Declaration } from '../src/declaration.js'
 import { Application } from '../src/application.js'
 import { BindingExpression } from '../src/binding-expression.js'
+import { BindingEnvironment } from '../src/binding-environment.js'
 import { Symbol as LurchSymbol } from '../src/symbol.js'
 
 // We need the makeSpy function for convenience testing of callbacks.
@@ -367,7 +368,7 @@ describe( 'Reading putdown notation', () => {
         expect( test[0].equals( discriminant ) ).to.equal( true )
     } )
 
-    it( 'Should support bindings (even nested ones)', () => {
+    it( 'Should support binding expressions (even nested ones)', () => {
         let test
         // ----------
         test = LogicConcept.fromPutdown( '(∀ x, P)' )
@@ -469,7 +470,7 @@ describe( 'Reading putdown notation', () => {
         ) ).to.equal( true )
     } )
 
-    it( 'Should support bindings with attributes after', () => {
+    it( 'Should support binding expressions with attributes after', () => {
         let test
         // ---------- attribute applied to a binding
         test = LogicConcept.fromPutdown( 'x , (P x) +{ "color": "green" }' )
@@ -516,6 +517,90 @@ describe( 'Reading putdown notation', () => {
                     )
                 ).attr( { color : 'blue' } )
             )
+        ) ).to.equal( true )
+    } )
+
+    it( 'Should support binding environments (even nested ones)', () => {
+        let test
+        // ----------
+        test = LogicConcept.fromPutdown( 'x,{}' )
+        expect( test ).to.be.instanceof( Array )
+        expect( test.length ).to.equal( 1 )
+        expect( test[0].equals(
+            new BindingEnvironment( new LurchSymbol( 'x' ), new Environment )
+        ) ).to.equal( true )
+        // ----------
+        test = LogicConcept.fromPutdown( `
+            alpha, beta, gamma,
+            { stuff about them }
+        ` )
+        expect( test ).to.be.instanceof( Array )
+        expect( test.length ).to.equal( 1 )
+        expect( test[0].equals(
+            new BindingEnvironment(
+                new LurchSymbol( 'alpha' ),
+                new BindingEnvironment(
+                    new LurchSymbol( 'beta' ),
+                    new BindingEnvironment(
+                        new LurchSymbol( 'gamma' ),
+                        new Environment(
+                            new LurchSymbol( 'stuff' ),
+                            new LurchSymbol( 'about' ),
+                            new LurchSymbol( 'them' )
+                        )
+                    )
+                )
+            )
+        ) ).to.equal( true )
+        // ----------
+        test = LogicConcept.fromPutdown( `
+            ( alpha beta gamma ) , { { more! , { } } }
+        ` )
+        expect( test ).to.be.instanceof( Array )
+        expect( test.length ).to.equal( 1 )
+        expect( test[0].equals(
+            new BindingEnvironment(
+                new LurchSymbol( 'alpha' ),
+                new LurchSymbol( 'beta' ),
+                new LurchSymbol( 'gamma' ),
+                new Environment(
+                    new Environment(
+                        new BindingEnvironment(
+                            new LurchSymbol( 'more!' ),
+                            new Environment
+                        )
+                    )
+                )
+            )
+        ) ).to.equal( true )
+        // ----------
+        test = LogicConcept.fromPutdown( 'a , { b , c }' )
+        expect( test ).to.be.instanceof( Array )
+        expect( test.length ).to.equal( 1 )
+        expect( test[0].equals(
+            new BindingEnvironment(
+                new LurchSymbol( 'a' ),
+                new Environment(
+                    new BindingExpression(
+                        new LurchSymbol( 'b' ),
+                        new LurchSymbol( 'c' )
+                    )
+                )
+            )
+        ) ).to.equal( true )
+    } )
+
+    it( 'Should support binding environments with attributes after', () => {
+        let test
+        // ---------- attribute applied to a binding
+        test = LogicConcept.fromPutdown( 'x , { y } +{ "color": "green" }' )
+        expect( test ).to.be.instanceof( Array )
+        expect( test.length ).to.equal( 1 )
+        expect( test[0].equals(
+            new BindingEnvironment(
+                new LurchSymbol( 'x' ),
+                new Environment( new LurchSymbol( 'y' ) )
+            ).attr( { color : 'green' } )
         ) ).to.equal( true )
     } )
 
