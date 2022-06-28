@@ -652,7 +652,7 @@ describe( 'Reading putdown notation', () => {
         ) ).to.equal( true )
     } )
 
-    it( 'Should support non-formula environments without givens', () => {
+    it( 'Should support environments without givens', () => {
         let test
         // ----------
         test = LogicConcept.fromPutdown( '{ A B C }' )
@@ -689,7 +689,7 @@ describe( 'Reading putdown notation', () => {
         ) ).to.equal( true )
     } )
 
-    it( 'Should support non-formula environments with givens', () => {
+    it( 'Should support environments with givens', () => {
         let test
         // ----------
         test = LogicConcept.fromPutdown( '{ A :B C }' )
