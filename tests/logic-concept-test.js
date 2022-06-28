@@ -869,6 +869,10 @@ describe( 'Reading putdown notation', () => {
         expect( () => {
             LogicConcept.fromPutdown( '( x , +{"one":2}\ny )' )
         } ).to.throw( /^Attribute JSON has no target to modify/ )
+        // you can't put +{...} after a bound variable list
+        expect( () => {
+            LogicConcept.fromPutdown( '(a b) +{"C":"D"}\n , e' )
+        } ).to.throw( /^Cannot modify a list of bound symbols/ )
         // you must match your groupers
         expect( () => {
             LogicConcept.fromPutdown( '( ]' )

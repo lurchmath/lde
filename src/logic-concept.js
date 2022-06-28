@@ -318,12 +318,18 @@ export class LogicConcept extends MathConcept {
                     let lhs = group.contents[j]
                     // unary case: symbol , body
                     // (just convert it to the n-ary case)
-                    if ( isSymbol( lhs ) )
-                        lhs = group.contents[j] = {
+                    if ( isSymbol( lhs ) ) {
+                        group.contents.splice( j, i-j, lhs = {
                             type : '( )',
                             contents : group.contents.slice( j, i ),
                             isBinding : false
-                        }
+                        } )
+                        i = j + 1
+                    }
+                    // ensure that in n-ary case, no modifier applies to the
+                    // whole list of attributes
+                    if ( j != i - 1 )
+                        problem( 'Cannot modify a list of bound symbols' )
                     // n-ary case: ( symbols... ) , body
                     let rhs = group.contents[i+1]
                     if ( lhs.type == '( )'
