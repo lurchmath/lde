@@ -24,7 +24,7 @@ describe( 'BindingExpression', () => {
     } )
 
     it( 'Should prevent construction with fewer than two arguments', () => {
-        // Try to construct Bindings with too few arguments,
+        // Try to construct BindingExpressions with too few arguments,
         // and verify that an error is thrown in each case.
         expect( () => { new BindingExpression } ).to.throw()
         expect( () => { new BindingExpression( f ) } ).to.throw()
@@ -34,48 +34,42 @@ describe( 'BindingExpression', () => {
     } )
 
     it( 'Should prevent construction with wrong argument types', () => {
-        // Try to construct Bindings with non-Expressions as the head,
-        // but all other parameters following the construction rules,
-        // and verify that an error is thrown in each case.
+        // Try to construct BindingExpressions with non-Expressions as the
+        // first bound symbol, but all other parameters following the
+        // construction rules, and verify that an error is thrown in each case.
         expect( () => { new BindingExpression( LC1, x, E1 ) } ).to.throw()
         expect( () => { new BindingExpression( LC2, x, y, E2 ) } ).to.throw()
-        // Try to construct Bindings with non-Expressions as the body,
+        // Try to construct BindingExpressions with non-Expressions as the body,
         // but all other parameters following the construction rules,
         // and verify that an error is thrown in each case.
-        expect( () => { new BindingExpression( E1, x, LC1 ) } ).to.throw()
-        expect( () => { new BindingExpression( E2, x, y, LC2 ) } ).to.throw()
-        // Try to construct Bindings with non-Symbols as the bound variables,
+        expect( () => { new BindingExpression( x, LC1 ) } ).to.throw()
+        expect( () => { new BindingExpression( x, y, LC2 ) } ).to.throw()
+        // Try to construct BindingExpressions with non-Symbols as the bound symbols,
         // but all other parameters following the construction rules,
         // and verify that an error is thrown in each case.
-        expect( () => { new BindingExpression( E1, LC1, E2 ) } ).to.throw()
-        expect( () => { new BindingExpression( E2, E2, x, y, E3 ) } ).to.throw()
-        expect( () => { new BindingExpression( E2, x, E2, y, E3 ) } ).to.throw()
-        expect( () => { new BindingExpression( E2, x, y, E2, E3 ) } ).to.throw()
-        // Try to construct Bindings no bound variables,
-        // but all other parameters following the construction rules,
-        // and verify that an error is thrown in each case.
-        expect( () => { new BindingExpression( E1, E2 ) } ).to.throw()
-        expect( () => { new BindingExpression( E2, E3 ) } ).to.throw()
-        expect( () => { new BindingExpression( E1, E3 ) } ).to.throw()
+        expect( () => { new BindingExpression( LC1, E2 ) } ).to.throw()
+        expect( () => { new BindingExpression( E2, x, y, E3 ) } ).to.throw()
+        expect( () => { new BindingExpression( x, E2, y, E3 ) } ).to.throw()
+        expect( () => { new BindingExpression( x, y, E2, E3 ) } ).to.throw()
     } )
 
     it( 'Should permit construction with correct argument types', () => {
         // Try to construct BindingExpression instances with an Expression as the
-        // body, and Symbols as the bound variables (of which there are >0),
+        // body, and Symbols as the bound symbols (of which there are >0),
         // and verify that no error is thrown in each case.
         expect( () => { new BindingExpression( x, E2 ) } ).not.to.throw()
         expect( () => { new BindingExpression( f, y, E3 ) } ).not.to.throw()
         expect( () => { new BindingExpression( f, x, y, E3 ) } ).not.to.throw()
     } )
 
-    it( 'Should return boundVars and body correctly', () => {
-        // Construct Bindings as in earlier tests.
+    it( 'Should return boundSymbols and body correctly', () => {
+        // Construct BindingExpressions as in earlier tests.
         // Note the importance of making copies when creating children!
         // Otherwise you remove the same instance from earlier parents.
         let B1 = new BindingExpression( x, E2 )
         let B2 = new BindingExpression( f, y, E3 )
         let B3 = new BindingExpression( f.copy(), x.copy(), y.copy(), E3.copy() )
-        // compute boundVars in each case
+        // compute boundSymbols in each case
         let tmp = B1.boundSymbols()
         expect( tmp ).to.be.instanceof( Array )
         expect( tmp.length ).to.equal( 1 )
@@ -97,27 +91,27 @@ describe( 'BindingExpression', () => {
         expect( B3.body() ).to.equal( B3.child( 3 ) )
     } )
 
-    it( 'Should return bound variable names correctly', () => {
-        // Construct Bindings as in earlier tests.
+    it( 'Should return bound symbol names correctly', () => {
+        // Construct BindingExpressions as in earlier tests.
         // Note the importance of making copies when creating children!
         // Otherwise you remove the same instance from earlier parents.
         let B1 = new BindingExpression( x, E2 )
         let B2 = new BindingExpression( f, y, E3 )
         let B3 = new BindingExpression( f.copy(), x.copy(), y.copy(), E3.copy() )
-        // compute bound variable names in each case
+        // compute bound symbol names in each case
         expect( B1.boundSymbolNames() ).to.eql( [ 'x' ] )
         expect( B2.boundSymbolNames() ).to.eql( [ 'f', 'y' ] )
         expect( B3.boundSymbolNames() ).to.eql( [ 'f', 'x', 'y' ] )
     } )
 
-    it( 'Should know whether a binding binds a given symbol', () => {
-        // Construct Bindings as in earlier tests.
+    it( 'Should know whether a binding expression binds a given symbol', () => {
+        // Construct BindingExpressions as in earlier tests.
         // Note the importance of making copies when creating children!
         // Otherwise you remove the same instance from earlier parents.
         let B1 = new BindingExpression( x, E2 )
         let B2 = new BindingExpression( f, y, E3 )
         let B3 = new BindingExpression( f.copy(), x.copy(), y.copy(), E3.copy() )
-        // compute bound variable names in each case
+        // compute bound symbol names in each case
         expect( B1.binds( 'f' ) ).to.equal( false )
         expect( B1.binds( 'x' ) ).to.equal( true )
         expect( B1.binds( 'y' ) ).to.equal( false )

@@ -7,7 +7,7 @@ import BindingInterface from './binding-interface.js'
  * A binding in general is defined in the documentation for the
  * {@link BindingInterface BindingInterface}.  Refer there for the general
  * principles.  This class uses that interface to implement bindings whose
- * bodies are {@link Expresison Expressions}.
+ * bodies are {@link Expression Expressions}.
  */
 export class BindingExpression extends Expression {
     
@@ -53,7 +53,7 @@ export class BindingExpression extends Expression {
      * 
      * Note that while it is possible later to remove children from a
      * BindingExpression so that it does not have the required structure of
-     * variables-then-body, this is almost certain to result in the members of
+     * symbols-then-body, this is almost certain to result in the members of
      * this class malfunctioning or throwing errors.  Clients should not remove
      * the necessary children of a BindingExpression; that is not supported.
      * 
@@ -61,8 +61,8 @@ export class BindingExpression extends Expression {
      * list of bound variables, we do not explicitly forbid it.
      * 
      * @param  {...Expression} args - the list of one or more
-     *   {@link Symbol Symbols} thatthis expression binds, followed by its body,
-     *   which must be of type {@link Expression Expression}.
+     *   {@link Symbol Symbols} that this expression binds, followed by its
+     *   body, which must be of type {@link Expression Expression}.
      * @throws This constructor throws an error if any argument is not an
      *   {@link Expression Expressions}, or if any argument but the last is not
      *   a {@link Symbol Symbols}, or if the list of bound symbols is empty.
@@ -76,7 +76,7 @@ export class BindingExpression extends Expression {
                            + 'constructor (except the last) must be a Symbol' )
         if ( !( body instanceof Expression ) )
             throw new Error( 'The body in a BindingExpression constructor '
-                            + 'must be an Expression' )
+                           + 'must be an Expression' )
         super( ...args, body )
     }
 
