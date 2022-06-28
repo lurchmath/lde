@@ -471,7 +471,7 @@ describe( 'Reading putdown notation', () => {
 
     it( 'Should support declarations without bodies', () => {
         let test
-        // ----------
+        // ---------- two declarations
         test = LogicConcept.fromPutdown( '[x] [y]' )
         expect( test ).to.be.instanceof( Array )
         expect( test.length ).to.equal( 2 )
@@ -481,7 +481,7 @@ describe( 'Reading putdown notation', () => {
         expect( test[1].equals(
             new Declaration( new LurchSymbol( 'y' ) )
         ) ).to.equal( true )
-        // ----------
+        // ---------- one larger declaration
         test = LogicConcept.fromPutdown( '[pi e 0 1 2 3]' )
         expect( test ).to.be.instanceof( Array )
         expect( test.length ).to.equal( 1 )
@@ -495,6 +495,19 @@ describe( 'Reading putdown notation', () => {
                     new LurchSymbol( '2' ),
                     new LurchSymbol( '3' )
                 ]
+            )
+        ) ).to.equal( true )
+        // ---------- with an attribute inside, and the decl is inside an env
+        test = LogicConcept.fromPutdown( '{ [x +{"A":"B"}\ny] z }' )
+        expect( test ).to.be.instanceof( Array )
+        expect( test.length ).to.equal( 1 )
+        expect( test[0].equals(
+            new Environment(
+                new Declaration(
+                    new LurchSymbol( 'x' ).attr( { 'A' : 'B' } ),
+                    new LurchSymbol( 'y' )
+                ),
+                new LurchSymbol( 'z' )
             )
         ) ).to.equal( true )
     } )
@@ -546,6 +559,20 @@ describe( 'Reading putdown notation', () => {
                 new Declaration(
                     new LurchSymbol( 'm' ),
                     new LurchSymbol( 'n' )
+                )
+            )
+        ) ).to.equal( true )
+        // ----------
+        test = LogicConcept.fromPutdown(
+            '[pi +{"foo":3}\n, [m n +{"bar":4}\n]]' )
+        expect( test ).to.be.instanceof( Array )
+        expect( test.length ).to.equal( 1 )
+        expect( test[0].equals(
+            new Declaration(
+                new LurchSymbol( 'pi' ).attr( { foo : 3 } ),
+                new Declaration(
+                    new LurchSymbol( 'm' ),
+                    new LurchSymbol( 'n' ).attr( { bar : 4 } )
                 )
             )
         ) ).to.equal( true )
@@ -1227,6 +1254,20 @@ describe( 'Writing putdown notation', () => {
           + '        +{"Weather":"Nice"}\n'
           + '  }\n'
           + '} +{"State":"MA"}\n' )
+        // declaration of metavariables
+        test = new Declaration(
+            [
+                new LurchSymbol( 'a' ).asA( 'metavariable' ),
+                new LurchSymbol( 'b' ).asA( 'metavariable' )
+            ],
+            new LurchSymbol( 'body' ).asA( 'something' )
+        )
+        expect( test.toPutdown() ).to.equal(
+            '[a +{"_type_metavariable":true}\n'
+          + ' b +{"_type_metavariable":true}\n'
+          + ' , body +{"_type_something":true}\n'
+          + ']'
+        )
         // we could do other tests here but this is a pretty good start
     } )
 
