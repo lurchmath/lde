@@ -311,21 +311,26 @@ export class LogicConcept extends MathConcept {
             // process all "sym , body" segments inside this group
             for ( let i = group.contents.length - 1 ; i >= 0 ; i-- ) {
                 if ( exactMatch( bindingRE, group.contents[i] ) ) {
-                    const lhs = group.contents[i-1]
-                    const rhs = group.contents[i+1]
+                    // find the next thing that is not a JSON modifier
+                    let j
+                    for ( j = i - 1 ; j >= 0 ; j-- )
+                        if ( !isModifier( group.contents[j] ) ) break
+                    let lhs = group.contents[j]
                     // unary case: symbol , body
-                    if ( isSymbol( lhs ) ) {
-                        group.contents.splice( i-1, 3, {
-                            type : rhs.type ? rhs.type : '( )',
-                            contents : [ lhs, rhs ],
-                            isBinding : true
-                        } )
+                    // (just convert it to the n-ary case)
+                    if ( isSymbol( lhs ) )
+                        lhs = group.contents[j] = {
+                            type : '( )',
+                            contents : group.contents.slice( j, i ),
+                            isBinding : false
+                        }
                     // n-ary case: ( symbols... ) , body
-                    } else if ( lhs.type == '( )'
-                             && lhs.hasOwnProperty( 'contents' )
-                             && lhs.contents.every( x =>
-                                    isSymbol( x ) || isModifier( x ) ) ) {
-                        group.contents.splice( i-1, 3, {
+                    let rhs = group.contents[i+1]
+                    if ( lhs.type == '( )'
+                      && lhs.hasOwnProperty( 'contents' )
+                      && lhs.contents.every( x =>
+                            isSymbol( x ) || isModifier( x ) ) ) {
+                        group.contents.splice( j, i-j+2, {
                             type : rhs.type ? rhs.type : '( )',
                             contents : [ ...lhs.contents, rhs ],
                             isBinding : true
