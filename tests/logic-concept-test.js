@@ -824,6 +824,18 @@ describe( 'Reading putdown notation', () => {
                 )
             ).attr( { 'modifier at topmost level' : 'checking in' } )
         ) ).to.equal( true )
+        // ----------
+        test = LogicConcept.fromPutdown(
+            '(one +{"asNumber":1}\n two +{"asNumber":2}\n) , body_here' )
+        expect( test ).to.be.instanceof( Array )
+        expect( test.length ).to.equal( 1 )
+        expect( test[0].equals(
+            new BindingExpression(
+                new LurchSymbol( 'one' ).attr( { asNumber : 1 } ),
+                new LurchSymbol( 'two' ).attr( { asNumber : 2 } ),
+                new LurchSymbol( 'body_here' )
+            )
+        ) ).to.equal( true )
     } )
 
     it( 'Should detect and report a wide variety of parsing errors', () => {
@@ -1344,6 +1356,15 @@ describe( 'Writing putdown notation', () => {
         ).attr( { style : 'fancy' } )
         expect( test.toPutdown() ).to.equal(
             '(⋃ A , (subscript A i)) +{"style":"fancy"}\n'
+        )
+        // binding with attributes inside the bound variables list
+        test = new BindingExpression(
+            new LurchSymbol( 'one' ).attr( { asNumber : 1 } ),
+            new LurchSymbol( 'two' ).attr( { asNumber : 2 } ),
+            new LurchSymbol( 'body_here' )
+        )
+        expect( test.toPutdown() ).to.equal(
+            '(one +{"asNumber":1}\n two +{"asNumber":2}\n) , body_here'
         )
         // we could do other tests here but this is a pretty good start
     } )

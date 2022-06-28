@@ -307,6 +307,7 @@ export class LogicConcept extends MathConcept {
             // utility function
             const isSymbol = x => typeof( x ) == 'string' &&
                 ( exactMatch( stringRE, x ) || exactMatch( symbolRE, x ) )
+            const isModifier = x => x.type == 'attributes'
             // process all "sym , body" segments inside this group
             for ( let i = group.contents.length - 1 ; i >= 0 ; i-- ) {
                 if ( exactMatch( bindingRE, group.contents[i] ) ) {
@@ -322,7 +323,8 @@ export class LogicConcept extends MathConcept {
                     // n-ary case: ( symbols... ) , body
                     } else if ( lhs.type == '( )'
                              && lhs.hasOwnProperty( 'contents' )
-                             && lhs.contents.every( isSymbol ) ) {
+                             && lhs.contents.every( x =>
+                                    isSymbol( x ) || isModifier( x ) ) ) {
                         group.contents.splice( i-1, 3, {
                             type : rhs.type ? rhs.type : '( )',
                             contents : [ ...lhs.contents, rhs ],
