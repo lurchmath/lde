@@ -181,7 +181,7 @@ describe( 'Capture Constraints', () => {
         expect( CC.bound.equals( b ) ).to.equal( true )
         expect( CC.free.equals( S.expression ) ).to.equal( true )
         expect( CC.free ).not.to.equal( S.expression )
-     } )
+    } )
 
 } )
 

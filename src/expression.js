@@ -64,7 +64,7 @@ export class Expression extends LogicConcept {
      *   this one (as in the constructors for {@link MathConcept} and
      *   {@link LogicConcept})
      */
-     constructor ( ...children ) {
+    constructor ( ...children ) {
         super( ...children.filter( child => child instanceof Expression ) )
     }
 
