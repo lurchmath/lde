@@ -69,33 +69,35 @@ can be organized into a tree by following the order of operations.  For
 example, $3+k=9$ might have $=$ at the root, with right child $9$ and left
 child a subtree with $+$ over $3$ and $k$.  Although that is one way to
 organize expressions into trees, we actually choose a slightly different
-means of applying functions/operators to arguments, which will be covered
-in the documentation for the <a href="Application.html">Application</a> class.</p>
+means of applying functions/operators to arguments, which is covered in the
+documentation for the <a href="Application.html">Application</a> class.</p>
 <p>Expressions are analogous to what mathematicians typically write inside
 <code>$...$</code> or <code>$$...$$</code> math mode in LaTeX.  This distinguishes them from
 larger structures that appear in mathematical writing, such as a proof,
 or a section, or an axiom, or an exercise.</p>
-<p>There are two types of Expressions:</p>
+<p>There are three types of Expressions:</p>
 <ol>
 <li>Atomic expressions, also called <a href="Symbol.html">Symbols</a>, which can
 represent any mathematical symbol, such as $x$, $5$, $e$, $\pi$, $B_4$,
-etc.  (Note that notation here is in math form just for the
-documentation; actual symbols may use a different style, such as <code>B_4</code>.)</li>
-<li>Compound expressions, also called <a href="Application.html">Applications</a>,
-because they represent the application of a function or operator to zero
-or more arguments, as in the example of $3 + k$, above, which applies $+$
-to the arguments $3$ and $k$.</li>
+$\in$, $\int$, etc.  (Note that notation here is in math form just for
+the documentation; actual symbols may use a different style, such as
+<code>B_4</code>.)</li>
+<li><a href="Application.html">Applications</a>, which represent the application of a
+function or operator to zero or more arguments, as in the example of
+$3 + k$, above, which applies $+$ to the arguments $3$ and $k$.</li>
+<li><a href="BindingExpression.html">Binding Expressions</a>, which represent the use
+of a dummy variable in an expression.  Specifically, if you have an
+expression such as $\exists x,(x^2=2)$ or $\int_a^b f(x);dx$, the $x$
+is used as a &quot;dummy&quot; or &quot;bound&quot; variable in each case, and thus has a
+limited scope one cannot express with a mere function
+<a href="Application.html">Application</a>.  See the documentation for the
+<a href="BindingExpression.html">Binding Expression class</a> for details on how to
+represent expressions like those examples.</li>
 </ol>
-<p>We do not define these further here; see the documentation of each of
+<p>We do not define these cases further here; see the documentation of each of
 the classes linked to above for details.  The Expression class is an
 abstract base class, and every instance should be an instance of one of
-those two subclasses.</p>
-<p>Every expression (and in fact every <a href="MathConcept.html">MathConcept</a>) can bind
-symbols.  Thus if one wishes to express, for example, the mathematical notion
-of $\forall x,2&lt;x^2$, one would create an application of the $\forall$ symbol
-to the Expression $2&lt;x^2$, and in that inner Expression, mark $x$ as bound.
-To learn more about binding symbols, refer to the appropriate
-functions in the MathConcept class.</p></div>
+those three subclasses.</p></div>
         
     
 </header>
@@ -246,7 +248,7 @@ this one (as in the constructors for <a href="MathConcept.html">MathConcept</a> 
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.53">, line 53</a>
+            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.54">, line 54</a>
         </li>
     </ul>
 
@@ -390,7 +392,7 @@ Expression</p>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.95">, line 95</a>
+            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.96">, line 96</a>
         </li>
     </ul>
 
@@ -559,7 +561,7 @@ being made</p></div>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.120">, line 120</a>
+            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.121">, line 121</a>
         </li>
     </ul>
 
@@ -687,7 +689,7 @@ Expression in the <a href="MathConcept.html">MathConcept</a> hierarchy in which 
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.81">, line 81</a>
+            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.82">, line 82</a>
         </li>
     </ul>
 
@@ -825,7 +827,7 @@ or undefined if it there is no such value</p>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.155">, line 155</a>
+            <a href="expression.js.html">expression.js</a><a href="expression.js.html#source.156">, line 156</a>
         </li>
     </ul>
 
@@ -851,7 +853,7 @@ or undefined if it there is no such value</p>
 
 <footer class="layout-footer">
   <div class="container">
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.10</a> on Tue Jun 28 2022 19:10:05 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.10</a> on Thu Jun 30 2022 13:47:12 GMT+0000 (Coordinated Universal Time)
   </div>
 </footer>
 
