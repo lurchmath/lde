@@ -1625,6 +1625,8 @@ export class MathConcept extends EventTarget {
      * simply returns false to indicate that no symbols are bound.
      * 
      * @return {boolean} the constant false
+     * 
+     * @see {@link BindingInterface.binds binds()}
      */
     binds () { return false }
 
@@ -1644,8 +1646,8 @@ export class MathConcept extends EventTarget {
      * @return {string[]} an array of names of free symbols appearing as
      *   descendants of this MathConcept
      * 
-     * @see {@link BindingInterface#binds binds()}
-     * @see {@link BindingInterface#boundSymbols boundSymbols()}
+     * @see {@link BindingInterface.binds binds()}
+     * @see {@link BindingInterface.boundSymbols boundSymbols()}
      */
     freeSymbolNames () {
         // a single symbol is free in itself
@@ -1681,6 +1683,8 @@ export class MathConcept extends EventTarget {
      *   place, as described above
      * @return {boolean} Whether this MathConcept is free in the specified
      *   ancestor (or its topmost ancestor if none is specified)
+     * 
+     * @see {@link BindingInterface.binds binds()}
      */
     isFree ( inThis ) {
         // compute the free identifiers in me that an ancestor might bind
@@ -1712,6 +1716,8 @@ export class MathConcept extends EventTarget {
      * @return {boolean} True if and only if there is a copy of `concept` as a
      *   descendant of this MathConcept satisfying `.isFree( inThis )`
      * @see {@link MathConcept#isFree isFree()}
+     * 
+     * @see {@link BindingInterface.binds binds()}
      */
     occursFree ( concept, inThis ) {
         return this.hasDescendantSatisfying( descendant =>
@@ -1730,6 +1736,8 @@ export class MathConcept extends EventTarget {
      * 
      * @return {boolean} True if this MathConcept is free to replace `original`,
      *   and false if it is not.
+     * 
+     * @see {@link BindingInterface.binds binds()}
      */
     isFreeToReplace ( original, inThis ) {
         // this implementation is an exact copy of isFree(), with one exception:
@@ -1761,6 +1769,8 @@ export class MathConcept extends EventTarget {
      * @param {MathConcept} [inThis] - When judging free/bound identifiers, judge
      *   them relative to this ancestor context, in the same sense of the
      *   `inThis` parameter to {@link MathConcept#isFree isFree()}
+     * 
+     * @see {@link BindingInterface.binds binds()}
      */
     replaceFree ( original, replacement, inThis ) {
         this.descendantsSatisfying(
