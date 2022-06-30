@@ -19,36 +19,37 @@ import { Environment } from './environment.js'
  * example, $3+k=9$ might have $=$ at the root, with right child $9$ and left
  * child a subtree with $+$ over $3$ and $k$.  Although that is one way to
  * organize expressions into trees, we actually choose a slightly different
- * means of applying functions/operators to arguments, which will be covered
- * in the documentation for the {@link Application} class.
+ * means of applying functions/operators to arguments, which is covered in the
+ * documentation for the {@link Application} class.
  * 
  * Expressions are analogous to what mathematicians typically write inside
  * `$...$` or `$$...$$` math mode in LaTeX.  This distinguishes them from
  * larger structures that appear in mathematical writing, such as a proof,
  * or a section, or an axiom, or an exercise.
  * 
- * There are two types of Expressions:
+ * There are three types of Expressions:
  * 
  *  1. Atomic expressions, also called {@link Symbol Symbols}, which can
  *     represent any mathematical symbol, such as $x$, $5$, $e$, $\pi$, $B_4$,
- *     etc.  (Note that notation here is in math form just for the
- *     documentation; actual symbols may use a different style, such as `B_4`.)
- *  2. Compound expressions, also called {@link Application Applications},
- *     because they represent the application of a function or operator to zero
- *     or more arguments, as in the example of $3 + k$, above, which applies $+$
- *     to the arguments $3$ and $k$.
+ *     $\in$, $\int$, etc.  (Note that notation here is in math form just for
+ *     the documentation; actual symbols may use a different style, such as
+ *     `B_4`.)
+ *  2. {@link Application Applications}, which represent the application of a
+ *     function or operator to zero or more arguments, as in the example of
+ *     $3 + k$, above, which applies $+$ to the arguments $3$ and $k$.
+ *  3. {@link BindingExpression Binding Expressions}, which represent the use
+ *     of a dummy variable in an expression.  Specifically, if you have an
+ *     expression such as $\exists x,(x^2=2)$ or $\int_a^b f(x)\;dx$, the $x$
+ *     is used as a "dummy" or "bound" variable in each case, and thus has a
+ *     limited scope one cannot express with a mere function
+ *     {@link Application Application}.  See the documentation for the
+ *     {@link BindingExpression Binding Expression class} for details on how to
+ *     represent expressions like those examples.
  * 
- * We do not define these further here; see the documentation of each of
+ * We do not define these cases further here; see the documentation of each of
  * the classes linked to above for details.  The Expression class is an
  * abstract base class, and every instance should be an instance of one of
- * those two subclasses.
- * 
- * Every expression (and in fact every {@link MathConcept MathConcept}) can bind
- * symbols.  Thus if one wishes to express, for example, the mathematical notion
- * of $\forall x,2<x^2$, one would create an application of the $\forall$ symbol
- * to the Expression $2<x^2$, and in that inner Expression, mark $x$ as bound.
- * To learn more about binding symbols, refer to the appropriate
- * {@link MathConcept#boundSymbols functions in the MathConcept class}.
+ * those three subclasses.
  */
 export class Expression extends LogicConcept {
     
