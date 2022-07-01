@@ -25,3 +25,4 @@ export { BindingEnvironment } from './binding-environment.js'
 
 export { default as Database } from './database.js'
 export { default as Matching } from './matching.js'
+export { default as Scoping } from './scoping.js'
