@@ -2,9 +2,9 @@
 /**
  * ## What is scoping?
  * 
- * The Lurch Deductive Enging supports the common notion of nested scopes for
- * symbols that appears in various ways in both mathematical language and
- * computer programming languages.
+ * The Lurch Deductive Engine supports the common notion of nested scopes for
+ * symbols, a notion that appears in various ways in both mathematical language
+ * and computer programming languages.
  * 
  *  * In mathematics, when we begin a proof by saying, "Let $x$ be an arbitrary
  *    real number," we do not expect that once the proof is over, we are still
@@ -20,7 +20,9 @@
  * do we know where a symbol's scope begins?  Notice in the two examples above
  * that explicit syntax marks the beginning of a variable's scope (in
  * mathematics, "Let...be arbitrary" and in JavaScript `function (...)`).  In
- * Lurch, we have three methods for marking the beginning of a variable's scope.
+ * Lurch, we have three methods for marking the beginning of a variable's scope,
+ * each of which could be used to represent mathematical content like the
+ * example above.
  * 
  *  1. A {@link Declaration Declaration} of a symbol marks the beginning of a
  *     scope for that symbol, and includes the declaration's body (if it has
@@ -29,19 +31,20 @@
  *      * We say that symbols declared in this way are *explicitly declared.*
  *      * You can find out which symbols a {@link Declaration Declaration}
  *        declares with its {@link Declaration#symbols symbols()} function.
- *  2. A {@link BindingEnvironment BindingEnvironment} that binds a symbol is
- *     the scope for that symbol; that is, it lasts from the first through the
- *     last children of the environment, inclusive.
+ *  2. A {@link BindingEnvironment BindingEnvironment} that binds a symbol $x$
+ *     is itself the scope for $x$; that is, the scope lasts from the first
+ *     through the last children of the environment, inclusive.
  *      * Symbols declared in this way are also said to be
  *        *explicitly declared.*
  *      * You can find out which symbols a {@link BindingEnvironment
  *        BindingEnvironment} declares with its
- *        {@link BindingEnvironment#boundSymbolNames boundSymbolNames()}
+ *        {@link BindingInterface.boundSymbolNames boundSymbolNames()}
  *        function.
  *  3. Any {@link LogicConcept LogicConcept} can be marked as implicitly
  *     declaring a symbol.  If the {@link LogicConcept LogicConcept} so marked
- *     is an environment, then the implicit declaration functions just like case
- *     2, above, and otherwise, it functions like case 1.
+ *     is an {@link Environment Environment}, then the implicit declaration
+ *     functions just like case 2, above, and otherwise, it functions like case
+ *     1.
  *      * Naturally, we say that a symbol declared in this way is
  *        *implicitly declared.*
  *      * You can add implicit declarations to any
@@ -80,9 +83,11 @@
  *     * {@link module:Scoping.scopeErrors scopeErrors()}
  *     * {@link module:Scoping.addScopeError addScopeError()}
  *     * {@link module:Scoping.clearScopeErrors clearScopeErrors()}
- *  * For running the scope validation algorithm on an
- *    {@link Environment Environment}:
- *     * {@link module:Scoping.validate validate()}
+ * 
+ * Second, the main workhorse function of this module is to run a scope checking
+ * algorithm on any given {@link Environment Environment}.  That function is
+ * called {@link module:Scoping.validate validate()}, and you can read its
+ * documentation for greater details.
  * 
  * Note also that this module sort of shares a name with the function
  * {@link MathConcept#scope scope()} (and its related functions) because for any
@@ -113,6 +118,7 @@ import { BindingEnvironment } from './binding-environment.js'
  * store such errors is with
  * {@link module:Scoping.validate validate()}.
  * 
+ * @function
  * @param {LogicConcept} target the {@link LogicConcept LogicConcept} in
  *   which to add data about scope errors
  * @param {Object} newData an object that can be treated as JSON data, to be
@@ -122,7 +128,7 @@ import { BindingEnvironment } from './binding-environment.js'
  * @see {@link module:Scoping.clearScopeErrors clearScopeErrors()}
  * @see {@link module:Scoping.validate validate()}
  */
- function addScopeError ( target, newData ) {
+export const addScopeError = ( target, newData ) => {
     target.setAttribute( 'scope errors',
         Object.assign( scopeErrors( target ) || { }, newData ) )
 }
@@ -140,6 +146,7 @@ import { BindingEnvironment } from './binding-environment.js'
  * undeclared.  If any such key is missing, there are no errors of that
  * type.
  * 
+ * @function
  * @param {LogicConcept} target the {@link LogicConcept LogicConcept} from
  *   which to read the scope error data
  * @return {Object|undefined} the scope error data in the `target`, or
@@ -149,7 +156,7 @@ import { BindingEnvironment } from './binding-environment.js'
  * @see {@link module:Scoping.clearScopeErrors clearScopeErrors()}
  * @see {@link module:Scoping.validate validate()}
  */
-function scopeErrors ( target ) {
+export const scopeErrors = target => {
     return target.getAttribute( 'scope errors' )
 }
 
@@ -164,6 +171,7 @@ function scopeErrors ( target ) {
  * {@link module:Scoping.scopeErrors scopeErrors()} for that same target is
  * guaranteed to be undefined.
  * 
+ * @function
  * @param {LogicConcept} target the {@link LogicConcept LogicConcept} from
  *   which to remove the scope error data
  * 
@@ -171,7 +179,7 @@ function scopeErrors ( target ) {
  * @see {@link module:Scoping.clearScopeErrors clearScopeErrors()}
  * @see {@link module:Scoping.validate validate()}
  */
- function clearScopeErrors ( target ) {
+export const clearScopeErrors = target => {
     target.clearAttributes( 'implicitly declares' )
     target.clearAttributes( 'scope errors' )
     target.children().forEach( clearScopeErrors )
@@ -191,6 +199,7 @@ function scopeErrors ( target ) {
  * store such errors is by passing an implicit variable declaration handler
  * to {@link module:Scoping.validate validate()}.
  * 
+ * @function
  * @param {LogicConcept} target the {@link LogicConcept LogicConcept} in
  *   which to add a new implicitly declared symbol
  * @param {Object} symbolName the name of the symbol to mark implicitly
@@ -199,7 +208,7 @@ function scopeErrors ( target ) {
  * @see {@link module:Scoping.implicitDeclarations implicitDeclarations()}
  * @see {@link module:Scoping.validate validate()}
  */
-function addImplicitDeclaration ( target, symbolName ) {
+export const addImplicitDeclaration = ( target, symbolName ) => {
     target.setAttribute( 'implicitly declares', Array.from( new Set( [
         ...( implicitDeclarations( target ) || [ ] ),
         symbolName
@@ -217,6 +226,7 @@ function addImplicitDeclaration ( target, symbolName ) {
  * The result will be an array of symbol names, possibly empty if no symbols
  * are implicitly declared in the `target`.
  * 
+ * @function
  * @param {LogicConcept} target the {@link LogicConcept LogicConcept} from
  *   which to read the implicit symbol declaration data
  * @return {Array|undefined} the implicit symbol declaration data in the
@@ -225,7 +235,7 @@ function addImplicitDeclaration ( target, symbolName ) {
  * @see {@link module:Scoping.addImplicitDeclaration addImplicitDeclaration()}
  * @see {@link module:Scoping.validate validate()}
  */
-function implicitDeclarations ( target ) {
+export const implicitDeclarations = target => {
     return target.getAttribute( 'implicitly declares' )
 }
 
@@ -240,6 +250,7 @@ function implicitDeclarations ( target ) {
  * {@link module:Scoping.scopeErrors scopeErrors()} for that same target is
  * guaranteed to be undefined.
  * 
+ * @function
  * @param {LogicConcept} target the {@link LogicConcept LogicConcept} from
  *   which to remove the scope error data
  * 
@@ -247,7 +258,7 @@ function implicitDeclarations ( target ) {
  * @see {@link module:Scoping.clearScopeErrors clearScopeErrors()}
  * @see {@link module:Scoping.validate validate()}
  */
- function clearImplicitDeclarations ( target ) {
+export const clearImplicitDeclarations = target => {
     target.clearAttributes( 'implicitly declares' )
     target.children().forEach( clearImplicitDeclarations )
 }
@@ -269,15 +280,16 @@ function implicitDeclarations ( target ) {
  *    {@link module:Scoping.scopeErrors marked with a scoping error} of the
  *    form `{ redeclared : [ 'x' ] }`.  If more than one symbol is redeclared,
  *    the array may contain multiple entries.
- *  * Any symbol $x$ used free in an {@link Expression Expression} but not in
- *    the scope of any declaration (by a
- *    {@link BindingEnvironment BindingEnvironment} or a
+ *  * Any symbol $x$ used {@link MathConcept#isFree free} in an
+ *    {@link Expression Expression} but not in the scope of any declaration (by
+ *    a {@link BindingEnvironment BindingEnvironment} or a
  *    {@link Declaration Declaration}) is
  *    {@link module:Scoping.scopeErrors marked with a scoping error} of the form
- *    `{ undeclared : [ 'x' ] }`.  If more than one symbol is used free and
- *    undeclared, the array may contain multiple entries.  Such an error is
- *    placed only on the first use of the symbol in any given scope; later uses
- *    of the same symbol in the same scope are not also marked.
+ *    `{ undeclared : [ 'x' ] }`.  If more than one symbol is used
+ *    {@link MathConcept#isFree free} and undeclared, the array may contain
+ *    multiple entries.  Such an error is placed only on the first use of the
+ *    symbol in any given scope; later uses of the same symbol in the same scope
+ *    are not also marked.
  * 
  * Note that a single {@link LogicConcept LogicConcept} might have more than one
  * type of error.  For instance, a {@link Declaration Declaration} that attempts
@@ -288,7 +300,7 @@ function implicitDeclarations ( target ) {
  * There are a variety of sensible ways to handle variables that are free and
  * undeclared.  On the permissive end of the spectrum, a client may wish to
  * simply ignore them, in which case the error feedback under the `undeclared`
- * headings can be ignored.  On the strict end of teh spectrum, a client may
+ * headings can be ignored.  On the strict end of the spectrum, a client may
  * refuse to process input that contains free and undeclared symbols.  Such
  * clients can pay particular attention to the feedback under the `undeclared`
  * headings.  But many clients will take a middle road of some type, such as
@@ -299,7 +311,7 @@ function implicitDeclarations ( target ) {
  * To help clients who wish to take this middle road, this function has an
  * optional second argument.  If a function is provided as the second argument,
  * it will be called on the first instance of every free and undeclared variable
- * *before* teh validation work described above is executed.  The function will
+ * *before* the validation work described above is executed.  The function will
  * be passed two parameters at each call: the name of the symbol that appears
  * free and undeclared, and the {@link LogicConcept LogicConcept} in which it
  * appears.  These calls will take place in tree-traversal order (that is,
@@ -313,6 +325,7 @@ function implicitDeclarations ( target ) {
  * takes effect exactly at L, in the sense that the scope of the declaration
  * includes L itself and continues on through the rest of L's scope.
  * 
+ * @function
  * @param {LogicConcept} target the LogicConcept in which to do the work
  * @param {Function} [callback] the handler for all symbols that are
  *   eligible for implicit declaration, as described above
@@ -324,7 +337,7 @@ function implicitDeclarations ( target ) {
  * @see {@link module:Scoping.addScopeError addScopeError()}
  * @see {@link module:Scoping.clearScopeErrors clearScopeErrors()}
  */
-function validate ( target, callback ) {
+export const validate = ( target, callback ) => {
     // If the user provided a handler for symbols that are eligible for implicit
     // validation, find those symbols and call the handler on each one:
     // (Note that findUndeclaredSymbols is a private function in this module.)

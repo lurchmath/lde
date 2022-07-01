@@ -57,10 +57,10 @@ export const metavariable = 'LDE MV'
  * marked as a metavariable as described in the documentation for
  * {@link module:Metavariables.metavariable metavariable}.
  * 
+ * @function
  * @param {LogicConcept} LC the {@link LogicConcept LogicConcept} to test
  *   for whether it contains any metavariables
  * @returns {boolean} true if and only if `LC` contains no metavariables
- * @static
  */
 export const containsAMetavariable = LC =>
     LC.hasDescendantSatisfying( d =>
@@ -76,6 +76,7 @@ export const containsAMetavariable = LC =>
  * {@link module:Metavariables.metavariableNamesIn metavariableNamesIn()}
  * would return on the same input.
  * 
+ * @function
  * @param {LogicConcept} LC where to search for metavariables
  * @returns {Array} a JavaScript array of all {@link Symbol Symbol} instances
  *   that are descendants of the given `LC` and that pass the
@@ -98,6 +99,7 @@ export const metavariablesIn = LC =>
  * {@link module:Metavariables.metavariablesIn metavariablesIn()} if it were
  * called on the same input.
  * 
+ * @function
  * @param {LogicConcept} LC where to search for metavariable names
  * @returns {Set} a JavaScript set of strings, each of which is the name of a
  *   metavariable appearing in the given `LC`

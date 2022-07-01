@@ -23,6 +23,9 @@ import { Symbol as LurchSymbol } from './symbol.js'
  * such an attribute will not use that attribute in any algorithm, such as when
  * validating the correctness of a deduction, or rendering a text-based form of
  * the Declaration (such as {@link LogicConcept#toPutdown putdown}).
+ * 
+ * To see how Declarations impact how {@link Symbol Symbols} are processed, see
+ * {@link module:Scoping the Scoping module}.
  */
 export class Declaration extends LogicConcept {
     
