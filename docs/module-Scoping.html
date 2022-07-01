@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Lurch Deductive Engine: Tutorial: Lurch Node REPL</title>
+    <title>Lurch Deductive Engine: Scoping</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
@@ -33,105 +33,1527 @@
 
 <main class="layout-main ">
   <div class="container">
-    <p class="page-kind"></p>
-    <h1 class="page-title">Tutorial: Lurch Node REPL</h1>
-    <section>
-
-<header>
+    <p class="page-kind">Module</p>
+    <h1 class="page-title">Scoping</h1>
     
 
-    <h2>Lurch Node REPL</h2>
+
+
+
+<section>
+
+
+<header class="not-class">
+
+
+    
+        
+            
+        
+    
 </header>
 
 <article>
-    <p>$\newcommand{\lode}{\mathbb{LODE}}$This tutorial covers how to run an instance of
-the node REPL in a terminal which has all of the LDE commands and supporting
-utilities preloaded.  This is useful for debugging and experimenting with the
-functions and classes defined in the repository. This initialized version of
-<code>node</code> can be thought of as <code>Lurch node</code>, or simply $\lode$ for short.</p>
-<p>The other tutorials cover what kinds of objects you can create in Lode and what you can do with them.</p>
-<ul>
-<li><a href="tutorial-Constructing LCs.html">Constructing LCs</a></li>
-<li><a href="tutorial-Methods in each LC subclass.html">Methods in each LC subclass</a></li>
-<li><a href="tutorial-LC tree hierarchies.html">LC tree hierarchies</a></li>
-<li><a href="tutorial-Serialization and attributes of LCs.html">Serialization and attributes of LCs</a></li>
-<li><a href="tutorial-Free and bound variables.html">Free and bound variables</a></li>
-<li><a href="tutorial-Connections among LCs.html">Connections among LCs</a></li>
-<li><a href="tutorial-Pattern matching.html">Pattern matching</a></li>
-</ul>
-<h2>Running $\lode$</h2>
-<p>To run $\lode$ from the command line in a terminal at the the root folder of your
-local copy of this source code repository simply type the command
-<code>npm run lode</code>.  Alternatively, you can run it from the <code>scripts</code> subfolder of
-the root folder with the command <code>node lode</code>. (If you have not yet set up a copy
-of this repository with the appropriate Node.js version installed, see
-<a href='https://github.com/lurchmath/lde'>our GitHub README</a>, which explains
-how to do so.)</p>
-<pre class="prettyprint source"><code>> node lode
+    <div class="container-overview">
 
-Welcome to 𝕃𝕠𝕕𝕖 - the Lurch Node app
-(type .help for help)
-▶︎ 
-</code></pre>
-<p>You are now at the Lurch Node REPL command prompt.  All of the exported modules in
-the <a href="https://github.com/lurchmath/lde/blob/main/src/index.js">src/index.js file</a> in this repository.  For example, you can now do things like this (see
-<a href="LogicConcept.html">LogicConcept</a> and <a href="LogicConcept.html#toPutdown">toPutdown</a>):</p>
-<pre class="prettyprint source"><code>Welcome to 𝕃𝕠𝕕𝕖 - the Lurch Node app
-(type .help for help)
-▶︎ LogicConcept.fromPutdown(`{ :Hello ( World ! ) }`)[0].toPutdown()
-'{ :Hello (World !) }'
-▶︎
-</code></pre>
-<p>Since creating and viewing LogicConcepts in putdown notation is often what we want, $\lode$ provides a shortcut for constructing LCs and displays LCs in Putdown notation by default.</p>
-<pre class="prettyprint source"><code>▶︎ LogicConcept.fromPutdown(`{ :Hello ( World ! ) }`)[0].toPutdown()
-'{ :Hello (World !) }'
-▶︎ lc(`{ :Hello ( World ! ) }`)  // constructs the same thing
-{ :Hello (World !) }
-</code></pre>
-<p>There is a similar feature for <a href="MathConcept.html">MathConcepts</a> using
-<a href="MathConcept.html#toSmackdown">smackdown</a>.</p>
-<p>$\lode$ also loads Algebrite.
-So you can do numerical and algebraic calculations such as these (see the
-<a href="http://algebrite.org/docs/latest-stable/reference.html">Algebrite documentation</a>
-for details).</p>
-<pre class="prettyprint source"><code>▶︎ Algebrite.run(`2^100`)
-'1267650600228229401496703205376'
-▶︎ Algebrite.run(`(x+1)^10`)
-'x^10+10*x^9+45*x^8+120*x^7+210*x^6+252*x^5+210*x^4+120*x^3+45*x^2+10*x+1'
-</code></pre>
-<p>$\lode$ also defines <code>compute</code> as a synonym for <code>Algebrite.run</code>, and <code>print</code> as
-a synonym for <code>console.log</code>.</p>
-<pre class="prettyprint source"><code>▶︎ compute(`2^100`)
-'1267650600228229401496703205376'
-▶︎ print(compute(`(x+1)^10`))
-x^10+10*x^9+45*x^8+120*x^7+210*x^6+252*x^5+210*x^4+120*x^3+45*x^2+10*x+1
-</code></pre>
-<p>If you want to inspect the Object structure of an LC (or any object) instead of
-seeing its Putdown rendering, you can use the command <code>inspect</code>.</p>
-<pre class="prettyprint source"><code>▶︎ X = lc(`A`)
-A
-▶︎ inspect(X)
-Symbol {
-  _dirty: true,
-  _parent: null,
-  _children: [],
-  _attributes: Map(1) { 'symbol text' => 'A' },
-  _origin: null,
-  _feedbackEnabled: true,
-  _feedbackQueue: []
-}
-</code></pre>
-<p>You can type <code>.features</code> in $\lode$ to see the current list of features.</p>
+
+
+    
+        
+            <div class="description"><h2>What is scoping?</h2>
+<p>The Lurch Deductive Engine supports the common notion of nested scopes for
+symbols, a notion that appears in various ways in both mathematical language
+and computer programming languages.</p>
+<ul>
+<li>In mathematics, when we begin a proof by saying, &quot;Let $x$ be an arbitrary
+real number,&quot; we do not expect that once the proof is over, we are still
+going to talk about $x$.  There is a notion of what computer scientists
+call &quot;variable scope&quot; that would say that the symbol $x$ is no longer
+accessible, or &quot;in scope,&quot; after the proof has closed.</li>
+<li>In almost all programming languages, this same principle appears.  For
+example, in JavaScript, the language in which the LDE is developed, one
+can write <code>function ( x ) { ... }</code> and the <code>x</code> is defined only within the
+curly brackets.  That is its &quot;scope.&quot;</li>
+</ul>
+<p>In Lurch, we use <a href="Environment.html">Environments</a> to delimit scope.  But how
+do we know where a symbol's scope begins?  Notice in the two examples above
+that explicit syntax marks the beginning of a variable's scope (in
+mathematics, &quot;Let...be arbitrary&quot; and in JavaScript <code>function (...)</code>).  In
+Lurch, we have three methods for marking the beginning of a variable's scope,
+each of which could be used to represent mathematical content like the
+example above.</p>
+<ol>
+<li>A <a href="Declaration.html">Declaration</a> of a symbol marks the beginning of a
+scope for that symbol, and includes the declaration's body (if it has
+one) and any other <a href="LogicConcept.html">LogicConcepts</a> that follow the
+declaration in its parent environment.
+<ul>
+<li>We say that symbols declared in this way are <em>explicitly declared.</em></li>
+<li>You can find out which symbols a <a href="Declaration.html">Declaration</a>
+declares with its <a href="Declaration.html#symbols">symbols()</a> function.</li>
+</ul>
+</li>
+<li>A <a href="BindingEnvironment.html">BindingEnvironment</a> that binds a symbol $x$
+is itself the scope for $x$; that is, the scope lasts from the first
+through the last children of the environment, inclusive.
+<ul>
+<li>Symbols declared in this way are also said to be
+<em>explicitly declared.</em></li>
+<li>You can find out which symbols a <a href="BindingEnvironment.html">BindingEnvironment</a> declares with its
+<a href="BindingInterface.html#.boundSymbolNames">boundSymbolNames()</a>
+function.</li>
+</ul>
+</li>
+<li>Any <a href="LogicConcept.html">LogicConcept</a> can be marked as implicitly
+declaring a symbol.  If the <a href="LogicConcept.html">LogicConcept</a> so marked
+is an <a href="Environment.html">Environment</a>, then the implicit declaration
+functions just like case 2, above, and otherwise, it functions like case
+1.
+<ul>
+<li>Naturally, we say that a symbol declared in this way is
+<em>implicitly declared.</em></li>
+<li>You can add implicit declarations to any
+<a href="LogicConcept.html">LogicConcept</a> with the
+<a href="module-Scoping.html#.addImplicitDeclaration">addImplicitDeclaration()</a>
+function in this module, but you should do so only during the
+appropriate phase of scope checking.  Refer to the documentation of
+<a href="module-Scoping.html#.validate">validate()</a> for details.</li>
+<li>You can find out which symbols a <a href="LogicConcept.html">LogicConcept</a>
+implicitly declares with this module's
+<a href="module-Scoping.html#.implicitDeclarations">implicitDeclarations()</a>
+function.</li>
+</ul>
+</li>
+</ol>
+<p>The third case may seem redundant, since it just repeats the functionality of
+the earlier cases, but we will use that case to represent in a natural way
+those mathematical situations in which it is typical to begin using symbols
+without declaring them, such as in an algebra exercise (where almost nobody
+says &quot;let $x$ be arbitrary&quot; before they solve for $x$), or a derivation in
+propositional logic (where almost nobody says &quot;let $P$ and $Q$ be arbitrary
+propositions&quot; before they write a propositional proof).  There are many other
+cases where symbols are used without being introduced, but these are just two
+common examples.</p>
+<p>This module provides two types of functionality.  First, while scoping
+information (including implicit symbol declarations and scoping error
+feedback) are stored in the attributes of <a href="LogicConcept.html">LogicConcepts</a>,
+and thus there is really no strict need for an API to manipulate such data,
+an API makes it easier, more readable, and less error-prone.  So we provide
+the following functions to that end.</p>
+<ul>
+<li>For manipulating implicit variable declaration data:
+<ul>
+<li><a href="module-Scoping.html#.implicitDeclarations">implicitDeclarations()</a></li>
+<li><a href="module-Scoping.html#.addImplicitDeclaration">addImplicitDeclaration()</a></li>
+<li><a href="module-Scoping.html#.clearImplicitDeclarations">clearImplicitDeclarations()</a></li>
+</ul>
+</li>
+<li>For manipulating feedback about scoping errors:
+<ul>
+<li><a href="module-Scoping.html#.scopeErrors">scopeErrors()</a></li>
+<li><a href="module-Scoping.html#.addScopeError">addScopeError()</a></li>
+<li><a href="module-Scoping.html#.clearScopeErrors">clearScopeErrors()</a></li>
+</ul>
+</li>
+</ul>
+<p>Second, the main workhorse function of this module is to run a scope checking
+algorithm on any given <a href="Environment.html">Environment</a>.  That function is
+called <a href="module-Scoping.html#.validate">validate()</a>, and you can read its
+documentation for greater details.</p>
+<p>Note also that this module sort of shares a name with the function
+<a href="MathConcept.html#scope">scope()</a> (and its related functions) because for any
+<a href="Declaration.html">Declaration</a> D, the scope of the symbols introduced in
+that declaration is precisely <code>D.scope()</code>, as defined in
+<a href="MathConcept.html#scope">the documentation of the scope() function</a>.</p></div>
+        
+
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="scoping.js.html">scoping.js</a><a href="scoping.js.html#source.2">, line 2</a>
+        </li>
+    </ul>
+
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+     
+
+    
+
+    
+
+
+    
+
+    
+        <h3 class="subtitle">Methods</h3>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    <span class="method-type-signature is-static">static</span>
+    </div>
+
+    <h4 class="method-name" id=".addImplicitDeclaration">addImplicitDeclaration<span class="signature">(target, symbolName)</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Given a <a href="LogicConcept.html">LogicConcept</a> in which we wish to mark some
+symbols as implicitly declared, this function writes that data into the
+appropriate attribute, merging it with any data already there.  It is
+assumed that the implicit variable declaration data is an array of symbol
+names, and that the new symbol given here is to be appended to the end of
+that array, if and only if it wasn't already on the array.</p>
+<p>This function is made static so that any client can easily make use of
+the same convention for storing implicit declarations in a
+<a href="LogicConcept.html">LogicConcept</a>, but the standard way to compute and
+store such errors is by passing an implicit variable declaration handler
+to <a href="module-Scoping.html#.validate">validate()</a>.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">target</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code><a href="LogicConcept.html">LogicConcept</a></code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the <a href="LogicConcept.html">LogicConcept</a> in
+which to add a new implicitly declared symbol</p></div>
+            
+        </li>
+
+    
+
+        <li>
+            
+                <span class="param-name">symbolName</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>Object</code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the name of the symbol to mark implicitly
+declared</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="module-Scoping.html#.implicitDeclarations">implicitDeclarations()</a></li>
+            
+                <li><a href="module-Scoping.html#.validate">validate()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="scoping.js.html">scoping.js</a><a href="scoping.js.html#source.211">, line 211</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    <span class="method-type-signature is-static">static</span>
+    </div>
+
+    <h4 class="method-name" id=".addScopeError">addScopeError<span class="signature">(target, newData)</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Given a <a href="LogicConcept.html">LogicConcept</a> in which we wish to save some
+data about its scoping errors, this function writes that data into the
+appropriate attribute, merging it with any data already there.  It is
+assumed that the scoping error data is an object containing key-value
+pairs as is common in JSON data, and that the <code>newData</code> will be merged
+with any old data already in the <code>target</code> using <code>Object.assign()</code>.</p>
+<p>This function is made static so that any client can easily make use of
+the same convention for storing scoping errors in a
+<a href="LogicConcept.html">LogicConcept</a>, but the standard way to compute and
+store such errors is with
+<a href="module-Scoping.html#.validate">validate()</a>.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">target</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code><a href="LogicConcept.html">LogicConcept</a></code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the <a href="LogicConcept.html">LogicConcept</a> in
+which to add data about scope errors</p></div>
+            
+        </li>
+
+    
+
+        <li>
+            
+                <span class="param-name">newData</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>Object</code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>an object that can be treated as JSON data, to be
+merged with existing scope error data in the <code>target</code></p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="module-Scoping.html#.scopeErrors">scopeErrors()</a></li>
+            
+                <li><a href="module-Scoping.html#.clearScopeErrors">clearScopeErrors()</a></li>
+            
+                <li><a href="module-Scoping.html#.validate">validate()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="scoping.js.html">scoping.js</a><a href="scoping.js.html#source.131">, line 131</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    <span class="method-type-signature is-static">static</span>
+    </div>
+
+    <h4 class="method-name" id=".clearImplicitDeclarations">clearImplicitDeclarations<span class="signature">(target)</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>This function clears any data stored by
+<a href="module-Scoping.html#.addScopeError">addScopeError()</a>.  It could just as
+easily be done with <a href="MathConcept.html#clearAttributes">clearAttributes()</a>
+and the appropriate key, but this API makes it easy to remain consistent
+if the underlying data storage method were to change.</p>
+<p>After this function has been run on the <code>target</code>, the result of
+<a href="module-Scoping.html#.scopeErrors">scopeErrors()</a> for that same target is
+guaranteed to be undefined.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">target</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code><a href="LogicConcept.html">LogicConcept</a></code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the <a href="LogicConcept.html">LogicConcept</a> from
+which to remove the scope error data</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="module-Scoping.html#.scopeErrors">scopeErrors()</a></li>
+            
+                <li><a href="module-Scoping.html#.clearScopeErrors">clearScopeErrors()</a></li>
+            
+                <li><a href="module-Scoping.html#.validate">validate()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="scoping.js.html">scoping.js</a><a href="scoping.js.html#source.261">, line 261</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    <span class="method-type-signature is-static">static</span>
+    </div>
+
+    <h4 class="method-name" id=".clearScopeErrors">clearScopeErrors<span class="signature">(target)</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>This function clears any data stored by
+<a href="module-Scoping.html#.addScopeError">addScopeError()</a>.  It could just as
+easily be done with <a href="MathConcept.html#clearAttributes">clearAttributes()</a>
+and the appropriate key, but this API makes it easy to remain consistent
+if the underlying data storage method were to change.</p>
+<p>After this function has been run on the <code>target</code>, the result of
+<a href="module-Scoping.html#.scopeErrors">scopeErrors()</a> for that same target is
+guaranteed to be undefined.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">target</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code><a href="LogicConcept.html">LogicConcept</a></code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the <a href="LogicConcept.html">LogicConcept</a> from
+which to remove the scope error data</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="module-Scoping.html#.scopeErrors">scopeErrors()</a></li>
+            
+                <li><a href="module-Scoping.html#.clearScopeErrors">clearScopeErrors()</a></li>
+            
+                <li><a href="module-Scoping.html#.validate">validate()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="scoping.js.html">scoping.js</a><a href="scoping.js.html#source.182">, line 182</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    <span class="method-type-signature is-static">static</span>
+    </div>
+
+    <h4 class="method-name" id=".implicitDeclarations">implicitDeclarations<span class="signature">(target)</span><span class="return-type-signature"> &rarr; {<a href="Array.html">Array</a>|undefined}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>This function reads the data stored by
+<a href="module-Scoping.html#.addImplicitDeclaration">addImplicitDeclaration()</a>.  It
+could just as easily be done with
+<a href="MathConcept.html#getAttribute">getAttribute()</a> and the appropriate key,
+but this API makes it easy to remain consistent if the underlying data
+storage method were to change.</p>
+<p>The result will be an array of symbol names, possibly empty if no symbols
+are implicitly declared in the <code>target</code>.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">target</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code><a href="LogicConcept.html">LogicConcept</a></code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the <a href="LogicConcept.html">LogicConcept</a> from
+which to read the implicit symbol declaration data</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="module-Scoping.html#.addImplicitDeclaration">addImplicitDeclaration()</a></li>
+            
+                <li><a href="module-Scoping.html#.validate">validate()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>Array</code>
+            
+                <code>undefined</code>
+            
+            
+                <p>the implicit symbol declaration data in the
+<code>target</code>, or undefined if none has been stored there</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="scoping.js.html">scoping.js</a><a href="scoping.js.html#source.238">, line 238</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    <span class="method-type-signature is-static">static</span>
+    </div>
+
+    <h4 class="method-name" id=".scopeErrors">scopeErrors<span class="signature">(target)</span><span class="return-type-signature"> &rarr; {Object|undefined}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>This function reads the data stored by
+<a href="module-Scoping.html#.addScopeError">addScopeError()</a>.  It could just as
+easily be done with <a href="MathConcept.html#getAttribute">getAttribute()</a> and
+the appropriate key, but this API makes it easy to remain consistent if
+the underlying data storage method were to change.</p>
+<p>The result will be an object, JSON data of key-value pairs, the keys of
+which will be the types of scoping errors, such as &quot;invalid&quot; for invalid
+variable declaratiosn or &quot;undeclared&quot; for variables that appear free and
+undeclared.  If any such key is missing, there are no errors of that
+type.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">target</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code><a href="LogicConcept.html">LogicConcept</a></code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the <a href="LogicConcept.html">LogicConcept</a> from
+which to read the scope error data</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="module-Scoping.html#.addScopeError">addScopeError()</a></li>
+            
+                <li><a href="module-Scoping.html#.clearScopeErrors">clearScopeErrors()</a></li>
+            
+                <li><a href="module-Scoping.html#.validate">validate()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>Object</code>
+            
+                <code>undefined</code>
+            
+            
+                <p>the scope error data in the <code>target</code>, or
+undefined if none has been stored there</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="scoping.js.html">scoping.js</a><a href="scoping.js.html#source.159">, line 159</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    <span class="method-type-signature is-static">static</span>
+    </div>
+
+    <h4 class="method-name" id=".validate">validate<span class="signature">(target, callback<span class="signature-attributes">opt</span>)</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Refer to the documentation at the top of this page for information on what
+scoping is in general.  This function is the main workhorse that validates
+symbol scoping inside an arbitrary <a href="Environment.html">Environment</a>.  It will
+typically be called on the topmost environment provided as input to Lurch, so
+that all symbols in the entire input have been analyzed for where their
+scopes begin and end.</p>
+<p>This function can be called in two ways.  First, it can be called with just
+one argument, in which case only the following tasks are done:</p>
+<ul>
+<li>Any symbol declaration (by a <a href="BindingEnvironment.html">BindingEnvironment</a>
+or a <a href="Declaration.html">Declaration</a>) that declares a symbol $x$ while
+sitting in the scope of some other declaration of the same symbol $x$ is
+<a href="module-Scoping.html#.scopeErrors">marked with a scoping error</a> of the
+form <code>{ redeclared : [ 'x' ] }</code>.  If more than one symbol is redeclared,
+the array may contain multiple entries.</li>
+<li>Any symbol $x$ used <a href="MathConcept.html#isFree">free</a> in an
+<a href="Expression.html">Expression</a> but not in the scope of any declaration (by
+a <a href="BindingEnvironment.html">BindingEnvironment</a> or a
+<a href="Declaration.html">Declaration</a>) is
+<a href="module-Scoping.html#.scopeErrors">marked with a scoping error</a> of the form
+<code>{ undeclared : [ 'x' ] }</code>.  If more than one symbol is used
+<a href="MathConcept.html#isFree">free</a> and undeclared, the array may contain
+multiple entries.  Such an error is placed only on the first use of the
+symbol in any given scope; later uses of the same symbol in the same scope
+are not also marked.</li>
+</ul>
+<p>Note that a single <a href="LogicConcept.html">LogicConcept</a> might have more than one
+type of error.  For instance, a <a href="Declaration.html">Declaration</a> that attempts
+to re-declare a symbol $x$, and whose body contains the symbols $y$ and $z$
+free and undeclared might have an error of the form
+<code>{ redeclared : [ 'x' ], undeclared : [ 'y', 'z' ] }</code>.</p>
+<p>There are a variety of sensible ways to handle variables that are free and
+undeclared.  On the permissive end of the spectrum, a client may wish to
+simply ignore them, in which case the error feedback under the <code>undeclared</code>
+headings can be ignored.  On the strict end of the spectrum, a client may
+refuse to process input that contains free and undeclared symbols.  Such
+clients can pay particular attention to the feedback under the <code>undeclared</code>
+headings.  But many clients will take a middle road of some type, such as
+treating the first use of the symbol as an implicit declaration of the
+symbol, either at that location, or at the beginning of its parent
+environment, or something else.</p>
+<p>To help clients who wish to take this middle road, this function has an
+optional second argument.  If a function is provided as the second argument,
+it will be called on the first instance of every free and undeclared variable
+<em>before</em> the validation work described above is executed.  The function will
+be passed two parameters at each call: the name of the symbol that appears
+free and undeclared, and the <a href="LogicConcept.html">LogicConcept</a> in which it
+appears.  These calls will take place in tree-traversal order (that is,
+<a href="MathConcept.html#isEarlierThan">earlier nodes</a> first).</p>
+<p>The callback function will often want to mark some
+<a href="LogicConcept.html">LogicConcept</a> as the location of the implicit declaration
+of the symbol in question.  It can do so by calling
+<a href="module-Scoping.html#.addImplicitDeclaration">addImplicitDeclaration()</a>.  Note
+that an implicit declaration marked in a <a href="LogicConcept.html">LogicConcept</a> L
+takes effect exactly at L, in the sense that the scope of the declaration
+includes L itself and continues on through the rest of L's scope.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">target</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code><a href="LogicConcept.html">LogicConcept</a></code>
+    </span>
+    
+
+            
+
+            
+                <span class="param-attributes">
+                
+
+                
+
+                
+                </span>
+            
+
+            
+
+            <div class="param-description"><p>the LogicConcept in which to do the work</p></div>
+            
+        </li>
+
+    
+
+        <li>
+            
+                <span class="param-name">callback</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>function</code>
+    </span>
+    
+
+            
+
+            
+                <span class="param-attributes">
+                
+                    &lt;optional&gt;<br>
+                
+
+                
+
+                
+                </span>
+            
+
+            
+
+            <div class="param-description"><p>the handler for all symbols that are
+eligible for implicit declaration, as described above</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="module-Scoping.html#.implicitDeclarations">implicitDeclarations()</a></li>
+            
+                <li><a href="module-Scoping.html#.addImplicitDeclaration">addImplicitDeclaration()</a></li>
+            
+                <li><a href="module-Scoping.html#.clearImplicitDeclarations">clearImplicitDeclarations()</a></li>
+            
+                <li><a href="module-Scoping.html#.scopeErrors">scopeErrors()</a></li>
+            
+                <li><a href="module-Scoping.html#.addScopeError">addScopeError()</a></li>
+            
+                <li><a href="module-Scoping.html#.clearScopeErrors">clearScopeErrors()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="scoping.js.html">scoping.js</a><a href="scoping.js.html#source.340">, line 340</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+    
+
+    
+
+    
 </article>
 
 </section>
+
+
+
 
   </div>
 </main>
 
 <footer class="layout-footer">
   <div class="container">
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.10</a> on Fri Jul 01 2022 16:40:34 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.10</a> on Fri Jul 01 2022 16:40:33 GMT+0000 (Coordinated Universal Time)
   </div>
 </footer>
 
