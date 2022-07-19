@@ -327,9 +327,9 @@ export class Problem {
      * 
      * @yields {Solution} the next solution to this Problem
      * 
-     * {@see Problem#firstSolution firstSolution()}
-     * {@see Problem#isSolvable isSolvable()}
-     * {@see Problem#numSolutions numSolutions()}
+     * @see {@link Problem#firstSolution firstSolution()}
+     * @see {@link Problem#isSolvable isSolvable()}
+     * @see {@link Problem#numSolutions numSolutions()}
      */
     *solutions () {
         const solutionsSeen = [ ]
