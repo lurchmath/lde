@@ -8,7 +8,7 @@ import { Constraint } from "./constraint.js"
 import { Substitution } from "./substitution.js"
 import { Solution } from "./solution.js"
 import {
-    constantEF, projectionEF, applicationEF, bindingEF, fullBetaReduce, alphaRenamed
+    constantEF, projectionEF, applicationEF, fullBetaReduce, alphaRenamed
 } from './expression-functions.js'
 import { NewSymbolStream } from "./new-symbol-stream.js"
 
