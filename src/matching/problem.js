@@ -554,9 +554,9 @@ export class Problem {
      * @returns {Solution} the first solution to this matching problem, or
      *   `undefined` if the problem has no solutions
      * 
-     * {@see Problem#solutions solutions()}
-     * {@see Problem#isSolvable isSolvable()}
-     * {@see Problem#numSolutions numSolutions()}
+     * @see {@link Problem#solutions solutions()}
+     * @see {@link Problem#isSolvable isSolvable()}
+     * @see {@link Problem#numSolutions numSolutions()}
      */
     firstSolution () {
         for ( let solution of this.solutions() ) return solution
@@ -574,10 +574,10 @@ export class Problem {
      * @returns {boolean} `true` if and only if there is at least one solution
      *   to this matching problem, and `false` otherwise
      * 
-     * {@see Problem#solutions solutions()}
-     * {@see Problem#firstSolution firstSolution()} (including comments about
+     * @see {@link Problem#solutions solutions()}
+     * @see {@link Problem#firstSolution firstSolution()} (including comments about
      *   caching)
-     * {@see Problem#numSolutions numSolutions()}
+     * @see {@link Problem#numSolutions numSolutions()}
      */
     isSolvable () {
         return !!this.firstSolution()
@@ -594,9 +594,9 @@ export class Problem {
      * 
      * @returns {integer} the number of solutions to this matching problem
      * 
-     * {@see Problem#solutions solutions()}
-     * {@see Problem#isSolvable isSolvable()}
-     * {@see Problem#firstSolution firstSolution()} (including comments about
+     * @see {@link Problem#solutions solutions()}
+     * @see {@link Problem#isSolvable isSolvable()}
+     * @see {@link Problem#firstSolution firstSolution()} (including comments about
      *   caching)
      */
     numSolutions () {
