@@ -198,11 +198,13 @@ export class LogicConcept extends MathConcept {
      *  * An {@link Application Application} is written using LISP notation.
      *    Function application requires at least one argument (no empty paren
      *    pairs).  For example, you might write $\sin x$ as `(sin x)`.
-     *  * A {@link Binding Binding} expression (quantifier, summation, etc.)
-     *    is written just like a function application but with a comma before
-     *    the body.  All children before the body and after the first child
-     *    must be {@link Symbol Symbols}, and are the bound variables.
-     *    Example:  `(∀ x , (P x))` means $\forall x, P(x)$.
+     *  * A {@link BindingExpression BindingExpression} is written as a series
+     *    of {@link Symbol Symbols}, separated by commas, followed by another
+     *    comma, and then the body expression.  All children before the body and
+     *    after the first child must be {@link Symbol Symbols}, and are the
+     *    bound variables.  Example:  `x , (P x)` means $P(x)$ with $x$ bound.
+     *    Consequently, could write, for example, `(∀ x , (P x))` to mean the
+     *    application of the `∀` symbol to the binding `x , (P x)`.
      *  * A variable {@link Declaration Declaration} lists the declared
      *    {@link Symbol Symbols} in brackets, followed by the keyword `var`
      *    followed by an optional body that is an assumption made about the
@@ -214,9 +216,6 @@ export class LogicConcept extends MathConcept {
      *  * An {@link Environment Environment} is written with its children
      *    separated by spaces and surrounded in curly brackets.  Example:
      *    `{ child1 child2 etc }`.
-     *  * A {@link Formula Formula} (which is a subclass of
-     *    {@link Environment Environment}) uses `{*` and `*}` as the
-     *    grouping markers instead of undecorated curly brackets.
      *  * Any {@link Environment Environment},
      *    {@link Declaration Declaration}, or
      *    {@link Expression#isOutermost outermost Expression} can be marked
@@ -264,15 +263,13 @@ export class LogicConcept extends MathConcept {
             string = string.substring( match[0].length )
         }
         // parsing data
-        const groupers =
-            [ [ '{*', '*}' ], [ '{', '}' ], [ '(', ')' ], [ '[', ']' ] ]
+        const groupers = [ [ '{', '}' ], [ '(', ')' ], [ '[', ']' ] ]
         const openGroupRE = /^\{\*|^\{|^\(|^\[/
         const closeGroupRE = /^\*\}|^\}|^\)|^\]/
         const stringRE = /^"(?:[^"\\\n]|\\"|\\\\)*"|^'(?:[^'\\\n]|\\'|\\\\)*'/
         const commentRE = /^\/\/.*\n/
         const givenRE = /^:/
         const bindingRE = /^,/
-        const declarationRE = /^var\b|^const\b/
         const attributesRE = /^[+][{].*(?:\n|$)/
         const whitespaceRE = /^\s/
         const symbolRE = /^(?:(?!,|\(|\)|\{|\}|\[|\]|:)\S)+/
@@ -286,7 +283,7 @@ export class LogicConcept extends MathConcept {
             return match && match[0].length == str.length
         }
         // stack management
-        const stack = [ ]
+        let stack = [ ]
         const save = x => stack.push( x || match[0] )
         const restore = () => {
             let result = [ ]
@@ -300,7 +297,57 @@ export class LogicConcept extends MathConcept {
                 if ( isOpenGrouper( stack[i] ) ) return stack[i]
             return
         }
-        const allOpenGroupers = () => stack.filter( isOpenGrouper )
+        // tool for processing commas into bindings
+        const handleCommas = group => {
+            // groups may not begin or end with commas
+            if ( exactMatch( bindingRE, group.contents[0] ) )
+                problem( 'Group begins with a comma' )
+            if ( exactMatch( bindingRE, group.contents.last() ) )
+                problem( 'Group ends with a comma' )
+            // utility function
+            const isSymbol = x => typeof( x ) == 'string' &&
+                ( exactMatch( stringRE, x ) || exactMatch( symbolRE, x ) )
+            const isModifier = x => x.type == 'attributes'
+            // process all "sym , body" segments inside this group
+            for ( let i = group.contents.length - 1 ; i >= 0 ; i-- ) {
+                if ( exactMatch( bindingRE, group.contents[i] ) ) {
+                    // find the next thing that is not a JSON modifier
+                    let j
+                    for ( j = i - 1 ; j >= 0 ; j-- )
+                        if ( !isModifier( group.contents[j] ) ) break
+                    let lhs = group.contents[j]
+                    // unary case: symbol , body
+                    // (just convert it to the n-ary case)
+                    if ( isSymbol( lhs ) ) {
+                        group.contents.splice( j, i-j, lhs = {
+                            type : '( )',
+                            contents : group.contents.slice( j, i ),
+                            isBinding : false
+                        } )
+                        i = j + 1
+                    }
+                    // ensure that in n-ary case, no modifier applies to the
+                    // whole list of attributes
+                    if ( j != i - 1 )
+                        problem( 'Cannot modify a list of bound symbols' )
+                    // n-ary case: ( symbols... ) , body
+                    let rhs = group.contents[i+1]
+                    if ( lhs.type == '( )'
+                      && lhs.hasOwnProperty( 'contents' )
+                      && lhs.contents.every( x =>
+                            isSymbol( x ) || isModifier( x ) ) ) {
+                        group.contents.splice( j, i-j+2, {
+                            type : rhs.type ? rhs.type : '( )',
+                            contents : [ ...lhs.contents, rhs ],
+                            isBinding : true
+                        } )
+                    // error case: you can't do anything else , body
+                    } else {
+                        problem( 'Invalid left hand side of binding' )
+                    }
+                }
+            }
+        }
         // tokenize and do a little parsing
         while ( string.length > 0 ) {
             // skip comments and whitespace
@@ -314,10 +361,9 @@ export class LogicConcept extends MathConcept {
                 } catch ( e ) {
                     problem( 'Invalid JSON attribute: ' + e.message )
                 }
-                // can't modify a comma, colon, var/const, or nothing
+                // can't modify a comma, colon, or nothing
                 if ( stack.length == 0 || isLast( givenRE )
-                  || isLast( bindingRE ) || isLast( declarationRE )
-                  || isOpenGrouper( stack.last() ) )
+                  || isLast( bindingRE ) || isOpenGrouper( stack.last() ) )
                     problem( 'Attribute JSON has no target to modify' )
                 save( { type : 'attributes', data : json } )
                 shiftNext()
@@ -328,8 +374,6 @@ export class LogicConcept extends MathConcept {
                 if ( outer == '(' && inner != '(' )
                     problem( 'Expressions can contain only Symbols or '
                            + 'other Expressions' )
-                if ( inner == '{*' && allOpenGroupers().includes( '[' ) )
-                    problem( 'Declaration bodies cannot contain Formulas' )
                 save()
                 shiftNext()
             // handle close groupers
@@ -349,50 +393,42 @@ export class LogicConcept extends MathConcept {
                     problem( 'Cannot end an environment with a colon' )
                 // handle meaning of a declaration, or errors it might contain:
                 if ( group.type == '[ ]' ) {
-                    // 1. wrong number of var/const in a declaration
-                    if ( group.contents.filter( x =>
-                            declarationRE.test( x ) ).length != 1 )
-                        problem( 'A declaration must have '
-                               + 'exactly one var/const' )
+                    // 1. cannot mark a declaration as given
+                    if ( isLast( givenRE ) )
+                        problem( 'Cannot mark a declaration as given' )
                     // 2. not enough children
-                    if ( group.contents.length <= 1 )
-                        problem( 'A declaration must have at least 2 children' )
-                    // 3. wrong placement of var/const in a declaration
-                    if ( declarationRE.test( group.contents[n-1] ) ) {
-                        group.declarationType = group.contents.pop()
-                        group.hasBody = false
-                    } else if ( declarationRE.test( group.contents[n-2] ) ) {
-                        const body = group.contents.pop()
-                        group.declarationType = group.contents.pop()
-                        group.contents.push( body )
+                    if ( group.contents.length == 0 )
+                        problem( 'Empty declarations are not permitted' )
+                    // 3. More than one comma is invalid syntax
+                    const numCommas = group.contents.filter( x =>
+                        exactMatch( bindingRE, x ) ).length
+                    if ( numCommas > 1 )
+                        problem( 'A declaration can have at most one comma' )
+                    // 4. If 2nd-to-last item (but not item #0) is a comma,
+                    //    declaration has a body
+                    if ( n >= 3
+                      && exactMatch( bindingRE, group.contents[n-2] ) ) {
                         group.hasBody = true
+                        group.contents = group.contents.without( n-2 )
+                    // 5. If some other item is a comma, it's misplaced.
+                    } else if ( numCommas > 0 ) {
+                        problem( 'Misplaced comma inside declaration' )
+                    // 6. No item is a comma, so it's a no-body binding.
                     } else {
-                        problem( 'Var/const appears too early in declaration' )
+                        group.hasBody = false
                     }
                 }
                 // handle meaning of an expr, or errors it might contain:
                 if ( group.type == '( )' ) {
-                    // 1. Empty expression is invalid syntax
+                    // Empty expression is invalid syntax
                     if ( group.contents.length == 0 )
                         problem( 'Empty applications are not permitted' )
-                    // 2. More than one comma is invalid syntax
-                    const numCommas = group.contents.filter( x =>
-                        exactMatch( bindingRE, x ) ).length
-                    if ( numCommas > 1 )
-                        problem( 'An expression can have at most one comma' )
-                    // 3. If 2nd-to-last item (but not item #0) is a comma,
-                    // group is either a binding or a declaration
-                    if ( n >= 3
-                      && exactMatch( bindingRE, group.contents[n-2] ) ) {
-                        group.isBinding = true
-                        group.contents = group.contents.without( n-2 )
-                    // 4. If some other item is a comma, it's misplaced.
-                    } else if ( numCommas > 0 ) {
-                        problem( 'Misplaced comma inside expression' )
-                    // 5. No item is a comma, so it's an application.
-                    } else {
-                        group.isBinding = false
-                    }
+                    // Non-empty is good...process any interior bindings
+                    handleCommas( group )
+                }
+                // handle meaning of an env:
+                if ( group.type == '{ }' ) {
+                    handleCommas( group )
                 }
                 save( group )
                 shiftNext()
@@ -412,15 +448,9 @@ export class LogicConcept extends MathConcept {
                 save()
                 shiftNext()
             } else if ( isNext( bindingRE ) ) {
-                // make sure it's inside an expression
-                if ( lastOpenGrouper() != '(' )
-                    problem( 'Cannot put a comma outside an expression' )
-                save()
-                shiftNext()
-            } else if ( isNext( declarationRE ) ) {
-                // make sure it's inside a declaration
-                if ( lastOpenGrouper() != '[' )
-                    problem( 'Cannot put var/const outside a declaration' )
+                // make sure it's not after another comma
+                if ( isLast( bindingRE ) )
+                    problem( 'Cannot put two commas in a row' )
                 save()
                 shiftNext()
             } else if ( isNext( symbolRE ) ) {
@@ -440,6 +470,10 @@ export class LogicConcept extends MathConcept {
         if ( unclosed.length > 0 )
             problem( 'Reached end of input while still inside '
                 + unclosed.join( ' and ' ) )
+        // there may be "v1 , ... vn , body" sequences at the top level
+        const virtualGroup = { type : '{ }', contents : stack }
+        handleCommas( virtualGroup )
+        stack = virtualGroup.contents
         // how to process a sequence of tokens and apply modifiers to siblings
         const applyModifiers = sequence => {
             let i = 0
@@ -497,21 +531,23 @@ export class LogicConcept extends MathConcept {
                 children = applyModifiers( children )
                 // now all children are LogicConcepts, so we can build them
                 // into whatever compound object is appropriate by tree.type:
-                // Formulas
-                if ( tree.type == '{* *}' ) {
-                    const Formula = MathConcept.subclasses.get( 'Formula' )
-                    return new Formula( ...children )
                 // Environments
-                } else if ( tree.type == '{ }' ) {
-                    const Environment =
-                        MathConcept.subclasses.get( 'Environment' )
-                    return new Environment( ...children )
+                if ( tree.type == '{ }' ) {
+                    if ( tree.isBinding ) {
+                        const BindingEnvironment =
+                            MathConcept.subclasses.get( 'BindingEnvironment' )
+                        return new BindingEnvironment( ...children )
+                    } else {
+                        const Environment =
+                            MathConcept.subclasses.get( 'Environment' )
+                        return new Environment( ...children )
+                    }
                 // Expressions
                 } else if ( tree.type == '( )' ) {
                     if ( tree.isBinding ) {
-                        const Binding =
-                            MathConcept.subclasses.get( 'Binding' )
-                        return new Binding( ...children )
+                        const BindingExpression =
+                            MathConcept.subclasses.get( 'BindingExpression' )
+                        return new BindingExpression( ...children )
                     } else {
                         const Application =
                             MathConcept.subclasses.get( 'Application' )
@@ -521,13 +557,10 @@ export class LogicConcept extends MathConcept {
                 } else if ( tree.type == '[ ]' ) {
                     const Declaration =
                         MathConcept.subclasses.get( 'Declaration' )
-                    const type = tree.declarationType == 'var' ?
-                        Declaration.Variable : Declaration.Constant
                     return tree.hasBody ?
-                        new Declaration( type,
-                            children.slice( 0, -1 ),
-                            children.last() ) :
-                        new Declaration( type, children )
+                        new Declaration( children.slice( 0, -1 ),
+                                         children.last() ) :
+                        new Declaration( children )
                 // This should never happen:
                 } else {
                     problem( 'Unknown group type: ' + tree.type )
@@ -551,9 +584,21 @@ export class LogicConcept extends MathConcept {
      * produces an object that {@link MathConcept#equals equals()} the
      * original.
      * 
+     * @param {Function} [formatter] - an optional function that takes three
+     *   arguments and returns the desired corresponding text output for them.
+     *   This can be used to greatly customize the output of this function.  By
+     *   default, the formatter used produces standard putdown.  If you use a
+     *   different formatter, you can customize your putdown with colors, HTML
+     *   tags, etc., as needed.  The three arguments are (1) the LC whose
+     *   putdown is being computed, (2) the putdown string computed for it so
+     *   far, with no attributes attached, and (3) the array of keys of
+     *   attributes that should be included in the output.  The formatter
+     *   function is responsible for creating the corresponding JSON for these
+     *   attributes.
+     * 
      * @returns {String} putdown notation for this LogicConcept instance
      */
-    toPutdown () {
+    toPutdown ( formatter ) {
         // Although normally it would make sense to use the dynamic dispatch
         // built into the JavaScript language to accompish this task, we will
         // reinvent the wheel a little bit here just in order to keep this
@@ -564,23 +609,31 @@ export class LogicConcept extends MathConcept {
         const isTooBig = text => /\n/.test( text ) || text.length > 50
         const childResults = this.children().map( child => child.toPutdown() )
         const Environment = MathConcept.subclasses.get( 'Environment' )
-        const given = ( ( !this.parent()
+        const Declaration = MathConcept.subclasses.get( 'Declaration' )
+        const given = ( !( this instanceof Declaration )
+                     && ( !this.parent()
                        || this.parent() instanceof Environment )
                      && this.isA( 'given' ) ) ? ':' : ''
+        if ( !formatter ) formatter = ( lc, putdown, keys ) => {
+            const attrText = key => '+{' + JSON.stringify(key) + ':'
+                + JSON.stringify(lc.getAttribute(key)) + '}\n'
+            if ( keys.length == 0 )
+                return putdown
+            else if ( keys.length == 1 )
+                return putdown + ' ' + attrText( keys[0] )
+            else
+                return putdown + '\n    '
+                     + keys.map( attrText ).join( '    ' )
+        }
         const finalize = ( text, skip = [ ] ) => {
-            let attributes = [ ]
+            let keys = [ ]
             skip.push( '_type_given' ) // bad style, but concise
             for ( let key of this.getAttributeKeys() )
                 if ( !skip.includes( key ) )
-                    attributes.push( '+{' + JSON.stringify( key ) + ':'
-                        + JSON.stringify( this.getAttribute( key ) ) + '}' )
-            if ( attributes.length == 0 )
-                attributes = ''
-            else if ( attributes.length == 1 )
-                attributes = ` ${attributes[0]}\n`
-            else
-                attributes = `\n    ${attributes.join('\n    ')}\n`
-            return given + text.replace( /\n\s*\n/g, '\n' ) + attributes
+                    keys.push( key )
+            return formatter( this,
+                              given + text.replace( /\n\s*\n/g, '\n' ),
+                              keys )
         }
         switch ( this.constructor.className ) {
             case 'Symbol':
@@ -594,21 +647,19 @@ export class LogicConcept extends MathConcept {
                 return result
             case 'Application':
                 return finalize( `(${childResults.join( ' ' )})` )
-            case 'Binding':
-                const body = childResults.pop()
-                return finalize( `(${childResults.join( ' ' )} , ${body})` )
+            case 'BindingExpression':
+            case 'BindingEnvironment':
+                const last = childResults.pop()
+                const first = childResults.length > 1 ?
+                    '(' + childResults.join( ' ' ) + ')' : childResults[0]
+                return finalize( first + ' , ' + last )
             case 'Declaration':
-                const Declaration = MathConcept.subclasses.get( 'Declaration' )
-                const type = this.type() == Declaration.Variable ?
-                    'var' : 'const'
                 if ( this.body() ) {
                     const body = childResults.pop()
                     return finalize(
-                        `[${childResults.join( ' ' )} ${type} ${body}]`,
-                        [ 'declaration type' ] )
+                        `[${childResults.join( ' ' )} , ${body}]` )
                 } else {
-                    return finalize( `[${childResults.join( ' ' )} ${type}]`,
-                        [ 'declaration type' ] )
+                    return finalize( `[${childResults.join( ' ' )}]` )
                 }
             case 'Environment':
                 const envInside = childResults.join( ' ' )
@@ -616,12 +667,6 @@ export class LogicConcept extends MathConcept {
                              isTooBig( envInside ) ?
                              `{\n${indent(childResults.join( '\n' ))}\n}` :
                              `{ ${envInside} }` )
-            case 'Formula':
-                const forInside = childResults.join( ' ' )
-                return finalize( forInside == '' ? '{* *}' :
-                             isTooBig( forInside ) ?
-                             `{*\n${indent(childResults.join( '\n' ))}\n*}` :
-                             `{* ${forInside} *}` )
             default:
                 throw 'Cannot convert this class to putdown: '
                     + this.constructor.className

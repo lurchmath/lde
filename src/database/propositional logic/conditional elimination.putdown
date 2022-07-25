@@ -5,8 +5,8 @@ names:
  - "->E"
 ---
 
-{*
+{
     :(implies A B)
     :A
     B
-*}
+}

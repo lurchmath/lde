@@ -72,7 +72,7 @@ describe( 'Expression Functions', () => {
         ) ) ).to.equal( true )
         expect( M.isAnEF( M.newEF(
             new LurchSymbol( 'i' ), new LurchSymbol( 'n' ),
-            LogicConcept.fromPutdown( '((sum 1 n) x , (^ x i))' )[0]
+            LogicConcept.fromPutdown( '(sum 1 n x , (^ x i))' )[0]
         ) ) ).to.equal( true )
         // Now make sure that several other kinds of expressions all fail the
         // isAnEF() test.  Such as:
@@ -81,7 +81,7 @@ describe( 'Expression Functions', () => {
         // An Application
         expect( M.isAnEF( new Application( new LurchSymbol( 'x' ) ) ) )
             .to.equal( false )
-        // A Binding
+        // A BindingExpressiomn
         expect( M.isAnEF( LogicConcept.fromPutdown( '(sum i , (f i))' )[0] ) )
             .to.equal( false )
         // An Environment
@@ -169,6 +169,9 @@ describe( 'Expression Functions', () => {
         )
         args = LogicConcept.fromPutdown( '"FOO" "BAR"' )
         result = LogicConcept.fromPutdown( '(+ (- "FOO" 1) (- "BAR" 1))' )[0]
+        // console.log( ef.toPutdown() )
+        // console.log( args.map( x => x.toPutdown() ) )
+        // console.log( M.applyEF( ef, ...args ).toPutdown() )
         expect( M.applyEF( ef, ...args ).equals( result ) ).to.equal( true )
         ef = M.newEF(
             new LurchSymbol( 'i' ), new LurchSymbol( 'n' ),
@@ -241,10 +244,10 @@ describe( 'Expression Functions', () => {
         expect( M.arityOfEF( M.constantEF( 4, B ) ) ).to.equal( 4 )
         // Ensure that constantEF() always creates functions with the requested
         // body.
-        expect( M.constantEF( 1, B ).body().equals( B ) ).to.equal( true )
-        expect( M.constantEF( 2, B ).body().equals( B ) ).to.equal( true )
-        expect( M.constantEF( 3, C ).body().equals( C ) ).to.equal( true )
-        expect( M.constantEF( 4, C ).body().equals( C ) ).to.equal( true )
+        expect( M.bodyOfEF( M.constantEF( 1, B ) ).equals( B ) ).to.equal( true )
+        expect( M.bodyOfEF( M.constantEF( 2, B ) ).equals( B ) ).to.equal( true )
+        expect( M.bodyOfEF( M.constantEF( 3, C ) ).equals( C ) ).to.equal( true )
+        expect( M.bodyOfEF( M.constantEF( 4, C ) ).equals( C ) ).to.equal( true )
         // Ensure that applying a constantEF() always gives the same output.
         expect( M.applyEF( M.constantEF( 1, B ), new LurchSymbol( 5 ) )
             .equals( B ) ).to.equal( true )
@@ -262,14 +265,15 @@ describe( 'Expression Functions', () => {
         ).to.equal( true )
         // Ensure that constantEF() avoids using parameters that appear in the
         // body
-        const defaultParam =
-            M.constantEF( 1, new LurchSymbol( 1 ) ).boundVariables()[0]
+        const defaultParam = M.parametersOfEF(
+            M.constantEF( 1, new LurchSymbol( 1 ) ) )[0]
         const shouldAvoidIt = M.constantEF( 1, defaultParam )
         expect( M.isAnEF( shouldAvoidIt ) ).to.equal( true )
         expect( M.arityOfEF( shouldAvoidIt ) ).to.equal( 1 )
-        expect( shouldAvoidIt.boundVariables()[0].equals( defaultParam ) )
-            .to.equal( false )
-        expect( shouldAvoidIt.body().equals( defaultParam ) ).to.equal( true )
+        expect( M.parametersOfEF( shouldAvoidIt )[0]
+            .equals( defaultParam ) ).to.equal( false )
+        expect( M.bodyOfEF( shouldAvoidIt ).equals( defaultParam ) )
+            .to.equal( true )
         // Ensure that projectionEF() always creates functions with the
         // requested arity.
         expect( M.arityOfEF( M.projectionEF( 1, 0 ) ) ).to.equal( 1 )
@@ -280,13 +284,17 @@ describe( 'Expression Functions', () => {
         // copy of one of the parameters--and the correct one.
         let ef
         ef = M.projectionEF( 1, 0 )
-        expect( ef.body().equals( ef.boundVariables()[0] ) ).to.equal( true )
+        expect( M.bodyOfEF( ef ).equals( M.parametersOfEF( ef )[0] ) )
+            .to.equal( true )
         ef = M.projectionEF( 2, 0 )
-        expect( ef.body().equals( ef.boundVariables()[0] ) ).to.equal( true )
+        expect( M.bodyOfEF( ef ).equals( M.parametersOfEF( ef )[0] ) )
+            .to.equal( true )
         ef = M.projectionEF( 3, 1 )
-        expect( ef.body().equals( ef.boundVariables()[1] ) ).to.equal( true )
+        expect( M.bodyOfEF( ef ).equals( M.parametersOfEF( ef )[1] ) )
+            .to.equal( true )
         ef = M.projectionEF( 4, 1 )
-        expect( ef.body().equals( ef.boundVariables()[1] ) ).to.equal( true )
+        expect( M.bodyOfEF( ef ).equals( M.parametersOfEF( ef )[1] ) )
+            .to.equal( true )
         // Ensure that applying a projectionEF() gives a copy of one of the
         // arguments as output--but just a copy, not the actual argument.
         let args, result
@@ -321,10 +329,10 @@ describe( 'Expression Functions', () => {
         names = [ 'A', 'B' ]
         ef = M.applicationEF( arity, names )
         expect( M.isAnEF( ef ) ).to.equal( true )
-        params = ef.boundVariables()
+        params = M.parametersOfEF( ef )
         expect( M.arityOfEF( ef ) ).to.equal( arity )
         expect( params.length ).to.equal( arity )
-        body = ef.body()
+        body = M.bodyOfEF( ef )
         expect( body instanceof Application ).to.equal( true )
         expect( body.numChildren() ).to.equal( names.length )
         child = body.child( 0 )
@@ -347,12 +355,12 @@ describe( 'Expression Functions', () => {
         names = [ 'v2', 'v1' ]
         ef = M.applicationEF( arity, names )
         expect( M.isAnEF( ef ) ).to.equal( true )
-        params = ef.boundVariables()
+        params = M.parametersOfEF( ef )
         expect( M.arityOfEF( ef ) ).to.equal( arity )
         expect( params.length ).to.equal( arity )
         expect( params[0].text() ).not.to.be.oneOf( names ) // avoided capture
         expect( params[1].text() ).not.to.be.oneOf( names ) // avoided capture
-        body = ef.body()
+        body = M.bodyOfEF( ef )
         expect( body instanceof Application ).to.equal( true )
         expect( body.numChildren() ).to.equal( names.length )
         child = body.child( 0 )
@@ -377,10 +385,10 @@ describe( 'Expression Functions', () => {
                   new LurchSymbol( 'z' ) ]
         ef = M.applicationEF( arity, names )
         expect( M.isAnEF( ef ) ).to.equal( true )
-        params = ef.boundVariables()
+        params = M.parametersOfEF( ef )
         expect( M.arityOfEF( ef ) ).to.equal( arity )
         expect( params.length ).to.equal( arity )
-        body = ef.body()
+        body = M.bodyOfEF( ef )
         expect( body instanceof Application ).to.equal( true )
         expect( body.numChildren() ).to.equal( names.length )
         child = body.child( 0 )
@@ -388,19 +396,22 @@ describe( 'Expression Functions', () => {
         expect( child.numChildren() ).to.equal( params.length + 2 )
         expect( child.child( 1 ) instanceof LurchSymbol ).to.equal( true )
         expect( child.child( 1 ).text() ).to.equal( names[0].text() )
-        expect( child.child( 2 ).equals( ef.boundVariables()[0] ) ).to.equal( true )
+        expect( child.child( 2 ).equals( M.parametersOfEF( ef )[0] ) )
+            .to.equal( true )
         child = body.child( 1 )
         expect( M.isAnEFA( child ) ).to.equal( true )
         expect( child.numChildren() ).to.equal( params.length + 2 )
         expect( child.child( 1 ) instanceof LurchSymbol ).to.equal( true )
         expect( child.child( 1 ).text() ).to.equal( names[1].text() )
-        expect( child.child( 2 ).equals( ef.boundVariables()[0] ) ).to.equal( true )
+        expect( child.child( 2 ).equals( M.parametersOfEF( ef )[0] ) )
+            .to.equal( true )
         child = body.child( 2 )
         expect( M.isAnEFA( child ) ).to.equal( true )
         expect( child.numChildren() ).to.equal( params.length + 2 )
         expect( child.child( 1 ) instanceof LurchSymbol ).to.equal( true )
         expect( child.child( 1 ).text() ).to.equal( names[2].text() )
-        expect( child.child( 2 ).equals( ef.boundVariables()[0] ) ).to.equal( true )
+        expect( child.child( 2 ).equals( M.parametersOfEF( ef )[0] ) )
+            .to.equal( true )
     } )
 
     it( 'Should let us construct valid EFAs', () => {
@@ -485,7 +496,7 @@ describe( 'Expression Functions', () => {
         // An Application
         expect( M.isAnEFA( new Application( new LurchSymbol( 'x' ) ) ) )
             .to.equal( false )
-        // A Binding
+        // A BindingExpression
         expect( M.isAnEFA( LogicConcept.fromPutdown( '(sum i , (f i))' )[0] ) )
             .to.equal( false )
         // An Environment

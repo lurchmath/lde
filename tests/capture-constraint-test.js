@@ -1,6 +1,6 @@
 
 import { Application } from '../src/application.js'
-import { Binding } from '../src/binding.js'
+import { BindingExpression } from '../src/binding-expression.js'
 import { Constraint } from '../src/matching/constraint.js'
 import { Substitution } from '../src/matching/substitution.js'
 import { LogicConcept } from '../src/logic-concept.js'
@@ -130,7 +130,7 @@ describe( 'Capture Constraints', () => {
         b = new LurchSymbol( 'thing' ).asA( M.metavariable )
         f = new LurchSymbol( 'temp' )
         CC = new M.CaptureConstraint( b, f )
-        CC.free = new Binding( new LurchSymbol( 'some' ), b.copy(),
+        CC.free = new BindingExpression( new LurchSymbol( 'some' ), b.copy(),
             new Application( new LurchSymbol( 'what' ),
                              new LurchSymbol( 'a' ), b.copy() ) )
         expect( CC.satisfied() ).to.be.undefined
@@ -181,7 +181,7 @@ describe( 'Capture Constraints', () => {
         expect( CC.bound.equals( b ) ).to.equal( true )
         expect( CC.free.equals( S.expression ) ).to.equal( true )
         expect( CC.free ).not.to.equal( S.expression )
-     } )
+    } )
 
 } )
 
@@ -222,8 +222,8 @@ describe( 'Capture Constraint sets', () => {
 
         let pat1, pat2, C
         pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
-        pat1.child( 1 ).makeIntoA( M.metavariable ) // outer x
-        pat1.index( [ 2, 2, 1, 1 ] ).makeIntoA( M.metavariable ) // inner x
+        pat1.child( 1, 0 ).makeIntoA( M.metavariable ) // outer x
+        pat1.child( 1, 1, 1, 1, 1, 1 ).makeIntoA( M.metavariable ) // inner x
         pat2 = new LurchSymbol( 'foo' ).asA( M.metavariable )
         expect( () => C = new M.CaptureConstraints( pat1, pat2 ) )
             .not.to.throw()
@@ -260,8 +260,8 @@ describe( 'Capture Constraint sets', () => {
             LogicConcept.fromPutdown( '(∀ x , (= (+ x 1) y))' )[0],
             LogicConcept.fromPutdown( '(Happy Halloween)' )[0]
         )
-        con1.pattern.child( 1 ).makeIntoA( M.metavariable ) // outer x
-        con1.pattern.index( [ 2, 1, 1 ] ).makeIntoA( M.metavariable ) // inner x
+        con1.pattern.child( 1, 0 ).makeIntoA( M.metavariable ) // outer x
+        con1.pattern.child( 1, 1, 1, 1 ).makeIntoA( M.metavariable ) // inner x
         con2 = new Constraint(
             new LurchSymbol( 'foo' ).makeIntoA( M.metavariable ),
             new LurchSymbol( 'bar' )

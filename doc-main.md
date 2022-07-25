@@ -32,19 +32,23 @@ Later, complex math concepts will be able to be compiled down to a set of
 simpler special cases that can be processed by the LDE.  We call that simpler
 subset the {@link LogicConcept Logic Concepts}, or LCs for short.
 
-Logic concepts come in four types: {@link Environment Environment},
-{@link Formula Formula}, {@link Declaration Declaration}, and
-{@link Expression Expression}.
+Logic concepts come in three types: {@link Environment Environment},
+{@link Declaration Declaration}, and {@link Expression Expression}.
+
+Environments are either the base type, {@link Environment Environment}, or a
+subclass called {@link BindingEnvironment Binding Environment}, which can bind
+symbols, such as when constructing subproofs about arbitrary variables.
 
 Expressions come in three types: {@link Symbol Symbol},
-{@link Application Application}, and {@link Binding Binding}.
+{@link Application Application}, and
+{@link BindingExpression Binding Expression}.
 
 ## Other tools
 
 Other basic tools support the classes above, including:
 
- * a class for {@link Connection connecting} math concept instances irrespective of
-   tree structure,
+ * a class for {@link Connection connecting} math concept instances
+   irrespective of tree structure,
  * functions for working with {@link JSON JSON} and
    {@link predictableStringify serializing it}.
 
@@ -63,5 +67,5 @@ corresponding metadata.
 set up your own development environment)
 
 [Design wiki](http://github.com/lurchmath/lde/wiki) (currently out-of-date; do
-not trust the content of that wiki until it has been updatedm, at which point
+not trust the content of that wiki until it has been updated, at which point
 we will update this note to reflect that it has been updated)

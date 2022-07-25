@@ -1,7 +1,6 @@
 
 import { metavariable, containsAMetavariable } from './metavariables.js'
 import { Symbol as LurchSymbol } from '../symbol.js'
-import { Binding } from '../binding.js'
 import { LogicConcept } from '../logic-concept.js'
 import { Constraint } from './constraint.js'
 
@@ -339,18 +338,16 @@ export class CaptureConstraints {
                 } )
             }
         }
-        // Recursive case: recur on all children, but if this pattern is a
-        // binding, take care to add a layer to the bound variable hierarchy
-        // before recurring.
-        let recurOn = pattern.children()
-        if ( pattern instanceof Binding ) {
-            // process the head not as part of the quantified scope
-            this.scan( recurOn.shift(), bound )
-            // process everything else as part of the quantified scope later
+        if ( pattern.binds() ) {
+            // Recursive case 1: If this pattern binds symbols, take care to add
+            // a layer to the bound variable hierarchy before recurring.
             bound = bound.slice()
-            bound.unshift( pattern.boundVariables() )
+            bound.unshift( pattern.boundSymbols() )
+            this.scan( pattern.lastChild(), bound )
+        } else {
+            // Recursive case 2: No binding here; just process all children.
+            pattern.children().forEach( child => this.scan( child, bound ) )
         }
-        recurOn.forEach( child => this.scan( child, bound ) )
     }
 
     /**

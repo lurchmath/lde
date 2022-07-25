@@ -775,7 +775,7 @@ const putdownDatabase = [
         "syntax": "invalid"
       }
     },
-    "content": "\n// This file contains several different variable and constant declarations,\n// but one of them has an invalid structure that is a putdown syntax error.\n\n[x y z var] // valid\n[A B C const] // valid\n[x y z var (P x y z)] // valid\n[A B C const { (Q A) (R B) (S T) }] // valid\n[x y z var {* A B C *}] // invalid\n"
+    "content": "\n{* A B C *} // invalid because we deleted formula notation\n"
   },
   {
     "filename": "/parsing tests/valid syntax 1.putdown",
@@ -795,7 +795,7 @@ const putdownDatabase = [
         "length": 1
       }
     },
-    "content": "\n// This file contains some nested Environments, Expressions, and Declarations,\n// all using valid putdown syntax.\n\n{\n    // Let x be arbitrary.\n    :[x var]\n    // Assume x is a real number.\n    :(in x R)\n    // Claim that x is a complex number, by Theorem 21\n    (in x C) +{\"reason\":\"Theorem 21\"}\n}\n"
+    "content": "\n// This file contains some nested Environments, Expressions, and Declarations,\n// all using valid putdown syntax.\n\n{\n    // Let x be arbitrary.\n    [x]\n    // Assume x is a real number.\n    :(in x R)\n    // Claim that x is a complex number, by Theorem 21\n    (in x C) +{\"reason\":\"Theorem 21\"}\n}\n"
   },
   {
     "filename": "/propositional logic/all rules.putdown",
@@ -814,7 +814,7 @@ const putdownDatabase = [
         "biconditional elimination.putdown"
       ]
     },
-    "content": "\n// Declare the logical connectives as constants:\n\n:[and or not implies iff const]\n\n\n{*\n    :A\n    :B\n    (and A B)\n*}\n\n\n{*\n    :(and A B)\n    A\n    B\n*}\n\n\n{*\n    :A\n    (or A B)\n*}\n\n{*\n    :B\n    (or A B)\n*}\n\n\n{*\n    :(or A B)\n    :(implies A C)\n    :(implies B C)\n    C\n*}\n\n\n{*\n    :{\n        :A\n        B\n    }\n    (implies A B)\n*}\n\n\n{*\n    :(implies A B)\n    :A\n    B\n*}\n\n\n{*\n    :{\n        :A\n        B\n        (not B)\n    }\n    (not A)\n*}\n\n\n{*\n    :{\n        :(not A)\n        B\n        (not B)\n    }\n    A\n*}\n\n\n{*\n    :{\n        :A\n        B\n    }\n    :{\n        :B\n        A\n    }\n    (iff A B)\n*}\n\n\n{*\n    :(iff A B)\n    :A\n    B\n*}\n\n{*\n    :(iff A B)\n    :B\n    A\n*}\n\n",
+    "content": "\n// Declare the logical connectives as constants:\n\n[and or not implies iff const]\n\n\n{\n    :A\n    :B\n    (and A B)\n}\n\n\n{\n    :(and A B)\n    A\n    B\n}\n\n\n{\n    :A\n    (or A B)\n}\n\n{\n    :B\n    (or A B)\n}\n\n\n{\n    :(or A B)\n    :(implies A C)\n    :(implies B C)\n    C\n}\n\n\n{\n    :{\n        :A\n        B\n    }\n    (implies A B)\n}\n\n\n{\n    :(implies A B)\n    :A\n    B\n}\n\n\n{\n    :{\n        :A\n        B\n        (not B)\n    }\n    (not A)\n}\n\n\n{\n    :{\n        :(not A)\n        B\n        (not B)\n    }\n    A\n}\n\n\n{\n    :{\n        :A\n        B\n    }\n    :{\n        :B\n        A\n    }\n    (iff A B)\n}\n\n\n{\n    :(iff A B)\n    :A\n    B\n}\n\n{\n    :(iff A B)\n    :B\n    A\n}\n\n",
     "original": ""
   },
   {
@@ -826,7 +826,7 @@ const putdownDatabase = [
         "<->E"
       ]
     },
-    "content": "\n{*\n    :(iff A B)\n    :A\n    B\n*}\n\n{*\n    :(iff A B)\n    :B\n    A\n*}\n"
+    "content": "\n{\n    :(iff A B)\n    :A\n    B\n}\n\n{\n    :(iff A B)\n    :B\n    A\n}\n"
   },
   {
     "filename": "/propositional logic/biconditional introduction.putdown",
@@ -837,7 +837,7 @@ const putdownDatabase = [
         "->I"
       ]
     },
-    "content": "\n{*\n    :{\n        :A\n        B\n    }\n    :{\n        :B\n        A\n    }\n    (iff A B)\n*}\n"
+    "content": "\n{\n    :{\n        :A\n        B\n    }\n    :{\n        :B\n        A\n    }\n    (iff A B)\n}\n"
   },
   {
     "filename": "/propositional logic/conditional elimination.putdown",
@@ -848,7 +848,7 @@ const putdownDatabase = [
         "->E"
       ]
     },
-    "content": "\n{*\n    :(implies A B)\n    :A\n    B\n*}\n"
+    "content": "\n{\n    :(implies A B)\n    :A\n    B\n}\n"
   },
   {
     "filename": "/propositional logic/conditional introduction.putdown",
@@ -859,7 +859,7 @@ const putdownDatabase = [
         "->I"
       ]
     },
-    "content": "\n{*\n    :{\n        :A\n        B\n    }\n    (implies A B)\n*}\n"
+    "content": "\n{\n    :{\n        :A\n        B\n    }\n    (implies A B)\n}\n"
   },
   {
     "filename": "/propositional logic/conjunction elimination.putdown",
@@ -870,7 +870,7 @@ const putdownDatabase = [
         "^E"
       ]
     },
-    "content": "\n{*\n    :(and A B)\n    A\n    B\n*}\n"
+    "content": "\n{\n    :(and A B)\n    A\n    B\n}\n"
   },
   {
     "filename": "/propositional logic/conjunction introduction.putdown",
@@ -881,12 +881,12 @@ const putdownDatabase = [
         "^I"
       ]
     },
-    "content": "\n{*\n    :A\n    :B\n    (and A B)\n*}\n"
+    "content": "\n{\n    :A\n    :B\n    (and A B)\n}\n"
   },
   {
     "filename": "/propositional logic/declare connectives.putdown",
     "metadata": {},
-    "content": "\n// Declare the logical connectives as constants:\n\n:[and or not implies iff const]\n"
+    "content": "\n// Declare the logical connectives as constants:\n\n[and or not implies iff const]\n"
   },
   {
     "filename": "/propositional logic/disjunction elimination.putdown",
@@ -897,7 +897,7 @@ const putdownDatabase = [
         "vE"
       ]
     },
-    "content": "\n{*\n    :(or A B)\n    :(implies A C)\n    :(implies B C)\n    C\n*}\n"
+    "content": "\n{\n    :(or A B)\n    :(implies A C)\n    :(implies B C)\n    C\n}\n"
   },
   {
     "filename": "/propositional logic/disjunction introduction.putdown",
@@ -908,7 +908,7 @@ const putdownDatabase = [
         "vI"
       ]
     },
-    "content": "\n{*\n    :A\n    (or A B)\n*}\n\n{*\n    :B\n    (or A B)\n*}\n"
+    "content": "\n{\n    :A\n    (or A B)\n}\n\n{\n    :B\n    (or A B)\n}\n"
   },
   {
     "filename": "/propositional logic/negation elimination.putdown",
@@ -919,7 +919,7 @@ const putdownDatabase = [
         "-E"
       ]
     },
-    "content": "\n{*\n    :{\n        :(not A)\n        B\n        (not B)\n    }\n    A\n*}\n"
+    "content": "\n{\n    :{\n        :(not A)\n        B\n        (not B)\n    }\n    A\n}\n"
   },
   {
     "filename": "/propositional logic/negation introduction.putdown",
@@ -930,7 +930,7 @@ const putdownDatabase = [
         "-I"
       ]
     },
-    "content": "\n{*\n    :{\n        :A\n        B\n        (not B)\n    }\n    (not A)\n*}\n"
+    "content": "\n{\n    :{\n        :A\n        B\n        (not B)\n    }\n    (not A)\n}\n"
   }
 ]
 

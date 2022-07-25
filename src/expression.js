@@ -19,8 +19,8 @@ import { Environment } from './environment.js'
  * example, $3+k=9$ might have $=$ at the root, with right child $9$ and left
  * child a subtree with $+$ over $3$ and $k$.  Although that is one way to
  * organize expressions into trees, we actually choose a slightly different
- * means of applying functions/operators to arguments, which will be covered
- * in the documentation for the {@link Application} class.
+ * means of applying functions/operators to arguments, which is covered in the
+ * documentation for the {@link Application} class.
  * 
  * Expressions are analogous to what mathematicians typically write inside
  * `$...$` or `$$...$$` math mode in LaTeX.  This distinguishes them from
@@ -29,19 +29,24 @@ import { Environment } from './environment.js'
  * 
  * There are three types of Expressions:
  * 
- *  1. A {@link Symbol}, which is atomic (a one-node tree), and can contain
- *     any mathematical symbol, such as $x$, $5$, $e$, $\pi$, $B_4$, etc.
- *     (Note that notation here is in math form just for the documentation;
- *     actual symbols may use a different style, such as `B_4`.)
- *  2. An {@link Application} of a function or operator to zero or more
- *     arguments, as in the example of $3 + k$, above, which applies $+$ to
- *     the arguments $3$ and $k$.  Applications are not atomic.
- *  3. A {@link Binding}, which applies a quantifier or ranged operator to
- *     a body, using a bound variable.  There are many examples of this in
- *     mathematics, including indexed sums and products, existential and
- *     universal quantifiers, and more.  Bindings are not atomic.
+ *  1. Atomic expressions, also called {@link Symbol Symbols}, which can
+ *     represent any mathematical symbol, such as $x$, $5$, $e$, $\pi$, $B_4$,
+ *     $\in$, $\int$, etc.  (Note that notation here is in math form just for
+ *     the documentation; actual symbols may use a different style, such as
+ *     `B_4`.)
+ *  2. {@link Application Applications}, which represent the application of a
+ *     function or operator to zero or more arguments, as in the example of
+ *     $3 + k$, above, which applies $+$ to the arguments $3$ and $k$.
+ *  3. {@link BindingExpression Binding Expressions}, which represent the use
+ *     of a dummy variable in an expression.  Specifically, if you have an
+ *     expression such as $\exists x,(x^2=2)$ or $\int_a^b f(x)\;dx$, the $x$
+ *     is used as a "dummy" or "bound" variable in each case, and thus has a
+ *     limited scope one cannot express with a mere function
+ *     {@link Application Application}.  See the documentation for the
+ *     {@link BindingExpression Binding Expression class} for details on how to
+ *     represent expressions like those examples.
  * 
- * We do not define these further here; see the documentation of each of
+ * We do not define these cases further here; see the documentation of each of
  * the classes linked to above for details.  The Expression class is an
  * abstract base class, and every instance should be an instance of one of
  * those three subclasses.
@@ -59,7 +64,7 @@ export class Expression extends LogicConcept {
      *   this one (as in the constructors for {@link MathConcept} and
      *   {@link LogicConcept})
      */
-     constructor ( ...children ) {
+    constructor ( ...children ) {
         super( ...children.filter( child => child instanceof Expression ) )
     }
 
@@ -140,10 +145,10 @@ export class Expression extends LogicConcept {
      * 
      * This initial implementation provides support for *none* of the types of
      * valuation described above, because each is best implemented in one of
-     * this class's subclasses ({@link Symbol}, {@link Application}, or
-     * {@link Binding}) instead.  A stub is implemented here as a pure virtual
-     * method, to guarantee that the function exists for all Expression
-     * instances and returns undefined by default.
+     * this class's subclasses ({@link Symbol} or {@link Application}) instead.
+     * A stub is implemented here as a pure virtual method, to guarantee that
+     * the function exists for all Expression instances and returns undefined by
+     * default.
      * 
      * @returns {*} any basic JavaScript value representing this Expression,
      *   or undefined if it there is no such value

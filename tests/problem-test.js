@@ -3,7 +3,7 @@ import M from '../src/matching.js'
 import { Symbol as LurchSymbol } from '../src/symbol.js'
 import { LogicConcept } from '../src/logic-concept.js'
 import { Application } from '../src/application.js'
-import { Binding } from '../src/binding.js'
+import { BindingExpression } from '../src/binding-expression.js'
 import Database from '../src/database.js'
 
 describe( 'Problem', function () {
@@ -920,10 +920,12 @@ describe( 'Problem', function () {
             LogicConcept.fromPutdown( '(c d)' )[0]
         )
         C3 = new M.Constraint(
-            new Binding(
+            new Application(
                 new LurchSymbol( 'x' ),
-                new LurchSymbol( 'Y' ).asA( M.metavariable ),
-                new LurchSymbol( 'Z' ).asA( M.metavariable )
+                new BindingExpression(
+                    new LurchSymbol( 'Y' ).asA( M.metavariable ),
+                    new LurchSymbol( 'Z' ).asA( M.metavariable )
+                )
             ),
             new LurchSymbol( 7 )
         )
@@ -947,8 +949,7 @@ describe( 'Problem', function () {
          && c.expression.equals( C1.expression ) ) ).to.equal( true )
         expect( P.constraints.some( c => c.equals( C2 ) ) ).to.equal( true )
         expect( P.constraints.some( c =>
-            c.pattern.equals(
-                LogicConcept.fromPutdown( '(x was_Y , was_Z)' )[0] )
+            c.pattern.equals( LogicConcept.fromPutdown( '(x was_Y , was_Z)' )[0] )
          && c.expression.equals( new LurchSymbol( 7 ) ) ) ).to.equal( true )
         // now repeat the same test, but call substitute() on an array of
         // substitutions rather than on 3 substitutions separately
@@ -979,10 +980,12 @@ describe( 'Problem', function () {
             LogicConcept.fromPutdown( '(c d)' )[0]
         )
         C3 = new M.Constraint(
-            new Binding(
+            new Application(
                 new LurchSymbol( 'x' ),
-                new LurchSymbol( 'Y' ).asA( M.metavariable ),
-                new LurchSymbol( 'Z' ).asA( M.metavariable )
+                new BindingExpression(
+                    new LurchSymbol( 'Y' ).asA( M.metavariable ),
+                    new LurchSymbol( 'Z' ).asA( M.metavariable )
+                )
             ),
             new LurchSymbol( 7 )
         )
@@ -1180,6 +1183,7 @@ describe( 'Problem', function () {
                         new LurchSymbol( 1 ) )
         expr = new LurchSymbol( 1 )
         prob = new M.Problem( pat, expr )
+        try { S = Array.from( prob.solutions() ) } catch ( e ) { console.log( e ) }
         expect( () => S = Array.from( prob.solutions() ) ).not.to.throw()
         expect( solSetsEq( S, solSet( prob,
             { 'P' : lambda( 'v1', 1 ) },
@@ -1298,11 +1302,15 @@ describe( 'Problem', function () {
                 // so we need to find each such expression and convert it into
                 // an actual EF.
                 const lambda = new LurchSymbol( '@lambda' )
-                const isEFNotation = lc => ( lc instanceof Binding )
-                                        && lc.boundVariables().length == 1
-                                        && lc.head().equals( lambda )
+                const isEFNotation = lc =>
+                    ( lc instanceof Application )
+                 && lc.numChildren() == 2
+                 && lc.firstChild().equals( lambda )
+                 && ( lc.lastChild() instanceof BindingExpression )
+                 && lc.lastChild().boundSymbols().length == 1
                 const convertToEF = lc => M.newEF(
-                    ...lc.boundVariables(), lc.body() )
+                    ...lc.lastChild().boundSymbols(),
+                    lc.lastChild().lastChild() )
                 sol.descendantsSatisfying( isEFNotation )
                    .map( d => d.replaceWith( convertToEF( d ) ) )
                 // Now form the parts into a Solution object

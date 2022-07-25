@@ -14,7 +14,7 @@ import { SourceMap } from './source-map.js'
  *
  *  1. LogicConcepts, which the LDE knows how to process for validating variable
  *     scoping and correctness of logical inference
- *  2. MathConcepts that are lot merely logical, and thus can be arbitrarily complex
+ *  2. MathConcepts that are not merely logical, and thus can be arbitrarily complex
  *     (such as a chain of equations, or a set of exercises), but which can be broken
  *     down into many LogicConcepts algorithmically, for processing by the LDE.
  *     This algorithmic breakdown is implemented in the
@@ -1619,36 +1619,47 @@ export class MathConcept extends EventTarget {
     //////
 
     /**
+     * By default, MathConcepts do not bind symbols.  Subclasses of
+     * MathConcept may import the {@link BindingInterface BindingInterface} and
+     * therefore override the following function, but in the base case, it
+     * simply returns false to indicate that no symbols are bound.
+     * 
+     * @return {boolean} the constant false
+     * 
+     * @see {@link BindingInterface.binds binds()}
+     */
+    binds () { return false }
+
+    /**
      * A {@link Symbol} X is free in an ancestor Y if and only if no MathConcept
      * that is an ancestor A of X inside of (or equal to) Y satisfies
-     * `A.binds( X.text() )`.  This function returns an array of
-     * all identifier names that appear within this MathConcept and, at the
-     * point where they appear, are free in this ancestor MathConcept.
+     * `A.binds( X.text() )`.  This function returns an array of all symbol
+     * names that appear within this MathConcept and, at the point where they
+     * appear, are free in this ancestor MathConcept.
      *
-     * If, instead of just the names of the identifiers, you wish to have the
-     * identifier MathConcepts themselves, you can couple the
+     * If, instead of just the names of the symbols, you wish to have the
+     * {@link Symbol Symbol} instances themselves, you can couple the
      * {@link MathConcept#isFree isFree()} function with the
      * {@link MathConcept#descendantsSatisfying descendantsSatisfying()}
      * function to achieve that.
      *
-     * @return {string[]} An array of names of free identifiers appearing as
+     * @return {string[]} an array of names of free symbols appearing as
      *   descendants of this MathConcept
-     * @see {@link Binding#binds binds()}
-     * @see {@link Binding#boundVariables boundVariables()}
+     * 
+     * @see {@link BindingInterface.binds binds()}
+     * @see {@link BindingInterface.boundSymbols boundSymbols()}
      */
-    freeIdentifierNames () {
-        // a single identifier is free in itself
+    freeSymbolNames () {
+        // a single symbol is free in itself
         if ( this instanceof MathConcept.subclasses.get( 'Symbol' ) )
             return [ this.text() ]
         // otherwise we collect all the free variables in all children...
         const result = new Set
         this.children().forEach( child =>
-            child.freeIdentifierNames().forEach( name =>
-                result.add( name ) ) )
-        // ...excepting any that this MathConcept binds
-        if ( this instanceof MathConcept.subclasses.get( 'Binding' ) )
-            this.boundVariableNames().forEach( name =>
-                result.delete( name ) )
+            child.freeSymbolNames().forEach( name => result.add( name ) ) )
+        // ...excepting any that this MathConcept binds, if any
+        if ( this.binds() )
+            this.boundSymbolNames().forEach( name => result.delete( name ) )
         return Array.from( result )
     }
 
@@ -1672,18 +1683,19 @@ export class MathConcept extends EventTarget {
      *   place, as described above
      * @return {boolean} Whether this MathConcept is free in the specified
      *   ancestor (or its topmost ancestor if none is specified)
+     * 
+     * @see {@link BindingInterface.binds binds()}
      */
     isFree ( inThis ) {
         // compute the free identifiers in me that an ancestor might bind
-        const myFreeSymbols = this.freeIdentifierNames()
+        const myFreeSymbolNames = this.freeSymbolNames()
         // walk upwards to the appropriate ancestor and see if any bind any of
         // those identifiers; if so, I am not free in that ancestor
         let walk = this
         while ( walk && walk != inThis ) {
             const parent = walk.parent()
-            if ( ( parent instanceof MathConcept.subclasses.get( 'Binding' ) )
-              && walk.indexInParent() > 0
-              && myFreeSymbols.some( name => parent.binds( name ) ) )
+            if ( parent
+              && myFreeSymbolNames.some( name => parent.binds( name ) ) )
                 return false
             walk = parent
         }
@@ -1704,6 +1716,8 @@ export class MathConcept extends EventTarget {
      * @return {boolean} True if and only if there is a copy of `concept` as a
      *   descendant of this MathConcept satisfying `.isFree( inThis )`
      * @see {@link MathConcept#isFree isFree()}
+     * 
+     * @see {@link BindingInterface.binds binds()}
      */
     occursFree ( concept, inThis ) {
         return this.hasDescendantSatisfying( descendant =>
@@ -1713,24 +1727,30 @@ export class MathConcept extends EventTarget {
     /**
      * A MathConcept A is free to replace a MathConcept B if no identifier free in A
      * becomes bound when B is replaced by A.
+     * 
      * @param {MathConcept} original - The MathConcept to be replaced with this one
      * @param {MathConcept} [inThis] - The ancestor we use as a context in which to
      *   gauge bound/free identifiers, as in the `inThis` parameter to
      *   {@link MathConcept#isFree isFree()}.  If omitted, the context defaults to
      *   the top-level ancestor of `original`.
+     * 
      * @return {boolean} True if this MathConcept is free to replace `original`,
      *   and false if it is not.
+     * 
+     * @see {@link BindingInterface.binds binds()}
      */
     isFreeToReplace ( original, inThis ) {
         // this implementation is an exact copy of isFree(), with one exception:
         // while the free identifiers are computed from this MathConcept, freeness
         // is computed from original.
-        const freeIdentifierNames = this.freeIdentifierNames()
-        for ( let ancestor = original ; ancestor ; ancestor = ancestor.parent() ) {
-            if ( ( ancestor instanceof MathConcept.subclasses.get( 'Binding' ) )
-              && freeIdentifierNames.some( name => ancestor.binds( name ) ) )
+        const freeSymbolNames = this.freeSymbolNames()
+        let walk = original
+        while ( walk && walk != inThis ) {
+            const parent = walk.parent()
+            if ( parent
+              && freeSymbolNames.some( name => parent.binds( name ) ) )
                 return false
-            if ( ancestor == inThis ) break
+            walk = parent
         }
         return true
     }
@@ -1749,6 +1769,8 @@ export class MathConcept extends EventTarget {
      * @param {MathConcept} [inThis] - When judging free/bound identifiers, judge
      *   them relative to this ancestor context, in the same sense of the
      *   `inThis` parameter to {@link MathConcept#isFree isFree()}
+     * 
+     * @see {@link BindingInterface.binds binds()}
      */
     replaceFree ( original, replacement, inThis ) {
         this.descendantsSatisfying(
@@ -2461,10 +2483,15 @@ export class MathConcept extends EventTarget {
      * This function is a temporary placeholder.  Later, a sophisticated
      * interpretation mechanism will be developed to convert a user's
      * representation of their document into a hierarchy of
-     * {@link LogicConcept LogicConcept} instances.  For now, we have this
-     * simple version in which many features are not yet implemented.  Its
-     * behavior is as follows.
+     * {@link LogicConcept LogicConcept} instances.
+     * 
+     * (In fact, we will actually use the
+     * {@link MathConcept#interpret interpret()} function when we do so, and
+     * remove this one.  That one is the official permanent interpretation API.)
      *
+     * For now, we have this simple version in which many features are not yet
+     * implemented.  Its behavior is as follows.
+     * 
      *  1. The method of interpretation that should be followed is extracted
      *     from the "Interpret as" attribute of this object.  If there is no
      *     such attribute, an error is thrown.  The attribute value should be
@@ -2495,9 +2522,8 @@ export class MathConcept extends EventTarget {
         if ( method[0] == 'class' ) {
             const classObject = MathConcept.subclasses.get( method[1] )
             let constructorArgs = this.children().map( x => x.interpret() )
-            if ( this._attributes.has( 'declaration type' ) )
+            if ( method[1] == 'Declaration' )
                 constructorArgs = [
-                    Symbol.for( this._attributes.get( 'declaration type' ) ),
                     constructorArgs.slice( 0, constructorArgs.length - 1 ),
                     constructorArgs[constructorArgs.length - 1]
                 ]
@@ -2541,9 +2567,8 @@ export class MathConcept extends EventTarget {
             if ( method[0] == 'class' ) {
                 const classObject = MathConcept.subclasses.get( method[1] )
                 let constructorArgs = mc.children().map( prePutdown )
-                if ( mc._attributes.has( 'declaration type' ) )
+                if ( method[1] == 'Declaration' )
                     constructorArgs = [
-                        Symbol.for( mc._attributes.get( 'declaration type' ) ),
                         constructorArgs.slice( 0, constructorArgs.length - 1 ),
                         constructorArgs[constructorArgs.length - 1]
                     ]

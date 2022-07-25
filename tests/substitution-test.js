@@ -1,9 +1,9 @@
 
-import { Symbol as LurchSymbol } from '../src/symbol.js'
-import { Application } from '../src/application.js'
-import { Binding } from '../src/binding.js'
-import { Environment } from '../src/environment.js'
 import { LogicConcept } from '../src/logic-concept.js'
+import { Environment } from '../src/environment.js'
+import { Application } from '../src/application.js'
+import { BindingExpression } from '../src/binding-expression.js'
+import { Symbol as LurchSymbol } from '../src/symbol.js'
 import M from '../src/matching.js'
 
 describe( 'Substitution', () => {
@@ -113,8 +113,16 @@ describe( 'Substitution', () => {
         )
         // create three patterns to which to apply it, and copies of each
         let P1 = new Application( new LurchSymbol( 'f' ), X.copy() )
-        let P2 = new Binding( new LurchSymbol( '𝝺' ), new LurchSymbol( 'v' ),
-            new Application( X.copy(), new LurchSymbol( 'v' ) ) )
+        let P2 = new Application(
+            new LurchSymbol( '𝝺' ),
+            new BindingExpression(
+                new LurchSymbol( 'v' ),
+                new Application(
+                    X.copy(),
+                    new LurchSymbol( 'v' )
+                )
+            )
+        )
         let P3 = new Environment( X.copy(), X.copy(), X.copy() )
         const P1copy = P1.copy()
         const P2copy = P2.copy()

@@ -1,7 +1,7 @@
 
 import { Symbol as LurchSymbol } from '../symbol.js'
 import { Application } from '../application.js'
-import { Binding } from '../binding.js'
+import { BindingExpression } from '../binding-expression.js'
 import { LogicConcept } from '../logic-concept.js'
 import { metavariable, containsAMetavariable } from './metavariables.js'
 import { isAnEFA } from './expression-functions.js'
@@ -177,11 +177,11 @@ export class Constraint {
             if ( expression instanceof Application )
                 return new Application(
                     ...expression.children().map( withoutBindings ) )
-            if ( expression instanceof Binding )
+            if ( expression instanceof BindingExpression )
                 return new Application(
                     new LurchSymbol( 'LDE binding' ),
                     ...expression.children().map( withoutBindings ) )
-            throw 'Invalid expression in removeBindings'
+            throw new Error( 'Invalid expression in removeBindings' )
         }
         this._pattern = withoutBindings( this._pattern )
         this._expression = withoutBindings( this._expression )
@@ -231,7 +231,7 @@ export class Constraint {
                 this.pattern.equals( this.expression ) ? 1 : 0
         // Now we know the pattern is nonatomic, because it contains no
         // metavariables, but is also not a lone metavariable.
-        // Since it is not an EFA, and we have converted all Bindings to
+        // Since it is not an EFA, and we have converted all bindings to
         // Applications, it is an Application.  We therefore just check to see
         // if the # children match, and return children or failure.
         return this._complexity = this.pattern.numChildren()
@@ -258,11 +258,10 @@ export class Constraint {
     /**
      * If a Constraint has {@link Constraint#complexity complexity()} = 3,
      * and thus {@link Constraint#complexityName complexityName()} = "children",
-     * then the pattern and expression are either both
-     * {@link Application Applications} or both {@link Binding Bindings}, and
-     * have the same number of children.  It is therefore useful when solving
-     * this constraint to pair up the corresponding children into new Constraint
-     * instances.  This function does so, returning them as an array.
+     * then the pattern and expression are both {@link Application Applications}
+     * and have the same number of children.  It is therefore useful when
+     * solving this constraint to pair up the corresponding children into new
+     * Constraint instances.  This function does so, returning them as an array.
      * 
      * For example, if we have a pattern $p=(a~b~c~d)$ and an expression
      * $e=(w~x~y~z)$ then the Constraint $(p,e)$ has complexity 3, and we can

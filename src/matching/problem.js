@@ -1,14 +1,14 @@
 
 import { Symbol as LurchSymbol } from '../symbol.js'
 import { Application } from "../application.js"
-import { Binding } from "../binding.js"
+import { BindingExpression } from "../binding-expression.js"
 import { LogicConcept } from "../logic-concept.js"
 import { metavariable, metavariableNamesIn } from "./metavariables.js"
 import { Constraint } from "./constraint.js"
 import { Substitution } from "./substitution.js"
 import { Solution } from "./solution.js"
 import {
-    constantEF, projectionEF, applicationEF, bindingEF, fullBetaReduce, alphaRenamed
+    constantEF, projectionEF, applicationEF, fullBetaReduce, alphaRenamed
 } from './expression-functions.js'
 import { NewSymbolStream } from "./new-symbol-stream.js"
 
@@ -327,9 +327,9 @@ export class Problem {
      * 
      * @yields {Solution} the next solution to this Problem
      * 
-     * {@see Problem#firstSolution firstSolution()}
-     * {@see Problem#isSolvable isSolvable()}
-     * {@see Problem#numSolutions numSolutions()}
+     * @see {@link Problem#firstSolution firstSolution()}
+     * @see {@link Problem#isSolvable isSolvable()}
+     * @see {@link Problem#numSolutions numSolutions()}
      */
     *solutions () {
         const solutionsSeen = [ ]
@@ -384,12 +384,12 @@ export class Problem {
                 ...pattern.children().map( child =>
                     this.convertAllBoundVarsToMetavars( child, stream ) ) )
         // recursive case 2: binding
+        if ( !( pattern instanceof BindingExpression ) )
+            throw new Error( `Invalid pattern: ${pattern}` )
         const copy = pattern.copy()
-        copy.head().replaceWith( this.convertAllBoundVarsToMetavars(
-            copy.head(), stream ) )
         copy.body().replaceWith( this.convertAllBoundVarsToMetavars(
             copy.body(), stream ) )
-        const newBoundVars = copy.boundVariables().map( old =>
+        const newBoundVars = copy.boundSymbols().map( old =>
             old.isA( metavariable ) ? old :
             new LurchSymbol( `${old.text()}_${stream.next().text()}` )
                 .asA( metavariable ) )
@@ -509,25 +509,15 @@ export class Problem {
             
             // Solution method 3: If the expression is compound, we could
             // imitate each child using a different expression function,
-            // combining the results into one big answer.  Because we care only
-            // about the children, we do not distinguish bindings from
-            // applications; we use applications for both cases, just as a
-            // wrapper construct.
+            // combining the results into one big answer.  Because we have
+            // already converted bindings to applications with removeBindings(),
+            // we know this case will involve only applications.
             dbg( '--3--' )
             const children = expr.children()
             if ( children.length > 0 ) {
-                if ( expr instanceof Binding ) {
-                    const asApp = new Application(
-                        ...expr.children().map( child => child.copy() ) )
-                    this.remove( 0 )
-                    this.add( new Constraint( constraint.pattern, asApp ) )
-                    dbg( `Converted B->A: ${this}` )
-                }
                 const metavars = this._stream.nextN( children.length )
                     .map( symbol => symbol.asA( metavariable ) )
-                yield* addEF( head, expr instanceof Binding ?
-                    bindingEF( args.length, metavars ) :
-                    applicationEF( args.length, metavars ) )
+                yield* addEF( head, applicationEF( args.length, metavars ) )
             } else dbg( 'case 3 does not apply' )
 
             // Those are the only three solution methods for the EFA case.
@@ -564,9 +554,9 @@ export class Problem {
      * @returns {Solution} the first solution to this matching problem, or
      *   `undefined` if the problem has no solutions
      * 
-     * {@see Problem#solutions solutions()}
-     * {@see Problem#isSolvable isSolvable()}
-     * {@see Problem#numSolutions numSolutions()}
+     * @see {@link Problem#solutions solutions()}
+     * @see {@link Problem#isSolvable isSolvable()}
+     * @see {@link Problem#numSolutions numSolutions()}
      */
     firstSolution () {
         for ( let solution of this.solutions() ) return solution
@@ -584,10 +574,10 @@ export class Problem {
      * @returns {boolean} `true` if and only if there is at least one solution
      *   to this matching problem, and `false` otherwise
      * 
-     * {@see Problem#solutions solutions()}
-     * {@see Problem#firstSolution firstSolution()} (including comments about
+     * @see {@link Problem#solutions solutions()}
+     * @see {@link Problem#firstSolution firstSolution()} (including comments about
      *   caching)
-     * {@see Problem#numSolutions numSolutions()}
+     * @see {@link Problem#numSolutions numSolutions()}
      */
     isSolvable () {
         return !!this.firstSolution()
@@ -604,9 +594,9 @@ export class Problem {
      * 
      * @returns {integer} the number of solutions to this matching problem
      * 
-     * {@see Problem#solutions solutions()}
-     * {@see Problem#isSolvable isSolvable()}
-     * {@see Problem#firstSolution firstSolution()} (including comments about
+     * @see {@link Problem#solutions solutions()}
+     * @see {@link Problem#isSolvable isSolvable()}
+     * @see {@link Problem#firstSolution firstSolution()} (including comments about
      *   caching)
      */
     numSolutions () {
