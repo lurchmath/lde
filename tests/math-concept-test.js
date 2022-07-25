@@ -3383,7 +3383,7 @@ describe( 'Smackdown notation and interpretation', () => {
         ) ).to.equal( true )
         expect( test8[1].equals(
             commandMC( 'insert', '\\}', '<-- that\'s a lotta escaping!' )
-            ) ).to.equal( true )
+        ) ).to.equal( true )
         expect( test8[2].equals(
             environmentMC(
                 symbolMC( 'E' ),

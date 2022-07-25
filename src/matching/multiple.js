@@ -23,11 +23,12 @@ const unionOfSolutions = ( s1, s2 ) => {
 //   patterns : JavaScript array of LCs with metavariables
 //   expressionLists : array of array of LCs without metavariables,
 //     must be the same length as patterns; one list per pattern
-//   extendThis : Solution, optional, defaults to empty solution
+//   soFar : Solution, optional, defaults to empty solution
 // Output:
-//   array of { solution : Solution, expressionIndices : [ i1,...,iN ] }
+//   array of { solution : Solution, expressionIndices : [ i_1,...,i_N ] }
 //   where N == patterns.length
-//   and solution instantiates patterns[j][ik] to expressionLists[i][k]
+//   and when expressionIndices[j] == k then
+//   solution instantiates patterns[j] to expressionLists[j][k]
 export function* allInstantiations (
     patterns, expressionLists, soFar = null, debug = false
 ) {
