@@ -390,11 +390,15 @@ class BindingStack extends Array {
         this.pop()
         return result
     }
+    // At the given location, if any of the given names were already declared,
+    // mark them redeclared there.
     markIfRedeclared ( location, names ) {
         const redeclared = names.filter( name => this.isDeclared( name ) )
         if ( redeclared.length > 0 )
             addScopeError( location, { redeclared } )
     }
+    // At the given location, if any of the given names were undeclared,
+    // mark them as such.
     markIfUndeclared ( location, names ) {
         const undeclared = names.filter( name => this.isUndeclared( name ) )
         if ( undeclared.length > 0 )
@@ -403,7 +407,7 @@ class BindingStack extends Array {
 }
 
 // Phase 1: Record where symbols are implicitly declared.
-// We fill the following variable with length-2 arrays of the form
+// We return an array of length-2 arrays, each of the form
 //   [ 'symbol name', the LC that implicitly declares it ],
 // in isEarlierThan order of the implicit declaration LCs.
 const findUndeclaredSymbols = ( location, scopeStack = new BindingStack ) => {
@@ -457,7 +461,7 @@ const validateDeclarations = ( location, scopeStack = new BindingStack ) => {
     } else if ( location instanceof Expression ) {
         // Two possible types of errors:
         // 1. Invalid implicit declarations (which happens only if the
-        // implicit declaration routines are erroneous! Let's hope not!)
+        // implicit declaration callbacks are erroneous! Let's hope not!)
         scopeStack.markIfRedeclared( location, implicitHere )
         scopeStack.declare( implicitHere )
         // 2. Undeclared variables, which happens only if the user has

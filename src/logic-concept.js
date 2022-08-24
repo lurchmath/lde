@@ -205,14 +205,14 @@ export class LogicConcept extends MathConcept {
      *    bound variables.  Example:  `x , (P x)` means $P(x)$ with $x$ bound.
      *    Consequently, could write, for example, `(∀ x , (P x))` to mean the
      *    application of the `∀` symbol to the binding `x , (P x)`.
-     *  * A variable {@link Declaration Declaration} lists the declared
-     *    {@link Symbol Symbols} in brackets, followed by the keyword `var`
-     *    followed by an optional body that is an assumption made about the
-     *    variables.  Example: `[x var (P x)]` means "Let $x$ be arbitary and
-     *    assume $P(x)$."
-     *  * A constant {@link Declaration Declaration} is the same but with
-     *    `const` instead of `var`.  Again, the body is optional, so
-     *    `[pi const]` declares the symbol `pi` to be a constant.
+     *  * A {@link Declaration Declaration} lists the declared {@link Symbol
+     *    Symbols} in brackets, followed optionally by a comma and then a
+     *    body, which is any LogicConcept. that is an assumption made about the
+     *    variables.  Example: `[x , (P x)]` means "Declare $x$ about which
+     *    $P(x)$ is true."  This can be used for arbitrary variables (in which
+     *    we would be assuming $P(x)$) or declaring constants we know to exist
+     *    (in which we would be concluding $P(x)$) or for anything else the
+     *    user's library wants to use declarations for.
      *  * An {@link Environment Environment} is written with its children
      *    separated by spaces and surrounded in curly brackets.  Example:
      *    `{ child1 child2 etc }`.
