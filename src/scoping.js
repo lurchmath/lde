@@ -40,7 +40,16 @@
  *        BindingEnvironment} declares with its
  *        {@link BindingInterface.boundSymbolNames boundSymbolNames()}
  *        function.
- *  3. Any {@link LogicConcept LogicConcept} can be marked as implicitly
+ *  3. A {@link BindingExpression BindingExpression} functions just like a
+ *     {@link BindingEnvironment BindingEnvironment}, except within one single
+ *     expression.  These are used for quantification, indexed operators,
+ *     dummy variables in integration and $\lambda$ notation, and more.
+ *      * Symbols introduced in this way are said to be *bound.*
+ *      * You can find out which symbols a {@link BindingExpression
+ *        BindingExpression} declares with its
+ *        {@link BindingInterface.boundSymbolNames boundSymbolNames()}
+ *        function.
+ *  4. Any {@link LogicConcept LogicConcept} can be marked as implicitly
  *     declaring a symbol.  If the {@link LogicConcept LogicConcept} so marked
  *     is an {@link Environment Environment}, then the implicit declaration
  *     functions just like case 2, above, and otherwise, it functions like case
@@ -58,19 +67,19 @@
  *        {@link module:Scoping.implicitDeclarations implicitDeclarations()}
  *        function.
  * 
- * The third case may seem redundant, since it just repeats the functionality of
- * the earlier cases, but we will use that case to represent in a natural way
- * those mathematical situations in which it is typical to begin using symbols
- * without declaring them, such as in an algebra exercise (where almost nobody
- * says "let $x$ be arbitrary" before they solve for $x$), or a derivation in
- * propositional logic (where almost nobody says "let $P$ and $Q$ be arbitrary
- * propositions" before they write a propositional proof).  There are many other
- * cases where symbols are used without being introduced, but these are just two
- * common examples.
+ * The fourth case may seem redundant, since it just repeats the functionality
+ * of the earlier cases, but we will use that case to represent in a natural
+ * way those mathematical situations in which it is typical to begin using
+ * symbols without declaring them, such as in an algebra exercise (where
+ * almost nobody says "let $x$ be arbitrary" before they solve for $x$), or a
+ * derivation in propositional logic (where almost nobody says "let $P$ and
+ * $Q$ be arbitrary propositions" before they write a propositional proof).
+ * There are many other cases where symbols are used without being introduced,
+ * but these are just two common examples.
  * 
  * This module provides two types of functionality.  First, while scoping
  * information (including implicit symbol declarations and scoping error
- * feedback) are stored in the attributes of {@link LogicConcept LogicConcepts},
+ * feedback) is stored in the attributes of {@link LogicConcept LogicConcepts},
  * and thus there is really no strict need for an API to manipulate such data,
  * an API makes it easier, more readable, and less error-prone.  So we provide
  * the following functions to that end.
@@ -103,6 +112,7 @@ import { Expression } from './expression.js'
 import { Declaration } from './declaration.js'
 import { Environment } from './environment.js'
 import { BindingEnvironment } from './binding-environment.js'
+import { BindingExpression } from './binding-expression.js'
 
 /**
  * Given a {@link LogicConcept LogicConcept} in which we wish to save some
@@ -280,6 +290,12 @@ export const clearImplicitDeclarations = target => {
  *    {@link module:Scoping.scopeErrors marked with a scoping error} of the
  *    form `{ redeclared : [ 'x' ] }`.  If more than one symbol is redeclared,
  *    the array may contain multiple entries.
+ *  * Any symbol $x$ bound by a {@link BindingExpression BindingExpression} in
+ *    the scope of a declaration of the same symbol $x$ or another binding of
+ *    the same symbol $x$ is {@link module:Scoping.scopeErrors marked with a
+ *    scoping error} of the form `{ redeclared : [ 'x' ] }`.  If more than one
+ *    symbol is redeclared by the binding, the array may contain multiple
+ *    entries.
  *  * Any symbol $x$ used {@link MathConcept#isFree free} in an
  *    {@link Expression Expression} but not in the scope of any declaration (by
  *    a {@link BindingEnvironment BindingEnvironment} or a
@@ -459,7 +475,7 @@ const validateDeclarations = ( location, scopeStack = new BindingStack ) => {
                 child => validateDeclarations( child, scopeStack ) )
         )
     } else if ( location instanceof Expression ) {
-        // Two possible types of errors:
+        // Three possible types of errors:
         // 1. Invalid implicit declarations (which happens only if the
         // implicit declaration callbacks are erroneous! Let's hope not!)
         scopeStack.markIfRedeclared( location, implicitHere )
@@ -468,6 +484,9 @@ const validateDeclarations = ( location, scopeStack = new BindingStack ) => {
         // chosen an implicit declaration method that doesn't handle
         // every case, and some symbols got left undeclared.
         scopeStack.markIfUndeclared( location, location.freeSymbolNames() )
+        // 3. Bound variables that were already bound/declared in our context.
+        // Mark any such as a redeclaration.
+        validateBindingExpressions( location, scopeStack )
     } else if ( location instanceof Declaration ) {
         // Two possible types of errors:
         // 1. Same as the type for Binding Environments, above.
@@ -483,6 +502,28 @@ const validateDeclarations = ( location, scopeStack = new BindingStack ) => {
     }
 }
 
+// Utility function for use in Phase 3, above:
+// Find all binding expressions inside an outermost expression (including the
+// outermost expression itself) and if any bind a variable that's declared or
+// bound outside the binding expression, mark it as a redeclaration.
+const validateBindingExpressions = ( location, scopeStack ) => {
+    if ( location instanceof BindingExpression ) {
+        // This is a binding expression, so anything bound here that was
+        // already declared or bound in the enclosing scope is a problem:
+        const boundHere = location.boundSymbolNames()
+        scopeStack.markIfRedeclared( location, boundHere )
+        // Recur inside this binding expression, extending the scope stack:
+        scopeStack.callInNewScope(
+            boundHere,
+            () => validateBindingExpressions( location.body(), scopeStack )
+        )
+    } else {
+        // This is not a binding expression, so no problems can arise at this
+        // exact node.  Just check each of its children, in the same scope.
+        location.children().forEach( child =>
+            validateBindingExpressions( child, scopeStack ) )
+    }
+}
 
 // Export public API only:
 export default {

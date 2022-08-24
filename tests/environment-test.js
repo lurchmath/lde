@@ -541,4 +541,44 @@ describe( 'Scope validation', () => {
         } )
     } )
 
+    it( 'Should mark twice-bound variables as a redeclaration', () => {
+        let test = LogicConcept.fromPutdown( `
+        {
+            [ExampleConstant]
+            x , (ExampleConstant x)  // no problem here
+            (x y) , (ExampleConstant x , y) // problem here
+        }
+        ` )[0]
+        expect( test.constructor.className ).to.equal( 'Environment' )
+        // Initially/by default, there are absolutely no scoping errors
+        checkScopeErrorsDeeply( test, 'twice-bound case 1' )
+        // Now validate the given environment
+        Scoping.validate( test )
+        // There should be precisely one problem, and that is with the twice-
+        // bound x in the final child of the test Environment.
+        checkScopeErrorsDeeply( test, 'twice-bound case 2', {
+            '2,2,1' : { redeclared : [ 'x' ] }
+        } )
+    } )
+
+    it( 'Should mark bound-and-declared variables as a redeclaration', () => {
+        let test = LogicConcept.fromPutdown( `
+        {
+            [ExampleConstant pi]
+            x , (ExampleConstant x)  // no problem here
+            pi , (ExampleConstant pi) // problem here
+        }
+        ` )[0]
+        expect( test.constructor.className ).to.equal( 'Environment' )
+        // Initially/by default, there are absolutely no scoping errors
+        checkScopeErrorsDeeply( test, 'bound-and-declared case 1' )
+        // Now validate the given environment
+        Scoping.validate( test )
+        // There should be precisely one problem, and that is with the twice-
+        // bound pi in the final child of the test Environment.
+        checkScopeErrorsDeeply( test, 'bound-and-declared case 2', {
+            '2' : { redeclared : [ 'pi' ] }
+        } )
+    } )
+
 } )
