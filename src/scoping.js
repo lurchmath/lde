@@ -87,6 +87,7 @@
  *  * For manipulating implicit symbol declaration data:
  *     * {@link module:Scoping.implicitDeclarations implicitDeclarations()}
  *     * {@link module:Scoping.addImplicitDeclaration addImplicitDeclaration()}
+ *     * {@link module:Scoping.removeImplicitDeclaration removeImplicitDeclaration()}
  *     * {@link module:Scoping.clearImplicitDeclarations clearImplicitDeclarations()}
  *  * For manipulating feedback about scoping errors:
  *     * {@link module:Scoping.scopeErrors scopeErrors()}
@@ -226,6 +227,36 @@ export const addImplicitDeclaration = ( target, symbolName ) => {
 }
 
 /**
+ * Given a {@link LogicConcept LogicConcept} in which we have marked some
+ * symbols as implicitly declared, this function modifies data in the target,
+ * removing the given symbol from the implicitly declared list in the target.
+ * If it isn't already there, this function takes no action.
+ * 
+ * This function is made static so that any client can easily make use of
+ * the same convention for storing implicit declarations in a
+ * {@link LogicConcept LogicConcept}, but the standard way to compute and
+ * store such errors is by passing an implicit symbol declaration handler
+ * to {@link module:Scoping.validate validate()}.
+ * 
+ * @function
+ * @param {LogicConcept} target the {@link LogicConcept LogicConcept} from
+ *   which to remove the implicitly declared symbol
+ * @param {Object} symbolName the name of the symbol to remove
+ * 
+ * @see {@link module:Scoping.implicitDeclarations implicitDeclarations()}
+ * @see {@link module:Scoping.validate validate()}
+ */
+export const removeImplicitDeclaration = ( target, symbolName ) => {
+    if ( !target.hasAttribute( 'implicitly declares' ) ) return // efficiency
+    const newList = ( implicitDeclarations( target ) || [ ] )
+        .filter( x => x != symbolName )
+    if ( newList.length > 0 )
+        target.setAttribute( 'implicitly declares', newList )
+    else
+        clearImplicitDeclarations( target )
+}
+
+/**
  * This function reads the data stored by
  * {@link module:Scoping.addImplicitDeclaration addImplicitDeclaration()}.  It
  * could just as easily be done with
@@ -341,6 +372,14 @@ export const clearImplicitDeclarations = target => {
  * takes effect exactly at L, in the sense that the scope of the declaration
  * includes L itself and continues on through the rest of L's scope.
  * 
+ * While callers can provide a callback function for whatever behavior they
+ * desire, we also provide some pre-built callback functions, for common actions
+ * the caller may desire:
+ * {@link module:Scoping.declareWhenSeen declareWhenSeen()},
+ * {@link module:Scoping.declareInAncestor declareInAncestor()},
+ * {@link module:Scoping.declareGlobal declareGlobal()}, and
+ * {@link module:Scoping.doNotDeclare doNotDeclare()}.
+ * 
  * @function
  * @param {LogicConcept} target the LogicConcept in which to do the work
  * @param {Function} [callback] the handler for all symbols that are
@@ -352,6 +391,10 @@ export const clearImplicitDeclarations = target => {
  * @see {@link module:Scoping.scopeErrors scopeErrors()}
  * @see {@link module:Scoping.addScopeError addScopeError()}
  * @see {@link module:Scoping.clearScopeErrors clearScopeErrors()}
+ * @see {@link module:Scoping.declareWhenSeen declareWhenSeen()}
+ * @see {@link module:Scoping.declareInAncestor declareInAncestor()}
+ * @see {@link module:Scoping.declareGlobal declareGlobal()}
+ * @see {@link module:Scoping.doNotDeclare doNotDeclare()}
  */
 export const validate = ( target, callback ) => {
     // If the user provided a handler for symbols that are eligible for implicit
@@ -525,9 +568,131 @@ const validateBindingExpressions = ( location, scopeStack ) => {
     }
 }
 
+/**
+ * A callback function that can be used with the
+ * {@link module:Scoping.validate validate()} function, as in
+ * `Scoping.validate(L,Scoping.declareWhenSeen)`.  If used in that manner,
+ * for every free and undeclared symbol in `L`, this function will add an
+ * implicit declaration of it at the first occurrence of that symbol in any
+ * given scope.  (The {@link module:Scoping.validate validate()} routine calls
+ * the callback only on the first occurrence in any given scope, so this
+ * function just adds an implicit declaration every time it is called.)
+ * 
+ * @function
+ * @param {string} symbolName the name of the symbol to implicitly declare
+ * @param {LogicConcept} target the location at which the symbol appears
+ *   free and undeclared
+ * 
+ * @see {@link module:Scoping.declareInAncestor declareInAncestor()}
+ * @see {@link module:Scoping.declareGlobal declareGlobal()}
+ * @see {@link module:Scoping.doNotDeclare doNotDeclare()}
+ */
+export const declareWhenSeen = ( symbolName, target ) =>
+    addImplicitDeclaration( target, symbolName )
+
+/**
+ * A callback function that can be used with the
+ * {@link module:Scoping.validate validate()} function, as in
+ * `Scoping.validate(L,Scoping.declareInAncestor)`.  If used in that manner,
+ * for every free and undeclared symbol in `L`, this function will add an
+ * implicit declaration of it at the smallest enclosing
+ * {@link Environment Environment} in which the symbol was used free and
+ * undeclared.  This behavior is complex enough that it bears illustrating
+ * with a few examples.
+ * 
+ * **Example 1:** If the symbol appears free and undeclared in only one
+ * expression, then that expression's parent environment is the one in which
+ * it will be marked implicitly declared.
+ * 
+ * **Example 2:** If the symbol appears free and undeclared in an expression,
+ * and then also in another expression that sits in an enclosing environment
+ * (an ancestor a few levels above the target), then it will be marked
+ * implicitly declared in that outer, ancestor environment, and not anywhere
+ * else.  Because the implicit declaration acts as a declaration at the start
+ * of the enclosing ancestor, its scope includes all the descendants,
+ * including both expressions in which it appears free and undeclared.
+ * 
+ * **Example 3:** If the symbol appears free and undeclared twice, once in an
+ * expression in an environment $E_1$ and the other time in an expression in
+ * an environment $E_2$, and both $E_1$ and $E_2$ are children of the same
+ * parent, then implicit declarations will be added to both $E_1$ and $E_2$,
+ * because they are each the smallest enclosing environment for the free and
+ * undeclared instance of the symbol within them.
+ * 
+ * @function
+ * @param {string} symbolName the name of the symbol to implicitly declare
+ * @param {LogicConcept} target the location at which the symbol appears
+ *   free and undeclared
+ * 
+ * @see {@link module:Scoping.declareWhenSeen declareWhenSeen()}
+ * @see {@link module:Scoping.declareGlobal declareGlobal()}
+ * @see {@link module:Scoping.doNotDeclare doNotDeclare()}
+ */
+export const declareInAncestor = ( symbolName, target ) => {
+    // this should happen only in pathological cases used in testing,
+    // but just in case, we check it here:
+    if ( !target.parent() ) return
+    // if some ancestor already has it implicitly declared, do nothing
+    if ( target.hasAncestorSatisfying( anc =>
+            ( implicitDeclarations( anc ) || [ ] ).includes( symbolName ) ) )
+        return
+    // since we will be declaring it inside our own nearest environment
+    // ancestor, if any earlier sibling declared it more deeply down in the LC
+    // tree, remove that declaration, since ours will supercede it
+    const earlierSiblings = target.parent().children().slice(
+        0, target.indexInParent() )
+    earlierSiblings.descendantsSatisfying( d => d instanceof Environment )
+        .forEach( e => removeImplicitDeclaration( e, symbolName ) )
+    // okay, now do our own declaration
+    addImplicitDeclaration( target.parent(), symbolName )
+}
+
+/**
+ * A callback function that can be used with the
+ * {@link module:Scoping.validate validate()} function, as in
+ * `Scoping.validate(L,Scoping.declareGlobal)`.  If used in that manner, for
+ * every free and undeclared symbol in `L`, this function will add an implicit
+ * declaration of it at the top-level ancestor (the "global" scope) for each
+ * free and undeclared symbol.  Each symbol is added only once to that global
+ * scope, because implicit symbol declaration lists are actually sets, not
+ * lists.
+ * 
+ * @function
+ * @param {string} symbolName the name of the symbol to implicitly declare
+ * @param {LogicConcept} target the location at which the symbol appears
+ *   free and undeclared
+ * 
+ * @see {@link module:Scoping.declareWhenSeen declareWhenSeen()}
+ * @see {@link module:Scoping.declareInAncestor declareInAncestor()}
+ * @see {@link module:Scoping.doNotDeclare doNotDeclare()}
+ */
+export const declareGlobal = ( symbolName, target ) => {
+    const topLevelAncestor = target.ancestorsSatisfying(
+        anc => !anc.parent() )[0]
+    addImplicitDeclaration( topLevelAncestor, symbolName )
+}
+
+/**
+ * A callback function that can be used with the
+ * {@link module:Scoping.validate validate()} function, as in
+ * `Scoping.validate(L,Scoping.doNotDeclare)`.  Because this function does
+ * absolutely nothing, that code is equivalent to calling
+ * `Scoping.validate(L)`, but we provide this function for those times when
+ * the caller wishes to make it obvious, in the code, that implicit
+ * declarations are being expressly omitted.
+ * 
+ * @function
+ * @see {@link module:Scoping.declareWhenSeen declareWhenSeen()}
+ * @see {@link module:Scoping.declareInAncestor declareInAncestor()}
+ * @see {@link module:Scoping.declareGlobal declareGlobal()}
+ */
+export const doNotDeclare = () => { }
+
+
 // Export public API only:
 export default {
     validate,
     scopeErrors, addScopeError, clearScopeErrors,
-    implicitDeclarations, addImplicitDeclaration, clearImplicitDeclarations
+    implicitDeclarations, addImplicitDeclaration, clearImplicitDeclarations,
+    declareWhenSeen, declareInAncestor, declareGlobal, doNotDeclare
 }
