@@ -84,7 +84,7 @@
  * an API makes it easier, more readable, and less error-prone.  So we provide
  * the following functions to that end.
  * 
- *  * For manipulating implicit variable declaration data:
+ *  * For manipulating implicit symbol declaration data:
  *     * {@link module:Scoping.implicitDeclarations implicitDeclarations()}
  *     * {@link module:Scoping.addImplicitDeclaration addImplicitDeclaration()}
  *     * {@link module:Scoping.clearImplicitDeclarations clearImplicitDeclarations()}
@@ -152,7 +152,7 @@ export const addScopeError = ( target, newData ) => {
  * 
  * The result will be an object, JSON data of key-value pairs, the keys of
  * which will be the types of scoping errors, such as "invalid" for invalid
- * variable declaratiosn or "undeclared" for variables that appear free and
+ * symbol declaratiosn or "undeclared" for variables that appear free and
  * undeclared.  If any such key is missing, there are no errors of that
  * type.
  * 
@@ -199,14 +199,14 @@ export const clearScopeErrors = target => {
  * Given a {@link LogicConcept LogicConcept} in which we wish to mark some
  * symbols as implicitly declared, this function writes that data into the
  * appropriate attribute, merging it with any data already there.  It is
- * assumed that the implicit variable declaration data is an array of symbol
+ * assumed that the implicit symbol declaration data is an array of symbol
  * names, and that the new symbol given here is to be appended to the end of
  * that array, if and only if it wasn't already on the array.
  * 
  * This function is made static so that any client can easily make use of
  * the same convention for storing implicit declarations in a
  * {@link LogicConcept LogicConcept}, but the standard way to compute and
- * store such errors is by passing an implicit variable declaration handler
+ * store such errors is by passing an implicit symbol declaration handler
  * to {@link module:Scoping.validate validate()}.
  * 
  * @function
@@ -326,7 +326,7 @@ export const clearImplicitDeclarations = target => {
  * 
  * To help clients who wish to take this middle road, this function has an
  * optional second argument.  If a function is provided as the second argument,
- * it will be called on the first instance of every free and undeclared variable
+ * it will be called on the first instance of every free and undeclared symbol
  * *before* the validation work described above is executed.  The function will
  * be passed two parameters at each call: the name of the symbol that appears
  * free and undeclared, and the {@link LogicConcept LogicConcept} in which it
@@ -463,7 +463,7 @@ const validateDeclarations = ( location, scopeStack = new BindingStack ) => {
     const implicitHere = implicitDeclarations( location ) || [ ]
     if ( location instanceof Environment ) {
         // The only possible error is that a binding environment might
-        // attempt to redeclare some already-declared variable:
+        // attempt to redeclare some already-declared symbol:
         const explicitHere = location instanceof BindingEnvironment ?
             location.boundSymbolNames() : [ ]
         const declaredHere = [ ...explicitHere, ...implicitHere ]
@@ -504,7 +504,7 @@ const validateDeclarations = ( location, scopeStack = new BindingStack ) => {
 
 // Utility function for use in Phase 3, above:
 // Find all binding expressions inside an outermost expression (including the
-// outermost expression itself) and if any bind a variable that's declared or
+// outermost expression itself) and if any bind a symbol that's declared or
 // bound outside the binding expression, mark it as a redeclaration.
 const validateBindingExpressions = ( location, scopeStack ) => {
     if ( location instanceof BindingExpression ) {
