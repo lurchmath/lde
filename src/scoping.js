@@ -641,8 +641,10 @@ export const declareInAncestor = ( symbolName, target ) => {
     // tree, remove that declaration, since ours will supercede it
     const earlierSiblings = target.parent().children().slice(
         0, target.indexInParent() )
-    earlierSiblings.descendantsSatisfying( d => d instanceof Environment )
-        .forEach( e => removeImplicitDeclaration( e, symbolName ) )
+    earlierSiblings.forEach( sibling => sibling.descendantsSatisfying(
+        descendant => descendant instanceof Environment
+    ).forEach( environment =>
+        removeImplicitDeclaration( environment, symbolName ) ) )
     // okay, now do our own declaration
     addImplicitDeclaration( target.parent(), symbolName )
 }

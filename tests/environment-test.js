@@ -508,6 +508,71 @@ describe( 'Scope validation', () => {
         } )
     } )
 
+    it( 'Should provide correct implicit handler callbacks', () => {
+        // Create a more complex test case
+        const testContent = `
+        {
+            {
+                symbol1
+                [operand1 operand2]
+                (operator operand1 operand2)
+            }
+            {
+                (operator operator)
+            }
+            symbol1
+        }
+        `
+        // Do before-and-after testing with the doNotDeclare callback,
+        // which is the simplest one.
+        let test = LogicConcept.fromPutdown( testContent )[0]
+        checkScopeErrorsDeeply( test, 'implicit handlers 1' )
+        checkImplicitsDeeply( test, 'implicit handlers 1b' )
+        Scoping.validate( test, Scoping.doNotDeclare )
+        checkScopeErrorsDeeply( test, 'implicit handlers 2', {
+            '0,0' : { undeclared : [ 'symbol1' ] },
+            '0,2' : { undeclared : [ 'operator' ] },
+            '1,0' : { undeclared : [ 'operator' ] },
+            '2'   : { undeclared : [ 'symbol1' ] }
+        } )
+        checkImplicitsDeeply( test, 'implicit handlers 2b' )
+        // Do before-and-after testing with the declareWhenSeen callback,
+        // which is the next simplest one.
+        test = LogicConcept.fromPutdown( testContent )[0]
+        checkScopeErrorsDeeply( test, 'implicit handlers 3' )
+        checkImplicitsDeeply( test, 'implicit handlers 3b' )
+        Scoping.validate( test, Scoping.declareWhenSeen )
+        checkScopeErrorsDeeply( test, 'implicit handlers 4' )
+        checkImplicitsDeeply( test, 'implicit handlers 4b', {
+            '0,0' : [ 'symbol1' ],
+            '0,2' : [ 'operator' ],
+            '1,0' : [ 'operator' ],
+            '2'   : [ 'symbol1' ]
+        } )
+        // Do before-and-after testing with the declareGlobal callback,
+        // which is only marginally more complex.
+        test = LogicConcept.fromPutdown( testContent )[0]
+        checkScopeErrorsDeeply( test, 'implicit handlers 5' )
+        checkImplicitsDeeply( test, 'implicit handlers 5b' )
+        Scoping.validate( test, Scoping.declareGlobal )
+        checkScopeErrorsDeeply( test, 'implicit handlers 6' )
+        checkImplicitsDeeply( test, 'implicit handlers 6b', {
+            '' : [ 'symbol1', 'operator' ]
+        } )
+        // Do before-and-after testing with the declareInAncestor callback,
+        // which is the most complex.
+        test = LogicConcept.fromPutdown( testContent )[0]
+        checkScopeErrorsDeeply( test, 'implicit handlers 7' )
+        checkImplicitsDeeply( test, 'implicit handlers 7b' )
+        Scoping.validate( test, Scoping.declareInAncestor )
+        checkScopeErrorsDeeply( test, 'implicit handlers 8' )
+        checkImplicitsDeeply( test, 'implicit handlers 8b', {
+            ''  : [ 'symbol1' ],
+            '0' : [ 'operator' ],
+            '1' : [ 'operator' ]
+        } )
+    } )
+
     it( 'Should mark redeclared variables as such', () => {
         // Create same LC as in an earlier test, but now with three declarations.
         let test = LogicConcept.fromPutdown( `
