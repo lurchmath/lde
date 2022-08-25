@@ -269,6 +269,21 @@ describe( 'Scope validation', () => {
         } )
     }
 
+    // Same as previous, except for implicit declarations
+    const checkImplicitsDeeply = ( testLC, message, declList = { } ) => {
+        testLC.descendantsSatisfying( d => true ).map( d => {
+            const address = d.address()
+            if ( !declList.hasOwnProperty( address ) )
+                expect( Scoping.implicitDeclarations( d ),
+                        `${message} (@${address})` ).to.be.undefined
+            else
+                expect( Scoping.implicitDeclarations( d ),
+                        `${message} (@${address})` ).to.eql( declList[address] )
+            // console.log( 'Checked:', message, address, declList[address],
+            //     Scoping.implicitDeclarations( d ) )
+        } )
+    }
+
     it( 'Should find all symbols undeclared when no decls are present', () => {
         // An LC that contains various symbols at various places
         let test = LogicConcept.fromPutdown( `
@@ -283,6 +298,7 @@ describe( 'Scope validation', () => {
         expect( test.constructor.className ).to.equal( 'Environment' )
         // Initially/by default, there are absolutely no scoping errors
         checkScopeErrorsDeeply( test, 'no declarations 1' )
+        checkImplicitsDeeply( test, 'no declarations 1b' )
         // Now run the routine we wish to test
         Scoping.validate( test )
         // Now there should be "undeclared" scoping errors on every expression,
@@ -292,6 +308,7 @@ describe( 'Scope validation', () => {
             '0,1' : { undeclared : [ 'operator', 'operand1', 'operand2' ] },
             '1'   : { undeclared : [ 'symbol2' ] }
         } )
+        checkImplicitsDeeply( test, 'no declarations 2b' )
     } )
 
     it( 'Should mark undeclared only those symbols that actually are', () => {
@@ -311,6 +328,7 @@ describe( 'Scope validation', () => {
         expect( test.constructor.className ).to.equal( 'Environment' )
         // Initially/by default, there are absolutely no scoping errors
         checkScopeErrorsDeeply( test, 'basic declarations 1' )
+        checkImplicitsDeeply( test, 'basic declarations 1b' )
         // Now run the routine we wish to test
         Scoping.validate( test )
         // Now there should be "undeclared" scoping errors at exactly those
@@ -319,6 +337,7 @@ describe( 'Scope validation', () => {
             '1,2' : { undeclared : [ 'operand1' ] },
             '2'   : { undeclared : [ 'symbol2' ] }
         } )
+        checkImplicitsDeeply( test, 'basic declarations 2b' )
         // Run a similar test to the one above, but now using a binding
         // environment to make some symbols declared.
         test = LogicConcept.fromPutdown( `
@@ -333,6 +352,7 @@ describe( 'Scope validation', () => {
         expect( test.constructor.className ).to.equal( 'Environment' )
         // Initially/by default, there are absolutely no scoping errors
         checkScopeErrorsDeeply( test, 'binding environment declarations 1' )
+        checkImplicitsDeeply( test, 'binding environment declarations 1b' )
         // Now run the routine we wish to test
         Scoping.validate( test )
         // Now there should be "undeclared" scoping errors at exactly those
@@ -342,6 +362,7 @@ describe( 'Scope validation', () => {
             '0,2,1' : { undeclared : [ 'operator' ] },
             '1' :     { undeclared : [ 'symbol2' ] }
         } )
+        checkImplicitsDeeply( test, 'binding environment declarations 2b' )
     } )
 
     it( 'Should ignore bound symbols when marking symbols undeclared', () => {
@@ -361,6 +382,7 @@ describe( 'Scope validation', () => {
         expect( test.constructor.className ).to.equal( 'Environment' )
         // Initially/by default, there are absolutely no scoping errors
         checkScopeErrorsDeeply( test, 'ignore bound symbols 1' )
+        checkImplicitsDeeply( test, 'ignore bound symbols 1b' )
         // Now run the routine we wish to test
         Scoping.validate( test )
         // Now there should be "undeclared" scoping errors at exactly those
@@ -368,6 +390,7 @@ describe( 'Scope validation', () => {
         checkScopeErrorsDeeply( test, 'ignore bound symbols 2', {
             '2' : { undeclared : [ 'symbol2' ] }
         } )
+        checkImplicitsDeeply( test, 'ignore bound symbols 2b' )
     } )
 
     it( 'Should mark nothing undeclared if all are declared', () => {
@@ -385,11 +408,13 @@ describe( 'Scope validation', () => {
         expect( test.constructor.className ).to.equal( 'Environment' )
         // Initially/by default, there are absolutely no scoping errors
         checkScopeErrorsDeeply( test, 'everything declared 1' )
+        checkImplicitsDeeply( test, 'everything declared 1b' )
         // Now run the routine we wish to test
         Scoping.validate( test )
         // And in this test there should still be no scoping errors, because we
         // declared all free variables up front.
         checkScopeErrorsDeeply( test, 'everything declared 2' )
+        checkImplicitsDeeply( test, 'everything declared 2b' )
     } )
 
     it( 'Should run the implicit handler on all undeclared variables', () => {
@@ -409,6 +434,7 @@ describe( 'Scope validation', () => {
         expect( test.constructor.className ).to.equal( 'Environment' )
         // Initially/by default, there are absolutely no scoping errors
         checkScopeErrorsDeeply( test, 'calls to implicit handler 1' )
+        checkImplicitsDeeply( test, 'calls to implicit handler 1b' )
         // Now run the routine we wish to test, but with a spy function as the
         // implicit variable declaration handler, so we know when it got called.
         // (We will test further below that it got called exactly when it should
@@ -422,6 +448,7 @@ describe( 'Scope validation', () => {
             '0,2' : { undeclared : [ 'operand1', 'operand2' ] },
             '1'   : { undeclared : [ 'symbol2' ] }
         } )
+        checkImplicitsDeeply( test, 'calls to implicit handler 2b' )
         // But furthermore, did the implicit variable declaration handler get
         // called when it should have been?
         expect( implicitHandler.callRecord ).to.be.instanceof( Array )
@@ -465,6 +492,7 @@ describe( 'Scope validation', () => {
         expect( test.constructor.className ).to.equal( 'Environment' )
         // Initially/by default, there are absolutely no scoping errors
         checkScopeErrorsDeeply( test, 'make declarations explicit 1' )
+        checkImplicitsDeeply( test, 'make declarations explicit 1b' )
         // Now define a simple implicit declaration handler and run validation
         // using it.
         const implicitHandler = ( symbolName, location ) =>
@@ -473,6 +501,11 @@ describe( 'Scope validation', () => {
         // Now there should be nothing undeclared, because we just took all
         // undeclared variables and declared them.
         checkScopeErrorsDeeply( test, 'make declarations explicit 2' )
+        checkImplicitsDeeply( test, 'make declarations explicit 2b', {
+            '0,0' : [ 'symbol1' ],
+            '0,1' : [ 'operator', 'operand1', 'operand2' ],
+            '1'   : [ 'symbol2' ]
+        } )
     } )
 
     it( 'Should mark redeclared variables as such', () => {
@@ -493,6 +526,7 @@ describe( 'Scope validation', () => {
         expect( test.constructor.className ).to.equal( 'Environment' )
         // Initially/by default, there are absolutely no scoping errors
         checkScopeErrorsDeeply( test, 'testing redeclarations 1' )
+        checkImplicitsDeeply( test, 'testing redeclarations 1b' )
         // Now run the routine we wish to test
         Scoping.validate( test )
         // And in this test there should still be no scoping errors, because we
@@ -502,6 +536,7 @@ describe( 'Scope validation', () => {
             '1,2' : { undeclared : [ 'operator', 'operand2' ] }
             // and we are NOT asking if symbol2 is redeclared, because it isn't
         } )
+        checkImplicitsDeeply( test, 'testing redeclarations 2b' )
     } )
 
     it( 'Should mark variables redeclared by the implicit handler', () => {
@@ -523,6 +558,7 @@ describe( 'Scope validation', () => {
         expect( test.constructor.className ).to.equal( 'Environment' )
         // Initially/by default, there are absolutely no scoping errors
         checkScopeErrorsDeeply( test, 'corner case 1' )
+        checkImplicitsDeeply( test, 'corner case 1b' )
         // Now define the silly implicit declaration handler and run validation
         // using it.
         const implicitHandler = ( symbolName, location ) => {
@@ -539,6 +575,12 @@ describe( 'Scope validation', () => {
             '0,1' : { redeclared : [ 'x' ] },
             '2' :   { redeclared : [ 'x' ] }
         } )
+        checkImplicitsDeeply( test, 'corner case 2b', {
+            '0,0' : [ 'symbol1', 'x' ],
+            '0,1' : [ 'operator', 'x', 'operand1', 'operand2' ],
+            '1'   : [ 'symbol2', 'x' ],
+            '2'   : [ 'just_another_thing', 'x' ]
+        } )
     } )
 
     it( 'Should mark twice-bound variables as a redeclaration', () => {
@@ -552,6 +594,7 @@ describe( 'Scope validation', () => {
         expect( test.constructor.className ).to.equal( 'Environment' )
         // Initially/by default, there are absolutely no scoping errors
         checkScopeErrorsDeeply( test, 'twice-bound case 1' )
+        checkImplicitsDeeply( test, 'twice-bound case 1b' )
         // Now validate the given environment
         Scoping.validate( test )
         // There should be precisely one problem, and that is with the twice-
@@ -559,6 +602,7 @@ describe( 'Scope validation', () => {
         checkScopeErrorsDeeply( test, 'twice-bound case 2', {
             '2,2,1' : { redeclared : [ 'x' ] }
         } )
+        checkImplicitsDeeply( test, 'twice-bound case 2b' )
     } )
 
     it( 'Should mark bound-and-declared variables as a redeclaration', () => {
@@ -572,6 +616,7 @@ describe( 'Scope validation', () => {
         expect( test.constructor.className ).to.equal( 'Environment' )
         // Initially/by default, there are absolutely no scoping errors
         checkScopeErrorsDeeply( test, 'bound-and-declared case 1' )
+        checkImplicitsDeeply( test, 'bound-and-declared case 1b' )
         // Now validate the given environment
         Scoping.validate( test )
         // There should be precisely one problem, and that is with the twice-
@@ -579,6 +624,7 @@ describe( 'Scope validation', () => {
         checkScopeErrorsDeeply( test, 'bound-and-declared case 2', {
             '2' : { redeclared : [ 'pi' ] }
         } )
+        checkImplicitsDeeply( test, 'bound-and-declared case 2b' )
     } )
 
 } )
