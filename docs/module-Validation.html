@@ -2,12 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Lurch Deductive Engine: matching/metavariables.js</title>
+    <title>Lurch Deductive Engine: Validation</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
     <link type="text/css" rel="stylesheet" href="styles/styles.css">
     
+
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+    </script>
 </head>
 <body>
 
@@ -24,128 +31,1431 @@
 </header>
 
 
-<main class="layout-main  layout-content--source">
+<main class="layout-main ">
   <div class="container">
-    <p class="page-kind">source</p>
-    <h1 class="page-title">matching/metavariables.js</h1>
+    <p class="page-kind">Module</p>
+    <h1 class="page-title">Validation</h1>
     
 
 
 
-    
 
 <section>
-    <article>
-        <pre id="source" class="source-page line-numbers"><code class="language-js">
-import { Symbol as LurchSymbol } from '../symbol.js'
 
-/**
- * This module defines a constant and function that formalize the concept of a
- * "metavariable."  See the documentation for
- * {@link module:Matching the Matching module} for a definition of
- * metavariables and how they relate to the concept of matching.
- * 
- * @see {@link module:Metavariables.metavariable metavariable} - for marking
- *   certain symbols as metavariables
- * @see {@link module:Metavariables.containsAMetavariable containsAMetavariable()} - for
- *   testing whether expressions contain metavariables
- * @see {@link module:Metavariables.metavariablesIn metavariablesIn()} - for
- *   computing an array of all metavariables within a given expression
- * @see {@link module:Metavariables.metavariableNamesIn metavariableNamesIn()} - for
- *   computing a set of all names of metavariables within a given expression
- * 
- * @module Metavariables
- */
 
-/**
- * To facilitate marking some {@link Symbol Symbols} as metavariables (in
- * contrast to any {@link Symbol Symbol} not so marked), we declare a string
- * constant that can be used with the
- * {@link MathConcept#isA isA()} and {@link MathConcept#asA asA()} and
- * {@link MathConcept#makeIntoA makeIntoA()} functions in the
- * {@link MathConcept MathConcept} class.
- * 
- * For example, to mark a symbol `A` as a metavariable, one can import this
- * module (call it `M`) and then call `A.makeIntoA( M.metavariable )`.  You
- * can later test to see if `A` is a metavariable with
- * `A.isA( M.metavariable )`.
- * 
- * Note, however, that only {@link Symbol Symbol} instances can be used as
- * metavariables by {@link module:Matching the matching module}.  Although you
- * can mark any {@link LogicConcept LogicConcept} as a metavariable this way,
- * it is useless to do so, and other functions in this module will not
- * recognize non-{@link Symbol Symbols} as metavariables.
- * 
- * @see {@link module:Metavariables.containsAMetavariable containsAMetavariable()}
- * @see {@link module:Metavariables.metavariablesIn metavariablesIn()}
- * @see {@link module:Metavariables.metavariableNamesIn metavariableNamesIn()}
- */
-export const metavariable = 'LDE MV'
+<header class="not-class">
 
-/**
- * A *pattern* is an {@link Expression Expression} that *may* contain a
- * metavariable.  Hence *all* {@link Expression Expressions} are
- * patterns, though an {@link Expression Expression} without any
- * metavariables is a pattern only in a degenerate sense.  But sometimes we
- * need to know we are working with an {@link Expression Expression} that
- * does *not* contain a metavariable, that is, a non-pattern expression.
- * This function is useful for detecting that case.
- * 
- * Recall that a metavariable is any {@link Symbol Symbol} that has been
- * marked as a metavariable as described in the documentation for
- * {@link module:Metavariables.metavariable metavariable}.
- * 
- * @function
- * @param {LogicConcept} LC the {@link LogicConcept LogicConcept} to test
- *   for whether it contains any metavariables
- * @returns {boolean} true if and only if `LC` contains no metavariables
- */
-export const containsAMetavariable = LC =>
-    LC.hasDescendantSatisfying( d =>
-        ( d instanceof LurchSymbol ) &amp;&amp; d.isA( metavariable ) )
 
-/**
- * Find the ordered list of all descendants of the given
- * {@link LogicConcept LogicConcept} that are metavariables.
- * In contrast to
- * {@link module:Metavariables.metavariableNamesIn metavariableNamesIn()},
- * this function returns the actual {@link Symbol Symbol} instances, not just
- * their string names, and thus this list might be longer than what
- * {@link module:Metavariables.metavariableNamesIn metavariableNamesIn()}
- * would return on the same input.
- * 
- * @function
- * @param {LogicConcept} LC where to search for metavariables
- * @returns {Array} a JavaScript array of all {@link Symbol Symbol} instances
- *   that are descendants of the given `LC` and that pass the
- *   `s.isA( metavariable )` test.  Note that a
- *   {@link LogicConcept LogicConcept} is considered a descendant of itself.
- *   The results appear in tree traversal order.
- * 
- * @see {@link module:Metavariables.metavariableNamesIn metavariableNamesIn()}
- */
-export const metavariablesIn = LC =>
-    LC.descendantsSatisfying( d =>
-        ( d instanceof LurchSymbol ) &amp;&amp; d.isA( metavariable ) )
+    
+        
+            
+        
+    
+</header>
 
-/**
- * Find the collection of metavariables appearing in the given
- * {@link LogicConcept LogicConcept}, considering only their names as strings,
- * not distinguishing one instance of, say, $x$, from another.
- * Thus the result of this function will be a set that may have fewer elements
- * than the array that would be returned by
- * {@link module:Metavariables.metavariablesIn metavariablesIn()} if it were
- * called on the same input.
- * 
- * @function
- * @param {LogicConcept} LC where to search for metavariable names
- * @returns {Set} a JavaScript set of strings, each of which is the name of a
- *   metavariable appearing in the given `LC`
- */
-export const metavariableNamesIn = LC =>
-    new Set( metavariablesIn( LC ).map( mv => mv.text() ) )
-</code></pre>
+<article>
+    <div class="container-overview">
+
+
+
+    
+        
+            <div class="description"><h2>What is Validation?</h2>
+<p>Validation is the process of computing feedback for the user about the
+validity of their reasoning.  It can be run on any <a href="LogicConcept.html">LogicConcept</a>, from a small one that represents only a single equation of
+arithmetic up to a large one that represents an entire document containing
+many theorems and proofs.</p>
+<p>The word &quot;reasoning&quot; is used in a very broad sense here; there are many
+ways one can define validation and many meanings one can ascribe to symbols
+in a document (or no meaning at all in a toy system).  But we will call the
+user's work &quot;reasoning&quot; because typically Lurch will be grading actual
+mathematical proofs, and the user will be doing some reasoning in any case
+in order to use even a toy system, even if the system itself has no
+meaning.</p>
+<p>Because there can be many different ways to validate a
+<a href="Environment.html#conclusions">conclusion()</a>, this module lets the client
+<a href="module-Validation.html#.installTool">install any number of validation tools</a>.  Some validation tools will be installed in this module by default,
+when the module is loaded, but the client can add others.</p>
+<p>The user can also specify options for how validation tools should operate,
+either global options for this whole module, or per-conclusion options, all
+using the
+<a href="module-Validation.html#.setOptions">setOptions()</a> function.</p></div>
+        
+
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="validation.js.html">validation.js</a><a href="validation.js.html#source.2">, line 2</a>
+        </li>
+    </ul>
+
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+     
+
+    
+
+    
+
+
+    
+        <h3 class="subtitle">Members</h3>
+
+        
+            
+
+<article class="member">
+    <div class="method-type">
+        <span class="method-type-signature is-static">static</span><span class="method-type-signature is-constant">constant</span>
+    </div>
+<h4 class="member-name" id=".installedToolNames">installedToolNames<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>This module is a collection of validation tools, which are installed using
+the <a href="module-Validation.html#.installTool">installTool()</a> function, each
+under a unique name.  This function returns that list of unique names.</p>
+</div>
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="module-Validation.html#.installTool">installTool()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    <h4>Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="validation.js.html">validation.js</a><a href="validation.js.html#source.97">, line 97</a>
+        </li>
+    </ul>
+
+
+</article>
+        
+            
+
+<article class="member">
+    <div class="method-type">
+        <span class="method-type-signature is-static">static</span><span class="method-type-signature is-constant">constant</span>
+    </div>
+<h4 class="member-name" id=".validate">validate<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Validating a conclusion means finding the
+appropriate validation routine for that conclusion and calling it on the
+conclusion.  (See <a href="module-Validation.html#.setOptions">setOptions()</a> for how
+we determine the appropriate validation routine for a conclusion.)  If this
+function is called on a conclusion, that is what it does.</p>
+<p>Validating an <a href="Environment.html">Environment</a> means validating all of its
+conclusions, in the order in which they appear
+(<a href="MathConcept.html#isEarlierThan">earlier ones</a> first).  If this function
+is called on an <a href="Environment.html">Environment</a>, that is what it does.</p>
+</div>
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    <h4>Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="validation.js.html">validation.js</a><a href="validation.js.html#source.317">, line 317</a>
+        </li>
+    </ul>
+
+
+</article>
+        
+    
+
+    
+        <h3 class="subtitle">Methods</h3>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    <span class="method-type-signature is-static">static</span>
+    </div>
+
+    <h4 class="method-name" id=".clearOptions">clearOptions<span class="signature">(conclusion)</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Remove the validation options stored in a conclusion. The conclusion will
+have options stored in it if the client has used
+<a href="module-Validation.html#.setOptions">setOptions()</a> on that conclusion.
+After calling this, a future call to
+<a href="module-Validation.html#.options">options()</a> on the same conclusion will
+yield undefined.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">conclusion</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code><a href="LogicConcept.html">LogicConcept</a></code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the conclusion whose validation options
+should be deleted</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="module-Validation.html#.setOptions">setOptions()</a></li>
+            
+                <li><a href="module-Validation.html#.options">options()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="validation.js.html">validation.js</a><a href="validation.js.html#source.272">, line 272</a>
+        </li>
+    </ul>
+
+
+
     </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    <span class="method-type-signature is-static">static</span>
+    </div>
+
+    <h4 class="method-name" id=".clearResult">clearResult<span class="signature">(target)</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Remove the validation result stored in a conclusion that has been validated
+before by one of this module's validation tools.  If no validation result
+was stored there, this function does nothing.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">target</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code><a href="LogicConcept.html">LogicConcept</a></code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the conclusion from which to remove any stored
+validation result</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="module-Validation.html#.setResult">setResult()</a></li>
+            
+                <li><a href="module-Validation.html#.result">result()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="validation.js.html">validation.js</a><a href="validation.js.html#source.174">, line 174</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    <span class="method-type-signature is-static">static</span>
+    </div>
+
+    <h4 class="method-name" id=".installTool">installTool<span class="signature">(name, func)</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>This module stores a collection of validation tools.  Each such tool is a
+function with the following signature:</p>
+<ul>
+<li>Argument 1 is a <a href="Environment.html#conclusions">conclusion</a> to be
+validated.</li>
+<li>Argument 2 is an options object, combining the module-level validation
+options with any options stored in the conclusion, with those in the
+conclusion superceding module-level options.</li>
+<li>The return value should be the validation results for that conclusion.</li>
+</ul>
+<p>That result will be written into the conclusion using the
+<a href="module-Validation.html#.setResult">setResult()</a>
+function.</p>
+<p>Each tool gets stored under a name chosen by the client, so that the tool
+can be referred to later by this name as a unique ID.  Installing another
+tool later with the same name overwrites the previous.</p>
+<p>If this is the first tool installed in this module, it will immediately
+become the default.  You can change this later using the
+<a href="module-Validation.html#.setOptions">setOptions()</a> function; see its
+documentation for further details.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">name</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>string</code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the name by which this tool will be called, and under
+which it will be stored in this module</p></div>
+            
+        </li>
+
+    
+
+        <li>
+            
+                <span class="param-name">func</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>function</code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the function that will be run when the tool is used;
+it will be called on the conclusion to be validated</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="module-Validation.html#.installedToolNames">installedToolNames()</a></li>
+            
+                <li><a href="module-Validation.html#.setResult">setResult()</a></li>
+            
+                <li><a href="module-Validation.html#.result">result()</a></li>
+            
+                <li><a href="module-Validation.html#.clearResult">clearResult()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="validation.js.html">validation.js</a><a href="validation.js.html#source.82">, line 82</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    <span class="method-type-signature is-static">static</span>
+    </div>
+
+    <h4 class="method-name" id=".options">options<span class="signature">()</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>For a general description of how validation options work, refer to the
+documentation for the <a href="module-Validation.html#.setOptions">setOptions()</a>
+function.  Calling this function with no arguments, <code>Validation.options()</code>,
+returns the full set of module-level options.  Calling it with one
+argument, a conclusion, <code>Validation.options(C)</code>, returns just those
+conclusion-specific options stored in that <a href="Expression.html">Expression</a>.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="module-Validation.html#.setOptions">setOptions()</a></li>
+            
+                <li><a href="module-Validation.html#.clearOptions">clearOptions()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="validation.js.html">validation.js</a><a href="validation.js.html#source.245">, line 245</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    <span class="method-type-signature is-static">static</span>
+    </div>
+
+    <h4 class="method-name" id=".result">result<span class="signature">(target)</span><span class="return-type-signature"> &rarr; {Object}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Read the validation result stored in a conclusion that has been validated
+before by one of this module's validation tools, and return it, or return
+undefined if no validation result is stored in the given conclusion.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">target</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code><a href="LogicConcept.html">LogicConcept</a></code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the conclusion in which to look up the stored
+validation result</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="module-Validation.html#.setResult">setResult()</a></li>
+            
+                <li><a href="module-Validation.html#.clearResult">clearResult()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>Object</code>
+            
+            
+                <p>any validation result stored previously using
+<a href="module-Validation.html#.setResult">setResult()</a>,
+or undefined if none is stored</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="validation.js.html">validation.js</a><a href="validation.js.html#source.159">, line 159</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    <span class="method-type-signature is-static">static</span>
+    </div>
+
+    <h4 class="method-name" id=".setOptions">setOptions<span class="signature">()</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>When validation is performed on a conclusion, using
+<a href="module-Validation.html#.validate">validate()</a>, it will compute the
+relevant options to be passed to the validation tool as follows.  First,
+look up any options stored in this module, and second, look up any options
+stored in the conclusion to be validated, overwriting the module-level
+options with the conclusion-specific ones in the case of any conflicts.
+The resulting set of options is given to the
+<a href="module-Validation.html#.validate">validate()</a> routine.</p>
+<p>This function can be used to change options either at the module level,
+by calling <code>setOptions( key1, value1, key2, value2, ... )</code>, or for a
+specific conclusion, by calling
+<code>setOptions( conclusion, key1, value1, key2, value2, ... )</code>.</p>
+<p>Although most options will be specific to the validation tool being used,
+one essential option that matters in all cases is <em>which</em> validation tool
+to use for the conclusion.  That option has the simple key <code>&quot;tool&quot;</code>, so
+you can set it for a conclusion with code such as
+<code>Validation.setOptions( conclusion, 'tool', 'tool name here' )</code>.  But it is
+inconvenient to do this for every conclusion in a large
+<a href="LogicConcept.html">LogicConcept</a>, so it is preferable to be able to set a
+default validation tool that will be used when the conclusion does not
+specify one.  Since module-level options are the defaults or &quot;fallbacks&quot;
+when a conclusion doesn't have an option specified, just set a module-level
+tool with code such as <code>Validation.setOptions( 'tool', 'tool name here' )</code>.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="module-Validation.html#.validate">validate()</a></li>
+            
+                <li><a href="module-Validation.html#.options">options()</a></li>
+            
+                <li><a href="module-Validation.html#.clearOptions">clearOptions()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="validation.js.html">validation.js</a><a href="validation.js.html#source.210">, line 210</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    <span class="method-type-signature is-static">static</span>
+    </div>
+
+    <h4 class="method-name" id=".setResult">setResult<span class="signature">(target, result)</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Store the results of a validation tool in the conclusion that was validated.
+Validation results are a JavaScript object amenable to JSON storage, and
+having the following keys (some optional, some required).</p>
+<ul>
+<li><code>result</code> - any string representing the validation result, though the only
+officially supported ones at the moment are <code>&quot;valid&quot;</code> (meaning the user's
+work is correct), <code>&quot;invalid&quot;</code> (meaning the user's work has a mistake),
+and <code>&quot;indeterminate&quot;</code> (meaning that Lurch cannot find the answer, perhaps
+because of limited computing resources or some ambiguity in the user's
+input)</li>
+<li><code>reason</code> - any string representing the reason for why the validation
+result was what it was.  We leave it up to the author of the validation
+tool how to use this attribute, but we recommend using short English
+phrases as error codes that can be looked up in a larger dictionary of
+detailed descriptions.  For example, you might use <code>&quot;No such reason&quot;</code> or
+<code>&quot;Too many premises&quot;</code> or any other simple phrase.</li>
+<li>Any other keys in the object are optional, and can be used at the
+discretion of the author of the validation tool to store whatever other
+information will help Lurch give helpful feedback to the user.</li>
+</ul>
+<p>Example validation result:</p>
+<pre class="prettyprint source lang-json"><code>{
+    &quot;result&quot; : &quot;invalid&quot;,
+    &quot;reason&quot; : &quot;Too many premises&quot;,
+    &quot;formula cited&quot; : &quot;conjunction introduction&quot;,
+    &quot;num premises needed&quot; : 2,
+    &quot;num premises cited&quot; : 4
+}
+</code></pre>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">target</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code><a href="LogicConcept.html">LogicConcept</a></code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the conclusion into which to store the given
+data as its validation result</p></div>
+            
+        </li>
+
+    
+
+        <li>
+            
+                <span class="param-name">result</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>Object</code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>data that can be stored in JSON form, representing
+the validation result for the given <code>target</code>, using the format described
+above</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4 class="method-heading">See</h4>
+        <ul>
+            
+                <li><a href="module-Validation.html#.result">result()</a></li>
+            
+                <li><a href="module-Validation.html#.clearResult">clearResult()</a></li>
+            
+        </ul>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="validation.js.html">validation.js</a><a href="validation.js.html#source.141">, line 141</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+    
+
+    
+
+    
+</article>
+
 </section>
 
 
@@ -156,7 +1466,7 @@ export const metavariableNamesIn = LC =>
 
 <footer class="layout-footer">
   <div class="container">
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.10</a> on Fri Aug 26 2022 15:16:00 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.10</a> on Fri Aug 26 2022 15:16:01 GMT+0000 (Coordinated Universal Time)
   </div>
 </footer>
 

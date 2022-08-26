@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Lurch Deductive Engine: matching/metavariables.js</title>
+    <title>Lurch Deductive Engine: validation.js</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
@@ -27,7 +27,7 @@
 <main class="layout-main  layout-content--source">
   <div class="container">
     <p class="page-kind">source</p>
-    <h1 class="page-title">matching/metavariables.js</h1>
+    <h1 class="page-title">validation.js</h1>
     
 
 
@@ -37,113 +37,391 @@
 <section>
     <article>
         <pre id="source" class="source-page line-numbers"><code class="language-js">
-import { Symbol as LurchSymbol } from '../symbol.js'
-
 /**
- * This module defines a constant and function that formalize the concept of a
- * "metavariable."  See the documentation for
- * {@link module:Matching the Matching module} for a definition of
- * metavariables and how they relate to the concept of matching.
+ * ## What is Validation?
  * 
- * @see {@link module:Metavariables.metavariable metavariable} - for marking
- *   certain symbols as metavariables
- * @see {@link module:Metavariables.containsAMetavariable containsAMetavariable()} - for
- *   testing whether expressions contain metavariables
- * @see {@link module:Metavariables.metavariablesIn metavariablesIn()} - for
- *   computing an array of all metavariables within a given expression
- * @see {@link module:Metavariables.metavariableNamesIn metavariableNamesIn()} - for
- *   computing a set of all names of metavariables within a given expression
+ * Validation is the process of computing feedback for the user about the
+ * validity of their reasoning.  It can be run on any {@link LogicConcept
+ * LogicConcept}, from a small one that represents only a single equation of
+ * arithmetic up to a large one that represents an entire document containing
+ * many theorems and proofs.
  * 
- * @module Metavariables
+ * The word "reasoning" is used in a very broad sense here; there are many
+ * ways one can define validation and many meanings one can ascribe to symbols
+ * in a document (or no meaning at all in a toy system).  But we will call the
+ * user's work "reasoning" because typically Lurch will be grading actual
+ * mathematical proofs, and the user will be doing some reasoning in any case
+ * in order to use even a toy system, even if the system itself has no
+ * meaning.
+ * 
+ * Because there can be many different ways to validate a
+ * {@link Environment#conclusions conclusion()}, this module lets the client
+ * {@link module:Validation.installTool install any number of validation
+ * tools}.  Some validation tools will be installed in this module by default,
+ * when the module is loaded, but the client can add others.
+ * 
+ * The user can also specify options for how validation tools should operate,
+ * either global options for this whole module, or per-conclusion options, all
+ * using the
+ * {@link module:Validation.setOptions setOptions()} function.
+ * 
+ * @module Validation
  */
 
-/**
- * To facilitate marking some {@link Symbol Symbols} as metavariables (in
- * contrast to any {@link Symbol Symbol} not so marked), we declare a string
- * constant that can be used with the
- * {@link MathConcept#isA isA()} and {@link MathConcept#asA asA()} and
- * {@link MathConcept#makeIntoA makeIntoA()} functions in the
- * {@link MathConcept MathConcept} class.
- * 
- * For example, to mark a symbol `A` as a metavariable, one can import this
- * module (call it `M`) and then call `A.makeIntoA( M.metavariable )`.  You
- * can later test to see if `A` is a metavariable with
- * `A.isA( M.metavariable )`.
- * 
- * Note, however, that only {@link Symbol Symbol} instances can be used as
- * metavariables by {@link module:Matching the matching module}.  Although you
- * can mark any {@link LogicConcept LogicConcept} as a metavariable this way,
- * it is useless to do so, and other functions in this module will not
- * recognize non-{@link Symbol Symbols} as metavariables.
- * 
- * @see {@link module:Metavariables.containsAMetavariable containsAMetavariable()}
- * @see {@link module:Metavariables.metavariablesIn metavariablesIn()}
- * @see {@link module:Metavariables.metavariableNamesIn metavariableNamesIn()}
- */
-export const metavariable = 'LDE MV'
+import { LogicConcept } from './logic-concept.js'
+import { Environment } from './environment.js'
+import { Expression } from './expression.js'
+import { Symbol as LurchSymbol } from './symbol.js'
+
+// Module-level constant in which we store all validation tools.  Users can
+// install new tools using installTool(), defined below.  This module also
+// installs some of its own tools, further down in this file.
+const tools = { }
+// Module-level settings object.  Users can change its key-value pairs using
+// routines below.  We call it "settings" instead of options so as not to
+// conflict with the getter function defined below, named options().
+const settings = { }
 
 /**
- * A *pattern* is an {@link Expression Expression} that *may* contain a
- * metavariable.  Hence *all* {@link Expression Expressions} are
- * patterns, though an {@link Expression Expression} without any
- * metavariables is a pattern only in a degenerate sense.  But sometimes we
- * need to know we are working with an {@link Expression Expression} that
- * does *not* contain a metavariable, that is, a non-pattern expression.
- * This function is useful for detecting that case.
+ * This module stores a collection of validation tools.  Each such tool is a
+ * function with the following signature:
  * 
- * Recall that a metavariable is any {@link Symbol Symbol} that has been
- * marked as a metavariable as described in the documentation for
- * {@link module:Metavariables.metavariable metavariable}.
+ *  * Argument 1 is a {@link Environment#conclusions conclusion} to be
+ *    validated.
+ *  * Argument 2 is an options object, combining the module-level validation
+ *    options with any options stored in the conclusion, with those in the
+ *    conclusion superceding module-level options.
+ *  * The return value should be the validation results for that conclusion.
+ * 
+ * That result will be written into the conclusion using the
+ * {@link module:Validation.setResult setResult()}
+ * function.
+ * 
+ * Each tool gets stored under a name chosen by the client, so that the tool
+ * can be referred to later by this name as a unique ID.  Installing another
+ * tool later with the same name overwrites the previous.
+ * 
+ * If this is the first tool installed in this module, it will immediately
+ * become the default.  You can change this later using the
+ * {@link module:Validation.setOptions setOptions()} function; see its
+ * documentation for further details.
  * 
  * @function
- * @param {LogicConcept} LC the {@link LogicConcept LogicConcept} to test
- *   for whether it contains any metavariables
- * @returns {boolean} true if and only if `LC` contains no metavariables
+ * @param {string} name the name by which this tool will be called, and under
+ *   which it will be stored in this module
+ * @param {function} func the function that will be run when the tool is used;
+ *   it will be called on the conclusion to be validated
+ * 
+ * @see {@link module:Validation.installedToolNames installedToolNames()}
+ * @see {@link module:Validation.setResult setResult()}
+ * @see {@link module:Validation.result result()}
+ * @see {@link module:Validation.clearResult clearResult()}
  */
-export const containsAMetavariable = LC =>
-    LC.hasDescendantSatisfying( d =>
-        ( d instanceof LurchSymbol ) &amp;&amp; d.isA( metavariable ) )
+export const installTool = ( name, func ) => {
+    tools[name] = func
+    if ( !options().hasOwnProperty( 'tool' ) ) setOptions( 'tool', name )
+}
 
 /**
- * Find the ordered list of all descendants of the given
- * {@link LogicConcept LogicConcept} that are metavariables.
- * In contrast to
- * {@link module:Metavariables.metavariableNamesIn metavariableNamesIn()},
- * this function returns the actual {@link Symbol Symbol} instances, not just
- * their string names, and thus this list might be longer than what
- * {@link module:Metavariables.metavariableNamesIn metavariableNamesIn()}
- * would return on the same input.
+ * This module is a collection of validation tools, which are installed using
+ * the {@link module:Validation.installTool installTool()} function, each
+ * under a unique name.  This function returns that list of unique names.
  * 
- * @function
- * @param {LogicConcept} LC where to search for metavariables
- * @returns {Array} a JavaScript array of all {@link Symbol Symbol} instances
- *   that are descendants of the given `LC` and that pass the
- *   `s.isA( metavariable )` test.  Note that a
- *   {@link LogicConcept LogicConcept} is considered a descendant of itself.
- *   The results appear in tree traversal order.
+ * @returns {string[]} an array of the names of all validation tools installed
+ *   in this module
  * 
- * @see {@link module:Metavariables.metavariableNamesIn metavariableNamesIn()}
+ * @see {@link module:Validation.installTool installTool()}
  */
-export const metavariablesIn = LC =>
-    LC.descendantsSatisfying( d =>
-        ( d instanceof LurchSymbol ) &amp;&amp; d.isA( metavariable ) )
+export const installedToolNames = () => Object.keys( tools )
 
 /**
- * Find the collection of metavariables appearing in the given
- * {@link LogicConcept LogicConcept}, considering only their names as strings,
- * not distinguishing one instance of, say, $x$, from another.
- * Thus the result of this function will be a set that may have fewer elements
- * than the array that would be returned by
- * {@link module:Metavariables.metavariablesIn metavariablesIn()} if it were
- * called on the same input.
+ * Store the results of a validation tool in the conclusion that was validated.
+ * Validation results are a JavaScript object amenable to JSON storage, and
+ * having the following keys (some optional, some required).
+ * 
+ *  * `result` - any string representing the validation result, though the only
+ *    officially supported ones at the moment are `"valid"` (meaning the user's
+ *    work is correct), `"invalid"` (meaning the user's work has a mistake),
+ *    and `"indeterminate"` (meaning that Lurch cannot find the answer, perhaps
+ *    because of limited computing resources or some ambiguity in the user's
+ *    input)
+ *  * `reason` - any string representing the reason for why the validation
+ *    result was what it was.  We leave it up to the author of the validation
+ *    tool how to use this attribute, but we recommend using short English
+ *    phrases as error codes that can be looked up in a larger dictionary of
+ *    detailed descriptions.  For example, you might use `"No such reason"` or
+ *    `"Too many premises"` or any other simple phrase.
+ *  * Any other keys in the object are optional, and can be used at the
+ *    discretion of the author of the validation tool to store whatever other
+ *    information will help Lurch give helpful feedback to the user.
+ * 
+ * Example validation result:
+ * ```json
+ * {
+ *     "result" : "invalid",
+ *     "reason" : "Too many premises",
+ *     "formula cited" : "conjunction introduction",
+ *     "num premises needed" : 2,
+ *     "num premises cited" : 4
+ * }
+ * ```
  * 
  * @function
- * @param {LogicConcept} LC where to search for metavariable names
- * @returns {Set} a JavaScript set of strings, each of which is the name of a
- *   metavariable appearing in the given `LC`
+ * @param {LogicConcept} target the conclusion into which to store the given
+ *   data as its validation result
+ * @param {Object} result data that can be stored in JSON form, representing
+ *   the validation result for the given `target`, using the format described
+ *   above
+ * 
+ * @see {@link module:Validation.result result()}
+ * @see {@link module:Validation.clearResult clearResult()}
  */
-export const metavariableNamesIn = LC =>
-    new Set( metavariablesIn( LC ).map( mv => mv.text() ) )
+export const setResult = ( target, result ) =>
+    target.setAttribute( 'validation result', result )
+
+/**
+ * Read the validation result stored in a conclusion that has been validated
+ * before by one of this module's validation tools, and return it, or return
+ * undefined if no validation result is stored in the given conclusion.
+ * 
+ * @function
+ * @param {LogicConcept} target the conclusion in which to look up the stored
+ *   validation result
+ * @returns {Object} any validation result stored previously using
+ *   {@link module:Validation.setResult setResult()},
+ *   or undefined if none is stored
+ * 
+ * @see {@link module:Validation.setResult setResult()}
+ * @see {@link module:Validation.clearResult clearResult()}
+ */
+export const result = ( target ) =>
+    target.getAttribute( 'validation result' )
+
+/**
+ * Remove the validation result stored in a conclusion that has been validated
+ * before by one of this module's validation tools.  If no validation result
+ * was stored there, this function does nothing.
+ * 
+ * @function
+ * @param {LogicConcept} target the conclusion from which to remove any stored
+ *   validation result
+ * 
+ * @see {@link module:Validation.setResult setResult()}
+ * @see {@link module:Validation.result result()}
+ */
+export const clearResult = ( target ) =>
+    target.clearAttributes( 'validation result' )
+
+/**
+ * When validation is performed on a conclusion, using
+ * {@link module:Validation.validate validate()}, it will compute the
+ * relevant options to be passed to the validation tool as follows.  First,
+ * look up any options stored in this module, and second, look up any options
+ * stored in the conclusion to be validated, overwriting the module-level
+ * options with the conclusion-specific ones in the case of any conflicts.
+ * The resulting set of options is given to the
+ * {@link module:Validation.validate validate()} routine.
+ * 
+ * This function can be used to change options either at the module level,
+ * by calling `setOptions( key1, value1, key2, value2, ... )`, or for a
+ * specific conclusion, by calling
+ * `setOptions( conclusion, key1, value1, key2, value2, ... )`.
+ * 
+ * Although most options will be specific to the validation tool being used,
+ * one essential option that matters in all cases is *which* validation tool
+ * to use for the conclusion.  That option has the simple key `"tool"`, so
+ * you can set it for a conclusion with code such as
+ * `Validation.setOptions( conclusion, 'tool', 'tool name here' )`.  But it is
+ * inconvenient to do this for every conclusion in a large
+ * {@link LogicConcept LogicConcept}, so it is preferable to be able to set a
+ * default validation tool that will be used when the conclusion does not
+ * specify one.  Since module-level options are the defaults or "fallbacks"
+ * when a conclusion doesn't have an option specified, just set a module-level
+ * tool with code such as `Validation.setOptions( 'tool', 'tool name here' )`.
+ * 
+ * @function
+ * 
+ * @see {@link module:Validation.validate validate()}
+ * @see {@link module:Validation.options options()}
+ * @see {@link module:Validation.clearOptions clearOptions()}
+ */
+export const setOptions = ( ...args ) => {
+    if ( args[0] instanceof LogicConcept ) {
+        const target = args.shift()
+        if ( !target.isAConclusionIn( /* top-level ancestor */ ) )
+            throw new Error(
+                'Cannot set validation options in a non-conclusion' )
+        if ( args.length % 2 != 0 )
+            throw new Error(
+                'Validation options must come in key-value pairs' )
+        const options = { }
+        for ( let i = 0 ; i &lt; args.length - 1 ; i += 2 )
+            options[args[i]] = args[i+1]
+        target.setAttribute( 'validation options', options )
+    } else {
+        if ( args.length % 2 != 0 )
+            throw new Error(
+                'Validation options must come in key-value pairs' )
+        for ( let i = 0 ; i &lt; args.length - 1 ; i += 2 )
+            settings[args[i]] = args[i+1]
+    }
+}
+
+/**
+ * For a general description of how validation options work, refer to the
+ * documentation for the {@link module:Validation.setOptions setOptions()}
+ * function.  Calling this function with no arguments, `Validation.options()`,
+ * returns the full set of module-level options.  Calling it with one
+ * argument, a conclusion, `Validation.options(C)`, returns just those
+ * conclusion-specific options stored in that {@link Expression Expression}.
+ * 
+ * @function
+ * 
+ * @see {@link module:Validation.setOptions setOptions()}
+ * @see {@link module:Validation.clearOptions clearOptions()}
+ */
+export const options = ( maybeTarget ) => {
+    if ( maybeTarget ) {
+        if ( !( maybeTarget instanceof LogicConcept )
+          || !maybeTarget.isAConclusionIn( /* top-level ancestor */ ) )
+            throw new Error(
+                'Validation options exist only in conclusion expressions' )
+        return maybeTarget.getAttribute( 'validation options' )
+    } else {
+        return settings
+    }
+}
+
+/**
+ * Remove the validation options stored in a conclusion. The conclusion will
+ * have options stored in it if the client has used
+ * {@link module:Validation.setOptions setOptions()} on that conclusion.
+ * After calling this, a future call to
+ * {@link module:Validation.options options()} on the same conclusion will
+ * yield undefined.
+ * 
+ * @function
+ * @param {LogicConcept} conclusion the conclusion whose validation options
+ *   should be deleted
+ * 
+ * @see {@link module:Validation.setOptions setOptions()}
+ * @see {@link module:Validation.options options()}
+ */
+export const clearOptions = ( conclusion ) =>
+    conclusion.clearAttributes( 'validation options' )
+
+// Internal utility function used by the validate() function below.
+const validateConclusion = conclusion => {
+    // merge the module-level options with this conclusion's options:
+    const conclOptions = Object.assign( options(), options( conclusion ) )
+    // if there is no validation tool specified, that's an error:
+    const tool = tools[conclOptions.tool]
+    if ( !tool ) {
+        setResult( conclusion, {
+            result : 'indeterminate',
+            reason : 'No validation tool available'
+        } )
+    } else {
+        // otherwise, run that tool, and record its result if it works:
+        try {
+            setResult( conclusion, tool( conclusion, conclOptions ) )
+        } catch ( error ) {
+            // but if it didn't work, record a result anyway---the error:
+            setResult( conclusion, {
+                result : 'indeterminate',
+                reason : 'Internal validation error',
+                message : error.message,
+                stack : error.stack
+            } )
+        }
+    }
+}
+
+/**
+ * Validating a {@link Environment.conclusions conclusion} means finding the
+ * appropriate validation routine for that conclusion and calling it on the
+ * conclusion.  (See {@link module:Validation.setOptions setOptions()} for how
+ * we determine the appropriate validation routine for a conclusion.)  If this
+ * function is called on a conclusion, that is what it does.
+ * 
+ * Validating an {@link Environment Environment} means validating all of its
+ * conclusions, in the order in which they appear
+ * ({@link MathConcept#isEarlierThan earlier ones} first).  If this function
+ * is called on an {@link Environment Environment}, that is what it does.
+ * 
+ * @param {LogicConcept} L the {@link LogicConcept LogicConcept} to validate,
+ *   either a conclusion or an environment
+ */
+export const validate = ( L ) => {
+    if ( L instanceof Environment ) {
+        L.conclusions().forEach( validateConclusion )
+    } else if ( L.isAConclusionIn( /* top-level ancestor */ ) ) {
+        validateConclusion( L )
+    } else {
+        throw new Error(
+            'Can validate only Environments and Conclusions' )
+    }
+}
+
+// A simple JavaScript (floating point) arithmetic checker, just as an
+// example validation tool
+const arithmeticOperatorsInJS = {
+    '+' : [ (x,y)=>x+y ],
+    '-' : [ x=>-x, (x,y)=>x-y ],
+    '*' : [ (x,y)=>x*y ],
+    '/' : [ (x,y)=>x/y ],
+    '%' : [ (x,y)=>x%y ],
+    '^' : [ (x,y)=>Math.pow(x,y) ],
+    '=' : [ (x,y)=>x===y ]
+}
+const runArithmeticInJS = ( conclusion ) => {
+    if ( conclusion instanceof LurchSymbol ) {
+        const result = Number( conclusion.text() )
+        if ( isNaN( result ) )
+            throw new Error( 'Invalid number: ' + conclusion.text() )
+        return result
+    }
+    if ( !( conclusion instanceof Expression ) )
+        throw new Error(
+            'Arithmetic supports only Expressions and Symbols' )
+    const operator = conclusion.firstChild()
+    if ( !( operator instanceof LurchSymbol ) )
+        throw new Error( 'Operators must be symbols' )
+    if ( !arithmeticOperatorsInJS.hasOwnProperty( operator.text() ) )
+        throw new Error( 'Not a supported operator: ' + operator.text() )
+    const operands = conclusion.allButFirstChild()
+    const toApply = arithmeticOperatorsInJS[operator.text()].find(
+        func => func.length == operands.length )
+    if ( !toApply )
+        throw new Error( 'Wrong number of arguments to ' + operator.text() )
+    return toApply.apply( null, operands.map( runArithmeticInJS ) )
+}
+const arithmeticValidator = ( conclusion/*, options */ ) => {
+    try {
+        return runArithmeticInJS( conclusion ) === true ? {
+            result : 'valid',
+            reason : 'JavaScript floating point check'
+        } : {
+            result : 'invalid',
+            reason : 'JavaScript floating point check'
+        }
+    } catch ( error ) {
+        return {
+            result : 'invalid',
+            reason : 'Invalid expression structure',
+            message : error.message,
+            stack : error.stack
+        }
+    }
+}
+installTool( 'JSarithmetic', arithmeticValidator )
+
+
+// Export public API only:
+export default {
+    installTool, installedToolNames, validate,
+    options, setOptions, clearOptions, result, setResult, clearResult
+}
 </code></pre>
     </article>
 </section>
