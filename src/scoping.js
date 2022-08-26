@@ -16,6 +16,8 @@
  *    can write `function ( x ) { ... }` and the `x` is defined only within the
  *    curly brackets.  That is its "scope."
  * 
+ * ## Scoping in Lurch
+ * 
  * In Lurch, we use {@link Environment Environments} to delimit scope.  But how
  * do we know where a symbol's scope begins?  Notice in the two examples above
  * that explicit syntax marks the beginning of a variable's scope (in
@@ -76,6 +78,8 @@
  * $Q$ be arbitrary propositions" before they write a propositional proof).
  * There are many other cases where symbols are used without being introduced,
  * but these are just two common examples.
+ * 
+ * ## Tools in this module
  * 
  * This module provides two types of functionality.  First, while scoping
  * information (including implicit symbol declarations and scoping error
@@ -191,8 +195,7 @@ export const scopeErrors = target => {
  * @see {@link module:Scoping.validate validate()}
  */
 export const clearScopeErrors = target => {
-    target.clearAttributes( 'implicitly declares' )
-    target.clearAttributes( 'scope errors' )
+    target.clearAttributes( 'implicitly declares', 'scope errors' )
     target.children().forEach( clearScopeErrors )
 }
 
