@@ -89,6 +89,7 @@ export const installTool = ( name, func ) => {
  * the {@link module:Validation.installTool installTool()} function, each
  * under a unique name.  This function returns that list of unique names.
  * 
+ * @function
  * @returns {string[]} an array of the names of all validation tools installed
  *   in this module
  * 
@@ -311,6 +312,7 @@ const validateConclusion = conclusion => {
  * ({@link MathConcept#isEarlierThan earlier ones} first).  If this function
  * is called on an {@link Environment Environment}, that is what it does.
  * 
+ * @function
  * @param {LogicConcept} L the {@link LogicConcept LogicConcept} to validate,
  *   either a conclusion or an environment
  */
