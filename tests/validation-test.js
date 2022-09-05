@@ -1,6 +1,7 @@
 
 // Import what we're testing
 import Validation from '../src/validation.js'
+import { } from '../src/validation/float-arithmetic.js'
 
 // Import other classes we need to do the testing
 import { LogicConcept } from '../src/logic-concept.js'
@@ -24,7 +25,7 @@ describe( 'Validation', () => {
         expect( test ).to.be.instanceof( Array )
         expect( test ).to.have.lengthOf.above( 0 )
         // it includes at least the following default validation tools
-        expect( test ).to.include( 'JSarithmetic' )
+        expect( test ).to.include( 'floating point arithmetic' )
         // some tool is the default and it's on the list
         expect( Validation.options ).to.be.ok
         expect( test ).to.include( Validation.options().tool )
@@ -153,7 +154,7 @@ describe( 'Validation', () => {
     } )
 
     it( 'Should do simple arithmetic validation', () => {
-        Validation.setOptions( 'tool', 'JSarithmetic' )
+        Validation.setOptions( 'tool', 'floating point arithmetic' )
         // Yes, 2+5=10-3
         let test = LogicConcept.fromPutdown( `
         {
