@@ -2,19 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Lurch Deductive Engine: EventTarget</title>
+    <title>Lurch Deductive Engine: validation/propositional-form.js</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
     <link type="text/css" rel="stylesheet" href="styles/styles.css">
     
-
-    <script>
-        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
-    </script>
-    <script id="MathJax-script" async
-        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
-    </script>
 </head>
 <body>
 
@@ -31,327 +24,259 @@
 </header>
 
 
-<main class="layout-main ">
+<main class="layout-main  layout-content--source">
   <div class="container">
-    <p class="page-kind">Class</p>
-    <h1 class="page-title">EventTarget</h1>
+    <p class="page-kind">source</p>
+    <h1 class="page-title">validation/propositional-form.js</h1>
     
 
 
 
+    
 
 <section>
-
-
-<header class="class">
-
-
-    
-        
-        <!-- <h2>EventTarget</h2> -->
-
-        
-
-        
-
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-
-
-
-    
-        
-
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    
-    </div>
-
-    <h4 class="method-name" id="EventTarget">new EventTarget<span class="signature">()</span><span class="return-type-signature"></span>
-    </h4>
-
-
-
-
-
-<div class="method-description">
-    
-    <p>The function below extends the built-in EventTarget class with new
-functionality.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="utilities.js.html">utilities.js</a><a href="utilities.js.html#source.88">, line 88</a>
-        </li>
-    </ul>
-
-
-
-    
-    </div>
-
-    
-
-    
-
-     
-
-    
-
-    
-
-
-    
-
-    
-        <h3 class="subtitle">Methods</h3>
-
-        
-            
-
-
-    <article class="method">
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    
-    </div>
-
-    <h4 class="method-name" id="emit">emit<span class="signature">(type, details)</span><span class="return-type-signature"></span>
-    </h4>
-
-
-
-
-
-<div class="method-description">
-    
-    <p>Extend the EventTarget prototype with a convenience method for emitting new
-events.  Mimics the function of the same name from node.js, but here in the
-browser.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Parameters</h4>
-    
-
-<ul class="method-params">
-    
-
-        <li>
-            
-                <span class="param-name">type</span>
-            
-
-            
-                
-
-
-    <span class="param-type">
-        <code>string</code>
-    </span>
-    
-
-            
-
-            
-
-            
-
-            <div class="param-description"><p>The type of event being emitted, as a string name</p></div>
-            
-        </li>
-
-    
-
-        <li>
-            
-                <span class="param-name">details</span>
-            
-
-            
-                
-
-
-    <span class="param-type">
-        <code>object</code>
-    </span>
-    
-
-            
-
-            
-
-            
-
-            <div class="param-description"><p>Any additional fields to copy into the Event object</p></div>
-            
-        </li>
-
-    
-</ul>
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="utilities.js.html">utilities.js</a><a href="utilities.js.html#source.103">, line 103</a>
-        </li>
-    </ul>
-
-
-
+    <article>
+        <pre id="source" class="source-page line-numbers"><code class="language-js">
+import CNFTools from './conjunctive-normal-form.js'
+
+/**
+ * Any {@link LogicConcept LogicConcept} can be interpreted as a proposition,
+ * in the usual sense of propositional logic, as follows.
+ * 
+ *  * An {@link Expression Expression} (no matter how complex) is treated as
+ *    atomic, and considered equal only to another expression with the exact
+ *    same structure.
+ *  * An {@link Environment Environment} containing no children is treated as
+ *    the constant "true."
+ *  * An {@link Environment Environment} containing exactly one child is
+ *    treated the same as if it were just the child alone.
+ *  * An {@link Environment Environment} containing two claim children is
+ *    treated as the conjunction of those children, after viewing each as a
+ *    proposition itself.
+ *  * An {@link Environment Environment} containing a given $G$ followed by a
+ *    claim $C$ is treated as the conditional expression "$G$ implies $C$."
+ *  * An {@link Environment Environment} with more than two children, $C_1$
+ *    through $C_n$, is viewed as if it contained only two children, first
+ *    $C_1$ and then an environment containing $C_2$ through $C_n$.
+ * 
+ * For example, if we use {@link LogicConcept.fromPutdown putdown notation} to
+ * express environments and expressions, then the {@link LogicConcept
+ * LogicConcept} written as
+ * ```
+ * {
+ *     :(> x 5)
+ *     (> y 10)
+ *     (= z 15)
+ * }
+ * ```
+ * might correspond to the proposition $P\Rightarrow(Q\wedge R)$, if $P$, $Q$,
+ * and $R$ were the propositional letters for the three expressions, in that
+ * order.
+ * 
+ * This conversion preserves the intended meaning of the notions of
+ * {@link Environment Environment} and given/claim.  Although
+ * {@link LogicConcept LogicConcepts} can be more complex than that (including
+ * declared variables, quantifiers, etc.), there are ways to reduce that
+ * complexity to propositional form.  Once a {@link LogicConcept LogicConcept}
+ * is in propositional form, it can be checked using a propositional tautology
+ * checker, either intuitionistic or classical.
+ * 
+ * We will later add the preprocessing steps that can simplify variable and
+ * constant declarations down into content amenable to propositional checking.
+ * Those tools are not yet present in this version of the class.
+ */
+export class PropositionalForm {
+
+    constructor ( catalog ) {
+        this._children = [ ]
+        this._catalog = catalog || [ ]
+    }
+
+    static constantTrue () {
+        const result = new PropositionalForm()
+        result.text = ' ' // not a possible .toPutdown() result
+        return result
+    }
+
+    isConstantTrue () { return this.text == ' T ' }
+
+    static atomic ( LC, catalog ) {
+        const result = new PropositionalForm( catalog )
+        result.text = LC.toPutdown().replace( /^[:]/, '' )
+        result.index( result ) // add it to its own catalog
+        return result
+    }
+
+    isAtomic () { return this._children.length == 0 }
+
+    static conditional ( antecedent, consequent, catalog ) {
+        // start at the end, with an atomic conclusion
+        const result = PropositionalForm.atomic( consequent, catalog )
+        // the antecedent might yield multiple propositional forms
+        const premises = PropositionalForm.fromConclusionsIn(
+            antecedent, result._catalog )
+        // so prepend them all to the conclusion one at a time, A->(B->(...))
+        for ( let i = premises.length - 1 ; i >= 0 ; i-- ) {
+            const next = new PropositionalForm( result._catalog )
+            next._children = [ premises[i], result ]
+            result = next
+        }
+        return result
+    }
+
+    isConditional () { return this._children.length > 0 }
+
+    static fromConclusion ( conclusion, ancestor, catalog ) {
+        return PropositionalForm(
+            conclusion.accessibles( true, ancestor ), catalog )
+    }
+
+    static fromConclusionsIn ( LC, catalog ) {
+        return LC.conclusions().map( conclusion =>
+            PropositionalForm.fromConclusion( conclusion, LC, catalog ) )
+    }
+
+    LHS () { return this._children[0] }
+    RHS () { return this._children[1] }
+
+    // for atomics only, what's my index in my own catalog?
+    index () {
+        const text = this.text
+        const index = this._catalog.indexOf( text )
+        if ( index > -1 ) return index + 1
+        this._catalog.push( text )
+        return this._catalog.length
+    }
+
+    unused () {
+        this._catalog.push( null )   // does not matter what we push, because:
+        return this._catalog.length  // this will be its 1-based index
+    }
+
+    isIn ( array ) { return array.includes( this.text ) }
+
+    addedTo ( array ) {
+        return this.isIn( array ) ? array : array.concat( [ this.text ] )
+    }
+
+    CNF () {
+        if ( this.isConstantTrue() ) return CNFTools.constantTrue()
+        if ( this.isAtomic() ) return CNFTools.proposition( this.index() )
+        // (A -> B) &lt;=> (-A v B)
+        return CNFTools.or( this.LHS().negatedCNF(), this.RHS().CNF(),
+                            () => this.unused() )
+    }
+
+    negatedCNF () {
+        if ( this.isConstantTrue() ) return CNFTools.constantFalse()
+        if ( this.isAtomic() ) return CNFTools.proposition( -this.index() )
+        // -(A -> B) &lt;=> (A ^ -B)
+        return CNFTools.and( this.LHS().CNF(), this.RHS().negatedCNF() )
+    }
+
+    isClassicalTautology () {
+        // classical tautology &lt;=> negation is not satisfiable
+        return !CNF.isSatisfiable( this.negatedCNF(), this._catalog.length )
+    }
+
+    // expects the premises to all be PFs with the same catalog as this one
+    followsClassicallyFrom ( ...premises ) {
+        if ( premises.some( premise => premise._catalog != this._catalog ) )
+            throw new Error(
+                'All premises must share a catalog with the conclusion' )
+        let asAConditional = this
+        premises.forEach( premise => {
+            const next = new PropositionalForm( asAConditional._catalog )
+            next._children = [ premise, asAConditional ]
+            asAConditional = next
+        } )
+        return asAConditional.isClassicalTautology()
+    }
+
+    isIntuitionisticTautology () {
+        return canProveInIPL( [ ], [ ], this, true, new Set() )
+    }
+
+}
+
+// Helper function, not public.  Checks if a sequent is IPL valid.
+// The sequent has a list of PFs on the left and one PF on the right.
+//   atomics = list of premise PFs passing .isAtomic()
+//   conditionals = list of premise PFs passing .isSequent()
+//   conclusion = RHS of the sequent to check (PF, may or may not be atomic)
+//   checkCPLFirst = boolean, true iff we should check CPL first
+//     (We do this check by default because if CPL says this is not a
+//     tautology, clearly IPL agrees, so we've saved time.  But if the caller
+//     knows CPL will say "yes" then it can tell us to not bother rechecking.)
+//   proven = JavaScript Set of texts of atomic PFs that we already know
+//     follow from the LHS of the given sequent's LHS (probably because we
+//     tried some other recursive proof that failed but gave partial results)
+const canProveInIPL = (
+    atomics, conditionals, conclusion, checkCPLFirst, proven
+) => {
+
+    // If the conclusion is literally the constant true, we're done.
+    if ( conclusion.isConstantTrue() ) {
+        return true
+    }
+
+    // don't bother with FIC if SAT says no...unless the caller told us not to
+    // do this check.  (Recursive calls that already know the check will pass
+    // may tell us to skip it to save time.)
+    if ( checkCPLFirst
+      &amp;&amp; !conclusion.followsClassicallyFrom( ...atomics, ...conditionals ) )
+        return false
+
+    // If the conclusion is already known, just stop now.
+    if ( proven.has( conclusion.text ) ) return true
+
+    // apply the GR rule as many times as needed to achieve an atomic RHS
+    while ( conclusion.isConditional() ) {
+        const A = conclusion.LHS()
+        if ( A.isAtomic() ) {
+            atomics = A.addedTo( atomics )
+        } else {
+            conditionals = A.addedTo( conditionals )
+        }
+        conclusion = conclusion._children[1]
+    }
+
+    // conclusion is now atomic.  if the S rule applies, done
+    if ( conclusion.isIn( atomics ) ) return true
+
+    // recursive applications of GL rule
+    for ( let i = 0 ; i &lt; conditionals.length ; i++ ) {
+        // Try the left subproof, and record any atomics you prove while you
+        // work on it, so that even if it fails, we increase our knowledge.
+        // If that left subproof fails, move on to the next conditional.
+        const provenNow = new Set()
+        const leftSubproofIsProvable = canProveInIPL( atomics,
+            conditionals.without( i ), conditionals[i].LHS(), true, provenNow )
+        Array.from( provenNow ).forEach( text => proven.add( text ) )
+        if ( !leftSubproofIsProvable ) continue
+        // The left subproof succeeds, so the whole question is now equivalent
+        // to whether the right subproof succeeds.
+        // Note: No need to call SAT in either of the following recursions,
+        // because in both cases, the sequent we're deferring to in recursion
+        // is provable (in both IPL and CPL) iff the current sequent is.
+        // Since we already know that the current one is CPL-provable, we know
+        // the one in the recursion is, so there's no need to waste time
+        // verifying that fact.
+        return Bi.isAtomic() ?
+            canProveInIPL( conditionals[i].RHS().addedTo( atomics ),
+                conditionals.without( i ), conclusion, false, proven ) :
+            canProveInIPL( atomics,
+                conditionals[i].RHS().addedTo( conditionals.without( i ) ),
+                conclusion, false, proven )
+    }
+
+    // failed to prove it in any of the legal ways, so it is not
+    // intuitionistically true
+    return false
+
+}
+</code></pre>
     </article>
-
-        
-    
-
-    
-
-    
-</article>
-
 </section>
 
 
@@ -362,7 +287,7 @@ browser.</p>
 
 <footer class="layout-footer">
   <div class="container">
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.10</a> on Mon Sep 12 2022 13:23:53 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.10</a> on Mon Sep 12 2022 13:23:52 GMT+0000 (Coordinated Universal Time)
   </div>
 </footer>
 

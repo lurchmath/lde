@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Lurch Deductive Engine: EventTarget</title>
+    <title>Lurch Deductive Engine: CNF</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
@@ -33,8 +33,8 @@
 
 <main class="layout-main ">
   <div class="container">
-    <p class="page-kind">Class</p>
-    <h1 class="page-title">EventTarget</h1>
+    <p class="page-kind">Namespace</p>
+    <h1 class="page-title">CNF</h1>
     
 
 
@@ -43,12 +43,12 @@
 <section>
 
 
-<header class="class">
+<header class="not-class">
 
 
     
         
-        <!-- <h2>EventTarget</h2> -->
+        <!-- <h2>CNF</h2> -->
 
         
 
@@ -65,43 +65,36 @@
 
     
         
+            <div class="description"><p>The CNF namespace includes tools for constructing nested JavaScript arrays
+suitable for use in the satisfiability solver stored in the <code>dependencies</code>
+folder in this repository.  (Credits to the author of that tool appear in
+the documentation for <a href="CNF.html#.isSatisfiable">isSatisfiable()</a>, below.)</p>
+<p>The format used by that tool is as follows.  Assume that we have a number
+for every propositional variable, so that we might refer to them as
+$p_1,p_2,p_3,\ldots$.  Then an expression such as</p>
+<p>$$ (p_1\vee p_2)\wedge(\neg p_2\vee p_3\vee\neg p_4) $$</p>
+<p>gets encoded as follows.</p>
+<p><code>[ [ 1, 2 ], [ -2, 3, 4 ] ]</code></p>
+<p>The inner arrays are disjunctions, the outer array is conjunction (as is
+the definition of CNF), and the integers represent propositions, or the
+negations of them, depending on the sign of the integer.</p>
+<p>Tools in this namespace let you construct CNFs for atomic propositions,
+including:</p>
+<ul>
+<li><a href="CNF.html#.constantTrue">the constrant true</a></li>
+<li><a href="CNF.html#.constantFalse">the constrant false</a></li>
+<li><a href="CNF.html#.proposition">any atomic proposition or its negation</a></li>
+</ul>
+<p>and non-atomic propositional expressions as well, including:</p>
+<ul>
+<li><a href="CNF.html#.and">the conjunction of two CNFs</a></li>
+<li><a href="CNF.html#.or">the disjunction of two CNFs</a></li>
+</ul>
+<p>You can then check satisfiability of any constructed CNF with
+<a href="CNF.html#.isSatisfiable">isSatisfiable()</a>.</p></div>
+        
 
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    
-    </div>
-
-    <h4 class="method-name" id="EventTarget">new EventTarget<span class="signature">()</span><span class="return-type-signature"></span>
-    </h4>
-
-
-
-
-
-<div class="method-description">
-    
-    <p>The function below extends the built-in EventTarget class with new
-functionality.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
+        
 
 
 <div class="details">
@@ -137,31 +130,7 @@ functionality.</p>
 </div>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="utilities.js.html">utilities.js</a><a href="utilities.js.html#source.88">, line 88</a>
-        </li>
-    </ul>
-
-
-
+        
     
     </div>
 
@@ -196,10 +165,10 @@ functionality.</p>
     
 
     <div class="method-type">
-    
+    <span class="method-type-signature is-static">static</span>
     </div>
 
-    <h4 class="method-name" id="emit">emit<span class="signature">(type, details)</span><span class="return-type-signature"></span>
+    <h4 class="method-name" id=".and">and<span class="signature">(args)</span><span class="return-type-signature"> &rarr; {<a href="Array.html">Array</a>}</span>
     </h4>
 
 
@@ -208,9 +177,10 @@ functionality.</p>
 
 <div class="method-description">
     
-    <p>Extend the EventTarget prototype with a convenience method for emitting new
-events.  Mimics the function of the same name from node.js, but here in the
-browser.</p>
+    <p>The conjunctive normal form (CNF) for the conjunction of the inputs.
+Each input must itself be a CNF, and consequently they can be conjoined
+just by concatenating the arrays (which is the same as flattening the
+argument list by one level).</p>
 </div>
 
 
@@ -229,7 +199,7 @@ browser.</p>
 
         <li>
             
-                <span class="param-name">type</span>
+                <span class="param-name">args</span>
             
 
             
@@ -237,7 +207,7 @@ browser.</p>
 
 
     <span class="param-type">
-        <code>string</code>
+        <code><a href="Array.html">Array</a>.&lt;<a href="Array.html">Array</a>></code>
     </span>
     
 
@@ -247,33 +217,7 @@ browser.</p>
 
             
 
-            <div class="param-description"><p>The type of event being emitted, as a string name</p></div>
-            
-        </li>
-
-    
-
-        <li>
-            
-                <span class="param-name">details</span>
-            
-
-            
-                
-
-
-    <span class="param-type">
-        <code>object</code>
-    </span>
-    
-
-            
-
-            
-
-            
-
-            <div class="param-description"><p>Any additional fields to copy into the Event object</p></div>
+            <div class="param-description"><p>two or more CNFs to conjoin</p></div>
             
         </li>
 
@@ -318,6 +262,21 @@ browser.</p>
 
 
 
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>Array</code>
+            
+            
+                <p>if the args contain $a_1,\ldots,a_n$, the result is a
+conjunctive normal form representing &quot;$a_1$ and $\cdots$ and $a_n$&quot;</p>
+            
+        </li>
+    
+    </ul>
+
 
 
 
@@ -336,7 +295,853 @@ browser.</p>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="utilities.js.html">utilities.js</a><a href="utilities.js.html#source.103">, line 103</a>
+            <a href="validation_conjunctive-normal-form.js.html">validation/conjunctive-normal-form.js</a><a href="validation_conjunctive-normal-form.js.html#source.100">, line 100</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    <span class="method-type-signature is-static">static</span>
+    </div>
+
+    <h4 class="method-name" id=".constantFalse">constantFalse<span class="signature">()</span><span class="return-type-signature"> &rarr; {<a href="Array.html">Array</a>}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>The conjunctive normal form (CNF) for the constant true is an array
+containing exactly one entry, itself an empty array.  The reason for this
+is that a CNF is a conjunction of disjunctions, so the inner array
+represents an empty disjunction, which is vacuously false.  Consequently,
+the outer conjunction is also false.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>Array</code>
+            
+            
+                <p>the conjunctive normal form representing the constant &quot;false&quot;</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="validation_conjunctive-normal-form.js.html">validation/conjunctive-normal-form.js</a><a href="validation_conjunctive-normal-form.js.html#source.64">, line 64</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    <span class="method-type-signature is-static">static</span>
+    </div>
+
+    <h4 class="method-name" id=".constantTrue">constantTrue<span class="signature">()</span><span class="return-type-signature"> &rarr; {<a href="Array.html">Array</a>}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>The conjunctive normal form (CNF) for the constant true is simply the empty
+array, because CNF means &quot;all these things must be true,&quot; and so an empty
+list is vacuously true.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>Array</code>
+            
+            
+                <p>the conjunctive normal form representing the constant &quot;true&quot;</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="validation_conjunctive-normal-form.js.html">validation/conjunctive-normal-form.js</a><a href="validation_conjunctive-normal-form.js.html#source.51">, line 51</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    <span class="method-type-signature is-static">static</span>
+    </div>
+
+    <h4 class="method-name" id=".isSatisfiable">isSatisfiable<span class="signature">(CNF, maxVariableIndex<span class="signature-attributes">opt</span>)</span><span class="return-type-signature"> &rarr; {boolean}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Checking the satisfiability of a propositional logic expression is an
+NP-hard problem.  We use, internally, a tool built by Gregory Duck that has
+many efficiencies built in, though of course, in the worst-case scenario,
+it still runs in exponential time.  But in practice, it is very fast.</p>
+<p>The CNF provided should be one in the form described at the top of this
+page (an array of arrays of integers, with the meaning documented there).
+Such CNFs can be built using the other functions in this module.</p>
+<p>Professor Duck's satisfiability checker has a
+<a href="http://www.comp.nus.edu.sg/~gregory/sat/">website here</a>
+and a <a href="https://github.com/GJDuck/SAT.js">GitHub repository here</a>.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">CNF</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code><a href="Array.html">Array</a>.&lt;<a href="Array.html">Array</a>></code>
+    </span>
+    
+
+            
+
+            
+                <span class="param-attributes">
+                
+
+                
+
+                
+                </span>
+            
+
+            
+
+            <div class="param-description"><p>the conjunctive normal form whose satisfiability
+should be tested</p></div>
+            
+        </li>
+
+    
+
+        <li>
+            
+                <span class="param-name">maxVariableIndex</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>integer</code>
+    </span>
+    
+
+            
+
+            
+                <span class="param-attributes">
+                
+                    &lt;optional&gt;<br>
+                
+
+                
+
+                
+                </span>
+            
+
+            
+
+            <div class="param-description"><p>the highest index variable mentioned in
+the CNF (which will be computed if not provided, but providing it saves a
+little time)</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>boolean</code>
+            
+            
+                <p>whether the given expression is satisfiable</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="validation_conjunctive-normal-form.js.html">validation/conjunctive-normal-form.js</a><a href="validation_conjunctive-normal-form.js.html#source.177">, line 177</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    <span class="method-type-signature is-static">static</span>
+    </div>
+
+    <h4 class="method-name" id=".or">or<span class="signature">(P, Q, getNewSymbol<span class="signature-attributes">opt</span>)</span><span class="return-type-signature"> &rarr; {<a href="Array.html">Array</a>}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>The conjunctive normal form (CNF) for the disjunction of the two inputs,
+although this is not quite true.  It is extremely inefficient to compute
+actual disjunction of two CNFs, and thus we adopt here a method that does
+not create the actual disjunction, but rather a CNF that is
+<em>equisatisfiable</em> with the actual disjunction.  Since our purpose here is
+only for creating CNFs for use in satisfiability checking, that shortcut is
+good enough.</p>
+<p>The third parameter is a callback function that will be used to generate a
+new, unused symbol (that is, an integer not appearing in $P$ or $Q$ or
+anywhere else in the larger problem into which these may fit) if one is
+needed as a so-called &quot;switch variable.&quot;  If this function is not provided,
+we will simply use the smallest positive integer not appearing (as itself
+or its negation) in $P$ or $Q$.  This fallback may not be what the caller
+wants; it is only a fallback.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">P</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code><a href="Array.html">Array</a></code>
+    </span>
+    
+
+            
+
+            
+                <span class="param-attributes">
+                
+
+                
+
+                
+                </span>
+            
+
+            
+
+            <div class="param-description"><p>the first CNF of the two to conjoin</p></div>
+            
+        </li>
+
+    
+
+        <li>
+            
+                <span class="param-name">Q</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code><a href="Array.html">Array</a></code>
+    </span>
+    
+
+            
+
+            
+                <span class="param-attributes">
+                
+
+                
+
+                
+                </span>
+            
+
+            
+
+            <div class="param-description"><p>the second CNF of the two to conjoin</p></div>
+            
+        </li>
+
+    
+
+        <li>
+            
+                <span class="param-name">getNewSymbol</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>function</code>
+    </span>
+    
+
+            
+
+            
+                <span class="param-attributes">
+                
+                    &lt;optional&gt;<br>
+                
+
+                
+
+                
+                </span>
+            
+
+            
+
+            <div class="param-description"><p>the callback for generating new symbols
+(which must take no inputs and return a positive integer if called, and
+which may have side effects, such as recording that integer as &quot;used&quot;).</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>Array</code>
+            
+            
+                <p>the conjunctive normal form representing an expression
+equisatisfiable with &quot;$P$ or $Q$&quot;</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="validation_conjunctive-normal-form.js.html">validation/conjunctive-normal-form.js</a><a href="validation_conjunctive-normal-form.js.html#source.129">, line 129</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    <span class="method-type-signature is-static">static</span>
+    </div>
+
+    <h4 class="method-name" id=".proposition">proposition<span class="signature">(index)</span><span class="return-type-signature"> &rarr; {<a href="Array.html">Array</a>}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>The conjunctive normal form (CNF) for a single propositional letter $p_i$
+is an array containing exactly one entry, itself also an array containing
+exactly one entry, the index $i$ of the propositional letter.  The reason
+for this is that a CNF is a conjunction of disjunctions, so the inner array
+represents a degenerate disjunction that is equivalent to $p_i$, and thus
+the outer conjunction represents the exact same thing.</p>
+<p>To express the negation of a propositional letter, $\neg p_i$, simply use
+the negation of its integer index, $-i$.  That is, the CNF for $\neg p_i$
+can be computed with <code>CNF.proposition( -i )</code>.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">index</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>Number</code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the index of the propositional letter whose CNF
+should be returned (must be a positive integer) or the negation of such
+an index if you wish to represent the propositional letter's negation</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>Array</code>
+            
+            
+                <p>the conjunctive normal form representing the propositional
+letter with the given index (or its negation, respectively)</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="validation_conjunctive-normal-form.js.html">validation/conjunctive-normal-form.js</a><a href="validation_conjunctive-normal-form.js.html#source.86">, line 86</a>
         </li>
     </ul>
 

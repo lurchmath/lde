@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Lurch Deductive Engine: EventTarget</title>
+    <title>Lurch Deductive Engine: PropositionalForm</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
@@ -34,7 +34,7 @@
 <main class="layout-main ">
   <div class="container">
     <p class="page-kind">Class</p>
-    <h1 class="page-title">EventTarget</h1>
+    <h1 class="page-title">PropositionalForm</h1>
     
 
 
@@ -48,12 +48,54 @@
 
     
         
-        <!-- <h2>EventTarget</h2> -->
+        <!-- <h2>PropositionalForm</h2> -->
 
         
 
         
 
+        
+            
+            <div class="class-description"><p>Any <a href="LogicConcept.html">LogicConcept</a> can be interpreted as a proposition,
+in the usual sense of propositional logic, as follows.</p>
+<ul>
+<li>An <a href="Expression.html">Expression</a> (no matter how complex) is treated as
+atomic, and considered equal only to another expression with the exact
+same structure.</li>
+<li>An <a href="Environment.html">Environment</a> containing no children is treated as
+the constant &quot;true.&quot;</li>
+<li>An <a href="Environment.html">Environment</a> containing exactly one child is
+treated the same as if it were just the child alone.</li>
+<li>An <a href="Environment.html">Environment</a> containing two claim children is
+treated as the conjunction of those children, after viewing each as a
+proposition itself.</li>
+<li>An <a href="Environment.html">Environment</a> containing a given $G$ followed by a
+claim $C$ is treated as the conditional expression &quot;$G$ implies $C$.&quot;</li>
+<li>An <a href="Environment.html">Environment</a> with more than two children, $C_1$
+through $C_n$, is viewed as if it contained only two children, first
+$C_1$ and then an environment containing $C_2$ through $C_n$.</li>
+</ul>
+<p>For example, if we use <a href="LogicConcept.html#.fromPutdown">putdown notation</a> to
+express environments and expressions, then the <a href="LogicConcept.html">LogicConcept</a> written as</p>
+<pre class="prettyprint source"><code>{
+    :(> x 5)
+    (> y 10)
+    (= z 15)
+}
+</code></pre>
+<p>might correspond to the proposition $P\Rightarrow(Q\wedge R)$, if $P$, $Q$,
+and $R$ were the propositional letters for the three expressions, in that
+order.</p>
+<p>This conversion preserves the intended meaning of the notions of
+<a href="Environment.html">Environment</a> and given/claim.  Although
+<a href="LogicConcept.html">LogicConcepts</a> can be more complex than that (including
+declared variables, quantifiers, etc.), there are ways to reduce that
+complexity to propositional form.  Once a <a href="LogicConcept.html">LogicConcept</a>
+is in propositional form, it can be checked using a propositional tautology
+checker, either intuitionistic or classical.</p>
+<p>We will later add the preprocessing steps that can simplify variable and
+constant declarations down into content amenable to propositional checking.
+Those tools are not yet present in this version of the class.</p></div>
         
     
 </header>
@@ -74,23 +116,19 @@
 
 
     
+    <h3 class="subtitle">Constructor</h3>
+    
 
     <div class="method-type">
     
     </div>
 
-    <h4 class="method-name" id="EventTarget">new EventTarget<span class="signature">()</span><span class="return-type-signature"></span>
+    <h4 class="method-name" id="PropositionalForm">new PropositionalForm<span class="signature">()</span><span class="return-type-signature"></span>
     </h4>
 
 
 
 
-
-<div class="method-description">
-    
-    <p>The function below extends the built-in EventTarget class with new
-functionality.</p>
-</div>
 
 
 
@@ -156,7 +194,7 @@ functionality.</p>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="utilities.js.html">utilities.js</a><a href="utilities.js.html#source.88">, line 88</a>
+            <a href="validation_propositional-form.js.html">validation/propositional-form.js</a><a href="validation_propositional-form.js.html#source.50">, line 50</a>
         </li>
     </ul>
 
@@ -167,6 +205,13 @@ functionality.</p>
 
     
 
+    
+        <h3 class="subsection-title">Classes</h3>
+
+        <dl>
+            <dt><a href="PropositionalForm.html">PropositionalForm</a></dt>
+            <dd></dd>
+        </dl>
     
 
      
@@ -178,173 +223,6 @@ functionality.</p>
 
     
 
-    
-        <h3 class="subtitle">Methods</h3>
-
-        
-            
-
-
-    <article class="method">
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    
-    </div>
-
-    <h4 class="method-name" id="emit">emit<span class="signature">(type, details)</span><span class="return-type-signature"></span>
-    </h4>
-
-
-
-
-
-<div class="method-description">
-    
-    <p>Extend the EventTarget prototype with a convenience method for emitting new
-events.  Mimics the function of the same name from node.js, but here in the
-browser.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Parameters</h4>
-    
-
-<ul class="method-params">
-    
-
-        <li>
-            
-                <span class="param-name">type</span>
-            
-
-            
-                
-
-
-    <span class="param-type">
-        <code>string</code>
-    </span>
-    
-
-            
-
-            
-
-            
-
-            <div class="param-description"><p>The type of event being emitted, as a string name</p></div>
-            
-        </li>
-
-    
-
-        <li>
-            
-                <span class="param-name">details</span>
-            
-
-            
-                
-
-
-    <span class="param-type">
-        <code>object</code>
-    </span>
-    
-
-            
-
-            
-
-            
-
-            <div class="param-description"><p>Any additional fields to copy into the Event object</p></div>
-            
-        </li>
-
-    
-</ul>
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="utilities.js.html">utilities.js</a><a href="utilities.js.html#source.103">, line 103</a>
-        </li>
-    </ul>
-
-
-
-    </article>
-
-        
     
 
     
