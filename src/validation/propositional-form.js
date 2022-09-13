@@ -91,7 +91,7 @@ export class PropositionalForm {
      * @see {@link PropositionalForm.constantTrue constantTrue()}
      * @see {@link PropositionalForm#isAtomic isAtomic()}
      */
-    isConstantTrue () { return this.text == ' T ' }
+    isConstantTrue () { return this.text == ' ' }
 
     /**
      * Construct a new instance of the PropositionalForm class, an atomic one
@@ -376,7 +376,8 @@ export class PropositionalForm {
      */
     isAClassicalTautology () {
         // classical tautology <=> negation is not satisfiable
-        return !CNF.isSatisfiable( this.negatedCNF(), this._catalog.length )
+        return !CNFTools.isSatisfiable( this.negatedCNF(),
+                                        this._catalog.length )
     }
 
     /**

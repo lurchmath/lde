@@ -1,6 +1,7 @@
 
 // Import what we're testing
 import { PropositionalForm } from '../src/validation/propositional-form.js'
+import { LogicConcept } from '../src/logic-concept.js'
 
 // Test suite begins here.
 
@@ -10,19 +11,43 @@ describe( 'Propositional form', () => {
         expect( PropositionalForm ).to.be.ok
     } )
     
-    xit( 'should correctly support atomic "true"', () => {
-        // TO DO:
-        // constantTrue() satisfies isConstantTrue() and isClassicalTaut
-        //   and satisfies isAtomic() but not isConditional()
+    it( 'should correctly support atomic "true"', () => {
+        const T = PropositionalForm.constantTrue()
+        expect( T instanceof PropositionalForm ).to.equal( true )
+        expect( T.isAtomic() ).to.equal( true )
+        expect( T.isConstantTrue() ).to.equal( true )
+        expect( T.isConditional() ).to.equal( false )
+        expect( T.isAClassicalTautology() ).to.equal( true )
+        expect( T.isAnIntuitionisticTautology() ).to.equal( true )
     } )
 
-    xit( 'should correctly support atomic propositions', () => {
-        // TO DO:
-        // atomic(LC) satisfies isAtomic() but not isConstantTrue() but not
-        //   isCLTaut and has the right index in whatever catalog you pass at
-        //   construction time
-        // two atomics have different texts, be it True vs. an LC, or two
-        //   different LCs
+    it( 'should correctly support atomic propositions', () => {
+        const T = PropositionalForm.constantTrue()
+        const catalog = [ ]
+        const P = PropositionalForm.atomic(
+            LogicConcept.fromPutdown( 'P' )[0], catalog )
+        expect( P.isAtomic() ).to.equal( true )
+        expect( P.isConstantTrue() ).to.equal( false )
+        expect( P.isAClassicalTautology() ).to.equal( false )
+        expect( P.index() ).to.equal( 1 ) // first thing put in the catalog
+        expect( P.text ).not.to.equal( T.text )
+        const Q = PropositionalForm.atomic(
+            LogicConcept.fromPutdown( 'Q' )[0], catalog )
+        expect( Q.isAtomic() ).to.equal( true )
+        expect( Q.isConstantTrue() ).to.equal( false )
+        expect( Q.isAClassicalTautology() ).to.equal( false )
+        expect( Q.index() ).to.equal( 2 ) // second thing put in the catalog
+        expect( Q.text ).not.to.equal( T.text )
+        expect( Q.text ).not.to.equal( P.text )
+        const PandQ = PropositionalForm.atomic(
+            LogicConcept.fromPutdown( '(and P Q)' )[0], catalog )
+        expect( PandQ.isAtomic() ).to.equal( true )
+        expect( PandQ.isConstantTrue() ).to.equal( false )
+        expect( PandQ.isAClassicalTautology() ).to.equal( false )
+        expect( PandQ.index() ).to.equal( 3 ) // third thing put in the catalog
+        expect( PandQ.text ).not.to.equal( T.text )
+        expect( PandQ.text ).not.to.equal( P.text )
+        expect( PandQ.text ).not.to.equal( Q.text )
     } )
 
     xit( 'should correctly support conditional expressions', () => {
