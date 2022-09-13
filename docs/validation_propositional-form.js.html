@@ -38,6 +38,8 @@
     <article>
         <pre id="source" class="source-page line-numbers"><code class="language-js">
 import CNFTools from './conjunctive-normal-form.js'
+import { Environment } from '../environment.js'
+import { LogicConcept } from '../logic-concept.js'
 
 /**
  * Any {@link LogicConcept LogicConcept} can be interpreted as a proposition,
@@ -129,7 +131,7 @@ export class PropositionalForm {
      * @see {@link PropositionalForm.constantTrue constantTrue()}
      * @see {@link PropositionalForm#isAtomic isAtomic()}
      */
-    isConstantTrue () { return this.text == ' T ' }
+    isConstantTrue () { return this.text == ' ' }
 
     /**
      * Construct a new instance of the PropositionalForm class, an atomic one
@@ -214,16 +216,19 @@ export class PropositionalForm {
      */
     static conditional ( antecedent, consequent, catalog ) {
         // start at the end, with an atomic conclusion
-        const result = consequent instanceof PropositionalForm ?
+        let result = consequent instanceof PropositionalForm ?
             consequent : PropositionalForm.atomic( consequent, catalog )
         catalog = result._catalog
         // the antecedent might yield multiple propositional forms
-        const premises = PropositionalForm.fromConclusionsIn(
-            antecedent, result._catalog )
+        const premises = antecedent instanceof Environment ?
+            PropositionalForm.fromConclusionsIn(
+                antecedent, result._catalog ) :
+            [  PropositionalForm.atomic( antecedent, result._catalog ) ]
         // so prepend them all to the conclusion one at a time, A->(B->(...))
         for ( let i = premises.length - 1 ; i >= 0 ; i-- ) {
             const next = new PropositionalForm( result._catalog )
             next._children = [ premises[i], result ]
+            next.text = `[${premises[i].text},${result.text}]`
             result = next
         }
         return result
@@ -305,8 +310,11 @@ export class PropositionalForm {
      *   given ancestor
      */
     static fromConclusion ( conclusion, ancestor, catalog ) {
+        const context = conclusion.accessibles( false, ancestor ).reverse()
+        const strictContext = context.filter(
+            accessible => accessible.isA( 'given' ) )
         return PropositionalForm.sequent(
-            ...conclusion.accessibles( true, ancestor ), catalog )
+            ...strictContext, conclusion, catalog )
     }
 
     /**
@@ -414,7 +422,8 @@ export class PropositionalForm {
      */
     isAClassicalTautology () {
         // classical tautology &lt;=> negation is not satisfiable
-        return !CNF.isSatisfiable( this.negatedCNF(), this._catalog.length )
+        return !CNFTools.isSatisfiable( this.negatedCNF(),
+                                        this._catalog.length )
     }
 
     /**
@@ -474,17 +483,17 @@ export class PropositionalForm {
         return this._catalog.length  // this will be its 1-based index
     }
 
-    // Does the text representation of this PropositionalForm object appear
-    // in the given array?
-    isIn ( array ) { return array.includes( this.text ) }
+    // Does a PropositionalForm object with the same the text representation
+    // as this one appear in the given array?
+    isIn ( array ) { return array.some( entry => entry.text == this.text ) }
 
-    // Yields the given array with this object's text representation added.
-    // More specifically:  Given an array of text representations of
-    // PropositionalForm objects, if this object's text representation is
-    // already in the array, then return the array unchanged.  Otherwise
-    // return a new array equal to the old, plus the new text appended.
+    // Yields the given array with this object added.
+    // More specifically:  Given an array of PropositionalForm objects, if one
+    // with this object's text representation is already in the array, then
+    // return the array unchanged.  Otherwise return a new array equal to the
+    // old, plus this object appended to the end.
     addedTo ( array ) {
-        return this.isIn( array ) ? array : array.concat( [ this.text ] )
+        return this.isIn( array ) ? array : array.concat( [ this ] )
     }
 
     // Does this PropositionalForm follow classically from the list of other
@@ -527,6 +536,12 @@ const canProveInIPL = (
     atomics, conditionals, conclusion, checkCPLFirst, proven
 ) => {
 
+    // console.log( 'IPL: '
+    //            + atomics.map( x=>x.text ).join( ',' ) + '; '
+    //            + conditionals.map( x=>x.text ).join( ',' ) + '; '
+    //            + [...proven].join( ',' ) + ' |- '
+    //            + conclusion.text + ' (' + checkCPLFirst + ')' )
+
     // If the conclusion is literally the constant true, we're done.
     if ( conclusion.isConstantTrue() ) {
         return true
@@ -552,6 +567,12 @@ const canProveInIPL = (
         }
         conclusion = conclusion._children[1]
     }
+
+    // console.log( ' ... '
+    //            + atomics.map( x=>x.text ).join( ',' ) + '; '
+    //            + conditionals.map( x=>x.text ).join( ',' ) + '; '
+    //            + [...proven].join( ',' ) + ' |- '
+    //            + conclusion.text + ' (' + checkCPLFirst + ')' )
 
     // conclusion is now atomic.  if the S rule applies, done
     if ( conclusion.isIn( atomics ) ) return true
@@ -600,7 +621,7 @@ const canProveInIPL = (
 
 <footer class="layout-footer">
   <div class="container">
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.10</a> on Mon Sep 12 2022 15:06:03 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.10</a> on Tue Sep 13 2022 20:55:54 GMT+0000 (Coordinated Universal Time)
   </div>
 </footer>
 
