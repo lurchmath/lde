@@ -40,6 +40,12 @@ import {
 // Import and install built-in validation tools:
 import { arithmeticValidator } from './validation/float-arithmetic.js'
 installTool( 'floating point arithmetic', arithmeticValidator )
+import {
+    classicalPropositionalValidator, intuitionisticPropositionalValidator
+} from './validation/reduction.js'
+installTool( 'classical propositional logic', classicalPropositionalValidator )
+installTool( 'intuitionistic propositional logic',
+             intuitionisticPropositionalValidator )
 
 // Export the public API only:
 export default {

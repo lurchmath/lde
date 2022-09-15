@@ -26,6 +26,8 @@ describe( 'Validation', () => {
         expect( test ).to.have.lengthOf.above( 0 )
         // it includes at least the following default validation tools
         expect( test ).to.include( 'floating point arithmetic' )
+        expect( test ).to.include( 'classical propositional logic' )
+        expect( test ).to.include( 'intuitionistic propositional logic' )
         // some tool is the default and it's on the list
         expect( Validation.options ).to.be.ok
         expect( test ).to.include( Validation.options().tool )
@@ -199,6 +201,110 @@ describe( 'Validation', () => {
         expect( result.reason ).to.equal( 'Invalid expression structure' )
         expect( result.message ).to.match( /Wrong number of arguments/ )
         expect( result.stack ).not.to.be.undefined
+    } )
+
+    it( 'Should do simple propositional validation', () => {
+        Validation.setOptions( 'tool', 'classical propositional logic' )
+        // Yes, things follow from given copies of the exact same thing
+        let test = LogicConcept.fromPutdown( `
+        {
+            :A :B A B
+        }
+        ` )[0]
+        expect( Validation.result( test ) ).to.be.undefined
+        expect( Validation.result( test.child( 0 ) ) ).to.be.undefined
+        expect( Validation.result( test.child( 1 ) ) ).to.be.undefined
+        expect( Validation.result( test.child( 2 ) ) ).to.be.undefined
+        expect( Validation.result( test.child( 3 ) ) ).to.be.undefined
+        Validation.validate( test )
+        expect( Validation.result( test ) ).to.be.undefined
+        expect( Validation.result( test.child( 0 ) ) ).to.be.undefined
+        expect( Validation.result( test.child( 1 ) ) ).to.be.undefined
+        expect( Validation.result( test.child( 2 ) ) ).to.eql( {
+            result : 'valid',
+            reason : 'Classical Propositional Logic'
+        } )
+        expect( Validation.result( test.child( 3 ) ) ).to.eql( {
+            result : 'valid',
+            reason : 'Classical Propositional Logic'
+        } )
+        // Yes, modus ponens works, even on compound expressions, but the
+        // unjustified conclusion does not validate.
+        test = LogicConcept.fromPutdown( `
+        {
+            :{ :(= a b) (> 3 -1) } (= a b) (> 3 -1)
+        }
+        ` )[0]
+        expect( Validation.result( test ) ).to.be.undefined
+        expect( Validation.result( test.child( 0 ) ) ).to.be.undefined
+        expect( Validation.result( test.child( 0, 0 ) ) ).to.be.undefined
+        expect( Validation.result( test.child( 0, 1 ) ) ).to.be.undefined
+        expect( Validation.result( test.child( 1 ) ) ).to.be.undefined
+        expect( Validation.result( test.child( 2 ) ) ).to.be.undefined
+        Validation.validate( test )
+        expect( Validation.result( test ) ).to.be.undefined
+        expect( Validation.result( test.child( 0 ) ) ).to.be.undefined
+        expect( Validation.result( test.child( 0, 0 ) ) ).to.be.undefined
+        expect( Validation.result( test.child( 0, 1 ) ) ).to.be.undefined
+        expect( Validation.result( test.child( 1 ) ) ).to.eql( {
+            result : 'invalid',
+            reason : 'Classical Propositional Logic'
+        } )
+        expect( Validation.result( test.child( 2 ) ) ).to.eql( {
+            result : 'valid',
+            reason : 'Classical Propositional Logic'
+        } )
+        // Repeat the same two tests again, this time using intuitionistic
+        // propositional logic instead of classical.
+        Validation.setOptions( 'tool', 'intuitionistic propositional logic' )
+        // Repeating Test 1...
+        test = LogicConcept.fromPutdown( `
+        {
+            :A :B A B
+        }
+        ` )[0]
+        expect( Validation.result( test ) ).to.be.undefined
+        expect( Validation.result( test.child( 0 ) ) ).to.be.undefined
+        expect( Validation.result( test.child( 1 ) ) ).to.be.undefined
+        expect( Validation.result( test.child( 2 ) ) ).to.be.undefined
+        expect( Validation.result( test.child( 3 ) ) ).to.be.undefined
+        Validation.validate( test )
+        expect( Validation.result( test ) ).to.be.undefined
+        expect( Validation.result( test.child( 0 ) ) ).to.be.undefined
+        expect( Validation.result( test.child( 1 ) ) ).to.be.undefined
+        expect( Validation.result( test.child( 2 ) ) ).to.eql( {
+            result : 'valid',
+            reason : 'Intuitionistic Propositional Logic'
+        } )
+        expect( Validation.result( test.child( 3 ) ) ).to.eql( {
+            result : 'valid',
+            reason : 'Intuitionistic Propositional Logic'
+        } )
+        // Repeating Test 2...
+        test = LogicConcept.fromPutdown( `
+        {
+            :{ :(= a b) (> 3 -1) } (= a b) (> 3 -1)
+        }
+        ` )[0]
+        expect( Validation.result( test ) ).to.be.undefined
+        expect( Validation.result( test.child( 0 ) ) ).to.be.undefined
+        expect( Validation.result( test.child( 0, 0 ) ) ).to.be.undefined
+        expect( Validation.result( test.child( 0, 1 ) ) ).to.be.undefined
+        expect( Validation.result( test.child( 1 ) ) ).to.be.undefined
+        expect( Validation.result( test.child( 2 ) ) ).to.be.undefined
+        Validation.validate( test )
+        expect( Validation.result( test ) ).to.be.undefined
+        expect( Validation.result( test.child( 0 ) ) ).to.be.undefined
+        expect( Validation.result( test.child( 0, 0 ) ) ).to.be.undefined
+        expect( Validation.result( test.child( 0, 1 ) ) ).to.be.undefined
+        expect( Validation.result( test.child( 1 ) ) ).to.eql( {
+            result : 'invalid',
+            reason : 'Intuitionistic Propositional Logic'
+        } )
+        expect( Validation.result( test.child( 2 ) ) ).to.eql( {
+            result : 'valid',
+            reason : 'Intuitionistic Propositional Logic'
+        } )
     } )
 
 } )
