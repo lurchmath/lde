@@ -1183,7 +1183,6 @@ describe( 'Problem', function () {
                         new LurchSymbol( 1 ) )
         expr = new LurchSymbol( 1 )
         prob = new M.Problem( pat, expr )
-        try { S = Array.from( prob.solutions() ) } catch ( e ) { console.log( e ) }
         expect( () => S = Array.from( prob.solutions() ) ).not.to.throw()
         expect( solSetsEq( S, solSet( prob,
             { 'P' : lambda( 'v1', 1 ) },
@@ -1362,6 +1361,162 @@ describe( 'Problem', function () {
                 expect( P.firstSolution() ).to.be.undefined
             }
           } )
+    } )
+
+    it( 'should support n-ary expression functions for n>1', () => {
+        let pat, expr, prob, S
+        // Test 1
+        // problem: pattern (= (@ _P_ a b) (@ _Q_ a b))
+        //       expression (= (+ a b)   (+ b a))
+        pat = LogicConcept.fromPutdown(
+            '( = ("LDE EFA" P a b) ("LDE EFA" Q a b) )' )[0]
+        pat.descendantsSatisfying(
+            d => ( d instanceof LurchSymbol ) && ['P','Q'].includes( d.text() )
+        ).forEach(
+            d => d.makeIntoA( M.metavariable )
+        )
+        expr = LogicConcept.fromPutdown( '( = (+ a b) (+ b a) )' )[0]
+        prob = new M.Problem( pat, expr )
+        expect( () => S = Array.from( prob.solutions() ) ).not.to.throw()
+        expect( solSetsEq( S, solSet( prob,
+            {
+                'Q' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v1 v2) , (+ b a))' )[0],
+                'P' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v1 v2) , (+ a b))' )[0],
+            },
+            {
+                'Q' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v1 v2) , (+ b a))' )[0],
+                'P' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v4 v5) , (+ v4 b))' )[0],
+            },
+            {
+                'Q' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v1 v2) , (+ b a))' )[0],
+                'P' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v4 v5) , (+ a v5))' )[0],
+            },
+            {
+                'Q' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v1 v2) , (+ b a))' )[0],
+                'P' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v4 v5) , (+ v4 v5))' )[0],
+            },
+            {
+                'Q' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v4 v5) , (+ v5 a))' )[0],
+                'P' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v1 v2) , (+ a b))' )[0],
+            },
+            {
+                'Q' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v4 v5) , (+ v5 a))' )[0],
+                'P' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v7 v8) , (+ v7 b))' )[0],
+            },
+            {
+                'Q' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v4 v5) , (+ v5 a))' )[0],
+                'P' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v7 v8) , (+ a v8))' )[0],
+            },
+            {
+                'Q' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v4 v5) , (+ v5 a))' )[0],
+                'P' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v7 v8) , (+ v7 v8))' )[0],
+            },
+            {
+                'Q' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v4 v5) , (+ b v4))' )[0],
+                'P' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v1 v2) , (+ a b))' )[0],
+            },
+            {
+                'Q' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v4 v5) , (+ b v4))' )[0],
+                'P' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v7 v8) , (+ v7 b))' )[0],
+            },
+            {
+                'Q' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v4 v5) , (+ b v4))' )[0],
+                'P' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v7 v8) , (+ a v8))' )[0],
+            },
+            {
+                'Q' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v4 v5) , (+ b v4))' )[0],
+                'P' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v7 v8) , (+ v7 v8))' )[0],
+            },
+            {
+                'Q' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v4 v5) , (+ v5 v4))' )[0],
+                'P' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v1 v2) , (+ a b))' )[0],
+            },
+            {
+                'Q' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v4 v5) , (+ v5 v4))' )[0],
+                'P' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v7 v8) , (+ v7 b))' )[0],
+            },
+            {
+                'Q' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v4 v5) , (+ v5 v4))' )[0],
+                'P' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v7 v8) , (+ a v8))' )[0],
+            },
+            {
+                'Q' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v4 v5) , (+ v5 v4))' )[0],
+                'P' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v7 v8) , (+ v7 v8))' )[0],
+            },
+        ) ) )
+
+        // Test 2
+        // problem: pattern (= (@ _P_ _x_ _y_) (@ _P_ _y_ _x_))
+        //       expression (= (+ a b)         (+ b a))
+        pat = LogicConcept.fromPutdown(
+            '( = ("LDE EFA" P x y) ("LDE EFA" P y x) )' )[0]
+        pat.descendantsSatisfying(
+            d => ( d instanceof LurchSymbol )
+              && ['P','Q','x','y'].includes( d.text() )
+        ).forEach(
+            d => d.makeIntoA( M.metavariable )
+        )
+        expr = LogicConcept.fromPutdown( '( = (+ a b) (+ b a) )' )[0]
+        prob = new M.Problem( pat, expr )
+        expect( () => S = Array.from( prob.solutions() ) ).not.to.throw()
+        expect( solSetsEq( S, solSet( prob,
+            {
+                'P' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v1 v2) , v1)' )[0],
+                'y' : LogicConcept.fromPutdown( '(+ b a)' )[0],
+                'x' : LogicConcept.fromPutdown( '(+ a b)' )[0],
+            },
+            {
+                'P' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v1 v2) , v2)' )[0],
+                'x' : LogicConcept.fromPutdown( '(+ b a)' )[0],
+                'y' : LogicConcept.fromPutdown( '(+ a b)' )[0],
+            },
+            {
+                'P' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v4 v5) , (+ v5 v4))' )[0],
+                'x' : LogicConcept.fromPutdown( 'b' )[0],
+                'y' : LogicConcept.fromPutdown( 'a' )[0],
+            },
+            {
+                'P' : LogicConcept.fromPutdown( 
+                    '("LDE lambda" (v4 v5) , (+ v4 v5))' )[0],
+                'y' : LogicConcept.fromPutdown( 'b' )[0],
+                'x' : LogicConcept.fromPutdown( 'a' )[0],
+            },
+        ) ) )
     } )
 
 } )
