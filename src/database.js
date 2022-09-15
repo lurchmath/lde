@@ -931,6 +931,80 @@ const putdownDatabase = [
       ]
     },
     "content": "\n{\n    :{\n        :A\n        B\n        (not B)\n    }\n    (not A)\n}\n"
+  },
+  {
+    "filename": "/validation tests/prop test 01.putdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "propositional"
+      },
+      "imported": {
+        "source": "fic-experiment repository",
+        "file": "scripts/init.js",
+        "name": "BadLC"
+      }
+    },
+    "content": "\n{\n  :{\n    :W\n    :V\n    U\n    V\n  }\n  :W\n  :V\n  U +{\"expected validation result\":\"valid\"}\n}\n"
+  },
+  {
+    "filename": "/validation tests/prop test 02.putdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "propositional"
+      },
+      "imported": {
+        "source": "fic-experiment repository",
+        "file": "scripts/init.js",
+        "name": "imp2"
+      }
+    },
+    "content": "\n{\n    :{\n        A\n        :B\n    }\n    A +{\"expected validation result\":\"valid\"}\n    :C\n    C +{\"expected validation result\":\"valid\"}\n}\n"
+  },
+  {
+    "filename": "/validation tests/prop test 03.putdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "propositional"
+      },
+      "imported": {
+        "source": "fic-experiment repository",
+        "file": "test/data/PropProofsTxt.js"
+      }
+    },
+    "content": "\n{\n    :{\n        :{\n            W\n            V\n        }\n        (and W V)\n        (and V W)\n    }\n    :{\n        :(and W V)\n        W\n        V\n    }\n    :{\n        :W\n        (or W V)\n        (or V W)\n    }\n    :{\n        :(or W V)\n        :{\n            :W\n            R\n        }\n        :{\n            :W\n            R\n        }\n        R\n    }\n    :{\n        :{\n            :W\n            V\n        }\n        (implies W V)\n    }\n    :{\n        :W\n        :(implies W V)\n        V\n    }\n    :{\n        :{\n            :W\n            V\n        }\n        :{\n            :V\n            W\n        }\n        (iff W V)\n    }\n    :{\n        :(iff W V)\n        {\n            :V\n            W\n        }\n        {\n            :W\n            V\n        }\n    }\n    :{\n        :{\n            :W\n            contradiction\n        }\n        (not W)\n    }\n    :{\n        :{\n            :(not W)\n            contradiction\n        }\n        W\n    }\n    :{\n        :W\n        :(not W)\n        contradiction\n    }\n    :{\n        :(not P)\n        (or P (not P))\n    }\n    :{\n        :P\n        (or P (not P))\n    }\n    :{\n        :P\n        (or P Q)\n    }\n    :{\n        :Q\n        (or P Q)\n    }\n    :{\n        :(or P Q)\n        (or (or P Q) R)\n    }\n    :{\n        :R\n        (or (or P Q) R)\n    }\n    :{\n        :P\n        (or P (and (not P) P))\n    }\n    :{\n        :(not P)\n        (or (not P) (not Q))\n    }\n    :{\n        :(not Q)\n        (or (not P) (not Q))\n    }\n    :{\n        :(or Q R)\n        :{\n            :Q\n            (or (or P Q) R)\n        }\n        :{\n            :R\n            (or (or P Q) R)\n        }\n        (or (or P Q) R)\n    }\n    :{\n        :(or P (or Q R))\n        :{\n            :P\n            (or (or P Q) R)\n        }\n        :{\n            :(or Q R)\n            (or (or P Q) R)\n        }\n        (or (or P Q) R)\n    }\n    :{\n        :(or (not P) (not Q))\n        :{\n            :(not P)\n            contradiction\n        }\n        :{\n            :(not Q)\n            contradiction\n        }\n        contradiction\n    }\n    :{\n        :(or P (not P))\n        :(not (or P (not P)))\n        contradiction\n    }\n    :{\n        :(not (or (not P) (not Q)))\n        :(or (not P) (not Q))\n        contradiction\n    }\n    :{\n        :(not (and P Q))\n        :(and P Q)\n        contradiction\n    }\n    :{\n        :(not P)\n        :P\n        contradiction\n    }\n    :{\n        :(not Q)\n        :Q\n        contradiction\n    }\n    :{\n        :{\n            :(not P)\n            contradiction\n        }\n        P\n    }\n    :{\n        :{\n            :(not Q)\n            contradiction\n        }\n        Q\n    }\n    :{\n        :{\n            :(not (or P (not P)))\n            contradiction\n        }\n        (or P (not P))\n    }\n    :{\n        :{\n            :(not (or (not P) (not Q)))\n            contradiction\n        }\n        (or (not P) (not Q))\n    }\n    :{\n        :{\n            :(and P Q)\n            contradiction\n        }\n        (not (and P Q))\n    }\n    :{\n        :{\n            :contradiction\n            P\n        }\n        (implies contradiction P)\n    }\n    :{\n        :{\n            :(or P (or Q R))\n            (or (or P Q) R)\n        }\n        (implies (or P (or Q R)) (or (or P Q) R))\n    }\n    :{\n        :{\n            :P\n            (or P (and (not P) P))\n        }\n        (implies P (or P (and (not P) P)))\n    }\n    :{\n        :{\n            :(or P (and (not P) P))\n            P\n        }\n        (implies (or P (and (not P) P)) P)\n    }\n    :{\n        :{\n            :P\n            (iff P (or P (and (not P) P)))\n        }\n        (implies P (iff P (or P (and (not P) P))))\n    }\n    :{\n        :{\n            :(not (and P Q))\n            (or (not P) (not Q))\n        }\n        (implies (not (and P Q)) (or (not P) (not Q)))\n    }\n    :{\n        :{\n            :(or (not P) (not Q))\n            (not (and P Q))\n        }\n        (implies (or (not P) (not Q)) (not (and P Q)))\n    }\n    :{\n        :(implies P (or P (and (not P) P)))\n        :(implies (or P (and (not P) P)) P)\n        (iff P (or P (and (not P) P)))\n    }\n    :{\n        :(implies (not (and P Q)) (or (not P) (not Q)))\n        :(implies (or (not P) (not Q)) (not (and P Q)))\n        (iff (not (and P Q)) (or (not P) (not Q)))\n    }\n    :{\n        :P\n        :Q\n        (and P Q)\n    }\n    :{\n        :P\n        :Q\n        (and P Q)\n    }\n    :{\n        :(and P Q)\n        P\n        Q\n    }\n    {\n        :(not (or P (not P)))\n        {\n            :(not P)\n            (or P (not P)) +{\"expected validation result\":\"valid\"}\n            contradiction +{\"expected validation result\":\"valid\"}\n        }\n        P +{\"expected validation result\":\"valid\"}\n        (or P (not P)) +{\"expected validation result\":\"valid\"}\n        contradiction +{\"expected validation result\":\"valid\"}\n    }\n    (or P (not P)) +{\"expected validation result\":\"valid\"}\n    {\n        :contradiction\n        {\n            :(not P)\n            contradiction +{\"expected validation result\":\"valid\"}\n        }\n        P +{\"expected validation result\":\"valid\"}\n    }\n    (implies contradiction P) +{\"expected validation result\":\"valid\"}\n    {\n        :(or P (or Q R))\n        {\n            :P\n            (or P Q) +{\"expected validation result\":\"valid\"}\n            (or (or P Q) R) +{\"expected validation result\":\"valid\"}\n        }\n        {\n            :(or Q R)\n            {\n                :Q\n                (or P Q) +{\"expected validation result\":\"valid\"}\n                (or (or P Q) R) +{\"expected validation result\":\"valid\"}\n            }\n            {\n                :R\n                (or (or P Q) R) +{\"expected validation result\":\"valid\"}\n            }\n            (or (or P Q) R) +{\"expected validation result\":\"valid\"}\n        }\n        (or (or P Q) R) +{\"expected validation result\":\"valid\"}\n    }\n    (implies (or P (or Q R)) (or (or P Q) R)) +{\"expected validation result\":\"valid\"}\n    {\n        :P\n        {\n            :P\n            (or P (and (not P) P)) +{\"expected validation result\":\"valid\"}\n        }\n        (implies P (or P (and (not P) P))) +{\"expected validation result\":\"valid\"}\n        {\n            :(or P (and (not P) P))\n            P +{\"expected validation result\":\"valid\"}\n        }\n        (implies (or P (and (not P) P)) P) +{\"expected validation result\":\"valid\"}\n        (iff P (or P (and (not P) P))) +{\"expected validation result\":\"valid\"}\n    }\n    (implies P (iff P (or P (and (not P) P)))) +{\"expected validation result\":\"valid\"}\n    {\n        :(not (and P Q))\n        {\n            :(not (or (not P) (not Q)))\n            {\n                :(not P)\n                (or (not P) (not Q)) +{\"expected validation result\":\"valid\"}\n                contradiction +{\"expected validation result\":\"valid\"}\n            }\n            P +{\"expected validation result\":\"valid\"}\n            {\n                :(not Q)\n                (or (not P) (not Q)) +{\"expected validation result\":\"valid\"}\n                contradiction +{\"expected validation result\":\"valid\"}\n            }\n            Q +{\"expected validation result\":\"valid\"}\n            (and P Q) +{\"expected validation result\":\"valid\"}\n            contradiction +{\"expected validation result\":\"valid\"}\n        }\n        (or (not P) (not Q)) +{\"expected validation result\":\"valid\"}\n    }\n    (implies (not (and P Q)) (or (not P) (not Q))) +{\"expected validation result\":\"valid\"}\n    {\n        :(or (not P) (not Q))\n        {\n            :(and P Q)\n            P +{\"expected validation result\":\"valid\"}\n            Q +{\"expected validation result\":\"valid\"}\n            {\n                :(not P)\n                contradiction +{\"expected validation result\":\"valid\"}\n            }\n            {\n                :(not Q)\n                contradiction +{\"expected validation result\":\"valid\"}\n            }\n            contradiction +{\"expected validation result\":\"valid\"}\n        }\n        (not (and P Q)) +{\"expected validation result\":\"valid\"}\n    }\n    (implies (or (not P) (not Q)) (not (and P Q))) +{\"expected validation result\":\"valid\"}\n    (iff (not (and P Q)) (or (not P) (not Q))) +{\"expected validation result\":\"valid\"}\n}\n"
+  },
+  {
+    "filename": "/validation tests/prop test 04.putdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "propositional"
+      }
+    },
+    "content": "\n{\n  :{\n    :G\n    {\n      :A\n      B\n    }\n  }\n  {\n    :G\n    :A\n    B +{\"expected validation result\":\"valid\"}\n  }\n}\n"
+  },
+  {
+    "filename": "/validation tests/prop test 05.putdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "propositional"
+      }
+    },
+    "content": "\n{\n  :{\n    :{\n      :A\n      B\n    }\n    {\n      :A\n      C\n    }\n  }\n  {\n    :{\n      :B\n      C\n    }\n    C +{\"expected validation result\":\"invalid\"}\n  }\n}\n"
+  },
+  {
+    "filename": "/validation tests/prop test 06.putdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "propositional"
+      }
+    },
+    "content": "\n{\n  :{ :A B }\n  :{ :C D }\n  :{ :E F }\n  :{ :G H }\n  :{ :I J }\n  :{ :K L }\n  :{ M N }\n  :{ :O P }\n  :{ :Q R }\n  :{ :R A }\n  :{ :P C }\n  :{ :N E }\n  :{ :L G }\n  :{ :I E }\n  :{ :K F }\n  :{ :M G }\n  :{ :O H }\n  :{ :Q I }\n  A +{\"expected validation result\":\"invalid\"}\n}\n"
   }
 ]
 

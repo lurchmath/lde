@@ -1,0 +1,19 @@
+---
+testing:
+  type: validation
+  subtype: propositional
+imported:
+  source: "fic-experiment repository"
+  file: "scripts/init.js"
+  name: imp2
+---
+
+{
+    :{
+        A
+        :B
+    }
+    A +{"expected validation result":"valid"}
+    :C
+    C +{"expected validation result":"valid"}
+}

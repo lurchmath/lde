@@ -5,6 +5,8 @@ import { } from '../src/validation/float-arithmetic.js'
 
 // Import other classes we need to do the testing
 import { LogicConcept } from '../src/logic-concept.js'
+import { Environment } from '../src/environment.js'
+import Database from '../src/database.js'
 
 // Import the spy function tool for testing callbacks/handlers
 import { makeSpy } from './test-utils.js'
@@ -304,6 +306,52 @@ describe( 'Validation', () => {
         expect( Validation.result( test.child( 2 ) ) ).to.eql( {
             result : 'valid',
             reason : 'Intuitionistic Propositional Logic'
+        } )
+    } )
+
+    it( 'should correctly validate propositional database entries', () => {
+        // Get all propositional validation tests from the database
+        const propositionalTests = Database.filterByMetadata( metadata =>
+            metadata.testing && metadata.testing.type &&
+            metadata.testing.type == 'validation' &&
+            metadata.testing.subtype &&
+            metadata.testing.subtype == 'propositional' )
+        // they are all entitled "/path/filename N.putdown" for some N,
+        // so sort them by that value of N in increasing order.
+        const getNum = key => {
+            const parts = key.split( ' ' )
+            return parseInt( parts.last().split( '.' )[0] )
+        }
+        propositionalTests.sort( ( a, b ) => getNum( a ) - getNum( b ) )
+        
+        // Now run each test as follows...
+        Validation.setOptions( 'tool', 'classical propositional logic' )
+        propositionalTests.forEach( key => {
+            // Look up the test with the given key and ensure it contains
+            // exactly one LogicConcept
+            const LCs = Database.getLogicConcepts( key )
+            expect( LCs.length ).equals( 1,
+                `Malformed test: ${key} had ${LCs.length} LCs instead of 1` )
+            const test = LCs[0]
+            // Compute the set of conclusions in the LC to be validated and
+            // ensure that none of them have been validated yet.
+            const conclusions = test instanceof Environment ?
+                test.conclusions() : [ test ]
+            expect( conclusions.every( C => !Validation.result( C ) ) )
+                .equals( true,
+                    `Malformed test: ${key} has at least 1 validation result` )
+            // Validate the entire LC we loaded.
+            Validation.validate( test )
+            test.descendantsSatisfying( d => true ).forEach( d => {
+                const result = Validation.result( d )
+                const expected = d.getAttribute( 'expected validation result' )
+                if ( typeof expected == 'undefined' )
+                    expect( result, `${key}@${d.address( test )}` )
+                        .to.be.undefined
+                else
+                    expect( result.result, `${key}@${d.address( test )}` )
+                        .equals( expected )
+            } )
         } )
     } )
 

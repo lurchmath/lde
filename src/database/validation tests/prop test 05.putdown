@@ -1,0 +1,25 @@
+---
+testing:
+  type: validation
+  subtype: propositional
+---
+
+{
+  :{
+    :{
+      :A
+      B
+    }
+    {
+      :A
+      C
+    }
+  }
+  {
+    :{
+      :B
+      C
+    }
+    C +{"expected validation result":"invalid"}
+  }
+}

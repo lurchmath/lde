@@ -1,0 +1,21 @@
+---
+testing:
+  type: validation
+  subtype: propositional
+imported:
+  source: "fic-experiment repository"
+  file: "scripts/init.js"
+  name: BadLC
+---
+
+{
+  :{
+    :W
+    :V
+    U
+    V
+  }
+  :W
+  :V
+  U +{"expected validation result":"valid"}
+}

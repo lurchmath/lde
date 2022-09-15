@@ -25,11 +25,11 @@ const createPropositionalValidator = classical =>
     ( conclusion/*, options */ ) => {
         // Copy all accessibles into a new sequent we can manipulate,
         // removing any irrelevant attributes such as old feedback:
-        const context = conclusion.accessibles().reverse()
-        const premises = context.map(
-            premise => premise.copy().makeIntoA( 'given' ) )
-        premises.forEach( removeIrrelevantAttributes )
-        const sequent = new Environment( ...premises, conclusion.copy() )
+        const sequent = new Environment(
+            ...conclusion.accessibles().reverse().map(
+                premise => premise.copy().makeIntoA( 'given' ) ),
+            conclusion.copy() )
+        sequent.children().forEach( removeIrrelevantAttributes )
         // Convert the sequent to propositional form:
         const proposition = PropositionalForm.fromConclusion(
             sequent.lastChild(), sequent )

@@ -1,0 +1,27 @@
+---
+testing:
+  type: validation
+  subtype: propositional
+---
+
+{
+  :{ :A B }
+  :{ :C D }
+  :{ :E F }
+  :{ :G H }
+  :{ :I J }
+  :{ :K L }
+  :{ M N }
+  :{ :O P }
+  :{ :Q R }
+  :{ :R A }
+  :{ :P C }
+  :{ :N E }
+  :{ :L G }
+  :{ :I E }
+  :{ :K F }
+  :{ :M G }
+  :{ :O H }
+  :{ :Q I }
+  A +{"expected validation result":"invalid"}
+}

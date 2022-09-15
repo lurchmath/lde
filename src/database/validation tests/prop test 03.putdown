@@ -1,0 +1,401 @@
+---
+testing:
+  type: validation
+  subtype: propositional
+imported:
+  source: "fic-experiment repository"
+  file: "test/data/PropProofsTxt.js"
+---
+
+{
+    :{
+        :{
+            W
+            V
+        }
+        (and W V)
+        (and V W)
+    }
+    :{
+        :(and W V)
+        W
+        V
+    }
+    :{
+        :W
+        (or W V)
+        (or V W)
+    }
+    :{
+        :(or W V)
+        :{
+            :W
+            R
+        }
+        :{
+            :W
+            R
+        }
+        R
+    }
+    :{
+        :{
+            :W
+            V
+        }
+        (implies W V)
+    }
+    :{
+        :W
+        :(implies W V)
+        V
+    }
+    :{
+        :{
+            :W
+            V
+        }
+        :{
+            :V
+            W
+        }
+        (iff W V)
+    }
+    :{
+        :(iff W V)
+        {
+            :V
+            W
+        }
+        {
+            :W
+            V
+        }
+    }
+    :{
+        :{
+            :W
+            contradiction
+        }
+        (not W)
+    }
+    :{
+        :{
+            :(not W)
+            contradiction
+        }
+        W
+    }
+    :{
+        :W
+        :(not W)
+        contradiction
+    }
+    :{
+        :(not P)
+        (or P (not P))
+    }
+    :{
+        :P
+        (or P (not P))
+    }
+    :{
+        :P
+        (or P Q)
+    }
+    :{
+        :Q
+        (or P Q)
+    }
+    :{
+        :(or P Q)
+        (or (or P Q) R)
+    }
+    :{
+        :R
+        (or (or P Q) R)
+    }
+    :{
+        :P
+        (or P (and (not P) P))
+    }
+    :{
+        :(not P)
+        (or (not P) (not Q))
+    }
+    :{
+        :(not Q)
+        (or (not P) (not Q))
+    }
+    :{
+        :(or Q R)
+        :{
+            :Q
+            (or (or P Q) R)
+        }
+        :{
+            :R
+            (or (or P Q) R)
+        }
+        (or (or P Q) R)
+    }
+    :{
+        :(or P (or Q R))
+        :{
+            :P
+            (or (or P Q) R)
+        }
+        :{
+            :(or Q R)
+            (or (or P Q) R)
+        }
+        (or (or P Q) R)
+    }
+    :{
+        :(or (not P) (not Q))
+        :{
+            :(not P)
+            contradiction
+        }
+        :{
+            :(not Q)
+            contradiction
+        }
+        contradiction
+    }
+    :{
+        :(or P (not P))
+        :(not (or P (not P)))
+        contradiction
+    }
+    :{
+        :(not (or (not P) (not Q)))
+        :(or (not P) (not Q))
+        contradiction
+    }
+    :{
+        :(not (and P Q))
+        :(and P Q)
+        contradiction
+    }
+    :{
+        :(not P)
+        :P
+        contradiction
+    }
+    :{
+        :(not Q)
+        :Q
+        contradiction
+    }
+    :{
+        :{
+            :(not P)
+            contradiction
+        }
+        P
+    }
+    :{
+        :{
+            :(not Q)
+            contradiction
+        }
+        Q
+    }
+    :{
+        :{
+            :(not (or P (not P)))
+            contradiction
+        }
+        (or P (not P))
+    }
+    :{
+        :{
+            :(not (or (not P) (not Q)))
+            contradiction
+        }
+        (or (not P) (not Q))
+    }
+    :{
+        :{
+            :(and P Q)
+            contradiction
+        }
+        (not (and P Q))
+    }
+    :{
+        :{
+            :contradiction
+            P
+        }
+        (implies contradiction P)
+    }
+    :{
+        :{
+            :(or P (or Q R))
+            (or (or P Q) R)
+        }
+        (implies (or P (or Q R)) (or (or P Q) R))
+    }
+    :{
+        :{
+            :P
+            (or P (and (not P) P))
+        }
+        (implies P (or P (and (not P) P)))
+    }
+    :{
+        :{
+            :(or P (and (not P) P))
+            P
+        }
+        (implies (or P (and (not P) P)) P)
+    }
+    :{
+        :{
+            :P
+            (iff P (or P (and (not P) P)))
+        }
+        (implies P (iff P (or P (and (not P) P))))
+    }
+    :{
+        :{
+            :(not (and P Q))
+            (or (not P) (not Q))
+        }
+        (implies (not (and P Q)) (or (not P) (not Q)))
+    }
+    :{
+        :{
+            :(or (not P) (not Q))
+            (not (and P Q))
+        }
+        (implies (or (not P) (not Q)) (not (and P Q)))
+    }
+    :{
+        :(implies P (or P (and (not P) P)))
+        :(implies (or P (and (not P) P)) P)
+        (iff P (or P (and (not P) P)))
+    }
+    :{
+        :(implies (not (and P Q)) (or (not P) (not Q)))
+        :(implies (or (not P) (not Q)) (not (and P Q)))
+        (iff (not (and P Q)) (or (not P) (not Q)))
+    }
+    :{
+        :P
+        :Q
+        (and P Q)
+    }
+    :{
+        :P
+        :Q
+        (and P Q)
+    }
+    :{
+        :(and P Q)
+        P
+        Q
+    }
+    {
+        :(not (or P (not P)))
+        {
+            :(not P)
+            (or P (not P)) +{"expected validation result":"valid"}
+            contradiction +{"expected validation result":"valid"}
+        }
+        P +{"expected validation result":"valid"}
+        (or P (not P)) +{"expected validation result":"valid"}
+        contradiction +{"expected validation result":"valid"}
+    }
+    (or P (not P)) +{"expected validation result":"valid"}
+    {
+        :contradiction
+        {
+            :(not P)
+            contradiction +{"expected validation result":"valid"}
+        }
+        P +{"expected validation result":"valid"}
+    }
+    (implies contradiction P) +{"expected validation result":"valid"}
+    {
+        :(or P (or Q R))
+        {
+            :P
+            (or P Q) +{"expected validation result":"valid"}
+            (or (or P Q) R) +{"expected validation result":"valid"}
+        }
+        {
+            :(or Q R)
+            {
+                :Q
+                (or P Q) +{"expected validation result":"valid"}
+                (or (or P Q) R) +{"expected validation result":"valid"}
+            }
+            {
+                :R
+                (or (or P Q) R) +{"expected validation result":"valid"}
+            }
+            (or (or P Q) R) +{"expected validation result":"valid"}
+        }
+        (or (or P Q) R) +{"expected validation result":"valid"}
+    }
+    (implies (or P (or Q R)) (or (or P Q) R)) +{"expected validation result":"valid"}
+    {
+        :P
+        {
+            :P
+            (or P (and (not P) P)) +{"expected validation result":"valid"}
+        }
+        (implies P (or P (and (not P) P))) +{"expected validation result":"valid"}
+        {
+            :(or P (and (not P) P))
+            P +{"expected validation result":"valid"}
+        }
+        (implies (or P (and (not P) P)) P) +{"expected validation result":"valid"}
+        (iff P (or P (and (not P) P))) +{"expected validation result":"valid"}
+    }
+    (implies P (iff P (or P (and (not P) P)))) +{"expected validation result":"valid"}
+    {
+        :(not (and P Q))
+        {
+            :(not (or (not P) (not Q)))
+            {
+                :(not P)
+                (or (not P) (not Q)) +{"expected validation result":"valid"}
+                contradiction +{"expected validation result":"valid"}
+            }
+            P +{"expected validation result":"valid"}
+            {
+                :(not Q)
+                (or (not P) (not Q)) +{"expected validation result":"valid"}
+                contradiction +{"expected validation result":"valid"}
+            }
+            Q +{"expected validation result":"valid"}
+            (and P Q) +{"expected validation result":"valid"}
+            contradiction +{"expected validation result":"valid"}
+        }
+        (or (not P) (not Q)) +{"expected validation result":"valid"}
+    }
+    (implies (not (and P Q)) (or (not P) (not Q))) +{"expected validation result":"valid"}
+    {
+        :(or (not P) (not Q))
+        {
+            :(and P Q)
+            P +{"expected validation result":"valid"}
+            Q +{"expected validation result":"valid"}
+            {
+                :(not P)
+                contradiction +{"expected validation result":"valid"}
+            }
+            {
+                :(not Q)
+                contradiction +{"expected validation result":"valid"}
+            }
+            contradiction +{"expected validation result":"valid"}
+        }
+        (not (and P Q)) +{"expected validation result":"valid"}
+    }
+    (implies (or (not P) (not Q)) (not (and P Q))) +{"expected validation result":"valid"}
+    (iff (not (and P Q)) (or (not P) (not Q))) +{"expected validation result":"valid"}
+}
