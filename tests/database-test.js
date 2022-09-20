@@ -9,10 +9,10 @@ describe( 'Database', () => {
         expect( Database.keysPaths ).to.be.ok
         expect( Database.filterByMetadata ).to.be.ok
         expect( Database.getMetadata ).to.be.ok
-        expect( Database.getPutdown ).to.be.ok
-        expect( Database.getPutdownWithoutIncludes ).to.be.ok
-        expect( Database.getLogicConcepts ).to.be.ok
-        expect( Database.getLogicConcept ).to.be.ok
+        expect( Database.getCode ).to.be.ok
+        expect( Database.getCodeWithoutIncludes ).to.be.ok
+        expect( Database.getObjects ).to.be.ok
+        expect( Database.getObject ).to.be.ok
     } )
 
     it( 'Should know that the database contains several entries', () => {
@@ -39,7 +39,7 @@ describe( 'Database', () => {
         // a claim).
         validSyntax.forEach( key => {
             let parsed
-            expect( () => { parsed = Database.getLogicConcepts( key ) },
+            expect( () => { parsed = Database.getObjects( key ) },
                 `Parsing ${key}` ).not.to.throw()
             const metadata = Database.getMetadata( key )
             if ( metadata.testing
@@ -57,7 +57,7 @@ describe( 'Database', () => {
         expect( invalidSyntax ).to.have.lengthOf.above( 0 )
         // For every such entry, asking for its LogicConcepts throws an error.
         invalidSyntax.forEach( key => {
-            expect( () => Database.getLogicConcepts( key ),
+            expect( () => Database.getObjects( key ),
                 `Parsing ${key}` ).to.throw()
         } )
     } )
@@ -69,36 +69,36 @@ describe( 'Database', () => {
         // For every such entry, asking for its LogicConcepts does not throw
         // an error.
         propLogic.forEach( key => {
-            expect( () => Database.getLogicConcepts( key ),
+            expect( () => Database.getObjects( key ),
                 `Parsing ${key}` ).not.to.throw()
         } )
     } )
 
-    it( 'Should have getLogicConcept/s correspond correctly', () => {
+    it( 'Should have getObject/s correspond correctly', () => {
         // See comments below "Test 1," "Test 2," and "Test 3" for details of
         // what this test does.
         Database.keys().forEach( key => {
-            // Run getLogicConcepts() and see what happens.
+            // Run getObjects() and see what happens.
             let parsed
             try {
-                parsed = Database.getLogicConcepts( key )
+                parsed = Database.getObjects( key )
             } catch ( e ) {
                 parsed = e
             }
-            // Depending on the result, we test getLogicConcept()...
+            // Depending on the result, we test getObject()...
             if ( parsed instanceof Array && parsed.length == 1 ) {
-                // Test 1: Every time getLogicConcepts() yields a list of
-                // length 1, getLogicConcept() will yield that 1 thing.
+                // Test 1: Every time getObjects() yields a list of
+                // length 1, getObject() will yield that 1 thing.
                 let one
-                expect( () => one = Database.getLogicConcept( key ) )
+                expect( () => one = Database.getObject( key ) )
                     .not.to.throw()
                 expect( one ).to.equal( parsed[0] )
             } else {
-                // Test 2: Whenever getLogicConcepts() yields 0 or 2+ things,
-                // getLogicConcept() throws an error.
-                // Test 3: Whenever getLogicConcepts() throws an error, then
-                // also getLogicConcept() throws an error.
-                expect( () => Database.getLogicConcept( key ) ).to.throw()
+                // Test 2: Whenever getObjects() yields 0 or 2+ things,
+                // getObject() throws an error.
+                // Test 3: Whenever getObjects() throws an error, then
+                // also getObject() throws an error.
+                expect( () => Database.getObject( key ) ).to.throw()
             }
         } )
     } )
@@ -108,16 +108,16 @@ describe( 'Database', () => {
         // propositional logic parses to include at least 10 expressions.
         const allPropKey = '/propositional logic/all rules.putdown'
         let allPropRules
-        expect( () => allPropRules = Database.getLogicConcepts( allPropKey ) )
+        expect( () => allPropRules = Database.getObjects( allPropKey ) )
             .not.to.throw()
         expect( allPropRules ).to.have.lengthOf.above( 9 )
         // Ensure that you can ask for its putdown source code, and it's
         // very long (over 100 characters) because it contains all 10 rules.
-        const fullPutdown = Database.getPutdown( allPropKey )
+        const fullPutdown = Database.getCode( allPropKey )
         expect( fullPutdown ).to.have.lengthOf.above( 100 )
         // Ensure that you can ask for its putdown source code without
         // includes, and it's very short, and all whitespace.
-        const origPutdown = Database.getPutdownWithoutIncludes( allPropKey )
+        const origPutdown = Database.getCodeWithoutIncludes( allPropKey )
         expect( origPutdown ).to.have.lengthOf.not.above( 10 )
         expect( origPutdown ).to.match( /^\s*$/ )
     } )
