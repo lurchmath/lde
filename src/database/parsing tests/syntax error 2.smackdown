@@ -1,0 +1,7 @@
+---
+testing:
+  syntax: invalid
+---
+
+\label{hello}   // invalid because it is preceded by no LC to modify
+(one two three)

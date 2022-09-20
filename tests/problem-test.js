@@ -1254,7 +1254,7 @@ describe( 'Problem', function () {
             // Look up the test with the given key and ensure it has three
             // parts (metavariable list, problem definition, expected solution
             // set)
-            const LCs = Database.getLogicConcepts( key )
+            const LCs = Database.getObjects( key )
             expect( LCs.length ).equals( 3,
                 `Malformed test: ${key} had ${LCs.length} LCs instead of 3` )
             // Convert all instances of the problem's metavariables into actual

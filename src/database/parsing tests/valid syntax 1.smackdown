@@ -1,0 +1,13 @@
+---
+testing:
+  syntax: valid
+  length: 3
+---
+
+// This file contains several examples of valid smackdown expressions
+
+(+ 1 2)    // valid putdown
+
+$k-t-u*v$  // a smackdown "notation" atom (for later parsing)
+
+(forall x , (exists y , $x>y$))  // smackdown inside putdown is also valid

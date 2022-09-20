@@ -1,0 +1,19 @@
+---
+testing:
+  syntax: valid
+  length: 1
+---
+
+// This file contains more complex smackdown, including labels,
+// references, and proof markers.
+
+\begin{proof}
+    // Let x be arbitrary and mark it with label "1"
+    [x]        \label{1}
+    // Assume x is a real number and mark it with label "2"
+    :$x∈R$     \label{2}
+    // Claim that x is a complex number, by Theorem 21
+    $x∈C$      \reason{Theorem 21}
+    // (Even though no reason command has a built-in meaning implemented,
+    // smackdown will still parse it and remember it was a command.)
+\end{proof}

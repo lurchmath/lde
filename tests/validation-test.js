@@ -329,7 +329,7 @@ describe( 'Validation', () => {
         propositionalTests.forEach( key => {
             // Look up the test with the given key and ensure it contains
             // exactly one LogicConcept
-            const LCs = Database.getLogicConcepts( key )
+            const LCs = Database.getObjects( key )
             expect( LCs.length ).equals( 1,
                 `Malformed test: ${key} had ${LCs.length} LCs instead of 1` )
             const test = LCs[0]

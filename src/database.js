@@ -6,12 +6,13 @@
 /////////////////////////////////////////////////
 
 // Instead, edit database/footer.js, database/generate.js, or any of the
-// .putdown files recursively stored in any subfolder of the database folder.
+// .putdown or .smackdown files recursively stored in any subfolder of the
+// database folder.
 
 // This file begins with the database as a large JSON object,
 // then ends with JavaScript code that provides access to it.
 
-const putdownDatabase = [
+const testingDatabase = [
   {
     "filename": "/matching tests/test 1.putdown",
     "metadata": {
@@ -798,6 +799,44 @@ const putdownDatabase = [
     "content": "\n// This file contains some nested Environments, Expressions, and Declarations,\n// all using valid putdown syntax.\n\n{\n    // Let x be arbitrary.\n    [x]\n    // Assume x is a real number.\n    :(in x R)\n    // Claim that x is a complex number, by Theorem 21\n    (in x C) +{\"reason\":\"Theorem 21\"}\n}\n"
   },
   {
+    "filename": "/parsing tests/syntax error 1.smackdown",
+    "metadata": {
+      "testing": {
+        "syntax": "invalid"
+      }
+    },
+    "content": "\n// This file contains an Expression with an Environment inside, which is\n// invalid smackdown syntax, because it is invalid putdown syntax.\n\n(+ 1 2 { :A B })\n"
+  },
+  {
+    "filename": "/parsing tests/syntax error 2.smackdown",
+    "metadata": {
+      "testing": {
+        "syntax": "invalid"
+      }
+    },
+    "content": "\n\\label{hello}   // invalid because it is preceded by no LC to modify\n(one two three)\n"
+  },
+  {
+    "filename": "/parsing tests/valid syntax 1.smackdown",
+    "metadata": {
+      "testing": {
+        "syntax": "valid",
+        "length": 3
+      }
+    },
+    "content": "\n// This file contains several examples of valid smackdown expressions\n\n(+ 1 2)    // valid putdown\n\n$k-t-u*v$  // a smackdown \"notation\" atom (for later parsing)\n\n(forall x , (exists y , $x>y$))  // smackdown inside putdown is also valid\n"
+  },
+  {
+    "filename": "/parsing tests/valid syntax 2.smackdown",
+    "metadata": {
+      "testing": {
+        "syntax": "valid",
+        "length": 1
+      }
+    },
+    "content": "\n// This file contains more complex smackdown, including labels,\n// references, and proof markers.\n\n\\begin{proof}\n    // Let x be arbitrary and mark it with label \"1\"\n    [x]        \\label{1}\n    // Assume x is a real number and mark it with label \"2\"\n    :$x∈R$     \\label{2}\n    // Claim that x is a complex number, by Theorem 21\n    $x∈C$      \\reason{Theorem 21}\n    // (Even though no reason command has a built-in meaning implemented,\n    // smackdown will still parse it and remember it was a command.)\n\\end{proof}\n"
+  },
+  {
     "filename": "/propositional logic/all rules.putdown",
     "metadata": {
       "includes": [
@@ -1014,11 +1053,11 @@ const putdownDatabase = [
 // documented in /src/database/generate.js.
 
 /**
- * The putdown database is built from a hierarchy of folders in the source
- * code repository, containing `.putdown` files.  The functions in this
- * namespace are for querying that database.  They are used in some of our
- * testing suite, so that a library of large expressions, even large proofs,
- * can be created outside of code, and just loaded from disk.
+ * The testing database is built from a hierarchy of folders in the source
+ * code repository, containing `.putdown` and `.smackdown` files.  The
+ * functions in this namespace are for querying that database.  They are used
+ * in some of our testing suite, so that a library of large expressions, even
+ * large proofs, can be created outside of code, and just loaded from disk.
  * 
  * The documentation of each function below assumes you have imported the
  * database using the code `import Database from '/path/to/database.js'`.
@@ -1027,20 +1066,22 @@ const putdownDatabase = [
  * `Database` appears in the documentation below, it is referring to the
  * database module itself, as documented in this namespace.
  * 
- * The source code file `database.js` will not be built into the LDE by
- * default, when we add a build process to this repository, because it
- * contains a large block of JSON in the code itself that is the entire
- * contents of the database; that would significantly bloat the size of any
- * app that used the LDE.  However, that file is available for use in all of
- * our testing scripts, and it is very useful in that regard.
+ * The source code file `database.js` is not intended to be imported into
+ * application code with the LDE itself, because it contains a large block of
+ * JSON in the code itself that is the entire contents of the database; that
+ * would significantly bloat the size of any app that used the LDE.  However,
+ * that file is available for use in all of our testing scripts, and it is very
+ * useful in that regard.
  * 
  * @namespace Database
  */
 
 // The features added by this file are various querying conveniences for the
 // database, which include conversion of putdown notation to LogicConcept
-// instances.  For that, we need the LogicConcept class.
+// instances and smackdown notation to MathConcept instances.  For that, we
+// need the relevant classes.
 import { LogicConcept } from './logic-concept.js'
+import { MathConcept } from './math-concept.js'
 
 /**
  * Each entry in the database has a unique name by which it is identified, and
@@ -1049,10 +1090,10 @@ import { LogicConcept } from './logic-concept.js'
  * 
  * The keys are simply the paths in the filesystem from which the data was
  * loaded.  So you might get a response of the form
- * `['/folder1/file1.putdown','/folder2/subfolder/file2.putdown']` and so on,
+ * `['/folder1/file1.putdown','/folder2/subfolder/file2.smackdown']` and so on,
  * containing as many files as there are in the database.  If you think of the
  * database as a filesystem, this function is like a recursive directory
- * listing, filtering for only the `.putdown` files.
+ * listing, filtering for only the `.putdown` and `.smackdown` files.
  * 
  * @returns {string[]} all keys in the database
  * @see {@link Database.keysStartingWith keysStartingWith()}
@@ -1061,7 +1102,7 @@ import { LogicConcept } from './logic-concept.js'
  * @alias Database.keys
  */
 export const keys = () =>
-    putdownDatabase.map( entry => entry.filename )
+    testingDatabase.map( entry => entry.filename )
 
 /**
  * This is a convenience function that returns just those keys in the database
@@ -1122,18 +1163,18 @@ export const keysPaths = ( folder = '' ) => {
  * @alias Database.filterByMetadata
  */
 export const filterByMetadata = predicate =>
-    putdownDatabase.filter( entry => predicate( entry.metadata ) )
+    testingDatabase.filter( entry => predicate( entry.metadata ) )
     .map( entry => entry.filename )
 
 // Read attributes from database entries; internal module helper function.
 const getEntryAttribute = ( entryName, attribute ) => {
-    const entry = putdownDatabase.find( entry => entry.filename == entryName )
+    const entry = testingDatabase.find( entry => entry.filename == entryName )
     return entry ? entry[attribute] : undefined
 }
 
 // Set attributes on database entries; internal module helper function.
 const setEntryAttribute = ( entryName, attribute, value ) => {
-    const entry = putdownDatabase.find( entry => entry.filename == entryName )
+    const entry = testingDatabase.find( entry => entry.filename == entryName )
     if ( entry ) entry[attribute] = value
     return value
 }
@@ -1145,13 +1186,14 @@ const setEntryAttribute = ( entryName, attribute, value ) => {
  * given key is invalid.
  * 
  * The metadata of any entry in the database is a JSON object extracted from
- * the (optional) YAML header in the original `.putdown` file.  It can contain
- * any information the original author put there.  For example, it might state
- * that the contents of the file are (or are not) valid `.putdown` syntax, so
- * that the file can be used for testing the putdown parser.  Or it might be
- * used to include other `.putdown` files as headers.  The list of uses for
- * this metadata is intended to grow over time, and thus not be fully
- * specified in advance.
+ * the (optional) YAML header in the original `.putdown` or `.smackdown` file.
+ * It can contain any information the original author put there.  For example,
+ * it might state that the contents of the file are (or are not) valid
+ * `.putdown` (or `.smackdown`) syntax, so that the file can be used for
+ * testing the putdown (or smackdown) parser.  Or it might be used to include
+ * other `.putdown` or `.smackdown` files as headers.  The list of uses for
+ * this metadata is intended to grow over time, and thus not be fully specified
+ * in advance.
  * 
  * The object returned is the actual metadata stored in the database, not a
  * copy, so altering it will alter the contents of the database in memory (but
@@ -1160,119 +1202,127 @@ const setEntryAttribute = ( entryName, attribute, value ) => {
  * @param {string} key - the key for the entry to look up
  * @returns {Object} a JSON object containing the metadata for the entry
  * @see {@link Database.filterByMetadata filterByMetadata()}
- * @see {@link Database.getPutdown getPutdown()}
+ * @see {@link Database.getCode getCode()}
  * @memberof Database
  * @alias Database.getMetadata
  */
 export const getMetadata = key => getEntryAttribute( key, 'metadata' )
 
 /**
- * Look up the putdown code associated with a database entry.  The result will
- * a string containing whatever was in the original `.putdown` file on disk
- * when the database was created, or `undefined` if the key is invalid.
+ * Look up the original code associated with a database entry, which will be in
+ * either putdown or smackdown notation.  The result will a string containing
+ * whatever was in the original `.putdown` or `.smackdown` file on disk when
+ * the database was created, or `undefined` if the key is invalid.
  * 
  * If the entry's metadata has an `"includes"` member, the database build
- * process respects this and includes other `.putdown` files as headers within
- * this one.  The result of this function will include the full `.putdown`
- * code for this entry, which includes any code that was imported using the
- * `"includes"` member of the metadata.  To get just the original code without
- * the other included files, see
- * {@link Database.getPutdownWithoutIncludes getPutdownWithoutIncludes()}.
+ * process respects this and includes other `.putdown` or `.smackdown` files as
+ * headers within this one.  The result of this function will include the full
+ * `.putdown` or `.smackdown` code for this entry, which includes any code that
+ * was imported using the `"includes"` member of the metadata.  To get just the
+ * original code without the other included files, see
+ * {@link Database.getCodeWithoutIncludes getCodeWithoutIncludes()}.
  * 
- * The return value includes only putdown code, not the YAML header that was
- * converted into metadata.  To get access to that information, see
- * {@link Database.getMetadata getMetadata()}.
+ * The return value includes only putdown or smackdown code, not the YAML
+ * header that was converted into metadata.  To get access to that information,
+ * see * {@link Database.getMetadata getMetadata()}.
  * 
  * The return value is just the code, not the actual objects signified by that
  * code.  To get access to those objects, see
- * {@link Database.getLogicConcepts getLogicConcepts()}.
+ * {@link Database.getObjects getObjects()}.
  * 
  * @param {string} key - the key for the entry to look up
- * @returns {string} the putdown source code for the entry
- * @see {@link Database.getPutdownWithoutIncludes getPutdownWithoutIncludes()}
+ * @returns {string} the putdown or smackdown source code for the entry
+ * @see {@link Database.getCodeWithoutIncludes getCodeWithoutIncludes()}
  * @see {@link Database.getMetadata getMetadata()}
- * @see {@link Database.getLogicConcepts getLogicConcepts()}
+ * @see {@link Database.getObjects getObjects()}
  * @memberof Database
- * @alias Database.getPutdown
+ * @alias Database.getCode
  */
-export const getPutdown = key => getEntryAttribute( key, 'content' )
+export const getCode = key => getEntryAttribute( key, 'content' )
 
 /**
  * This function works exactly the same as
- * {@link Database.getPutdown getPutdown()}, except that any code included
+ * {@link Database.getCode getCode()}, except that any code included
  * from a separate file using the `"includes"` member of the metadata object
  * will not be included here.  Thus the return value from this function is
  * always a terminal substring of the return value of
- * {@link Database.getPutdown getPutdown()}.
+ * {@link Database.getCode getCode()}.
  * 
  * @param {string} key - the key for the entry to look up
- * @returns {string} the putdown source code for the entry
- * @see {@link Database.getPutdown getPutdown()}
+ * @returns {string} the putdown or smackdown source code for the entry
+ * @see {@link Database.getCode getCode()}
  * @see {@link Database.getMetadata getMetadata()}
  * @memberof Database
- * @alias Database.getPutdownWithoutIncludes
+ * @alias Database.getCodeWithoutIncludes
  */
-export const getPutdownWithoutIncludes = key => {
+export const getCodeWithoutIncludes = key => {
     const original = getEntryAttribute( key, 'original' )
     return typeof( original ) == 'undefined' ?
         getEntryAttribute( key, 'content' ) : original
 }
 
-// Get a cached parsed result of the given entry's full putdown source, if any
-// exists yet in the database.
+// Get a cached parsed result of the given entry's full putdown/smackdown
+// source, if any exists yet in the database.
 const getParsedResult = key => getEntryAttribute( key, 'parsed' )
 
-// Store in the cache the parsed result of the given entry's putdown source,
-// overwriting any previous cache value if there was one.
+// Store in the cache the parsed result of the given entry's putdown/smackdown
+// source, overwriting any previous cache value if there was one.
 const setParsedResult = ( key, result ) =>
     setEntryAttribute( key, 'parsed', result )
 
 /**
  * This function works exactly the same as
- * {@link Database.getPutdown getPutdown()}, with two exceptions.
+ * {@link Database.getCode getCode()}, with two exceptions.
  * 
- *  1. In addition to fetching the putdown code, it also interprets it if
- *     possible, yielding an array of {@link LogicConcept LogicConcepts} as
- *     the result.
+ *  1. In addition to fetching the putdown or smackdown code, it also
+ *     interprets it if possible, yielding an array of {@link MathConcept
+ *     MathConcepts} or {@link LogicConcept LogicConcepts} as the result.
+ *     (Putdown notation produces {@link LogicConcept LogicConcepts} and
+ *     smackdown notation produces {@link MathConcept MathConcepts}, although
+ *     since every {@link LogicConcept LogicConcept} is a {@link MathConcept
+ *     MathConcept}, smackdown notation may produce either type, but putdown
+ *     notation always produces {@link LogicConcept LogicConcepts}.)
  *  2. Such results are cached so that future calls to this function with the
- *     same arguments will return the exact same
- *     {@link LogicConcept LogicConcepts} instances.  In particular, this
- *     means that if you manipulate the copies you get, you are mainpulating
- *     the copies in the cache.  If this is not what you want, make separate
- *     copies.
+ *     same arguments will return the exact same {@link MathConcept
+ *     MathConcept} or {@link LogicConcept LogicConcepts} instances.  In
+ *     particular, this means that if you manipulate the copies you get, you
+ *     are mainpulating the copies in the cache.  If this is not what you want,
+ *     make separate copies.
  * 
- * If the putdown code fetched for the entry is not valid putdown code, then
+ * If the putdown or smackdown code fetched for the entry is not valid, then
  * this function will instead throw a parsing error.  If the key is an invalid
  * key for the database, this function will return undefined.  If the file
- * contains the putdown code for zero actual objects (e.g., only whitespace
- * and comments) then this function will return an empty array.
+ * contains the putdown or smackdown code for zero actual objects (e.g., only
+ * whitespace and comments) then this function will return an empty array.
  * 
  * If you know that there is only one object in the file, and you want to get
- * it without bothering to do `getLogicConcepts(key)[0]`, you can just call
- * {@link Database.getLogicConcept getLogicConcept()} instead.
+ * it without bothering to do `getObjects(key)[0]`, you can just call
+ * {@link Database.getObject getObject()} instead.
  * 
  * @param {string} key - the key for the entry to look up
- * @returns {LogicConcept[]} the meaning of the putdown source code for the
- *   entry, as an array of {@link LogicConcept LogicConcept} instances
- * @see {@link Database.getPutdown getPutdown()}
- * @see {@link Database.getLogicConcept getLogicConcept()}
+ * @returns {LogicConcept[]} the meaning of the putdown or smackdown source
+ *   code for the entry, as an array of {@link MathConcept MathConcept} or
+ *   {@link LogicConcept LogicConcept} instances
+ * @see {@link Database.getCode getCode()}
+ * @see {@link Database.getObject getObject()}
  * @memberof Database
- * @alias Database.getLogicConcepts
+ * @alias Database.getObjects
  */
- export const getLogicConcepts = key => {
+ export const getObjects = key => {
     const cached = getParsedResult( key )
     // if we cached a list of LCs, return them
     if ( cached instanceof Array ) return cached
     // if we cached something else, it was an error object; re-throw it
     if ( cached ) throw cached
-    // we have no cache, so we must parse; get the putdown code
-    const putdownCode = getPutdown( key )
+    // we have no cache, so we must parse; get the putdown/smackdown code
+    const code = getCode( key )
     // if we have no code, we cannot proceed
-    if ( !putdownCode ) return undefined
+    if ( !code ) return undefined
     try {
         // if we parse without error, cache the result and then return it
         return setParsedResult( key,
-            LogicConcept.fromPutdown( putdownCode ) )
+            key.endsWith( '.putdown' ) ? LogicConcept.fromPutdown( code )
+                                       : MathConcept.fromSmackdown( code ) )
     } catch ( error ) {
         // otherwise, cache the error and also throw it
         throw setParsedResult( key, error )
@@ -1281,22 +1331,23 @@ const setParsedResult = ( key, result ) =>
 
 /**
  * This function works exactly the same as
- * {@link Database.getLogicConcepts getLogicConcepts()}, with one exception:
- * If the putdown source code parses into an array of length one, this
- * function just returns the sole entry of that array, but if instead the
+ * {@link Database.getObjects getObjects()}, with one exception:
+ * If the putdown or smackdown source code parses into an array of length one,
+ * this function just returns the sole entry of that array, but if instead the
  * array has any other length, this function throws an error, whose message
  * states that it expected an array of length one.
  * 
  * @param {string} key - the key for the entry to look up
- * @returns {LogicConcept} the meaning of the putdown source code for the
- *   entry, as a single {@link LogicConcept LogicConcept} instance
- * @see {@link Database.getPutdown getPutdown()}
- * @see {@link Database.getLogicConcepts getLogicConcepts()}
+ * @returns {LogicConcept} the meaning of the putdown or smackdown source code
+ *   for the entry, as a single {@link MathConcept MathConcept} or
+ *   {@link LogicConcept LogicConcept} instance
+ * @see {@link Database.getCode getCode()}
+ * @see {@link Database.getObjects getObjects()}
  * @memberof Database
- * @alias Database.getLogicConcept
+ * @alias Database.getObject
  */
- export const getLogicConcept = key => {
-    const all = getLogicConcepts( key )
+ export const getObject = key => {
+    const all = getObjects( key )
     if ( all.length != 1 )
         throw `Expected 1 LogicConcept, got ${all.length}`
     return all[0]
@@ -1306,7 +1357,6 @@ const setParsedResult = ( key, result ) =>
 // import Database from './database.js'
 export default {
     keys, keysStartingWith, keysPaths, filterByMetadata,
-    getMetadata, getPutdown, getPutdownWithoutIncludes,
-    getLogicConcepts, getLogicConcept
+    getMetadata, getCode, getCodeWithoutIncludes, getObjects, getObject
 }
 
