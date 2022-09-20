@@ -1,0 +1,103 @@
+---
+testing:
+  type: validation
+  subtype: formula
+  description: "A basic valid single formula test."
+---
+
+(⇒ ¬ or),{                            // declare non-metavars
+  
+  \label{"alt def of ⇒"}              // smackdown label       
+  :{ :(⇒ P Q) (or (¬ P) Q) }          // a theorem turned formula
+  
+  // start a proof
+  {  
+     :(⇒ A B)                         // assume something
+     (or (¬ A) B)                     // prove this
+      \by{"alt def of ⇒" with (P = A) (Q = B)}  // reason and instantiations
+      \expectValidation{result}{"valid"}        // expected validation result     
+  }
+}
+
+//
+// incorrect variants
+//
+
+// no such reference
+(⇒ ¬ or),{                 
+  
+  \label{"alt def of ⇒"}  :{ :(⇒ P Q) (or (¬ P) Q) }     
+  
+  {  
+     :(⇒ A B)                    
+     (or (¬ A) B) 
+        \by{"Stewart's Theorem" with (P = A) (Q = B)}
+        \expectValidation{result}{"invalid"}    
+        \expectValidation{reason}{"no such reference"}        
+  }
+}
+
+// formula not accessible (and meaningless)
+(⇒ ¬ or),{ 
+  {
+   \label{"alt def of ⇒"}  :{ :(⇒ P Q) (or (¬ P) Q) }     
+  }  // accidentially make it inaccessible/meaningless
+  {  
+     :(⇒ A B)                    
+     (or (¬ A) B) 
+        \by{"alt def of ⇒" with (P = A) (Q = B)}
+        \expectValidation{result}{"invalid"}    
+        \expectValidation{reason}{"reference not accessible"}        
+  }
+}
+
+// bound, so not a metavariable
+(⇒ ¬ or),{                   
+  \label{"alt def of ⇒"}  :{ :(⇒ P Q) (or (¬ P) Q) }
+  
+  {  
+     :(⇒ A B)                    
+     (or (¬ A) B) 
+             \by{"alt def of ⇒" with (P = A) (Q = B) (⇒ = A)}
+             \expectValidation{result}{"invalid"}    
+             \expectValidation{reason}{["not a metavariable","⇒"]}        
+  }
+}
+
+// extraneous metavariable
+(⇒ ¬ or),{                   
+  \label{"alt def of ⇒"}  :{ :(⇒ P Q) (or (¬ P) Q) }     
+  
+  {  
+     :(⇒ A B)                    
+     (or (¬ A) B) 
+              \by{"alt def of ⇒" with (P = A) (Q = B) (R = A)}
+              \expectValidation{result}{"invalid"}    
+              \expectValidation{reason}{["extra metavariable","R"]}        
+  }
+}
+
+// syntactically valid, but not logically
+(⇒ ¬ or),{                   
+  \label{"alt def of ⇒"}  :{ :(⇒ P Q) (or (¬ P) Q) }     
+  
+  {  
+     :(⇒ A B)                    
+     (or (¬ A) B) 
+               \by{"alt def of ⇒" with (P = A) (Q = A)}
+               \expectValidation{result}{"invalid"}
+  }
+}
+
+// syntactically valid, but not logically
+(⇒ ¬ or),{                   
+  \label{"alt def of ⇒"}   :{ :(⇒ P Q) (or (¬ P) Q) }     
+  (label "reflexive of ⇒") :{ (⇒ P P) }
+  
+  {  
+     :(⇒ A B)                    
+     (or (¬ A) B) 
+               \by{"reflexive of ⇒" with (P = A)}
+               \expectValidation{result}{"invalid"}    
+  }
+}
