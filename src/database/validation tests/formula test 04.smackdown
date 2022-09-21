@@ -1,0 +1,77 @@
+---
+testing:
+  type: validation
+  subtype: formula
+  description: "Testing the Identity Instantiation"
+---
+
+// global constants 
+(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{       
+
+  // ND Prop rule library
+  :{ :W :V  (∧ W V) }               \label{∧+}
+  :{ :(∧ W V) W V }                 \label{∧-}
+  :{ :W  (∨ W V) (∨ V W) }          \label{∨+}
+  :{ :(∨ W V) :{:W U} :{:V U}  U }  \label{∨-}
+  :{ :{:W V}  (⇒ W V) }             \label{⇒+}
+  :{ :W :(⇒ W V)  V }               \label{⇒-}
+  :{ :{:W V} :{:V W}  (⇒ W V) }     \label{⇔+}
+  :{ :(⇔ W V)  {:W V} {:V W} }      \label{⇔-}
+  :{ :{:W V (¬ V)}  (¬ W) }         \label{¬+}
+  :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
+  
+  // Altertnate or- proof
+  {
+    { :(∨ W V) :(¬ V)
+      { :W
+        W               \expectValidation{result}{"valid"} // freebie
+      }
+      { :V
+        { :(¬ W)
+          (¬ V)         \expectValidation{result}{"valid"} // freebie
+        }
+        W               \expectValidation{result}{"valid"} // freebie
+      }
+      W                 \by{∨-}{W=W}{V=V}{U=W}
+                        \expectValidation{result}{"valid"}   
+    }
+   
+  // Theorem (we should get this for free now... no justification needed)
+  { :(∨ W V) :(¬ V) W }    \expectValidation{result}{"valid"}
+}
+
+// global constants 
+(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{       
+
+  // ND Prop rule library
+  :{ :W :V  (∧ W V) }               \label{∧+}
+  :{ :(∧ W V) W V }                 \label{∧-}
+  :{ :W  (∨ W V) (∨ V W) }          \label{∨+}
+  :{ :(∨ W V) :{:W U} :{:V U}  U }  \label{∨-}
+  :{ :{:W V}  (⇒ W V) }             \label{⇒+}
+  :{ :W :(⇒ W V)  V }               \label{⇒-}
+  :{ :{:W V} :{:V W}  (⇒ W V) }     \label{⇔+}
+  :{ :(⇔ W V)  {:W V} {:V W} }      \label{⇔-}
+  :{ :{:W V (¬ V)}  (¬ W) }         \label{¬+}
+  :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
+  
+  // Same as above, but with extraneous justifications
+  {
+    { :(∨ W V) :(¬ V)
+      { :W
+        W               \expectValidation{result}{"valid"} // freebie
+      }
+      { :V
+        { :(¬ W)
+          (¬ V)         \expectValidation{result}{"valid"} // freebie
+        }
+        W               \by{¬-}{W=W}{V=V}  // extraneous
+                        \expectValidation{result}{"valid"} // freebie
+      }
+      W                 \by{∨-}{W=W}{V=V}{U=W}
+                        \expectValidation{result}{"valid"}   
+    }
+   
+  // Theorem (we should get this for free now... no justification needed)
+  { :(∨ W V) :(¬ V) W }    \expectValidation{result}{"valid"}
+}
