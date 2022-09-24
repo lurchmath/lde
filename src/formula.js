@@ -147,19 +147,20 @@ const instantiate = ( formula, instantiation ) => {
 // Object, and return a copy of the image, if there is one.
 const lookup = ( instantiation, metavar ) => {
     if ( instantiation instanceof Matching.Substitution )
-        return instantiation.instantiated( metavar )
+        return instantiation.metavariable.equals( metavar ) ?
+            instantiation.expression.copy() : metavar
     if ( instantiation instanceof Matching.Solution ) {
         const mapsTo = instantiation.get( metavar )
         return mapsTo ? mapsTo.copy() : metavar
     }
     if ( instantiation instanceof Map ) {
-        if ( !instantiation.has( metavar ) ) return metavar
-        const mapsTo = instantiation.get( metavar )
+        if ( !instantiation.has( metavar.text() ) ) return metavar
+        const mapsTo = instantiation.get( metavar.text() )
         return mapsTo instanceof LogicConcept ? mapsTo.copy() : metavar
     }
     if ( instantiation instanceof Object ) {
-        if ( !instantiation.hasOwnProperty( metavar ) ) return metavar
-        const mapsTo = instantiation[metavar]
+        if ( !instantiation.hasOwnProperty( metavar.text() ) ) return metavar
+        const mapsTo = instantiation[metavar.text()]
         return mapsTo instanceof LogicConcept ? mapsTo.copy() : metavar
     }
     throw new Error( `Invalid instantiation: ${instantiation}` )
