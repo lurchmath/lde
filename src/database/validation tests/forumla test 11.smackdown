@@ -1,0 +1,50 @@
+---
+testing:
+  type: validation
+  subtype: formula
+  description: "Natural Deduction - extra instantiations don't hurt"
+---
+
+// document
+
+(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{       
+
+  // ND Prop rule library
+  :{ :W :V  (∧ W V) }               \label{∧+}
+  :{ :(∧ W V) W V }                 \label{∧-}
+  :{ :W  (∨ W V) (∨ V W) }          \label{∨+}
+  :{ :(∨ W V) :{:W U} :{:V U}  U }  \label{∨-}
+  :{ :{:W V}  (⇒ W V) }             \label{⇒+}
+  :{ :W :(⇒ W V)  V }               \label{⇒-}
+  :{ :{:W V} :{:V W}  (⇒ W V) }     \label{⇔+}
+  :{ :(⇔ W V)  {:W V} {:V W} }      \label{⇔-}
+  :{ :{:W V (¬ V)}  (¬ W) }         \label{¬+}
+  :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
+
+  // Theorem (notice we get this for free .. we don't even need the proof)
+  (⇒ P P )    \valid{}
+  
+  // Baby warm up proof... just for kicks
+  {
+    { :P 
+      P            \valid{} 
+    }
+    (⇒ P P )       \valid{}             
+  }
+  
+}
+
+// instantiation
+
+( instantiation         // :{ :{:P P} (⇒ P P) }
+   (formula "⇒+")        
+   ((W P) (V P))                   
+   (result "valid")       
+)
+
+( instantiation         // :{ :Z :Q (∧ Z Q) }
+   (formula "∧+")        
+   ((W Z) (V Q))                   
+   (result "valid")       
+)
+

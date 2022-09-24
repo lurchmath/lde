@@ -1,0 +1,69 @@
+---
+testing:
+  type: validation
+  subtype: formula
+  description: "ND using a Theorem as a Formula"
+---
+
+// global constants 
+(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{
+
+  // ND Prop rule library
+  :{ :W :V  (∧ W V) }               \label{∧+}
+  :{ :(∧ W V) W V }                 \label{∧-}
+  :{ :W  (∨ W V) (∨ V W) }          \label{∨+}
+  :{ :(∨ W V) :{:W U} :{:V U}  U }  \label{∨-}
+  :{ :{:W V}  (⇒ W V) }             \label{⇒+}
+  :{ :W :(⇒ W V)  V }               \label{⇒-}
+  :{ :{:W V} :{:V W}  (⇒ W V) }     \label{⇔+}
+  :{ :(⇔ W V)  {:W V} {:V W} }      \label{⇔-}
+  :{ :{:W V (¬ V)}  (¬ W) }         \label{¬+}
+  :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
+  
+  // Corollary:  (should be invalid here)
+  { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \invalid{} } 
+  
+  // Theorem (alt or-)
+  { :(∨ P Q) :(¬ Q) P \valid{} }  \label{alt or-}
+
+  // Altertnate or- proof (not needed but motivates the instantiations
+  {
+    { :(∨ P Q) 
+      :(¬ Q)
+      { :P
+        P               \valid{} // no instantiation needed
+      }
+      { :Q
+        { :(¬ P)
+          (¬ Q)         \valid{} // no instantiation needed
+        }
+        P               \valid{} // motivates ¬- instantiation
+      }
+      P                 \valid{} // motivates or- instantiation
+    }
+
+   // Corollary:
+   { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \valid{} } 
+
+}
+
+
+// instantiations
+
+( instantiation         // :{ :{ :(¬ P) Q (¬ Q)}  P }
+   (formula "¬-")        
+   ((W P) (V Q))                   
+   (result "valid")  
+)
+
+( instantiation          // :{ :(∨ P Q) :{ :P P } :{:Q P} P }
+   (formula "∨-")        
+   ((W P) (V Q) (U P) )                   
+   (result "valid")       
+)
+
+( instantiation          // { :(∨ (⇒ A C) (∨ A B)) :(¬ (∨ A B)) (⇒ A C) }
+   (formula "alt or-")        
+   ((P (⇒ A C)) (Q (∨ A B)) )                   
+   (result "valid")       
+)

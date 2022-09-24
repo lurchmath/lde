@@ -2,8 +2,47 @@
 testing:
   type: validation
   subtype: formula
-  description: "A basic valid single formula test."
+  description: "Testing various errors in instantiation-hint blocks."
 ---
+
+// Each of these tests begins with a 'document' LC (and environment in
+// smackdown notation) followed by sequence of instantiation specifiers
+// each of which give the necessary information to construct an instatiation
+// of a formula in the document. 
+// 
+// In addition to putdown notation, the document can contain smackdown commands 
+//
+//  \label{abc}          - labels the preceding LC with 'abc'
+//  \valid{}, \invalid{} - indicates whether the preceding LC should be 
+//                         valid or invalid after validation
+//
+// The instantiation specifiers specify the following items:
+//
+//    (formula abc)      - formula to instantiate has label 'abc' 
+//    ((P A) (Q B))      - instantiate metavars P and Q with A and B resp.  
+//    (result "valid")   - whether or not the instantiation was successfully 
+//                         constructed                         
+//    (reason "foo")     - if it was unable to construct the instantiation
+//                         give a reason why it failed
+//
+// To process these tests, first the test will
+//   1. Construct the LC of the document form the first section.
+//      a. \label commands assign labels to the appropriate LCs
+//      b. \valid, \invalid commands assign expected validation result
+//         to each conclusion to check later against the actual validation
+//         result.
+//   2. For each instantiation specifier it attempts to construct the
+//      instantiation of the specified formula using the specified values.
+//      a. If it succeeds (and was expected to), it inserts that LC into the
+//         document after the formula.
+//      b. If not, it checks that it failed for the expected reason
+//   3. After all instantiations are constructed and inserted, all of the 
+//      conclusions in the document are validated propositionally, and the
+//      result of the validation checked for each conclusion to see if it 
+//      matches what was expected as specified by the \valid and \invalid 
+//      smackdown commands in the document.
+
+// document
 
 (⇒ ¬ or),{                                 // declare non-metavars
         
@@ -14,104 +53,58 @@ testing:
   {  
      :(⇒ A B)                              // assume something
      (or (¬ A) B)                          // prove this
-      \by{"alt def of ⇒"}{P=A}{Q=B}        // reason and instantiations
-      \expectValidation{result}{"valid"}   // expected validation result     
+                    \valid{}               // expected validation result     
   }
 }
+
+// instantiations
+
+( instantiation   
+   (formula "alt def of ⇒")        // abc = formula's label
+   ((P A) (Q B))                   // the metavar assignments
+   (result "valid")                // this instantiationshould succeed
+)
 
 //
 // incorrect variants
 //
 
-// no such reference
-(⇒ ¬ or),{                 
-  
-  :{ :(⇒ P Q) (or (¬ P) Q) }  \label{"alt def of ⇒"}
-  
-  {  
-     :(⇒ A B)                    
-     (or (¬ A) B) 
-        \by{"Stewart's Theorem"}{P=A}{Q=B}
-        \expectValidation{result}{"invalid"}    
-        \expectValidation{reason}{"no such reference"}        
-  }
-}
-
-// formula not accessible (and meaningless)
-(⇒ ¬ or),{ 
-  {
-   :{ :(⇒ P Q) (or (¬ P) Q) }  \label{"alt def of ⇒"}
-  }  // accidentially make it inaccessible/meaningless
-  {  
-     :(⇒ A B)                    
-     (or (¬ A) B) 
-        \by{"alt def of ⇒"}{P=A}{Q=B}
-        \expectValidation{result}{"invalid"}    
-        \expectValidation{reason}{"reference not accessible"}        
-  }
-}
+// no such formula
+( instantiation   
+   (formula "Stewart's Theorem")   
+   ((P A) (Q B))                   
+   (result "invalid")                
+   (reason "no such formula")
+)
 
 // bound, so not a metavariable
-(⇒ ¬ or),{                   
-  :{ :(⇒ P Q) (or (¬ P) Q) }  \label{"alt def of ⇒"}
-  
-  {  
-     :(⇒ A B)                    
-     (or (¬ A) B) 
-             \by{"alt def of ⇒"}{P=A}{Q=B}{⇒=A}
-             \expectValidation{result}{"invalid"}    
-             \expectValidation{reason}{["not a metavariable","⇒"]}        
-  }
-}
+( instantiation   
+   (formula "alt def of ⇒")   
+   ((P A) (Q B) (or A)))                   
+   (result "invalid")                
+   (reason "'or' is not a metavariable")
+)
 
 // extraneous metavariable
-(⇒ ¬ or),{                   
-  :{ :(⇒ P Q) (or (¬ P) Q) }  \label{"alt def of ⇒"}     
-  
-  {  
-     :(⇒ A B)                    
-     (or (¬ A) B) 
-              \by{"alt def of ⇒"}{P=A}{Q=B}{R=A}
-              \expectValidation{result}{"invalid"}    
-              \expectValidation{reason}{["extra metavariable","R"]}        
-  }
-}
+( instantiation   
+   (formula "alt def of ⇒")   
+   ((P A) (Q B) (R A)))
+   (result "invalid")                
+   (reason "'R' is an extraneous metavariable")
+)
 
-// syntactically valid, but not logically
-(⇒ ¬ or),{                   
-  :{ :(⇒ P Q) (or (¬ P) Q) }  \label{"alt def of ⇒"}     
-  
-  {  
-     :(⇒ A B)                    
-     (or (¬ A) B) 
-               \by{"alt def of ⇒"}{P=A}{Q=A}}
-               \expectValidation{result}{"invalid"}
-  }
-}
+// missing metavariable
+( instantiation  
+   (formula "alt def of ⇒")   
+   ( (Q B) )
+   (result "invalid")                
+   (reason "missing metavariable 'P'")
+)
 
-// syntactically valid, but not logically
-(⇒ ¬ or),{                   
-  :{ :(⇒ P Q) (or (¬ P) Q) }  \label{"alt def of ⇒"}
-  :{ (⇒ P P) }                \label{"reflexive of ⇒"} 
-  
-  {  
-     :(⇒ A B)                    
-     (or (¬ A) B) 
-               \by{"reflexive of ⇒"}{P=A}
-               \expectValidation{result}{"invalid"}    
-  }
-}
-
-// referencing the wrong formula can false flag the cause of the error
-(⇒ ¬ or),{                   
-  :{ :(⇒ P Q) (or (¬ P) Q) }  \label{"alt def of ⇒"}
-  :{ (⇒ P P) }                \label{"reflexive of ⇒"} 
-  
-  {  
-     :(⇒ A B)                    
-     (or (¬ A) B) 
-               \by{"reflexive of ⇒"}{P=A}{Q=B}
-               \expectValidation{result}{"invalid"}
-               \expectValidation{reason}{["extra metavariable","Q"]}            
-  }
-}
+// missing metavariable
+( instantiation   
+   (formula "alt def of ⇒")   
+   ( (P A) )
+   (result "invalid")                
+   (reason "missing metavariable 'Q'")
+)

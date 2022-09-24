@@ -2,24 +2,24 @@
 testing:
   type: validation
   subtype: formula
-  description: "A valid instantiation, but not the one needed to justify the conclusion."
+  description: "A valid instantiation, but the formula is inaccessible."
 ---
 
 // document
 
-(⇒ ¬ or),{                                       
-  :{ :(⇒ P Q) (or (¬ P) Q) }     \label{"alt def of ⇒"}
+(⇒ ¬ or),{ 
   // start a proof
   {  
      :(⇒ A B)                             
      (or (¬ A) B)                 \invalid{}
-  }
+  }  
+  :{ :(⇒ P Q) (or (¬ P) Q) }     \label{"alt def of ⇒"} // too late
 }
 
 // instantiation
 
-( instantiation-test    
+( instantiation  
    (formula "alt def of ⇒")        
-   ((P A) (Q A))                   
+   ((P A) (Q B))                   
    (result "valid")                
 )

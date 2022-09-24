@@ -1,0 +1,51 @@
+---
+testing:
+  type: validation
+  subtype: formula
+  description: "Natural Deduction proof using the Identity Instantiation. So only one of the instantiations in the previous test should be needed."
+---
+
+// document
+
+// global constants 
+(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{       
+
+  // ND Prop rule library
+  :{ :W :V  (∧ W V) }               \label{∧+}
+  :{ :(∧ W V) W V }                 \label{∧-}
+  :{ :W  (∨ W V) (∨ V W) }          \label{∨+}
+  :{ :(∨ W V) :{:W U} :{:V U}  U }  \label{∨-}
+  :{ :{:W V}  (⇒ W V) }             \label{⇒+}
+  :{ :W :(⇒ W V)  V }               \label{⇒-}
+  :{ :{:W V} :{:V W}  (⇒ W V) }     \label{⇔+}
+  :{ :(⇔ W V)  {:W V} {:V W} }      \label{⇔-}
+  :{ :{:W V (¬ V)}  (¬ W) }         \label{¬+}
+  :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
+
+  // Theorem
+  { :(∨ W V) :(¬ V) W \valid{} }    
+  
+  // Altertnate or- proof
+  {
+    { :(∨ W V) :(¬ V)
+      { :W
+        W               \valid{}
+      }
+      { :V
+        { :(¬ W)
+          (¬ V)         \valid{}
+        }
+        W               \valid{}
+      }
+      W                 \valid{}
+    }
+  }
+}
+
+// instantiation
+
+( instantiation         // :{ :(∨ W V) :{ :W U } :{:V U} U }
+   (formula "∨-")        
+   ((W W) (V V) (U W) )                   
+   (result "valid")       
+)

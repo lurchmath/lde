@@ -2,31 +2,28 @@
 testing:
   type: validation
   subtype: formula
-  description: "Natural Deduction Propositional Proof"
+  description: "A valid instantiation, but the formula is inaccessible (and meaningless)."
 ---
 
-// global constants 
-(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{       
+// document
 
-  // ND Prop rule library
-  :{ :W :V  (∧ W V) }               \label{∧+}
-  :{ :(∧ W V) W V }                 \label{∧-}
-  :{ :W  (∨ W V) (∨ V W) }          \label{∨+}
-  :{ :(∨ W V) :{:W U} :{:V U}  U }  \label{∨-}
-  :{ :{:W V}  (⇒ W V) }             \label{⇒+}
-  :{ :W :(⇒ W V)  V }               \label{⇒-}
-  :{ :{:W V} :{:V W}  (⇒ W V) }     \label{⇔+}
-  :{ :(⇔ W V)  {:W V} {:V W} }      \label{⇔-}
-  :{ :{:W V (¬ V)}  (¬ W) }         \label{¬+}
-  :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
+(⇒ ¬ or),{                                
   
-  // Baby warm up proof
-  {
-    { :P P }
-    (⇒ P P )  \by{⇒+}{W=P}{V=P}
-              \expectValidation{result}{"valid"}
+  {      
+    :{ :(⇒ P Q) (or (¬ P) Q) }     \label{"alt def of ⇒"}
+  }                                // the formula is accidentially inaccessible
+  
+  // start a proof
+  {  
+     :(⇒ A B)                             
+     (or (¬ A) B)                 \invalid{}
   }
-  
-  // Theorem (we should get this for free now... no justification needed)
-  (⇒ P P )    \expectValidation{result}{"valid"}
 }
+
+// instantiation
+
+( instantiation-test    
+   (formula "alt def of ⇒")        
+   ((P A) (Q B))                   
+   (result "valid")                
+)

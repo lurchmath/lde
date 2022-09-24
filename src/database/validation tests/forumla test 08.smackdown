@@ -1,0 +1,61 @@
+---
+testing:
+  type: validation
+  subtype: formula
+  description: "Natural Deduction Propositional Proof (alt or-)"
+---
+
+// global constants 
+(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{
+
+  // ND Prop rule library
+  :{ :W :V  (∧ W V) }               \label{∧+}
+  :{ :(∧ W V) W V }                 \label{∧-}
+  :{ :W  (∨ W V) (∨ V W) }          \label{∨+}
+  :{ :(∨ W V) :{:W U} :{:V U}  U }  \label{∨-}
+  :{ :{:W V}  (⇒ W V) }             \label{⇒+}
+  :{ :W :(⇒ W V)  V }               \label{⇒-}
+  :{ :{:W V} :{:V W}  (⇒ W V) }     \label{⇔+}
+  :{ :(⇔ W V)  {:W V} {:V W} }      \label{⇔-}
+  :{ :{:W V (¬ V)}  (¬ W) }         \label{¬+}
+  :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
+  
+  
+  // Theorem (alt or-)
+  { :(∨ P Q) :(¬ Q) P \valid{} }   // once again, we get it free from the 
+                                   // instantiations.  No proof below needed!
+                                   // But the proof below motivates the
+                                   // instantiations
+
+  // Altertnate or- proof (not needed but motivates the instantiations
+  {
+    { :(∨ P Q) 
+      :(¬ Q)
+      { :P
+        P               \valid{} // no instantiation needed
+      }
+      { :Q
+        { :(¬ P)
+          (¬ Q)         \valid{} // no instantiation needed
+        }
+        P               \valid{} // motivates ¬- instantiation
+      }
+      P                 \valid{} // motivates or- instantiation
+    }
+}
+
+
+// instantiation
+
+( instantiation         // :{ :{ :(¬ P) Q (¬ Q)}  P }
+   (formula "¬-")        
+   ((W P) (V Q))                   
+   (result "valid")  
+)
+
+( instantiation          // :{ :(∨ P Q) :{ :P P } :{:Q P} P }
+   (formula "∨-")        
+   ((W P) (V Q) (U P) )                   
+   (result "valid")       
+)
+
