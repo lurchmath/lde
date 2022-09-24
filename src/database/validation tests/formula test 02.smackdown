@@ -8,11 +8,9 @@ testing:
 // document
 
 (⇒ ¬ or),{                                
-  
   {      
     :{ :(⇒ P Q) (or (¬ P) Q) }     \label{"alt def of ⇒"}
   }                                // the formula is accidentially inaccessible
-  
   // start a proof
   {  
      :(⇒ A B)                             
@@ -22,7 +20,7 @@ testing:
 
 // instantiation
 
-( instantiation-test    
+( instantiation 
    (formula "alt def of ⇒")        
    ((P A) (Q B))                   
    (result "valid")                
