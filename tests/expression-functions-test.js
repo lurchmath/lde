@@ -604,6 +604,16 @@ describe( 'Expression Functions', () => {
         )
         result = LogicConcept.fromPutdown( '(+ 5 7)' )[0]
         expect( M.betaReduce( expr ) ).to.be.undefined
+        // Repeat the first test, but ensure that "given" status is preserved.
+        expr = M.newEFA(
+            M.newEF(
+                new LurchSymbol( 'u' ), new LurchSymbol( 'v' ),
+                LogicConcept.fromPutdown( '(+ (- u 1) (- v 1))' )[0]
+            ),
+            ...LogicConcept.fromPutdown( '"FOO" "BAR"' )
+        ).makeIntoA( 'given' )
+        result = LogicConcept.fromPutdown( ':(+ (- "FOO" 1) (- "BAR" 1))' )[0]
+        expect( M.betaReduce( expr ).equals( result ) ).to.equal( true )
     } )
 
     it( 'Should be able to do all beta reductions in an expression', () => {

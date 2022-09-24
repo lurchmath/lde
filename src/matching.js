@@ -37,7 +37,8 @@
  * metavariables explicitly.  To that end, this module imports all the tools
  * defined in the
  * {@link module:Metavariables metavariables module} and exposes them to
- * clients.
+ * clients.  For more information about determining metavariables from context,
+ * see {@link Formula the Formula namespace}.
  * 
  * Thus the problem of matching can be stated like so: Given a pattern $P$ and
  * an expression $E$, where $P$ may contain metavariables and $E$ may not,
@@ -119,7 +120,9 @@
  * the matching algorithm will be a JavaScript array of
  * {@link Solution Solutions}.  Each pair $a\mapsto b$ in a solution mapping
  * is called a *substitution,* and will be represented by a member of the
- * {@link Substitution Substitution class}.
+ * {@link Substitution Substitution class}.  To apply a {@link Substitution
+ * Substitution} or a {@link Solution Solution} to an {@link LogicConcept
+ * LogicConcept}, see {@link Formula the Formula namespace}.
  * 
  * ## Technical details
  * 

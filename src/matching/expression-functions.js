@@ -435,7 +435,8 @@ export const canBetaReduce = expr =>
  * @see {@link module:ExpressionFunctions.fullBetaReduce fullBetaReduce()}
  */
 export const betaReduce = expr => canBetaReduce( expr ) ?
-    applyEF( expr.child( 1 ), ...expr.children().slice( 2 ) ) : undefined
+    applyEF( expr.child( 1 ), ...expr.children().slice( 2 ) )
+        .copyAttributesFrom( expr ) : undefined
 
 /**
  * Make a copy of the given {@link Expression Expression}, then find inside it
