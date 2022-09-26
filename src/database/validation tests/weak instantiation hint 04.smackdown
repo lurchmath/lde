@@ -1,0 +1,19 @@
+---
+testing:
+  type: validation
+  subtype: weak instantiation hint
+  description: "Citing the wrong formula."
+---
+
+// document
+
+(⇒ ¬ or),{                                
+  :{ :(⇒ P Q) (or (¬ P) Q) }     \label{"alt def of ⇒"}
+  :{ (⇒ P P) }                   \label{"reflexive of ⇒"} 
+
+  // start a proof
+  {  
+     :(⇒ A B)                             
+     (or (¬ A) B)   \ref{"reflexive of ⇒"} \invalid{}
+  }
+}

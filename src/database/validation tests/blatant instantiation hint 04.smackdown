@@ -1,0 +1,21 @@
+---
+testing:
+  type: validation
+  subtype: blatant instantiation hint
+  description: "Citing the wrong formula."
+---
+
+// document
+
+(⇒ ¬ or),{                                
+  :{ :(⇒ P Q) (or (¬ P) Q) }     \label{"alt def of ⇒"}
+  :{ (⇒ P P) }                   \label{"reflexive of ⇒"} 
+
+  // blatant instantiation hint
+  :{ :(⇒ A B) (or (¬ A) B) \invalid{} }   \ref{"reflexive of ⇒"}
+  // start a proof
+  {  
+     :(⇒ A B)                             
+     (or (¬ A) B)                 \valid{}
+  }
+}

@@ -1,0 +1,22 @@
+---
+testing:
+  type: validation
+  subtype: blatant instantiation hint
+  description: "A valid instantiation, but the formula is inaccessible."
+---
+
+// document
+
+(⇒ ¬ or),{ 
+ 
+  // blatant instantiation hint
+  :{ :(⇒ A B) (or (¬ A) B) \invalid{} }   \ref{"reflexive of ⇒"}
+  // start a proof
+  {  
+     :(⇒ A B)                             
+     (or (¬ A) B)                 \valid{}
+  }  
+  
+  // too late
+  :{ :(⇒ P Q) (or (¬ P) Q) }     \label{"alt def of ⇒"} 
+}

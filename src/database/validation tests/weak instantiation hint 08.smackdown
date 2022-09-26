@@ -1,7 +1,7 @@
 ---
 testing:
   type: validation
-  subtype: formula
+  subtype: weak instantiation hint
   description: "Natural Deduction proof using the Identity Instantiation. So only one of the instantiations in the previous test should be needed."
 ---
 
@@ -22,6 +22,9 @@ testing:
   :{ :{:W V (¬ V)}  (¬ W) }         \label{¬+}
   :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
 
+  // blatant instantiation hints
+  { :(∨ W V) :{ :W W } :{:V W} W \valid{} }  \ref{∨-}
+
   // Theorem
   { :(∨ W V) :(¬ V) W \valid{} }    
   
@@ -41,11 +44,3 @@ testing:
     }
   }
 }
-
-// instantiation
-
-( instantiation         // :{ :(∨ W V) :{ :W U } :{:V U} U }
-   (formula "∨-")        
-   ((W W) (V V) (U W) )                   
-   (result "valid")       
-)

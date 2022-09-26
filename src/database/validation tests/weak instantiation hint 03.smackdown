@@ -1,0 +1,20 @@
+---
+testing:
+  type: validation
+  subtype: weak instantiation hint
+  description: "A valid instantiation, but not the one needed to justify the conclusion."
+---
+
+// document
+
+(⇒ ¬ or),{                                       
+  :{ :(⇒ P Q) (or (¬ P) Q) }              \label{"alt def of ⇒"}
+  
+  // blatant instantiation hint
+  :{ :(⇒ A A) (or (¬ A) A) \valid{} }     \ref{"alt def of ⇒"}
+  // start a proof
+  {  
+     :(⇒ A B)                             
+     (or (¬ A) B)                         \invalid{}
+  }
+}

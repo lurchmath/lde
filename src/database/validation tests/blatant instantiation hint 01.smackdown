@@ -1,0 +1,21 @@
+---
+testing:
+  type: validation
+  subtype: blatant instantiation hint
+  description: "Basic test of a blatant instantiation hint."
+---
+
+// document
+
+(⇒ ¬ or),{                                 
+        
+  :{ :(⇒ P Q) (or (¬ P) Q) }  \label{"alt def of ⇒"}                   
+  
+  // blatant instantiation hint
+  { :(⇒ A B) (or (¬ A) B) \valid{} }   \ref{"alt def of ⇒"}   
+  // start a proof
+  {  
+     :(⇒ A B)                              
+     (or (¬ A) B)  \valid{} 
+  }
+}

@@ -1,0 +1,19 @@
+---
+testing:
+  type: validation
+  subtype: weak instantiation hint
+  description: "Basic test of a weak instantiation hint."
+---
+
+// document
+
+(⇒ ¬ or),{                                 
+        
+  :{ :(⇒ P Q) (or (¬ P) Q) }  \label{"alt def of ⇒"}                   
+     
+  // start a proof
+  {  
+     :(⇒ A B)                              
+     (or (¬ A) B)  \ref{"alt def of ⇒"}  \valid{} 
+  }
+}
