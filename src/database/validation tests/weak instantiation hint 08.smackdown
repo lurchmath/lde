@@ -22,9 +22,6 @@ testing:
   :{ :{:W V (¬ V)}  (¬ W) }         \label{¬+}
   :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
 
-  // blatant instantiation hints
-  { :(∨ W V) :{ :W W } :{:V W} W \valid{} }  \ref{∨-}
-
   // Theorem
   { :(∨ W V) :(¬ V) W \valid{} }    
   
@@ -40,7 +37,7 @@ testing:
         }
         W               \valid{}
       }
-      W                 \valid{}
+      W                 \ref{∨-}  \valid{}
     }
   }
 }
