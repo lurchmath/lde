@@ -21,8 +21,8 @@ testing:
   :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
   
   // blatant instantiation hints
-  { :{ :(¬ P) Q (¬ Q)}  P \valid{} }          \ref{\¬-}
-  { :(∨ P Q) :{ :P P } :{:Q P} P \valid{} }   \ref{∨-}
+  { :{ :(¬ P) Q (¬ Q)}  P \valid{} }          \ref{\¬-} \valid{}
+  { :(∨ P Q) :{ :P P } :{:Q P} P \valid{} }   \ref{∨-}  \valid{}
   
   // Theorem (alt or-)
   { :(∨ P Q) :(¬ Q) P \valid{} }  

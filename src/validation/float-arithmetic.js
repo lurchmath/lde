@@ -1,7 +1,8 @@
 
 // A simple JavaScript (floating point) arithmetic checker, just as an
-// example validation tool.  Importing this file installs a new validation
-// tool called "floating point arithmetic".
+// example validation tool.  Importing this file defines the function
+// arithmeticValidator() which is installed as a new validation
+// tool called "floating point arithmetic" by validation.js.
 
 import { Expression } from '../expression.js'
 import { Symbol as LurchSymbol } from '../symbol.js'
@@ -22,7 +23,7 @@ const arithmeticOperatorsInJS = {
     '<=' : [ (x,y)=>x<=y ],
 }
 
-// Internal function that treats the given conclusion as an arithmeitc
+// Internal function that treats the given conclusion as an arithmetic
 // expression, and runs the appropriate functions to compute its value.
 // (That includes equality and inequality operators, so that the result can be
 // true or false.)

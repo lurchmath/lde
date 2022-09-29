@@ -11,7 +11,7 @@ testing:
   :{ :(⇒ P Q) (or (¬ P) Q) }              \label{"alt def of ⇒"}
   
   // blatant instantiation hint
-  :{ :(⇒ A A) (or (¬ A) A) \valid{} }     \ref{"alt def of ⇒"}
+  :{ :(⇒ A A) (or (¬ A) A) \valid{} }     \ref{"alt def of ⇒"} \valid{}
   // start a proof
   {  
      :(⇒ A B)                             

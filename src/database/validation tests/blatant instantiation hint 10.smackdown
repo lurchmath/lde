@@ -19,12 +19,12 @@ testing:
   :{ :{:W V} :{:V W}  (⇒ W V) }     \label{⇔+}
   :{ :(⇔ W V)  {:W V} {:V W} }      \label{⇔-}
   :{ :{:W V (¬ V)}  (¬ W) }         \label{¬+}
-  :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
+  :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-} 
 
   // blatant instantiation hints
-  { :{:P P} (⇒ P P) \valid{} }     \ref{⇒+}
-  { :{:Z V} (⇒ Z V) \valid{} }     \ref{⇒+}
-  { :Z :Q (∧ Z Q) \valid{} }       \ref{∧+}
+  { :{:P P} (⇒ P P) \valid{} }     \ref{⇒+} \valid{}
+  { :{:Z V} (⇒ Z V) \valid{} }     \ref{⇒+} \valid{}
+  { :Z :Q (∧ Z Q) \valid{} }       \ref{∧+} \valid{}
 
   // Theorem (notice we get this for free .. we don't even need the proof)
   (⇒ P P )    \valid{}

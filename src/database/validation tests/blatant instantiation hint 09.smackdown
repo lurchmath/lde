@@ -21,11 +21,11 @@ testing:
   :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
   
   // blatant instantiation hints
-  { :{:(¬ Q) P (¬ P)} Q \valid{} }                        \ref{¬-}
-  { :{:P Q} (⇒ P Q ) \valid{} }                           \ref{⇒+}
-  { :(⇒ P Q ) :(⇒ (⇒ P Q) P) P \valid{} }                 \ref{⇒-}
-  { :{(¬ P) P (¬ P)} P \valid{} }                         \ref{¬-}
-  { :{ :(⇒ (⇒ P Q) P) P } (⇒ (⇒ (⇒ P Q) P) P) \valid{} }  \ref{⇒+} 
+  { :{:(¬ Q) P (¬ P)} Q \valid{} }                        \ref{¬-} \valid{}
+  { :{:P Q} (⇒ P Q ) \valid{} }                           \ref{⇒+} \valid{}
+  { :(⇒ P Q ) :(⇒ (⇒ P Q) P) P \valid{} }                 \ref{⇒-} \valid{}
+  { :{(¬ P) P (¬ P)} P \valid{} }                         \ref{¬-} \valid{}
+  { :{ :(⇒ (⇒ P Q) P) P } (⇒ (⇒ (⇒ P Q) P) P) \valid{} }  \ref{⇒+} \valid{}
               
   // Theorem (Pierce) 
   { :(⇒ (⇒ (⇒ P Q) P) P) \valid{} }  

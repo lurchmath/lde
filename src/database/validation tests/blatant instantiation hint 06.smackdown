@@ -22,7 +22,7 @@ testing:
   :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
 
   // blatant instantiation hint
-  { :{:P P}  (⇒ P P) \valid{} }     \ref{⇒+}
+  { :{:P P}  (⇒ P P) \valid{} }     \ref{⇒+} \valid{}
   
   // Theorem (notice we get this for free .. we don't even need the proof)
   (⇒ P P )    \valid{}

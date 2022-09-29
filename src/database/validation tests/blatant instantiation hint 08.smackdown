@@ -23,7 +23,7 @@ testing:
   :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
 
   // blatant instantiation hints
-  { :(∨ W V) :{ :W W } :{:V W} W \valid{} }  \ref{∨-}
+  { :(∨ W V) :{ :W W } :{:V W} W \valid{} }  \ref{∨-} \valid{}
 
   // Theorem
   { :(∨ W V) :(¬ V) W \valid{} }    

@@ -24,10 +24,10 @@ testing:
   { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \invalid{} } 
   
   // blatant instantiation hints
-  { :{ :(¬ P) Q (¬ Q)}  P \valid{} }          \ref{\¬-}
-  { :(∨ P Q) :{ :P P } :{:Q P} P \valid{} }   \ref{∨-}
+  { :{ :(¬ P) Q (¬ Q)}  P \valid{} }          \ref{¬-} \valid{}
+  { :(∨ P Q) :{ :P P } :{:Q P} P \valid{} }   \ref{∨-}  \valid{}
   // this is too soon
-  { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \invalid{} } \ref{alt or-}
+  { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \invalid{} } \ref{alt or-} \invalid{}
   
   // Corollary:  (should also be invalid here)
   { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \invalid{} }
@@ -52,7 +52,7 @@ testing:
     }
 
    // now a blatant instantiation hint for the theorem
-   { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \valid{} } \ref{alt or-}
+   { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \valid{} } \ref{alt or-} \valid{}
 
    // Corollary:
    { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \valid{} } 
