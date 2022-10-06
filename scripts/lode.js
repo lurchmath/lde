@@ -15,8 +15,10 @@
 import repl from 'repl'
 // load everything from index.js
 import * as Lurch from '../src/index.js'
+// load PropositionalForm
+import { PropositionalForm } from '../src/validation/propositional-form.js'
 // load Algebrite
-import Algebrite from 'algebrite'
+import Algebrite from '../dependencies/algebrite.js'
 // load SAT
 import { satSolve } from '../dependencies/LSAT.js'
 // load chalk
@@ -55,6 +57,7 @@ for ( let key in Lurch )
 global[key] = Lurch[key]
 global.Algebrite = Algebrite
 global.compute = Algebrite.run
+global.PropositionalForm = PropositionalForm
 global.satSolve = satSolve
 global.chalk = chalk
 global.lc = (s) => { return LogicConcept.fromPutdown(s)[0] }
@@ -106,3 +109,171 @@ ${heading('Lode Features')}
     }
   }
 )
+
+/*
+  show - utility to provide options for formatting and syntax highlighting
+         the smackdown format of an MC in the terminal.  This can be thought of 
+         as the prettyprint exporter for terminal interfaces (currently designed
+         for the Mac terminal).
+         
+  Syntax:  show( LC { optional options object } )
+  
+  Options:
+     
+*/
+/*
+global.lisp2pre ( string ) {
+  let ans = '', open = 0, current 
+  let tokens = string.split(' ').filter(x=>x)
+  while (tokens.length) {
+      current = tokens.shift()
+      if (current = '(') { 
+         ++open
+      }
+  }  
+}
+
+global.show ( L, options = { Indent:true, Color:true, Compact:false } ,
+          ...args ) {
+    // allow multiple option arguments to be combined into one
+    let allopts = { ...options }
+    for (let n=0;n<args.length;n++) allopts = { ...allopts , ...(args[n]) }
+    
+    // define syntax highlighting
+    let colorize = ( x, col , font ) =>
+      ( options && options.Color ) ?
+        ( ( font ) ? chalk[col][font](x) : chalk[col](x) ) : x
+
+    let decColor = 'yellow',
+        envColor = 'whiteBright'
+    let colon    = colorize(':','whiteBright','bold'),
+        lsqr     = colorize('[',envColor),
+        lset     = colorize('{',envColor),
+        letStr   = colorize('Let{',decColor),
+        decStr   = colorize('Declare{',decColor),
+        rsqr     = colorize(']',envColor),
+        rset     = colorize('}',envColor),
+        closeDec = colorize('}',decColor),
+        boundYes = colorize('✓','yellowBright'),
+        concYes  = colorize('✔︎','yellowBright'),
+        envYes   = colorize('★','yellowBright'),
+        concNo   = colorize('✗','redBright'),
+        envNo    = colorize('✘','redBright')
+
+    // Separate styling for EEs
+    if (this.inEE) {
+      let EEcolor = 'blue'
+      colon    = colorize(':',EEcolor)
+      lsqr     = colorize('[',EEcolor)
+      lset     = colorize('{',EEcolor)
+      letStr   = colorize('Let{',EEcolor)
+      decStr   = colorize('Declare{',EEcolor)
+      rsqr     = colorize(']',EEcolor)
+      rset     = colorize('}',EEcolor)
+      closeDec = colorize('}',EEcolor)
+      boundYes = colorize('✓',EEcolor)
+      concYes  = colorize('✔︎',EEcolor)
+      envYes   = colorize('★',EEcolor)
+      concNo   = colorize('✗',EEcolor)
+      envNo    = colorize('✘',EEcolor)
+    }
+
+    // initialize
+    let result = ''
+
+    // options.Indent determines if we should indent and add newlines
+    if ( options && options.Indent ) {
+      // indentLevel and tabsize are also optional options
+      if (!options.hasOwnProperty('indentLevel')) options.indentLevel = 0
+      if (!options.hasOwnProperty('tabsize')) options.tabsize = 2
+      let tab = () => ' '.repeat(options.tabsize).repeat(options.indentLevel)
+
+      // given's : first before environments and declarations
+      result  +=  this.isAGiven ? colon : ''
+
+      // Declarations are formatted on a single line, unless their body is an
+      // environment, in which case we format the body starting on the following
+      // line.
+      if ( this.isAnActualDeclaration() ) {
+        result+= ((this.declaration === 'variable') ? letStr : decStr)
+              + ' '
+              + this.allButLast.map(
+                    child => child.toString(options)
+                  ).join(' ')
+        // Check for environment bodies
+        if (this.last.isAnActualEnvironment() && !this.last.isEmpty) {
+          options.indentLevel++
+          result+= '\n'
+                +  tab()
+                +  this.last.toString( options )
+                +  '\n'
+          options.indentLevel--
+          result+= tab()
+        // otherwise format the body on one line
+        } else {
+          result+= ' '
+                +  this.last.toString( options )
+                +  ' '
+        }
+        // then close the declaration
+          result+= closeDec
+                + ( ( options && options.Conc && this.isValidated ) ?
+                  ( (this.isValid) ? concYes : concNo ) : '' )
+                + ( ( options && options.Conc && this.isvalidated ) ?
+                    ( (this.isvalid) ? ' '+concYes : ' '+concNo ) : '' )
+
+      // empty environments are formatted inline
+      } else if ( this.isEmpty ) {
+        return lset+' '+rset
+               + ( ( options && options.Env && this.isValidated ) ?
+                   ( (this.isValid) ? envYes : envNo ) : '' )
+
+      // Ordinary environments are printed as indented subproofs
+      } else {
+        options.indentLevel++
+        let lf = ( options && options.Compact ) ? ' ' : '\n'+tab()
+        result+= ( this.isAFormula  ? lsqr  : lset )
+              +  lf
+              +  this.children().map(
+                   child => child.toString( options ) )
+                            .filter( Boolean )  // filter out empty strings
+                            .join('\n'+tab())
+              +  '\n'
+        options.indentLevel--
+        result+= tab()
+              + ( this.isAFormula ? rsqr : rset )
+              + ( ( options && options.Env && this.isValidated ) ?
+                ( (this.isValid) ? envYes : envNo ) : '' )
+      }
+
+    // if indentations not requested, print it as a flat string
+    } else {
+      result+=( this.isAGiven    ? colon         : '' )
+            + ( this.isAFormula  ? lsqr          :
+              ( this.declaration && this.declaration === 'variable'
+                                 ? letStr        :
+              ( this.declaration && this.declaration === 'constant'
+                                 ? decStr : lset )))
+            + ' '
+            + this.children().map( child => child.toString(options) )
+                        .filter( Boolean )  // skip empty strings
+                        .join( ' ' )
+            + ' '
+            + ( this.isAFormula  ? rsqr        : rset )
+            + ( ( options && options.Env && this.isValidated ) ?
+                ( (this.isValid) ? envYes : envNo ) : '' )
+            + ( ( options && options.Conc && this.isvalidated ) ?
+                ( (this.isvalid) ? ' '+concYes : ' '+concNo ) : '' )
+
+    }
+
+    return result
+
+   }    
+    // see if we have to markAll it to give the appropriate feedback
+    // if ( ( allopts.Skolem || allopts.EEs ) && !this.isMarked ) this.markAll()
+
+    // print the result
+    console.log(X.toString( allopts ))
+  }
+*/

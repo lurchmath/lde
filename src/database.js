@@ -1046,15 +1046,136 @@ const testingDatabase = [
     "content": "\n{\n  :{ :A B }\n  :{ :C D }\n  :{ :E F }\n  :{ :G H }\n  :{ :I J }\n  :{ :K L }\n  :{ M N }\n  :{ :O P }\n  :{ :Q R }\n  :{ :R A }\n  :{ :P C }\n  :{ :N E }\n  :{ :L G }\n  :{ :I E }\n  :{ :K F }\n  :{ :M G }\n  :{ :O H }\n  :{ :Q I }\n  A +{\"expected validation result\":\"invalid\"}\n}\n"
   },
   {
+    "filename": "/validation tests/blatant instantiation hint 01.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "blatant instantiation hint",
+        "description": "Basic test of a blatant instantiation hint."
+      }
+    },
+    "content": "\n// document\n\n(⇒ ¬ or),{                                 \n        \n  :{ :(⇒ P Q) (or (¬ P) Q) }  \\label{\"alt def of ⇒\"}                   \n  \n  // blatant instantiation hint\n  { :(⇒ A B) (or (¬ A) B) \\valid{} }   \\ref{\"alt def of ⇒\"}  \\valid{}\n  // start a proof\n  {  \n     :(⇒ A B)                              \n     (or (¬ A) B)  \\valid{} \n  }\n}\n"
+  },
+  {
+    "filename": "/validation tests/blatant instantiation hint 02.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "blatant instantiation hint",
+        "description": "A valid instantiation, but the formula is inaccessible (and meaningless)."
+      }
+    },
+    "content": "\n// document\n\n(⇒ ¬ or),{                                \n  {      \n    :{ :(⇒ P Q) (or (¬ P) Q) }     \\label{\"alt def of ⇒\"}\n  }                               \n  \n  // blatant instantiation hint\n  // Note, if it is a valid instantation, but the formula is inaccessible\n  // we mark the BIH tool as \\valid, but the conclusion as ∈valid:\n  { :(⇒ A B) (or (¬ A) B) \\invalid{} }   \\ref{\"alt def of ⇒\"} \\invalid{}\n  // start a proof\n  {  \n     :(⇒ A B)                             \n     (or (¬ A) B)                   \\invalid{}\n  }\n}"
+  },
+  {
+    "filename": "/validation tests/blatant instantiation hint 03.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "blatant instantiation hint",
+        "description": "A valid instantiation, but not the one needed to justify the conclusion."
+      }
+    },
+    "content": "\n// document\n\n(⇒ ¬ or),{                                       \n  :{ :(⇒ P Q) (or (¬ P) Q) }              \\label{\"alt def of ⇒\"}\n  \n  // blatant instantiation hint\n  :{ :(⇒ A A) (or (¬ A) A) \\valid{} }     \\ref{\"alt def of ⇒\"} \\valid{}\n  // start a proof\n  {  \n     :(⇒ A B)                             \n     (or (¬ A) B)                         \\invalid{}\n  }\n}"
+  },
+  {
+    "filename": "/validation tests/blatant instantiation hint 04.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "blatant instantiation hint",
+        "description": "Citing the wrong formula."
+      }
+    },
+    "content": "\n// document\n\n(⇒ ¬ or),{                                \n  :{ :(⇒ P Q) (or (¬ P) Q) }     \\label{\"alt def of ⇒\"}\n  :{ (⇒ P P) }                   \\label{\"reflexive of ⇒\"} \n\n  // blatant instantiation hint\n  :{ :(⇒ A B) (or (¬ A) B) \\invalid{} }   \\ref{\"reflexive of ⇒\"} \\valid{}\n  // start a proof\n  {  \n     :(⇒ A B)                             \n     (or (¬ A) B)                 \\valid{}\n  }\n}\n"
+  },
+  {
+    "filename": "/validation tests/blatant instantiation hint 05.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "blatant instantiation hint",
+        "description": "A valid instantiation, but the formula is inaccessible."
+      }
+    },
+    "content": "\n// document\n\n(⇒ ¬ or),{ \n \n  // blatant instantiation hint\n  :{ :(⇒ A B) (or (¬ A) B) \\invalid{} }   \\ref{\"reflexive of ⇒\"} \\invalid{}\n  // start a proof\n  {  \n     :(⇒ A B)                             \n     (or (¬ A) B)                 \\valid{}\n  }  \n  \n  // too late\n  :{ :(⇒ P Q) (or (¬ P) Q) }     \\label{\"alt def of ⇒\"} \n}"
+  },
+  {
+    "filename": "/validation tests/blatant instantiation hint 06.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "blatant instantiation hint",
+        "description": "Natural Deduction Propositional Proof of (P⇒P)"
+      }
+    },
+    "content": "\n// document\n\n(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{       \n\n  // ND Prop rule library\n  :{ :W :V  (∧ W V) }               \\label{∧+}\n  :{ :(∧ W V) W V }                 \\label{∧-}\n  :{ :W  (∨ W V) (∨ V W) }          \\label{∨+}\n  :{ :(∨ W V) :{:W U} :{:V U}  U }  \\label{∨-}\n  :{ :{:W V}  (⇒ W V) }             \\label{⇒+}\n  :{ :W :(⇒ W V)  V }               \\label{⇒-}\n  :{ :{:W V} :{:V W}  (⇒ W V) }     \\label{⇔+}\n  :{ :(⇔ W V)  {:W V} {:V W} }      \\label{⇔-}\n  :{ :{:W V (¬ V)}  (¬ W) }         \\label{¬+}\n  :{ :{:(¬ W) V (¬ V)}  W }         \\label{¬-}\n\n  // blatant instantiation hint\n  { :{:P P}  (⇒ P P) \\valid{} }     \\ref{⇒+} \\valid{}\n  \n  // Theorem (notice we get this for free .. we don't even need the proof)\n  (⇒ P P )    \\valid{}\n  \n  // Baby warm up proof... just for kicks\n  {\n    { :P \n      P            \\valid{} \n    }\n    (⇒ P P )       \\valid{}             \n  }\n  \n}\n"
+  },
+  {
+    "filename": "/validation tests/blatant instantiation hint 07.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "blatant instantiation hint",
+        "description": "Natural Deduction Propositional Proof (alt or-)"
+      }
+    },
+    "content": "\n// global constants \n(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{\n\n  // ND Prop rule library\n  :{ :W :V  (∧ W V) }               \\label{∧+}\n  :{ :(∧ W V) W V }                 \\label{∧-}\n  :{ :W  (∨ W V) (∨ V W) }          \\label{∨+}\n  :{ :(∨ W V) :{:W U} :{:V U}  U }  \\label{∨-}\n  :{ :{:W V}  (⇒ W V) }             \\label{⇒+}\n  :{ :W :(⇒ W V)  V }               \\label{⇒-}\n  :{ :{:W V} :{:V W}  (⇒ W V) }     \\label{⇔+}\n  :{ :(⇔ W V)  {:W V} {:V W} }      \\label{⇔-}\n  :{ :{:W V (¬ V)}  (¬ W) }         \\label{¬+}\n  :{ :{:(¬ W) V (¬ V)}  W }         \\label{¬-}\n  \n  // blatant instantiation hints\n  { :{ :(¬ P) Q (¬ Q)}  P \\valid{} }          \\ref{\\¬-} \\valid{}\n  { :(∨ P Q) :{ :P P } :{:Q P} P \\valid{} }   \\ref{∨-}  \\valid{}\n  \n  // Theorem (alt or-)\n  { :(∨ P Q) :(¬ Q) P \\valid{} }  \n                                   \n  // Altertnate or- proof (not needed but motivates the instantiations\n  {\n    { :(∨ P Q) \n      :(¬ Q)\n      { :P\n        P               \\valid{} // no instantiation needed\n      }\n      { :Q\n        { :(¬ P)\n          (¬ Q)         \\valid{} // no instantiation needed\n        }\n        P               \\valid{} // motivates ¬- instantiation\n      }\n      P                 \\valid{} // motivates or- instantiation\n    }\n}\n"
+  },
+  {
+    "filename": "/validation tests/blatant instantiation hint 08.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "blatant instantiation hint",
+        "description": "Natural Deduction proof using the Identity Instantiation. So only one of the instantiations in the previous test should be needed."
+      }
+    },
+    "content": "\n// document\n\n// global constants \n(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{       \n\n  // ND Prop rule library\n  :{ :W :V  (∧ W V) }               \\label{∧+}\n  :{ :(∧ W V) W V }                 \\label{∧-}\n  :{ :W  (∨ W V) (∨ V W) }          \\label{∨+}\n  :{ :(∨ W V) :{:W U} :{:V U}  U }  \\label{∨-}\n  :{ :{:W V}  (⇒ W V) }             \\label{⇒+}\n  :{ :W :(⇒ W V)  V }               \\label{⇒-}\n  :{ :{:W V} :{:V W}  (⇒ W V) }     \\label{⇔+}\n  :{ :(⇔ W V)  {:W V} {:V W} }      \\label{⇔-}\n  :{ :{:W V (¬ V)}  (¬ W) }         \\label{¬+}\n  :{ :{:(¬ W) V (¬ V)}  W }         \\label{¬-}\n\n  // blatant instantiation hints\n  { :(∨ W V) :{ :W W } :{:V W} W \\valid{} }  \\ref{∨-} \\valid{}\n\n  // Theorem\n  { :(∨ W V) :(¬ V) W \\valid{} }    \n  \n  // Altertnate or- proof\n  {\n    { :(∨ W V) :(¬ V)\n      { :W\n        W               \\valid{}\n      }\n      { :V\n        { :(¬ W)\n          (¬ V)         \\valid{}\n        }\n        W               \\valid{}\n      }\n      W                 \\valid{}\n    }\n  }\n}\n"
+  },
+  {
+    "filename": "/validation tests/blatant instantiation hint 09.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "blatant instantiation hint",
+        "description": "Testing Pierce."
+      }
+    },
+    "content": "\n// global constants \n(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{       \n\n  // ND Prop rule library\n  :{ :W :V  (∧ W V) }               \\label{∧+}\n  :{ :(∧ W V) W V }                 \\label{∧-}\n  :{ :W  (∨ W V) (∨ V W) }          \\label{∨+}\n  :{ :(∨ W V) :{:W U} :{:V U}  U }  \\label{∨-}\n  :{ :{:W V}  (⇒ W V) }             \\label{⇒+}\n  :{ :W :(⇒ W V)  V }               \\label{⇒-}\n  :{ :{:W V} :{:V W}  (⇒ W V) }     \\label{⇔+}\n  :{ :(⇔ W V)  {:W V} {:V W} }      \\label{⇔-}\n  :{ :{:W V (¬ V)}  (¬ W) }         \\label{¬+}\n  :{ :{:(¬ W) V (¬ V)}  W }         \\label{¬-}\n  \n  // blatant instantiation hints\n  { :{:(¬ Q) P (¬ P)} Q \\valid{} }                        \\ref{¬-} \\valid{}\n  { :{:P Q} (⇒ P Q ) \\valid{} }                           \\ref{⇒+} \\valid{}\n  { :(⇒ P Q ) :(⇒ (⇒ P Q) P) P \\valid{} }                 \\ref{⇒-} \\valid{}\n  { :{(¬ P) P (¬ P)} P \\valid{} }                         \\ref{¬-} \\valid{}\n  { :{ :(⇒ (⇒ P Q) P) P } (⇒ (⇒ (⇒ P Q) P) P) \\valid{} }  \\ref{⇒+} \\valid{}\n              \n  // Theorem (Pierce) \n  { :(⇒ (⇒ (⇒ P Q) P) P) \\valid{} }  \n\n  // proof\n  { \n    { :(⇒ (⇒ P Q) P)\n      { :(¬ P)\n        { :P\n          Q                 \\valid{}  // motivates ¬-\n        }              \n        (⇒ P Q)             \\valid{}  // motivates ⇒+\n        P                   \\valid{}  // motivates ⇒-\n      }\n      P                     \\valid{}  // motivates second ¬-                    \n    }\n    :(⇒ (⇒ (⇒ P Q) P) P)    \\valid{}  // motivates second ⇒+\n  }\n    \n}"
+  },
+  {
+    "filename": "/validation tests/blatant instantiation hint 10.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "blatant instantiation hint",
+        "description": "Natural Deduction - extra instantiations don't hurt"
+      }
+    },
+    "content": "\n// document\n\n(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{       \n\n  // ND Prop rule library\n  :{ :W :V  (∧ W V) }               \\label{∧+}\n  :{ :(∧ W V) W V }                 \\label{∧-}\n  :{ :W  (∨ W V) (∨ V W) }          \\label{∨+}\n  :{ :(∨ W V) :{:W U} :{:V U}  U }  \\label{∨-}\n  :{ :{:W V}  (⇒ W V) }             \\label{⇒+}\n  :{ :W :(⇒ W V)  V }               \\label{⇒-}\n  :{ :{:W V} :{:V W}  (⇒ W V) }     \\label{⇔+}\n  :{ :(⇔ W V)  {:W V} {:V W} }      \\label{⇔-}\n  :{ :{:W V (¬ V)}  (¬ W) }         \\label{¬+}\n  :{ :{:(¬ W) V (¬ V)}  W }         \\label{¬-} \n\n  // blatant instantiation hints\n  { :{:P P} (⇒ P P) \\valid{} }     \\ref{⇒+} \\valid{}\n  { :{:Z V} (⇒ Z V) \\valid{} }     \\ref{⇒+} \\valid{}\n  { :Z :Q (∧ Z Q) \\valid{} }       \\ref{∧+} \\valid{}\n\n  // Theorem (notice we get this for free .. we don't even need the proof)\n  (⇒ P P )    \\valid{}\n  \n  // Baby warm up proof... just for kicks\n  {\n    { :P \n      P            \\valid{} \n    }\n    (⇒ P P )       \\valid{}             \n  }\n  \n}\n\n"
+  },
+  {
+    "filename": "/validation tests/blatant instantiation hint 11.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "blatant instantiation hint",
+        "description": "ND using a Theorem as a Formula"
+      }
+    },
+    "content": "\n// global constants \n(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{\n\n  // ND Prop rule library\n  :{ :W :V  (∧ W V) }               \\label{∧+}\n  :{ :(∧ W V) W V }                 \\label{∧-}\n  :{ :W  (∨ W V) (∨ V W) }          \\label{∨+}\n  :{ :(∨ W V) :{:W U} :{:V U}  U }  \\label{∨-}\n  :{ :{:W V}  (⇒ W V) }             \\label{⇒+}\n  :{ :W :(⇒ W V)  V }               \\label{⇒-}\n  :{ :{:W V} :{:V W}  (⇒ W V) }     \\label{⇔+}\n  :{ :(⇔ W V)  {:W V} {:V W} }      \\label{⇔-}\n  :{ :{:W V (¬ V)}  (¬ W) }         \\label{¬+}\n  :{ :{:(¬ W) V (¬ V)}  W }         \\label{¬-}\n  \n  // Corollary:  (should be invalid here)\n  { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \\invalid{} } \n  \n  // blatant instantiation hints\n  { :{ :(¬ P) Q (¬ Q)}  P \\valid{} }          \\ref{¬-} \\valid{}\n  { :(∨ P Q) :{ :P P } :{:Q P} P \\valid{} }   \\ref{∨-}  \\valid{}\n  // this is too soon\n  { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \\invalid{} } \\ref{alt or-} \\invalid{}\n  \n  // Corollary:  (should also be invalid here)\n  { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \\invalid{} }\n  \n  // Theorem (alt or-)\n  { :(∨ P Q) :(¬ Q) P \\valid{} }  \\label{alt or-}\n\n  // Altertnate or- proof (not needed but motivates the instantiations\n  {\n    { :(∨ P Q) \n      :(¬ Q)\n      { :P\n        P               \\valid{} // no instantiation needed\n      }\n      { :Q\n        { :(¬ P)\n          (¬ Q)         \\valid{} // no instantiation needed\n        }\n        P               \\valid{} // motivates ¬- instantiation\n      }\n      P                 \\valid{} // motivates or- instantiation\n    }\n\n   // now a blatant instantiation hint for the theorem\n   { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \\valid{} } \\ref{alt or-} \\valid{}\n\n   // Corollary:\n   { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \\valid{} } \n\n}"
+  },
+  {
     "filename": "/validation tests/formula test 01.smackdown",
     "metadata": {
       "testing": {
         "type": "validation",
         "subtype": "formula",
-        "description": "A basic valid single formula test."
+        "description": "Testing various errors in instantiation-hint blocks."
       }
     },
-    "content": "\n(⇒ ¬ or),{                                 // declare non-metavars\n        \n  :{ :(⇒ P Q) (or (¬ P) Q) }               // a theorem turned formula\n  \\label{\"alt def of ⇒\"}                   // smackdown label \n  \n  // start a proof\n  {  \n     :(⇒ A B)                              // assume something\n     (or (¬ A) B)                          // prove this\n      \\by{\"alt def of ⇒\"}{P=A}{Q=B}        // reason and instantiations\n      \\expectValidation{result}{\"valid\"}   // expected validation result     \n  }\n}\n\n//\n// incorrect variants\n//\n\n// no such reference\n(⇒ ¬ or),{                 \n  \n  :{ :(⇒ P Q) (or (¬ P) Q) }  \\label{\"alt def of ⇒\"}\n  \n  {  \n     :(⇒ A B)                    \n     (or (¬ A) B) \n        \\by{\"Stewart's Theorem\"}{P=A}{Q=B}\n        \\expectValidation{result}{\"invalid\"}    \n        \\expectValidation{reason}{\"no such reference\"}        \n  }\n}\n\n// formula not accessible (and meaningless)\n(⇒ ¬ or),{ \n  {\n   :{ :(⇒ P Q) (or (¬ P) Q) }  \\label{\"alt def of ⇒\"}\n  }  // accidentially make it inaccessible/meaningless\n  {  \n     :(⇒ A B)                    \n     (or (¬ A) B) \n        \\by{\"alt def of ⇒\"}{P=A}{Q=B}\n        \\expectValidation{result}{\"invalid\"}    \n        \\expectValidation{reason}{\"reference not accessible\"}        \n  }\n}\n\n// bound, so not a metavariable\n(⇒ ¬ or),{                   \n  :{ :(⇒ P Q) (or (¬ P) Q) }  \\label{\"alt def of ⇒\"}\n  \n  {  \n     :(⇒ A B)                    \n     (or (¬ A) B) \n             \\by{\"alt def of ⇒\"}{P=A}{Q=B}{⇒=A}\n             \\expectValidation{result}{\"invalid\"}    \n             \\expectValidation{reason}{[\"not a metavariable\",\"⇒\"]}        \n  }\n}\n\n// extraneous metavariable\n(⇒ ¬ or),{                   \n  :{ :(⇒ P Q) (or (¬ P) Q) }  \\label{\"alt def of ⇒\"}     \n  \n  {  \n     :(⇒ A B)                    \n     (or (¬ A) B) \n              \\by{\"alt def of ⇒\"}{P=A}{Q=B}{R=A}\n              \\expectValidation{result}{\"invalid\"}    \n              \\expectValidation{reason}{[\"extra metavariable\",\"R\"]}        \n  }\n}\n\n// syntactically valid, but not logically\n(⇒ ¬ or),{                   \n  :{ :(⇒ P Q) (or (¬ P) Q) }  \\label{\"alt def of ⇒\"}     \n  \n  {  \n     :(⇒ A B)                    \n     (or (¬ A) B) \n               \\by{\"alt def of ⇒\"}{P=A}{Q=A}}\n               \\expectValidation{result}{\"invalid\"}\n  }\n}\n\n// syntactically valid, but not logically\n(⇒ ¬ or),{                   \n  :{ :(⇒ P Q) (or (¬ P) Q) }  \\label{\"alt def of ⇒\"}\n  :{ (⇒ P P) }                \\label{\"reflexive of ⇒\"} \n  \n  {  \n     :(⇒ A B)                    \n     (or (¬ A) B) \n               \\by{\"reflexive of ⇒\"}{P=A}\n               \\expectValidation{result}{\"invalid\"}    \n  }\n}\n\n// referencing the wrong formula can false flag the cause of the error\n(⇒ ¬ or),{                   \n  :{ :(⇒ P Q) (or (¬ P) Q) }  \\label{\"alt def of ⇒\"}\n  :{ (⇒ P P) }                \\label{\"reflexive of ⇒\"} \n  \n  {  \n     :(⇒ A B)                    \n     (or (¬ A) B) \n               \\by{\"reflexive of ⇒\"}{P=A}{Q=B}\n               \\expectValidation{result}{\"invalid\"}\n               \\expectValidation{reason}{[\"extra metavariable\",\"Q\"]}            \n  }\n}"
+    "content": "\n// Each of these tests begins with a 'document' LC (and environment in\n// smackdown notation) followed by sequence of instantiation specifiers\n// each of which give the necessary information to construct an instatiation\n// of a formula in the document. \n// \n// In addition to putdown notation, the document can contain smackdown commands \n//\n//  \\label{abc}          - labels the preceding LC with 'abc'\n//  \\valid{}, \\invalid{} - indicates whether the preceding LC should be \n//                         valid or invalid after validation\n//\n// The instantiation specifiers specify the following items:\n//\n//    (formula abc)      - formula to instantiate has label 'abc' \n//    ((P A) (Q B))      - instantiate metavars P and Q with A and B resp.  \n//    (result \"valid\")   - whether or not the instantiation was successfully \n//                         constructed                         \n//    (reason \"foo\")     - if it was unable to construct the instantiation\n//                         give a reason why it failed\n//\n// To process these tests, first the test will\n//   1. Construct the LC of the document form the first section.\n//      a. \\label commands assign labels to the appropriate LCs\n//      b. \\valid, \\invalid commands assign expected validation result\n//         to each conclusion to check later against the actual validation\n//         result.\n//   2. For each instantiation specifier it attempts to construct the\n//      instantiation of the specified formula using the specified values.\n//      a. If it succeeds (and was expected to), it inserts that LC into the\n//         document after the formula.\n//      b. If not, it checks that it failed for the expected reason\n//   3. After all instantiations are constructed and inserted, all of the \n//      conclusions in the document are validated propositionally, and the\n//      result of the validation checked for each conclusion to see if it \n//      matches what was expected as specified by the \\valid and \\invalid \n//      smackdown commands in the document.\n\n// document\n\n(⇒ ¬ or),{                                 // declare non-metavars\n        \n  :{ :(⇒ P Q) (or (¬ P) Q) }               // a theorem turned formula\n  \\label{\"alt def of ⇒\"}                   // smackdown label \n  \n  // start a proof\n  {  \n     :(⇒ A B)                              // assume something\n     (or (¬ A) B)                          // prove this\n                    \\valid{}               // expected validation result     \n  }\n}\n\n// instantiations\n\n( instantiation   \n   (formula \"alt def of ⇒\")        // abc = formula's label\n   ((P A) (Q B))                   // the metavar assignments\n   (result \"valid\")                // this instantiationshould succeed\n)\n\n//\n// incorrect variants\n//\n\n// no such formula\n( instantiation   \n   (formula \"Stewart's Theorem\")   \n   ((P A) (Q B))                   \n   (result \"invalid\")                \n   (reason \"no such formula\")\n)\n\n// bound, so not a metavariable\n( instantiation   \n   (formula \"alt def of ⇒\")   \n   ((P A) (Q B) (or A)))                   \n   (result \"invalid\")                \n   (reason \"'or' is not a metavariable\")\n)\n\n// extraneous metavariable\n( instantiation   \n   (formula \"alt def of ⇒\")   \n   ((P A) (Q B) (R A)))\n   (result \"invalid\")                \n   (reason \"'R' is an extraneous metavariable\")\n)\n\n// missing metavariable\n( instantiation  \n   (formula \"alt def of ⇒\")   \n   ( (Q B) )\n   (result \"invalid\")                \n   (reason \"missing metavariable 'P'\")\n)\n\n// missing metavariable\n( instantiation   \n   (formula \"alt def of ⇒\")   \n   ( (P A) )\n   (result \"invalid\")                \n   (reason \"missing metavariable 'Q'\")\n)\n"
   },
   {
     "filename": "/validation tests/formula test 02.smackdown",
@@ -1062,10 +1183,10 @@ const testingDatabase = [
       "testing": {
         "type": "validation",
         "subtype": "formula",
-        "description": "Natural Deduction Propositional Proof"
+        "description": "A valid instantiation, but the formula is inaccessible (and meaningless)."
       }
     },
-    "content": "\n// global constants \n(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{       \n\n  // ND Prop rule library\n  :{ :W :V  (∧ W V) }               \\label{∧+}\n  :{ :(∧ W V) W V }                 \\label{∧-}\n  :{ :W  (∨ W V) (∨ V W) }          \\label{∨+}\n  :{ :(∨ W V) :{:W U} :{:V U}  U }  \\label{∨-}\n  :{ :{:W V}  (⇒ W V) }             \\label{⇒+}\n  :{ :W :(⇒ W V)  V }               \\label{⇒-}\n  :{ :{:W V} :{:V W}  (⇒ W V) }     \\label{⇔+}\n  :{ :(⇔ W V)  {:W V} {:V W} }      \\label{⇔-}\n  :{ :{:W V (¬ V)}  (¬ W) }         \\label{¬+}\n  :{ :{:(¬ W) V (¬ V)}  W }         \\label{¬-}\n  \n  // Baby warm up proof\n  {\n    { :P P }\n    (⇒ P P )  \\by{⇒+}{W=P}{V=P}\n              \\expectValidation{result}{\"valid\"}\n  }\n  \n  // Theorem (we should get this for free now... no justification needed)\n  (⇒ P P )    \\expectValidation{result}{\"valid\"}\n}"
+    "content": "\n// document\n\n(⇒ ¬ or),{                                \n  {      \n    :{ :(⇒ P Q) (or (¬ P) Q) }     \\label{\"alt def of ⇒\"}\n  }                                // the formula is accidentially inaccessible\n  // start a proof\n  {  \n     :(⇒ A B)                             \n     (or (¬ A) B)                 \\invalid{}\n  }\n}\n\n// instantiation\n\n( instantiation \n   (formula \"alt def of ⇒\")        \n   ((P A) (Q B))                   \n   (result \"valid\")                \n)\n"
   },
   {
     "filename": "/validation tests/formula test 03.smackdown",
@@ -1073,10 +1194,10 @@ const testingDatabase = [
       "testing": {
         "type": "validation",
         "subtype": "formula",
-        "description": "Natural Deduction Propositional Proof"
+        "description": "A valid instantiation, but not the one needed to justify the conclusion."
       }
     },
-    "content": "\n// global constants \n(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{       \n\n  // ND Prop rule library\n  :{ :W :V  (∧ W V) }               \\label{∧+}\n  :{ :(∧ W V) W V }                 \\label{∧-}\n  :{ :W  (∨ W V) (∨ V W) }          \\label{∨+}\n  :{ :(∨ W V) :{:W U} :{:V U}  U }  \\label{∨-}\n  :{ :{:W V}  (⇒ W V) }             \\label{⇒+}\n  :{ :W :(⇒ W V)  V }               \\label{⇒-}\n  :{ :{:W V} :{:V W}  (⇒ W V) }     \\label{⇔+}\n  :{ :(⇔ W V)  {:W V} {:V W} }      \\label{⇔-}\n  :{ :{:W V (¬ V)}  (¬ W) }         \\label{¬+}\n  :{ :{:(¬ W) V (¬ V)}  W }         \\label{¬-}\n  \n  // Altertnate or- proof\n  {\n    { :(∨ P Q) :(¬ Q)\n      { :P\n        P               \\expectValidation{result}{\"valid\"} // freebie\n      }\n      { :Q\n        { :(¬ P)\n          (¬ Q)         \\expectValidation{result}{\"valid\"} // freebie\n        }\n        P               \\by{¬-}{W=P}{V=Q}\n                        \\expectValidation{result}{\"valid\"}\n      }\n      P                 \\by{∨-}{W=P}{V=Q}{U=P}\n                        \\expectValidation{result}{\"valid\"}   \n    }\n   \n  // Theorem (we should get this for free now... no justification needed)\n  { :(∨ P Q) :(¬ Q) P }    \\expectValidation{result}{\"valid\"}\n}"
+    "content": "\n// document\n\n(⇒ ¬ or),{                                       \n  :{ :(⇒ P Q) (or (¬ P) Q) }     \\label{\"alt def of ⇒\"}\n  // start a proof\n  {  \n     :(⇒ A B)                             \n     (or (¬ A) B)                 \\invalid{}\n  }\n}\n\n// instantiation\n\n( instantiation \n   (formula \"alt def of ⇒\")        \n   ((P A) (Q A))                   \n   (result \"valid\")                \n)\n"
   },
   {
     "filename": "/validation tests/formula test 04.smackdown",
@@ -1084,10 +1205,208 @@ const testingDatabase = [
       "testing": {
         "type": "validation",
         "subtype": "formula",
-        "description": "Testing the Identity Instantiation"
+        "description": "Citing the wrong formula can false flag the cause of the error."
       }
     },
-    "content": "\n// global constants \n(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{       \n\n  // ND Prop rule library\n  :{ :W :V  (∧ W V) }               \\label{∧+}\n  :{ :(∧ W V) W V }                 \\label{∧-}\n  :{ :W  (∨ W V) (∨ V W) }          \\label{∨+}\n  :{ :(∨ W V) :{:W U} :{:V U}  U }  \\label{∨-}\n  :{ :{:W V}  (⇒ W V) }             \\label{⇒+}\n  :{ :W :(⇒ W V)  V }               \\label{⇒-}\n  :{ :{:W V} :{:V W}  (⇒ W V) }     \\label{⇔+}\n  :{ :(⇔ W V)  {:W V} {:V W} }      \\label{⇔-}\n  :{ :{:W V (¬ V)}  (¬ W) }         \\label{¬+}\n  :{ :{:(¬ W) V (¬ V)}  W }         \\label{¬-}\n  \n  // Altertnate or- proof\n  {\n    { :(∨ W V) :(¬ V)\n      { :W\n        W               \\expectValidation{result}{\"valid\"} // freebie\n      }\n      { :V\n        { :(¬ W)\n          (¬ V)         \\expectValidation{result}{\"valid\"} // freebie\n        }\n        W               \\expectValidation{result}{\"valid\"} // freebie\n      }\n      W                 \\by{∨-}{W=W}{V=V}{U=W}\n                        \\expectValidation{result}{\"valid\"}   \n    }\n   \n  // Theorem (we should get this for free now... no justification needed)\n  { :(∨ W V) :(¬ V) W }    \\expectValidation{result}{\"valid\"}\n}\n\n// global constants \n(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{       \n\n  // ND Prop rule library\n  :{ :W :V  (∧ W V) }               \\label{∧+}\n  :{ :(∧ W V) W V }                 \\label{∧-}\n  :{ :W  (∨ W V) (∨ V W) }          \\label{∨+}\n  :{ :(∨ W V) :{:W U} :{:V U}  U }  \\label{∨-}\n  :{ :{:W V}  (⇒ W V) }             \\label{⇒+}\n  :{ :W :(⇒ W V)  V }               \\label{⇒-}\n  :{ :{:W V} :{:V W}  (⇒ W V) }     \\label{⇔+}\n  :{ :(⇔ W V)  {:W V} {:V W} }      \\label{⇔-}\n  :{ :{:W V (¬ V)}  (¬ W) }         \\label{¬+}\n  :{ :{:(¬ W) V (¬ V)}  W }         \\label{¬-}\n  \n  // Same as above, but with extraneous justifications\n  {\n    { :(∨ W V) :(¬ V)\n      { :W\n        W               \\expectValidation{result}{\"valid\"} // freebie\n      }\n      { :V\n        { :(¬ W)\n          (¬ V)         \\expectValidation{result}{\"valid\"} // freebie\n        }\n        W               \\by{¬-}{W=W}{V=V}  // extraneous\n                        \\expectValidation{result}{\"valid\"} // freebie\n      }\n      W                 \\by{∨-}{W=W}{V=V}{U=W}\n                        \\expectValidation{result}{\"valid\"}   \n    }\n   \n  // Theorem (we should get this for free now... no justification needed)\n  { :(∨ W V) :(¬ V) W }    \\expectValidation{result}{\"valid\"}\n}"
+    "content": "\n// document\n\n(⇒ ¬ or),{                                \n  :{ :(⇒ P Q) (or (¬ P) Q) }     \\label{\"alt def of ⇒\"}\n  :{ (⇒ P P) }                   \\label{\"reflexive of ⇒\"} \n  // start a proof\n  {  \n     :(⇒ A B)                             \n     (or (¬ A) B)                 \\invalid{}\n  }\n}\n\n// instantiation\n\n( instantiation\n   (formula \"reflexive of ⇒\")        \n   ((P A) (Q B))                   \n   (result \"invalid\")\n   (reason \"'Q' is an extraneous metavariable\")\n)\n"
+  },
+  {
+    "filename": "/validation tests/formula test 05.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "formula",
+        "description": "A valid instantiation, but the formula is inaccessible."
+      }
+    },
+    "content": "\n// document\n\n(⇒ ¬ or),{ \n  // start a proof\n  {  \n     :(⇒ A B)                             \n     (or (¬ A) B)                 \\invalid{}\n  }  \n  :{ :(⇒ P Q) (or (¬ P) Q) }     \\label{\"alt def of ⇒\"} // too late\n}\n\n// instantiation\n\n( instantiation  \n   (formula \"alt def of ⇒\")        \n   ((P A) (Q B))                   \n   (result \"valid\")                \n)\n"
+  },
+  {
+    "filename": "/validation tests/formula test 06.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "formula",
+        "description": "Natural Deduction Propositional Proof of (P⇒P)"
+      }
+    },
+    "content": "\n// document\n\n(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{       \n\n  // ND Prop rule library\n  :{ :W :V  (∧ W V) }               \\label{∧+}\n  :{ :(∧ W V) W V }                 \\label{∧-}\n  :{ :W  (∨ W V) (∨ V W) }          \\label{∨+}\n  :{ :(∨ W V) :{:W U} :{:V U}  U }  \\label{∨-}\n  :{ :{:W V}  (⇒ W V) }             \\label{⇒+}\n  :{ :W :(⇒ W V)  V }               \\label{⇒-}\n  :{ :{:W V} :{:V W}  (⇒ W V) }     \\label{⇔+}\n  :{ :(⇔ W V)  {:W V} {:V W} }      \\label{⇔-}\n  :{ :{:W V (¬ V)}  (¬ W) }         \\label{¬+}\n  :{ :{:(¬ W) V (¬ V)}  W }         \\label{¬-}\n\n  // Theorem (notice we get this for free .. we don't even need the proof)\n  (⇒ P P )    \\valid{}\n  \n  // Baby warm up proof... just for kicks\n  {\n    { :P \n      P            \\valid{} \n    }\n    (⇒ P P )       \\valid{}             \n  }\n  \n}\n\n// instantiation\n\n( instantiation         // :{ :{:P P} (⇒ P P) }\n   (formula \"⇒+\")        \n   ((W P) (V P))                   \n   (result \"valid\")       \n)\n"
+  },
+  {
+    "filename": "/validation tests/formula test 07.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "formula",
+        "description": "Natural Deduction Propositional Proof (alt or-)"
+      }
+    },
+    "content": "\n// global constants \n(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{\n\n  // ND Prop rule library\n  :{ :W :V  (∧ W V) }               \\label{∧+}\n  :{ :(∧ W V) W V }                 \\label{∧-}\n  :{ :W  (∨ W V) (∨ V W) }          \\label{∨+}\n  :{ :(∨ W V) :{:W U} :{:V U}  U }  \\label{∨-}\n  :{ :{:W V}  (⇒ W V) }             \\label{⇒+}\n  :{ :W :(⇒ W V)  V }               \\label{⇒-}\n  :{ :{:W V} :{:V W}  (⇒ W V) }     \\label{⇔+}\n  :{ :(⇔ W V)  {:W V} {:V W} }      \\label{⇔-}\n  :{ :{:W V (¬ V)}  (¬ W) }         \\label{¬+}\n  :{ :{:(¬ W) V (¬ V)}  W }         \\label{¬-}\n  \n  \n  // Theorem (alt or-)\n  { :(∨ P Q) :(¬ Q) P \\valid{} }   // once again, we get it free from the \n                                   // instantiations.  No proof below needed!\n                                   // But the proof below motivates the\n                                   // instantiations\n\n  // Altertnate or- proof (not needed but motivates the instantiations\n  {\n    { :(∨ P Q) \n      :(¬ Q)\n      { :P\n        P               \\valid{} // no instantiation needed\n      }\n      { :Q\n        { :(¬ P)\n          (¬ Q)         \\valid{} // no instantiation needed\n        }\n        P               \\valid{} // motivates ¬- instantiation\n      }\n      P                 \\valid{} // motivates or- instantiation\n    }\n}\n\n\n// instantiation\n\n( instantiation         // :{ :{ :(¬ P) Q (¬ Q)}  P }\n   (formula \"¬-\")        \n   ((W P) (V Q))                   \n   (result \"valid\")  \n)\n\n( instantiation          // :{ :(∨ P Q) :{ :P P } :{:Q P} P }\n   (formula \"∨-\")        \n   ((W P) (V Q) (U P) )                   \n   (result \"valid\")       \n)\n\n"
+  },
+  {
+    "filename": "/validation tests/formula test 08.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "formula",
+        "description": "Natural Deduction proof using the Identity Instantiation. So only one of the instantiations in the previous test should be needed."
+      }
+    },
+    "content": "\n// document\n\n// global constants \n(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{       \n\n  // ND Prop rule library\n  :{ :W :V  (∧ W V) }               \\label{∧+}\n  :{ :(∧ W V) W V }                 \\label{∧-}\n  :{ :W  (∨ W V) (∨ V W) }          \\label{∨+}\n  :{ :(∨ W V) :{:W U} :{:V U}  U }  \\label{∨-}\n  :{ :{:W V}  (⇒ W V) }             \\label{⇒+}\n  :{ :W :(⇒ W V)  V }               \\label{⇒-}\n  :{ :{:W V} :{:V W}  (⇒ W V) }     \\label{⇔+}\n  :{ :(⇔ W V)  {:W V} {:V W} }      \\label{⇔-}\n  :{ :{:W V (¬ V)}  (¬ W) }         \\label{¬+}\n  :{ :{:(¬ W) V (¬ V)}  W }         \\label{¬-}\n\n  // Theorem\n  { :(∨ W V) :(¬ V) W \\valid{} }    \n  \n  // Altertnate or- proof\n  {\n    { :(∨ W V) :(¬ V)\n      { :W\n        W               \\valid{}\n      }\n      { :V\n        { :(¬ W)\n          (¬ V)         \\valid{}\n        }\n        W               \\valid{}\n      }\n      W                 \\valid{}\n    }\n  }\n}\n\n// instantiation\n\n( instantiation         // :{ :(∨ W V) :{ :W W } :{:V W} W }\n   (formula \"∨-\")        \n   ((W W) (V V) (U W) )                   \n   (result \"valid\")       \n)"
+  },
+  {
+    "filename": "/validation tests/formula test 09.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "formula",
+        "description": "Testing Pierce."
+      }
+    },
+    "content": "\n// global constants \n(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{       \n\n  // ND Prop rule library\n  :{ :W :V  (∧ W V) }               \\label{∧+}\n  :{ :(∧ W V) W V }                 \\label{∧-}\n  :{ :W  (∨ W V) (∨ V W) }          \\label{∨+}\n  :{ :(∨ W V) :{:W U} :{:V U}  U }  \\label{∨-}\n  :{ :{:W V}  (⇒ W V) }             \\label{⇒+}\n  :{ :W :(⇒ W V)  V }               \\label{⇒-}\n  :{ :{:W V} :{:V W}  (⇒ W V) }     \\label{⇔+}\n  :{ :(⇔ W V)  {:W V} {:V W} }      \\label{⇔-}\n  :{ :{:W V (¬ V)}  (¬ W) }         \\label{¬+}\n  :{ :{:(¬ W) V (¬ V)}  W }         \\label{¬-}\n  \n  // Theorem (Pierce) \n  { :(⇒ (⇒ (⇒ P Q) P) P) \\valid{} }  \n\n  // proof\n  { \n    { :(⇒ (⇒ P Q) P)\n      { :(¬ P)\n        { :P\n          Q                 \\valid{}  // motivates ¬-\n        }              \n        (⇒ P Q)             \\valid{}  // motivates ⇒+\n        P                   \\valid{}  // motivates ⇒-\n      }\n      P                     \\valid{}  // motivates second ¬-                    \n    }\n    :(⇒ (⇒ (⇒ P Q) P) P)    \\valid{}  // motivates second ⇒+\n  }\n    \n}\n\n( instantiation      // :{ :{:(¬ Q) P (¬ P)} Q }\n   (formula \"¬-\")\n   ((W Q) (V P))\n   (result \"valid\")\n)\n\n( instantiation      // :{ :{:P Q} (⇒ P Q ) }\n   (formula \"⇒-\")\n    ((W P) (V Q) )\n   (result \"valid\")\n)\n\n( instantiation      // :{ :(⇒ P Q ) :(⇒ (⇒ P Q) P) P }\n   (formula \"⇒-\")\n    ((W (⇒ P Q)) (V Q) )\n   (result \"valid\")\n)\n\n( instantiation      // :{ :{(¬ P) P (¬ P)} P }\n   (formula \"¬-\")\n    ((W P) (V P) )\n   (result \"valid\")\n)\n\n( instantiation      // :{ :(⇒ (⇒ P Q) P) P } (⇒ (⇒ (⇒ P Q) P) P) }\n   (formula \"⇒+\")\n    ((W (⇒ (⇒ P Q) P)) (V P) )\n   (result \"valid\")\n)\n"
+  },
+  {
+    "filename": "/validation tests/formula test 10.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "formula",
+        "description": "Natural Deduction - extra instantiations don't hurt"
+      }
+    },
+    "content": "\n// document\n\n(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{       \n\n  // ND Prop rule library\n  :{ :W :V  (∧ W V) }               \\label{∧+}\n  :{ :(∧ W V) W V }                 \\label{∧-}\n  :{ :W  (∨ W V) (∨ V W) }          \\label{∨+}\n  :{ :(∨ W V) :{:W U} :{:V U}  U }  \\label{∨-}\n  :{ :{:W V}  (⇒ W V) }             \\label{⇒+}\n  :{ :W :(⇒ W V)  V }               \\label{⇒-}\n  :{ :{:W V} :{:V W}  (⇒ W V) }     \\label{⇔+}\n  :{ :(⇔ W V)  {:W V} {:V W} }      \\label{⇔-}\n  :{ :{:W V (¬ V)}  (¬ W) }         \\label{¬+}\n  :{ :{:(¬ W) V (¬ V)}  W }         \\label{¬-}\n\n  // Theorem (notice we get this for free .. we don't even need the proof)\n  (⇒ P P )    \\valid{}\n  \n  // Baby warm up proof... just for kicks\n  {\n    { :P \n      P            \\valid{} \n    }\n    (⇒ P P )       \\valid{}             \n  }\n  \n}\n\n// instantiation\n\n( instantiation         // :{ :{:P P} (⇒ P P) }\n   (formula \"⇒+\")        \n   ((W P) (V P))                   \n   (result \"valid\")       \n)\n\n( instantiation         // :{ :Z :Q (∧ Z Q) }\n   (formula \"∧+\")        \n   ((W Z) (V Q))                   \n   (result \"valid\")       \n)\n\n"
+  },
+  {
+    "filename": "/validation tests/formula test 11.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "formula",
+        "description": "ND using a Theorem as a Formula"
+      }
+    },
+    "content": "\n// global constants \n(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{\n\n  // ND Prop rule library\n  :{ :W :V  (∧ W V) }               \\label{∧+}\n  :{ :(∧ W V) W V }                 \\label{∧-}\n  :{ :W  (∨ W V) (∨ V W) }          \\label{∨+}\n  :{ :(∨ W V) :{:W U} :{:V U}  U }  \\label{∨-}\n  :{ :{:W V}  (⇒ W V) }             \\label{⇒+}\n  :{ :W :(⇒ W V)  V }               \\label{⇒-}\n  :{ :{:W V} :{:V W}  (⇒ W V) }     \\label{⇔+}\n  :{ :(⇔ W V)  {:W V} {:V W} }      \\label{⇔-}\n  :{ :{:W V (¬ V)}  (¬ W) }         \\label{¬+}\n  :{ :{:(¬ W) V (¬ V)}  W }         \\label{¬-}\n  \n  // Corollary:  (should be invalid here)\n  { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \\invalid{} } \n  \n  // Theorem (alt or-)\n  { :(∨ P Q) :(¬ Q) P \\valid{} }  \\label{alt or-}\n\n  // Altertnate or- proof (not needed but motivates the instantiations\n  {\n    { :(∨ P Q) \n      :(¬ Q)\n      { :P\n        P               \\valid{} // no instantiation needed\n      }\n      { :Q\n        { :(¬ P)\n          (¬ Q)         \\valid{} // no instantiation needed\n        }\n        P               \\valid{} // motivates ¬- instantiation\n      }\n      P                 \\valid{} // motivates or- instantiation\n    }\n\n   // Corollary:\n   { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \\valid{} } \n\n}\n\n\n// instantiations\n\n( instantiation         // :{ :{ :(¬ P) Q (¬ Q)}  P }\n   (formula \"¬-\")        \n   ((W P) (V Q))                   \n   (result \"valid\")  \n)\n\n( instantiation          // :{ :(∨ P Q) :{ :P P } :{:Q P} P }\n   (formula \"∨-\")        \n   ((W P) (V Q) (U P) )                   \n   (result \"valid\")       \n)\n\n( instantiation          // { :(∨ (⇒ A C) (∨ A B)) :(¬ (∨ A B)) (⇒ A C) }\n   (formula \"alt or-\")        \n   ((P (⇒ A C)) (Q (∨ A B)) )                   \n   (result \"valid\")       \n)\n"
+  },
+  {
+    "filename": "/validation tests/weak instantiation hint 01.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "weak instantiation hint",
+        "description": "Basic test of a weak instantiation hint."
+      }
+    },
+    "content": "\n// document\n\n(⇒ ¬ or),{                                 \n        \n  :{ :(⇒ P Q) (or (¬ P) Q) }  \\label{\"alt def of ⇒\"}                   \n     \n  // start a proof\n  {  \n     :(⇒ A B)                              \n     (or (¬ A) B)  \\ref{\"alt def of ⇒\"}  \\valid{} \n  }\n}\n"
+  },
+  {
+    "filename": "/validation tests/weak instantiation hint 02.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "weak instantiation hint",
+        "description": "A valid instantiation, but the formula is inaccessible (and meaningless)."
+      }
+    },
+    "content": "\n// document\n\n(⇒ ¬ or),{                                \n  {      \n    :{ :(⇒ P Q) (or (¬ P) Q) }     \\label{\"alt def of ⇒\"}\n  }                               \n      \n  // start a proof\n  {  \n     :(⇒ A B)                             \n     (or (¬ A) B)   \\ref{\"alt def of ⇒\"}  \\invalid{}\n  }\n}"
+  },
+  {
+    "filename": "/validation tests/weak instantiation hint 03.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "weak instantiation hint",
+        "description": "A valid instantiation, but not the one needed to justify the conclusion."
+      }
+    },
+    "content": "\n// document\n\n(⇒ ¬ or),{                                       \n  :{ :(⇒ P Q) (or (¬ P) Q) }              \\label{\"alt def of ⇒\"}\n  \n  // blatant instantiation hint\n  :{ :(⇒ A A) (or (¬ A) A) \\valid{} }     \\ref{\"alt def of ⇒\"}\n  // start a proof\n  {  \n     :(⇒ A B)                             \n     (or (¬ A) B)                         \\invalid{}\n  }\n}"
+  },
+  {
+    "filename": "/validation tests/weak instantiation hint 04.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "weak instantiation hint",
+        "description": "Citing the wrong formula."
+      }
+    },
+    "content": "\n// document\n\n(⇒ ¬ or),{                                \n  :{ :(⇒ P Q) (or (¬ P) Q) }     \\label{\"alt def of ⇒\"}\n  :{ (⇒ P P) }                   \\label{\"reflexive of ⇒\"} \n\n  // start a proof\n  {  \n     :(⇒ A B)                             \n     (or (¬ A) B)   \\ref{\"reflexive of ⇒\"} \\invalid{}\n  }\n}\n"
+  },
+  {
+    "filename": "/validation tests/weak instantiation hint 05.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "weak instantiation hint",
+        "description": "A valid instantiation, but the formula is inaccessible."
+      }
+    },
+    "content": "\n// document\n\n(⇒ ¬ or),{ \n \n  {  \n     :(⇒ A B)                             \n     (or (¬ A) B)  \\ref{\"reflexive of ⇒\"}  \\invalid{}\n  }  \n  \n  // too late\n  :{ :(⇒ P Q) (or (¬ P) Q) }     \\label{\"alt def of ⇒\"} \n}"
+  },
+  {
+    "filename": "/validation tests/weak instantiation hint 06.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "weak instantiation hint",
+        "description": "Natural Deduction Propositional Proof of (P⇒P)"
+      }
+    },
+    "content": "\n// document\n\n(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{       \n\n  // ND Prop rule library\n  :{ :W :V  (∧ W V) }               \\label{∧+}\n  :{ :(∧ W V) W V }                 \\label{∧-}\n  :{ :W  (∨ W V) (∨ V W) }          \\label{∨+}\n  :{ :(∨ W V) :{:W U} :{:V U}  U }  \\label{∨-}\n  :{ :{:W V}  (⇒ W V) }             \\label{⇒+}\n  :{ :W :(⇒ W V)  V }               \\label{⇒-}\n  :{ :{:W V} :{:V W}  (⇒ W V) }     \\label{⇔+}\n  :{ :(⇔ W V)  {:W V} {:V W} }      \\label{⇔-}\n  :{ :{:W V (¬ V)}  (¬ W) }         \\label{¬+}\n  :{ :{:(¬ W) V (¬ V)}  W }         \\label{¬-}\n\n  // Theorem  (note this will STILL validate)\n  { (⇒ P P )  \\valid{} }\n  \n  // Baby warm up proof... just for kicks\n  {\n    { :P \n      P                       \\valid{} \n    }\n    (⇒ P P )       \\ref{⇒+}   \\valid{}             \n  }\n  \n}"
+  },
+  {
+    "filename": "/validation tests/weak instantiation hint 07.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "weak instantiation hint",
+        "description": "Natural Deduction Propositional Proof (alt or-)"
+      }
+    },
+    "content": "\n// global constants \n(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{\n\n  // ND Prop rule library\n  :{ :W :V  (∧ W V) }               \\label{∧+}\n  :{ :(∧ W V) W V }                 \\label{∧-}\n  :{ :W  (∨ W V) (∨ V W) }          \\label{∨+}\n  :{ :(∨ W V) :{:W U} :{:V U}  U }  \\label{∨-}\n  :{ :{:W V}  (⇒ W V) }             \\label{⇒+}\n  :{ :W :(⇒ W V)  V }               \\label{⇒-}\n  :{ :{:W V} :{:V W}  (⇒ W V) }     \\label{⇔+}\n  :{ :(⇔ W V)  {:W V} {:V W} }      \\label{⇔-}\n  :{ :{:W V (¬ V)}  (¬ W) }         \\label{¬+}\n  :{ :{:(¬ W) V (¬ V)}  W }         \\label{¬-}\n    \n  // Theorem (alt or-)\n  { :(∨ P Q) :(¬ Q) P \\valid{} }  \n                                   \n  // Altertnate or- proof (not needed but motivates the instantiations\n  {\n    { :(∨ P Q) \n      :(¬ Q)\n      { :P\n        P                          \\valid{} // no instantiation needed\n      }\n      { :Q\n        { :(¬ P)\n          (¬ Q)                    \\valid{} // no instantiation needed\n        }\n        P               \\ref{\\¬-}  \\valid{}\n      }\n      P                 \\ref{∨-}   \\valid{}\n    }\n}\n"
+  },
+  {
+    "filename": "/validation tests/weak instantiation hint 08.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "weak instantiation hint",
+        "description": "Natural Deduction proof using the Identity Instantiation. So only one of the instantiations in the previous test should be needed."
+      }
+    },
+    "content": "\n// document\n\n// global constants \n(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{       \n\n  // ND Prop rule library\n  :{ :W :V  (∧ W V) }               \\label{∧+}\n  :{ :(∧ W V) W V }                 \\label{∧-}\n  :{ :W  (∨ W V) (∨ V W) }          \\label{∨+}\n  :{ :(∨ W V) :{:W U} :{:V U}  U }  \\label{∨-}\n  :{ :{:W V}  (⇒ W V) }             \\label{⇒+}\n  :{ :W :(⇒ W V)  V }               \\label{⇒-}\n  :{ :{:W V} :{:V W}  (⇒ W V) }     \\label{⇔+}\n  :{ :(⇔ W V)  {:W V} {:V W} }      \\label{⇔-}\n  :{ :{:W V (¬ V)}  (¬ W) }         \\label{¬+}\n  :{ :{:(¬ W) V (¬ V)}  W }         \\label{¬-}\n\n  // Theorem\n  { :(∨ W V) :(¬ V) W \\valid{} }    \n  \n  // Altertnate or- proof\n  {\n    { :(∨ W V) :(¬ V)\n      { :W\n        W               \\valid{}\n      }\n      { :V\n        { :(¬ W)\n          (¬ V)         \\valid{}\n        }\n        W               \\valid{}\n      }\n      W                 \\ref{∨-}  \\valid{}\n    }\n  }\n}\n"
+  },
+  {
+    "filename": "/validation tests/weak instantiation hint 09.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "weak instantiation hint",
+        "description": "Testing Pierce."
+      }
+    },
+    "content": "\n// global constants \n(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{       \n\n  // ND Prop rule library\n  :{ :W :V  (∧ W V) }               \\label{∧+}\n  :{ :(∧ W V) W V }                 \\label{∧-}\n  :{ :W  (∨ W V) (∨ V W) }          \\label{∨+}\n  :{ :(∨ W V) :{:W U} :{:V U}  U }  \\label{∨-}\n  :{ :{:W V}  (⇒ W V) }             \\label{⇒+}\n  :{ :W :(⇒ W V)  V }               \\label{⇒-}\n  :{ :{:W V} :{:V W}  (⇒ W V) }     \\label{⇔+}\n  :{ :(⇔ W V)  {:W V} {:V W} }      \\label{⇔-}\n  :{ :{:W V (¬ V)}  (¬ W) }         \\label{¬+}\n  :{ :{:(¬ W) V (¬ V)}  W }         \\label{¬-}\n  \n  // Theorem (Pierce) \n  { :(⇒ (⇒ (⇒ P Q) P) P) \\valid{} }  \n\n  // proof\n  { \n    { :(⇒ (⇒ P Q) P)\n      { :(¬ P)\n        { :P\n          Q                 \\ref{¬-}     \\valid{}\n        }              \n        (⇒ P Q)             \\ref{⇒+}     \\valid{}\n        P                   \\ref{⇒-}     \\valid{}\n      }\n      P                     \\ref{¬-}     \\valid{}                    \n    }\n    :(⇒ (⇒ (⇒ P Q) P) P)    \\ref{⇒+}     \\valid{}\n  }\n    \n}\n"
+  },
+  {
+    "filename": "/validation tests/weak instantiation hint 10.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "weak instantiation hint",
+        "description": "Natural Deduction - extra instantiations don't hurt"
+      }
+    },
+    "content": "\n// document\n\n(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{       \n\n  // ND Prop rule library\n  :{ :W :V  (∧ W V) }               \\label{∧+}\n  :{ :(∧ W V) W V }                 \\label{∧-}\n  :{ :W  (∨ W V) (∨ V W) }          \\label{∨+}\n  :{ :(∨ W V) :{:W U} :{:V U}  U }  \\label{∨-}\n  :{ :{:W V}  (⇒ W V) }             \\label{⇒+}\n  :{ :W :(⇒ W V)  V }               \\label{⇒-}\n  :{ :{:W V} :{:V W}  (⇒ W V) }     \\label{⇔+}\n  :{ :(⇔ W V)  {:W V} {:V W} }      \\label{⇔-}\n  :{ :{:W V (¬ V)}  (¬ W) }         \\label{¬+}\n  :{ :{:(¬ W) V (¬ V)}  W }         \\label{¬-}\n\n  // extraneous\n  { :{:Z V} (⇒ Z V) \\ref{⇒+} \\valid{} }\n  { :Z :Q (∧ Z Q)   \\ref{∧+} \\valid{} }\n\n  // Theorem \n  (⇒ P P )    \\valid{}\n  \n  // Baby warm up proof... just for kicks\n  {\n    { :P \n      P                      \\valid{} \n    }\n    (⇒ P P )       \\ref{⇒+}  \\valid{}             \n  }\n  \n}"
+  },
+  {
+    "filename": "/validation tests/weak instantiation hint 11.smackdown",
+    "metadata": {
+      "testing": {
+        "type": "validation",
+        "subtype": "weak instantiation hint",
+        "description": "ND using a Theorem as a Formula"
+      }
+    },
+    "content": "\n// global constants \n(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{\n\n  // ND Prop rule library\n  :{ :W :V  (∧ W V) }               \\label{∧+}\n  :{ :(∧ W V) W V }                 \\label{∧-}\n  :{ :W  (∨ W V) (∨ V W) }          \\label{∨+}\n  :{ :(∨ W V) :{:W U} :{:V U}  U }  \\label{∨-}\n  :{ :{:W V}  (⇒ W V) }             \\label{⇒+}\n  :{ :W :(⇒ W V)  V }               \\label{⇒-}\n  :{ :{:W V} :{:V W}  (⇒ W V) }     \\label{⇔+}\n  :{ :(⇔ W V)  {:W V} {:V W} }      \\label{⇔-}\n  :{ :{:W V (¬ V)}  (¬ W) }         \\label{¬+}\n  :{ :{:(¬ W) V (¬ V)}  W }         \\label{¬-}\n  \n  // Corollary:  (should be invalid here because the instantiation\n  //              follows the Theorem)\n  { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \\invalid{} } \n  \n  // Theorem (alt or-)\n  { :(∨ P Q) :(¬ Q) P \\valid{} }  \\label{alt or-}\n\n  // Alternate or- proof\n  {\n    { :(∨ P Q) \n      :(¬ Q)\n      { :P\n        P               \\valid{} // no instantiation needed\n      }\n      { :Q\n        { :(¬ P)\n          (¬ Q)         \\valid{} // no instantiation needed\n        }\n        P               \\ref{\\¬-}   \\valid{} \n      }\n      P                 \\ref{∨-}    \\valid{} \n    } \n\n   // Corollary:\n   { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \\ref{alt or-} \\valid{} } \n\n}\n"
   }
 ]
 

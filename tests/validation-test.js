@@ -2,6 +2,7 @@
 // Import what we're testing
 import Validation from '../src/validation.js'
 import { } from '../src/validation/float-arithmetic.js'
+import Algebrite from '../dependencies/algebrite.js'
 
 // Import other classes we need to do the testing
 import { LogicConcept } from '../src/logic-concept.js'
@@ -30,6 +31,7 @@ describe( 'Validation', () => {
         expect( test ).to.include( 'floating point arithmetic' )
         expect( test ).to.include( 'classical propositional logic' )
         expect( test ).to.include( 'intuitionistic propositional logic' )
+        expect( test ).to.include( 'CAS' )
         // some tool is the default and it's on the list
         expect( Validation.options ).to.be.ok
         expect( test ).to.include( Validation.options().tool )
@@ -203,6 +205,54 @@ describe( 'Validation', () => {
         expect( result.reason ).to.equal( 'Invalid expression structure' )
         expect( result.message ).to.match( /Wrong number of arguments/ )
         expect( result.stack ).not.to.be.undefined
+    } )
+
+    it( 'Should do simple CAS validation', () => {
+        Validation.setOptions( 'tool', 'CAS' )
+        // Yes, 2x+5x=10x-3x
+        let test = LogicConcept.fromPutdown( `
+        {
+            (= (+ (* 2 x) (* 5 x)) (- (* 10 x) (* 3 x)) )
+        }
+        ` )[0]
+        expect( Validation.result( test ) ).to.be.undefined
+        expect( Validation.result( test.child( 0 ) ) ).to.be.undefined
+        Validation.validate( test.child(0) )
+        expect( Validation.result( test ) ).to.be.undefined
+        let result = Validation.result( test.child(0) )
+        expect( result ).to.be.instanceof( Object )
+        expect( result.result ).to.equal( 'valid' )
+        expect( result.reason ).to.equal( 'CAS' )
+        expect( result.value ).to.equal( '1' )
+        // No, 5/(2+x) is not the same as (2+x)/5 (except for x=3 and x=-7 :))
+        test = LogicConcept.fromPutdown( `
+        {
+            (= (/ 5 (+ 2 x)) (/ (+ 2 x) 5))
+        }
+        ` )[0]
+        expect( Validation.result( test ) ).to.be.undefined
+        expect( Validation.result( test.child(0) ) ).to.be.undefined
+        Validation.validate( test )
+        expect( Validation.result( test ) ).to.be.undefined
+        result = Validation.result( test.child(0) )
+        expect( result ).to.be.instanceof( Object )
+        expect( result.result ).to.equal( 'invalid' )
+        expect( result.reason ).to.equal( 'CAS' )
+        expect( result.value ).to.equal( 'check(5/(x+2)=(x+2)*1/5)' )
+        // Invalid structures are also invalid
+        test = LogicConcept.fromPutdown( `
+        {
+            (= (/ 1 2 x) 6)
+        }
+        ` )[0]
+        expect( Validation.result( test ) ).to.be.undefined
+        expect( Validation.result( test.child(0) ) ).to.be.undefined
+        Validation.validate( test )
+        result = Validation.result( test.child(0) )
+        expect( result ).to.be.instanceof( Object )
+        expect( result.result ).to.equal( 'invalid' )
+        expect( result.reason ).to.equal( 'CAS' )
+        expect( result.value ).to.equal( '0' )
     } )
 
     it( 'Should do simple propositional validation', () => {

@@ -37,9 +37,19 @@ import {
     validate
 } from './validation/engine.js'
 
+
 // Import and install built-in validation tools:
+
+// JS arithmetic
 import { arithmeticValidator } from './validation/float-arithmetic.js'
 installTool( 'floating point arithmetic', arithmeticValidator )
+
+// CAS
+import { CASValidator } from './validation/algebrite-cas.js'
+installTool( 'CAS', CASValidator )
+
+
+// Propositional Logic
 import {
     classicalPropositionalValidator, intuitionisticPropositionalValidator
 } from './validation/reduction.js'
