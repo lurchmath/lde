@@ -2,20 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Lurch Deductive Engine: ExpressionFunctions</title>
+    <title>Lurch Deductive Engine: formula.js</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
     <link type="text/css" rel="stylesheet" href="styles/styles.css">
     
-
-    <script>
-        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
-    </script>
-    <script id="MathJax-script" async
-        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
-    </script>
-<style>:root { --nav-width: 320px }</style></head>
+</head>
 <body>
 
 <header class="layout-header">
@@ -31,1550 +24,218 @@
 </header>
 
 
-<main class="layout-main ">
+<main class="layout-main  layout-content--source">
   <div class="container">
-    <p class="page-kind">Module</p>
-    <h1 class="page-title">ExpressionFunctions</h1>
+    <p class="page-kind">source</p>
+    <h1 class="page-title">formula.js</h1>
     
 
 
 
+    
 
 <section>
-
-
-<header class="not-class">
-
-
-    
-        
-            
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-
-
-
-    
-        
-            <div class="description"><p>Defines functions for working with expression functions and their
-applications</p>
-<p>Let $\mathcal{L}$ be the set of expressions in a language.  Here, we will
-think of $\mathcal{L}$ as all possible <a href="Expression.html">Expressions</a>, in
-the technical sense of that word (not just saying &quot;expression&quot; informally,
-but now referring to instances of the <a href="Expression.html">Expressions</a> class).</p>
-<p>An <em>Expression Function</em> (or EF for short) is a function whose signature is
-$f:\mathcal{L}^n\to\mathcal{L}$ for some $n\in\mathbb{N}$.  We need a way to
-represent Expression Functions as <a href="LogicConcept.html">LogicConcepts</a>.
-This module provides functions that let us do so.</p>
-<p>We will write an Expression Function using standard $\lambda$ notation, as in
-$\lambda v_1,\ldots,v_n.B$, where each $v_i$ is a parameter to the function
-(represented using a <a href="Symbol.html">Symbol</a> with the name <code>v_1</code>, <code>v_2</code>, etc.))
-and the body $B$ is any <a href="Expression.html">Expression</a> that may contain free
-instances of the $v_i$ that can be replaced with other
-<a href="Expression.html">Expressions</a> when the function is applied to arguments.
-For example, if $f=\lambda v_1,v_2.v_1+\cos(v_2+1)$, then we could apply $f$
-to the <a href="Expression.html">Expressions</a> $3$ and $k$ to obtain the new
-<a href="Expression.html">Expression</a> $3+\cos(k+1)$.</p>
-<p>The above paragraph uses ordinary mathematical notation, but we will need to
-be able to write expression functions in
-<a href="LogicConcept.html#.fromPutdown">putdown</a> notation so that we can express
-them as <a href="LogicConcept.html">LogicConcepts</a>.  We define a constant in this
-module to be <code>&quot;LDE lambda&quot;</code> so that we can express the $f$ from above as
-<code>(&quot;LDE lambda&quot; v_1 , v_2 , (+ v_1 (cos (+ v_2 1))))</code>.
-That constant may change in later versions of the LDE, so clients should not
-hard-code that name into their code, but instead use
-<a href="module-ExpressionFunctions.html#.newEF">newEF()</a> and
-<a href="module-ExpressionFunctions.html#.isAnEF">isAnEF()</a>.</p>
-<p>You can also check the number of arguments of an expression function with
-<a href="module-ExpressionFunctions.html#.arityOfEF">arityOfEF()</a> and apply them with
-<a href="module-ExpressionFunctions.html#.applyEF">applyEF()</a>.  And you can create
-simple types of expression functions with
-<a href="module-ExpressionFunctions.html#.constantEF">constantEF()</a> and
-<a href="module-ExpressionFunctions.html#.projectionEF">projectionEF()</a>.</p>
-<p>An <em>Expression Function Application</em> (or EFA for short) is an
-<a href="Expression.html">Expression</a> expressing the idea that we are applying some
-Expression Function to a list of arguments.  For example, the application
-above was $f(3,k)$, but we cannot write this in
-<a href="LogicConcept.html#.fromPutdown">putdown notation</a> as <code>(f 3 k)</code> because that
-would be indistinguishable from normal function application.  Thus we need a
-new symbol.  We define a constant in this module to be <code>&quot;LDE EFA&quot;</code> so that we
-can express $f(3,k)$ as <code>(&quot;LDE EFA&quot; f 3 k)</code>.  That constant may change in
-later versions of the LDE, so clients should not hard-code that name into
-their code, but instead use <a href="module-ExpressionFunctions.html#.newEF">newEFA()</a>
-and <a href="module-ExpressionFunctions.html#.isAnEF">isAnEFA()</a>.  You can also check
-whether an EFA is evaluatable with
-<a href="module-ExpressionFunctions.html#.canBetaReduce">canBetaReduce()</a> and evaluate
-it (or any possible $\beta$-reduction inside it) with
-<a href="module-ExpressionFunctions.html#.betaReduce">betaReduce()</a> and
-<a href="module-ExpressionFunctions.html#.fullBetaReduce">fullBetaReduce()</a>.</p>
-<p>Since we have functions in this module for $\beta$-reduction, we also have
-two related to $\alpha$-equivalence.  You can check if two expressions are
-$\alpha$-equivalent with
-<a href="module-ExpressionFunctions.html#.alphaEquivalent">alphaEquivalent()</a> and you
-can convert a binding to an $\alpha$-equivalent version of itself by renaming
-its variables, using
-<a href="module-ExpressionFunctions.html#.alphaRenamed">alphaRenamed()</a>.</p></div>
-        
-
-        
-            
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="matching_expression-functions.js.html">matching/expression-functions.js</a><a href="matching_expression-functions.js.html#source.2">, line 2</a>
-        </li>
-    </ul>
-
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-     
-
-    
-
-    
-
-
-    
-        <h3 class="subtitle">Members</h3>
-
-        
-            
-
-<article class="member">
-    <div class="method-type">
-        <span class="method-type-signature is-static">static</span><span class="method-type-signature is-constant">constant</span>
-    </div>
-<h4 class="member-name" id=".alphaEquivalent">alphaEquivalent<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Two expressions are $\alpha$-equivalent if renaming the bound variables in
-one makes it exactly equal to the other.  For example, $\forall x,R(x,2)$ is
-$\alpha$-equivalent to $\forall y,R(y,2)$, but not to $\forall y,R(y,y)$.</p>
-</div>
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-
-
-
-
-    <h4>Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="matching_expression-functions.js.html">matching/expression-functions.js</a><a href="matching_expression-functions.js.html#source.519">, line 519</a>
-        </li>
-    </ul>
-
-
-</article>
-        
-            
-
-<article class="member">
-    <div class="method-type">
-        <span class="method-type-signature is-static">static</span><span class="method-type-signature is-constant">constant</span>
-    </div>
-<h4 class="member-name" id=".alphaRenamed">alphaRenamed<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Perform $\alpha$-renaming on a <a href="MathConcept.html#binds">binding</a>, producing a
-new <a href="MathConcept.html">MathConcept</a> that is
-<a href="module-ExpressionFunctions.html#.alphaEquivalent">$\alpha$-equivalent</a> to
-the original, but with different names for the bound variables.</p>
-<p>If you pass an argument to the <code>binding</code> parameter that does not pass the
-<a href="MathConcept.html#binds">binds()</a> test, the result of this function is
-undefined.</p>
-</div>
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-
-
-
-
-    <h4>Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="matching_expression-functions.js.html">matching/expression-functions.js</a><a href="matching_expression-functions.js.html#source.499">, line 499</a>
-        </li>
-    </ul>
-
-
-</article>
-        
-            
-
-<article class="member">
-    <div class="method-type">
-        <span class="method-type-signature is-static">static</span><span class="method-type-signature is-constant">constant</span>
-    </div>
-<h4 class="member-name" id=".applicationEF">applicationEF<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Construct a function whose body is an application of the form shown below.
-The caller provides the arity of the function as well as a list of symbols to
-be used in constructing the function's body, as shown below.  Assume the
-given arity is $n$ and the list of symbols given is $F_1,\ldots,F_m$.
-Further assume that the symbol used to indicate an EFA (as defined
-<a href="module-ExpressionFunctions.html#.isAnEFA">here</a>) is $A$.  Then the
-expression function created will be
-$$ \lambda v_1,\ldots,v_n.((A~F_1~v_1~\cdots~v_n)~\cdots~(A~F_m~v_1~\cdots~v_n)). $$
-This particular form is useful in the matching algorithm in the
-<a href="Problem.html">Problem</a> class.  The bound variables will be chosen so that
-none of them is equal to any of the symbols $F_1,\ldots,F_m$.</p>
-</div>
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-
-
-
-
-    <h4>Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="matching_expression-functions.js.html">matching/expression-functions.js</a><a href="matching_expression-functions.js.html#source.303">, line 303</a>
-        </li>
-    </ul>
-
-
-</article>
-        
-            
-
-<article class="member">
-    <div class="method-type">
-        <span class="method-type-signature is-static">static</span><span class="method-type-signature is-constant">constant</span>
-    </div>
-<h4 class="member-name" id=".applyEF">applyEF<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Applies <code>ef</code> as an expression function to a list of arguments.  If <code>ef</code> is
-not an expression function (as per
-<a href="module-ExpressionFunctions.html#.isAnEF">isAnEF()</a>) or the list of arguments
-is the wrong length, an error is thrown.  Otherwise, a copy of the body of
-<code>ef</code> is returned with all parameters substituted with arguments.</p>
-<p>For example, if <code>ef</code> is an <a href="Expression.html">Expression</a> representing
-$\lambda v_1,v_2.\sqrt{v_1^2+v_2^2}$ and <code>A</code> another representing $x-1$ and
-<code>B</code> another representing $y+1$, then <code>applyEF(ef,A,B)</code> would be a newly
-constructed <a href="Expression.html">Expression</a> instance (sharing no subtrees with
-any of those already mentioned) representing $\sqrt{(x-1)^2+(y+1)^2}$.</p>
-<p>No check is made regarding whether this might cause variable capture, and no
-effort is made to do $\alpha$-substitution to avoid variable capture.  Thus
-this routine is of limited value; it should be used only in situations where
-the caller knows that no variable capture will take place.  For example, if
-<code>ef</code> is $\lambda v.\sum_{i=1}^n i^v$ then <code>applyEF(ef,i)</code> is
-$\sum_{i=1}^n i^i$.  No error is thrown; the capture simply happens.</p>
-</div>
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h4 class="method-heading">See</h4>
-        <ul>
-            
-                <li><a href="module-ExpressionFunctions.html#.isAnEF">isAnEF()</a></li>
-            
-                <li><a href="module-ExpressionFunctions.html#.arityOfEF">arityOfEF()</a></li>
-            
-        </ul>
-    
-
-    
-</div>
-
-
-
-
-
-
-
-    <h4>Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="matching_expression-functions.js.html">matching/expression-functions.js</a><a href="matching_expression-functions.js.html#source.215">, line 215</a>
-        </li>
-    </ul>
-
-
-</article>
-        
-            
-
-<article class="member">
-    <div class="method-type">
-        <span class="method-type-signature is-static">static</span><span class="method-type-signature is-constant">constant</span>
-    </div>
-<h4 class="member-name" id=".arityOfEF">arityOfEF<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Compute the arity of a given expression function.  If <code>ef</code> is not an
-expression function (as judged by
-<a href="module-ExpressionFunctions.html#.isAnEF">isAnEF()</a>) then an error is thrown.
-Otherwise, a positive integer is returned representing the arity of the given
-function, 1 for a unary function, 2 for a binary function, etc.</p>
-</div>
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h4 class="method-heading">See</h4>
-        <ul>
-            
-                <li><a href="module-ExpressionFunctions.html#.isAnEF">isAnEF()</a></li>
-            
-                <li><a href="module-ExpressionFunctions.html#.applyEF">applyEF()</a></li>
-            
-                <li><a href="module-ExpressionFunctions.html#.parametersOfEF">parametersOfEF()</a></li>
-            
-        </ul>
-    
-
-    
-</div>
-
-
-
-
-
-
-
-    <h4>Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="matching_expression-functions.js.html">matching/expression-functions.js</a><a href="matching_expression-functions.js.html#source.137">, line 137</a>
-        </li>
-    </ul>
-
-
-</article>
-        
-            
-
-<article class="member">
-    <div class="method-type">
-        <span class="method-type-signature is-static">static</span><span class="method-type-signature is-constant">constant</span>
-    </div>
-<h4 class="member-name" id=".betaReduce">betaReduce<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>If <a href="module-ExpressionFunctions.html#.canBetaReduce">canBetaReduce()</a> returns
-true, we may want to act upon that and perform the $\beta$-reduction.  This
-function does so.  It requires an argument that passes the
-<a href="module-ExpressionFunctions.html#.canBetaReduce">canBetaReduce()</a> test, and it
-will perform exactly one step of $\beta$-reduction.  That is, it will
-substitute the arguments of the expression function application into (a copy
-of) the body of the expression function and return the result.</p>
-<p>Note that the process of $\beta$-reduction is usually considered to be the
-repetition of this process in all possible ways until it termintes (if it
-does).  That process is implemented in the function
-<a href="module-ExpressionFunctions.html#.fullBetaReduce">fullBetaReduce()</a>.  This
-function does just one step.</p>
-</div>
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h4 class="method-heading">See</h4>
-        <ul>
-            
-                <li><a href="module-ExpressionFunctions.html#.canBetaReduce">canBetaReduce()</a></li>
-            
-                <li><a href="module-ExpressionFunctions.html#.fullBetaReduce">fullBetaReduce()</a></li>
-            
-        </ul>
-    
-
-    
-</div>
-
-
-
-
-
-
-
-    <h4>Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="matching_expression-functions.js.html">matching/expression-functions.js</a><a href="matching_expression-functions.js.html#source.437">, line 437</a>
-        </li>
-    </ul>
-
-
-</article>
-        
-            
-
-<article class="member">
-    <div class="method-type">
-        <span class="method-type-signature is-static">static</span><span class="method-type-signature is-constant">constant</span>
-    </div>
-<h4 class="member-name" id=".bodyOfEF">bodyOfEF<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Get the body of a given expression function.  If <code>ef</code> is not an expression
-function (as judged by
-<a href="module-ExpressionFunctions.html#.isAnEF">isAnEF()</a>) then an error is thrown.
-Otherwise, its function body returned, which is one of its descendants.</p>
-</div>
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h4 class="method-heading">See</h4>
-        <ul>
-            
-                <li><a href="module-ExpressionFunctions.html#.isAnEF">isAnEF()</a></li>
-            
-                <li><a href="module-ExpressionFunctions.html#.applyEF">applyEF()</a></li>
-            
-                <li><a href="module-ExpressionFunctions.html#.arityOfEF">arityOfEF()</a></li>
-            
-                <li><a href="module-ExpressionFunctions.html#.parametersOfEF">parametersOfEF()</a></li>
-            
-        </ul>
-    
-
-    
-</div>
-
-
-
-
-
-
-
-    <h4>Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="matching_expression-functions.js.html">matching/expression-functions.js</a><a href="matching_expression-functions.js.html#source.179">, line 179</a>
-        </li>
-    </ul>
-
-
-</article>
-        
-            
-
-<article class="member">
-    <div class="method-type">
-        <span class="method-type-signature is-static">static</span><span class="method-type-signature is-constant">constant</span>
-    </div>
-<h4 class="member-name" id=".canBetaReduce">canBetaReduce<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>An expression can be $\beta$-reduced if it is an expression function
-application and the expression function in question is not a metavariable,
-but an actual expression function.  To help distinguish these two
-possibilities, consider:</p>
-<ul>
-<li>If <code>P</code> is a <a href="module-Metavariables.html#.metavariable">metavariable</a> and <code>x</code>
-is a <a href="Symbol.html">Symbol</a>, we could create an expression function
-application with, for example, <code>newEFA(P,new Symbol(5))</code>, but we could not
-evaluate it, because we do not know the meaning of <code>P</code>.</li>
-<li>If <code>f</code> is an expression function, that is, it would pass the test
-<code>isAnEF(f)</code> defined <a href="module-ExpressionFunctions.html#.isAnEF">here</a>, and
-<code>x</code> is as above, then (assuming the arity of <code>f</code> is 1) the expression
-<code>newEFA(f,new Symbol(5))</code> can be evaluated, because <code>f</code> has a body and we
-can substitute 5 into its body in the appropriate places.</li>
-</ul>
-<p>Thus we need a function to distinguish these two cases.  Both will pass the
-test <a href="module-ExpressionFunctions.html#.isAnEFA">isAnEFA()</a>, but only one can
-be applied.  Such application is called $\beta$-reduction, so we have this
-function <code>canBetaReduce()</code> that can detect when we are in the second case,
-above, rather than the first.  That is, does the expression being applied
-pass the <a href="module-ExpressionFunctions.html#.isAnEF">isAnEF()</a> test, or is it
-just a metavariable?  This function returns true only in the former case,
-plus it also verifies that the correct number of arguments are present; if
-not, it returns false for that reason.</p>
-<p>Examples:</p>
-<ul>
-<li><code>canBetaReduce(newEFA(metavar,arg))</code> returns false</li>
-<li><code>canBetaReduce(newEFA(newEF(symbol,body),arg))</code> returns true</li>
-<li><code>canBetaReduce(newEFA(newEF(symbol,body),too,many,args))</code> returns false</li>
-</ul>
-</div>
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-
-
-
-
-    <h4>Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="matching_expression-functions.js.html">matching/expression-functions.js</a><a href="matching_expression-functions.js.html#source.409">, line 409</a>
-        </li>
-    </ul>
-
-
-</article>
-        
-            
-
-<article class="member">
-    <div class="method-type">
-        <span class="method-type-signature is-static">static</span><span class="method-type-signature is-constant">constant</span>
-    </div>
-<h4 class="member-name" id=".constantEF">constantEF<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Create an expression function (as defined
-<a href="module-ExpressionFunctions.html#.isAnEF">here</a>) that is a constant function
-(that is, it always returns the same expression).  That is, the function can
-be expressed as $\lambda v_1,\ldots,v_n. E$ for some expression $E$ not
-containing any of the $v_i$.  The variables will have names chosen so that
-none of them appears free in $E$.</p>
-</div>
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h4 class="method-heading">See</h4>
-        <ul>
-            
-                <li><a href="module-ExpressionFunctions.html#.isAnEF">isAnEF()</a></li>
-            
-                <li><a href="module-ExpressionFunctions.html#.newEF">newEF()</a></li>
-            
-                <li><a href="module-ExpressionFunctions.html#.projectionEF">projectionEF()</a></li>
-            
-        </ul>
-    
-
-    
-</div>
-
-
-
-
-
-
-
-    <h4>Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="matching_expression-functions.js.html">matching/expression-functions.js</a><a href="matching_expression-functions.js.html#source.257">, line 257</a>
-        </li>
-    </ul>
-
-
-</article>
-        
-            
-
-<article class="member">
-    <div class="method-type">
-        <span class="method-type-signature is-static">static</span><span class="method-type-signature is-constant">constant</span>
-    </div>
-<h4 class="member-name" id=".fullBetaReduce">fullBetaReduce<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Make a copy of the given <a href="Expression.html">Expression</a>, then find inside it
-all subexpressions passing the test in
-<a href="module-ExpressionFunctions.html#.canBetaReduce">canBetaReduce()</a>, and apply
-each such $\beta$-reduction using
-<a href="module-ExpressionFunctions.html#.betaReduce">betaReduce()</a>.  Continue this
-process until there are no more opportunities for $\beta$-reduction.</p>
-<p>This process is, in general, not guaranteed to terminate.  Clients should
-take care to call it only in situations where it is guaranteed to terminate.
-For example, the following expression function application will
-$\beta$-reduce to itself, and thus enter an infinite loop.
-$$ ((\lambda v. (v~v))~(\lambda v. (v~v))) $$
-In the LDE, we are unlikely to permit users to write input that requires us
-to apply expression functions to other expression functions, thus preventing
-cases like this one.</p>
-</div>
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h4 class="method-heading">See</h4>
-        <ul>
-            
-                <li><a href="module-ExpressionFunctions.html#.canBetaReduce">canBetaReduce()</a></li>
-            
-                <li><a href="module-ExpressionFunctions.html#.betaReduce">betaReduce()</a></li>
-            
-        </ul>
-    
-
-    
-</div>
-
-
-
-
-
-
-
-    <h4>Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="matching_expression-functions.js.html">matching/expression-functions.js</a><a href="matching_expression-functions.js.html#source.466">, line 466</a>
-        </li>
-    </ul>
-
-
-</article>
-        
-            
-
-<article class="member">
-    <div class="method-type">
-        <span class="method-type-signature is-static">static</span><span class="method-type-signature is-constant">constant</span>
-    </div>
-<h4 class="member-name" id=".isAnEF">isAnEF<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Test whether the given <a href="Expression.html">Expression</a> encodes an Expression
-Function, as defined by the encoding documented at the top of this file, and
-as produced by the function <a href="module-ExpressionFunctions.html#.newEF">newEF()</a>.</p>
-</div>
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h4 class="method-heading">See</h4>
-        <ul>
-            
-                <li><a href="module-ExpressionFunctions.html#.newEF">newEF()</a></li>
-            
-        </ul>
-    
-
-    
-</div>
-
-
-
-
-
-
-
-    <h4>Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="matching_expression-functions.js.html">matching/expression-functions.js</a><a href="matching_expression-functions.js.html#source.118">, line 118</a>
-        </li>
-    </ul>
-
-
-</article>
-        
-            
-
-<article class="member">
-    <div class="method-type">
-        <span class="method-type-signature is-static">static</span><span class="method-type-signature is-constant">constant</span>
-    </div>
-<h4 class="member-name" id=".isAnEFA">isAnEFA<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Test whether the given expression encodes an Expression Function Application,
-as defined by the encoding documented at the top of this file, and as
-produced by the function <a href="module-ExpressionFunctions.html#.newEFA">newEFA()</a>.</p>
-</div>
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h4 class="method-heading">See</h4>
-        <ul>
-            
-                <li><a href="module-ExpressionFunctions.html#.newEFA">newEFA()</a></li>
-            
-        </ul>
-    
-
-    
-</div>
-
-
-
-
-
-
-
-    <h4>Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="matching_expression-functions.js.html">matching/expression-functions.js</a><a href="matching_expression-functions.js.html#source.369">, line 369</a>
-        </li>
-    </ul>
-
-
-</article>
-        
-            
-
-<article class="member">
-    <div class="method-type">
-        <span class="method-type-signature is-static">static</span><span class="method-type-signature is-constant">constant</span>
-    </div>
-<h4 class="member-name" id=".newEF">newEF<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Creates a new expression function, encoded as a
-<a href="LogicConcept.html">LogicConcept</a>, as described at the top of this file.
-The arguments are not copied; if you do not wish them removed from their
-existing contexts, pass copies to this function.</p>
-<p>For example, if <code>x</code> and <code>y</code> are <a href="Symbol.html">Symbol</a> instances with the
-names &quot;x&quot; and &quot;y&quot; and <code>B</code> is an Application, such as <code>(+ x y)</code>, then
-<code>newEF(x,y,B)</code> will be the <a href="Expression.html">Expression</a>
-<code>(&quot;LDE lambda&quot; (x y , (+ x y)))</code>.</p>
-</div>
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h4 class="method-heading">See</h4>
-        <ul>
-            
-                <li><a href="module-ExpressionFunctions.html#.isAnEF">isAnEF()</a></li>
-            
-        </ul>
-    
-
-    
-</div>
-
-
-
-
-
-
-
-    <h4>Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="matching_expression-functions.js.html">matching/expression-functions.js</a><a href="matching_expression-functions.js.html#source.103">, line 103</a>
-        </li>
-    </ul>
-
-
-</article>
-        
-            
-
-<article class="member">
-    <div class="method-type">
-        <span class="method-type-signature is-static">static</span><span class="method-type-signature is-constant">constant</span>
-    </div>
-<h4 class="member-name" id=".newEFA">newEFA<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Creates a new Expression Function Application, encoded as an
-<a href="Expression.html">Expression</a>, as described at the top of this file.
-The arguments are not copied; if you do not wish them removed from their
-existing contexts, pass copies to this function.</p>
-<p>For example, if <code>F</code> is an <a href="Expression.html">Expression</a> representing an
-Expression Function (or a metavariable that might later be instantiated as
-one) and <code>x</code> and <code>y</code> are any other <a href="Expression.html">Expressions</a> (let's just
-say the symbols &quot;x&quot; and &quot;y&quot; for this example) then <code>newEFA(F,x,y)</code> will be
-the <a href="Expression.html">Expression</a> <code>(&quot;LDE EFA&quot; F x y)</code>.</p>
-<p>If the first argument is a metavariable then there must be one or more
-additional arguments of any type.  If the first argument is an Expression
-Function (as per <a href="module-ExpressionFunctions.html#.isAnEF">isAnEF()</a>) then there must
-be a number of arguments following it that are equal to its arity.  If these
-rules are not followed, an error is thrown.</p>
-</div>
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h4 class="method-heading">See</h4>
-        <ul>
-            
-                <li><a href="module-ExpressionFunctions.html#.isAnEFA">isAnEFA()</a></li>
-            
-        </ul>
-    
-
-    
-</div>
-
-
-
-
-
-
-
-    <h4>Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="matching_expression-functions.js.html">matching/expression-functions.js</a><a href="matching_expression-functions.js.html#source.348">, line 348</a>
-        </li>
-    </ul>
-
-
-</article>
-        
-            
-
-<article class="member">
-    <div class="method-type">
-        <span class="method-type-signature is-static">static</span><span class="method-type-signature is-constant">constant</span>
-    </div>
-<h4 class="member-name" id=".parametersOfEF">parametersOfEF<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Get the list of parameters for a given expression function.  If <code>ef</code> is not
-an expression function (as judged by
-<a href="module-ExpressionFunctions.html#.isAnEF">isAnEF()</a>) then an error is thrown.
-Otherwise, an array of its parameters is returned, the exact descendants that
-are <a href="Symbol.html">Symbol</a> instances.</p>
-</div>
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h4 class="method-heading">See</h4>
-        <ul>
-            
-                <li><a href="module-ExpressionFunctions.html#.isAnEF">isAnEF()</a></li>
-            
-                <li><a href="module-ExpressionFunctions.html#.applyEF">applyEF()</a></li>
-            
-                <li><a href="module-ExpressionFunctions.html#.arityOfEF">arityOfEF()</a></li>
-            
-                <li><a href="module-ExpressionFunctions.html#.bodyOfEF">bodyOfEF()</a></li>
-            
-        </ul>
-    
-
-    
-</div>
-
-
-
-
-
-
-
-    <h4>Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="matching_expression-functions.js.html">matching/expression-functions.js</a><a href="matching_expression-functions.js.html#source.159">, line 159</a>
-        </li>
-    </ul>
-
-
-</article>
-        
-            
-
-<article class="member">
-    <div class="method-type">
-        <span class="method-type-signature is-static">static</span><span class="method-type-signature is-constant">constant</span>
-    </div>
-<h4 class="member-name" id=".projectionEF">projectionEF<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Create an expression function (as defined
-<a href="module-ExpressionFunctions.html#.isAnEF">here</a>) that returns one of its
-arguments.  That is, the function can be expressed as
-$\lambda v_1,\ldots,v_n. v_i$ for some $i$ between 1 and $n$.</p>
-</div>
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h4 class="method-heading">See</h4>
-        <ul>
-            
-                <li><a href="module-ExpressionFunctions.html#.isAnEF">isAnEF()</a></li>
-            
-                <li><a href="module-ExpressionFunctions.html#.newEF">newEF()</a></li>
-            
-                <li><a href="module-ExpressionFunctions.html#.constantEF">constantEF()</a></li>
-            
-        </ul>
-    
-
-    
-</div>
-
-
-
-
-
-
-
-    <h4>Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="matching_expression-functions.js.html">matching/expression-functions.js</a><a href="matching_expression-functions.js.html#source.281">, line 281</a>
-        </li>
-    </ul>
-
-
-</article>
-        
-    
-
-    
-
-    
-
-    
-</article>
-
+    <article>
+        <pre id="source" class="source-page line-numbers"><code class="language-js">
+/**
+ * A formula is a {@link LogicConcept LogicConcept} that includes symbols
+ * intended to be used for substitution, that is, what
+ * {@link module:Matching the Matching module} calls
+ * {@link module:Matching.metavariable metavariables}.  This namespace
+ * provides functions for dealing with formulas, including
+ * {@link Formula.from converting} a {@link LogicConcept LogicConcept} into a
+ * formula, computing the {@link Formula.domain domain} of a formula, and
+ * {@link Formula.instantiate instantiating} a formula.
+ * 
+ * Import this namespace with code such as
+ * `import Formula from './formula.js'` and then make calls such as
+ * `Formula.domain( myLC )`.
+ * 
+ * @namespace Formula
+ */
+
+import { LogicConcept } from './logic-concept.js'
+import { BindingEnvironment } from './binding-environment.js'
+import { BindingExpression } from './binding-expression.js'
+import { Declaration } from './declaration.js'
+import { Expression } from './expression.js'
+import { Symbol as LurchSymbol } from './symbol.js'
+import Matching from './matching.js'
+
+/**
+ * A {@link LogicConcept LogicConcept} can be converted into a formula by
+ * replacing any subset of its {@link Symbol Symbols} with metavariables.
+ * Recall that a metavariable can be any symbol, but with
+ * {@link module:Matching.metavariable a specific attribute} set to "true."
+ * 
+ * Which {@link Symbol Symbols} should be converted into metavariables?  Any
+ * one that is not in the scope of a {@link Declaration Declaration} of that
+ * same {@link Symbol Symbol}.  For example, if we consider the
+ * {@link LogicConcept LogicConcept} indicated by the
+ * {@link LogicConcept.fromPutdown putdown notation} `{ :(= a b) (= b a) }`
+ * and we assume it is in the scope of a {@link Declaration Declaration} of
+ * the `=` {@link Symbol Symbol}, but not of the `a` or `b` {@link Symbol
+ * Symbols}.  Then converting `{ :(= a b) (= b a) }` to a formula would
+ * produce a copy in which each instance of `a` and `b` have had their
+ * metavariable attribute set to "true" (via a call to the
+ * {@link LogicConcept#makeIntoA makeIntoA()} member).
+ * 
+ * @param {LogicConcept} LC - the {@link LogicConcept LogicConcept} to convert
+ *   into a formula
+ * @returns {LogicConcept} a structural copy of `LC`, except with the relevant
+ *   {@link Symbol Symbol} atoms converted into
+ *   {@link module:Matching.metavariable metavariables}
+ * @memberof Formula
+ * @alias Formula.from
+ */
+const from = LC => {
+    // what symbol names were already declared?
+    const declared = new Set( LC.accessibles().filter(
+        a => a instanceof Declaration
+    ).map( d => d.symbols() ).flat().map( s => s.text() ) )
+    // make a copy and change all of its undeclared symbols into metavariables
+    const result = LC.copy()
+    result.descendantsSatisfying( d => d instanceof LurchSymbol )
+    .forEach( s => {
+        if ( !declared.has( s.text() ) ) s.makeIntoA( Matching.metavariable )
+    } )
+    // return it
+    return result
+}
+
+/**
+ * Once a {@link LogicConcept LogicConcept} has been {@link Formula.from
+ * converted into a formula}, it will have zero or more metavariables.  This
+ * function returns the set of names of those metavariables.  If the formula
+ * has no metavariables, or if a non-formula {@link LogicConcept LogicConcept}
+ * was passed as input, this function will return the empty set.
+ * 
+ * @param {LogicConcept} formula - the {@link LogicConcept LogicConcept} to
+ *   view as a formula, and whose metavariables should be investigated to
+ *   compute this function's result
+ * @returns {Set} the set of names of {@link Symbol Symbols} in the given
+ *   `formula` that appear as a metavariable therein
+ * @memberof Formula
+ * @alias Formula.domain
+ */
+const domain = formula =>
+    new Set( formula.descendantsSatisfying(
+        d => ( d instanceof LurchSymbol ) &amp;&amp; d.isA( Matching.metavariable )
+    ).map( metavar => metavar.text() ) )
+
+/**
+ * Instantiating a formula means making a copy of that formula and then
+ * replacing each metavariable in it with another {@link LogicConcept
+ * LogicConcept}, according to some predetermined mapping of metavariable
+ * names to {@link LogicConcept LogicConcepts}, called the "instantiation."
+ * This function performs exactly that operation, with two exceptions.
+ * 
+ * First, this function does not check to ensure that the domain of the given
+ * `instantiation` matches the {@link Formula.domain domain} of the given
+ * `formula`.  If that is important to the caller, they should verify that
+ * themselves in advance, using an {@link Set#equals equality check} between
+ * the two sets.
+ * 
+ * Second, this function also applies {@link module:Matching.fullBetaReduce
+ * beta reduction} to the result before returning it (if necessary) because
+ * the instantiation may have introduced an explicit expression function in a
+ * position where it should be applied to its arguments.  Note the warnings in
+ * the beta reduction documentation about infinite loops.
+ * 
+ * @param {LogicConcept} formula - the {@link LogicConcept LogicConcept} to
+ *   instantiate with the given `instantiation`
+ * @param {Substitution|Solution|Object|Map} instantiation - either a
+ *   {@link Substitution Substitution} instance (which describes a single
+ *   metavariable's replacement) or a {@link Solution Solution} instance
+ *   (which describes the substitution of zero or more metavariables) or a
+ *   JavaScript Object or Map (which should map metavariable names to the
+ *   desired instantiations) to be used as the function to apply to each
+ *   metavariable in the `formula`
+ * @memberof Formula
+ * @alias Formula.instantiate
+ */
+const instantiate = ( formula, instantiation ) => {
+    // handle the atomic case, where .replaceWith() would fail, and where we
+    // don't need to check any restrictions on the parent, because there is no
+    // parent in this case (since we're making a copy).  Furthermore, in this
+    // case, we cannot possibly have created a case of
+    // ("LDE EFA" ("LDE lambda" ...) ...), so we do not beta-reduce.
+    if ( ( formula instanceof LurchSymbol )
+      &amp;&amp; formula.isA( Matching.metavariable ) )
+        return lookup( instantiation, formula )
+    // handle the usual case, where we may have multiple substitutions to make
+    // and since each one is inside a parent, that may bring restrictions.
+    const result = formula.copy()
+    result.descendantsSatisfying(
+        d => ( d instanceof LurchSymbol ) &amp;&amp; d.isA( Matching.metavariable )
+    ).forEach( metavar =>
+        replaceIfPossible( metavar, lookup( instantiation, metavar ) )
+    )
+    // if there are any expression function applications, try beta reducing.
+    if ( result instanceof Expression )
+        return betaIfNeeded( result )
+    result.descendantsSatisfying(
+        d => ( d instanceof Expression ) &amp;&amp; d.isOutermost()
+    ).forEach( d => d.replaceWith( betaIfNeeded( d ) ) )
+    return result
+}
+
+// Helper function:  Look up a given metavariable in a given instantiation,
+// whether that instantiation is a Solution, a Substitution, a Map, or an
+// Object, and return a copy of the image, if there is one.
+const lookup = ( instantiation, metavar ) => {
+    if ( instantiation instanceof Matching.Substitution )
+        return instantiation.metavariable.equals( metavar ) ?
+            instantiation.expression.copy() : metavar
+    if ( instantiation instanceof Matching.Solution ) {
+        const mapsTo = instantiation.get( metavar )
+        return mapsTo ? mapsTo.copy() : metavar
+    }
+    if ( instantiation instanceof Map ) {
+        if ( !instantiation.has( metavar.text() ) ) return metavar
+        const mapsTo = instantiation.get( metavar.text() )
+        return mapsTo instanceof LogicConcept ? mapsTo.copy() : metavar
+    }
+    if ( instantiation instanceof Object ) {
+        if ( !instantiation.hasOwnProperty( metavar.text() ) ) return metavar
+        const mapsTo = instantiation[metavar.text()]
+        return mapsTo instanceof LogicConcept ? mapsTo.copy() : metavar
+    }
+    throw new Error( `Invalid instantiation: ${instantiation}` )
+}
+
+// Helper function:  Check whether it's acceptable to call x.replaceWith( y ),
+// in the sense that the resulting LogicConcept hierarchy would still be valid
+// (only symbols are bound, no environments inside expressions, etc.).
+const replaceIfPossible = ( target, replacement ) => {
+    const parent = target.parent()
+    // bound symbols must be symbols, not anything else
+    if ( ( ( parent instanceof BindingEnvironment )
+        || ( parent instanceof BindingExpression ) )
+      &amp;&amp; !( replacement instanceof LurchSymbol )
+      &amp;&amp; ( target != parent.body() ) )
+        throw new Error( 'Cannot replace a bound symbol with a non-symbol' )
+    // declared symbols must be symbols, not anything else
+    if ( ( parent instanceof Declaration )
+      &amp;&amp; !( replacement instanceof LurchSymbol )
+      &amp;&amp; parent.symbols().includes( target ) )
+        throw new Error( 'Cannot replace a delcared symbol with a non-symbol' )
+    // expressions can contain only other expressions
+    if ( ( parent instanceof Expression )
+      &amp;&amp; !( replacement instanceof Expression ) )
+        throw new Error( 'Cannot place a non-expression inside an expression' )
+    // no restrictions forbid us, so proceed
+    target.replaceWith( replacement )
+}
+
+// Helper function:  Beta reduce an Expression only if necessary.
+const betaIfNeeded = expr =>
+    expr.hasDescendantSatisfying( Matching.isAnEFA ) ?
+    Matching.fullBetaReduce( expr ) : expr
+
+export default { from, domain, instantiate }
+</code></pre>
+    </article>
 </section>
 
 
@@ -1585,7 +246,7 @@ $\lambda v_1,\ldots,v_n. v_i$ for some $i$ between 1 and $n$.</p>
 
 <footer class="layout-footer">
   <div class="container">
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.10</a> on Thu Oct 06 2022 12:41:55 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.10</a> on Thu Oct 06 2022 12:41:54 GMT-0400 (Eastern Daylight Time)
   </div>
 </footer>
 
