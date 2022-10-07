@@ -7,6 +7,9 @@
     "metadata": {
         "title": "Lurch Deductive Engine"
     },
+    "styles": {
+        "nav-width": "335px"
+    },	
     "source": {
         "exclude": [
             "./src/database/footer.js",
