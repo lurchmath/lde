@@ -35,6 +35,18 @@ console.log(`\nWelcome to \x1B[1;34m𝕃𝕠𝕕𝕖\x1B[0m - the Lurch Node app
 // and uncertainty about which one is running what.  That's why we use global.
 // below to import things.
 //
+const patternsToIgnore = [
+    'Symbol(kEvents)',
+    'Symbol(events.maxEventTargetListeners)',
+    'Symbol(events.maxEventTargetListenersWarned)'
+]
+const withPatternsIgnored = text => {
+    patternsToIgnore.forEach( pattern => {
+        const escaped = pattern.replace( /[-\/\\^$*+?.()|[\]{}]/g, '\\$&' )
+        text = text.replace( new RegExp( `\n.*${escaped}.*\n`, 'g' ), '\n' )
+    } )
+    return text
+}
 const rpl = repl.start( { 
     ignoreUndefined: true,
     prompt:`\x1B[1;34m▶︎\x1B[0m `,
@@ -45,11 +57,11 @@ const rpl = repl.start( {
         } else if ( expr instanceof MathConcept ) {
             return '\x1B[1;34m'+expr.toSmackdown()+'\x1B[0m'
         } else { 
-            return util.inspect( expr, {
+            return withPatternsIgnored( util.inspect( expr, {
                 customInspect:false,
                 depth: Infinity,
                 colors: true
-            } )
+            } ) )
         } 
     }
 } )
@@ -64,11 +76,11 @@ global.lc = s => { return LogicConcept.fromPutdown(s)[0] }
 global.mc = s => { return MathConcept.fromSmackdown(s)[0] }
 global.print = console.log
 global.inspect = ( object, depth=null ) => {
-    console.log( util.inspect( object, {
+    console.log( withPatternsIgnored( util.inspect( object, {
         customInspect: false,
         depth: depth,
         colors: true
-    } ) )
+    } ) ) )
 }
   
 rpl.defineCommand( "features", {
