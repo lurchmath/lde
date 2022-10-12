@@ -180,7 +180,7 @@ export class SourceMap {
      * which are equal at construction time.  But through one or more calls to
      * this function, the modified text can change, diverging from the source
      * text.  This function not only makes such modifications, but it records
-     * where they were made, and any data assocaited with them, so that
+     * where they were made, and any data associated with them, so that
      * queries can be made later about correspondences between the source and
      * modified text, as documented at the top of this file.
      * 
