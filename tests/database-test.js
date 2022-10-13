@@ -62,13 +62,14 @@ describe( 'Database', () => {
         } )
     } )
 
-    it( 'Should verify that all prop logic rules parse successfully', () => {
-        // The database contains at least 10 entries in the prop logic folder
-        const propLogic = Database.keysPaths( '/propositional logic/' )
-        expect( propLogic ).to.have.lengthOf.above( 9 )
-        // For every such entry, asking for its LogicConcepts does not throw
-        // an error.
-        propLogic.forEach( key => {
+    it( 'Should verify that all other entries parse successfully', () => {
+        // Get entries that are NOT marked as invalid syntax
+        const validSyntax = Database.filterByMetadata( metadata =>
+            !( metadata.testsing && metadata.testing.syntax &&
+               metadata.testing.syntax == 'invalid' ) )
+        // For every entry, asking for its LogicConcepts does not throw an
+        // error.
+        validSyntax.forEach( key => {
             expect( () => Database.getObjects( key ),
                 `Parsing ${key}` ).not.to.throw()
         } )
