@@ -65,7 +65,7 @@ describe( 'Database', () => {
     it( 'Should verify that all other entries parse successfully', () => {
         // Get entries that are NOT marked as invalid syntax
         const validSyntax = Database.filterByMetadata( metadata =>
-            !( metadata.testsing && metadata.testing.syntax &&
+            !( metadata.testing && metadata.testing.syntax &&
                metadata.testing.syntax == 'invalid' ) )
         // For every entry, asking for its LogicConcepts does not throw an
         // error.
