@@ -27,12 +27,12 @@ import Algebrite from '../dependencies/algebrite.js'
 import { satSolve } from '../dependencies/LSAT.js'
 // load chalk
 import chalk from 'chalk'
+const blueText = text => `\x1B[1;34m${text}\x1B[0m`
+const heading = text => chalk.ansi256(226)(text)
+const item = text => chalk.ansi256(214)(text) 
 
-// the Lode terminal blue color theme
-const blue = s => '\x1B[1;34m'+s+'\x1B[0m'
 // Welcome splash screen
-// console.log(`\nWelcome to \x1B[1;34m𝕃𝕠𝕕𝕖\x1B[0m - the Lurch Node app\n(type help() for help)`)
-console.log(`\nWelcome to `+blue(`𝕃𝕠𝕕𝕖`)+` - the Lurch Node app\n(type .help for help)\n`)
+console.log(`\nWelcome to ${blueText("𝕃𝕠𝕕𝕖")} - the Lurch Node app\n(type .help for help)\n`)
 // start a new context
 //
 // Note: that we use the useGlobal parameter so the current context
@@ -41,52 +41,47 @@ console.log(`\nWelcome to `+blue(`𝕃𝕠𝕕𝕖`)+` - the Lurch Node app\n(ty
 // and uncertainty about which one is running what.  That's why we use global.
 // below to import things.
 //
-const rpl = repl.start({ 
-              ignoreUndefined: true,
-              prompt: blue(`▶︎ `),
-              useGlobal: true,
-              writer: ( expr ) => {
-                if (expr instanceof LogicConcept) {
-                   return blue(expr.toPutdown())
-                } else if (expr instanceof MathConcept) {
-                   try { return blue(expr.toSmackdown()) } 
-                   catch (e) { return blue(expr.toString()) }
-                } else { 
-                   return util.inspect(expr,
-                      { customInspect:false,
-                        depth: Infinity,
-                        colors: true
-                   }) } 
-                }
-             })
+const rpl = repl.start( { 
+    ignoreUndefined: true,
+    prompt: blueText('▶︎')+' ',
+    useGlobal: true,
+    writer: ( expr ) => {
+        if ( expr instanceof LogicConcept ) {
+            return blueText( expr.toPutdown() )
+        } else if ( expr instanceof MathConcept ) {
+          try { return blueText(expr.toSmackdown()) }
+          catch (e) { return blueText(expr.toString()) }
+        } else { 
+            return util.inspect( expr, {
+                customInspect:false,
+                depth: Infinity,
+                colors: true
+            } )
+        } 
+    }
+} )
 
-for ( let key in Lurch ) 
-global[key] = Lurch[key]
+Object.assign( global, Lurch )
 global.Algebrite = Algebrite
 global.compute = Algebrite.run
 global.PropositionalForm = PropositionalForm
 global.satSolve = satSolve
 global.chalk = chalk
-global.lc = (s) => { return LogicConcept.fromPutdown(s)[0] }
-global.mc = (s) => { return MathConcept.fromSmackdown(s)[0] }
+global.lc = s => { return LogicConcept.fromPutdown(s)[0] }
+global.mc = s => { return MathConcept.fromSmackdown(s)[0] }
 global.print = console.log
-global.inspect = (x,d=null) => {
-      console.log(util.inspect(x,
-        { customInspect:false,
-          depth:d,
-          colors:true
-        }))
-    }
+global.inspect = ( object, depth=null ) => {
+    console.log( util.inspect( object, {
+        customInspect: false,
+        depth: depth,
+        colors: true
+    } ) )
+}
   
-rpl.defineCommand(
-  "features",
-  {
+rpl.defineCommand( "features", {
     help: "Show Lode features",
     action() {
-      let heading = x => chalk.ansi256(226)(x)
-      let item = x => chalk.ansi256(214)(x) 
-      print(
-        chalk.ansi256(248)(
+        print( chalk.ansi256(248)(
 `
 ${heading('Lode Features')}
   Lode is the Node.js REPL with all of the modules in index.js loaded at the
@@ -109,13 +104,11 @@ ${heading('Lode Features')}
                     (see www.comp.nus.edu.sg/~gregory/sat)
     ${item('chalk')}         : a Node package to colorize text output to the terminal 
                     (see www.npmjs.com/package/chalk)
-`          
-        )
-      )
-      this.displayPrompt()
+`
+        ) )
+        this.displayPrompt()
     }
-  }
-)
+} )
 
 /*
   show - utility to provide options for formatting and syntax highlighting
