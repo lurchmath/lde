@@ -11,8 +11,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-// NOTE: keeping all imports must be at the top of the file
+// NOTE: all imports must be at the top of the file
 import repl from 'repl'
+// In LODE we have no need for EventTarget because we don't edit MCs in 
+// real time and react to changes.  Importing this BEFORE importing 
+// math-concept.js disables that.  
+import disableEventTarget from './disable-event-target.js'
 // load everything from index.js
 import * as Lurch from '../src/index.js'
 // load PropositionalForm
@@ -24,9 +28,11 @@ import { satSolve } from '../dependencies/LSAT.js'
 // load chalk
 import chalk from 'chalk'
 
+// the Lode terminal blue color theme
+const blue = s => '\x1B[1;34m'+s+'\x1B[0m'
 // Welcome splash screen
 // console.log(`\nWelcome to \x1B[1;34m𝕃𝕠𝕕𝕖\x1B[0m - the Lurch Node app\n(type help() for help)`)
-console.log(`\nWelcome to \x1B[1;34m𝕃𝕠𝕕𝕖\x1B[0m - the Lurch Node app\n(type .help for help)\n`)
+console.log(`\nWelcome to `+blue(`𝕃𝕠𝕕𝕖`)+` - the Lurch Node app\n(type .help for help)\n`)
 // start a new context
 //
 // Note: that we use the useGlobal parameter so the current context
@@ -37,13 +43,14 @@ console.log(`\nWelcome to \x1B[1;34m𝕃𝕠𝕕𝕖\x1B[0m - the Lurch Node app
 //
 const rpl = repl.start({ 
               ignoreUndefined: true,
-              prompt:`\x1B[1;34m▶︎\x1B[0m `,
+              prompt: blue(`▶︎ `),
               useGlobal: true,
               writer: ( expr ) => {
                 if (expr instanceof LogicConcept) {
-                   return '\x1B[1;34m'+expr.toPutdown()+'\x1B[0m'
+                   return blue(expr.toPutdown())
                 } else if (expr instanceof MathConcept) {
-                   return '\x1B[1;34m'+expr.toSmackdown()+'\x1B[0m'
+                   try { return blue(expr.toSmackdown()) } 
+                   catch (e) { return blue(expr.toString()) }
                 } else { 
                    return util.inspect(expr,
                       { customInspect:false,

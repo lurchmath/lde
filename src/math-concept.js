@@ -1,6 +1,6 @@
 
 import { Connection } from './connection.js'
-import { SourceMap } from './source-map.js'
+import { SourceMap  } from './source-map.js'
 
 /**
  * The MathConcept class, an n-ary tree of MathConcept instances, using functions
@@ -24,8 +24,18 @@ import { SourceMap } from './source-map.js'
  * This second category of subclasses is not intended to be fully specified, but can
  * grow and change over time, as new classes in that category are developed.
  */
-export class MathConcept extends EventTarget {
 
+// Check if the global.disableEventTarget is set to true, and if it is, don't 
+// use the EventTarget superclass.  This can then be set by a client by loading
+// the disable-event-target.js module before loading math-concept.js. The default
+// for all other clients is to allow it.  Note that we have to test if global is 
+// undeclared first, for when this module is being imported in a browser.
+//
+let Superclass = (!(typeof global==='undefined') && global.disableEventTarget) ? 
+                  class { emit(){} } : EventTarget
+//
+export class MathConcept extends Superclass {
+  
     //////
     //
     //  Constructor
@@ -2311,14 +2321,12 @@ export class MathConcept extends EventTarget {
             /(?<!\\)(?:\\\\)*\$((?:[^\\$\n\r]|\\\$|\\\\)*)(?:\n|\r|\/\/|$)/
         ]
         const commandRE =
-            /\\([a-z]+)\{((?:[^{}\\\n\r]|\\\\|\\.|\}\{)*)\}/
+        /\\([a-zA-Z]+)(?:(?![a-zA-Z{])|(?:\{((?:[^{}\\\n\r]|\\\\|\\.|\}\{)*)\}))/
         const commandErrors = [
             // start of command with no ending on the same line:
             /\\([a-z]+)\{((?:[^{}\\\n\r]|\\.|\}\{)*)(?:\n|\r|\/\/|$)/,
             // escaping errors:
-            /\\([a-z]+)\{((?:[^{}\\\n\r]|\\.|\}\{)*)\}/,
-            // whitespace after command:
-            /\\([a-z]+)\s/
+            /\\([a-z]+)\{((?:[^{}\\\n\r]|\\.|\}\{)*)\}/
         ]
         const unescape = ( text, escapables ) => {
             let result = ''
@@ -2372,6 +2380,7 @@ export class MathConcept extends EventTarget {
                 const match = commandRE.exec( string )
                 string = string.substring( match[0].length )
                 const command = match[1]
+                if (typeof match[2] === 'undefined') match[2]='' 
                 const args = match[2].split( '}{' ).map(
                     arg => unescape( arg, '{}' ) )
                 let replacement =
