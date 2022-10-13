@@ -2438,8 +2438,10 @@ export class MathConcept extends Superclass {
             const message = e.message ? e.message : e
             const match = /line ([0-9]+) col ([0-9]+)/.exec( message )
             if ( !match ) throw e
-            const [ origLine, origCol ] = map.sourceLineAndColumn(
+            const pair = map.sourceLineAndColumn(
                 parseInt( match[1] ), parseInt( match[2] ) )
+            if ( !pair ) throw e
+            const [ origLine, origCol ] = pair
             throw new Error( message.replace(
                 match[0], `line ${origLine} col ${origCol}` ) )
         }
