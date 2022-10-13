@@ -3318,7 +3318,37 @@ describe( 'Smackdown notation and interpretation', () => {
                 'lets', 'try', '', '', '', 'many empty args', '', '', ''
             )
         ) ) ) ) ).to.equal( true )
-
+        // ---------- supports commands with no argument  
+        const test5 = MathConcept.fromSmackdown( `
+          \\noargcommand {makes}{environments}
+        ` )
+        expect( test5 ).to.be.instanceOf( Array )
+        expect( test5.length ).to.equal( 3 )
+        expect( test5[0].equals( commandMC(
+            'noargcommand', ''
+        ) ) ).to.equal( true )
+        const E1=test5[1].interpret()
+        const E2=test5[2].interpret()
+        expect( E1 ).to.be.instanceOf( Environment )
+        expect( E1.numChildren() ).to.equal( 1 )
+        expect( E1.child(0) ).to.be.instanceOf( LurchSymbol )
+        expect( E1.child(0).text() ).to.equal( 'makes' )
+        expect( E2 ).to.be.instanceOf( Environment )
+        expect( E2.numChildren() ).to.equal( 1 )
+        expect( E2.child(0) ).to.be.instanceOf( LurchSymbol )
+        expect( E2.child(0).text() ).to.equal( 'environments' )
+        // 
+        const test6 = MathConcept.fromSmackdown( `
+          \\noargcommand   yo 
+        ` )
+        expect( test6 ).to.be.instanceOf( Array )
+        expect( test6.length ).to.equal( 2 )
+        expect( test6[0].equals( commandMC(
+             'noargcommand', ''
+        ) ) ).to.equal( true )
+        const E3 = test6[1].interpret()
+        expect( E3 ).to.be.instanceOf( LurchSymbol )
+        expect( E3.text() ).to.equal( 'yo' )
         // ---------- several commands sprinkled throughout a larger doc
         const test7 = MathConcept.fromSmackdown( `
             :{
@@ -3397,11 +3427,6 @@ describe( 'Smackdown notation and interpretation', () => {
         expect( () => MathConcept.fromSmackdown( `
             \\this{will
             fail}
-        ` ) ).to.throw( /Invalid command/ )
-
-        // ---------- no whitespace allowed between \command and {arg1}
-        expect( () => MathConcept.fromSmackdown( `
-            \\this {will also fail}
         ` ) ).to.throw( /Invalid command/ )
 
         // ---------- any invalid escaping, like \a

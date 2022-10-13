@@ -11,8 +11,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-// NOTE: keeping all imports must be at the top of the file
+// NOTE: all imports must be at the top of the file
 import repl from 'repl'
+// In LODE we have no need for EventTarget because we don't edit MCs in 
+// real time and react to changes.  Importing this BEFORE importing 
+// math-concept.js disables that.  
+import disableEventTarget from './disable-event-target.js'
 // load everything from index.js
 import * as Lurch from '../src/index.js'
 // load PropositionalForm
@@ -28,7 +32,6 @@ const heading = text => chalk.ansi256(226)(text)
 const item = text => chalk.ansi256(214)(text) 
 
 // Welcome splash screen
-// console.log(`\nWelcome to \x1B[1;34m𝕃𝕠𝕕𝕖\x1B[0m - the Lurch Node app\n(type help() for help)`)
 console.log(`\nWelcome to ${blueText("𝕃𝕠𝕕𝕖")} - the Lurch Node app\n(type .help for help)\n`)
 // start a new context
 //
@@ -38,18 +41,6 @@ console.log(`\nWelcome to ${blueText("𝕃𝕠𝕕𝕖")} - the Lurch Node app\n
 // and uncertainty about which one is running what.  That's why we use global.
 // below to import things.
 //
-const patternsToIgnore = [
-    'Symbol(kEvents)',
-    'Symbol(events.maxEventTargetListeners)',
-    'Symbol(events.maxEventTargetListenersWarned)'
-]
-const withPatternsIgnored = text => {
-    patternsToIgnore.forEach( pattern => {
-        const escaped = pattern.replace( /[-\/\\^$*+?.()|[\]{}]/g, '\\$&' )
-        text = text.replace( new RegExp( `\n.*${escaped}.*\n`, 'g' ), '\n' )
-    } )
-    return text
-}
 const rpl = repl.start( { 
     ignoreUndefined: true,
     prompt: blueText('▶︎')+' ',
@@ -58,13 +49,14 @@ const rpl = repl.start( {
         if ( expr instanceof LogicConcept ) {
             return blueText( expr.toPutdown() )
         } else if ( expr instanceof MathConcept ) {
-            return blueText( expr.toSmackdown() )
+          try { return blueText(expr.toSmackdown()) }
+          catch (e) { return blueText(expr.toString()) }
         } else { 
-            return withPatternsIgnored( util.inspect( expr, {
+            return util.inspect( expr, {
                 customInspect:false,
                 depth: Infinity,
                 colors: true
-            } ) )
+            } )
         } 
     }
 } )
@@ -79,11 +71,11 @@ global.lc = s => { return LogicConcept.fromPutdown(s)[0] }
 global.mc = s => { return MathConcept.fromSmackdown(s)[0] }
 global.print = console.log
 global.inspect = ( object, depth=null ) => {
-    console.log( withPatternsIgnored( util.inspect( object, {
+    console.log( util.inspect( object, {
         customInspect: false,
         depth: depth,
         colors: true
-    } ) ) )
+    } ) )
 }
   
 rpl.defineCommand( "features", {
