@@ -15,31 +15,33 @@ testing:
   :{ :(∨ W V) :{:W U} :{:V U}  U }  \label{∨-}
   :{ :{:W V}  (⇒ W V) }             \label{⇒+}
   :{ :W :(⇒ W V)  V }               \label{⇒-}
-  :{ :{:W V} :{:V W}  (⇒ W V) }     \label{⇔+}
+  :{ :{:W V} :{:V W}  (⇔ W V) }     \label{⇔+}
   :{ :(⇔ W V)  {:W V} {:V W} }      \label{⇔-}
   :{ :{:W V (¬ V)}  (¬ W) }         \label{¬+}
   :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
   
   // blatant instantiation hints
-  { :{ :(¬ P) Q (¬ Q)}  P \valid{} }          \ref{\¬-} \valid{}
-  { :(∨ P Q) :{ :P P } :{:Q P} P \valid{} }   \ref{∨-}  \valid{}
+  { :{ :(¬ P) Q (¬ Q)}  P \valid }          \ref{¬-} \valid
+  { :(∨ P Q) :{ :P P } :{:Q P} P \valid }   \ref{∨-}  \valid
   
   // Theorem (alt or-)
-  { :(∨ P Q) :(¬ Q) P \valid{} }  
+  { :(∨ P Q) :(¬ Q) P \valid }  
                                    
   // Altertnate or- proof (not needed but motivates the instantiations
   {
     { :(∨ P Q) 
       :(¬ Q)
       { :P
-        P               \valid{} // no instantiation needed
+        P               \valid // no instantiation needed
       }
       { :Q
         { :(¬ P)
-          (¬ Q)         \valid{} // no instantiation needed
+          (¬ Q)         \valid // no instantiation needed
         }
-        P               \valid{} // motivates ¬- instantiation
+        P               \valid // motivates ¬- instantiation
       }
-      P                 \valid{} // motivates or- instantiation
+      P                 \valid // motivates or- instantiation
     }
+  }
 }
+

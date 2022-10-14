@@ -15,6 +15,6 @@ testing:
   // start a proof
   {  
      :(⇒ A B)                             
-     (or (¬ A) B)   \ref{"alt def of ⇒"}  \invalid{}
+     (or (¬ A) B)   \ref{"alt def of ⇒"}  \invalid
   }
 }

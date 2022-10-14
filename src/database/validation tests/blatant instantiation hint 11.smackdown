@@ -21,40 +21,40 @@ testing:
   :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
   
   // Corollary:  (should be invalid here)
-  { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \invalid{} } 
+  { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \invalid } 
   
   // blatant instantiation hints
-  { :{ :(¬ P) Q (¬ Q)}  P \valid{} }          \ref{¬-} \valid{}
-  { :(∨ P Q) :{ :P P } :{:Q P} P \valid{} }   \ref{∨-}  \valid{}
+  { :{ :(¬ P) Q (¬ Q)}  P \valid }          \ref{¬-} \valid
+  { :(∨ P Q) :{ :P P } :{:Q P} P \valid }   \ref{∨-}  \valid
   // this is too soon
-  { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \invalid{} } \ref{alt or-} \invalid{}
+  { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \invalid } \ref{alt or-} \invalid
   
   // Corollary:  (should also be invalid here)
-  { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \invalid{} }
+  { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \invalid }
   
   // Theorem (alt or-)
-  { :(∨ P Q) :(¬ Q) P \valid{} }  \label{alt or-}
+  { :(∨ P Q) :(¬ Q) P \valid }  \label{alt or-}
 
   // Altertnate or- proof (not needed but motivates the instantiations
   {
     { :(∨ P Q) 
       :(¬ Q)
       { :P
-        P               \valid{} // no instantiation needed
+        P               \valid // no instantiation needed
       }
       { :Q
         { :(¬ P)
-          (¬ Q)         \valid{} // no instantiation needed
+          (¬ Q)         \valid // no instantiation needed
         }
-        P               \valid{} // motivates ¬- instantiation
+        P               \valid // motivates ¬- instantiation
       }
-      P                 \valid{} // motivates or- instantiation
+      P                 \valid // motivates or- instantiation
     }
 
-   // now a blatant instantiation hint for the theorem
-   { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \valid{} } \ref{alt or-} \valid{}
+    // now a blatant instantiation hint for the theorem
+    { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \valid } \ref{alt or-} \valid
 
-   // Corollary:
-   { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \valid{} } 
-
+    // Corollary:
+    { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \valid } 
+  }
 }

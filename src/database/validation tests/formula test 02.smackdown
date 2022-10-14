@@ -14,7 +14,7 @@ testing:
   // start a proof
   {  
      :(⇒ A B)                             
-     (or (¬ A) B)                 \invalid{}
+     (or (¬ A) B)                 \invalid
   }
 }
 

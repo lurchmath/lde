@@ -13,7 +13,7 @@ testing:
 // In addition to putdown notation, the document can contain smackdown commands 
 //
 //  \label{abc}          - labels the preceding LC with 'abc'
-//  \valid{}, \invalid{} - indicates whether the preceding LC should be 
+//  \valid, \invalid - indicates whether the preceding LC should be 
 //                         valid or invalid after validation
 //
 // The instantiation specifiers specify the following items:
@@ -53,7 +53,7 @@ testing:
   {  
      :(⇒ A B)                              // assume something
      (or (¬ A) B)                          // prove this
-                    \valid{}               // expected validation result     
+                    \valid               // expected validation result     
   }
 }
 
@@ -80,7 +80,7 @@ testing:
 // bound, so not a metavariable
 ( instantiation   
    (formula "alt def of ⇒")   
-   ((P A) (Q B) (or A)))                   
+   ((P A) (Q B) (or A))                   
    (result "invalid")                
    (reason "'or' is not a metavariable")
 )
@@ -88,7 +88,7 @@ testing:
 // extraneous metavariable
 ( instantiation   
    (formula "alt def of ⇒")   
-   ((P A) (Q B) (R A)))
+   ((P A) (Q B) (R A))
    (result "invalid")                
    (reason "'R' is an extraneous metavariable")
 )

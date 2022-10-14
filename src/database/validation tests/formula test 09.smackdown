@@ -21,21 +21,21 @@ testing:
   :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
   
   // Theorem (Pierce) 
-  { :(⇒ (⇒ (⇒ P Q) P) P) \valid{} }  
+  { :(⇒ (⇒ (⇒ P Q) P) P) \valid }  
 
   // proof
   { 
     { :(⇒ (⇒ P Q) P)
       { :(¬ P)
         { :P
-          Q                 \valid{}  // motivates ¬-
+          Q                 \valid  // motivates ¬-
         }              
-        (⇒ P Q)             \valid{}  // motivates ⇒+
-        P                   \valid{}  // motivates ⇒-
+        (⇒ P Q)             \valid  // motivates ⇒+
+        P                   \valid  // motivates ⇒-
       }
-      P                     \valid{}  // motivates second ¬-                    
+      P                     \valid  // motivates second ¬-                    
     }
-    :(⇒ (⇒ (⇒ P Q) P) P)    \valid{}  // motivates second ⇒+
+    :(⇒ (⇒ (⇒ P Q) P) P)    \valid  // motivates second ⇒+
   }
     
 }

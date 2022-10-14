@@ -22,7 +22,7 @@ testing:
   
   
   // Theorem (alt or-)
-  { :(∨ P Q) :(¬ Q) P \valid{} }   // once again, we get it free from the 
+  { :(∨ P Q) :(¬ Q) P \valid }   // once again, we get it free from the 
                                    // instantiations.  No proof below needed!
                                    // But the proof below motivates the
                                    // instantiations
@@ -32,16 +32,17 @@ testing:
     { :(∨ P Q) 
       :(¬ Q)
       { :P
-        P               \valid{} // no instantiation needed
+        P               \valid // no instantiation needed
       }
       { :Q
         { :(¬ P)
-          (¬ Q)         \valid{} // no instantiation needed
+          (¬ Q)         \valid // no instantiation needed
         }
-        P               \valid{} // motivates ¬- instantiation
+        P               \valid // motivates ¬- instantiation
       }
-      P                 \valid{} // motivates or- instantiation
+      P                 \valid // motivates or- instantiation
     }
+  }  
 }
 
 

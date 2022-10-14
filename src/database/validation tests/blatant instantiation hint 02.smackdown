@@ -15,10 +15,10 @@ testing:
   // blatant instantiation hint
   // Note, if it is a valid instantation, but the formula is inaccessible
   // we mark the BIH tool as \valid, but the conclusion as ∈valid:
-  { :(⇒ A B) (or (¬ A) B) \invalid{} }   \ref{"alt def of ⇒"} \invalid{}
+  { :(⇒ A B) (or (¬ A) B) \invalid }   \ref{"alt def of ⇒"} \invalid
   // start a proof
   {  
      :(⇒ A B)                             
-     (or (¬ A) B)                   \invalid{}
+     (or (¬ A) B)                   \invalid
   }
 }

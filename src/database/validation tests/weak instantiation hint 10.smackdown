@@ -22,18 +22,18 @@ testing:
   :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
 
   // extraneous
-  { :{:Z V} (⇒ Z V) \ref{⇒+} \valid{} }
-  { :Z :Q (∧ Z Q)   \ref{∧+} \valid{} }
+  { :{:Z V} (⇒ Z V) \ref{⇒+} \valid }
+  { :Z :Q (∧ Z Q)   \ref{∧+} \valid }
 
   // Theorem 
-  (⇒ P P )    \valid{}
+  (⇒ P P )    \valid
   
   // Baby warm up proof... just for kicks
   {
     { :P 
-      P                      \valid{} 
+      P                      \valid 
     }
-    (⇒ P P )       \ref{⇒+}  \valid{}             
+    (⇒ P P )       \ref{⇒+}  \valid             
   }
   
 }

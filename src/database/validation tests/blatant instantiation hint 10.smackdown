@@ -22,19 +22,19 @@ testing:
   :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-} 
 
   // blatant instantiation hints
-  { :{:P P} (⇒ P P) \valid{} }     \ref{⇒+} \valid{}
-  { :{:Z V} (⇒ Z V) \valid{} }     \ref{⇒+} \valid{}
-  { :Z :Q (∧ Z Q) \valid{} }       \ref{∧+} \valid{}
+  { :{:P P} (⇒ P P) \valid }     \ref{⇒+} \valid
+  { :{:Z V} (⇒ Z V) \valid }     \ref{⇒+} \valid
+  { :Z :Q (∧ Z Q) \valid }       \ref{∧+} \valid
 
   // Theorem (notice we get this for free .. we don't even need the proof)
-  (⇒ P P )    \valid{}
+  (⇒ P P )    \valid
   
   // Baby warm up proof... just for kicks
   {
     { :P 
-      P            \valid{} 
+      P            \valid 
     }
-    (⇒ P P )       \valid{}             
+    (⇒ P P )       \valid             
   }
   
 }

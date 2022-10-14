@@ -21,28 +21,28 @@ testing:
   :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
   
   // blatant instantiation hints
-  { :{:(¬ Q) P (¬ P)} Q \valid{} }                        \ref{¬-} \valid{}
-  { :{:P Q} (⇒ P Q ) \valid{} }                           \ref{⇒+} \valid{}
-  { :(⇒ P Q ) :(⇒ (⇒ P Q) P) P \valid{} }                 \ref{⇒-} \valid{}
-  { :{(¬ P) P (¬ P)} P \valid{} }                         \ref{¬-} \valid{}
-  { :{ :(⇒ (⇒ P Q) P) P } (⇒ (⇒ (⇒ P Q) P) P) \valid{} }  \ref{⇒+} \valid{}
+  { :{:(¬ Q) P (¬ P)} Q \valid }                        \ref{¬-} \valid
+  { :{:P Q} (⇒ P Q ) \valid }                           \ref{⇒+} \valid
+  { :(⇒ P Q ) :(⇒ (⇒ P Q) P) P \valid }                 \ref{⇒-} \valid
+  { :{(¬ P) P (¬ P)} P \valid }                         \ref{¬-} \valid
+  { :{ :(⇒ (⇒ P Q) P) P } (⇒ (⇒ (⇒ P Q) P) P) \valid }  \ref{⇒+} \valid
               
   // Theorem (Pierce) 
-  { :(⇒ (⇒ (⇒ P Q) P) P) \valid{} }  
+  { :(⇒ (⇒ (⇒ P Q) P) P) \valid }  
 
   // proof
   { 
     { :(⇒ (⇒ P Q) P)
       { :(¬ P)
         { :P
-          Q                 \valid{}  // motivates ¬-
+          Q                 \valid  // motivates ¬-
         }              
-        (⇒ P Q)             \valid{}  // motivates ⇒+
-        P                   \valid{}  // motivates ⇒-
+        (⇒ P Q)             \valid  // motivates ⇒+
+        P                   \valid  // motivates ⇒-
       }
-      P                     \valid{}  // motivates second ¬-                    
+      P                     \valid  // motivates second ¬-                    
     }
-    :(⇒ (⇒ (⇒ P Q) P) P)    \valid{}  // motivates second ⇒+
+    :(⇒ (⇒ (⇒ P Q) P) P)    \valid  // motivates second ⇒+
   }
     
 }

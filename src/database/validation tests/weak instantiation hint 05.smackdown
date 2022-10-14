@@ -11,7 +11,7 @@ testing:
  
   {  
      :(⇒ A B)                             
-     (or (¬ A) B)  \ref{"reflexive of ⇒"}  \invalid{}
+     (or (¬ A) B)  \ref{"reflexive of ⇒"}  \invalid
   }  
   
   // too late

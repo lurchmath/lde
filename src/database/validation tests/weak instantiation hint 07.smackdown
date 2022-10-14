@@ -21,21 +21,22 @@ testing:
   :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
     
   // Theorem (alt or-)
-  { :(∨ P Q) :(¬ Q) P \valid{} }  
+  { :(∨ P Q) :(¬ Q) P \valid }  
                                    
   // Altertnate or- proof (not needed but motivates the instantiations
   {
     { :(∨ P Q) 
       :(¬ Q)
       { :P
-        P                          \valid{} // no instantiation needed
+        P                          \valid // no instantiation needed
       }
       { :Q
         { :(¬ P)
-          (¬ Q)                    \valid{} // no instantiation needed
+          (¬ Q)                    \valid // no instantiation needed
         }
-        P               \ref{\¬-}  \valid{}
+        P               \ref{¬-}   \valid
       }
-      P                 \ref{∨-}   \valid{}
+      P                 \ref{∨-}   \valid
     }
+  }  
 }

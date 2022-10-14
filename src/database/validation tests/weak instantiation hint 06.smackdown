@@ -22,14 +22,14 @@ testing:
   :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
 
   // Theorem  (note this will STILL validate)
-  { (⇒ P P )  \valid{} }
+  { (⇒ P P )  \valid }
   
   // Baby warm up proof... just for kicks
   {
     { :P 
-      P                       \valid{} 
+      P                       \valid 
     }
-    (⇒ P P )       \ref{⇒+}   \valid{}             
+    (⇒ P P )       \ref{⇒+}   \valid             
   }
   
 }

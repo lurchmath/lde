@@ -22,28 +22,29 @@ testing:
   
   // Corollary:  (should be invalid here because the instantiation
   //              follows the Theorem)
-  { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \invalid{} } 
+  { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \invalid } 
   
   // Theorem (alt or-)
-  { :(∨ P Q) :(¬ Q) P \valid{} }  \label{alt or-}
+  { :(∨ P Q) :(¬ Q) P \valid }  \label{alt or-}
 
   // Alternate or- proof
   {
     { :(∨ P Q) 
       :(¬ Q)
       { :P
-        P               \valid{} // no instantiation needed
+        P               \valid // no instantiation needed
       }
       { :Q
         { :(¬ P)
-          (¬ Q)         \valid{} // no instantiation needed
+          (¬ Q)         \valid // no instantiation needed
         }
-        P               \ref{\¬-}   \valid{} 
+        P               \ref{¬-}    \valid 
       }
-      P                 \ref{∨-}    \valid{} 
-    } 
+      P                 \ref{∨-}    \valid 
+    }
+  }  
 
-   // Corollary:
-   { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \ref{alt or-} \valid{} } 
-
+  // Corollary:
+  { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \ref{alt or-} \valid } 
+  
 }

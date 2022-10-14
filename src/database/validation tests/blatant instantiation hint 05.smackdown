@@ -10,11 +10,11 @@ testing:
 (⇒ ¬ or),{ 
  
   // blatant instantiation hint
-  :{ :(⇒ A B) (or (¬ A) B) \invalid{} }   \ref{"reflexive of ⇒"} \invalid{}
+  :{ :(⇒ A B) (or (¬ A) B) \invalid }   \ref{"reflexive of ⇒"} \invalid
   // start a proof
   {  
      :(⇒ A B)                             
-     (or (¬ A) B)                 \valid{}
+     (or (¬ A) B)                 \valid
   }  
   
   // too late

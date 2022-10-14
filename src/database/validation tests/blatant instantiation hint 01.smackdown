@@ -12,10 +12,10 @@ testing:
   :{ :(⇒ P Q) (or (¬ P) Q) }  \label{"alt def of ⇒"}                   
   
   // blatant instantiation hint
-  { :(⇒ A B) (or (¬ A) B) \valid{} }   \ref{"alt def of ⇒"}  \valid{}
+  { :(⇒ A B) (or (¬ A) B) \valid }   \ref{"alt def of ⇒"}  \valid
   // start a proof
   {  
      :(⇒ A B)                              
-     (or (¬ A) B)  \valid{} 
+     (or (¬ A) B)  \valid 
   }
 }

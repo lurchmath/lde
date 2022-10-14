@@ -23,21 +23,21 @@ testing:
   :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
 
   // Theorem
-  { :(∨ W V) :(¬ V) W \valid{} }    
+  { :(∨ W V) :(¬ V) W \valid }    
   
   // Altertnate or- proof
   {
     { :(∨ W V) :(¬ V)
       { :W
-        W               \valid{}
+        W               \valid
       }
       { :V
         { :(¬ W)
-          (¬ V)         \valid{}
+          (¬ V)         \valid
         }
-        W               \valid{}
+        W               \valid
       }
-      W                 \valid{}
+      W                 \valid
     }
   }
 }
