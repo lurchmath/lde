@@ -28,7 +28,7 @@ testing:
   { :{ :(⇒ (⇒ P Q) P) P } (⇒ (⇒ (⇒ P Q) P) P) \valid }  \ref{⇒+} \valid
               
   // Theorem (Pierce) 
-  { :(⇒ (⇒ (⇒ P Q) P) P) \valid }  
+  { (⇒ (⇒ (⇒ P Q) P) P) \valid }  
 
   // proof
   { 
@@ -42,7 +42,7 @@ testing:
       }
       P                     \valid  // motivates second ¬-                    
     }
-    :(⇒ (⇒ (⇒ P Q) P) P)    \valid  // motivates second ⇒+
+    (⇒ (⇒ (⇒ P Q) P) P)    \valid  // motivates second ⇒+
   }
     
 }

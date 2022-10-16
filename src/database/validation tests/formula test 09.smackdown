@@ -21,7 +21,7 @@ testing:
   :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
   
   // Theorem (Pierce) 
-  { :(⇒ (⇒ (⇒ P Q) P) P) \valid }  
+  { (⇒ (⇒ (⇒ P Q) P) P) \valid }  
 
   // proof
   { 
@@ -35,7 +35,7 @@ testing:
       }
       P                     \valid  // motivates second ¬-                    
     }
-    :(⇒ (⇒ (⇒ P Q) P) P)    \valid  // motivates second ⇒+
+    (⇒ (⇒ (⇒ P Q) P) P)    \valid  // motivates second ⇒+
   }
     
 }
