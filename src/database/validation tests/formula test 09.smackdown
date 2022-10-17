@@ -15,13 +15,13 @@ testing:
   :{ :(∨ W V) :{:W U} :{:V U}  U }  \label{∨-}
   :{ :{:W V}  (⇒ W V) }             \label{⇒+}
   :{ :W :(⇒ W V)  V }               \label{⇒-}
-  :{ :{:W V} :{:V W}  (⇒ W V) }     \label{⇔+}
+  :{ :{:W V} :{:V W}  (⇔ W V) }     \label{⇔+}
   :{ :(⇔ W V)  {:W V} {:V W} }      \label{⇔-}
   :{ :{:W V (¬ V)}  (¬ W) }         \label{¬+}
   :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
   
   // Theorem (Pierce) 
-  { :(⇒ (⇒ (⇒ P Q) P) P) \valid }  
+  { (⇒ (⇒ (⇒ P Q) P) P)     \valid }  
 
   // proof
   { 
@@ -35,7 +35,7 @@ testing:
       }
       P                     \valid  // motivates second ¬-                    
     }
-    :(⇒ (⇒ (⇒ P Q) P) P)    \valid  // motivates second ⇒+
+    (⇒ (⇒ (⇒ P Q) P) P)     \valid  // motivates second ⇒+
   }
     
 }
@@ -47,14 +47,14 @@ testing:
 )
 
 ( instantiation      // :{ :{:P Q} (⇒ P Q ) }
-   (formula "⇒-")
+   (formula "⇒+")
     ((W P) (V Q) )
    (result "valid")
 )
 
-( instantiation      // :{ :(⇒ P Q ) :(⇒ (⇒ P Q) P) P }
+( instantiation      // :{ :(⇒ P Q) :(⇒ (⇒ P Q) P) P }
    (formula "⇒-")
-    ((W (⇒ P Q)) (V Q) )
+    ((W (⇒ P Q)) (V P) )
    (result "valid")
 )
 

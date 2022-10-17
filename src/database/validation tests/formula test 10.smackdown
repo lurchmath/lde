@@ -16,7 +16,7 @@ testing:
   :{ :(∨ W V) :{:W U} :{:V U}  U }  \label{∨-}
   :{ :{:W V}  (⇒ W V) }             \label{⇒+}
   :{ :W :(⇒ W V)  V }               \label{⇒-}
-  :{ :{:W V} :{:V W}  (⇒ W V) }     \label{⇔+}
+  :{ :{:W V} :{:V W}  (⇔ W V) }     \label{⇔+}
   :{ :(⇔ W V)  {:W V} {:V W} }      \label{⇔-}
   :{ :{:W V (¬ V)}  (¬ W) }         \label{¬+}
   :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
