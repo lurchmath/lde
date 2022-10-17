@@ -85,7 +85,7 @@ testing:
    (formula "alt def of ⇒")   
    ((P A) (Q B) (or A))                   
    (result "invalid")                
-   (reason "'or' is not a metavariable")
+   (reason "not a metavariable: or")
 )
 
 // extraneous metavariable
@@ -93,7 +93,7 @@ testing:
    (formula "alt def of ⇒")   
    ((P A) (Q B) (R A))
    (result "invalid")                
-   (reason "'R' is an extraneous metavariable")
+   (reason "not a metavariable: R")
 )
 
 // missing metavariable
@@ -101,7 +101,7 @@ testing:
    (formula "alt def of ⇒")   
    ( (Q B) )
    (result "invalid")                
-   (reason "missing metavariable 'P'")
+   (reason "uninstantiated metavariable: P")
 )
 
 // missing metavariable

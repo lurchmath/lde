@@ -23,5 +23,5 @@ testing:
    (formula "reflexive of ⇒")        
    ((P A) (Q B))                   
    (result "invalid")
-   (reason "'Q' is an extraneous metavariable")
+   (reason "not a metavariable: Q")
 )
