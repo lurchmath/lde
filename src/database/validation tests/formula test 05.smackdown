@@ -13,7 +13,7 @@ testing:
      :(⇒ A B)                             
      (or (¬ A) B)                 \invalid
   }  
-  :{ :(⇒ P Q) (or (¬ P) Q) }     \label{"alt def of ⇒"} // too late
+  :{ :(⇒ P Q) (or (¬ P) Q) }     \label{alt def of ⇒} // too late
 }
 
 // instantiation

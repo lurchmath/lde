@@ -8,8 +8,8 @@ testing:
 // document
 
 (⇒ ¬ or),{                                
-  :{ :(⇒ P Q) (or (¬ P) Q) }     \label{"alt def of ⇒"}
-  :{ (⇒ P P) }                   \label{"reflexive of ⇒"} 
+  :{ :(⇒ P Q) (or (¬ P) Q) }     \label{alt def of ⇒}
+  :{ (⇒ P P) }                   \label{reflexive of ⇒}
   // start a proof
   {  
      :(⇒ A B)                             

@@ -50,7 +50,7 @@ testing:
 (⇒ ¬ or),{                                 // declare non-metavars
         
   :{ :(⇒ P Q) (or (¬ P) Q) }               // a theorem turned formula
-  \label{"alt def of ⇒"}                   // smackdown label 
+  \label{alt def of ⇒}                   // smackdown label 
   
   // start a proof
   {  
