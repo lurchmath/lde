@@ -5,16 +5,19 @@ testing:
   description: "Testing various errors in instantiation-hint blocks."
 ---
 
-// Each of these tests begins with a 'document' LC (and environment in
-// smackdown notation) followed by sequence of instantiation specifiers
-// each of which give the necessary information to construct an instatiation
-// of a formula in the document. 
+// Each of test of type: validation and subtype: formula begins with a
+// 'document' LC (and environment in smackdown notation) followed by sequence
+// of instantiation specifiers each of which give the necessary information to
+// construct an instatiation of a formula in the document. 
 // 
-// In addition to putdown notation, the document can contain smackdown commands 
+// In addition to putdown notation, the document can contain smackdown commands
+// (though here we do not show them with their initial backslash, so as not to
+// confuse the smackdown parser, which is not currently smart enough to skip
+// comment lines):
 //
-//  \label{abc}          - labels the preceding LC with 'abc'
-//  \valid, \invalid - indicates whether the preceding LC should be 
-//                         valid or invalid after validation
+//  label{abc}          - labels the preceding LC with 'abc'
+//  valid, invalid      - indicates whether the preceding LC should be 
+//                        valid or invalid after validation
 //
 // The instantiation specifiers specify the following items:
 //
@@ -27,8 +30,8 @@ testing:
 //
 // To process these tests, first the test will
 //   1. Construct the LC of the document form the first section.
-//      a. \label commands assign labels to the appropriate LCs
-//      b. \valid, \invalid commands assign expected validation result
+//      a. label commands assign labels to the appropriate LCs
+//      b. valid, invalid commands assign expected validation result
 //         to each conclusion to check later against the actual validation
 //         result.
 //   2. For each instantiation specifier it attempts to construct the
@@ -106,5 +109,5 @@ testing:
    (formula "alt def of ⇒")   
    ( (P A) )
    (result "invalid")                
-   (reason "missing metavariable 'Q'")
+   (reason "uninstantiated metavariable: Q")
 )
