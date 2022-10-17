@@ -4,8 +4,14 @@ import Validation from '../src/validation.js'
 import { } from '../src/validation/float-arithmetic.js'
 
 // Import other classes we need to do the testing
+import { MathConcept } from '../src/math-concept.js'
 import { LogicConcept } from '../src/logic-concept.js'
 import { Environment } from '../src/environment.js'
+import { BindingEnvironment } from '../src/binding-environment.js'
+import { Application } from '../src/application.js'
+import { Symbol as LurchSymbol } from '../src/symbol.js'
+import Formula from '../src/formula.js'
+import Scoping from '../src/scoping.js'
 import Database from '../src/database.js'
 
 // Import the spy function tool for testing callbacks/handlers
@@ -400,6 +406,294 @@ describe( 'Validation', () => {
                 else
                     expect( result.result, `${key}@${d.address( test )}` )
                         .equals( expected )
+            } )
+        } )
+    } )
+
+    // Utility function to find any command of the form \[in]valid[{...}] and
+    // turn it into an attribute on its previous sibling, marking it as
+    // expecting it to be valid/invalid for this test.
+    // Used in tests below.
+    const processValidityCommands = LC => {
+        LC.descendantsSatisfying( d => {
+            const interpAs = d.getAttribute( "Interpret as" )
+            return ( interpAs instanceof Array )
+                && interpAs[0] == 'command'
+                && ( interpAs[1] == 'valid' || interpAs[1] == 'invalid' )
+        } ).map( validityMarker => {
+            const interpAs = validityMarker.getAttribute( "Interpret as" )
+            const target = validityMarker.previousSibling()
+            if ( !target ) throw new Error(
+                `${validityMarker.toSmackdown()} with no previous sibling` )
+            const expected = { result : interpAs[1] }
+            const message = interpAs.slice( 2 ).join( ' ' )
+            if ( message ) expected.message = message
+            target.setAttribute( 'expected validation result', expected )
+            validityMarker.remove()
+        } )
+    }
+
+    // Utility function to find any LC of the form
+    // (instantiation
+    //   (formula "formula name")
+    //   (pairs...) // e.g. ((P a) (Q b))
+    //   (result [in]valid)
+    //   (reason "some text") // this line optional
+    // )
+    // and parse it into a corresponding JSON structure.
+    const parseInstantiation = LC => {
+        // Verify overall form
+        if ( !( LC instanceof Application ) )
+            throw new Error( 'Instantiation must be an Application LC' )
+        if ( LC.numChildren() != 4 && LC.numChildren() != 5 )
+            throw new Error( 'Wrong number of children in instantiation LC' )
+        if ( !LC.allButFirstChild().every(
+                child => child instanceof Application ) )
+            throw new Error(
+                'Every child of an instantiation must be an Application' )
+        // Verify formula block (child at index 1)
+        if ( !LC.child( 1, 0 ).equals( new LurchSymbol( 'formula' ) )
+          || !( LC.child( 1, 1 ) instanceof LurchSymbol )
+          || LC.child( 1 ).numChildren() != 2 )
+            throw new Error( 'Incorrect formula block in instantiation' )
+        const formula = LC.child( 1, 1 ).text()
+        // Verify pairs block (child at index 2)
+        if ( !LC.child( 2 ).children().every(
+                child => child instanceof Application )
+          || !LC.child( 2 ).children().every(
+                child => child.numChildren() == 2 )
+          || !LC.child( 2 ).children().every(
+                child => child.child( 0 ) instanceof LurchSymbol ) )
+            throw new Error( 'Incorrect pairs list in instantiation' )
+        const pairs = { }
+        LC.child( 2 ).children().forEach( pair =>
+            pairs[pair.child( 0 ).text()] = pair.child( 1 ) )
+        // Verify result block (child at index 3)
+        if ( !LC.child( 3, 0 ).equals( new LurchSymbol( 'result' ) )
+          || !( LC.child( 3, 1 ) instanceof LurchSymbol )
+          || LC.child( 3 ).numChildren() != 2 )
+            throw new Error( 'Incorrect result block in instantiation' )
+        const result = LC.child( 3, 1 ).text()
+        // Construct final result now, although we may edit it below
+        const parsed = {
+            formula : formula,
+            instantiation : pairs,
+            result : result,
+            original : LC
+        }
+        // Verify reason block (child at index 4, if any)
+        if ( LC.numChildren() == 5 ) {
+            if ( !LC.child( 4, 0 ).equals( new LurchSymbol( 'reason' ) )
+              || !( LC.child( 4, 1 ) instanceof LurchSymbol )
+              || LC.child( 4 ).numChildren() != 2 )
+                throw new Error( 'Incorrect reason block in instantiation' )
+            const reason = LC.child( 4, 1 ).text()
+            parsed.reason = reason
+        }
+        // Done
+        return parsed
+    }
+
+    // Utility function used by tests below.  Find the mapping of label texts
+    // to labeled LCs.
+    const labelMapping = LC => {
+        const result = { }
+        LC.descendantsSatisfying( d => d.hasAttribute( 'label' ) ).forEach(
+            labeled => result[labeled.getAttribute( 'label' )] = labeled )
+        return result
+    }
+
+    // Utility function used by tests below to build a sequent from a conclusion
+    // (Just piles all the accessibles into an environment, except it ensures
+    // that all of them are marked givens, and it does not include any symbols
+    // bound by a BindingEnvironment, which are technically accessible by the
+    // tree definition of accessibility, but not logically usable as premises.)
+    const getSequent = concl => {
+        const isBoundInAnEnv = x =>
+            ( x.parent() instanceof BindingEnvironment )
+         && x != x.parent().lastChild()
+        const accessibles = concl.accessibles( false, document )
+            .filter( a => !isBoundInAnEnv( a ) ).reverse()
+        return new Environment(
+            ...accessibles.map( a => a.copy().makeIntoA( 'given' ) ),
+            concl.copy() )
+    }
+
+    it( 'should correctly check formula instantiations', () => {
+        // Get all formula instantiation tests from the database
+        const formulaTests = Database.filterByMetadata( metadata =>
+            metadata.testing && metadata.testing.type &&
+            metadata.testing.type == 'validation' &&
+            metadata.testing.subtype &&
+            metadata.testing.subtype == 'formula' )
+        // they are all entitled "/path/filename N.putdown" for some N,
+        // so sort them by that value of N in increasing order.
+        const getNum = key => {
+            const parts = key.split( ' ' )
+            return parseInt( parts.last().split( '.' )[0] )
+        }
+        formulaTests.sort( ( a, b ) => getNum( a ) - getNum( b ) )
+        
+        // Now run each test as follows...
+        Validation.setOptions( 'tool', 'classical propositional logic' )
+        formulaTests.forEach( key => {
+            // Look up the test with the given key and ensure it contains
+            // more than one LogicConcept, the first being the "document" and
+            // the rest being the instantiation blocks.
+            const LCs = Database.getObjects( key )
+            expect( LCs.length ).to.be.above( 1,
+                `Malformed test: ${key} had only one LogicConcept in it` )
+            let document = LCs[0]
+            const instantiations = LCs.slice( 1 )
+            // Process \[in]valid[{...}] commands
+            expect(
+                () => processValidityCommands( document ),
+                `Processing \\[in]valid[{...}] commands in ${key}`
+            ).not.to.throw()
+            // Now we should be able to convert the document to an LC
+            document = document.interpret()
+            // Ensure the document passes a scoping check
+            Scoping.validate( document, Scoping.declareInAncestor )
+            expect(
+                document.hasDescendantSatisfying(
+                    d => !!Scoping.scopeErrors( d ) ),
+                `Ensuring no scoping errors in document for ${key}`
+            ).to.equal( false )
+            // Process instantiation test blocks
+            let instantiationTests = [ ]
+            instantiations.forEach( ( MC, index ) => {
+                expect(
+                    () => instantiationTests.push(
+                        parseInstantiation( MC.interpret() ) ),
+                    `parsing instantiation #${index+1} in ${key}`
+                ).not.to.throw()
+            } )
+            // Get mapping from labels to LCs
+            const labelLookup = labelMapping( document )
+
+            // Now run the instantiation tests in that test file
+            instantiationTests.forEach( test => {
+                // Ensure cited formula exists
+                if ( !labelLookup.hasOwnProperty( test.formula ) ) {
+                    expect(
+                        test.result,
+                        `Should fail to find ${test.formula} in ${key}`
+                    ).to.equal( 'invalid' )
+                    expect(
+                        !test.hasOwnProperty( 'reason' )
+                     || test.reason == 'no such formula',
+                        `Should know there's no ${test.formula} in ${key}`
+                    ).to.equal( true )
+                    return
+                }
+                const original = labelLookup[test.formula]
+                const formula = Formula.from( original )
+                formula.clearAttributes()
+                formula.makeIntoA( 'given' )
+                // Ensure the correct set of metavariables was used
+                const testDomain = new Set()
+                Object.keys( test.instantiation ).forEach( key => {
+                    if ( test.instantiation.hasOwnProperty( key ) )
+                        testDomain.add( key )
+                } )
+                const formulaDomain = Formula.domain( formula )
+                // Could be the instantiation contains some non-metavars:
+                const badNonMetaVars = testDomain.difference( formulaDomain )
+                if ( badNonMetaVars.size > 0 ) {
+                    const reason = 'not a metavariable: '
+                                 + Array.from( badNonMetaVars ).join( ',' )
+                    expect(
+                        test.result,
+                        `There were non-metavars ${test.formula} in ${key}`
+                    ).to.equal( 'invalid' )
+                    expect(
+                        !test.hasOwnProperty( 'reason' )
+                     || test.reason == reason,
+                        `Should know non-metavars ${test.formula} in ${key}`
+                    ).to.equal( true )
+                    return
+                }
+                // Could be the instantiation doesn't hit all the metavars:
+                const missingMetaVars = formulaDomain.difference( testDomain )
+                if ( missingMetaVars.size > 0 ) {
+                    const reason = 'uninstantiated metavariable: '
+                                 + Array.from( missingMetaVars ).join( ',' )
+                    expect(
+                        test.result,
+                        `There were missing metavars ${test.formula} in ${key}`
+                    ).to.equal( 'invalid' )
+                    expect(
+                        !test.hasOwnProperty( 'reason' )
+                     || test.reason == reason,
+                        `Should know missing metavars ${test.formula} in ${key}`
+                    ).to.equal( true )
+                    return
+                }
+                // Could be the instantiation causes variable capture:
+                const variableCapture = Array.from( testDomain ).some( mv =>
+                    formula.descendantsSatisfying(
+                        d => ( d instanceof LurchSymbol ) && d.text() == mv
+                    ).some(
+                        d => !test.instantiation[mv].isFreeToReplace( d, formula )
+                    ) )
+                if ( variableCapture ) {
+                    expect(
+                        test.result,
+                        `Variable capture ${test.formula} in ${key}`
+                    ).to.equal( 'invalid' )
+                    expect(
+                        !test.hasOwnProperty( 'reason' )
+                     || test.reason == 'variable capture',
+                        `Should know about capture ${test.formula} in ${key}`
+                    ).to.equal( true )
+                    return
+                }
+                // All errors have been checked; this should succeed:
+                let result
+                expect(
+                    () => {
+                        result = Formula.instantiate(
+                            formula, test.instantiation,
+                            [ MathConcept.typeAttributeKey( 'given' ) ] )
+                        Scoping.clearImplicitDeclarations( result )
+                        Scoping.clearScopeErrors( result )
+                    },
+                    `Doing the instantiation of ${test.formula} in ${key}`
+                ).not.to.throw()
+                // And the test should have expected that:
+                expect( test.result ).to.equal( 'valid' )
+                // Insert the instantiated version after the formula
+                original.parent().insertChild(
+                    result, original.indexInParent() + 1 )
+            } )
+
+            // Now run the validation tests in that file
+            // What was marked valid/invalid, and thus needs validating?
+            document.descendantsSatisfying(
+                d => d.hasAttribute( 'expected validation result' )
+            ).forEach( toValidate => {
+                const location = `${key}@${toValidate.address()}`
+                // ensure it's a conclusion
+                expect(
+                    toValidate.isAConclusionIn( document ),
+                    `${location} has non-conclusion marked valid`
+                ).to.equal( true )
+                // validate it
+                const sequent = getSequent( toValidate )
+                Validation.validate( sequent )
+                // check to see if we got the right result
+                const expected = toValidate.getAttribute(
+                    'expected validation result' )
+                const actual = Validation.result( sequent.lastChild() )
+
+                if ( actual.result != expected.result )
+                    console.log( sequent.toPutdown() )
+
+                expect( actual.result ).to.equal( expected.result,
+                    `${location} has wrong validation result` )
+                if ( expected.hasOwnProperty( 'message' ) )
+                    expect( actual.message ).to.equal( expected.message,
+                        `${location} has wrong validation message` )
             } )
         } )
     } )
