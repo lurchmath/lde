@@ -2,7 +2,6 @@
 // Import what we're testing
 import Validation from '../src/validation.js'
 import { } from '../src/validation/float-arithmetic.js'
-import Algebrite from '../dependencies/algebrite.js'
 
 // Import other classes we need to do the testing
 import { LogicConcept } from '../src/logic-concept.js'
