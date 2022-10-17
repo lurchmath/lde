@@ -118,25 +118,38 @@ const domain = formula =>
  *   JavaScript Object or Map (which should map metavariable names to the
  *   desired instantiations) to be used as the function to apply to each
  *   metavariable in the `formula`
+ * @param {String[]} preserve - the list of attributes to preserve while doing
+ *   the instantiation.  Any metavariable having these attributes will have the
+ *   values of those attributes copied over to its instantiation.  All other
+ *   attributes of the metavariable (including, typically, the fact that it is a
+ *   metavariable) will be lost during the instantiation.  This defaults to the
+ *   empty array, but the client can pass whatever attributes they choose here.
  * @memberof Formula
  * @alias Formula.instantiate
  */
-const instantiate = ( formula, instantiation ) => {
+const instantiate = ( formula, instantiation, preserve = [ ] ) => {
     // handle the atomic case, where .replaceWith() would fail, and where we
     // don't need to check any restrictions on the parent, because there is no
     // parent in this case (since we're making a copy).  Furthermore, in this
     // case, we cannot possibly have created a case of
     // ("LDE EFA" ("LDE lambda" ...) ...), so we do not beta-reduce.
     if ( ( formula instanceof LurchSymbol )
-      && formula.isA( Matching.metavariable ) )
-        return lookup( instantiation, formula )
+      && formula.isA( Matching.metavariable ) ) {
+        const result = lookup( instantiation, formula )
+        preserve.forEach( attrKey => {
+            if ( formula.hasAttribute( attrKey ) )
+                result.setAttribute( attrKey,
+                    JSON.copy( formula.getAttribute( attrKey ) ) )
+        } )
+        return result
+    }
     // handle the usual case, where we may have multiple substitutions to make
     // and since each one is inside a parent, that may bring restrictions.
     const result = formula.copy()
     result.descendantsSatisfying(
         d => ( d instanceof LurchSymbol ) && d.isA( Matching.metavariable )
     ).forEach( metavar =>
-        replaceIfPossible( metavar, lookup( instantiation, metavar ) )
+        replaceIfPossible( metavar, lookup( instantiation, metavar ), preserve )
     )
     // if there are any expression function applications, try beta reducing.
     if ( result instanceof Expression )
@@ -174,7 +187,8 @@ const lookup = ( instantiation, metavar ) => {
 // Helper function:  Check whether it's acceptable to call x.replaceWith( y ),
 // in the sense that the resulting LogicConcept hierarchy would still be valid
 // (only symbols are bound, no environments inside expressions, etc.).
-const replaceIfPossible = ( target, replacement ) => {
+// The "preserve" attribute is documented above, in instantiate().
+const replaceIfPossible = ( target, replacement, preserve ) => {
     const parent = target.parent()
     // bound symbols must be symbols, not anything else
     if ( ( ( parent instanceof BindingEnvironment )
@@ -193,6 +207,11 @@ const replaceIfPossible = ( target, replacement ) => {
         throw new Error( 'Cannot place a non-expression inside an expression' )
     // no restrictions forbid us, so proceed
     target.replaceWith( replacement )
+    preserve.forEach( attrKey => {
+        if ( target.hasAttribute( attrKey ) )
+            replacement.setAttribute( attrKey,
+                JSON.copy( target.getAttribute( attrKey ) ) )
+    } )
 }
 
 // Helper function:  Beta reduce an Expression only if necessary.

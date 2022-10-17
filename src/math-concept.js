@@ -347,6 +347,28 @@ export class MathConcept extends Superclass {
     }
 
     /**
+     * Several functions internal to this object ({@link MathConcept#isA
+     * isA()}, {@link MathConcept#asA asA()}, and {@link MathConcept#makeIntoA
+     * makeIntoA()}) all take a type name as an argument, but do not use it
+     * directly as an attribute key, to avoid collisions among commonly used
+     * words.  Rather, they use this function to slightly obfuscate the type
+     * name, thus making accidental name collisions less likely.
+     * 
+     * To give a specific example, if we wanted to designate a symbol as, say,
+     * a number, we might not want to set its attribute `"number"` to true,
+     * because some other piece of code might have a different meaning/intent
+     * for the common word `"number"` and might overwrite or misread our data.
+     * So for saying that a MathConcept *is* a number (or any other type), we
+     * use this function, which turns the text `"number"` into the text
+     * `"_type_number"`, which almost no one would accidentally also use.
+     * 
+     * @param {String} type - The type that will be stored/queried using the
+     *   resulting key
+     * @returns {String} The key to use for querying the given `type`
+     */
+    static typeAttributeKey ( type ) { return `_type_${type}` }
+
+    /**
      * MathConcepts can be categorized into types with simple string labels.
      * For instance, we might want to say that some MathConcepts are assumptions,
      * and flag that using an attribute.  Some of these attributes have meanings
@@ -371,7 +393,10 @@ export class MathConcept extends Superclass {
      * @see {@link MathConcept#unmakeIntoA unmakeIntoA()}
      * @see {@link MathConcept#asA asA()}
      */
-    isA ( type ) { return this.getAttribute( `_type_${type}` ) === true }
+    isA ( type ) {
+        return this.getAttribute(
+            MathConcept.typeAttributeKey( type ) ) === true
+    }
 
     /**
      * For a full explanation of the typing features afforded by this function,
@@ -388,7 +413,7 @@ export class MathConcept extends Superclass {
      * @see {@link MathConcept#unmakeIntoA unmakeIntoA()}
      */
     makeIntoA ( type ) {
-        this.setAttribute( `_type_${type}`, true )
+        this.setAttribute( MathConcept.typeAttributeKey( type ), true )
         return this
     }
 
@@ -410,7 +435,7 @@ export class MathConcept extends Superclass {
      * @see {@link MathConcept#makeIntoA makeIntoA()}
      */
     unmakeIntoA ( type ) {
-        this.clearAttributes( `_type_${type}` )
+        this.clearAttributes( MathConcept.typeAttributeKey( type ) )
         return this
     }
 

@@ -3,6 +3,7 @@
 import Formula from '../src/formula.js'
 
 // Import other classes we need to do the testing
+import { MathConcept } from '../src/math-concept.js'
 import { LogicConcept } from '../src/logic-concept.js'
 import { Symbol as LurchSymbol } from '../src/symbol.js'
 import Matching from '../src/matching.js'
@@ -834,6 +835,135 @@ describe( 'Formulas', () => {
                 :(= (first letter) (second letter))
                 :(> (first letter) 1)
                 (> (second letter) 1)
+            } +{"label":"equality elimination"}
+        ` )[0]
+        expect( instantiated.equals( expected ) ).equals( true )
+    } )
+
+    it( 'Should respect the "preserve" attribute to instantiate', () => {
+        let formula
+        let instantiated
+        let expected
+
+        // Repeat a portion of the first instantiation test above, for Objects,
+        // but now we place some attributes on the metavariables that will be
+        // substituted:
+        formula = LogicConcept.fromPutdown( `
+            :{
+                :(= a b)
+                :("LDE EFA" P a)
+                ("LDE EFA" P b)
+            } +{"label":"equality elimination"}
+        ` )[0]
+
+        // Here's where we mark P, a, and b as metavariables:
+        formula.descendantsSatisfying( d => d instanceof LurchSymbol )
+            .filter( s => ['P','a','b'].includes( s.text() ) )
+            .forEach( s => s.makeIntoA( Matching.metavariable ) )
+        // Here's where we give them some other attributes, too:
+        // 1. Every P and a will be colored green.
+        formula.descendantsSatisfying( d => d instanceof LurchSymbol )
+            .filter( s => ['P','a'].includes( s.text() ) )
+            .forEach( s => s.setAttribute( 'color', 'green' ) )
+        // 2. Every P and b will be flavored bitter.
+        formula.descendantsSatisfying( d => d instanceof LurchSymbol )
+            .filter( s => ['P','b'].includes( s.text() ) )
+            .forEach( s => s.setAttribute( 'flavor', 'bitter' ) )
+        // 3. Every a and b will be have type "lower-case".
+        formula.descendantsSatisfying( d => d instanceof LurchSymbol )
+            .filter( s => ['a','b'].includes( s.text() ) )
+            .forEach( s => s.makeIntoA( 'lower-case' ) )
+
+        // Now we try instantiating without preserving any attributes.
+        // We should get an output that retains none of the attributes that
+        // were on the original metavariables.
+        instantiated = Formula.instantiate( formula, {
+            'P' : Matching.newEF( new LurchSymbol( 'v' ),
+                LogicConcept.fromPutdown( '(> v 1)' )[0] ),
+            'a' : new LurchSymbol( 'I was "a" before' ).makeIntoA( 'foo!' ),
+            'b' : LogicConcept.fromPutdown( '(+ x 1)' )[0]
+        } )
+        expected = LogicConcept.fromPutdown( `
+            :{
+                :(= "I was \\"a\\" before" +{"_type_foo!":true}
+                    (+ x 1))
+                :(> "I was \\"a\\" before" +{"_type_foo!":true}
+                    1)
+                (> (+ x 1) 1)
+            } +{"label":"equality elimination"}
+        ` )[0]
+        expect( instantiated.equals( expected ) ).equals( true )
+
+        // Repeat the same test but preserve just the color attribute.
+        // We should get an output that is the same as last time, except the
+        // instantiation of "a" will have color green.  (Although P's
+        // instantiation also had it, it was removed when P was beta-reduced.)
+        instantiated = Formula.instantiate( formula, {
+            'P' : Matching.newEF( new LurchSymbol( 'v' ),
+                LogicConcept.fromPutdown( '(> v 1)' )[0] ),
+            'a' : new LurchSymbol( 'I was "a" before' ).makeIntoA( 'foo!' ),
+            'b' : LogicConcept.fromPutdown( '(+ x 1)' )[0]
+        }, [ "color" ] )
+        expected = LogicConcept.fromPutdown( `
+            :{
+                :(= "I was \\"a\\" before" +{"_type_foo!":true,"color":"green"}
+                    (+ x 1))
+                :(> "I was \\"a\\" before" +{"_type_foo!":true,"color":"green"}
+                    1)
+                (> (+ x 1) 1)
+            } +{"label":"equality elimination"}
+        ` )[0]
+        expect( instantiated.equals( expected ) ).equals( true )
+
+        // Repeat the same test but preserve just the flavor attribute.
+        // We should get an output that is the same as the first time, except
+        // instantiation of "b" will have flavor bitter.  (Although P's
+        // instantiation also had it, it was removed when P was beta-reduced.)
+        instantiated = Formula.instantiate( formula, {
+            'P' : Matching.newEF( new LurchSymbol( 'v' ),
+                LogicConcept.fromPutdown( '(> v 1)' )[0] ),
+            'a' : new LurchSymbol( 'I was "a" before' ).makeIntoA( 'foo!' ),
+            'b' : LogicConcept.fromPutdown( '(+ x 1)' )[0]
+        }, [ "flavor" ] )
+        expected = LogicConcept.fromPutdown( `
+            :{
+                :(= "I was \\"a\\" before" +{"_type_foo!":true}
+                    (+ x 1) +{"flavor":"bitter"}
+                    )
+                :(> "I was \\"a\\" before" +{"_type_foo!":true}
+                    1)
+                (> (+ x 1) +{"flavor":"bitter"}
+                    1)
+            } +{"label":"equality elimination"}
+        ` )[0]
+        expect( instantiated.equals( expected ) ).equals( true )
+
+        // Repeat the same test but preserve color, flavor, and lower-case
+        // status.  We should get an output that retains every attribute except
+        // those on P, for the reasons documented above.
+        instantiated = Formula.instantiate( formula, {
+            'P' : Matching.newEF( new LurchSymbol( 'v' ),
+                LogicConcept.fromPutdown( '(> v 1)' )[0] ),
+            'a' : new LurchSymbol( 'I was "a" before' ).makeIntoA( 'foo!' ),
+            'b' : LogicConcept.fromPutdown( '(+ x 1)' )[0]
+        }, [ "color", "flavor", MathConcept.typeAttributeKey( 'lower-case' ) ] )
+        expected = LogicConcept.fromPutdown( `
+            :{
+                :(= "I was \\"a\\" before"
+                        +{"_type_foo!":true,"color":"green"}
+                        +{"_type_lower-case":true}
+                    (+ x 1)
+                        +{"flavor":"bitter"}
+                        +{"_type_lower-case":true}
+                    )
+                :(> "I was \\"a\\" before"
+                        +{"_type_foo!":true,"color":"green"}
+                        +{"_type_lower-case":true}
+                    1)
+                (> (+ x 1)
+                        +{"flavor":"bitter"}
+                        +{"_type_lower-case":true}
+                    1)
             } +{"label":"equality elimination"}
         ` )[0]
         expect( instantiated.equals( expected ) ).equals( true )
