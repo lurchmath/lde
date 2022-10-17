@@ -118,6 +118,40 @@ describe( 'Formulas', () => {
         expect( formula.child( 1, 2 ).isA( Matching.metavariable ) )
             .equals( true )
 
+        // Repeat the previous test, but now ensure that Binding Environments
+        // also count as declaring variables.
+        context = LogicConcept.fromPutdown( `(i j k) , {
+            { :(= i 1) (> n m) }  // <-- target
+        } ` )[0]
+        target = context.child( 3, 0 )
+        // No metavariables in the target right now:
+        expect( target.child( 0, 0 ).isA( Matching.metavariable ) )
+            .equals( false )
+        expect( target.child( 0, 1 ).isA( Matching.metavariable ) )
+            .equals( false )
+        expect( target.child( 0, 2 ).isA( Matching.metavariable ) )
+            .equals( false )
+        expect( target.child( 1, 0 ).isA( Matching.metavariable ) )
+            .equals( false )
+        expect( target.child( 1, 1 ).isA( Matching.metavariable ) )
+            .equals( false )
+        expect( target.child( 1, 2 ).isA( Matching.metavariable ) )
+            .equals( false )
+        // But if we make a formula, everything except i becomes a metavar:
+        formula = Formula.from( target )
+        expect( formula.child( 0, 0 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 0, 1 ).isA( Matching.metavariable ) )
+            .equals( false )
+        expect( formula.child( 0, 2 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 1, 0 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 1, 1 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 1, 2 ).isA( Matching.metavariable ) )
+            .equals( true )
+
         // Consider two nested environment with many symbols declared at
         // different points, so that some environments have a symbol declared
         // while earlier environments do not have that same symbol declared.

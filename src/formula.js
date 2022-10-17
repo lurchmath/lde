@@ -55,11 +55,16 @@ const from = LC => {
     const declared = new Set( LC.accessibles().filter(
         a => a instanceof Declaration
     ).map( d => d.symbols() ).flat().map( s => s.text() ) )
+    // and what were bound?
+    const bound = new Set( LC.ancestors().filter(
+        a => a != LC && ( a instanceof BindingEnvironment )
+    ).map( be => be.boundSymbolNames() ).flat() )
     // make a copy and change all of its undeclared symbols into metavariables
     const result = LC.copy()
     result.descendantsSatisfying( d => d instanceof LurchSymbol )
     .forEach( s => {
-        if ( !declared.has( s.text() ) ) s.makeIntoA( Matching.metavariable )
+        if ( !declared.has( s.text() ) && !bound.has( s.text() ) )
+            s.makeIntoA( Matching.metavariable )
     } )
     // return it
     return result
