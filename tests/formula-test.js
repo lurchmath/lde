@@ -969,4 +969,269 @@ describe( 'Formulas', () => {
         expect( instantiated.equals( expected ) ).equals( true )
     } )
 
+    // Utility function used below to construct a Formula whose metavariables
+    // do not include those on the given list.
+    const buildFormula = ( putdown, nonMetavarNames = [ ] ) => {
+        const wrapper = LogicConcept.fromPutdown(
+            `( ${nonMetavarNames.join(" ")} ) , { ${putdown} }` )[0]
+        return Formula.from( wrapper.lastChild().firstChild() )
+    }
+    // Utility function for constructing solution sets
+    // Call like so: solset( problem, [
+    //     { 'metavar1' : 'putdown for expression1', ... }, // solution 1
+    //     ...
+    // ] )
+    const solSet = ( problem, ...sols ) => {
+        return sols.map( sol => {
+            const result = new Matching.Solution( problem )
+            for ( let mv in sol ) {
+                if ( sol.hasOwnProperty( mv ) ) {
+                    result.add( new Matching.Substitution(
+                        new LurchSymbol( mv ).asA( Matching.metavariable ),
+                        sol[mv] instanceof LogicConcept ? sol[mv] :
+                            LogicConcept.fromPutdown( sol[mv] )[0]
+                    ) )
+                }
+            }
+            return result
+        } )
+    }
+    // Utility function for comparing solution sets for equality
+    const solSetsEq = ( set1, set2, debug = true ) => {
+        const set1strs = set1.map( x => `${x}` )
+        const set2strs = set2.map( x => `${x}` )
+        if ( set1.length != set2.length ) {
+            if ( debug ) {
+                console.log( 'Not same length:' )
+                console.log( `\tlength ${set1.length}:` )
+                set1strs.map( x => console.log( `\t\t${x}` ) )
+                console.log( `\tlength ${set2.length}:` )
+                set2strs.map( x => console.log( `\t\t${x}` ) )
+            }
+            return false
+        }
+        if ( !set1.every( sol => sol instanceof Matching.Solution ) ) {
+            if ( debug ) {
+                console.log( 'Not all are solution instances:' )
+                set1strs.map( x => console.log( `\t\t${x}` ) )
+            }
+            return false
+        }
+        if ( !set2.every( sol => sol instanceof Matching.Solution ) ) {
+            if ( debug ) {
+                console.log( 'Not all are solution instances:' )
+                set2strs.map( x => console.log( `\t\t${x}` ) )
+            }
+            return false
+        }
+        const missing = set1.find( sol1 =>
+            !set2.some( sol2 => sol1.equals( sol2 ) ) )
+        if ( missing ) {
+            if ( debug ) {
+                console.log( `Missing: ${missing}` )
+                console.log( `\tfrom here:` )
+                set1strs.map( x => console.log( `\t\t${x}` ) )
+                console.log( `\tin here:` )
+                set2strs.map( x => console.log( `\t\t${x}` ) )
+            }
+            return false
+        }
+        return true
+    }
+    // Utility function for creating lambdas
+    const lambda = ( arg, body ) => {
+        if ( !( arg instanceof LogicConcept ) )
+            arg = new LurchSymbol( arg )
+        if ( !( body instanceof LogicConcept ) )
+            body = LogicConcept.fromPutdown( `${body}` )[0]
+        return Matching.newEF( arg, body )
+    }
+
+    it( 'Should correctly compute possible formula instantiations', () => {
+        // Because here we are mostly just testing that the Formula module can
+        // correctly set up problems to pass to the matching package, we do not
+        // do here a comprehensive test of all matching features.  Rather, we
+        // focus mostly on small matching problems sitting inside a variety of
+        // different environments, declarations, binding environments, etc.
+        let formula
+        let candidate
+        let results
+
+        // Test 1: Put a simple matching problem inside an environment.
+        formula = buildFormula( `
+            { :A  :B  (^ A B) }
+        `, [ '^' ] )
+        candidate = LogicConcept.fromPutdown( `
+            { :foo :bar (^ foo bar) }
+        ` )[0]
+        results = Array.from( Formula.instantiations( formula, candidate ) )
+        expect( solSetsEq( results, solSet( results[0]._problem,
+            { 'A' : 'foo', 'B' : 'bar' }
+        ) ) ).equals( true )
+
+        // Test 2: Same as previous, but this time make sure it fails.
+        formula = buildFormula( `
+            { :A  :B  (^ A B) }
+        `, [ '^' ] )
+        candidate = LogicConcept.fromPutdown( `
+            { :foo :bar (^ foo baz) }
+        ` )[0]
+        results = Array.from( Formula.instantiations( formula, candidate ) )
+        expect( results ).to.eql( [ ] )
+
+        // Test 3: Still a simple problem, but with nested environments.
+        formula = buildFormula( `
+            { :{ :X Y } :{ :Y X } (<=> X Y) }
+        `, [ '<=>' ] )
+        candidate = LogicConcept.fromPutdown( `
+            {
+                :{ :happy clapping }
+                :{ :clapping happy }
+                (<=> happy clapping)
+            }
+        ` )[0]
+        results = Array.from( Formula.instantiations( formula, candidate ) )
+        expect( solSetsEq( results, solSet( results[0]._problem,
+            { 'X' : 'happy', 'Y' : 'clapping' }
+        ) ) ).equals( true )
+
+        // Test 4: Same as previous, but not correct, so no matches.
+        formula = buildFormula( `
+            { :{ :X Y } :{ :Y X } (<=> X Y) }
+        `, [ '<=>' ] )
+        candidate = LogicConcept.fromPutdown( `
+            {
+                :{ :happy clapping }
+                :{ :clapping happy }
+                (<=> clapping happy) // mistake here; these args are reversed
+            }
+        ` )[0]
+        results = Array.from( Formula.instantiations( formula, candidate ) )
+        expect( results ).to.eql( [ ] )
+
+        // Test 5: Same as #3, but only incorrect via nesting
+        formula = buildFormula( `
+            { :{ :X Y } :{ :Y X } (<=> X Y) }
+        `, [ '<=>' ] )
+        candidate = LogicConcept.fromPutdown( `
+            {
+                :{ :happy clapping }
+                :clapping happy // mistake here; not nested
+                (<=> happy clapping)
+            }
+        ` )[0]
+        results = Array.from( Formula.instantiations( formula, candidate ) )
+        expect( results ).to.eql( [ ] )
+
+        // Test 6: Same as #3, but only incorrect via missing "given" flag
+        formula = buildFormula( `
+            { :{ :X Y } :{ :Y X } (<=> X Y) }
+        `, [ '<=>' ] )
+        candidate = LogicConcept.fromPutdown( `
+            {
+                :{ :happy clapping }
+                { :clapping happy } // mistake here; not marked as a given
+                (<=> happy clapping)
+            }
+        ` )[0]
+        results = Array.from( Formula.instantiations( formula, candidate ) )
+        expect( results ).to.eql( [ ] )
+
+        // Test 7: Slightly less simple problem, because it has EFAs.
+        formula = buildFormula( `
+            { :(= a b) :("LDE EFA" P a) ("LDE EFA" P b) }
+        `, [ '=', '"LDE EFA"' ] )
+        candidate = LogicConcept.fromPutdown( `
+            {
+                :(= x 3)
+                :(= (- x 1) (+ y 1))
+                (= (- 3 1) (+ y 1))
+            }
+        ` )[0]
+        results = Array.from( Formula.instantiations( formula, candidate ) )
+        expect( solSetsEq( results, solSet( results[0]._problem,
+            {
+                'a' : 'x',
+                'b' : '3',
+                'P' : lambda( 'v', '(= (- v 1) (+ y 1))' )
+            }
+        ) ) ).equals( true )
+
+        // Test 8: Like the previous, but with multiple solutions
+        formula = buildFormula( `
+            { ("LDE EFA" P 500) }
+        `, [ '"LDE EFA"', '500' ] )
+        candidate = LogicConcept.fromPutdown( `
+            { (^ 500 2) }
+        ` )[0]
+        results = Array.from( Formula.instantiations( formula, candidate ) )
+        expect( solSetsEq( results, solSet( results[0]._problem,
+            { 'P' : lambda( 'v', '(^ v 2)' ) },
+            { 'P' : lambda( 'v', '(^ 500 2)' ) }
+        ) ) ).equals( true )
+
+        // Test 9: Like test 7, but with no solutions.
+        formula = buildFormula( `
+            { :(= a b) :("LDE EFA" P a) ("LDE EFA" P b) }
+        `, [ '=', '"LDE EFA"' ] )
+        candidate = LogicConcept.fromPutdown( `
+            {
+                :(= x 3)
+                :(= (- 3 1) (+ y 1)) // mistake is in these two lines;
+                (= (- x 1) (+ y 1))  // they are reversed
+            }
+        ` )[0]
+        results = Array.from( Formula.instantiations( formula, candidate ) )
+        expect( results ).to.eql( [ ] )
+
+        // Test 10: Larger example, including both nested Envs and EFAs.
+        formula = buildFormula( `
+            {
+                :{
+                    [x]
+                    ("LDE EFA" P x)
+                }
+                (∀ x , ("LDE EFA" P x))
+            }
+        `, [ '∀', '"LDE EFA"' ] )
+        candidate = LogicConcept.fromPutdown( `
+            {
+                :{
+                    [a]
+                    (not (is_silly a))
+                }
+                (∀ a , (not (is_silly a)))
+            }
+        ` )[0]
+        results = Array.from( Formula.instantiations( formula, candidate ) )
+        expect( solSetsEq( results, solSet( results[0]._problem,
+            {
+                'x' : 'a',
+                'P' : lambda( 'v', '(not (is_silly v))' )
+            }
+        ) ) ).equals( true )
+
+        // Test 11: Same as previous, but incorrect/not matching
+        formula = buildFormula( `
+            {
+                :{
+                    [x]
+                    ("LDE EFA" P x)
+                }
+                (∀ x , ("LDE EFA" P x))
+            }
+        `, [ '∀', '"LDE EFA"' ] )
+        candidate = LogicConcept.fromPutdown( `
+            {
+                :{
+                    a // mistake is here; this is not a declaration of a
+                    (not (is_silly a))
+                }
+                (∀ a , (not (is_silly a)))
+            }
+        ` )[0]
+        results = Array.from( Formula.instantiations( formula, candidate ) )
+        expect( results ).to.eql( [ ] )
+    } )
+
 } )

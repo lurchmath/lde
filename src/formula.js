@@ -214,9 +214,78 @@ const replaceIfPossible = ( target, replacement, preserve ) => {
     } )
 }
 
+/**
+ * What are all instantiations of the given formula that produce the given
+ * candidate?
+ * 
+ * On the one hand, it may seem like this is a simple application of
+ * {@link module:Matching the Matching module}, and this is somewhat true.  The
+ * only additional feature provided here is that the formula and its candidate
+ * instantiation need not be {@link Expression Expressions}.  If they are not,
+ * then they must have isomorphic structure except for any {@link Expression
+ * Expressions} inside the two, which will be paired up to construct a matching
+ * problem, whose solutions will be returned.
+ * 
+ * In other words, this function extends matching to support a single pair of
+ * inputs that do not need to be {@link Expression Expressions}, and it does
+ * exactly what you'd expect in that case.
+ * 
+ * @param {LogicConcept} formula a {@link LogicConcept} that has had
+ *   metavariables added to it using {@link Formula.from}
+ * @param {LogicConcept} candidate a {@link LogicConcept} that may or may not
+ *   be an instantiation of the given `formula`
+ * @yields {Solution} zero or more ways to instantiation `formula` to produce
+ *   `candidate`; all possible ways will be enumerated, though it may be that
+ *   there are no such ways, in which case the enumeration will be empty
+ */
+const instantiations = function* ( formula, candidate ) {
+    const problem = problemFromExpressionsWithin( formula, candidate )
+    if ( !problem ) return // no isomorphism == no results
+    yield* problem.solutions()
+}
+
+// Helper function used by instantiations(), above.
+// Given two LogicConcepts that are not necessarily expressions, this ensures
+// that they have the same structure outside of all expressions, and if so, it
+// pairs up the corresponding expressions to produce a matching problem, which
+// it then returns.  Otherwise, it returns null (no such pairing possible).
+// Third argument is for internal use only; clients provide just the first two.
+const problemFromExpressionsWithin = ( formula, candidate, result = null ) => {
+    // create a problem if we were not passed one
+    if ( result == null ) result = new Matching.Problem()
+    // Case 1: The formula is an expression
+    if ( formula instanceof Expression ) {
+        if ( ( candidate instanceof Expression )
+          && ( formula.isA( 'given' ) == candidate.isA( 'given' ) ) ) {
+            // If the candidate is, they pair up in the matching problem
+            result.add( formula.copy().unmakeIntoA( 'given' ),
+                        candidate.copy().unmakeIntoA( 'given' ) )
+            return result
+        } else {
+            return null // otherwise there can be no possible instantiation
+        }
+    } else { // Case 2: the formula is not an expression
+        if ( ( candidate instanceof Expression )
+          || ( formula.constructor.className
+            != candidate.constructor.className )
+          || ( formula.numChildren() != candidate.numChildren() )
+          || ( formula.isA( 'given' ) != candidate.isA( 'given' ) ) ) {
+            return null // candidate has diff. structure; no pairing possible
+        } else {
+            // Candidate has the same shape; proceed recursively
+            for ( let i = 0 ; i < formula.numChildren() ; i++ ) {
+                result = problemFromExpressionsWithin(
+                    formula.child( i ), candidate.child( i ), result )
+                if ( !result ) return null // if any child fails, all fails
+            }
+            return result // return the recursively-produced result
+        }
+    }
+}
+
 // Helper function:  Beta reduce an Expression only if necessary.
 const betaIfNeeded = expr =>
     expr.hasDescendantSatisfying( Matching.isAnEFA ) ?
     Matching.fullBetaReduce( expr ) : expr
 
-export default { from, domain, instantiate }
+export default { from, domain, instantiate, instantiations }
