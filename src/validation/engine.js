@@ -9,7 +9,7 @@ import { Expression } from '../expression.js'
 const tools = { }
 // Module-level settings object.  Users can change its key-value pairs using
 // routines below.  We call it "settings" instead of options so as not to
-// conflict with the getter function defined below, named options().
+// conflict with the getter function defined below, named getOptions().
 const settings = { }
 
 /**
@@ -51,7 +51,7 @@ const settings = { }
  */
 export const installTool = ( name, func ) => {
     tools[name] = func
-    if ( !options().hasOwnProperty( 'tool' ) ) setOptions( 'tool', name )
+    if ( !getOptions().hasOwnProperty( 'tool' ) ) setOptions( 'tool', name )
 }
 
 /**
@@ -184,7 +184,7 @@ export const clearResult = ( target ) =>
  * @alias module:Validation.setOptions
  * 
  * @see {@link module:Validation.validate validate()}
- * @see {@link module:Validation.options options()}
+ * @see {@link module:Validation.getOptions getOptions()}
  * @see {@link module:Validation.clearOptions clearOptions()}
  */
 export const setOptions = ( ...args ) => {
@@ -212,18 +212,19 @@ export const setOptions = ( ...args ) => {
 /**
  * For a general description of how validation options work, refer to the
  * documentation for the {@link module:Validation.setOptions setOptions()}
- * function.  Calling this function with no arguments, `Validation.options()`,
- * returns the full set of module-level options.  Calling it with one
- * argument, a conclusion, `Validation.options(C)`, returns just those
- * conclusion-specific options stored in that {@link Expression Expression}.
+ * function.  Calling this function with no arguments,
+ * `Validation.getOptions()`, returns the full set of module-level options.
+ * Calling it with one argument, a conclusion, `Validation.getOptions(C)`,
+ * returns just those conclusion-specific options stored in that
+ * {@link Expression Expression}.
  * 
  * @function
- * @alias module:Validation.options
+ * @alias module:Validation.getOptions
  * 
  * @see {@link module:Validation.setOptions setOptions()}
  * @see {@link module:Validation.clearOptions clearOptions()}
  */
-export const options = ( maybeTarget ) => {
+export const getOptions = ( maybeTarget ) => {
     if ( maybeTarget ) {
         if ( !( maybeTarget instanceof LogicConcept )
           || !maybeTarget.isAConclusionIn( /* top-level ancestor */ ) )
@@ -240,8 +241,8 @@ export const options = ( maybeTarget ) => {
  * have options stored in it if the client has used
  * {@link module:Validation.setOptions setOptions()} on that conclusion.
  * After calling this, a future call to
- * {@link module:Validation.options options()} on the same conclusion will
- * yield undefined.
+ * {@link module:Validation.getOptions getOptions()} on the same conclusion
+ * will yield undefined.
  * 
  * @function
  * @alias module:Validation.clearOptions
@@ -250,17 +251,19 @@ export const options = ( maybeTarget ) => {
  *   should be deleted
  * 
  * @see {@link module:Validation.setOptions setOptions()}
- * @see {@link module:Validation.options options()}
+ * @see {@link module:Validation.getOptions getOptions()}
  */
 export const clearOptions = ( conclusion ) =>
     conclusion.clearAttributes( 'validation options' )
 
 // Internal utility function used by the validate() function below.
-const validateConclusion = conclusion => {
-    // merge the module-level options with this conclusion's options:
-    const conclOptions = Object.assign( options(), options( conclusion ) )
+const validateConclusion = ( conclusion, options = { } ) => {
+    // merge the module-level options, the conclusion's options, and the
+    // options parameter, with later ones overriding earlier ones:
+    options = Object.assign( Object.assign(
+        getOptions(), getOptions( conclusion ) ), options )
     // if there is no validation tool specified, that's an error:
-    const tool = tools[conclOptions.tool]
+    const tool = tools[options.tool]
     if ( !tool ) {
         setResult( conclusion, {
             result : 'indeterminate',
@@ -269,7 +272,7 @@ const validateConclusion = conclusion => {
     } else {
         // otherwise, run that tool, and record its result if it works:
         try {
-            setResult( conclusion, tool( conclusion, conclOptions ) )
+            setResult( conclusion, tool( conclusion, options ) )
         } catch ( error ) {
             // but if it didn't work, record a result anyway---the error:
             setResult( conclusion, {
@@ -299,12 +302,15 @@ const validateConclusion = conclusion => {
  * 
  * @param {LogicConcept} L the {@link LogicConcept LogicConcept} to validate,
  *   either a conclusion or an environment
+ * @param {Object} [options] an options object to pass on to any validation
+ *   tool called by this routine
  */
-export const validate = ( L ) => {
+export const validate = ( L, options = { } ) => {
     if ( L instanceof Environment ) {
-        L.conclusions().forEach( validateConclusion )
+        L.conclusions().forEach(
+            concl => validateConclusion( concl, options ) )
     } else if ( L.isAConclusionIn( /* top-level ancestor */ ) ) {
-        validateConclusion( L )
+        validateConclusion( L, options )
     } else {
         throw new Error(
             'Can validate only Environments and Conclusions' )

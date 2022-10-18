@@ -38,8 +38,8 @@ describe( 'Validation', () => {
         expect( test ).to.include( 'intuitionistic propositional logic' )
         expect( test ).to.include( 'CAS' )
         // some tool is the default and it's on the list
-        expect( Validation.options ).to.be.ok
-        expect( test ).to.include( Validation.options().tool )
+        expect( Validation.getOptions ).to.be.ok
+        expect( test ).to.include( Validation.getOptions().tool )
     } )
 
     const dummySpy = makeSpy()
@@ -258,6 +258,48 @@ describe( 'Validation', () => {
         expect( result.result ).to.equal( 'invalid' )
         expect( result.reason ).to.equal( 'CAS' )
         expect( result.value ).to.equal( '0' )
+    } )
+
+    it( 'Should give options the correct priorities', () => {
+        // Set a module-level option
+        Validation.setOptions( 'tool', 'floating point arithmetic' )
+        // Create a test that has one conclusion-level option
+        let test = LogicConcept.fromPutdown( `
+        {
+            (= (+ 9 2) (- 13 2))
+            (= (+ (* 2 x) (* 5 x)) (- (* 10 x) (* 3 x)) )
+                +{"validation options":{"tool":"CAS"}}
+        }
+        ` )[0]
+        // Validate all and ensure the latter overrode the former in one case:
+        expect( Validation.result( test.child( 0 ) ) ).to.be.undefined
+        expect( Validation.result( test.child( 1 ) ) ).to.be.undefined
+        Validation.validate( test )
+        expect( Validation.result( test.child( 0 ) ) ).to.eql( {
+            result : 'valid',
+            reason : 'JavaScript floating point check'
+        } )
+        expect( Validation.result( test.child( 1 ) ) ).to.eql( {
+            result : 'valid',
+            reason : 'CAS',
+            value : '1'
+        } )
+        // Now re-validate but pass the dummy tool as the one that should be
+        // used, and it should apply it to each conclusion in the document,
+        // because options passed to validate() override everything:
+        dummySpy.callRecord = [ ]
+        Validation.validate( test, { tool : 'dummy' } )
+        expect( dummySpy.callRecord ).to.have.length( 2 )
+        expect( dummySpy.callRecord[0] ).to.have.lengthOf( 2 )
+        expect( dummySpy.callRecord[0][0] ).to.equal( test.child( 0 ) )
+        expect( dummySpy.callRecord[0][1] ).to.eql( { 'tool' : 'dummy' } )
+        expect( dummySpy.callRecord[1] ).to.have.lengthOf( 2 )
+        expect( dummySpy.callRecord[1][0] ).to.equal( test.child( 1 ) )
+        expect( dummySpy.callRecord[1][1] ).to.eql( { 'tool' : 'dummy' } )
+        expect( Validation.result( test.child( 0 ) ) )
+            .to.eql( dummyResult )
+        expect( Validation.result( test.child( 1 ) ) )
+            .to.eql( dummyResult )
     } )
 
     it( 'Should do simple propositional validation', () => {

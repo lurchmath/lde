@@ -33,7 +33,7 @@
 // Import all the functions from the validation engine:
 import {
     installTool, installedToolNames,
-    options, setOptions, clearOptions, result, setResult, clearResult,
+    getOptions, setOptions, clearOptions, result, setResult, clearResult,
     validate
 } from './validation/engine.js'
 
@@ -60,6 +60,6 @@ installTool( 'intuitionistic propositional logic',
 // Export the public API only:
 export default {
     installTool, installedToolNames,
-    options, setOptions, clearOptions, result, setResult, clearResult,
+    getOptions, setOptions, clearOptions, result, setResult, clearResult,
     validate
 }
