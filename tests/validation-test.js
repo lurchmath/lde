@@ -635,7 +635,8 @@ describe( 'Validation', () => {
         formulaTests.sort( ( a, b ) => getNum( a ) - getNum( b ) )
         
         // Now run each test as follows...
-        Validation.setOptions( 'tool', 'classical propositional logic' )
+        Validation.setOptions( 'tool',
+            'classical propositional logic on conclusions' )
         formulaTests.forEach( key => {
             // Look up the test with the given key and ensure it contains
             // more than one LogicConcept, the first being the "document" and
