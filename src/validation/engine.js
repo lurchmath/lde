@@ -1,6 +1,5 @@
 
 import { LogicConcept } from '../logic-concept.js'
-import { Environment } from '../environment.js'
 import { Expression } from '../expression.js'
 
 // Module-level constant in which we store all validation tools.  Users can
@@ -15,16 +14,18 @@ const options = { }
  * This module stores a collection of validation tools.  Each such tool is a
  * function with the following signature:
  * 
- *  * Argument 1 is a {@link Environment#conclusions conclusion} to be
- *    validated.
- *  * Argument 2 is an options object, combining the module-level validation
- *    options with any options stored in the conclusion, with those in the
- *    conclusion superceding module-level options.
- *  * The return value should be the validation results for that conclusion.
- * 
- * That result will be written into the conclusion using the
- * {@link module:Validation.setResult setResult()}
- * function.
+ *  * Argument 1 is a target {@link LogicConcept} to be validated.
+ *  * Argument 2 is an options object, which this module guarantees will be the
+ *    module-level validation options, possibly superceded by any options
+ *    passed to the {@link module:Validation.validate validate function}, and
+ *    further possibly overridden by options stored in the target itself.
+ *  * The function should store the validation results in the target.  If you
+ *    have a function that just returns validation results instead, you can
+ *    easily convert it to one that writes its results into the target, using
+ *    the convenient meta-function {@link module:Validation.functionToTool
+ *    functionToTool()}.  If you are writing your own validation tool, you can
+ *    write the results into a target using the
+ *    {@link module:Validation.setResult setResult()} function.
  * 
  * Each tool gets stored under a name chosen by the client, so that the tool
  * can be referred to later by this name as a unique ID.  Installing another
@@ -54,6 +55,18 @@ export const installTool = ( name, func ) => {
 }
 
 /**
+ * This is the corresponding getter function for the {@link
+ * module:Validation.installTool installTool()} function.  Anything installed
+ * with that function can later be looked up with this one.
+ * 
+ * @param {String} name - the name of the tool, as it was initially installed
+ *   by {@link module:Validation.installTool installTool()}
+ * @returns {Function} the tool with the given name, or undefined if there was
+ *   no such tool
+ */
+export const installedTool = name => tools[name]
+
+/**
  * This module is a collection of validation tools, which are installed using
  * the {@link module:Validation.installTool installTool()} function, each
  * under a unique name.  This function returns that list of unique names.
@@ -67,6 +80,28 @@ export const installTool = ( name, func ) => {
  * @see {@link module:Validation.installTool installTool()}
  */
 export const installedToolNames = () => Object.keys( tools )
+
+/**
+ * A useful tool for converting pure validation functions into validation tools
+ * (that is, functions with the side effect of writing their results into the
+ * target object).
+ * 
+ * For example, let's say you have a function that can take as input any
+ * expression in a simple toy system and return a validation result, either
+ * `{ result:'valid', reason:'...' }` or `{ result:'invalid', reason:'...' }`.
+ * Call this function on it to produce a validation tool that you can install
+ * in this module, and that will write its results into the appropriate
+ * attribute of any target on which it is called.
+ * 
+ * @param {Function} func a function that can take as input a target
+ *   {@link LogicConcept} to validate, and an options object, and return a
+ *   validation result object that should be stored in the target
+ * @returns a function that can serve as a validation tool; rather than just
+ *   returning the validation results (as the input function does), it stores
+ *   those results in the target object
+ */
+export const functionToTool = func =>
+    ( target, options ) => setResult( target, func( target, options ) )
 
 /**
  * Store the results of a validation tool in the conclusion that was validated.
@@ -223,17 +258,8 @@ export const setOptions = ( ...args ) => {
  * @see {@link module:Validation.setOptions setOptions()}
  * @see {@link module:Validation.clearOptions clearOptions()}
  */
-export const getOptions = ( maybeTarget ) => {
-    if ( maybeTarget ) {
-        if ( !( maybeTarget instanceof LogicConcept )
-          || !maybeTarget.isAConclusionIn( /* top-level ancestor */ ) )
-            throw new Error(
-                'Validation options exist only in conclusion expressions' )
-        return maybeTarget.getAttribute( 'validation options' )
-    } else {
-        return options
-    }
-}
+export const getOptions = ( maybeTarget ) =>
+    maybeTarget ? maybeTarget.getAttribute( 'validation options' ) : options
 
 /**
  * Remove the validation options stored in a conclusion. The conclusion will
@@ -255,63 +281,65 @@ export const getOptions = ( maybeTarget ) => {
 export const clearOptions = ( conclusion ) =>
     conclusion.clearAttributes( 'validation options' )
 
-// Internal utility function used by the validate() function below.
-const validateConclusion = ( conclusion, options = { } ) => {
-    // merge the module-level options, the conclusion's options, and the
-    // options parameter, with later ones overriding earlier ones:
-    options = Object.assign( Object.assign(
-        getOptions(), getOptions( conclusion ) ), options )
+/**
+ * This function computes the validation result for any given
+ * {@link LogicConcept} `L` and stores it in `L`'s validation attribute.  It
+ * prioritizes various sets of options as follows.
+ * 
+ *  1. If the options stored in the {@link LogicConcept} `L` itself, obtained
+ *     by calling {@link module:Validation.getOptions
+ *     Validation.getOptions( L )}, give us a validation tool, then we call it
+ *     on `L` and store its result in `L`.
+ *  2. Otherwise, if the second parameter to the validation function (an
+ *     options object) specifies which tool to use, that one is used to compute
+ *     the result.  We call that validation tool and store its result in `L`.
+ *  3. If even that does not specify a tool, we fall back on the global options
+ *     stored in the {@link module:Validation Validation module}, fetched by
+ *     calling {@link module:Validation.getOptions Validation.getOptions()}.
+ *     If that gives us a validation tool, call it on `L` and store its result
+ *     in `L`.
+ *  4. No tool is available, so we store in `L` a validation result object with
+ *     result "indeterminate" and reason stating that no validation tool was
+ *     available for `L`.
+ * 
+ * This function computes the validation result afresh every time it is called.
+ * See other functions below for how to read cache validation results.
+ * 
+ * @function
+ * @alias module:Validation.validate
+ * 
+ * @param {LogicConcept} L the {@link LogicConcept LogicConcept} to validate
+ * @param {Object} [options] an options object to pass on to any validation
+ *   tool called by this routine
+ * 
+ * @see {@link module:Validation.setResult setResult()}
+ * @see {@link module:Validation.getResult getResult()}
+ */
+export const validate = ( L, options = { } ) => {
+    // merge the module-level options, the options parameter, and the
+    // conclusion's options, with later ones overriding earlier ones:
+    // (use JSON.copy so as not to modify anything, but just make a new object)
+    options = Object.assign(
+        JSON.copy( getOptions() ), options, getOptions( L ) )
     // if there is no validation tool specified, that's an error:
     const tool = tools[options.tool]
     if ( !tool ) {
-        setResult( conclusion, {
+        setResult( L, {
             result : 'indeterminate',
             reason : 'No validation tool available'
         } )
     } else {
         // otherwise, run that tool, and record its result if it works:
         try {
-            setResult( conclusion, tool( conclusion, options ) )
+            tool( L, options ) // should write the result itself
         } catch ( error ) {
             // but if it didn't work, record a result anyway---the error:
-            setResult( conclusion, {
+            setResult( L, {
                 result : 'indeterminate',
                 reason : 'Internal validation error',
                 message : error.message,
                 stack : error.stack
             } )
         }
-    }
-}
-
-/**
- * Validating a {@link Environment.conclusions conclusion} means finding the
- * appropriate validation routine for that conclusion and calling it on the
- * conclusion.  (See {@link module:Validation.setOptions setOptions()} for how
- * we determine the appropriate validation routine for a conclusion.)  If this
- * function is called on a conclusion, that is what it does.
- * 
- * Validating an {@link Environment Environment} means validating all of its
- * conclusions, in the order in which they appear
- * ({@link MathConcept#isEarlierThan earlier ones} first).  If this function
- * is called on an {@link Environment Environment}, that is what it does.
- * 
- * @function
- * @alias module:Validation.validate
- * 
- * @param {LogicConcept} L the {@link LogicConcept LogicConcept} to validate,
- *   either a conclusion or an environment
- * @param {Object} [options] an options object to pass on to any validation
- *   tool called by this routine
- */
-export const validate = ( L, options = { } ) => {
-    if ( L instanceof Environment ) {
-        L.conclusions().forEach(
-            concl => validateConclusion( concl, options ) )
-    } else if ( L.isAConclusionIn( /* top-level ancestor */ ) ) {
-        validateConclusion( L, options )
-    } else {
-        throw new Error(
-            'Can validate only Environments and Conclusions' )
     }
 }

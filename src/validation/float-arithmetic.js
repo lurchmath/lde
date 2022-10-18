@@ -23,29 +23,29 @@ const arithmeticOperatorsInJS = {
     '<=' : [ (x,y)=>x<=y ],
 }
 
-// Internal function that treats the given conclusion as an arithmetic
+// Internal function that treats the given expression as an arithmetic
 // expression, and runs the appropriate functions to compute its value.
 // (That includes equality and inequality operators, so that the result can be
 // true or false.)
 // An error is thrown if the input is anything other than nested application
 // of the operators in the above table, with the appropriate arities, to
 // floating point atomic values stored as symbols.
-const runArithmeticInJS = ( conclusion ) => {
-    if ( conclusion instanceof LurchSymbol ) {
-        const result = Number( conclusion.text() )
+const runArithmeticInJS = ( expression ) => {
+    if ( expression instanceof LurchSymbol ) {
+        const result = Number( expression.text() )
         if ( isNaN( result ) )
-            throw new Error( 'Invalid number: ' + conclusion.text() )
+            throw new Error( 'Invalid number: ' + expression.text() )
         return result
     }
-    if ( !( conclusion instanceof Expression ) )
+    if ( !( expression instanceof Expression ) )
         throw new Error(
             'Arithmetic supports only Expressions and Symbols' )
-    const operator = conclusion.firstChild()
+    const operator = expression.firstChild()
     if ( !( operator instanceof LurchSymbol ) )
         throw new Error( 'Operators must be symbols' )
     if ( !arithmeticOperatorsInJS.hasOwnProperty( operator.text() ) )
         throw new Error( 'Not a supported operator: ' + operator.text() )
-    const operands = conclusion.allButFirstChild()
+    const operands = expression.allButFirstChild()
     const toApply = arithmeticOperatorsInJS[operator.text()].find(
         func => func.length == operands.length )
     if ( !toApply )
@@ -54,7 +54,7 @@ const runArithmeticInJS = ( conclusion ) => {
 }
 
 // a validation tool (as documented in the tools.js file) that uses the above
-// function to do validation of conclusions that are just equalities or
+// function to do validation of expressions that are just equalities or
 // inequalities of basic floating point arithmetic
 
  /**

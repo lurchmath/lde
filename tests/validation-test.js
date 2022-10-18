@@ -56,9 +56,15 @@ describe( 'Validation', () => {
         expect( Validation.installedToolNames() ).to.not.include( 'dummy' )
         expect( Validation.installTool ).to.be.ok
         expect(
-            () => Validation.installTool( 'dummy', dummyTool )
+            () => Validation.installTool( 'dummy',
+                Validation.functionToTool( dummyTool ) )
         ).not.to.throw()
         expect( Validation.installedToolNames() ).to.include( 'dummy' )
+        expect(
+            () => Validation.installConclusionsVersion( 'dummy' )
+        ).not.to.throw()
+        expect( Validation.installedToolNames() ).to.include(
+            'dummy on conclusions' )
     } )
 
     it( 'Should call validation tools on all conclusions', () => {
@@ -77,7 +83,9 @@ describe( 'Validation', () => {
         }
         ` )[0]
         // Set the dummy validation tool as the default
-        expect( () => Validation.setOptions( 'tool', 'dummy' ) ).not.to.throw()
+        expect(
+            () => Validation.setOptions( 'tool', 'dummy on conclusions' )
+        ).not.to.throw()
         // Clear the dummy tool's call record,
         // then run validation on the above LC
         dummySpy.callRecord = [ ]
@@ -143,7 +151,7 @@ describe( 'Validation', () => {
             concl3
         }
         ` )[0]
-        Validation.setOptions( 'tool', 'dummy' )
+        Validation.setOptions( 'tool', 'dummy on conclusions' )
         Validation.validate( test )
         // Ensure that all the relevant data was stored in those conclusions
         expect( Validation.result( test.child( 0, 0 ) ) )
@@ -165,7 +173,8 @@ describe( 'Validation', () => {
     } )
 
     it( 'Should do simple arithmetic validation', () => {
-        Validation.setOptions( 'tool', 'floating point arithmetic' )
+        Validation.setOptions( 'tool',
+            'floating point arithmetic on conclusions' )
         // Yes, 2+5=10-3
         let test = LogicConcept.fromPutdown( `
         {
@@ -213,7 +222,7 @@ describe( 'Validation', () => {
     } )
 
     it( 'Should do simple CAS validation', () => {
-        Validation.setOptions( 'tool', 'CAS' )
+        Validation.setOptions( 'tool', 'CAS on conclusions' )
         // Yes, 2x+5x=10x-3x
         let test = LogicConcept.fromPutdown( `
         {
@@ -222,7 +231,7 @@ describe( 'Validation', () => {
         ` )[0]
         expect( Validation.result( test ) ).to.be.undefined
         expect( Validation.result( test.child( 0 ) ) ).to.be.undefined
-        Validation.validate( test.child(0) )
+        Validation.validate( test.child( 0 ) )
         expect( Validation.result( test ) ).to.be.undefined
         expect( Validation.result( test.child( 0 ) ) ).to.eql( {
             result : 'valid',
@@ -262,7 +271,8 @@ describe( 'Validation', () => {
 
     it( 'Should give options the correct priorities', () => {
         // Set a module-level option
-        Validation.setOptions( 'tool', 'floating point arithmetic' )
+        Validation.setOptions( 'tool',
+            'floating point arithmetic on conclusions' )
         // Create a test that has one conclusion-level option
         let test = LogicConcept.fromPutdown( `
         {
@@ -285,25 +295,26 @@ describe( 'Validation', () => {
             value : '1'
         } )
         // Now re-validate but pass the dummy tool as the one that should be
-        // used, and it should apply it to each conclusion in the document,
-        // because options passed to validate() override everything:
+        // used, and it should apply it to each conclusion in the document that
+        // did not already have a validation function specified:
         dummySpy.callRecord = [ ]
-        Validation.validate( test, { tool : 'dummy' } )
-        expect( dummySpy.callRecord ).to.have.length( 2 )
+        Validation.validate( test, { tool : 'dummy on conclusions' } )
+        expect( dummySpy.callRecord ).to.have.length( 1 )
         expect( dummySpy.callRecord[0] ).to.have.lengthOf( 2 )
         expect( dummySpy.callRecord[0][0] ).to.equal( test.child( 0 ) )
         expect( dummySpy.callRecord[0][1] ).to.eql( { 'tool' : 'dummy' } )
-        expect( dummySpy.callRecord[1] ).to.have.lengthOf( 2 )
-        expect( dummySpy.callRecord[1][0] ).to.equal( test.child( 1 ) )
-        expect( dummySpy.callRecord[1][1] ).to.eql( { 'tool' : 'dummy' } )
         expect( Validation.result( test.child( 0 ) ) )
             .to.eql( dummyResult )
-        expect( Validation.result( test.child( 1 ) ) )
-            .to.eql( dummyResult )
+        expect( Validation.result( test.child( 1 ) ) ).to.eql( {
+            result : 'valid',
+            reason : 'CAS',
+            value : '1'
+        } )
     } )
 
     it( 'Should do simple propositional validation', () => {
-        Validation.setOptions( 'tool', 'classical propositional logic' )
+        Validation.setOptions( 'tool',
+            'classical propositional logic on conclusions' )
         // Yes, things follow from given copies of the exact same thing
         let test = LogicConcept.fromPutdown( `
         {
@@ -355,7 +366,8 @@ describe( 'Validation', () => {
         } )
         // Repeat the same two tests again, this time using intuitionistic
         // propositional logic instead of classical.
-        Validation.setOptions( 'tool', 'intuitionistic propositional logic' )
+        Validation.setOptions( 'tool',
+            'intuitionistic propositional logic on conclusions' )
         // Repeating Test 1...
         test = LogicConcept.fromPutdown( `
         {
@@ -422,7 +434,8 @@ describe( 'Validation', () => {
         propositionalTests.sort( ( a, b ) => getNum( a ) - getNum( b ) )
         
         // Now run each test as follows...
-        Validation.setOptions( 'tool', 'classical propositional logic' )
+        Validation.setOptions( 'tool',
+            'classical propositional logic on conclusions' )
         propositionalTests.forEach( key => {
             // Look up the test with the given key and ensure it contains
             // exactly one LogicConcept
