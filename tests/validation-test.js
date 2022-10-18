@@ -224,11 +224,11 @@ describe( 'Validation', () => {
         expect( Validation.result( test.child( 0 ) ) ).to.be.undefined
         Validation.validate( test.child(0) )
         expect( Validation.result( test ) ).to.be.undefined
-        let result = Validation.result( test.child(0) )
-        expect( result ).to.be.instanceof( Object )
-        expect( result.result ).to.equal( 'valid' )
-        expect( result.reason ).to.equal( 'CAS' )
-        expect( result.value ).to.equal( '1' )
+        expect( Validation.result( test.child( 0 ) ) ).to.eql( {
+            result : 'valid',
+            reason : 'CAS',
+            value : '1'
+        } )
         // No, 5/(2+x) is not the same as (2+x)/5 (except for x=3 and x=-7 :))
         test = LogicConcept.fromPutdown( `
         {
@@ -239,11 +239,11 @@ describe( 'Validation', () => {
         expect( Validation.result( test.child(0) ) ).to.be.undefined
         Validation.validate( test )
         expect( Validation.result( test ) ).to.be.undefined
-        result = Validation.result( test.child(0) )
-        expect( result ).to.be.instanceof( Object )
-        expect( result.result ).to.equal( 'invalid' )
-        expect( result.reason ).to.equal( 'CAS' )
-        expect( result.value ).to.equal( 'check(5/(x+2)=(x+2)*1/5)' )
+        expect( Validation.result( test.child( 0 ) ) ).to.eql( {
+            result : 'invalid',
+            reason : 'CAS',
+            value : 'check(5/(x+2)=(x+2)*1/5)'
+        } )
         // Invalid structures are also invalid
         test = LogicConcept.fromPutdown( `
         {
@@ -253,11 +253,11 @@ describe( 'Validation', () => {
         expect( Validation.result( test ) ).to.be.undefined
         expect( Validation.result( test.child(0) ) ).to.be.undefined
         Validation.validate( test )
-        result = Validation.result( test.child(0) )
-        expect( result ).to.be.instanceof( Object )
-        expect( result.result ).to.equal( 'invalid' )
-        expect( result.reason ).to.equal( 'CAS' )
-        expect( result.value ).to.equal( '0' )
+        expect( Validation.result( test.child( 0 ) ) ).to.eql( {
+            result : 'invalid',
+            reason : 'CAS',
+            value : '0'
+        } )
     } )
 
     it( 'Should give options the correct priorities', () => {
