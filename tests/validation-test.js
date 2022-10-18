@@ -82,7 +82,52 @@ describe( 'Validation', () => {
             concl3
         }
         ` )[0]
+
         // Set the dummy validation tool as the default
+        expect( () => Validation.setOptions( 'tool', 'dummy' ) ).not.to.throw()
+        // Clear the dummy tool's call record,
+        // then run validation on the above LC
+        dummySpy.callRecord = [ ]
+        expect( () => Validation.validate( test ) ).not.to.throw()
+        // Ensure that only the top-level environment got validated
+        expect( dummySpy.callRecord ).to.have.lengthOf( 1 )
+        expect( dummySpy.callRecord[0] ).to.have.lengthOf( 2 )
+        expect( dummySpy.callRecord[0][0] ).to.equal( test )
+        expect( dummySpy.callRecord[0][1] ).to.eql( { 'tool' : 'dummy' } )
+        // Ensure that no other descendants of the document had validation
+        // results stored into them
+        expect( Validation.result( test.child( 0 ) ) )
+            .to.be.undefined
+        expect( Validation.result( test.child( 0, 0 ) ) )
+            .to.be.undefined
+        expect( Validation.result( test.child( 0, 1 ) ) )
+            .to.be.undefined
+        expect( Validation.result( test.child( 0, 2 ) ) )
+            .to.be.undefined
+        expect( Validation.result( test.child( 0, 2, 0 ) ) )
+            .to.be.undefined
+        expect( Validation.result( test.child( 0, 2, 0, 0 ) ) )
+            .to.be.undefined
+        expect( Validation.result( test.child( 0, 2, 0, 1 ) ) )
+            .to.be.undefined
+        expect( Validation.result( test.child( 0, 2, 0, 2 ) ) )
+            .to.be.undefined
+        expect( Validation.result( test.child( 1 ) ) )
+            .to.be.undefined
+        expect( Validation.result( test.child( 1, 0 ) ) )
+            .to.be.undefined
+        expect( Validation.result( test.child( 1, 1 ) ) )
+            .to.be.undefined
+        expect( Validation.result( test.child( 1, 2 ) ) )
+            .to.be.undefined
+        expect( Validation.result( test.child( 1, 3 ) ) )
+            .to.be.undefined
+        expect( Validation.result( test.child( 1, 4 ) ) )
+            .to.be.undefined
+        expect( Validation.result( test.child( 2 ) ) )
+            .to.be.undefined
+
+        // Set the dummy validation tool on conclusions as the default
         expect(
             () => Validation.setOptions( 'tool', 'dummy on conclusions' )
         ).not.to.throw()
