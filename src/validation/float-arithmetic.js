@@ -57,37 +57,22 @@ const runArithmeticInJS = ( conclusion ) => {
 // function to do validation of conclusions that are just equalities or
 // inequalities of basic floating point arithmetic
 
-// * The {@link Validation Validation} module provides a framework for installing 
-// * and using a collection of Validation Tools.  This virtual namespace documents
-// * them all in one place.
-// * 
-
  /**
-  * The Floating Point Arithmetic Validation Tool uses javascript to evaluate
-  * an {@link Expression} that evaluates to a javascript expression. Since such
-  * javascript expressions can be inequalies and equations, they can evaluate
-  * to `true` or `false` in some cases.  This tool marks the expression `valid`
-  * if and only if the expression evaluates to `true`.
+  * The Floating Point Arithmetic Validation Tool uses JavaScript to evaluate
+  * an {@link Expression} whose only operators are `+`, `-`, `*`, `/`, `%`, `^`,
+  * `=`, `>`, `<`, `>=`, and `<=`.  Since such JavaScript expressions can be
+  * inequalies and equations, they can evaluate to `true` or `false` in some
+  * cases.  This tool marks the expression `valid` if and only if the JavaScript
+  * expression built from it evaluates to `true`.
   * 
-  * This tool is installed with the tool name `'floating point arithmetic'`. Thus,
-  * to use this tool to validate an {@link Expression}, `E`, call
-  * {@link module:Validation.setOptions Validation.setOptions } and {@link module:Validation.validate Validation.validate} as follows:
-  * 
-  ```
-  Validation.setOptions(E,'tool','floating point arithmetic')
-  Validation.validate(E)
-  ```
-  * That will result in the validation results being stored in $E$ as an
-  * attribute.
-  *
   * @memberof ValidationTools
-  * @param {Expression} expression - An {@link Expression} that represents
-  * a valid javascript expression.
+  * @param {Expression} target - an {@link Expression} that represents
+  *   a valid JavaScript expression
   * @see {@link module:Validation Validation}
   */
-const arithmeticValidator = ( conclusion/*, options */ ) => {
+const arithmeticValidator = ( target/*, options */ ) => {
     try {
-        return runArithmeticInJS( conclusion ) === true ? {
+        return runArithmeticInJS( target ) === true ? {
             result : 'valid',
             reason : 'JavaScript floating point check'
         } : {
