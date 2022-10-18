@@ -7,10 +7,9 @@ import { Expression } from '../expression.js'
 // install new tools using installTool(), defined below.  This module also
 // installs some of its own tools, further down in this file.
 const tools = { }
-// Module-level settings object.  Users can change its key-value pairs using
-// routines below.  We call it "settings" instead of options so as not to
-// conflict with the getter function defined below, named getOptions().
-const settings = { }
+// Module-level options object.  Users can change its key-value pairs using
+// routines below.
+const options = { }
 
 /**
  * This module stores a collection of validation tools.  Each such tool is a
@@ -205,7 +204,7 @@ export const setOptions = ( ...args ) => {
             throw new Error(
                 'Validation options must come in key-value pairs' )
         for ( let i = 0 ; i < args.length - 1 ; i += 2 )
-            settings[args[i]] = args[i+1]
+            options[args[i]] = args[i+1]
     }
 }
 
@@ -232,7 +231,7 @@ export const getOptions = ( maybeTarget ) => {
                 'Validation options exist only in conclusion expressions' )
         return maybeTarget.getAttribute( 'validation options' )
     } else {
-        return settings
+        return options
     }
 }
 
