@@ -634,6 +634,9 @@ describe( 'Validation', () => {
         }
         formulaTests.sort( ( a, b ) => getNum( a ) - getNum( b ) )
         
+        let totalTime = 0
+        // set the following to true for validation timing spam on console:
+        const timingTest = false
         // Now run each test as follows...
         Validation.setOptions( 'tool',
             'classical propositional logic on conclusions' )
@@ -781,11 +784,23 @@ describe( 'Validation', () => {
                 ).to.equal( true )
                 // validate it
                 const sequent = getSequent( toValidate )
+                if ( timingTest ) {
+                    console.log( location )
+                    console.log( '\tsequent ending in '
+                               + toValidate.toPutdown().trim() )
+                }
+                const startTime = new Date
                 Validation.validate( sequent )
+                const endTime = new Date
+                if ( timingTest )
+                    console.log( `\tcompleted in ${(endTime-startTime)/1000}s` )
+                totalTime += endTime - startTime
                 // check to see if we got the right result
                 const expected = toValidate.getAttribute(
                     'expected validation result' )
                 const actual = Validation.result( sequent.lastChild() )
+                if ( timingTest )
+                    console.log( `\t${JSON.stringify(actual)}` )
 
                 if ( actual.result != expected.result )
                     console.log( sequent.toPutdown() )
@@ -797,6 +812,8 @@ describe( 'Validation', () => {
                         `${location} has wrong validation message` )
             } )
         } )
+        if ( timingTest )
+            console.log( `Total elapsed time: ${totalTime/1000}s` )
     } )
 
 } )
