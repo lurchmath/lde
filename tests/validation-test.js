@@ -619,6 +619,23 @@ describe( 'Validation', () => {
             concl.copy() )
     }
 
+    // Utility function:  Often we know that a LogicConcept has failed a
+    // validation test, and we need to check that the test itself expects
+    // exactly that result, possibly with a specific error message provided by
+    // the test, which we must check against the actual failure reason.
+    const expectInvalidity = (
+        description, // text description for ease of debugging when testing
+        reasonForInvalidity, // actual reason why the LogicConcept is invalid
+        resultFromTest, // valid/invalid, expected result from test suite
+        reasonFromTest // expected reason given in test suite (optional)
+    ) => {
+        expect( resultFromTest, description ).to.equal( 'invalid' )
+        expect( ( typeof reasonFromTest == 'undefined' )
+             || reasonFromTest == reasonForInvalidity,
+            description + ' (checking reason text)'
+        ).to.equal( true )
+    }
+
     it( 'should correctly check formula instantiations', () => {
         // Get all formula instantiation tests from the database
         const formulaTests = Database.filterByMetadata( metadata =>
@@ -678,18 +695,11 @@ describe( 'Validation', () => {
             // Now run the instantiation tests in that test file
             instantiationTests.forEach( test => {
                 // Ensure cited formula exists
-                if ( !labelLookup.hasOwnProperty( test.formula ) ) {
-                    expect(
-                        test.result,
-                        `Should fail to find ${test.formula} in ${key}`
-                    ).to.equal( 'invalid' )
-                    expect(
-                        !test.hasOwnProperty( 'reason' )
-                     || test.reason == 'no such formula',
-                        `Should know there's no ${test.formula} in ${key}`
-                    ).to.equal( true )
-                    return
-                }
+                if ( !labelLookup.hasOwnProperty( test.formula ) )
+                    return expectInvalidity(
+                        `Should fail to find ${test.formula} in ${key}`,
+                        'no such formula',
+                        test.result, test.reason )
                 const original = labelLookup[test.formula]
                 const formula = Formula.from( original )
                 formula.clearAttributes()
@@ -703,36 +713,20 @@ describe( 'Validation', () => {
                 const formulaDomain = Formula.domain( formula )
                 // Could be the instantiation contains some non-metavars:
                 const badNonMetaVars = testDomain.difference( formulaDomain )
-                if ( badNonMetaVars.size > 0 ) {
-                    const reason = 'not a metavariable: '
-                                 + Array.from( badNonMetaVars ).join( ',' )
-                    expect(
-                        test.result,
-                        `There were non-metavars ${test.formula} in ${key}`
-                    ).to.equal( 'invalid' )
-                    expect(
-                        !test.hasOwnProperty( 'reason' )
-                     || test.reason == reason,
-                        `Should know non-metavars ${test.formula} in ${key}`
-                    ).to.equal( true )
-                    return
-                }
+                if ( badNonMetaVars.size > 0 )
+                    return expectInvalidity(
+                        `There were non-metavars ${test.formula} in ${key}`,
+                        'not a metavariable: '
+                            + Array.from( badNonMetaVars ).join( ',' ),
+                        test.result, test.reason )
                 // Could be the instantiation doesn't hit all the metavars:
                 const missingMetaVars = formulaDomain.difference( testDomain )
-                if ( missingMetaVars.size > 0 ) {
-                    const reason = 'uninstantiated metavariable: '
-                                 + Array.from( missingMetaVars ).join( ',' )
-                    expect(
-                        test.result,
-                        `There were missing metavars ${test.formula} in ${key}`
-                    ).to.equal( 'invalid' )
-                    expect(
-                        !test.hasOwnProperty( 'reason' )
-                     || test.reason == reason,
-                        `Should know missing metavars ${test.formula} in ${key}`
-                    ).to.equal( true )
-                    return
-                }
+                if ( missingMetaVars.size > 0 )
+                    return expectInvalidity(
+                        `There were missing metavars ${test.formula} in ${key}`,
+                        'uninstantiated metavariable: '
+                            + Array.from( missingMetaVars ).join( ',' ),
+                        test.result, test.reason )
                 // Could be the instantiation causes variable capture:
                 const variableCapture = Array.from( testDomain ).some( mv =>
                     formula.descendantsSatisfying(
@@ -740,18 +734,11 @@ describe( 'Validation', () => {
                     ).some(
                         d => !test.instantiation[mv].isFreeToReplace( d, formula )
                     ) )
-                if ( variableCapture ) {
-                    expect(
-                        test.result,
-                        `Variable capture ${test.formula} in ${key}`
-                    ).to.equal( 'invalid' )
-                    expect(
-                        !test.hasOwnProperty( 'reason' )
-                     || test.reason == 'variable capture',
-                        `Should know about capture ${test.formula} in ${key}`
-                    ).to.equal( true )
-                    return
-                }
+                if ( variableCapture )
+                    return expectInvalidity(
+                        `Variable capture ${test.formula} in ${key}`,
+                        'variable capture',
+                        test.result, test.reason )
                 // All errors have been checked; this should succeed:
                 let result
                 expect(
