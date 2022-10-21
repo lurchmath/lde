@@ -92,12 +92,13 @@ console.log( A.toPutdown() )
 ```
 
 ```js
-import { Binding } from './src/index.js'
+import { BindingExpression } from './src/index.js'
 
 // Make the mathematical expression ∀y.P
 const forall = new LurchSymbol( 'forall' )
 const P = new LurchSymbol( 'P' )
-const B = new Binding( forall, y.copy(), P ) // see comment below
+const B = new Application( forall,
+    new BindingExpression( y.copy(), P ) ) // see comment below
 console.log( B.toPutdown() )
 ```
 
