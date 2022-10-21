@@ -648,7 +648,7 @@ describe( 'Validation', () => {
             metadata.testing.type == 'validation' &&
             metadata.testing.subtype &&
             metadata.testing.subtype == 'formula' )
-        // they are all entitled "/path/filename N.putdown" for some N,
+        // they are all entitled "/path/filename N.smackdown" for some N,
         // so sort them by that value of N in increasing order.
         const getNum = key => {
             const parts = key.split( ' ' )
@@ -815,7 +815,7 @@ describe( 'Validation', () => {
             metadata.testing.type == 'validation' &&
             metadata.testing.subtype &&
             metadata.testing.subtype == 'blatant instantiation hint' )
-        // they are all entitled "/path/filename N.putdown" for some N,
+        // they are all entitled "/path/filename N.smackdown" for some N,
         // so sort them by that value of N in increasing order.
         const getNum = key => {
             const parts = key.split( ' ' )
