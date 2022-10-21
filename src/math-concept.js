@@ -2,6 +2,15 @@
 import { Connection } from './connection.js'
 import { SourceMap  } from './source-map.js'
 
+// Check if the global.disableEventTarget is set to true, and if it is, don't 
+// use the EventTarget superclass.  This can then be set by a client by loading
+// the disable-event-target.js module before loading math-concept.js. The default
+// for all other clients is to allow it.  Note that we have to test if global is 
+// undeclared first, for when this module is being imported in a browser.
+//
+let Superclass = (!(typeof global==='undefined') && global.disableEventTarget) ? 
+                  class { emit(){} } : EventTarget
+
 /**
  * The MathConcept class, an n-ary tree of MathConcept instances, using functions
  * like {@link MathConcept#parent parent()} and {@link MathConcept#children children()}
@@ -24,16 +33,6 @@ import { SourceMap  } from './source-map.js'
  * This second category of subclasses is not intended to be fully specified, but can
  * grow and change over time, as new classes in that category are developed.
  */
-
-// Check if the global.disableEventTarget is set to true, and if it is, don't 
-// use the EventTarget superclass.  This can then be set by a client by loading
-// the disable-event-target.js module before loading math-concept.js. The default
-// for all other clients is to allow it.  Note that we have to test if global is 
-// undeclared first, for when this module is being imported in a browser.
-//
-let Superclass = (!(typeof global==='undefined') && global.disableEventTarget) ? 
-                  class { emit(){} } : EventTarget
-//
 export class MathConcept extends Superclass {
   
     //////
