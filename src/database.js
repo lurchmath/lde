@@ -1087,7 +1087,7 @@ const testingDatabase = [
         "description": "Citing the wrong formula"
       }
     },
-    "content": "\n(⇒ ¬ or),{\n\n    :{ :(⇒ P Q) (or (¬ P) Q) }            \\label{alt def of ⇒}\n    :{ (⇒ P P) }                          \\label{reflexive of ⇒}\n\n    // blatant instantiation hint\n    :{ :(⇒ A B) (or (¬ A) B) }            \\ref{reflexive of ⇒} \\invalid\n    // start a proof\n    {\n        :(⇒ A B)\n        (or (¬ A) B)                      \\valid\n    }\n\n}\n"
+    "content": "\n(⇒ ¬ or),{\n\n    :{ :(⇒ P Q) (or (¬ P) Q) }            \\label{alt def of ⇒}\n    :{ (⇒ P P) }                          \\label{reflexive of ⇒}\n\n    // blatant instantiation hint\n    { :(⇒ A B) (or (¬ A) B) \\invalid }    \\ref{reflexive of ⇒} \\invalid\n    // start a proof\n    {\n        :(⇒ A B)\n        (or (¬ A) B)                      \\valid\n    }\n\n}\n"
   },
   {
     "filename": "/validation tests/blatant instantiation hint 05.smackdown",

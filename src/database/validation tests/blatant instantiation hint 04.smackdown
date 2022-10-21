@@ -11,7 +11,7 @@ testing:
     :{ (⇒ P P) }                          \label{reflexive of ⇒}
 
     // blatant instantiation hint
-    :{ :(⇒ A B) (or (¬ A) B) }            \ref{reflexive of ⇒} \invalid
+    { :(⇒ A B) (or (¬ A) B) \invalid }    \ref{reflexive of ⇒} \invalid
     // start a proof
     {
         :(⇒ A B)
