@@ -2,19 +2,20 @@
 testing:
   type: validation
   subtype: blatant instantiation hint
-  description: "A valid instantiation, but not the one needed to justify the conclusion."
+  description: "A valid instantiation, but not the one needed to justify the conclusion"
 ---
 
-// document
+(⇒ ¬ or),{
 
-(⇒ ¬ or),{                                       
-  :{ :(⇒ P Q) (or (¬ P) Q) }              \label{"alt def of ⇒"}
-  
-  // blatant instantiation hint
-  :{ :(⇒ A A) (or (¬ A) A) \valid }     \ref{"alt def of ⇒"} \valid
-  // start a proof
-  {  
-     :(⇒ A B)                             
-     (or (¬ A) B)                         \invalid
-  }
+    :{ :(⇒ P Q) (or (¬ P) Q) }              \label{alt def of ⇒}
+    
+    // blatant instantiation hint
+    :{ :(⇒ A A) (or (¬ A) A) \valid }       \ref{alt def of ⇒} \valid
+
+    // start a proof
+    {
+        :(⇒ A B)
+        (or (¬ A) B)                         \invalid
+    }
+
 }

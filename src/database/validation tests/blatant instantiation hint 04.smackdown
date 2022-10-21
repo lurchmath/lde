@@ -2,20 +2,20 @@
 testing:
   type: validation
   subtype: blatant instantiation hint
-  description: "Citing the wrong formula."
+  description: "Citing the wrong formula"
 ---
 
-// document
+(⇒ ¬ or),{
 
-(⇒ ¬ or),{                                
-  :{ :(⇒ P Q) (or (¬ P) Q) }     \label{"alt def of ⇒"}
-  :{ (⇒ P P) }                   \label{"reflexive of ⇒"} 
+    :{ :(⇒ P Q) (or (¬ P) Q) }            \label{alt def of ⇒}
+    :{ (⇒ P P) }                          \label{reflexive of ⇒}
 
-  // blatant instantiation hint
-  :{ :(⇒ A B) (or (¬ A) B) \invalid }   \ref{"reflexive of ⇒"} \valid
-  // start a proof
-  {  
-     :(⇒ A B)                             
-     (or (¬ A) B)                 \valid
-  }
+    // blatant instantiation hint
+    :{ :(⇒ A B) (or (¬ A) B) }            \ref{reflexive of ⇒} \invalid
+    // start a proof
+    {
+        :(⇒ A B)
+        (or (¬ A) B)                      \valid
+    }
+
 }

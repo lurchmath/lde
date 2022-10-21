@@ -614,9 +614,14 @@ describe( 'Validation', () => {
          && x != x.parent().lastChild()
         const accessibles = concl.accessibles( false, document )
             .filter( a => !isBoundInAnEnv( a ) ).reverse()
-        return new Environment(
+        const result = new Environment(
             ...accessibles.map( a => a.copy().makeIntoA( 'given' ) ),
             concl.copy() )
+        Array.from( result.descendantsIterator() ).forEach( d =>
+            d.clearAttributes( 'expected validation result',
+                               'validation result', 'label', 'ref' ) )
+        Scoping.clearImplicitDeclarations( result )
+        return result
     }
 
     // Utility function:  Often we know that a LogicConcept has failed a
@@ -651,9 +656,9 @@ describe( 'Validation', () => {
         }
         formulaTests.sort( ( a, b ) => getNum( a ) - getNum( b ) )
         
-        let totalTime = 0
         // set the following to true for validation timing spam on console:
         const timingTest = false
+        let totalTime = 0
         // Now run each test as follows...
         Validation.setOptions( 'tool',
             'classical propositional logic on conclusions' )
@@ -770,6 +775,182 @@ describe( 'Validation', () => {
                     `${location} has non-conclusion marked valid`
                 ).to.equal( true )
                 // validate it
+                const sequent = getSequent( toValidate )
+                if ( timingTest ) {
+                    console.log( location )
+                    console.log( '\tsequent ending in '
+                               + toValidate.toPutdown().trim() )
+                }
+                const startTime = new Date
+                Validation.validate( sequent )
+                const endTime = new Date
+                if ( timingTest )
+                    console.log( `\tcompleted in ${(endTime-startTime)/1000}s` )
+                totalTime += endTime - startTime
+                // check to see if we got the right result
+                const expected = toValidate.getAttribute(
+                    'expected validation result' )
+                const actual = Validation.result( sequent.lastChild() )
+                if ( timingTest )
+                    console.log( `\t${JSON.stringify(actual)}` )
+
+                if ( actual.result != expected.result )
+                    console.log( sequent.toPutdown() )
+
+                expect( actual.result ).to.equal( expected.result,
+                    `${location} has wrong validation result` )
+                if ( expected.hasOwnProperty( 'message' ) )
+                    expect( actual.message ).to.equal( expected.message,
+                        `${location} has wrong validation message` )
+            } )
+        } )
+        if ( timingTest )
+            console.log( `Total elapsed time: ${totalTime/1000}s` )
+    } )
+
+    it( 'Should check blatant instantiation hints', () => {
+        // Get all blatant instantiation tests from the database
+        const formulaTests = Database.filterByMetadata( metadata =>
+            metadata.testing && metadata.testing.type &&
+            metadata.testing.type == 'validation' &&
+            metadata.testing.subtype &&
+            metadata.testing.subtype == 'blatant instantiation hint' )
+        // they are all entitled "/path/filename N.putdown" for some N,
+        // so sort them by that value of N in increasing order.
+        const getNum = key => {
+            const parts = key.split( ' ' )
+            return parseInt( parts.last().split( '.' )[0] )
+        }
+        formulaTests.sort( ( a, b ) => getNum( a ) - getNum( b ) )
+        
+        // set the following to true for validation timing spam on console:
+        const timingTest = false
+        let totalTime = 0
+        Validation.setOptions( 'tool',
+            'classical propositional logic on conclusions' )
+        formulaTests.forEach( key => {
+            // Look up the test with the given key and ensure it contains
+            // exactly one LogicConcept, the "document."
+            const LCs = Database.getObjects( key )
+            expect( LCs ).to.have.length( 1,
+                `Malformed test: ${key} should have one LogicConcept in it` )
+            let document = LCs[0]
+            // Process \[in]valid[{...}] commands
+            expect(
+                () => processValidityCommands( document ),
+                `Processing \\[in]valid[{...}] commands in ${key}`
+            ).not.to.throw()
+            // Now we should be able to convert the document to an LC
+            document = document.interpret()
+            // Ensure the document passes a scoping check
+            Scoping.validate( document, Scoping.declareInAncestor )
+            expect(
+                document.hasDescendantSatisfying(
+                    d => !!Scoping.scopeErrors( d ) ),
+                `Ensuring no scoping errors in document for ${key}`
+            ).to.equal( false )
+            // Get mapping from labels to LCs
+            const labelLookup = labelMapping( document )
+
+            // Process all blatant instantiation hints as follows:
+            const BIHs = document.descendantsSatisfying(
+                d => d.hasAttribute( 'ref' ) )
+            BIHs.forEach( BIH => {
+                // Fetch the expectations the database file gives
+                const test = BIH.getAttribute( 'expected validation result' )
+                const location = `In ${key} at ${BIH.address()}`
+
+                // If there was no such thing, this test is incorrectly formed.
+                expect(
+                    test,
+                    `${location}: incorrectly-formed blatant instantiation hint`
+                ).to.be.ok
+
+                // Does it cite a formula that is accessible to B?  If not,
+                // mark it invalid, and then check that it was indeed expected
+                // to be \invalid{} in the test file.
+                const cited = labelLookup[BIH.getAttribute( 'ref' )]
+                // Might fail because no such cited thing
+                if ( !cited )
+                    return expectInvalidity(
+                        `${location}: bad \\ref{}`,
+                        'no such formula',
+                        test.result, test.reason )
+                // Might fail because the cited thing is inaccessible
+                if ( !cited.isAccessibleTo( BIH ) )
+                    return expectInvalidity(
+                        `${location}: inaccessible \\ref{}`,
+                        'formula not accessible',
+                        test.result, test.reason )
+                // OK, the cited formula can be used, so let's prepare to do so
+                // by making it a formula and normalizing attributes across
+                // both the formula and the purported instantiation of it
+                const formula = Formula.from( cited )
+                Scoping.clearImplicitDeclarations( formula )
+                formula.clearAttributes()
+                const cleanBIH = BIH.copy()
+                Scoping.clearImplicitDeclarations( cleanBIH )
+                Array.from( cleanBIH.descendantsIterator() ).forEach( d =>
+                    d.clearAttributes( 'ref', 'expected validation result' ) )
+                cleanBIH.clearAttributes(
+                    MathConcept.typeAttributeKey( 'given' ) )
+                
+                // Use the Formula.instantiations() function to determine if B
+                // is, indeed, an instantiation of the cited formula, and mark
+                // it valid/invalid in response, then the test suite should
+                // check that it was indeed marked \valid{} or \invalid{}
+                // (resp.) in the test file.
+                let correctInstantiation = false
+                for ( let i of Formula.instantiations( formula, cleanBIH ) ) {
+                    correctInstantiation = true
+                    break
+                }
+                if ( correctInstantiation ) {
+                    expect( test.result ).to.equal( 'valid' )
+                } else {
+                    return expectInvalidity(
+                        `${location}: invalid instantiation`,
+                        'invalid instantiation',
+                        test.result, test.reason )
+                }
+                
+                // Since the BIH was valid, insert a copy of it after the
+                // formula it instantiates.  But before you do so, erase all
+                // validation expectations inside it, because such expectations
+                // are based on the instantiation having appeared beforehand!
+                const toInsert = BIH.copy()
+                Array.from( toInsert.descendantsIterator() ).forEach( d =>
+                    d.clearAttributes( 'expected validation result' ) )
+                cited.parent().insertChild(
+                    toInsert, cited.indexInParent() + 1 )
+            } )
+
+            // Now all BIHs have been processed.
+            // For each non-BIH marked with \[in]valid{} (which may include
+            // conclusions inside of BIHs):
+            document.descendantsSatisfying(
+                d => d.hasAttribute( 'expected validation result' )
+                  && !d.hasAttribute( 'ref' )
+            ).filter(
+                toValidate => !BIHs.includes( toValidate )
+            ).forEach( toValidate => {
+                const location = `In ${key} at ${toValidate.address()}`
+                // Ensure that it’s a claim, and if not, throw an error that
+                // the test file is incorrectly formed, because the only other
+                // type of validation this test suite does is propositional,
+                // which must be done on conclusions...but when we build a
+                // sequent from the claim, any given ancestors won't be present
+                // anyway, so claim status is sufficient.  (Especially since we
+                // will want to validate claims inside BIHs, which will often
+                // be flagged as givens in a test file.)
+                expect(
+                    toValidate.isA( 'given' ),
+                    `${location}: must be a claim`
+                ).to.equal( false )
+
+                // Validate the conclusion propositionally and compare the
+                // validation result to the \[in]valid{} marker on the
+                // conclusion as part of the test.
                 const sequent = getSequent( toValidate )
                 if ( timingTest ) {
                     console.log( location )
