@@ -7,7 +7,6 @@ import { } from '../src/validation/float-arithmetic.js'
 import { MathConcept } from '../src/math-concept.js'
 import { LogicConcept } from '../src/logic-concept.js'
 import { Environment } from '../src/environment.js'
-import { BindingEnvironment } from '../src/binding-environment.js'
 import { Application } from '../src/application.js'
 import { Symbol as LurchSymbol } from '../src/symbol.js'
 import Formula from '../src/formula.js'
@@ -603,27 +602,6 @@ describe( 'Validation', () => {
         return result
     }
 
-    // Utility function used by tests below to build a sequent from a conclusion
-    // (Just piles all the accessibles into an environment, except it ensures
-    // that all of them are marked givens, and it does not include any symbols
-    // bound by a BindingEnvironment, which are technically accessible by the
-    // tree definition of accessibility, but not logically usable as premises.)
-    const getSequent = concl => {
-        const isBoundInAnEnv = x =>
-            ( x.parent() instanceof BindingEnvironment )
-         && x != x.parent().lastChild()
-        const accessibles = concl.accessibles( false, document )
-            .filter( a => !isBoundInAnEnv( a ) ).reverse()
-        const result = new Environment(
-            ...accessibles.map( a => a.copy().makeIntoA( 'given' ) ),
-            concl.copy() )
-        Array.from( result.descendantsIterator() ).forEach( d =>
-            d.clearAttributes( 'expected validation result',
-                               'validation result', 'label', 'ref' ) )
-        Scoping.clearImplicitDeclarations( result )
-        return result
-    }
-
     // Utility function:  Often we know that a LogicConcept has failed a
     // validation test, and we need to check that the test itself expects
     // exactly that result, possibly with a specific error message provided by
@@ -775,7 +753,7 @@ describe( 'Validation', () => {
                     `${location} has non-conclusion marked valid`
                 ).to.equal( true )
                 // validate it
-                const sequent = getSequent( toValidate )
+                const sequent = new Validation.Sequent( toValidate )
                 if ( timingTest ) {
                     console.log( location )
                     console.log( '\tsequent ending in '
@@ -951,7 +929,7 @@ describe( 'Validation', () => {
                 // Validate the conclusion propositionally and compare the
                 // validation result to the \[in]valid{} marker on the
                 // conclusion as part of the test.
-                const sequent = getSequent( toValidate )
+                const sequent = new Validation.Sequent( toValidate )
                 if ( timingTest ) {
                     console.log( location )
                     console.log( '\tsequent ending in '

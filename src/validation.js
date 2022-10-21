@@ -40,6 +40,8 @@ import {
     getOptions, setOptions, clearOptions, result, setResult, clearResult,
     validate
 } from './validation/engine.js'
+// And the sequent class:
+import { Sequent } from './validation/sequent.js'
 
 
 // A meta-tool: validateConclusionsWith(T) returns a validation tool that, if
@@ -99,5 +101,6 @@ export default {
     installTool, installedToolNames, installedTool,
     functionToTool, installConclusionsVersion,
     getOptions, setOptions, clearOptions, result, setResult, clearResult,
-    validate, validateConclusionsWith
+    validate, validateConclusionsWith,
+    Sequent
 }
