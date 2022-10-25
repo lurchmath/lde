@@ -619,6 +619,33 @@ describe( 'Validation', () => {
         ).to.equal( true )
     }
 
+    // Utility function:  Run the validation algorithm on the sequent for a
+    // given claim, and return the time the actual validation algorithm took.
+    const validateSequentFor = ( claim, key ) => {
+        const location = `${key}@${claim.address()}`
+        // Validate the conclusion propositionally and compare the
+        // validation result to the \[in]valid{} marker on the
+        // conclusion as part of the test.
+        const sequent = new Validation.Sequent( claim )
+        const startTime = new Date
+        Validation.validate( sequent )
+        const endTime = new Date
+        // check to see if we got the right result
+        const expected = claim.getAttribute(
+            'expected validation result' )
+        const actual = Validation.result( sequent.lastChild() )
+
+        if ( actual.result != expected.result )
+            console.log( sequent.toPutdown() )
+
+        expect( actual.result ).to.equal( expected.result,
+            `${location} has wrong validation result` )
+        if ( expected.hasOwnProperty( 'message' ) )
+            expect( actual.message ).to.equal( expected.message,
+                `${location} has wrong validation message` )
+        return endTime - startTime
+    }
+
     it( 'should correctly check formula instantiations', () => {
         // Get all formula instantiation tests from the database
         const formulaTests = Database.filterByMetadata( metadata =>
@@ -634,12 +661,9 @@ describe( 'Validation', () => {
         }
         formulaTests.sort( ( a, b ) => getNum( a ) - getNum( b ) )
         
-        // set the following to true for validation timing spam on console:
-        const timingTest = false
-        let totalTime = 0
+        let clTime = 0
+        let intTime = 0
         // Now run each test as follows...
-        Validation.setOptions( 'tool',
-            'classical propositional logic on conclusions' )
         formulaTests.forEach( key => {
             // Look up the test with the given key and ensure it contains
             // more than one LogicConcept, the first being the "document" and
@@ -735,47 +759,29 @@ describe( 'Validation', () => {
 
             // Now run the validation tests in that file
             // What was marked valid/invalid, and thus needs validating?
-            document.descendantsSatisfying(
+            const arrayToValidate = document.descendantsSatisfying(
                 d => d.hasAttribute( 'expected validation result' )
-            ).forEach( toValidate => {
-                const location = `${key}@${toValidate.address()}`
+            )
+            // First, ensure all are conclusions
+            arrayToValidate.forEach( toValidate => {
                 // ensure it's a conclusion
                 expect(
                     toValidate.isAConclusionIn( document ),
-                    `${location} has non-conclusion marked valid`
+                    `Validating non-conclusion: ${key}@${toValidate.address()}`
                 ).to.equal( true )
-                // validate it
-                const sequent = new Validation.Sequent( toValidate )
-                if ( timingTest ) {
-                    console.log( location )
-                    console.log( '\tsequent ending in '
-                               + toValidate.toPutdown().trim() )
-                }
-                const startTime = new Date
-                Validation.validate( sequent )
-                const endTime = new Date
-                if ( timingTest )
-                    console.log( `\tcompleted in ${(endTime-startTime)/1000}s` )
-                totalTime += endTime - startTime
-                // check to see if we got the right result
-                const expected = toValidate.getAttribute(
-                    'expected validation result' )
-                const actual = Validation.result( sequent.lastChild() )
-                if ( timingTest )
-                    console.log( `\t${JSON.stringify(actual)}` )
-
-                if ( actual.result != expected.result )
-                    console.log( sequent.toPutdown() )
-
-                expect( actual.result ).to.equal( expected.result,
-                    `${location} has wrong validation result` )
-                if ( expected.hasOwnProperty( 'message' ) )
-                    expect( actual.message ).to.equal( expected.message,
-                        `${location} has wrong validation message` )
             } )
+            // Run classical and intuitionistic validation on all
+            Validation.setOptions( 'tool',
+                'classical propositional logic on conclusions' )
+            arrayToValidate.forEach( toValidate =>
+                clTime += validateSequentFor( toValidate, key ) )
+            Validation.setOptions( 'tool',
+                'intuitionistic propositional logic on conclusions' )
+            arrayToValidate.forEach( toValidate =>
+                intTime += validateSequentFor( toValidate, key ) )
         } )
-        if ( timingTest )
-            console.log( `Total elapsed time: ${totalTime/1000}s` )
+        // console.log( `INT / CL = ${intTime}ms / ${clTime}ms = `
+        //            + Number( intTime / clTime ).toFixed( 2 ) )
     } )
 
     it( 'Should check blatant instantiation hints', () => {
@@ -793,11 +799,9 @@ describe( 'Validation', () => {
         }
         formulaTests.sort( ( a, b ) => getNum( a ) - getNum( b ) )
         
-        // set the following to true for validation timing spam on console:
-        const timingTest = false
-        let totalTime = 0
-        Validation.setOptions( 'tool',
-            'classical propositional logic on conclusions' )
+        let clTime = 0
+        let intTime = 0
+        // Now run each test as follows...
         formulaTests.forEach( key => {
             // Look up the test with the given key and ensure it contains
             // exactly one LogicConcept, the "document."
@@ -894,13 +898,14 @@ describe( 'Validation', () => {
             // Now all BIHs have been processed.
             // For each non-BIH marked with \[in]valid{} (which may include
             // conclusions inside of BIHs):
-            document.descendantsSatisfying(
+            const arrayToValidate = document.descendantsSatisfying(
                 d => d.hasAttribute( 'expected validation result' )
                   && !d.hasAttribute( 'ref' )
             ).filter(
                 toValidate => !BIHs.includes( toValidate )
-            ).forEach( toValidate => {
-                const location = `In ${key} at ${toValidate.address()}`
+            )
+            // Ensure all of them are claims
+            arrayToValidate.forEach( toValidate => {
                 // Ensure that it’s a claim, and if not, throw an error that
                 // the test file is incorrectly formed, because the only other
                 // type of validation this test suite does is propositional,
@@ -911,43 +916,21 @@ describe( 'Validation', () => {
                 // be flagged as givens in a test file.)
                 expect(
                     toValidate.isA( 'given' ),
-                    `${location}: must be a claim`
+                    `${key}@${toValidate.address()} must be a claim`
                 ).to.equal( false )
-
-                // Validate the conclusion propositionally and compare the
-                // validation result to the \[in]valid{} marker on the
-                // conclusion as part of the test.
-                const sequent = new Validation.Sequent( toValidate )
-                if ( timingTest ) {
-                    console.log( location )
-                    console.log( '\tsequent ending in '
-                               + toValidate.toPutdown().trim() )
-                }
-                const startTime = new Date
-                Validation.validate( sequent )
-                const endTime = new Date
-                if ( timingTest )
-                    console.log( `\tcompleted in ${(endTime-startTime)/1000}s` )
-                totalTime += endTime - startTime
-                // check to see if we got the right result
-                const expected = toValidate.getAttribute(
-                    'expected validation result' )
-                const actual = Validation.result( sequent.lastChild() )
-                if ( timingTest )
-                    console.log( `\t${JSON.stringify(actual)}` )
-
-                if ( actual.result != expected.result )
-                    console.log( sequent.toPutdown() )
-
-                expect( actual.result ).to.equal( expected.result,
-                    `${location} has wrong validation result` )
-                if ( expected.hasOwnProperty( 'message' ) )
-                    expect( actual.message ).to.equal( expected.message,
-                        `${location} has wrong validation message` )
             } )
+            // Run validation algorithm on each
+            Validation.setOptions( 'tool',
+                'classical propositional logic on conclusions' )
+            arrayToValidate.forEach( toValidate =>
+                clTime += validateSequentFor( toValidate, key ) )
+            Validation.setOptions( 'tool',
+                'intuitionistic propositional logic on conclusions' )
+            arrayToValidate.forEach( toValidate =>
+                intTime += validateSequentFor( toValidate, key ) )
         } )
-        if ( timingTest )
-            console.log( `Total elapsed time: ${totalTime/1000}s` )
+        // console.log( `INT / CL = ${intTime}ms / ${clTime}ms = `
+        //            + Number( intTime / clTime ).toFixed( 2 ) )
     } )
 
 } )
