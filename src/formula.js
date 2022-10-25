@@ -238,13 +238,13 @@ const replaceIfPossible = ( target, replacement, preserve ) => {
  *   `candidate`; all possible ways will be enumerated, though it may be that
  *   there are no such ways, in which case the enumeration will be empty
  */
-const instantiations = function* ( formula, candidate ) {
+const allPossibleInstantiations = function* ( formula, candidate ) {
     const problem = problemFromExpressionsWithin( formula, candidate )
     if ( !problem ) return // no isomorphism == no results
     yield* problem.solutions()
 }
 
-// Helper function used by instantiations(), above.
+// Helper function used by allPossibleInstantiations(), above.
 // Given two LogicConcepts that are not necessarily expressions, this ensures
 // that they have the same structure outside of all expressions, and if so, it
 // pairs up the corresponding expressions to produce a matching problem, which
@@ -288,4 +288,4 @@ const betaIfNeeded = expr =>
     expr.hasDescendantSatisfying( Matching.isAnEFA ) ?
     Matching.fullBetaReduce( expr ) : expr
 
-export default { from, domain, instantiate, instantiations }
+export default { from, domain, instantiate, allPossibleInstantiations }

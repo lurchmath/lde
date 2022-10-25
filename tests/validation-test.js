@@ -873,13 +873,14 @@ describe( 'Validation', () => {
                 cleanBIH.clearAttributes(
                     MathConcept.typeAttributeKey( 'given' ) )
                 
-                // Use the Formula.instantiations() function to determine if B
-                // is, indeed, an instantiation of the cited formula, and mark
-                // it valid/invalid in response, then the test suite should
-                // check that it was indeed marked \valid{} or \invalid{}
-                // (resp.) in the test file.
+                // Use the Formula.allPossibleInstantiations() function to
+                // determine if B is, indeed, an instantiation of the cited
+                // formula, and mark it valid/invalid in response, then the
+                // test suite should check that it was indeed marked \valid{}
+                // or \invalid{} (resp.) in the test file.
                 let correctInstantiation = false
-                for ( let i of Formula.instantiations( formula, cleanBIH ) ) {
+                for ( let i of Formula.allPossibleInstantiations(
+                        formula, cleanBIH ) ) {
                     correctInstantiation = true
                     break
                 }

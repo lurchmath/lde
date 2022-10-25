@@ -1064,7 +1064,8 @@ describe( 'Formulas', () => {
         candidate = LogicConcept.fromPutdown( `
             { :foo :bar (^ foo bar) }
         ` )[0]
-        results = Array.from( Formula.instantiations( formula, candidate ) )
+        results = Array.from(
+            Formula.allPossibleInstantiations( formula, candidate ) )
         expect( solSetsEq( results, solSet( results[0]._problem,
             { 'A' : 'foo', 'B' : 'bar' }
         ) ) ).equals( true )
@@ -1076,7 +1077,8 @@ describe( 'Formulas', () => {
         candidate = LogicConcept.fromPutdown( `
             { :foo :bar (^ foo baz) }
         ` )[0]
-        results = Array.from( Formula.instantiations( formula, candidate ) )
+        results = Array.from(
+            Formula.allPossibleInstantiations( formula, candidate ) )
         expect( results ).to.eql( [ ] )
 
         // Test 3: Still a simple problem, but with nested environments.
@@ -1090,7 +1092,8 @@ describe( 'Formulas', () => {
                 (<=> happy clapping)
             }
         ` )[0]
-        results = Array.from( Formula.instantiations( formula, candidate ) )
+        results = Array.from(
+            Formula.allPossibleInstantiations( formula, candidate ) )
         expect( solSetsEq( results, solSet( results[0]._problem,
             { 'X' : 'happy', 'Y' : 'clapping' }
         ) ) ).equals( true )
@@ -1106,7 +1109,8 @@ describe( 'Formulas', () => {
                 (<=> clapping happy) // mistake here; these args are reversed
             }
         ` )[0]
-        results = Array.from( Formula.instantiations( formula, candidate ) )
+        results = Array.from(
+            Formula.allPossibleInstantiations( formula, candidate ) )
         expect( results ).to.eql( [ ] )
 
         // Test 5: Same as #3, but only incorrect via nesting
@@ -1120,7 +1124,8 @@ describe( 'Formulas', () => {
                 (<=> happy clapping)
             }
         ` )[0]
-        results = Array.from( Formula.instantiations( formula, candidate ) )
+        results = Array.from(
+            Formula.allPossibleInstantiations( formula, candidate ) )
         expect( results ).to.eql( [ ] )
 
         // Test 6: Same as #3, but only incorrect via missing "given" flag
@@ -1134,7 +1139,8 @@ describe( 'Formulas', () => {
                 (<=> happy clapping)
             }
         ` )[0]
-        results = Array.from( Formula.instantiations( formula, candidate ) )
+        results = Array.from(
+            Formula.allPossibleInstantiations( formula, candidate ) )
         expect( results ).to.eql( [ ] )
 
         // Test 7: Slightly less simple problem, because it has EFAs.
@@ -1148,7 +1154,8 @@ describe( 'Formulas', () => {
                 (= (- 3 1) (+ y 1))
             }
         ` )[0]
-        results = Array.from( Formula.instantiations( formula, candidate ) )
+        results = Array.from(
+            Formula.allPossibleInstantiations( formula, candidate ) )
         expect( solSetsEq( results, solSet( results[0]._problem,
             {
                 'a' : 'x',
@@ -1164,7 +1171,8 @@ describe( 'Formulas', () => {
         candidate = LogicConcept.fromPutdown( `
             { (^ 500 2) }
         ` )[0]
-        results = Array.from( Formula.instantiations( formula, candidate ) )
+        results = Array.from(
+            Formula.allPossibleInstantiations( formula, candidate ) )
         expect( solSetsEq( results, solSet( results[0]._problem,
             { 'P' : lambda( 'v', '(^ v 2)' ) },
             { 'P' : lambda( 'v', '(^ 500 2)' ) }
@@ -1181,7 +1189,8 @@ describe( 'Formulas', () => {
                 (= (- x 1) (+ y 1))  // they are reversed
             }
         ` )[0]
-        results = Array.from( Formula.instantiations( formula, candidate ) )
+        results = Array.from(
+            Formula.allPossibleInstantiations( formula, candidate ) )
         expect( results ).to.eql( [ ] )
 
         // Test 10: Larger example, including both nested Envs and EFAs.
@@ -1203,7 +1212,8 @@ describe( 'Formulas', () => {
                 (∀ a , (not (is_silly a)))
             }
         ` )[0]
-        results = Array.from( Formula.instantiations( formula, candidate ) )
+        results = Array.from(
+            Formula.allPossibleInstantiations( formula, candidate ) )
         expect( solSetsEq( results, solSet( results[0]._problem,
             {
                 'x' : 'a',
@@ -1230,7 +1240,8 @@ describe( 'Formulas', () => {
                 (∀ a , (not (is_silly a)))
             }
         ` )[0]
-        results = Array.from( Formula.instantiations( formula, candidate ) )
+        results = Array.from(
+            Formula.allPossibleInstantiations( formula, candidate ) )
         expect( results ).to.eql( [ ] )
     } )
 
