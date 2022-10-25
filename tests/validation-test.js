@@ -727,8 +727,7 @@ describe( 'Validation', () => {
                 expect(
                     () => {
                         result = Formula.instantiate(
-                            formula, test.instantiation,
-                            [ MathConcept.typeAttributeKey( 'given' ) ] )
+                            formula, test.instantiation )
                         Scoping.clearImplicitDeclarations( result )
                         Scoping.clearScopeErrors( result )
                     },

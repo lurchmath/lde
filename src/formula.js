@@ -16,6 +16,7 @@
  * @namespace Formula
  */
 
+import { MathConcept } from './math-concept.js'
 import { LogicConcept } from './logic-concept.js'
 import { BindingEnvironment } from './binding-environment.js'
 import { BindingExpression } from './binding-expression.js'
@@ -123,11 +124,14 @@ const domain = formula =>
  *   values of those attributes copied over to its instantiation.  All other
  *   attributes of the metavariable (including, typically, the fact that it is a
  *   metavariable) will be lost during the instantiation.  This defaults to the
- *   empty array, but the client can pass whatever attributes they choose here.
+ *   list containing just one entry, the "given" type attribute flag.
  * @memberof Formula
  * @alias Formula.instantiate
  */
-const instantiate = ( formula, instantiation, preserve = [ ] ) => {
+const instantiate = (
+    formula, instantiation,
+    preserve = [ MathConcept.typeAttributeKey( 'given' ) ]
+) => {
     // handle the atomic case, where .replaceWith() would fail, and where we
     // don't need to check any restrictions on the parent, because there is no
     // parent in this case (since we're making a copy).  Furthermore, in this
