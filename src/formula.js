@@ -288,4 +288,114 @@ const betaIfNeeded = expr =>
     expr.hasDescendantSatisfying( Matching.isAnEFA ) ?
     Matching.fullBetaReduce( expr ) : expr
 
-export default { from, domain, instantiate, allPossibleInstantiations }
+/**
+ * To facilitate marking some {@link LogicConcept LogicConcepts} as cached
+ * instantiations of formulas, we declare a string constant that can be used
+ * with the {@link MathConcept#isA isA()} and {@link MathConcept#asA asA()} and
+ * {@link MathConcept#makeIntoA makeIntoA()} functions in the
+ * {@link MathConcept MathConcept} class.
+ * 
+ * This is used when we have a formula `F` and the inferences done in the scope
+ * of that formula cite the formula and create instantiations of it.  Some of
+ * our algorithms then insert those instantiations as next siblings following
+ * `F` so that they are accessible at any location at which `F` is accessible.
+ * But in order to distinguish those algorithmically-created instantiations
+ * from content that was authored by the user, we mark algorithmically-created
+ * instantiations with an attribute.  Specifically, for such an instantiation
+ * `I`, we would call `I.makeIntoA( cachedInstantiation )`, and can then test
+ * that later with `I.isA( cachedInstantiation )`.
+ * 
+ * @see {@link Formula.addCachedInstantiation addCachedInstantiation()}
+ * @see {@link Formula.allCachedInstantiations allCachedInstantiations()}
+ * @see {@link Formula.clearCachedInstantiations clearCachedInstantiations()}
+ * @alias Formula.cachedInstantiation
+ */
+const cachedInstantiation = 'LDE CI'
+
+/**
+ * As described in {@link Formula.cachedInstantiation this documentation}, we
+ * can insert after any formula instantiations of it.  This function adds a new
+ * instantiation to that cache.  It does not first check to be sure that the
+ * given instantiation is actually an instantiation of the given formula; the
+ * client is in charge of ensuring that.  This function inserts the given
+ * instantiation at the end of the given formula's instantiation cache and also
+ * marks it with {@link Formula.cachedInstantiation the appropriate attribute}
+ * so that it can be clearly identified as part of the cache.
+ * 
+ * If the formula has no parent, it can have no siblings, and thus this
+ * function cannot do its job and will instead throw an error.
+ * 
+ * @param {LogicConcept} formula add a cached instantiation of this formula
+ * @param {LogicConcept} instantiation the instantiation to add to the cache
+ * @see {@link Formula.allCachedInstantiations allCachedInstantiations()}
+ * @see {@link Formula.clearCachedInstantiations clearCachedInstantiations()}
+ * @alias Formula.addCachedInstantiation
+ */
+const addCachedInstantiation = ( formula, instantiation ) => {
+    if ( !formula.parent() )
+        throw new Error(
+            'Cannot insert cached instantiation: formula has no parent' )
+    const existing = allCachedInstantiations( formula )
+    const insertAfter = existing.length > 0 ? existing.last() : formula
+    insertAfter.parent().insertChild(
+        instantiation, insertAfter.indexInParent() + 1 )
+    instantiation.makeIntoA( cachedInstantiation )
+}
+
+/**
+ * As described in {@link Formula.cachedInstantiation this documentation}, we
+ * can insert after any formula instantiations of it.  The sequence of next
+ * siblings after a formula that have been marked as instantiations of it
+ * (using {@link Formula.cachedInstantiation this constant}) are that formula's
+ * instantiation cache.  This function returns that cache as a JavaScript
+ * array, in the same order that the siblings appear following the formula.  It
+ * may have zero or more entries, but will always be an array.
+ * 
+ * If the given formula has no parent, it will have no siblings and thus no
+ * instantiation cache, and this function will return an empty array.
+ * 
+ * @param {LogicConcept} formula the formula whose cache should be computed
+ * @returns {LogicConcept[]} the array of instantiations cached for the given
+ *   formula
+ * @see {@link Formula.addCachedInstantiation addCachedInstantiation()}
+ * @see {@link Formula.clearCachedInstantiations clearCachedInstantiations()}
+ * @alias Formula.allCachedInstantiations
+ */
+const allCachedInstantiations = formula => {
+    const parent = formula.parent()
+    if ( !parent ) return [ ]
+    const result = [ ]
+    const children = parent.children()
+    let i = formula.indexInParent() + 1
+    while ( i < children.length && children[i].isA( cachedInstantiation ) )
+        result.push( children[i++] )
+    return result
+}
+
+/**
+ * As described in {@link Formula.cachedInstantiation this documentation}, we
+ * can insert after any formula instantiations of it.  This function removes
+ * all entries from that cache.  Because the cache is defined to be the
+ * sequence of siblings following the formula that have the {@link
+ * Formula.cachedInstantiation appropriate attribute}, this function actually
+ * removes those {@link LogicConcept LogicConcepts} from their parent (which is
+ * also the parent of the given formula).
+ * 
+ * If the given formula has no parent, it will have no instantiation cache, and
+ * so this function will do nothing.
+ * 
+ * @param {LogicConcept} formula add a cached instantiation of this formula
+ * @param {LogicConcept} instantiation the instantiation to add to the cache
+ * @see {@link Formula.allCachedInstantiations allCachedInstantiations()}
+ * @see {@link Formula.addCachedInstantiation addCachedInstantiation()}
+ * @alias Formula.clearCachedInstantiations
+ */
+const clearCachedInstantiations = formula => {
+    allCachedInstantiations( formula ).forEach(
+        instantiation => instantiation.remove() )
+}
+
+export default {
+    from, domain, instantiate, allPossibleInstantiations, cachedInstantiation,
+    addCachedInstantiation, allCachedInstantiations, clearCachedInstantiations
+}

@@ -5,6 +5,7 @@ import Formula from '../src/formula.js'
 // Import other classes we need to do the testing
 import { MathConcept } from '../src/math-concept.js'
 import { LogicConcept } from '../src/logic-concept.js'
+import { Environment } from '../src/environment.js'
 import { Symbol as LurchSymbol } from '../src/symbol.js'
 import Matching from '../src/matching.js'
 
@@ -1243,6 +1244,107 @@ describe( 'Formulas', () => {
         results = Array.from(
             Formula.allPossibleInstantiations( formula, candidate ) )
         expect( results ).to.eql( [ ] )
+    } )
+
+    it( 'Should support caching formula instantiations as siblings', () => {
+
+        // Can we mark LogicConcepts as cached formula instantiations?
+        const testSymbol = new LurchSymbol( 'test' )
+        expect( Formula.cachedInstantiation ).to.be.ok
+        expect( testSymbol.isA( Formula.cachedInstantiation ) )
+            .to.equal( false )
+        expect( () => testSymbol.makeIntoA( Formula.cachedInstantiation ) )
+            .not.to.throw()
+        expect( testSymbol.isA( Formula.cachedInstantiation ) )
+            .to.equal( true )
+        expect( () => testSymbol.unmakeIntoA( Formula.cachedInstantiation ) )
+            .not.to.throw()
+        expect( testSymbol.isA( Formula.cachedInstantiation ) )
+            .to.equal( false )
+
+        // If we try to add a cached instantiation to a formula with no parent,
+        // it should throw an error.
+        let formula
+        let instantiation1, instantiation2
+        formula = buildFormula( `
+            { :A  :B  (^ A B) }
+        `, [ '^' ] )
+        instantiation1 = LogicConcept.fromPutdown( `
+            { :x  :y  (^ x y) }
+        ` )[0]
+        expect( () => Formula.addCachedInstantiation( formula, instantiation1 ) )
+            .to.throw( /^Cannot insert.*formula has no parent$/ )
+        // In that situation, the cache should be an empty list
+        expect( Formula.allCachedInstantiations( formula ) ).to.eql( [ ] )
+
+        // But if it has a parent, we can insert several, and they show up as
+        // next siblings. We also test fetching the cache before and after each.
+        let parentEnvironment
+        parentEnvironment = new Environment(
+            LogicConcept.fromPutdown( '(first child of environment)' )[0],
+            formula,
+            new LurchSymbol( 'last_child_of_environment' )
+        )
+        // test initial state:
+        expect( parentEnvironment.numChildren() ).to.equal( 3 )
+        expect( parentEnvironment.children().some( child =>
+            child.isA( Formula.cachedInstantiation ) ) ).to.equal( false )
+        expect( Formula.allCachedInstantiations( formula ) ).to.eql( [ ] )
+        // no errors when we add one, and all subsequent tests pass:
+        expect( () => Formula.addCachedInstantiation( formula, instantiation1 ) )
+            .not.to.throw()
+        expect( parentEnvironment.numChildren() ).to.equal( 4 )
+        expect(
+            parentEnvironment.child( 0 ).isA( Formula.cachedInstantiation )
+        ).to.equal( false )
+        expect(
+            parentEnvironment.child( 1 ).isA( Formula.cachedInstantiation )
+        ).to.equal( false )
+        expect(
+            parentEnvironment.child( 2 ).isA( Formula.cachedInstantiation )
+        ).to.equal( true )
+        expect(
+            parentEnvironment.child( 3 ).isA( Formula.cachedInstantiation )
+        ).to.equal( false )
+        expect( parentEnvironment.child( 1 ) ).to.equal( formula )
+        expect( parentEnvironment.child( 2 ) ).to.equal( instantiation1 )
+        expect( Formula.allCachedInstantiations( formula ) )
+            .to.eql( [ instantiation1 ] )
+        // no errors when we add another, and all subsequent tests pass:
+        instantiation2 = LogicConcept.fromPutdown( `
+            { :P  :Q  (^ P Q) }
+        ` )[0]
+        expect( () => Formula.addCachedInstantiation( formula, instantiation2 ) )
+            .not.to.throw()
+        expect( parentEnvironment.numChildren() ).to.equal( 5 )
+        expect(
+            parentEnvironment.child( 0 ).isA( Formula.cachedInstantiation )
+        ).to.equal( false )
+        expect(
+            parentEnvironment.child( 1 ).isA( Formula.cachedInstantiation )
+        ).to.equal( false )
+        expect(
+            parentEnvironment.child( 2 ).isA( Formula.cachedInstantiation )
+        ).to.equal( true )
+        expect(
+            parentEnvironment.child( 3 ).isA( Formula.cachedInstantiation )
+        ).to.equal( true )
+        expect(
+            parentEnvironment.child( 4 ).isA( Formula.cachedInstantiation )
+        ).to.equal( false )
+        expect( parentEnvironment.child( 1 ) ).to.equal( formula )
+        expect( parentEnvironment.child( 2 ) ).to.equal( instantiation1 )
+        expect( parentEnvironment.child( 3 ) ).to.equal( instantiation2 )
+        expect( Formula.allCachedInstantiations( formula ) )
+            .to.eql( [ instantiation1, instantiation2 ] )
+        
+        // Then if we remove the cached instantiations, they get removed.
+        expect( () => Formula.clearCachedInstantiations( formula ) )
+            .not.to.throw()
+        expect( parentEnvironment.numChildren() ).to.equal( 3 )
+        expect( parentEnvironment.children().some( child =>
+            child.isA( Formula.cachedInstantiation ) ) ).to.equal( false )
+        expect( Formula.allCachedInstantiations( formula ) ).to.eql( [ ] )
     } )
 
 } )
