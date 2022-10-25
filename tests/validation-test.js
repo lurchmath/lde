@@ -685,8 +685,6 @@ describe( 'Validation', () => {
                         test.result, test.reason )
                 const original = labelLookup[test.formula]
                 const formula = Formula.from( original )
-                formula.clearAttributes()
-                formula.makeIntoA( 'given' )
                 // Ensure the correct set of metavariables was used
                 const testDomain = new Set()
                 Object.keys( test.instantiation ).forEach( key => {
@@ -725,12 +723,8 @@ describe( 'Validation', () => {
                 // All errors have been checked; this should succeed:
                 let result
                 expect(
-                    () => {
-                        result = Formula.instantiate(
-                            formula, test.instantiation )
-                        Scoping.clearImplicitDeclarations( result )
-                        Scoping.clearScopeErrors( result )
-                    },
+                    () => result = Formula.instantiate(
+                        formula, test.instantiation ),
                     `Doing the instantiation of ${test.formula} in ${key}`
                 ).not.to.throw()
                 // And the test should have expected that:
@@ -858,6 +852,7 @@ describe( 'Validation', () => {
                         `${location}: inaccessible \\ref{}`,
                         'formula not accessible',
                         test.result, test.reason )
+
                 // OK, the cited formula can be used, so let's prepare to do so
                 // by making it a formula and normalizing attributes across
                 // both the formula and the purported instantiation of it
@@ -891,14 +886,9 @@ describe( 'Validation', () => {
                         test.result, test.reason )
                 }
                 
-                // Since the BIH was valid, insert a copy of it after the
-                // formula it instantiates.  But before you do so, erase all
-                // validation expectations inside it, because such expectations
-                // are based on the instantiation having appeared beforehand!
-                const toInsert = BIH.copy()
-                Array.from( toInsert.descendantsIterator() ).forEach( d =>
-                    d.clearAttributes( 'expected validation result' ) )
-                Formula.addCachedInstantiation( cited, toInsert )
+                // Since the BIH was valid, insert the clean copy of it after
+                // the formula it instantiates.
+                Formula.addCachedInstantiation( cited, cleanBIH )
             } )
 
             // Now all BIHs have been processed.
