@@ -737,8 +737,7 @@ describe( 'Validation', () => {
                 // And the test should have expected that:
                 expect( test.result ).to.equal( 'valid' )
                 // Insert the instantiated version after the formula
-                original.parent().insertChild(
-                    result, original.indexInParent() + 1 )
+                Formula.addCachedInstantiation( original, result )
             } )
 
             // Now run the validation tests in that file
@@ -900,8 +899,7 @@ describe( 'Validation', () => {
                 const toInsert = BIH.copy()
                 Array.from( toInsert.descendantsIterator() ).forEach( d =>
                     d.clearAttributes( 'expected validation result' ) )
-                cited.parent().insertChild(
-                    toInsert, cited.indexInParent() + 1 )
+                Formula.addCachedInstantiation( cited, toInsert )
             } )
 
             // Now all BIHs have been processed.
