@@ -2,6 +2,9 @@
 import { Problem } from './problem.js'
 import { fullBetaReduce } from './expression-functions.js'
 
+// Utility function used by allInstantiations(), below.
+// Applies the given solution to the metavariables in the given pattern,
+// doing full beta reduction thereafter, in case it is necessary.
 const applyWithBeta = ( solution, pattern ) => {
     if ( !solution ) return pattern
     for ( let symbol of solution.domain() ) {
@@ -11,6 +14,10 @@ const applyWithBeta = ( solution, pattern ) => {
     return fullBetaReduce( pattern )
 }
 
+// Utility function used by allInstantiations(), below.
+// Creates a new Solution instances that is equal to a copy of s1 with all the
+// pairs from s2 added.  Note that this will throw an error if s1 and s2
+// disagree on the image of any metavariable.
 const unionOfSolutions = ( s1, s2 ) => {
     if ( !s1 ) return s2
     const result = s1.copy()
@@ -19,16 +26,58 @@ const unionOfSolutions = ( s1, s2 ) => {
     return result
 }
 
-// Input:
-//   patterns : JavaScript array of LCs with metavariables
-//   expressionLists : array of array of LCs without metavariables,
-//     must be the same length as patterns; one list per pattern
-//   soFar : Solution, optional, defaults to empty solution
-// Output:
-//   array of { solution : Solution, expressionIndices : [ i_1,...,i_N ] }
-//   where N == patterns.length
-//   and when expressionIndices[j] == k then
-//   solution instantiates patterns[j] to expressionLists[j][k]
+/**
+ * {@link Problem Matching problems} are of the form
+ * $\\{(p_1,e_1),\ldots,(p_n,e_n)\\}$, where each $p_i$ is pattern and each
+ * $e_i$ is an expression.  A {@link Solution Solution} $S$ to such a problem
+ * is such that for every $i\in\\{1,\ldots,n\\}$, $S(p_i)=e_i$.  You can
+ * compute the full set of such solutions with {@link Problem#solutions the
+ * solutions() member}.  More details are given in the documentation for
+ * {@link module:Matching the Matching module}.
+ * 
+ * This function generalizes that capability as follows.
+ * 
+ * It supports problems of the form $\\{(p_1,E_1),\ldots,(p_n,E_n)\\}$, where
+ * the $p_i$ are as before but the $E_i$ are sets of expressions.  It yields
+ * all solutions $S$ satisfying $S(p_i)\in E_i$.  (The special case where each
+ * $E_i$ has exactly one entry is the original notion of a matching problem as
+ * stated above.)  This algorithm is designed to explore the wider space of
+ * possible solutions created by permitting larger $E_i$, but in the most
+ * efficient way, organizing the exploration to prune the largest branches in
+ * the search tree as early as possible.
+ * 
+ * In addition to producing solutions $S$ satisfying $S(p_i)\in E_i$, because
+ * each $E_i$ is not just a set but an array, each $S$ can come with a mapping
+ * $f:\mathbb{N}\to\mathbb{N}$ that tells us exactly which entry of each $E_i$
+ * was matched: not only is $S(p_i)\in E_i$ but $S(p_i)=E_i[f(i)]$, that is,
+ * the $f(i)$th entry in the list $E_i$.  This mapping is returned for each
+ * solution $S$ generated, and in the parameters below is named the
+ * "expressionIndices" list for that solution.  Specifically, we encode such an
+ * $f$ as a simple JavaScript array $[f(1),\ldots,f(n)]$.  Each such
+ * expressionIndices array has length $n$, where $n$ comes from the original
+ * input to this function.
+ * 
+ * @param {LogicConcept[]} patterns JavaScript array of LogicConcept instances,
+ *   each of which may contain {@link module:Matching.metavariable
+ *   metavariables}, and each will be used as a pattern.  The elements
+ *   `patterns[i]` in this array are the patterns documented as $p_i$ above.
+ * @param {LogicConcept[][]} expressionLists array of arrays of LogicConcept
+ *   instances, none of which should contain metavariables; the outer array
+ *   must be the same length as `patterns`, because each array within it
+ *   corresponds to an entry in `patterns`, as discussed above.  That is, the
+ *   elements `expressionLists[i]` in this array are the "sets" documented as
+ *   $E_i$ above.
+ * @param {Solution} [soFar] used in recursion, defaults to an empty Solution;
+ *   clients typically do not provide this value
+ * @param {boolean} [debug] whether to print debugging information to the
+ *   console while it does its job, defaults to false
+ * @returns {Object[]} an array of objects, each of which has two entries:
+ *   one under the key "solution" maps to a solution as described above, and
+ *   the entry under the key "expressionIndices" is an array of integers that
+ *   indicates which entry in each of the `expressionLists` is matched by each
+ *   of the `patterns`
+ * @alias module:Matching.allInstantiations
+ */
 export function* allInstantiations (
     patterns, expressionLists, soFar = null, debug = false
 ) {
