@@ -163,3 +163,120 @@ allIn(  patterns = [ ${patterns.map(x=>x.toString()).join(', ')} ],
         }
     }
 }
+
+// Utility function used below to convert index maps into arrays
+const indexMapToArray = map => {
+    const indices = Object.keys( map ).map( key => parseInt( key ) )
+    const length = indices.length > 0 ? Math.max( ...indices ) + 1 : 0
+    const result = Array( length ).fill( 0 )
+    result.forEach( ( _, i ) => result[i] = map[i] )
+    return result
+}
+
+/**
+ * There will be situations in which we want to seek instantiations of patterns
+ * but not require absolutely every pattern to be instantiated.
+ * 
+ * The simplest example is probably the following:  Imagine we have a formula
+ * for the introduction of a conditional, such as `:{ :{ :A B } (=> A B) }` if
+ * we're using {@link LogicConcept.fromPutdown putdown notation}.  We're
+ * checking to see if it justifies conclusion `(=> P Q)`, so we need to find a
+ * premise of the form `{ :P Q }`.  But actually, we would accept a premise
+ * that's just of the form `Q` even if there is no `P` in sight, because that
+ * could be strictly stronger than `{ :P Q }`, so we would want to run it
+ * through validation to see if it works.  Thus we do not need to match both
+ * `P` and `Q` when searching; we must match `Q` and can optionally also match
+ * `P`.
+ * 
+ * That's not an excellent example, because of course just matching the final
+ * conclusion `(=> A B)` to `(=> P Q)` provides us with the full instantiation,
+ * but there are many example of rules with environment premises, and not all
+ * are so simple.
+ * 
+ * We therefore create this function, which behaves exactly like
+ * {@link module:Matching.allInstantiations allInstantiations()}, except that
+ * you can provide an index that indicates how to separate the constraints into
+ * the required ones and the optional ones.  We call that index
+ * `firstOptional`, and it has the meaning that it is the index of the first
+ * optional constraint, in the sense that all previous ones are required, and
+ * any constraint from that point onward is optional.
+ * 
+ * The return values will be exactly like those for
+ * {@link module:Matching.allInstantiations allInstantiations()}, except that
+ * some of the expression indices may be $-1$, indicating that the pattern was
+ * not matched to any expression.  Only optional constraints will have an
+ * expression index of $-1$; all required constraints will have non-negative
+ * expression indices.
+ * 
+ * @param {LogicConcept[]} patterns this parameter has the same meaning as it
+ *   has in {@link module:Matching.allInstantiations allInstantiations()}; see
+ *   the documentation there
+ * @param {LogicConcept[][]} expressionLists this parameter has the same
+ *   meaning as it has in {@link module:Matching.allInstantiations
+ *   allInstantiations()}; see the documentation there
+ * @param {integer} firstOptional the index of the first optional constraint.
+ *   To indicate that all constraints are required, set this value to be less
+ *   than 0 or larger than the last valid index into `patterns`.
+ * @param {Solution} soFar this parameter has the same meaning as it has in
+ *   {@link module:Matching.allInstantiations allInstantiations()}; see the
+ *   documentation there
+ * @param {boolean} debug this parameter has the same meaning as it has in
+ *   {@link module:Matching.allInstantiations allInstantiations()}; see the
+ *   documentation there
+ * @returns {Object[]} the return value has the same format as it has in
+ *   {@link module:Matching.allInstantiations allInstantiations()}; see the
+ *   documentation there, plus the comments above about $-1$ expression indices
+ *   for unmatched and optional constraints
+ * @alias module:Matching.allOptionalInstantiations
+ */
+export function* allOptionalInstantiations (
+    patterns, expressionLists, firstOptional = -1, soFar = null, debug = false
+) {
+    // Degenerate case: Nothing optional; just call allInstantiations()
+    if ( firstOptional < 0 || firstOptional >= patterns.length ) {
+        yield* allInstantiations( patterns, expressionLists, soFar, debug )
+        return
+    }
+    // Generate all solutions for the non-optional portion of the input,
+    // and build upon those with various extensions...
+    const outerGenerator = allInstantiations(
+        patterns.slice( 0, firstOptional ),
+        expressionLists.slice( 0, firstOptional ),
+        soFar, debug )
+    for ( let nonOptionalSolution of outerGenerator ) {
+        let innerGenerator
+        // Extend it to all solutions for which
+        // patterns[firstOptional],expressionLists[firstOptional] has a match.
+        // Just recursively call this function to extend nonOptionalSolution,
+        // requiring index 0 to be matched:
+        innerGenerator = allOptionalInstantiations(
+            patterns.slice( firstOptional ),
+            expressionLists.slice( firstOptional ), 1,
+            nonOptionalSolution.solution )
+        for ( let optionalSolution of innerGenerator ) {
+            // Then concatenate the two expression index lists before yielding:
+            optionalSolution.expressionIndices = [
+                ...indexMapToArray( nonOptionalSolution.expressionIndices ),
+                ...indexMapToArray( optionalSolution.expressionIndices )
+            ]
+            yield optionalSolution
+        }
+        // Also extend it to all solutions for which
+        // patterns[firstOptional],expressionLists[firstOptional] has no match.
+        // Just recursively call this function to extend nonOptionalSolution,
+        // leaving out that first pair entirely:
+        innerGenerator = allOptionalInstantiations(
+            patterns.slice( firstOptional + 1 ),
+            expressionLists.slice( firstOptional + 1 ), 0,
+            nonOptionalSolution.solution )
+        for ( let optionalSolution of innerGenerator ) {
+            // Then concatenate the two expression index lists before yielding,
+            // marking the missing pair as not used:
+            optionalSolution.expressionIndices = [
+                ...indexMapToArray( nonOptionalSolution.expressionIndices ),
+                -1, ...indexMapToArray( optionalSolution.expressionIndices )
+            ]
+            yield optionalSolution
+        }
+    }
+}

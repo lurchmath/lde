@@ -10,6 +10,7 @@ describe( 'Multiple pattern instantiations', () => {
     it( 'Should declare the expected global identifiers', () => {
         expect( Matching ).to.be.ok
         expect( Matching.allInstantiations ).to.be.ok
+        expect( Matching.allOptionalInstantiations ).to.be.ok
     } )
 
     // Utility function used by tests below to extract meaning from the
@@ -17,6 +18,8 @@ describe( 'Multiple pattern instantiations', () => {
     const getTestComponents = ( key, LCs ) => {
         expect( LCs.length ).equals( 3,
             `Malformed test: ${key} had ${LCs.length} LCs instead of 3` )
+        // Use a copy so we don't mess up the database
+        LCs = LCs.map( LC => LC.copy() )
         // Convert all instances of the problem's metavariables into actual
         // metavariables (which would be prohibitive in putdown)
         const metavars = LCs[0].children().slice( 1 )
@@ -105,9 +108,15 @@ describe( 'Multiple pattern instantiations', () => {
 
     // Utility function used below for comparing two solution sets
     const hackyEquals = ( expSol, compSol ) => {
-        if ( JSON.stringify( expSol.expressionIndices )
-          != JSON.stringify( compSol.expressionIndices ) )
+        const intKeys = obj =>
+            Object.keys( obj ).map( x => parseInt( x ) ).sort()
+        if ( !JSON.equals( intKeys( expSol.expressionIndices ),
+                           intKeys( compSol.expressionIndices ) ) )
             return false
+        for ( let key of intKeys( expSol.expressionIndices ) )
+            if ( expSol.expressionIndices[key]
+              != compSol.expressionIndices[key] )
+                return false
         const expDom = Object.keys( expSol.solution )
         const compDom = Array.from( compSol.solution.domain() )
         return expDom.length == compDom.length
@@ -155,7 +164,7 @@ describe( 'Multiple pattern instantiations', () => {
     }
 
     it( 'Should compute correct solutions for the whole database', () => {
-        // Get all matching tests from the database
+        // Get all multi-matching tests from the database
         const matchingTests = Database.filterByMetadata( metadata =>
             metadata.testing && metadata.testing.type &&
             metadata.testing.type == 'multi-matching' )
@@ -185,6 +194,115 @@ describe( 'Multiple pattern instantiations', () => {
             let computedSols
             expect( () => computedSols = Array.from( G ),
                 `Error when running allInstantiations on ${key}:\n${debugText}`
+            ).not.to.throw()
+            debugText += debugFooter( computedSols )
+            // And check to see if it gave the expected answer
+            expect( computedSols.length ).to.equal( expectedSols.length,
+                `Length of result doesn't match length of expectation:\n${debugText}` )
+            const missing = expectedSols.find( sol1 =>
+                !computedSols.some( sol2 => hackyEquals( sol1, sol2 ) ) )
+            expect( missing,
+                `Missing this expected solution:\n${expSolStr(missing)}\n`
+              + `in this problem:\n${debugText}`
+            ).to.be.undefined
+        } )
+    } )
+
+    it( 'Should compute degenerate optional solutions for the database', () => {
+        // This test just repeates the one above, but uses the "optional"
+        // multi-matching algorithm in allOptionalInstantiations(), but in the
+        // degenerate case where it has nothing marked "optional."  We should
+        // therefore get the exact same results as in the previous test.
+        // See the comment below marked with this symbol: <------- ***
+
+        // Get all multi-matching tests from the database
+        const matchingTests = Database.filterByMetadata( metadata =>
+            metadata.testing && metadata.testing.type &&
+            metadata.testing.type == 'multi-matching' )
+        // they are all entitled "/path/to/test N.putdown" for some N,
+        // so sort them by that value of N in increasing order.
+        const getNum = key => {
+            const parts = key.split( ' ' )
+            return parseInt( parts[parts.length-1].split( '.' )[0] )
+        }
+        matchingTests.sort( ( a, b ) => getNum( a ) - getNum( b ) )
+        // Now run each test as follows...
+
+        matchingTests.forEach( key => {
+            // Look up the test with the given key and process all its content
+            // using the utility function above
+            const LCs = Database.getObjects( key )
+            const { constraints, expectedSols } = getTestComponents( key, LCs )
+            // Finally, make the function call that creates a generator that
+            // will actually solve the problem
+            const debug = false // getNum( key ) == 4
+            const G = Matching.allOptionalInstantiations(
+                constraints.map( c => c.child( 1 ) ),
+                constraints.map( c => c.children().slice( 2 ) ),
+                constraints.length, // this says none are optional <------- ***
+                null, debug )
+            // Now actually run the matching algorithm
+            let debugText = debugHeader( constraints, expectedSols )
+            let computedSols
+            expect( () => computedSols = Array.from( G ),
+                `Error when running allInstantiations on ${key}:\n${debugText}`
+            ).not.to.throw()
+            debugText += debugFooter( computedSols )
+            // And check to see if it gave the expected answer
+            expect( computedSols.length ).to.equal( expectedSols.length,
+                `Length of result doesn't match length of expectation:\n${debugText}` )
+            const missing = expectedSols.find( sol1 =>
+                !computedSols.some( sol2 => hackyEquals( sol1, sol2 ) ) )
+            expect( missing,
+                `Missing this expected solution:\n${expSolStr(missing)}\n`
+              + `in this problem:\n${debugText}`
+            ).to.be.undefined
+        } )
+    } )
+
+    it( 'Should compute optional solutions for the database', () => {
+        // Get all optional multi-matching tests from the database
+        const matchingTests = Database.filterByMetadata( metadata =>
+            metadata.testing && metadata.testing.type &&
+            metadata.testing.type == 'optional multi-matching' )
+        // they are all entitled "/path/to/test N.putdown" for some N,
+        // so sort them by that value of N in increasing order.
+        const getNum = key => {
+            const parts = key.split( ' ' )
+            return parseInt( parts[parts.length-1].split( '.' )[0] )
+        }
+        matchingTests.sort( ( a, b ) => getNum( a ) - getNum( b ) )
+        // Now run each test as follows...
+
+        matchingTests.forEach( key => {
+            // Look up the test with the given key and process all its content
+            // using the utility function above
+            const LCs = Database.getObjects( key )
+            const { constraints, expectedSols } = getTestComponents( key, LCs )
+            // Find out which is the first one marked "optional":
+            const optionalSymbol = new LurchSymbol( 'optional' )
+            const firstOptional = constraints.findIndex( constraint =>
+                constraint.child( 2 ).equals( optionalSymbol ) )
+            if ( firstOptional > -1 )
+                constraints[firstOptional].child( 2 ).remove()
+            // constraints.forEach( ( c, i ) =>
+            //     console.log( `Constraint ${i}: ${c.toPutdown()}` ) )
+            // expectedSols.forEach( ( es, i ) =>
+            //     console.log( `Expected solution ${i}: ${expSolStr(es)}` ) )
+            // console.log( 'First optional constraint:', firstOptional )
+
+            // Finally, make the function call that creates a generator that
+            // will actually solve the problem
+            const debug = false // getNum( key ) == 4
+            const G = Matching.allOptionalInstantiations(
+                constraints.map( c => c.child( 1 ) ),
+                constraints.map( c => c.children().slice( 2 ) ),
+                firstOptional, null, debug )
+            // Now actually run the matching algorithm
+            let debugText = debugHeader( constraints, expectedSols )
+            let computedSols
+            expect( () => computedSols = Array.from( G ),
+                `Error when running allOptionalInstantiations on ${key}:\n${debugText}`
             ).not.to.throw()
             debugText += debugFooter( computedSols )
             // And check to see if it gave the expected answer

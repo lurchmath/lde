@@ -180,7 +180,9 @@ import {
 } from '../src/matching/expression-functions.js'
 import { Problem } from "./matching/problem.js"
 import { Solution } from "./matching/solution.js"
-import { allInstantiations } from "./matching/multiple.js"
+import {
+    allInstantiations, allOptionalInstantiations
+} from "./matching/multiple.js"
 
 export default {
     NewSymbolStream,
@@ -191,5 +193,5 @@ export default {
     newEFA, isAnEFA, canBetaReduce, betaReduce, fullBetaReduce, alphaEquivalent,
     bodyOfEF, parametersOfEF,
     Problem, Solution,
-    allInstantiations
+    allInstantiations, allOptionalInstantiations
 }

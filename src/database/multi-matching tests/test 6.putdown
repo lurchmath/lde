@@ -1,0 +1,30 @@
+---
+testing:
+  type: optional multi-matching
+---
+
+// Declare the metavariables in this optional multi-matching problem:
+(metavariables x y)
+
+// List the pattern-then-expressions tuples in this multi-matching problem:
+// (Note that once one is marked "optional," all later ones are optional also.)
+(problem
+    (constraint  (and x y)              (and 1 2)  (and 3 4)  )
+    (constraint  (and 3 y)              (and 1 4)  (and 3 2)  )
+    (constraint  x            optional  totally_unrelated_thing  )
+)
+
+// List all solutions in this optional multi-matching problem:
+// (Note that each one comes with a list of indices,
+// followed by a metavariable assignment.  Negative indices indicate that the
+// pattern in question was optional and was not matched to any expression.)
+(solutions
+    // The only way to match this is to satisfy constraints 1 and 2 in the only
+    // way that they can be satisfied, and ignore constraint 3, which cannot be
+    // satisfied together with the other ones.
+    (0 1 -1)
+    (
+        x  1
+        y  2
+    )
+)

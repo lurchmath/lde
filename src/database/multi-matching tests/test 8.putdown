@@ -1,0 +1,49 @@
+---
+testing:
+  type: optional multi-matching
+---
+
+// Imagine that we wish to use the optional multi-matching algorithm to look
+// for instantiations of the equality elimination rule that will make a certain
+// conclusion true, by searching among the accessible premises.  Here is a
+// small example document.
+//
+// {
+//     :{ :{ :A B } (=> A B) }      // the formula
+//     {                            // the only environment premise
+//         :(hello there)           // instantiation of A
+//         hi!                      // possible instantiation of B
+//         (how r u?)               // another possible instantiation of B
+//     }
+//     bar                          // the premise we will actually use
+//     (=> foo bar)                 // the desired conclusion
+// }
+//
+// We would set up an optional multi-matching problem as follows:
+//  - A must match (hello there) if it matches anything, but it's optional
+//  - B must match one of: hi!, (how r u?), bar
+//  - (=> A B) must match the desired conclusion (=> foo bar)
+// We do exactly that below.
+
+// Declare the metavariables in this optional multi-matching problem:
+(metavariables A B)
+
+// List the pattern-then-expressions tuples in this multi-matching problem:
+// (Note that once one is marked "optional," all later ones are optional also.)
+(problem
+    (constraint  B                      hi!  (how r u?)  bar  )
+    (constraint  (=> A B)               (=> foo bar)  )
+    (constraint  A            optional  (hello there)  )
+)
+
+// List all solutions in this optional multi-matching problem:
+// (Note that each one comes with a list of indices,
+// followed by a metavariable assignment.  Negative indices indicate that the
+// pattern in question was optional and was not matched to any expression.)
+(solutions
+    (2 0 -1)
+    (
+        A  foo
+        B  bar
+    )
+)
