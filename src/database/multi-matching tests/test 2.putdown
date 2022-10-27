@@ -3,7 +3,7 @@ testing:
   type: multi-matching
 ---
 
-// Declare the metavariables in this matching problem:
+// Declare the metavariables in this multi-matching problem:
 (metavariables P x t)
 
 // List the pattern-then-expressions tuples in this multi-matching problem:
@@ -17,7 +17,7 @@ testing:
                  (= (+ 9 r) t)  )
 )
 
-// List all solutions in this matching problem:
+// List all solutions in this multi-matching problem:
 // (Note that each one comes with a list of indices,
 // followed by a metavariable assignment.)
 (solutions

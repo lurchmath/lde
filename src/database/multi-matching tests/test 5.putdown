@@ -1,0 +1,46 @@
+---
+testing:
+  type: multi-matching
+---
+
+// Imagine that we wish to use the multi-matching algorithm to look for
+// instantiations of the equality elimination rule that will make a certain
+// conclusion true, by searching among the accessible premises.  Here is a
+// small example document.
+//
+// {
+//     :{ :(= a b) :(@apply P a) (@apply P b) }  // the formula
+//     (^ (= 1 2) (= 2 3))                       // not an =-type expression
+//     (= 1 2)                                   // possible =-type premise
+//     (= 2 3)                                   // possible =-type premise
+//     (> 1 3)                                   // not an =-type expression
+//     (= 1 3)                                   // desired conclusion
+// }
+//
+// We would set up a multi-matching problem as follows:
+//  - one of the 4 usable premises must match (= a b)
+//  - one of the 4 usable premises must match (@apply P a)
+//  - the conclusion (= 1 3) must match (@apply P b)
+// We do exactly that below.
+
+// Declare the metavariables in this optional multi-matching problem:
+(metavariables a b P)
+
+// List the pattern-then-expressions tuples in this multi-matching problem:
+(problem
+    (constraint  (= a b)       (^ (= 1 2) (= 2 3))  (= 1 2)  (= 2 3)  (> 1 3)  )
+    (constraint  (@apply P a)  (^ (= 1 2) (= 2 3))  (= 1 2)  (= 2 3)  (> 1 3)  )
+    (constraint  (@apply P b)  (= 1 3)  )
+)
+
+// List all solutions in this multi-matching problem:
+// (Note that each one comes with a list of indices,
+// followed by a metavariable assignment.)
+(solutions
+    (2 1 0)
+    (
+        a  2
+        b  3
+        P  (@lambda v , (= 1 v))
+    )
+)
