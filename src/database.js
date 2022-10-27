@@ -731,7 +731,7 @@ const testingDatabase = [
         "type": "multi-matching"
       }
     },
-    "content": "\n// Declare the metavariables in this matching problem:\n(metavariables x y)\n\n// List the pattern-then-expressions tuples in this multi-matching problem:\n(problem\n    (constraint  (and x y)    (and 1 2)  (and 3 4)  )\n    (constraint  (and 3 y)    (and 1 4)  (and 3 2)  )\n)\n\n// List all solutions in this matching problem:\n// (Note that each one comes with a list of indices,\n// followed by a metavariable assignment.)\n(solutions\n    (0 1)\n    (\n        x  1\n        y  2\n    )\n)\n"
+    "content": "\n// Declare the metavariables in this multi-matching problem:\n(metavariables x y)\n\n// List the pattern-then-expressions tuples in this multi-matching problem:\n(problem\n    (constraint  (and x y)    (and 1 2)  (and 3 4)  )\n    (constraint  (and 3 y)    (and 1 4)  (and 3 2)  )\n)\n\n// List all solutions in this multi-matching problem:\n// (Note that each one comes with a list of indices,\n// followed by a metavariable assignment.)\n(solutions\n    (0 1)\n    (\n        x  1\n        y  2\n    )\n)\n"
   },
   {
     "filename": "/multi-matching tests/test 2.putdown",
@@ -740,7 +740,7 @@ const testingDatabase = [
         "type": "multi-matching"
       }
     },
-    "content": "\n// Declare the metavariables in this matching problem:\n(metavariables P x t)\n\n// List the pattern-then-expressions tuples in this multi-matching problem:\n(problem\n    (constraint  (forall x , (@apply P x))\n                 (> 5 n)\n                 (forall k , (happier k 7))\n                 (forall q , (= (+ q r) t))\n                 (exists foo , bar)  )\n    (constraint  (@apply P t)\n                 (= (+ 9 r) t)  )\n)\n\n// List all solutions in this matching problem:\n// (Note that each one comes with a list of indices,\n// followed by a metavariable assignment.)\n(solutions\n    (2 0)\n    (\n        x  q\n        t  9\n        P  (@lambda v , (= (+ v r) t))\n    )\n)\n"
+    "content": "\n// Declare the metavariables in this multi-matching problem:\n(metavariables P x t)\n\n// List the pattern-then-expressions tuples in this multi-matching problem:\n(problem\n    (constraint  (forall x , (@apply P x))\n                 (> 5 n)\n                 (forall k , (happier k 7))\n                 (forall q , (= (+ q r) t))\n                 (exists foo , bar)  )\n    (constraint  (@apply P t)\n                 (= (+ 9 r) t)  )\n)\n\n// List all solutions in this multi-matching problem:\n// (Note that each one comes with a list of indices,\n// followed by a metavariable assignment.)\n(solutions\n    (2 0)\n    (\n        x  q\n        t  9\n        P  (@lambda v , (= (+ v r) t))\n    )\n)\n"
   },
   {
     "filename": "/multi-matching tests/test 3.putdown",
@@ -749,7 +749,7 @@ const testingDatabase = [
         "type": "multi-matching"
       }
     },
-    "content": "\n// Declare the metavariables in this matching problem:\n(metavariables A B C)\n\n// List the pattern-then-expressions tuples in this multi-matching problem:\n(problem\n    (constraint  (or A B)  (or p p)  (=> p p)  p  )\n    (constraint  (=> A C)  (or p p)  (=> p p)  p  )\n    (constraint  (=> B C)  (or p p)  (=> p p)  p  )\n    (constraint  C         (or p p)  (=> p p)  p  )\n)\n\n// List all solutions in this matching problem:\n// (Note that each one comes with a list of indices,\n// followed by a metavariable assignment.)\n(solutions\n    (0 1 1 2)\n    (\n        A  p\n        B  p\n        C  p\n    )\n)\n"
+    "content": "\n// Declare the metavariables in this multi-matching problem:\n(metavariables A B C)\n\n// List the pattern-then-expressions tuples in this multi-matching problem:\n(problem\n    (constraint  (or A B)  (or p p)  (=> p p)  p  )\n    (constraint  (=> A C)  (or p p)  (=> p p)  p  )\n    (constraint  (=> B C)  (or p p)  (=> p p)  p  )\n    (constraint  C         (or p p)  (=> p p)  p  )\n)\n\n// List all solutions in this multi-matching problem:\n// (Note that each one comes with a list of indices,\n// followed by a metavariable assignment.)\n(solutions\n    (0 1 1 2)\n    (\n        A  p\n        B  p\n        C  p\n    )\n)\n"
   },
   {
     "filename": "/multi-matching tests/test 4.putdown",
@@ -758,7 +758,43 @@ const testingDatabase = [
         "type": "multi-matching"
       }
     },
-    "content": "\n// Declare the metavariables in this matching problem:\n(metavariables a b P)\n\n// List the pattern-then-expressions tuples in this multi-matching problem:\n(problem\n    (constraint  (= a b)\n                 (> (squared 5) (squared x))\n                 (= (+ 3 1) 4)\n                 (= x 4)\n                 (= y 3)  )\n    (constraint  (@apply P a)\n                 (> (squared 5) (squared x))\n                 (= (+ 3 1) 4)\n                 (= x 4)\n                 (= y 3)  )\n    (constraint  (@apply P b)\n                 (> (squared 5) (squared 4))  )\n)\n\n// List all solutions in this matching problem:\n// (Note that each one comes with a list of indices,\n// followed by a metavariable assignment.)\n(solutions\n    (2 0 0)\n    (\n        a  x\n        b  4\n        P  (@lambda v , (> (squared 5) (squared v)))\n    )\n)\n"
+    "content": "\n// Declare the metavariables in this multi-matching problem:\n(metavariables a b P)\n\n// List the pattern-then-expressions tuples in this multi-matching problem:\n(problem\n    (constraint  (= a b)\n                 (> (squared 5) (squared x))\n                 (= (+ 3 1) 4)\n                 (= x 4)\n                 (= y 3)  )\n    (constraint  (@apply P a)\n                 (> (squared 5) (squared x))\n                 (= (+ 3 1) 4)\n                 (= x 4)\n                 (= y 3)  )\n    (constraint  (@apply P b)\n                 (> (squared 5) (squared 4))  )\n)\n\n// List all solutions in this multi-matching problem:\n// (Note that each one comes with a list of indices,\n// followed by a metavariable assignment.)\n(solutions\n    (2 0 0)\n    (\n        a  x\n        b  4\n        P  (@lambda v , (> (squared 5) (squared v)))\n    )\n)\n"
+  },
+  {
+    "filename": "/multi-matching tests/test 5.putdown",
+    "metadata": {
+      "testing": {
+        "type": "multi-matching"
+      }
+    },
+    "content": "\n// Imagine that we wish to use the multi-matching algorithm to look for\n// instantiations of the equality elimination rule that will make a certain\n// conclusion true, by searching among the accessible premises.  Here is a\n// small example document.\n//\n// {\n//     :{ :(= a b) :(@apply P a) (@apply P b) }  // the formula\n//     (^ (= 1 2) (= 2 3))                       // not an =-type expression\n//     (= 1 2)                                   // possible =-type premise\n//     (= 2 3)                                   // possible =-type premise\n//     (> 1 3)                                   // not an =-type expression\n//     (= 1 3)                                   // desired conclusion\n// }\n//\n// We would set up a multi-matching problem as follows:\n//  - one of the 4 usable premises must match (= a b)\n//  - one of the 4 usable premises must match (@apply P a)\n//  - the conclusion (= 1 3) must match (@apply P b)\n// We do exactly that below.\n\n// Declare the metavariables in this optional multi-matching problem:\n(metavariables a b P)\n\n// List the pattern-then-expressions tuples in this multi-matching problem:\n(problem\n    (constraint  (= a b)       (^ (= 1 2) (= 2 3))  (= 1 2)  (= 2 3)  (> 1 3)  )\n    (constraint  (@apply P a)  (^ (= 1 2) (= 2 3))  (= 1 2)  (= 2 3)  (> 1 3)  )\n    (constraint  (@apply P b)  (= 1 3)  )\n)\n\n// List all solutions in this multi-matching problem:\n// (Note that each one comes with a list of indices,\n// followed by a metavariable assignment.)\n(solutions\n    (2 1 0)\n    (\n        a  2\n        b  3\n        P  (@lambda v , (= 1 v))\n    )\n)\n"
+  },
+  {
+    "filename": "/multi-matching tests/test 6.putdown",
+    "metadata": {
+      "testing": {
+        "type": "optional multi-matching"
+      }
+    },
+    "content": "\n// Declare the metavariables in this optional multi-matching problem:\n(metavariables x y)\n\n// List the pattern-then-expressions tuples in this multi-matching problem:\n// (Note that once one is marked \"optional,\" all later ones are optional also.)\n(problem\n    (constraint  (and x y)              (and 1 2)  (and 3 4)  )\n    (constraint  (and 3 y)              (and 1 4)  (and 3 2)  )\n    (constraint  x            optional  totally_unrelated_thing  )\n)\n\n// List all solutions in this optional multi-matching problem:\n// (Note that each one comes with a list of indices,\n// followed by a metavariable assignment.  Negative indices indicate that the\n// pattern in question was optional and was not matched to any expression.)\n(solutions\n    // The only way to match this is to satisfy constraints 1 and 2 in the only\n    // way that they can be satisfied, and ignore constraint 3, which cannot be\n    // satisfied together with the other ones.\n    (0 1 -1)\n    (\n        x  1\n        y  2\n    )\n)\n"
+  },
+  {
+    "filename": "/multi-matching tests/test 7.putdown",
+    "metadata": {
+      "testing": {
+        "type": "optional multi-matching"
+      }
+    },
+    "content": "\n// Declare the metavariables in this optional multi-matching problem:\n(metavariables x y)\n\n// List the pattern-then-expressions tuples in this multi-matching problem:\n// (Note that once one is marked \"optional,\" all later ones are optional also.)\n(problem\n    (constraint  (and x y)              (and 1 2)  (and 3 4)  )\n    (constraint  (and 3 y)    optional  (and 1 4)  (and 3 2)  )\n)\n\n// List all solutions in this optional multi-matching problem:\n// (Note that each one comes with a list of indices,\n// followed by a metavariable assignment.  Negative indices indicate that the\n// pattern in question was optional and was not matched to any expression.)\n(solutions\n    // Full match, not using the \"optional\" flag on constraint 2\n    (0 1)\n    (\n        x  1\n        y  2\n    )\n    // Same assignment as previous, but now ignoring constraint 2\n    (0 -1)\n    (\n        x  1\n        y  2\n    )\n    // Different assignment than #1, because we don't have constraint 2\n    (1 -1)\n    (\n        x  3\n        y  4\n    )\n)\n"
+  },
+  {
+    "filename": "/multi-matching tests/test 8.putdown",
+    "metadata": {
+      "testing": {
+        "type": "optional multi-matching"
+      }
+    },
+    "content": "\n// Imagine that we wish to use the optional multi-matching algorithm to look\n// for instantiations of the equality elimination rule that will make a certain\n// conclusion true, by searching among the accessible premises.  Here is a\n// small example document.\n//\n// {\n//     :{ :{ :A B } (=> A B) }      // the formula\n//     {                            // the only environment premise\n//         :(hello there)           // instantiation of A\n//         hi!                      // possible instantiation of B\n//         (how r u?)               // another possible instantiation of B\n//     }\n//     bar                          // the premise we will actually use\n//     (=> foo bar)                 // the desired conclusion\n// }\n//\n// We would set up an optional multi-matching problem as follows:\n//  - A must match (hello there) if it matches anything, but it's optional\n//  - B must match one of: hi!, (how r u?), bar\n//  - (=> A B) must match the desired conclusion (=> foo bar)\n// We do exactly that below.\n\n// Declare the metavariables in this optional multi-matching problem:\n(metavariables A B)\n\n// List the pattern-then-expressions tuples in this multi-matching problem:\n// (Note that once one is marked \"optional,\" all later ones are optional also.)\n(problem\n    (constraint  B                      hi!  (how r u?)  bar  )\n    (constraint  (=> A B)               (=> foo bar)  )\n    (constraint  A            optional  (hello there)  )\n)\n\n// List all solutions in this optional multi-matching problem:\n// (Note that each one comes with a list of indices,\n// followed by a metavariable assignment.  Negative indices indicate that the\n// pattern in question was optional and was not matched to any expression.)\n(solutions\n    (2 0 -1)\n    (\n        A  foo\n        B  bar\n    )\n)\n"
   },
   {
     "filename": "/parsing tests/syntax error 1.putdown",

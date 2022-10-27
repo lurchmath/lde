@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Lurch Deductive Engine: Tutorial: LC tree hierarchies</title>
+    <title>Lurch Deductive Engine: matching/multiple.js</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
@@ -18,13 +18,6 @@
       }
     </style>
     
-
-    <script>
-        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
-    </script>
-    <script id="MathJax-script" async
-        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
-    </script>
 </head>
 <body>
 
@@ -41,352 +34,313 @@
 </header>
 
 
-<main class="layout-main ">
+<main class="layout-main  layout-content--source">
   <div class="container">
-    <p class="page-kind"></p>
-    <h1 class="page-title">Tutorial: LC tree hierarchies</h1>
-    <section>
-
-<header>
+    <p class="page-kind">source</p>
+    <h1 class="page-title">matching/multiple.js</h1>
     
 
-    <h2>LC tree hierarchies</h2>
-</header>
 
-<article>
-    <p>This tutorial assumes you know how to construct LC instances; if not, see
-the tutorial on <a href="tutorial-Constructing LCs.html">Constructing LCs</a>.  This tutorial covers the
-essential read/write operations available on a hierarchy of nested LC
-structures.</p>
-<p>Every method documented here is actually defined not in the
-<a href="LogicConcept.html">LogicConcept class</a>, but in the
-<a href="MathConcept.html">MathConcept class</a>, which is a more general concept than an
-LC.  Once interpretation of syntax has been built into the LDE, we will use it
-to &quot;interpret&quot; <a href="MathConcept.html">MathConcepts</a> into
-<a href="LogicConcept.html">LogicConcepts</a>.  Although that feature of the LDE has not
-yet been built, the <a href="MathConcept.html">MathConcept class</a> remains the most
-general class from which most others inherit.</p>
-<p>(Each piece of sample code below is written as if it were a script sitting in
-the root folder of this source code repository, and run from there with the
-command-line tools <code>node</code>.  If you place your scripts in another folder, you
-will need to adjust the path in each <code>import</code> statement accordingly.  If you
-have not yet set up a copy of this repository with the appropriate Node.js
-version installed, see <a href="https://github.com/lurchmath/lde">our GitHub README</a>,
-which explains how to do so.)</p>
-<h2>Preparing by building some LCs</h2>
-<p>Let's build a few nested LCs, so that we can use them as recurring examples in
-the code below.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>import { LogicConcept } from './src/index.js'
 
-const famous = LogicConcept.fromPutdown( '(= (+ (^ e (* i pi)) 1) 0)' )[0]
-const env = LogicConcept.fromPutdown( '{ :A B :C D :E F }' )[0]
-</code></pre>
-<hr/>
-<br/>
-<h2>Reading parent, child, and sibling relationships</h2>
-<p>Parents and children can be looked up in the ways you would expect.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>const lhs = famous.child( 1 )
-const rhs = famous.child( 2 )
-console.log( 'LHS:', lhs.toPutdown(), 'RHS:', rhs.toPutdown() )
-console.log( 'LHS parent is whole equation?', lhs.parent() === famous )
-console.log( 'Operator and both sides:', famous.children().map( x => x.toPutdown() ) )
-console.log( 'In total, this many children:', famous.numChildren() )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-LHS: (+ (^ e (* i pi)) 1) RHS: 0
-LHS parent is whole equation? true
-Operator and both sides: [ '=', '(+ (^ e (* i pi)) 1)', '0' ]
-In total, this many children: 3
-</code></pre>
-<hr/>
-<br/>
-<p>There are also convenience functions for getting the first or last child, or
-for getting the array of children without the first or last child.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>console.log( env.firstChild().toPutdown() )
-console.log( env.lastChild().toPutdown() )
-console.log( env.allButFirstChild().map( x => x.toPutdown() ) )
-console.log( env.allButLastChild().map( x => x.toPutdown() ) )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-:A
-F
-[ 'B', ':C', 'D', ':E', 'F' ]
-[ ':A', 'B', ':C', 'D', ':E' ]
-</code></pre>
-<hr/>
-<br/>
-<p>You can also ask for the <a href="MathConcept.html#nextSibling">next</a> or
-<a href="MathConcept.html#previousSibling">previous</a> sibling (child of same parent).</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>const C = env.child( 2 )
-console.log( 'Third child:', C.toPutdown() )
-console.log( 'Right before it:', C.previousSibling().toPutdown() )
-console.log( 'Right after it:', C.nextSibling().toPutdown() )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-Third child: :C
-Right before it: B
-Right after it: D
-</code></pre>
-<hr/>
-<br/>
-<h2>Reading more deeply: descendants and ancestors</h2>
-<p>Parent and child relationships are just one step up or down the LC hierarchy.
-We can represent several steps down into children of children using an array
-of child indices called an <a href="MathConcept.html#address">address</a>.  We look up
-descendants by address using a method called <a href="MathConcept.html#index">index()</a>.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>const pi = famous.index( [ 1, 1, 2, 2 ] )
-console.log( 'Name of that descendant:', pi.toPutdown() )
-console.log( 'Address in the equation:', pi.address() )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-Name of that descendant: pi
-Address in the equation: [ 1, 1, 2, 2 ]
-</code></pre>
-<hr/>
-<br/>
-<p>We can also get a list of all the <a href="MathConcept.html#ancestors">ancestors</a> of a
-descendant LC, in order from bottom upwards.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>console.log( pi.ancestors().map( x => x.toPutdown() ) )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-[
-  'pi',
-  '(* i pi)',
-  '(^ e (* i pi))',
-  '(+ (^ e (* i pi)) 1)',
-  '(= (+ (^ e (* i pi)) 1) 0)'
-]
-</code></pre>
-<hr/>
-<br/>
-<h2>Filtering for only some results</h2>
-<p>It's also common to want to find just those children, descendants, or
-ancestors satisfying a certain condition (whatever that condition may be).
-There are therefore functions
-<a href="MathConcept.html#childrenSatisfying">childrenSatisfying()</a>,
-<a href="MathConcept.html#descendantsSatisfying">descendantsSatisfying()</a>, and
-<a href="MathConcept.html#ancestorsSatisfying">ancestorsSatisfying()</a>, which take a
-unary predicate on LCs as their argument and return results filtered using
-that predicate.  Here is one example.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>// Get every descendants of the famous equation that is atomic.
-const leaves = famous.descendantsSatisfying( x => x.isAtomic() )
-console.log( leaves.map( x => x.toPutdown() ) )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-[
-  '=',  '+', '^',
-  'e',  '*', 'i',
-  'pi', '1', '0'
-]
-</code></pre>
-<hr/>
-<br/>
-<p>Sometimes, you just want to check to see if there exists a child, descendant,
-or ancestor with the given property, rather than fetch all of them.  (It is
-usually more efficient this way, because you can stop looking when you've
-found one, rather than continuing to find all of them and assemble the results
-into an array.)  There are thus corresponding methods
-<a href="MathConcept.html#hasChildSatisfying">hasChildSatisfying()</a>,
-<a href="MathConcept.html#hasDescendantSatisfying">hasDescendantSatisfying()</a>, and
-<a href="MathConcept.html#hasAncestorSatisfying">hasAncestorSatisfying()</a>, which take
-the same unary predicate and return a boolean.</p>
-<h2>Altering the list of children of an LC</h2>
-<p>You can insert and remove children using zero-based indexing.  This modifies
-the original LC in place; it does not create a copy.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>console.log( 'Before:', env.toPutdown() )
-env.removeChild( 2 )
-env.insertChild( new LurchSymbol( 'YO' ), 0 )
-console.log( 'After:', env.toPutdown() )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-Before: { :A B :C D :E F }
-After: { YO :A B D :E F }
-</code></pre>
-<hr/>
-<br/>
-<p>Because one often wants to insert or remove a child from the beginning or
-ending of the list of children, there are four methods whose names correspond
-to the methods of the same names on JavaScript arrays:
-<a href="MathConcept.html#pushChild">pushChild()</a>,
-<a href="MathConcept.html#popChild">popChild()</a>,
-<a href="MathConcept.html#shiftChild">shiftChild()</a>, and
-<a href="MathConcept.html#unshiftChild">unshiftChild()</a>.</p>
-<p>You can also replace all the children at once with a call to
-<a href="MathConcept.html#setChildren">setChildren()</a>, which takes an array of any
-length as argument; it need not be the same number of children.</p>
-<h2>Warning: moving an LC to a new location removes it from its old location!</h2>
-<p>If you use any of the tools described above for inserting a new child into an
-LC, if that child was formerly a child of a different LC, it will be removed
-from its original location before being placed in the new location!  This can
-sometimes be surprising, if you forget that each LC can exist in only one
-location in one LC tree at a time.</p>
-<p>Consider the following example.  The goal is to write the equation
-$6x-5=6x-5$, but using the wrong technique produces an incorrect result.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>import { LurchSymbol, Application } from './src/index.js'
+    
 
-// Construct the term that should appear on each side:
-const term = LogicConcept.fromPutdown( '(- (* 6 x) 5)' )[0]
+<section>
+    <article>
+        <pre id="source" class="source-page line-numbers"><code class="language-js">
+import { Problem } from './problem.js'
+import { fullBetaReduce } from './expression-functions.js'
 
-// The following step seems correct, but tries to place the same exact term
-// object on both sides of an equation, which is two distinct places in an LC
-// tree, and will not work as expected:
-let equation = new Application( new LurchSymbol( '=' ), term, term )
+// Utility function used by allInstantiations(), below.
+// Applies the given solution to the metavariables in the given pattern,
+// doing full beta reduction thereafter, in case it is necessary.
+const applyWithBeta = ( solution, pattern ) => {
+    if ( !solution ) return pattern
+    for ( let symbol of solution.domain() ) {
+        const subst = solution._substitutions[symbol]
+        pattern = subst.appliedTo( pattern )
+    }
+    return fullBetaReduce( pattern )
+}
 
-// The (surprising and unintended) result:
-console.log( equation.toPutdown() )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-(= (- (* 6 x) 5))
-</code></pre>
-<hr/>
-<br/>
-<p>The correct way:</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>equation = new Application( new LurchSymbol( '=' ), term, term.copy() )
-console.log( equation.toPutdown() )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-(= (- (* 6 x) 5) (- (* 6 x) 5))
-</code></pre>
-<hr/>
-<br/>
-<h2>Removing and replacing LCs</h2>
-<p>To remove an LC from a hierarchy, simply call its
-<a href="MathConcept.html#remove">remove()</a> method.  Note that this will alter its
-parent (and, indirectly, grandparent, etc.) LC by removing one of its
-descendants.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>console.log( 'Before:', equation.toPutdown() ) // See equation, above.
-term.remove() // Recall that term is the left hand side of the equation.
-console.log( 'After:', equation.toPutdown() )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-Before: (= (- (* 6 x) 5) (- (* 6 x) 5))
-After: (= (- (* 6 x) 5))
-</code></pre>
-<hr/>
-<br/>
-<p>One can remove an LC and <a href="MathConcept.html#replaceWith">replace it</a> with a
-different one all in a single operation, as follows.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>console.log( 'Before:', env.toPutdown() )
-env.child( 4 ).replaceWith( pi.copy() )
-console.log( 'After:', env.toPutdown() )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-Before: { YO :A B D :E F }
-After: { YO :A B D pi F }
-</code></pre>
-<hr/>
-<br/>
-<p>If we had written <code>pi</code> instead of <code>pi.copy()</code>, it would have removed the
-symbol <code>pi</code> from its original place in the <code>famous</code> equation from earlier,
-rendering that equation not false so much as syntactically invalid.</p>
-<h2>Two important relations: earlier/later and accessibility</h2>
-<p>One very important relation among nodes in an LC tree is
-<a href="MathConcept.html#isAccessibleTo">accessibility</a>.  (See that link for the
-official explanation of the concept.)  One can test it in a variety of
-equivalent ways:</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>const c1 = env.firstChild()
-const c2 = env.lastChild()
-console.log( c1.isAccessibleTo( c2 ) )
-console.log( c2.isInTheScopeOf( c1 ) ) // equivalent to previous line
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-true
-true
-</code></pre>
-<hr/>
-<br/>
-<p>You can also get a list of all the things accessible to (or in the scope of)
-a given LC.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>console.log( c2.accessibles().map( x => x.toPutdown() ) )
-console.log( c1.scope().map( x => x.toPutdown() ) )
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-[ 'pi', 'D', 'B', ':A', 'YO' ]
-[ 'YO', ':A', 'B', 'D', 'pi', 'F' ]
-</code></pre>
-<hr/>
-<br/>
-<p>The second very important relationship is whether one node appears
-<a href="MathConcept.html#isEarlierThan">earlier than</a> another in (a pre-order
-traversal of) the LC tree in which both sit.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>console.log( c1.isEarlierThan( c2 ) )
-console.log( c1.isLaterThan( env ) ) // children are later than parents
-</code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-true
-true
-</code></pre>
-<hr/>
-<br/>
-<p>You can also ask for the <a href="MathConcept.html#nextInTree">next</a> or
-<a href="MathConcept.html#previousInTree">previous</a> node in a pre-order tree
-traversal.  This sometimes coincides with being the next or previous sibling,
-but not always.  Consider the following example.</p>
-<br/>
-<hr/>
-<pre class="prettyprint source lang-js"><code>let temp = famous
-while ( temp ) {
-    console.log( temp.toPutdown() )
-    temp = temp.nextInTree()
+// Utility function used by allInstantiations(), below.
+// Creates a new Solution instances that is equal to a copy of s1 with all the
+// pairs from s2 added.  Note that this will throw an error if s1 and s2
+// disagree on the image of any metavariable.
+const unionOfSolutions = ( s1, s2 ) => {
+    if ( !s1 ) return s2
+    const result = s1.copy()
+    for ( let symbol of s2.domain() )
+        result.add( s2._substitutions[symbol] )
+    return result
+}
+
+/**
+ * {@link Problem Matching problems} are of the form
+ * $\\{(p_1,e_1),\ldots,(p_n,e_n)\\}$, where each $p_i$ is pattern and each
+ * $e_i$ is an expression.  A {@link Solution Solution} $S$ to such a problem
+ * is such that for every $i\in\\{1,\ldots,n\\}$, $S(p_i)=e_i$.  You can
+ * compute the full set of such solutions with {@link Problem#solutions the
+ * solutions() member}.  More details are given in the documentation for
+ * {@link module:Matching the Matching module}.
+ * 
+ * This function generalizes that capability as follows.
+ * 
+ * It supports problems of the form $\\{(p_1,E_1),\ldots,(p_n,E_n)\\}$, where
+ * the $p_i$ are as before but the $E_i$ are sets of expressions.  It yields
+ * all solutions $S$ satisfying $S(p_i)\in E_i$.  (The special case where each
+ * $E_i$ has exactly one entry is the original notion of a matching problem as
+ * stated above.)  This algorithm is designed to explore the wider space of
+ * possible solutions created by permitting larger $E_i$, but in the most
+ * efficient way, organizing the exploration to prune the largest branches in
+ * the search tree as early as possible.
+ * 
+ * In addition to producing solutions $S$ satisfying $S(p_i)\in E_i$, because
+ * each $E_i$ is not just a set but an array, each $S$ can come with a mapping
+ * $f:\mathbb{N}\to\mathbb{N}$ that tells us exactly which entry of each $E_i$
+ * was matched: not only is $S(p_i)\in E_i$ but $S(p_i)=E_i[f(i)]$, that is,
+ * the $f(i)$th entry in the list $E_i$.  This mapping is returned for each
+ * solution $S$ generated, and in the parameters below is named the
+ * "expressionIndices" list for that solution.  Specifically, we encode such an
+ * $f$ as a simple JavaScript array $[f(1),\ldots,f(n)]$.  Each such
+ * expressionIndices array has length $n$, where $n$ comes from the original
+ * input to this function.
+ * 
+ * @param {LogicConcept[]} patterns JavaScript array of LogicConcept instances,
+ *   each of which may contain {@link module:Matching.metavariable
+ *   metavariables}, and each will be used as a pattern.  The elements
+ *   `patterns[i]` in this array are the patterns documented as $p_i$ above.
+ * @param {LogicConcept[][]} expressionLists array of arrays of LogicConcept
+ *   instances, none of which should contain metavariables; the outer array
+ *   must be the same length as `patterns`, because each array within it
+ *   corresponds to an entry in `patterns`, as discussed above.  That is, the
+ *   elements `expressionLists[i]` in this array are the "sets" documented as
+ *   $E_i$ above.
+ * @param {Solution} [soFar] used in recursion, defaults to an empty Solution;
+ *   clients typically do not provide this value
+ * @param {boolean} [debug] whether to print debugging information to the
+ *   console while it does its job, defaults to false
+ * @returns {Object[]} an array of objects, each of which has two entries:
+ *   one under the key "solution" maps to a solution as described above, and
+ *   the entry under the key "expressionIndices" is an array of integers that
+ *   indicates which entry in each of the `expressionLists` is matched by each
+ *   of the `patterns`
+ * @alias module:Matching.allInstantiations
+ */
+export function* allInstantiations (
+    patterns, expressionLists, soFar = null, debug = false
+) {
+    const DEBUG = debug ? console.log : () => {}
+    DEBUG( `
+allIn(  patterns = [ ${patterns.map(x=>x.toString()).join(', ')} ],
+        expressionLists = [ ${expressionLists.map(L=>'\n            [ '+L.map(e=>e.toString()).join(', ')+' ]').join(',')}
+        ], soFar = ${soFar}  )`)
+    // base cases
+    if ( patterns.length == 0 ) {
+        DEBUG( '    base case - one solution: soFar w/indices { }' )
+        yield { solution : soFar, expressionIndices : { } }
+        return
+    }
+    if ( expressionLists.some( list => list.length == 0 ) ) {
+        DEBUG( '    base case - no solutions' )
+        return
+    }
+    // recursive case
+    // 1. find pattern with minimal number of matches on its expr list
+    let min = null
+    outerloop:
+    for ( let i = 0 ; i &lt; patterns.length ; i++ ) {
+        let current = {
+            patternIndex : i,
+            solutions : [ ],
+            expressionIndices : [ ]
+        }
+        for ( let j = 0 ; j &lt; expressionLists[i].length ; j++ ) {
+            const nextProblem = new Problem(
+                applyWithBeta( soFar, patterns[i].copy() ),
+                expressionLists[i][j] )
+            DEBUG( `    will try to match ${nextProblem.toString()}` )
+            for ( let solution of nextProblem.solutions() ) {
+                current.solutions.push( solution )
+                DEBUG( `        FOUND: ${solution}` )
+                current.expressionIndices.push( j )
+                if ( min
+                  &amp;&amp; current.solutions.length >= min.solutions.length ) {
+                    DEBUG( `    ${i} got >= shortest...skipping` )
+                    continue outerloop
+                }
+            }
+        }
+        min = current
+        DEBUG( `    shortest is @ ${i} w/len ${min.solutions.length}` )
+        if ( min.solutions.length == 0 ) {
+            // signal to point 2., below, that there are no solutions:
+            min = null
+            break
+        }
+    }
+    // 2. other base case: maybe no matches succeeded, so no instantiations
+    if ( !min ) {
+        DEBUG( '    base case - all match lists empty - no solutions' )
+        return
+    }
+    // 3. do all possible recursions and bundle them into our solutions, too
+    DEBUG( '    recurring...' )
+    const insertedExpressionIndex = ( newIndex, oldData ) => {
+        // oldData is of the form { solution, expressionIndices }
+        const newMap = { }
+        for ( let k in oldData.expressionIndices )
+            newMap[k >= min.patternIndex ? parseInt(k) + 1 : parseInt(k)] =
+                oldData.expressionIndices[k]
+        newMap[min.patternIndex] = newIndex
+        oldData.expressionIndices = newMap
+        return oldData
+    }
+    for ( let i = 0 ; i &lt; min.solutions.length ; i++ ) {
+        const recursiveGenerator = allInstantiations(
+            patterns.without( min.patternIndex ),
+            expressionLists.without( min.patternIndex ),
+            unionOfSolutions( soFar, min.solutions[i] ), debug )
+        for ( let recursiveSol of recursiveGenerator ) {
+            recursiveSol = insertedExpressionIndex(
+                min.expressionIndices[i], recursiveSol )
+            recursiveSol.solution = unionOfSolutions( soFar,
+                recursiveSol.solution )
+            DEBUG( `...rec - ${recursiveSol.solution} with indices `
+                 + JSON.stringify( recursiveSol.expressionIndices ) )
+            yield recursiveSol
+        }
+    }
+}
+
+// Utility function used below to convert index maps into arrays
+const indexMapToArray = map => {
+    const indices = Object.keys( map ).map( key => parseInt( key ) )
+    const length = indices.length > 0 ? Math.max( ...indices ) + 1 : 0
+    const result = Array( length ).fill( 0 )
+    result.forEach( ( _, i ) => result[i] = map[i] )
+    return result
+}
+
+/**
+ * There will be situations in which we want to seek instantiations of patterns
+ * but not require absolutely every pattern to be instantiated.
+ * 
+ * The simplest example is probably the following:  Imagine we have a formula
+ * for the introduction of a conditional, such as `:{ :{ :A B } (=> A B) }` if
+ * we're using {@link LogicConcept.fromPutdown putdown notation}.  We're
+ * checking to see if it justifies conclusion `(=> P Q)`, so we need to find a
+ * premise of the form `{ :P Q }`.  But actually, we would accept a premise
+ * that's just of the form `Q` even if there is no `P` in sight, because that
+ * could be strictly stronger than `{ :P Q }`, so we would want to run it
+ * through validation to see if it works.  Thus we do not need to match both
+ * `P` and `Q` when searching; we must match `Q` and can optionally also match
+ * `P`.
+ * 
+ * That's not an excellent example, because of course just matching the final
+ * conclusion `(=> A B)` to `(=> P Q)` provides us with the full instantiation,
+ * but there are many example of rules with environment premises, and not all
+ * are so simple.
+ * 
+ * We therefore create this function, which behaves exactly like
+ * {@link module:Matching.allInstantiations allInstantiations()}, except that
+ * you can provide an index that indicates how to separate the constraints into
+ * the required ones and the optional ones.  We call that index
+ * `firstOptional`, and it has the meaning that it is the index of the first
+ * optional constraint, in the sense that all previous ones are required, and
+ * any constraint from that point onward is optional.
+ * 
+ * The return values will be exactly like those for
+ * {@link module:Matching.allInstantiations allInstantiations()}, except that
+ * some of the expression indices may be $-1$, indicating that the pattern was
+ * not matched to any expression.  Only optional constraints will have an
+ * expression index of $-1$; all required constraints will have non-negative
+ * expression indices.
+ * 
+ * @param {LogicConcept[]} patterns this parameter has the same meaning as it
+ *   has in {@link module:Matching.allInstantiations allInstantiations()}; see
+ *   the documentation there
+ * @param {LogicConcept[][]} expressionLists this parameter has the same
+ *   meaning as it has in {@link module:Matching.allInstantiations
+ *   allInstantiations()}; see the documentation there
+ * @param {integer} firstOptional the index of the first optional constraint.
+ *   To indicate that all constraints are required, set this value to be less
+ *   than 0 or larger than the last valid index into `patterns`.
+ * @param {Solution} soFar this parameter has the same meaning as it has in
+ *   {@link module:Matching.allInstantiations allInstantiations()}; see the
+ *   documentation there
+ * @param {boolean} debug this parameter has the same meaning as it has in
+ *   {@link module:Matching.allInstantiations allInstantiations()}; see the
+ *   documentation there
+ * @returns {Object[]} the return value has the same format as it has in
+ *   {@link module:Matching.allInstantiations allInstantiations()}; see the
+ *   documentation there, plus the comments above about $-1$ expression indices
+ *   for unmatched and optional constraints
+ * @alias module:Matching.allOptionalInstantiations
+ */
+export function* allOptionalInstantiations (
+    patterns, expressionLists, firstOptional = -1, soFar = null, debug = false
+) {
+    // Degenerate case: Nothing optional; just call allInstantiations()
+    if ( firstOptional &lt; 0 || firstOptional >= patterns.length ) {
+        yield* allInstantiations( patterns, expressionLists, soFar, debug )
+        return
+    }
+    // Generate all solutions for the non-optional portion of the input,
+    // and build upon those with various extensions...
+    const outerGenerator = allInstantiations(
+        patterns.slice( 0, firstOptional ),
+        expressionLists.slice( 0, firstOptional ),
+        soFar, debug )
+    for ( let nonOptionalSolution of outerGenerator ) {
+        let innerGenerator
+        // Extend it to all solutions for which
+        // patterns[firstOptional],expressionLists[firstOptional] has a match.
+        // Just recursively call this function to extend nonOptionalSolution,
+        // requiring index 0 to be matched:
+        innerGenerator = allOptionalInstantiations(
+            patterns.slice( firstOptional ),
+            expressionLists.slice( firstOptional ), 1,
+            nonOptionalSolution.solution )
+        for ( let optionalSolution of innerGenerator ) {
+            // Then concatenate the two expression index lists before yielding:
+            optionalSolution.expressionIndices = [
+                ...indexMapToArray( nonOptionalSolution.expressionIndices ),
+                ...indexMapToArray( optionalSolution.expressionIndices )
+            ]
+            yield optionalSolution
+        }
+        // Also extend it to all solutions for which
+        // patterns[firstOptional],expressionLists[firstOptional] has no match.
+        // Just recursively call this function to extend nonOptionalSolution,
+        // leaving out that first pair entirely:
+        innerGenerator = allOptionalInstantiations(
+            patterns.slice( firstOptional + 1 ),
+            expressionLists.slice( firstOptional + 1 ), 0,
+            nonOptionalSolution.solution )
+        for ( let optionalSolution of innerGenerator ) {
+            // Then concatenate the two expression index lists before yielding,
+            // marking the missing pair as not used:
+            optionalSolution.expressionIndices = [
+                ...indexMapToArray( nonOptionalSolution.expressionIndices ),
+                -1, ...indexMapToArray( optionalSolution.expressionIndices )
+            ]
+            yield optionalSolution
+        }
+    }
 }
 </code></pre>
-<pre class="prettyprint source lang-text"><code>// Console output:
-(= (+ (^ e (* i pi)) 1) 0)
-=
-(+ (^ e (* i pi)) 1)
-+
-(^ e (* i pi))
-^
-e
-(* i pi)
-*
-i
-pi
-1
-0
-</code></pre>
-<hr/>
-<br/>
-</article>
-
+    </article>
 </section>
+
+
+
 
   </div>
 </main>
 
 <footer class="layout-footer">
   <div class="container">
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.10</a> on Thu Oct 27 2022 16:25:34 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.10</a> on Thu Oct 27 2022 16:25:33 GMT+0000 (Coordinated Universal Time)
   </div>
 </footer>
 
