@@ -1489,3 +1489,87 @@ describe( 'Writing putdown notation', () => {
     } )
 
 } )
+
+describe( 'Conditional form', () => {
+
+    it( 'Should ignore Declarations', () => {
+        let D = new Declaration(
+            new LurchSymbol( 'x' ), new LurchSymbol( 'y' ) )
+        expect( D.conditionalForm() ).to.eql( [ ] )
+        let innerD = new Environment(
+            new LurchSymbol( 'w' ).asA( 'given' ), D.copy() )
+        expect( innerD.conditionalForm() ).to.eql( [ ] )
+    } )
+
+    it( 'Should convert Expressions to singleton arrays', () => {
+        let expr
+        let result
+        // try a single symbol
+        expr = new LurchSymbol( 'a' )
+        result = expr.conditionalForm()
+        expect( result ).to.have.length( 1 )
+        expect( result[0].equals( expr ) ).to.equal( true )
+        // try something more complex
+        expr = LogicConcept.fromPutdown( '(one two three , four)' )[0]
+        result = expr.conditionalForm()
+        expect( result ).to.have.length( 1 )
+        expect( result[0].equals( expr ) ).to.equal( true )
+        // try something nested many levels and that is also a given
+        expr = LogicConcept.fromPutdown( ':((x y) (("zee" a) b c))' )[0]
+        result = expr.conditionalForm()
+        expect( result ).to.have.length( 1 )
+        expect( result[0].equals( expr.copy().unmakeIntoA( 'given' ) ) )
+            .to.equal( true )
+    } )
+
+    it( 'Should create singletons from sequents', () => {
+        let sequent
+        let result
+        // try a simple conditional A -> B
+        sequent = LogicConcept.fromPutdown( '{ :A B }' )[0]
+        result = sequent.conditionalForm()
+        expect( result ).to.have.length( 1 )
+        expect( result[0].equals( sequent ) ).to.equal( true )
+        // try a longer conditional A1 -> (A2 ^ A3) -> A4 -> B
+        sequent = LogicConcept.fromPutdown( '{ :A1 :{ A2 A3 } :A4 B }' )[0]
+        result = sequent.conditionalForm()
+        expect( result ).to.have.length( 1 )
+        expect( result[0].equals( LogicConcept.fromPutdown(
+            '{ :A1 :A2 :A3 :A4 B }' )[0] ) ).to.equal( true )
+    } )
+
+    it( 'Should handle multi-conclusion Environments correctly', () => {
+        let env
+        let result
+        // try a simple conjunction A ^ B
+        env = LogicConcept.fromPutdown( '{ A B }' )[0]
+        result = env.conditionalForm()
+        expect( result ).to.have.length( 2 )
+        expect( result[0].equals( new LurchSymbol( 'A' ) ) ).to.equal( true )
+        expect( result[1].equals( new LurchSymbol( 'B' ) ) ).to.equal( true )
+        // try a more complex situation with lots of confusing nesting
+        env = LogicConcept.fromPutdown(
+            '{ :{ :{ A :B C } { D :E } :{ F } G } { H :I J } }' )[0]
+        result = env.conditionalForm()
+        expect( result ).to.have.length( 2 )
+        expect( result[0].equals( LogicConcept.fromPutdown(
+            '{ :{ :A :{ :B C } D } :{ :A :{ :B C } :F G } H }'
+        )[0] ) ).to.equal( true )
+        expect( result[1].equals( LogicConcept.fromPutdown(
+            '{ :{ :A :{ :B C } D } :{ :A :{ :B C } :F G } :I J }'
+        )[0] ) ).to.equal( true )
+        // try one that creates lots of seqents
+        env = LogicConcept.fromPutdown( '{ :P1 :P2 :P3 C1 C2 C3 C4 }' )[0]
+        result = env.conditionalForm()
+        expect( result ).to.have.length( 4 )
+        expect( result[0].equals( LogicConcept.fromPutdown(
+            '{ :P1 :P2 :P3 C1 }' )[0] ) ).to.equal( true )
+        expect( result[1].equals( LogicConcept.fromPutdown(
+            '{ :P1 :P2 :P3 C2 }' )[0] ) ).to.equal( true )
+        expect( result[2].equals( LogicConcept.fromPutdown(
+            '{ :P1 :P2 :P3 C3 }' )[0] ) ).to.equal( true )
+        expect( result[3].equals( LogicConcept.fromPutdown(
+            '{ :P1 :P2 :P3 C4 }' )[0] ) ).to.equal( true )
+    } )
+
+} )

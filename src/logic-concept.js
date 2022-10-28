@@ -92,6 +92,69 @@ export class LogicConcept extends MathConcept {
         return true
     }
 
+    /**
+     * LogicConcepts can be thought of as expression a fragment of propositional
+     * logic if we view givens (that is, LogicConcepts satisfying
+     * `.isA( 'given' )`) as saying "if this is true..." and those that are not
+     * givens as saying "...then this is true."  For example, we would view the
+     * LogicConcept expressed by the {@link LogicConcept#fromPutdown putdown
+     * notation} `{ :{ A B } C D }` as saying "if A and B are true then C and D
+     * are true," or in propositional logic notation as
+     * $(A\wedge B)\to(C\wedge D)$.
+     * 
+     * This function helps us express such propositional sentences using only
+     * conditionals, that is, not needing conjunctions.  The above example would
+     * be written as two separate sentences, one saying "if A then if B then C"
+     * and another saying "if A then if B then D," or in propositional logic
+     * notation as the sentences $A\to B\to C$ and $A\to B\to D$, where the
+     * conditional arrow associates to the right.  We interpret the set of such
+     * propositional expressions as meaning their conjunction.  Thus there is
+     * one implied conjunction over all of the conditional expressions, and so
+     * this is a type of normal form.
+     * 
+     * It returns a list of LogicConcepts, each of which is either a single
+     * {@link Expression}, which should be interpreted as a single propositional
+     * letter, or an {@link Environment} whose only claim child is its last,
+     * that is, one of the form `{ :G_1 ... :G_n C }`, containing $n$ givens and
+     * 1 claim.
+     * 
+     * The current version of this function supports only inputs containing
+     * nested {@link Environment Environments} and {@link Expression
+     * Expressions}, not inputs that may contain {@link Declaration
+     * Declarations}.  Any {@link Declaration Declarations} are just ignored.
+     * 
+     * @returns {LogicConcept[]} the conditional form of this LogicConcept, as
+     *   documented above
+     */
+    conditionalForm () {
+        // The conditional form of an Expression E is just E (not as a given)
+        const Expression = MathConcept.subclasses.get( 'Expression' )
+        if ( this instanceof Expression )
+            return [ this.copy().unmakeIntoA( 'given' ) ]
+        // The conditional form of a Declaration is [ ], because we ignore Decls
+        const Environment = MathConcept.subclasses.get( 'Environment' )
+        if ( !( this instanceof Environment ) )
+            return [ ]
+        // The conditional form of an Environment is the concatenation of all
+        // of the conditional forms of its conclusion sequents.
+        const result = [ ]
+        const conclusions = this.conclusions().filter(
+            x => x instanceof Expression ) // again, we ignore Declarations
+        for ( let conclusion of conclusions ) {
+            // build the inner sequent for this conclusion
+            const next = new Environment()
+            const context = conclusion.accessibles( false, this ).reverse()
+            const strictContext = context.filter( x => x.isA( 'given' ) )
+            for ( let premise of strictContext )
+                for ( let sequent of premise.conditionalForm() )
+                    next.pushChild( sequent.makeIntoA( 'given' ) )
+            next.pushChild( conclusion.copy() )
+            // if it is degenerate, drop the unneeded Environment wrapper
+            result.push( next.numChildren() > 1 ? next : next.firstChild() )
+        }
+        return result
+    }
+
     //////
     //
     //  Feedback functions
