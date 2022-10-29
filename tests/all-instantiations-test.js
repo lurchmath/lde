@@ -13,6 +13,47 @@ describe( 'Multiple pattern instantiations', () => {
         expect( Matching.allOptionalInstantiations ).to.be.ok
     } )
 
+    // Utility function used by tests below to build solutions w/expr. indices
+    const pairToSolution = ( key, exprIndices, instantiation ) => {
+        // process the expression indices
+        const newMap = { }
+        for ( let j = 0 ; j < exprIndices.numChildren() ; j++ )
+            newMap[j] = parseInt( exprIndices.child( j ).text() )
+        const result = { expressionIndices : newMap }
+        // process the solution mapping
+        expect( instantiation.numChildren() % 2 == 0 ).equals( true,
+            `Expected solution of even length in ${key}: ${instantiation}` )
+        // The tests use the notation (@lambda (x , y)) for EFs,
+        // so we need to find each such expression and convert it into
+        // an actual EF.
+        const lambda = new LurchSymbol( '@lambda' )
+        const isEFNotation = lc =>
+            ( lc instanceof Application )
+         && lc.numChildren() == 2
+         && lc.firstChild().equals( lambda )
+         && ( lc.lastChild() instanceof BindingExpression )
+         && lc.lastChild().boundSymbols().length == 1
+        const convertToEF = lc => Matching.newEF(
+            ...lc.lastChild().boundSymbols(), lc.lastChild().lastChild() )
+            instantiation.descendantsSatisfying( isEFNotation )
+            .map( d => d.replaceWith( convertToEF( d ) ) )
+        // Now form the parts into a mapping
+        const solution = { }
+        for ( let i = 0 ; i < instantiation.numChildren() - 1 ; i += 2 ) {
+            expect( instantiation.child( i ) ).to.be.instanceOf( LurchSymbol,
+                `Expected solution in ${key} has ${instantiation.child(i)}`
+              + ` where a metavariable belongs` )
+            expect( instantiation.child( i ).isA( Matching.metavariable) )
+                .equals( true,
+                    `Expected solution in ${key} has ${instantiation.child(i)}`
+                  + ` where a metavariable belongs` )
+            solution[instantiation.child(i).text()] =
+                instantiation.child( i + 1 )
+        }
+        result.solution = solution
+        return result
+    }
+
     // Utility function used by tests below to extract meaning from the
     // test formatting convention described in the comments below.
     const getTestComponents = ( key, LCs ) => {
@@ -62,47 +103,9 @@ describe( 'Multiple pattern instantiations', () => {
         // Extract the solutions and define the expected solution objects
         // from them.
         let expectedSols = [ ]
-        for ( let i = 1 ; i < LCs[2].numChildren() ; i++ ) {
-            const child = LCs[2].child( i )
-            if ( i % 2 == 1 ) { // process the expression indices
-                const newMap = { }
-                for ( let j = 0 ; j < child.numChildren() ; j++ )
-                    newMap[j] = parseInt( child.child( j ).text() )
-                expectedSols.push( { expressionIndices : newMap } )
-            } else { // process the solution mapping
-                const last = expectedSols[expectedSols.length-1]
-                expect( child.numChildren() % 2 == 0 ).equals( true,
-                    `Expected solution of even length in ${key}: ${child}` )
-                // The tests use the notation (@lambda (x , y)) for EFs,
-                // so we need to find each such expression and convert it into
-                // an actual EF.
-                const lambda = new LurchSymbol( '@lambda' )
-                const isEFNotation = lc =>
-                    ( lc instanceof Application )
-                 && lc.numChildren() == 2
-                 && lc.firstChild().equals( lambda )
-                 && ( lc.lastChild() instanceof BindingExpression )
-                 && lc.lastChild().boundSymbols().length == 1
-                const convertToEF = lc => Matching.newEF(
-                    ...lc.lastChild().boundSymbols(),
-                    lc.lastChild().lastChild() )
-                child.descendantsSatisfying( isEFNotation )
-                    .map( d => d.replaceWith( convertToEF( d ) ) )
-                // Now form the parts into a mapping
-                const result = { }
-                for ( let i = 0 ; i < child.numChildren() - 1 ; i += 2 ) {
-                    expect( child.child( i ) ).to.be.instanceOf( LurchSymbol,
-                        `Expected solution in ${key} has ${child.child(i)}`
-                      + ` where a metavariable belongs` )
-                    expect( child.child( i ).isA( Matching.metavariable) )
-                        .equals( true,
-                            `Expected solution in ${key} has ${child.child(i)}`
-                          + ` where a metavariable belongs` )
-                    result[child.child(i).text()] = child.child( i + 1 )
-                }
-                last.solution = result
-            }
-        }
+        for ( let i = 1 ; i < LCs[2].numChildren() ; i += 2 )
+            expectedSols.push( pairToSolution(
+                key, LCs[2].child( i ), LCs[2].child( i + 1 ) ) )
         return { constraints, expectedSols }
     }
 
