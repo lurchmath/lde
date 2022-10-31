@@ -734,6 +734,51 @@ const testingDatabase = [
     "content": "\n// Declare the metavariables in this multi-matching problem:\n(metavariables x y)\n\n// List the pattern-then-expressions tuples in this multi-matching problem:\n(problem\n    (constraint  (and x y)    (and 1 2)  (and 3 4)  )\n    (constraint  (and 3 y)    (and 1 4)  (and 3 2)  )\n)\n\n// List all solutions in this multi-matching problem:\n// (Note that each one comes with a list of indices,\n// followed by a metavariable assignment.)\n(solutions\n    (0 1)\n    (\n        x  1\n        y  2\n    )\n)\n"
   },
   {
+    "filename": "/multi-matching tests/test 10.putdown",
+    "metadata": {
+      "testing": {
+        "type": "possible sufficient instantiations"
+      }
+    },
+    "content": "\n// Metavariables used in the formula below:\n(metavariables A B)\n\n// The formula to be instantiated:\n{\n    :A\n    :B\n    (^ A B)\n}\n// Note that the above formula will become the following sequence of patterns:\n// [ A, B, (^ A B) ]\n\n// The sequent we will attempt to make true:\n{\n    :X\n    :(-> Y Z)\n    :Y\n    (^ Y X)\n}\n// Note that the above formula will become the following sequence of patterns:\n// [ X, (-> Y Z), Y, (^ Y X) ]\n\n// The options to use when searching:\n(options direct) // but still keep the default of not intuitionistic\n\n// List all solutions expected:\n// (Note that each one comes with a list of indices, followed by a metavariable\n// assignment.  Negative indices indicate that the pattern in question was\n// optional and was not matched to any expression.)\n(solutions\n    (-1 -1  3)  (A Y   B X)  // instantiate just the third one\n    (-1  0  3)  (A Y   B X)  // instantiate just the second and third ones\n    ( 2 -1  3)  (A Y   B X)  // instantiate just the first and third ones\n    ( 2  0  3)  (A Y   B X)  // instantiate all 3\n)\n"
+  },
+  {
+    "filename": "/multi-matching tests/test 11.putdown",
+    "metadata": {
+      "testing": {
+        "type": "possible sufficient instantiations"
+      }
+    },
+    "content": "\n// Metavariables used in the formula below:\n(metavariables A B)\n\n// The formula to be instantiated:\n{\n    :A\n    :B\n    (^ A B)\n}\n// Note that the above formula will become the following sequence of patterns:\n// [ A, B, (^ A B) ]\n\n// The sequent we will attempt to make true:\n{\n    :X\n    :(-> Y Z)\n    :Y\n    (^ Y X)\n}\n// Note that the above formula will become the following sequence of patterns:\n// [ X, (-> Y Z), Y, (^ Y X) ]\n\n// The options to use when searching:\n(options intuitionistic) // but still keep the default of not direct\n\n// List all solutions expected:\n// (Note that each one comes with a list of indices, followed by a metavariable\n// assignment.  Negative indices indicate that the pattern in question was\n// optional and was not matched to any expression.)\n(solutions\n    ( 2  0  3)  (A Y   B X)  // in this case, must instantiate all three\n)\n"
+  },
+  {
+    "filename": "/multi-matching tests/test 12.putdown",
+    "metadata": {
+      "testing": {
+        "type": "possible sufficient instantiations"
+      }
+    },
+    "content": "\n// Metavariables used in the formula below:\n(metavariables A B)\n\n// The formula to be instantiated:\n{\n    :A\n    :B\n    (^ A B)\n}\n// Note that the above formula will become the following sequence of patterns:\n// [ A, B, (^ A B) ]\n\n// The sequent we will attempt to make true:\n{\n    :X\n    :(-> Y Z)\n    :Y\n    (^ Y X)\n}\n// Note that the above formula will become the following sequence of patterns:\n// [ X, (-> Y Z), Y, (^ Y X) ]\n\n// The options to use when searching:\n(options intuitionistic direct)\n\n// List all solutions expected:\n// (Note that each one comes with a list of indices, followed by a metavariable\n// assignment.  Negative indices indicate that the pattern in question was\n// optional and was not matched to any expression.)\n(solutions\n    ( 2  0  3)  (A Y   B X)  // in this case, must instantiate all three\n)\n"
+  },
+  {
+    "filename": "/multi-matching tests/test 13.putdown",
+    "metadata": {
+      "testing": {
+        "type": "possible sufficient instantiations"
+      }
+    },
+    "content": "\n// Metavariables used in the formula below:\n(metavariables P Q)\n\n// The formula to be instantiated:\n{\n    :{ :P Q }\n    (-> P Q)\n}\n// Note that the above formula will become the following sequence of patterns:\n// [ P, Q, (-> P Q) ]\n\n// The sequent we will attempt to make true:\n{\n    :{ :X Y }\n    :{ :R S }\n    :Y\n    (-> X Y)\n}\n// Note that the above formula will become the following sequence of patterns:\n// [ X, Y, R, S, Y, (-> X Y) ]\n\n// The options to use when searching:\n(options intuitionistic)\n// This will limit the candidates when searching to this:\n//   P may optionally match any of [ X, R, (-> X Y) ]\n//   Q must match one of [ Y, S, Y ]\n//   (-> P Q) must match one of [ X, R, (-> X Y) ]\n\n// List all solutions expected:\n// (Note that each one comes with a list of indices, followed by a metavariable\n// assignment.  Negative indices indicate that the pattern in question was\n// optional and was not matched to any expression.)\n(solutions\n    (-1 1 5)  (P X   Q Y)  // P not matched, Q=first Y\n    (-1 4 5)  (P X   Q Y)  // P not matched, Q=second Y\n    ( 0 1 5)  (P X   Q Y)  // P=X, Q=first Y\n    ( 0 4 5)  (P X   Q Y)  // P=X, Q=second Y\n)\n"
+  },
+  {
+    "filename": "/multi-matching tests/test 14.putdown",
+    "metadata": {
+      "testing": {
+        "type": "possible sufficient instantiations"
+      }
+    },
+    "content": "\n// Metavariables used in the formula below:\n(metavariables P Q)\n\n// The formula to be instantiated:\n{\n    :{ :P Q }\n    (-> P Q)\n}\n// Note that the above formula will become the following sequence of patterns:\n// [ P, Q, (-> P Q) ]\n\n// The sequent we will attempt to make true:\n{\n    :{ :X Y }\n    :{ :R S }\n    :{ :F G }\n    (-> X Y)\n}\n// Note that the above formula will become the following sequence of patterns:\n// [ X, Y, R, S, F, G, (-> X Y) ]\n\n// The options to use when searching:\n(options intuitionistic)\n// This will limit the candidates when searching to this:\n//   P may optionally match any of [ X, R, F, (-> X Y) ]\n//   Q must match one of [ Y, S, G ]\n//   (-> P Q) must match one of [ X, R, F, (-> X Y) ]\n\n// List all solutions expected:\n// (Note that each one comes with a list of indices, followed by a metavariable\n// assignment.  Negative indices indicate that the pattern in question was\n// optional and was not matched to any expression.)\n(solutions\n    (-1 1 6)  (P X   Q Y)  // P not matched, Q=Y\n    ( 0 1 6)  (P X   Q Y)  // P=X, Q=Y\n)\n"
+  },
+  {
     "filename": "/multi-matching tests/test 2.putdown",
     "metadata": {
       "testing": {
@@ -795,6 +840,15 @@ const testingDatabase = [
       }
     },
     "content": "\n// Imagine that we wish to use the optional multi-matching algorithm to look\n// for instantiations of the equality elimination rule that will make a certain\n// conclusion true, by searching among the accessible premises.  Here is a\n// small example document.\n//\n// {\n//     :{ :{ :A B } (=> A B) }      // the formula\n//     {                            // the only environment premise\n//         :(hello there)           // instantiation of A\n//         hi!                      // possible instantiation of B\n//         (how r u?)               // another possible instantiation of B\n//     }\n//     bar                          // the premise we will actually use\n//     (=> foo bar)                 // the desired conclusion\n// }\n//\n// We would set up an optional multi-matching problem as follows:\n//  - A must match (hello there) if it matches anything, but it's optional\n//  - B must match one of: hi!, (how r u?), bar\n//  - (=> A B) must match the desired conclusion (=> foo bar)\n// We do exactly that below.\n\n// Declare the metavariables in this optional multi-matching problem:\n(metavariables A B)\n\n// List the pattern-then-expressions tuples in this multi-matching problem:\n// (Note that once one is marked \"optional,\" all later ones are optional also.)\n(problem\n    (constraint  B                      hi!  (how r u?)  bar  )\n    (constraint  (=> A B)               (=> foo bar)  )\n    (constraint  A            optional  (hello there)  )\n)\n\n// List all solutions in this optional multi-matching problem:\n// (Note that each one comes with a list of indices,\n// followed by a metavariable assignment.  Negative indices indicate that the\n// pattern in question was optional and was not matched to any expression.)\n(solutions\n    (2 0 -1)\n    (\n        A  foo\n        B  bar\n    )\n)\n"
+  },
+  {
+    "filename": "/multi-matching tests/test 9.putdown",
+    "metadata": {
+      "testing": {
+        "type": "possible sufficient instantiations"
+      }
+    },
+    "content": "\n// Metavariables used in the formula below:\n(metavariables A B)\n\n// The formula to be instantiated:\n{\n    :A\n    :B\n    (^ A B)\n}\n// Note that the above formula will become the following sequence of patterns:\n// [ A, B, (^ A B) ]\n\n// The sequent we will attempt to make true:\n{\n    :X\n    :(-> Y Z)\n    :Y\n    (^ Y X)\n}\n// Note that the above formula will become the following sequence of patterns:\n// [ X, (-> Y Z), Y, (^ Y X) ]\n\n// The options to use when searching:\n(options none) // defaults: not direct, not intuitionistic\n\n// List all solutions expected:\n// (Note that each one comes with a list of indices, followed by a metavariable\n// assignment.  Negative indices indicate that the pattern in question was\n// optional and was not matched to any expression.)\n(solutions\n    // 1 way to instantiate none of the formula's outermost expressions\n    (-1 -1 -1)  empty_function\n    // 1 way to instantiate just the third one\n    (-1 -1  3)  (A Y   B X)\n    // 4 ways to instantiate just the second one\n    (-1  0 -1)  (B X)\n    (-1  1 -1)  (B (-> Y Z))\n    (-1  2 -1)  (B Y)\n    (-1  3 -1)  (B (^ Y X))\n    // 1 way to instantiate just the second and third ones\n    (-1  0  3)  (A Y   B X)\n    // 4 ways to instantiate just the first one\n    ( 0 -1 -1)  (A X)\n    ( 1 -1 -1)  (A (-> Y Z))\n    ( 2 -1 -1)  (A Y)\n    ( 3 -1 -1)  (A (^ Y X))\n    // 1 way to instantiate just the first and third ones\n    ( 2 -1  3)  (A Y   B X)\n    // 16 ways to instantiate just the first and second ones\n    ( 0  0 -1)  (A X   B X)\n    ( 0  1 -1)  (A X   B (-> Y Z))\n    ( 0  2 -1)  (A X   B Y)\n    ( 0  3 -1)  (A X   B (^ Y X))\n    ( 1  0 -1)  (A (-> Y Z)   B X)\n    ( 1  1 -1)  (A (-> Y Z)   B (-> Y Z))\n    ( 1  2 -1)  (A (-> Y Z)   B Y)\n    ( 1  3 -1)  (A (-> Y Z)   B (^ Y X))\n    ( 2  0 -1)  (A Y   B X)\n    ( 2  1 -1)  (A Y   B (-> Y Z))\n    ( 2  2 -1)  (A Y   B Y)\n    ( 2  3 -1)  (A Y   B (^ Y X))\n    ( 3  0 -1)  (A (^ Y X)   B X)\n    ( 3  1 -1)  (A (^ Y X)   B (-> Y Z))\n    ( 3  2 -1)  (A (^ Y X)   B Y)\n    ( 3  3 -1)  (A (^ Y X)   B (^ Y X))\n    // 1 way to instantiate all 3\n    ( 2  0  3)  (A Y   B X)\n)\n"
   },
   {
     "filename": "/parsing tests/syntax error 1.putdown",
