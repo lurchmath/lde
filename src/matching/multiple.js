@@ -1,5 +1,6 @@
 
 import { Problem } from './problem.js'
+import { Solution } from './solution.js'
 import { fullBetaReduce } from './expression-functions.js'
 
 // Utility function used by allInstantiations(), below.
@@ -89,6 +90,7 @@ allIn(  patterns = [ ${patterns.map(x=>x.toString()).join(', ')} ],
     // base cases
     if ( patterns.length == 0 ) {
         DEBUG( '    base case - one solution: soFar w/indices { }' )
+        if ( !soFar ) soFar = new Solution( new Problem() )
         yield { solution : soFar, expressionIndices : { } }
         return
     }
