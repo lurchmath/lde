@@ -82,6 +82,27 @@ const unionOfSolutions = ( s1, s2 ) => {
 export function* allInstantiations (
     patterns, expressionLists, soFar = null, debug = false
 ) {
+    // This function is a wrapper.  It delegates its work to the big workhorse
+    // function designated a "helper," below, and just converts the output to a
+    // form more amenable to what clients mean; see comments below.
+    const generator = allInstantiationsHelper(
+        patterns, expressionLists, soFar, debug )
+    for ( let solutionObject of generator ) {
+        solutionObject.expressionIndices =
+            indexMapToArray( solutionObject.expressionIndices )
+        yield solutionObject
+    }
+}
+
+// This is the workhorse function for allInstantiations, and that function is
+// just a wrapper around this one that converts each of the results from this
+// function from an expressionIndices Map into an expressionIndices Array.
+// (It must be a map while the solution is being constructed because it may be
+// a partial function, but once the solution is complete, it will be a total
+// function.)
+function* allInstantiationsHelper (
+    patterns, expressionLists, soFar = null, debug = false
+) {
     const DEBUG = debug ? console.log : () => {}
     DEBUG( `
 allIn(  patterns = [ ${patterns.map(x=>x.toString()).join(', ')} ],
@@ -150,7 +171,7 @@ allIn(  patterns = [ ${patterns.map(x=>x.toString()).join(', ')} ],
         return oldData
     }
     for ( let i = 0 ; i < min.solutions.length ; i++ ) {
-        const recursiveGenerator = allInstantiations(
+        const recursiveGenerator = allInstantiationsHelper(
             patterns.without( min.patternIndex ),
             expressionLists.without( min.patternIndex ),
             unionOfSolutions( soFar, min.solutions[i] ), debug )
@@ -166,7 +187,9 @@ allIn(  patterns = [ ${patterns.map(x=>x.toString()).join(', ')} ],
     }
 }
 
-// Utility function used below to convert index maps into arrays
+// Utility function used by allInstantiations to convert index maps into arrays,
+// to transform the output of its inner workhorse function into a format that
+// the clients can use.
 const indexMapToArray = map => {
     const indices = Object.keys( map ).map( key => parseInt( key ) )
     const length = indices.length > 0 ? Math.max( ...indices ) + 1 : 0
@@ -258,8 +281,8 @@ export function* allOptionalInstantiations (
         for ( let optionalSolution of innerGenerator ) {
             // Then concatenate the two expression index lists before yielding:
             optionalSolution.expressionIndices = [
-                ...indexMapToArray( nonOptionalSolution.expressionIndices ),
-                ...indexMapToArray( optionalSolution.expressionIndices )
+                ...nonOptionalSolution.expressionIndices,
+                ...optionalSolution.expressionIndices
             ]
             yield optionalSolution
         }
@@ -275,8 +298,8 @@ export function* allOptionalInstantiations (
             // Then concatenate the two expression index lists before yielding,
             // marking the missing pair as not used:
             optionalSolution.expressionIndices = [
-                ...indexMapToArray( nonOptionalSolution.expressionIndices ),
-                -1, ...indexMapToArray( optionalSolution.expressionIndices )
+                ...nonOptionalSolution.expressionIndices,
+                -1, ...optionalSolution.expressionIndices
             ]
             yield optionalSolution
         }

@@ -432,15 +432,6 @@ const classifyByParity = ( LC, parity = 1 ) => {
     return result
 }
 
-// Utility function used below to convert index maps into arrays
-const indexMapToArray = map => {
-    const indices = Object.keys( map ).map( key => parseInt( key ) )
-    const length = indices.length > 0 ? Math.max( ...indices ) + 1 : 0
-    const result = Array( length ).fill( 0 )
-    result.forEach( ( _, i ) => result[i] = map[i] )
-    return result
-}
-
 /**
  * Given a sequent and a formula, is there an instantiation of the formula that,
  * if added as another premise to the sequent, would make the sequent true?  The
@@ -593,7 +584,7 @@ function *possibleSufficientInstantiations (
                            + JSON.stringify( solObj.expressionIndices ) + ' '
                            + solObj.solution.toString() )
             solObj.expressionIndices =
-                indexMapToArray( solObj.expressionIndices ).map(
+                solObj.expressionIndices.map(
                     ( exprInd, patInd ) => sequentOEs.both.findIndex(
                         x => candidates[patInd][exprInd]
                           && x.original == candidates[patInd][exprInd].original ) )
