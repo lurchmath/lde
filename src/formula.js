@@ -235,15 +235,18 @@ const replaceIfPossible = ( target, replacement, preserve ) => {
  * inputs that do not need to be {@link Expression Expressions}, and it does
  * exactly what you'd expect in that case.
  * 
+ * This function is a generator that yields zero or more ways to instantiation
+ * `formula` to produce `candidate`; all possible ways will be enumerated,
+ * though it may be that there are no such ways, in which case the enumeration
+ * will be empty.
+ * 
  * @param {LogicConcept} formula a {@link LogicConcept} that has had
  *   metavariables added to it using {@link Formula.from}
  * @param {LogicConcept} candidate a {@link LogicConcept} that may or may not
  *   be an instantiation of the given `formula`
- * @yields {Solution} zero or more ways to instantiation `formula` to produce
- *   `candidate`; all possible ways will be enumerated, though it may be that
- *   there are no such ways, in which case the enumeration will be empty
+ * @alias Formula.allPossibleInstantiations
  */
-const allPossibleInstantiations = function* ( formula, candidate ) {
+function *allPossibleInstantiations ( formula, candidate ) {
     const problem = problemFromExpressionsWithin( formula, candidate )
     if ( !problem ) return // no isomorphism == no results
     yield* problem.solutions()
@@ -474,6 +477,10 @@ const indexMapToArray = map => {
  * this function.  Set `debug: true` in the options object to print copious
  * debugging output to the console.
  * 
+ * This function is a generator that yields a sequence of objects in the same
+ * format as those returned by {@link module:Matching.allInstantiations
+ * allInstantiations()}; see its documentation for details.
+ * 
  * @param {Sequent} sequent the sequent whose conclusion the client hopes to
  *   justify by instantiating the formula
  * @param {Formula} formula the formula whose possible instantiations are to be
@@ -481,11 +488,9 @@ const indexMapToArray = map => {
  * @param {Object} options a dictionary of options, which default to
  *   `{ direct: false, intuitionistic: false, debug: false }` and whose meaning
  *   is given above
- * @yields {Object} a sequence of objects in the same format as those returned
- *   by {@link module:Matching.allInstantiations allInstantiations()}; see its
- *   documentation for details
+ * @alias Formula.possibleSufficientInstantiations
  */
-export function* possibleSufficientInstantiations (
+function *possibleSufficientInstantiations (
     sequent, formula, options = { }
 ) {
     // Assign default options

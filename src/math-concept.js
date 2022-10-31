@@ -674,8 +674,10 @@ export class MathConcept extends Superclass {
      * An iterator over all descendants of this MathConcept, in a pre-order tree
      * traversal.
      *
-     * @yields {MathConcept} This MathConcept, then its first child, and so on down
-     *   that branch of the tree, and onward in a pre-order traversal
+     * This function is a generator that yields this MathConcept, then its first
+     * child, and so on down that branch of the tree, and onward in a pre-order
+     * traversal.
+     * 
      * @see {@link MathConcept#descendantsSatisfying descendantsSatisfying()}
      * @see {@link MathConcept#hasDescendantSatisfying hasDescendantSatisfying()}
      */
@@ -736,7 +738,9 @@ export class MathConcept extends Superclass {
      * An iterator through all the ancestors of this MathConcept, starting with
      * itself as the first (trivial) ancestor, and walking upwards from there.
      *
-     * @yields {MathConcept} This MathConcept, then its parent, grandparent, etc.
+     * This function is a generator that yields this MathConcept, then its
+     * parent, grandparent, etc.
+     * 
      * @see {@link MathConcept#ancestors ancestors()}
      * @see {@link MathConcept#parent parent()}
      */
@@ -1195,14 +1199,16 @@ export class MathConcept extends Superclass {
      * An iterator that walks through the entire tree from this node onward, in
      * a pre-order tree traversal, yielding each node in turn.
      *
+     * This function is a generator that yields the next node after this one in
+     * pre-order tree traversal, just as {@link MathConcept#nextInTree
+     * nextInTree()} would yield, then the next after that, and so on.
+     * 
      * @param {boolean} inThisTreeOnly - Set this to true to limit the iterator
      *   to return only descendants of this MathConcept.  Set it to false to
      *   permit the iterator to proceed outside of this tree into its context,
      *   once all nodes within this tree have been exhausted.  If this MathConcept
      *   has no parent, then this parameter is irrelevant.
-     * @yields {MathConcept} The next node after this one in pre-order tree
-     *   traversal, just as {@link MathConcept#nextInTree nextInTree()} would
-     *   yield, then the next after that, and so on.
+     * 
      * @see {@link MathConcept#nextInTree nextInTree()}
      * @see {@link MathConcept#isEarlierThan isEarlierThan()}
      * @see {@link MathConcept#isLaterThan isLaterThan()}
@@ -1319,6 +1325,11 @@ export class MathConcept extends Superclass {
      * You can limit the list to only those accessibles within a given ancestor
      * by using the `inThis` parameter, documented below.
      * 
+     * This function is a generator that yields each MathConcept accessible to
+     * this one, beginning with the one closest to this one (often its previous
+     * sibling) and proceeding back through the hierarchy, so that each new
+     * result is accessible to (and earlier than) the previous).
+     * 
      * @param {boolean} reflexive - Functions analogously to the `reflexive`
      *   parameter for {@link MathConcept#isAccessibleTo isAccessibleTo()}; that
      *   is, do we include this MathConcept on its list of accessibles?  The
@@ -1327,10 +1338,6 @@ export class MathConcept extends Superclass {
      *   accessibles.  No accessible outside this ancestor will be returned.
      *   (If this is not actually an ancestor, it is ignored, and all accessibles
      *   are returned, which is the default.)
-     * @yields {MathConcept} Each MathConcept accessible to this one, beginning with
-     *   the one closest to this one (often its previous sibling) and proceeding
-     *   back through the hierarchy, so that each new result is accessible to
-     *   (and earlier than) the previous).
      * @see {@link MathConcept#isAccessibleTo isAccessibleTo()}
      * @see {@link MathConcept#accessibles accessibles()}
      */
@@ -1379,14 +1386,16 @@ export class MathConcept extends Superclass {
      * {@link MathConcept#isEarlierThan isEarlierThan()} all nodes yielded
      * thereafter.
      *
+     * This function is a generator that yields each MathConcept in the scope of
+     * this one, beginning with the one closest to this one (often its previous
+     * sibling) and proceeding forward through the hierarchy, so that each new
+     * result {@link MathConcept#isLaterThan isLaterThan()} the previous.
+     * 
      * @param {boolean} reflexive - Functions analogously to the `reflexive`
      *   parameter for {@link MathConcept#isInTheScopeOf isInTheScopeOf()}; that
      *   is, do we include this MathConcept on its list of things in its scope?
      *   The default value is true.
-     * @yields {MathConcept} Each MathConcept in the scope of this one, beginning
-     *   with the one closest to this one (often its previous sibling) and
-     *   proceeding forward through the hierarchy, so that each new result
-     *   {@link MathConcept#isLaterThan isLaterThan()} the previous.
+     * 
      * @see {@link MathConcept#isInTheScopeOf isInTheScopeOf()}
      * @see {@link MathConcept#scope scope()}
      */
