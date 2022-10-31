@@ -1,0 +1,41 @@
+---
+testing:
+  type: possible sufficient instantiations
+---
+
+// Metavariables used in the formula below:
+(metavariables P Q)
+
+// The formula to be instantiated:
+{
+    :{ :P Q }
+    (-> P Q)
+}
+// Note that the above formula will become the following sequence of patterns:
+// [ P, Q, (-> P Q) ]
+
+// The sequent we will attempt to make true:
+{
+    :{ :X Y }
+    :{ :R S }
+    :{ :F G }
+    (-> X Y)
+}
+// Note that the above formula will become the following sequence of patterns:
+// [ X, Y, R, S, F, G, (-> X Y) ]
+
+// The options to use when searching:
+(options intuitionistic)
+// This will limit the candidates when searching to this:
+//   P may optionally match any of [ X, R, F, (-> X Y) ]
+//   Q must match one of [ Y, S, G ]
+//   (-> P Q) must match one of [ X, R, F, (-> X Y) ]
+
+// List all solutions expected:
+// (Note that each one comes with a list of indices, followed by a metavariable
+// assignment.  Negative indices indicate that the pattern in question was
+// optional and was not matched to any expression.)
+(solutions
+    (-1 1 6)  (P X   Q Y)  // P not matched, Q=Y
+    ( 0 1 6)  (P X   Q Y)  // P=X, Q=Y
+)

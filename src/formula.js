@@ -22,6 +22,7 @@ import { BindingEnvironment } from './binding-environment.js'
 import { BindingExpression } from './binding-expression.js'
 import { Declaration } from './declaration.js'
 import { Expression } from './expression.js'
+import { Environment } from './environment.js'
 import { Symbol as LurchSymbol } from './symbol.js'
 import Matching from './matching.js'
 
@@ -399,7 +400,216 @@ const clearCachedInstantiations = formula => {
         instantiation => instantiation.remove() )
 }
 
+// Helper function used by possibleSufficientInstantiations(), below.
+// Traverses any given LogicConcept and returns an object of the form
+// { positives : [ ... ], negatives : [ ... ] }, where the two arrays are full
+// of the outermost expressions in the given LogicConcept, in the same order
+// they appear in the tree, but classified by parity.  There is also a "both"
+// member in the result, which just concatenates the two arrays.
+const classifyByParity = ( LC, parity = 1 ) => {
+    // Base case: this is an Expression; classify by the given parity
+    if ( LC instanceof Expression ) {
+        const claim = LC.copy().unmakeIntoA( 'given' )
+        claim.original = LC
+        return parity == 1 ?
+            { positives : [ claim ], negatives : [ ], both : [ claim ] }
+          : { positives : [ ], negatives : [ claim ], both : [ claim ] }
+    }
+    // Other base case: some type of LC we cannot handle; don't classify it
+    const result = { positives : [ ], negatives : [ ], both : [ ] }
+    if ( !( LC instanceof Environment ) ) return result
+    // Inductive case: recur on children, gather their results, in order
+    LC.children().forEach( child => {
+        const childResult = classifyByParity( child,
+            parity * ( child.isA( 'given' ) ? -1 : 1 ) )
+        result.positives = result.positives.concat( childResult.positives )
+        result.negatives = result.negatives.concat( childResult.negatives )
+        result.both = result.both.concat( childResult.both )
+    } )
+    return result
+}
+
+// Utility function used below to convert index maps into arrays
+const indexMapToArray = map => {
+    const indices = Object.keys( map ).map( key => parseInt( key ) )
+    const length = indices.length > 0 ? Math.max( ...indices ) + 1 : 0
+    const result = Array( length ).fill( 0 )
+    result.forEach( ( _, i ) => result[i] = map[i] )
+    return result
+}
+
+/**
+ * Given a sequent and a formula, is there an instantiation of the formula that,
+ * if added as another premise to the sequent, would make the sequent true?  The
+ * answer to that question depends upon which deductive system is providing the
+ * meaning of "true" for sequents, but in any reasonable case, finding exactly
+ * the set of instantiations that would make a sequent true will typically be at
+ * least as difficult as validating the instantiated sequent, perhaps moreso.
+ * Consequently, this function does not attempt to find the exact correct answer
+ * to that question, but rather finds a superset of the answer, guaranteeing
+ * that any instantiation that would make the sequent hold will be among the
+ * results.  Those results can be filtered further, if desired, by the client,
+ * by running them through the validation algorithm for the deductive system in
+ * play.
+ * 
+ * The default is to search for instantiations that will make the sequent true
+ * when validated by {@link ValidationTools.classicalPropositionalValidator
+ * classical propositional logic}.  However, if the client will be using
+ * {@link ValidationTools.intuitionisticPropositionalValidator intuitionistic
+ * propositional logic} instead, the results can be filterted further; simply
+ * set `intuitionistic: true` in the options object.  This will not only return
+ * fewer results, but also speed up the search for those results.
+ * 
+ * The default is to search for instantiations that will make the sequent true
+ * even if the formula itself is only an intermediate step in a larger chain of
+ * inferences.  However, it is often the case that the client wants the formula
+ * to be the final step that achieves the sequent's conclusion (say, if a
+ * student should be expected to cite a formula directly relevant to the
+ * statement they're justifying).  This will significantly narrow the search
+ * space and the result set and will consequently speed up the search.  Simply
+ * set `direct: true` in the options object.
+ * 
+ * The default is to do the work silently, not generating any debugging output.
+ * But if debugging a complex problem, it may help to see the inner workings of
+ * this function.  Set `debug: true` in the options object to print copious
+ * debugging output to the console.
+ * 
+ * @param {Sequent} sequent the sequent whose conclusion the client hopes to
+ *   justify by instantiating the formula
+ * @param {Formula} formula the formula whose possible instantiations are to be
+ *   explored
+ * @param {Object} options a dictionary of options, which default to
+ *   `{ direct: false, intuitionistic: false, debug: false }` and whose meaning
+ *   is given above
+ * @yields {Object} a sequence of objects in the same format as those returned
+ *   by {@link module:Matching.allInstantiations allInstantiations()}; see its
+ *   documentation for details
+ */
+export function* possibleSufficientInstantiations (
+    sequent, formula, options = { }
+) {
+    // Assign default options
+    options = Object.assign( {
+        direct : false, intuitionistic : false, debug : false
+    }, options )
+    if ( options.debug ) {
+        console.log( 'Sequent: ' + sequent.toPutdown() )
+        console.log( 'Formula: ' + formula.toPutdown() )
+    }
+    // Compute and classify the outermost expressions in the sequent.
+    const sequentOEs = classifyByParity( sequent )
+    // Now view the formula as a set of formulas, one for each of its
+    // conclusions.  The conditionalForm() function is ideal for this.
+    for ( let innerFormula of formula.conditionalForm() ) {
+
+        // Compute outermost expres in the formula; classifying not used here.
+        const classified = classifyByParity( innerFormula )
+        let patterns = classified.both.slice()
+        patterns.unshift( patterns.pop() )
+        // Candidates to match with each are all outermost expressions of the
+        // sequent, so we make many copies of that for use below.
+        let candidates = Array( patterns.length ).fill( sequentOEs.both )
+
+        // Now process the options object.
+        let numRequired = 0
+        if ( options.direct ) {
+            // If direct = true, then the final conclusion of the formula must
+            // match the final conclusion of the sequent, so we can simplify:
+            candidates[0] = [ sequentOEs.both.last() ]
+            numRequired = 1
+        } else if ( options.intuitionistic ) {
+            // If direct = false, but intuitionistics = true, the formula
+            // conclusion must still match something in positive position.
+            candidates[0] = sequentOEs.positives
+            numRequired = 1
+        }
+        // If intuitionistics = true, we can also require any formulaOE that is
+        // the last child of a top-level premise to match a negative sequentOE.
+        if ( options.intuitionistic ) {
+            const isLastChildOfTopLevelPremise = x => x.parent() && ( (
+                // either :{ ... x } is a child of the innerFormula but not the last:
+                x == x.parent().lastChild()
+             && x.parent().parent() == innerFormula
+             && x.parent() != innerFormula.lastChild()
+            ) || (
+                // or :x is a child of the innerFormula but not the last:
+                x.parent() == innerFormula
+             && x != innerFormula.lastChild()
+            ) )
+            const toMatchNegatives = patterns.slice( 1 ).filter(
+                x => isLastChildOfTopLevelPremise( x.original ) )
+            const toMatchAnything = patterns.slice( 1 ).filter(
+                x => !isLastChildOfTopLevelPremise( x.original ) )
+            patterns = [ patterns[0], ...toMatchNegatives, ...toMatchAnything ]
+            candidates = [ candidates[0],
+                ...Array( toMatchNegatives.length ).fill( sequentOEs.negatives ),
+                ...Array( toMatchAnything.length ).fill( sequentOEs.both ) ]
+            numRequired = 1 + toMatchNegatives.length
+        }
+
+        if ( options.debug ) {
+            console.log( `Calling Matching w/j=${numRequired} and:` )
+            for ( let i = 0 ; i < patterns.length ; i++ ) {
+                console.log( 'Pair '+i+':' )
+                console.log( patterns[i].toPutdown() )
+                for ( let j = 0 ; j < candidates[i].length ; j++ )
+                    console.log( '\t' + candidates[i][j].toPutdown() )
+            }
+        }
+
+        // Now yield all instantiations for this innerFormula
+        // But fix their expression indices to match the tree order, because
+        // the way we've permuted them will not make sense to the caller.
+        const origPatternIndex = pattern => classified.both.indexOf( pattern )
+        const unpermute = anyArray => {
+            const result = Array( anyArray ).fill( 0 )
+            for ( let i = 0 ; i < anyArray.length ; i++ )
+                result[origPatternIndex( patterns[i] )] = anyArray[i]
+            return result
+        }
+        const generator = Matching.allOptionalInstantiations(
+            patterns, candidates, numRequired )
+        if ( options.debug ) {
+            console.log( 'Patterns:   [ '
+                       + patterns.map( x => x.toPutdown() ).join( ', ' ) + ' ]' )
+            console.log( 'Candidates: [ '
+                       + candidates.map( x => '[ '
+                       + x.map( y => y.toPutdown() ).join( ', ' ) + ' ]' ) + ' ]' )
+            console.log( 'Classified: [ '
+                       + classified.both.map( x => x.toPutdown() ).join( ', ' )
+                       + ' ]' )
+            console.log( 'sequentOEs: [ '
+                       + sequentOEs.both.map( x => x.toPutdown() ).join( ', ' )
+                       + ' ]' )
+        }
+        for ( let solObj of generator ) {
+            if ( options.debug )
+                console.log( 'Before: '
+                           + JSON.stringify( solObj.expressionIndices ) + ' '
+                           + solObj.solution.toString() )
+            solObj.expressionIndices =
+                indexMapToArray( solObj.expressionIndices ).map(
+                    ( exprInd, patInd ) => sequentOEs.both.findIndex(
+                        x => candidates[patInd][exprInd]
+                          && x.original == candidates[patInd][exprInd].original ) )
+            if ( options.debug )
+                console.log( 'Half:   '
+                           + JSON.stringify( solObj.expressionIndices ) + ' '
+                           + solObj.solution.toString() )
+            solObj.expressionIndices = unpermute(
+                solObj.expressionIndices )
+            if ( options.debug )
+                console.log( 'After:  '
+                           + JSON.stringify( solObj.expressionIndices ) + ' '
+                           + solObj.solution.toString() )
+            yield solObj
+        }
+    }
+}
+
 export default {
-    from, domain, instantiate, allPossibleInstantiations, cachedInstantiation,
-    addCachedInstantiation, allCachedInstantiations, clearCachedInstantiations
+    from, domain, instantiate,
+    allPossibleInstantiations, possibleSufficientInstantiations,
+    cachedInstantiation, addCachedInstantiation,
+    allCachedInstantiations, clearCachedInstantiations
 }

@@ -175,6 +175,6 @@ export class Sequent extends Environment {
      * @return {LogicConcept} the conclusion, as created by the constructor
      * @see {@link Sequent#premises premises()}
      */
-     conclusion () { return this.lastChild() }
+    conclusion () { return this.lastChild() }
 
 }

@@ -1,0 +1,37 @@
+---
+testing:
+  type: possible sufficient instantiations
+---
+
+// Metavariables used in the formula below:
+(metavariables A B)
+
+// The formula to be instantiated:
+{
+    :A
+    :B
+    (^ A B)
+}
+// Note that the above formula will become the following sequence of patterns:
+// [ A, B, (^ A B) ]
+
+// The sequent we will attempt to make true:
+{
+    :X
+    :(-> Y Z)
+    :Y
+    (^ Y X)
+}
+// Note that the above formula will become the following sequence of patterns:
+// [ X, (-> Y Z), Y, (^ Y X) ]
+
+// The options to use when searching:
+(options intuitionistic direct)
+
+// List all solutions expected:
+// (Note that each one comes with a list of indices, followed by a metavariable
+// assignment.  Negative indices indicate that the pattern in question was
+// optional and was not matched to any expression.)
+(solutions
+    ( 2  0  3)  (A Y   B X)  // in this case, must instantiate all three
+)

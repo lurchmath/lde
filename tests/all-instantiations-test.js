@@ -1,9 +1,11 @@
 
 import Matching from '../src/matching.js'
 import { Application } from '../src/application.js'
+import { Environment } from '../src/environment.js'
 import { BindingExpression } from '../src/binding-expression.js'
 import { Symbol as LurchSymbol } from '../src/symbol.js'
 import Database from '../src/database.js'
+import Formula from '../src/formula.js'
 
 describe( 'Multiple pattern instantiations', () => {
 
@@ -121,7 +123,8 @@ describe( 'Multiple pattern instantiations', () => {
               != compSol.expressionIndices[key] )
                 return false
         const expDom = Object.keys( expSol.solution )
-        const compDom = Array.from( compSol.solution.domain() )
+        const compDom = compSol.solution ?
+            Array.from( compSol.solution.domain() ) : [ ]
         return expDom.length == compDom.length
             && expDom.every( name => compDom.indexOf( name ) > -1 )
             && expDom.every( name => Matching.alphaEquivalent(
@@ -296,7 +299,7 @@ describe( 'Multiple pattern instantiations', () => {
 
             // Finally, make the function call that creates a generator that
             // will actually solve the problem
-            const debug = false // getNum( key ) == 4
+            const debug = false
             const G = Matching.allOptionalInstantiations(
                 constraints.map( c => c.child( 1 ) ),
                 constraints.map( c => c.children().slice( 2 ) ),
@@ -313,6 +316,122 @@ describe( 'Multiple pattern instantiations', () => {
                 `Length of result doesn't match length of expectation:\n${debugText}` )
             const missing = expectedSols.find( sol1 =>
                 !computedSols.some( sol2 => hackyEquals( sol1, sol2 ) ) )
+            expect( missing,
+                `Missing this expected solution:\n${expSolStr(missing)}\n`
+              + `in this problem:\n${debugText}`
+            ).to.be.undefined
+        } )
+    } )
+
+    // Utility function used in the test below
+    const getPSIComponents = ( key, LCs ) => {
+        // number of entries
+        expect( LCs, `Malformed test: ${key} has wrong # entries` )
+            .to.have.length( 5 )
+        // metavariables entry
+        expect( LCs[0].child( 0 ).equals( new LurchSymbol( 'metavariables' ) ),
+            `Malformed test: ${key} first entry is not "metavariables"` )
+            .to.equal( true )
+        const metavariables = LCs[0].allButFirstChild()
+        // formula entry
+        expect( LCs[1] instanceof Environment,
+            `Malformed test: ${key} has non-environment as child #2` )
+            .to.equal( true )
+        const formula = LCs[1]
+        metavariables.forEach( mv => {
+            formula.descendantsSatisfying( d =>
+                d.equals( mv ) || d.equals( mv.asA( 'given' ) )
+            ).forEach( d => d.makeIntoA( Matching.metavariable ) )
+        } )
+        // sequent entry
+        expect( LCs[2] instanceof Environment,
+            `Malformed test: ${key} has non-environment as child #3` )
+            .to.equal( true )
+        const sequent = LCs[2]
+        // options entry
+        expect( LCs[3].child( 0 ).equals( new LurchSymbol( 'options' ) ),
+            `Malformed test: ${key} child #4 entry is not "options"` )
+            .to.equal( true )
+        const options = { }
+        LCs[3].allButFirstChild().forEach( option => {
+            if ( [ 'direct', 'intuitionistic' ].includes( option.text() ) )
+                options[option.text()] = true
+        } )
+        // solutions entry
+        expect( LCs[4].child( 0 ).equals( new LurchSymbol( 'solutions' ) ),
+            `Malformed test: ${key} child #5 entry is not "solutions"` )
+            .to.equal( true )
+        // LCs[4] is of the form
+        //     (solutions (indices...) (mv1 exp1 mv2 exp2...) ...)
+        // and thus even-index things in each solution are metavariables
+        metavariables.forEach( mv => {
+            LCs[4].descendantsSatisfying( d =>
+                d.equals( mv )
+             && d.address( LCs[4] ).length == 2
+             && d.address( LCs[4] )[0] > 1
+             && d.address( LCs[4] )[0] % 2 == 0
+             && d.address( LCs[4] )[1] % 2 == 0
+            ).forEach( d => d.makeIntoA( Matching.metavariable ) )
+        } )
+        let solutions = [ ]
+        for ( let i = 1 ; i < LCs[4].numChildren() ; i += 2 )
+            solutions.push( pairToSolution(
+                key, LCs[4].child( i ), LCs[4].child( i + 1 ) ) )
+        return { formula, sequent, options, solutions }
+    }
+
+    const debugHeader2 = ( formula, sequent, options, expectedSols ) => {
+        let debugText = 'Formula = ' + formula.toPutdown() + '\n'
+                      + 'Sequent = ' + sequent.toPutdown() + '\n'
+                      + 'Options = ' + JSON.stringify( options ) + '\n'
+        debugText += `Expected solutions:\n`
+        for ( let i = 0 ; i < expectedSols.length ; i++ )
+            debugText += `\t#${i+1}.\n${expSolStr( expectedSols[i] )}\n`
+        return debugText
+    }
+
+    it( 'Should compute possible sufficient instantiations for the database', () => {
+        // Get all possible sufficient instantiations tests from the database
+        const matchingTests = Database.filterByMetadata( metadata =>
+            metadata.testing && metadata.testing.type &&
+            metadata.testing.type == 'possible sufficient instantiations' )
+        // they are all entitled "/path/to/test N.putdown" for some N,
+        // so sort them by that value of N in increasing order.
+        const getNum = key => {
+            const parts = key.split( ' ' )
+            return parseInt( parts[parts.length-1].split( '.' )[0] )
+        }
+        matchingTests.sort( ( a, b ) => getNum( a ) - getNum( b ) )
+        // Now run each test as follows...
+
+        matchingTests.forEach( key => {
+            // Look up the test with the given key and process all its content
+            // using the utility function above
+            const LCs = Database.getObjects( key )
+            const {
+                formula, sequent, options, solutions
+            } = getPSIComponents( key, LCs )
+            let debugText = `In ${key}:\n`
+              + debugHeader2( formula, sequent, options, solutions )
+            const expectedSols = solutions
+
+            // Finally, make the function call that creates a generator that
+            // will actually solve the problem
+            // options.debug = key.endsWith( '13.putdown' )
+            const G = Formula.possibleSufficientInstantiations(
+                sequent, formula, options )
+            // Now actually run the matching algorithm
+            let computedSols
+            expect( () => computedSols = Array.from( G ),
+                `Error when running possibleSufficientInstantiations on ${key}:\n${debugText}`
+            ).not.to.throw()
+            debugText += debugFooter( computedSols )
+            // And check to see if it gave the expected answer
+            expect( computedSols.length ).to.equal( expectedSols.length,
+                `Length of result doesn't match length of expectation:\n${debugText}` )
+            const missing = expectedSols.find( sol1 =>
+                !computedSols.some( sol2 => hackyEquals( sol1, sol2 ) ) )
+            if ( missing ) console.log( expSolStr(missing) + '\n' + debugText )
             expect( missing,
                 `Missing this expected solution:\n${expSolStr(missing)}\n`
               + `in this problem:\n${debugText}`
