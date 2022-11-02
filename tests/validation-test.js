@@ -618,6 +618,19 @@ describe( 'Validation', () => {
             description + ' (checking reason text)'
         ).to.equal( true )
     }
+    // Same as above, but for validity
+    const expectValidity = (
+        description, // text description for ease of debugging when testing
+        reasonForValidity, // actual reason why the LogicConcept is valid
+        resultFromTest, // valid/invalid, expected result from test suite
+        reasonFromTest // expected reason given in test suite (optional)
+    ) => {
+        expect( resultFromTest, description ).to.equal( 'valid' )
+        expect( ( typeof reasonFromTest == 'undefined' )
+             || reasonFromTest == reasonForValidity,
+            description + ' (checking reason text)'
+        ).to.equal( true )
+    }
 
     // Utility function:  Run the validation algorithm on the sequent for a
     // given claim, and return the time the actual validation algorithm took.
@@ -633,7 +646,7 @@ describe( 'Validation', () => {
         // check to see if we got the right result
         const expected = claim.getAttribute(
             'expected validation result' )
-        const actual = Validation.result( sequent.lastChild() )
+        const actual = Validation.result( sequent.conclusion() )
 
         if ( actual.result != expected.result )
             console.log( sequent.toPutdown() )
@@ -786,7 +799,7 @@ describe( 'Validation', () => {
 
     it( 'Should check blatant instantiation hints', () => {
         // Get all blatant instantiation tests from the database
-        const formulaTests = Database.filterByMetadata( metadata =>
+        const blatantInstTests = Database.filterByMetadata( metadata =>
             metadata.testing && metadata.testing.type &&
             metadata.testing.type == 'validation' &&
             metadata.testing.subtype &&
@@ -797,12 +810,12 @@ describe( 'Validation', () => {
             const parts = key.split( ' ' )
             return parseInt( parts.last().split( '.' )[0] )
         }
-        formulaTests.sort( ( a, b ) => getNum( a ) - getNum( b ) )
+        blatantInstTests.sort( ( a, b ) => getNum( a ) - getNum( b ) )
         
         let clTime = 0
         let intTime = 0
         // Now run each test as follows...
-        formulaTests.forEach( key => {
+        blatantInstTests.forEach( key => {
             // Look up the test with the given key and ensure it contains
             // exactly one LogicConcept, the "document."
             const LCs = Database.getObjects( key )
@@ -840,7 +853,7 @@ describe( 'Validation', () => {
                     `${location}: incorrectly-formed blatant instantiation hint`
                 ).to.be.ok
 
-                // Does it cite a formula that is accessible to B?  If not,
+                // Does it cite a formula that is accessible to the BIH?  If not,
                 // mark it invalid, and then check that it was indeed expected
                 // to be \invalid{} in the test file.
                 const cited = labelLookup[BIH.getAttribute( 'ref' )]
@@ -871,10 +884,10 @@ describe( 'Validation', () => {
                     MathConcept.typeAttributeKey( 'given' ) )
                 
                 // Use the Formula.allPossibleInstantiations() function to
-                // determine if B is, indeed, an instantiation of the cited
-                // formula, and mark it valid/invalid in response, then the
-                // test suite should check that it was indeed marked \valid{}
-                // or \invalid{} (resp.) in the test file.
+                // determine if the BIH is, indeed, an instantiation of the
+                // cited formula, and mark it valid/invalid in response, then
+                // the test suite should check that it was indeed marked
+                // \valid{} or \invalid{} (resp.) in the test file.
                 let correctInstantiation = false
                 for ( let i of Formula.allPossibleInstantiations(
                         formula, cleanBIH ) ) {
@@ -928,6 +941,331 @@ describe( 'Validation', () => {
                 'intuitionistic propositional logic on conclusions' )
             arrayToValidate.forEach( toValidate =>
                 intTime += validateSequentFor( toValidate, key ) )
+        } )
+        // console.log( `INT / CL = ${intTime}ms / ${clTime}ms = `
+        //            + Number( intTime / clTime ).toFixed( 2 ) )
+    } )
+
+    // Utility function:  Run the validation algorithm on the sequent for a
+    // given claim, and return the time the actual validation algorithm took,
+    // but don't actually use expect(); just also return the validation result.
+    const validateSequentWithoutExpectation = claim => {
+        // Validate the conclusion propositionally and compare the
+        // validation result to the \[in]valid{} marker on the
+        // conclusion as part of the test.
+        const sequent = new Validation.Sequent( claim )
+        const startTime = new Date
+        Validation.validate( sequent )
+        // console.log( sequent.toPutdown() )
+        const endTime = new Date
+        return {
+            time : endTime - startTime,
+            result : Validation.result( sequent.conclusion() )
+        }
+    }
+
+    it( 'Should pass weak instantiation hint tests from the database', () => {
+        // Get all blatant instantiation tests from the database
+        const weakInstTests = Database.filterByMetadata( metadata =>
+            metadata.testing && metadata.testing.type &&
+            metadata.testing.type == 'validation' &&
+            metadata.testing.subtype &&
+            metadata.testing.subtype == 'weak instantiation hint' )
+        // they are all entitled "/path/filename N.smackdown" for some N,
+        // so sort them by that value of N in increasing order.
+        const getNum = key => {
+            const parts = key.split( ' ' )
+            return parseInt( parts.last().split( '.' )[0] )
+        }
+        weakInstTests.sort( ( a, b ) => getNum( a ) - getNum( b ) )
+        
+        let clTime = 0
+        let intTime = 0
+        // Now run each test as follows...
+        weakInstTests.forEach( key => {
+            // Look up the test with the given key and ensure it contains
+            // exactly one LogicConcept, the "document."
+            const LCs = Database.getObjects( key )
+            expect( LCs ).to.have.length( 1,
+                `Malformed test: ${key} should have one LogicConcept in it` )
+            let document = LCs[0]
+            // Process \[in]valid[{...}] commands
+            expect(
+                () => processValidityCommands( document ),
+                `Processing \\[in]valid[{...}] commands in ${key}`
+            ).not.to.throw()
+            // Now we should be able to convert the document to an LC
+            document = document.interpret()
+            // Ensure the document passes a scoping check
+            Scoping.validate( document, Scoping.declareInAncestor )
+            expect(
+                document.hasDescendantSatisfying(
+                    d => !!Scoping.scopeErrors( d ) ),
+                `Ensuring no scoping errors in document for ${key}`
+            ).to.equal( false )
+
+            // Find all Weak Instantiation Hints and make sure they're
+            // correctly formed:
+            document.descendantsSatisfying(
+                d => d.hasAttribute( 'ref' )
+            ).forEach( WIH => {
+                const location = `In ${key} at ${WIH.address()}`
+                expect(
+                    WIH.getAttribute( 'expected validation result' ),
+                    `${location}: incorrectly-formed weak instantiation hint`
+                ).to.be.ok
+            } )
+
+            // Now test them all classically:
+            //
+            // Compute a few data about the document that we will use below.
+            // We will recompute these later when we do the same validation
+            // intuitionistically, so we start with fresh copies of everything.
+            Validation.setOptions( 'tool',
+                'classical propositional logic on conclusions' )
+            let docCopy = document.copy()
+            let labelLookup = labelMapping( docCopy )
+            let WIHs = docCopy.descendantsSatisfying(
+                d => d.hasAttribute( 'ref' ) )
+            // console.log( 'Before loop in '+key+':' )
+            // console.log( docCopy.toPutdown() )
+            WIHs.forEach( WIH => {
+                // Fetch the expectations the database file gives
+                const test = WIH.getAttribute( 'expected validation result' )
+                const location = `In ${key} at ${WIH.address()}`
+                // console.log( 'WIH @'+WIH.address()+':' )
+                // console.log( WIH.toPutdown() )
+                // console.log( JSON.stringify( test ) )
+
+                // Is the WIH valid without even referring to the cited formula?
+                // If so, give feedback saying as much.
+                let temp = validateSequentWithoutExpectation( WIH )
+                clTime += temp.time
+                if ( temp.result.result == 'valid' ) {
+                    expectValidity(
+                        `${location}: extra \\ref{}`,
+                        'formula citation unnecessary',
+                        test.result, test.reason )
+                    // console.log( 'Was valid alone!' )
+                    // console.log( new Validation.Sequent( WIH ).toPutdown() )
+                    return
+                }
+
+                // Does it cite a formula that is accessible to the WIH?  If not,
+                // mark it invalid, and then check that it was indeed expected
+                // to be \invalid{} in the test file.
+                const cited = labelLookup[WIH.getAttribute( 'ref' )]
+                // Might fail because no such cited thing
+                if ( !cited )
+                    return expectInvalidity(
+                        `${location}: bad \\ref{}`,
+                        'no such formula',
+                        test.result, test.reason )
+                // Might fail because the cited thing is inaccessible
+                if ( !cited.isAccessibleTo( WIH ) )
+                    return expectInvalidity(
+                        `${location}: inaccessible \\ref{}`,
+                        'formula not accessible',
+                        test.result, test.reason )
+
+                // OK, the cited formula can be used, so let's build a sequent,
+                // ensure the formula is outside of it, convert it into a
+                // formula, and get some candidate instantiations to test.
+                // Clear all irrelevant attributes.
+                // This test suite assumes the option direct = true.
+                const cleanWIH = WIH.copy()
+                Scoping.clearImplicitDeclarations( cleanWIH )
+                Array.from( cleanWIH.descendantsIterator() ).forEach( d =>
+                    d.clearAttributes( 'ref', 'expected validation result' ) )
+                cleanWIH.clearAttributes(
+                    MathConcept.typeAttributeKey( 'given' ) )
+                const sequent = new Validation.Sequent( WIH )
+                const formula = Formula.from( cited.copy() )
+                formula.clearAttributes()
+                
+                // Use the Formula.possibleSufficientInstantiations() function
+                // to try to find some instantiations of the WIH that will make
+                // validation succeed for the sequent in question.
+                const generator = Formula.possibleSufficientInstantiations(
+                    sequent, formula, { direct : true } )
+                let goodInstantiation = null
+                // let count = 0
+                for ( const solution of generator ) {
+                    const instantiation = Formula.instantiate(
+                        formula, solution.solution )
+                    sequent.insertChild( instantiation, 0 )
+                    temp = validateSequentWithoutExpectation( 
+                        sequent.conclusion() )
+                    clTime += temp.time
+                    if ( temp.result.result == 'valid' )
+                        goodInstantiation = instantiation
+                    // cleanup and possibly stop
+                    sequent.removeChild( 0 )
+                    if ( goodInstantiation ) break
+                }
+                if ( goodInstantiation == null ) {
+                    // console.log( 'No good instantiations:' )
+                    // console.log( sequent.toPutdown() )
+                    // console.log( formula.toPutdown() )
+                    return expectInvalidity(
+                        `${location}: invalid step`,
+                        undefined, test.result, test.reason )
+                }
+                expectValidity(
+                    `${location}: valid step`,
+                    undefined, test.result, test.reason )
+                // Since the WIH was valid, insert the good instantiation we
+                // found after the cited formula.
+                Formula.addCachedInstantiation( cited, goodInstantiation )
+                // console.log( 'Added @'+cited.address(), docCopy.toPutdown() )
+                // console.log( `Made me add ${goodInstantiation.toPutdown()}` )
+            } )
+
+            // Now all WIHs have been processed classically.
+            // Now find each thing marked with \[in]valid{} but that has not yet
+            // been validated, so we can validate them.
+            docCopy.descendantsSatisfying(
+                d => d.hasAttribute( 'expected validation result' )
+                  && !d.hasAttribute( 'validation result' )
+            ).forEach( toValidate => {
+                // Ensure that it’s a claim, and if not, throw an error that
+                // the test file is incorrectly formed, because the only other
+                // type of validation this test suite does is propositional,
+                // which must be done on conclusions...but when we build a
+                // sequent from the claim, any given ancestors won't be present
+                // anyway, so claim status is sufficient.
+                expect(
+                    toValidate.isA( 'given' ),
+                    `${key}@${toValidate.address()} must be a claim`
+                ).to.equal( false )
+                // OK now validate it
+                clTime += validateSequentFor( toValidate, key )
+            } )
+
+            // Now test them all intuitionistically as well:
+            //
+            // Recompute the same things we did earlier, so we have a fresh
+            // copy of the document and aren't re-using stuff done with CPL:
+            Validation.setOptions( 'tool',
+                'intuitionistic propositional logic on conclusions' )
+            docCopy = document.copy()
+            labelLookup = labelMapping( docCopy )
+            WIHs = docCopy.descendantsSatisfying(
+                d => d.hasAttribute( 'ref' ) )
+            // console.log( 'Before loop in '+key+':' )
+            // console.log( docCopy.toPutdown() )
+            WIHs.forEach( WIH => {
+                // Fetch the expectations the database file gives
+                const test = WIH.getAttribute( 'expected validation result' )
+                const location = `In ${key} at ${WIH.address()}`
+                // console.log( 'WIH @'+WIH.address()+':' )
+                // console.log( WIH.toPutdown() )
+                // console.log( JSON.stringify( test ) )
+
+                // Is the WIH valid without even referring to the cited formula?
+                // If so, give feedback saying as much.
+                let temp = validateSequentWithoutExpectation( WIH )
+                intTime += temp.time
+                if ( temp.result.result == 'valid' ) {
+                    expectValidity(
+                        `${location}: extra \\ref{}`,
+                        'formula citation unnecessary',
+                        test.result, test.reason )
+                    // console.log( 'Was valid alone!' )
+                    // console.log( new Validation.Sequent( WIH ).toPutdown() )
+                    return
+                }
+
+                // Does it cite a formula that is accessible to the WIH?  If not,
+                // mark it invalid, and then check that it was indeed expected
+                // to be \invalid{} in the test file.
+                const cited = labelLookup[WIH.getAttribute( 'ref' )]
+                // Might fail because no such cited thing
+                if ( !cited )
+                    return expectInvalidity(
+                        `${location}: bad \\ref{}`,
+                        'no such formula',
+                        test.result, test.reason )
+                // Might fail because the cited thing is inaccessible
+                if ( !cited.isAccessibleTo( WIH ) )
+                    return expectInvalidity(
+                        `${location}: inaccessible \\ref{}`,
+                        'formula not accessible',
+                        test.result, test.reason )
+
+                // OK, the cited formula can be used, so let's build a sequent,
+                // ensure the formula is outside of it, convert it into a
+                // formula, and get some candidate instantiations to test.
+                // Clear all irrelevant attributes.
+                // This test suite assumes the option direct = true.
+                const cleanWIH = WIH.copy()
+                Scoping.clearImplicitDeclarations( cleanWIH )
+                Array.from( cleanWIH.descendantsIterator() ).forEach( d =>
+                    d.clearAttributes( 'ref', 'expected validation result' ) )
+                cleanWIH.clearAttributes(
+                    MathConcept.typeAttributeKey( 'given' ) )
+                const sequent = new Validation.Sequent( WIH )
+                const formula = Formula.from( cited.copy() )
+                formula.clearAttributes()
+                
+                // Use the Formula.possibleSufficientInstantiations() function
+                // to try to find some instantiations of the WIH that will make
+                // validation succeed for the sequent in question.
+                const generator = Formula.possibleSufficientInstantiations(
+                    sequent, formula, { direct : true } )
+                let goodInstantiation = null
+                // let count = 0
+                for ( const solution of generator ) {
+                    const instantiation = Formula.instantiate(
+                        formula, solution.solution )
+                    sequent.insertChild( instantiation, 0 )
+                    temp = validateSequentWithoutExpectation( 
+                        sequent.conclusion() )
+                    intTime += temp.time
+                    if ( temp.result.result == 'valid' )
+                        goodInstantiation = instantiation
+                    // cleanup and possibly stop
+                    sequent.removeChild( 0 )
+                    if ( goodInstantiation ) break
+                }
+                if ( goodInstantiation == null ) {
+                    // console.log( 'No good instantiations:' )
+                    // console.log( sequent.toPutdown() )
+                    // console.log( formula.toPutdown() )
+                    return expectInvalidity(
+                        `${location}: invalid step`,
+                        undefined, test.result, test.reason )
+                }
+                expectValidity(
+                    `${location}: valid step`,
+                    undefined, test.result, test.reason )
+                // Since the WIH was valid, insert the good instantiation we
+                // found after the cited formula.
+                Formula.addCachedInstantiation( cited, goodInstantiation )
+                // console.log( 'Added @'+cited.address(), docCopy.toPutdown() )
+                // console.log( `Made me add ${goodInstantiation.toPutdown()}` )
+            } )
+
+            // Now all WIHs have been processed classically.
+            // Now find each thing marked with \[in]valid{} but that has not yet
+            // been validated, so we can validate them.
+            docCopy.descendantsSatisfying(
+                d => d.hasAttribute( 'expected validation result' )
+                  && !d.hasAttribute( 'validation result' )
+            ).forEach( toValidate => {
+                // Ensure that it’s a claim, and if not, throw an error that
+                // the test file is incorrectly formed, because the only other
+                // type of validation this test suite does is propositional,
+                // which must be done on conclusions...but when we build a
+                // sequent from the claim, any given ancestors won't be present
+                // anyway, so claim status is sufficient.
+                expect(
+                    toValidate.isA( 'given' ),
+                    `${key}@${toValidate.address()} must be a claim`
+                ).to.equal( false )
+                // OK now validate it:
+                intTime += validateSequentFor( toValidate, key )
+            } )
         } )
         // console.log( `INT / CL = ${intTime}ms / ${clTime}ms = `
         //            + Number( intTime / clTime ).toFixed( 2 ) )
