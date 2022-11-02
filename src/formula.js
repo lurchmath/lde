@@ -432,6 +432,18 @@ const classifyByParity = ( LC, parity = 1 ) => {
     return result
 }
 
+// Utility function used by possibleSufficientInstantiations(), below.
+// Takes a list [ LC_1, ..., LC_n ] of LCs and returns a sublist such that no
+// two entries are .equals() with one another.
+const duplicateLCsRemoved = listOfLCs => {
+    const result = [ ]
+    listOfLCs.forEach( LC => {
+        if ( !result.some( earlierLC => earlierLC.equals( LC ) ) )
+            result.push( LC )
+    } )
+    return result
+}
+
 /**
  * Given a sequent and a formula, is there an instantiation of the formula that,
  * if added as another premise to the sequent, would make the sequent true?  The
@@ -563,6 +575,8 @@ function *possibleSufficientInstantiations (
                 result[origPatternIndex( patterns[i] )] = anyArray[i]
             return result
         }
+        // Ensure each candidate list is a set, not a list (no duplicates!).
+        candidates = candidates.map( duplicateLCsRemoved )
         const generator = Matching.allOptionalInstantiations(
             patterns, candidates, numRequired )
         if ( options.debug ) {

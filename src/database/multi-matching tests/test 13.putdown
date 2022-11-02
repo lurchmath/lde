@@ -23,6 +23,8 @@ testing:
 }
 // Note that the above formula will become the following sequence of patterns:
 // [ X, Y, R, S, Y, (-> X Y) ]
+// Which will then get reduced to the following, because of the duplicate Y:
+// [ X, Y, R, S, (-> X Y) ]
 
 // The options to use when searching:
 (options intuitionistic)
@@ -36,8 +38,6 @@ testing:
 // assignment.  Negative indices indicate that the pattern in question was
 // optional and was not matched to any expression.)
 (solutions
-    (-1 1 5)  (P X   Q Y)  // P not matched, Q=first Y
-    (-1 4 5)  (P X   Q Y)  // P not matched, Q=second Y
-    ( 0 1 5)  (P X   Q Y)  // P=X, Q=first Y
-    ( 0 4 5)  (P X   Q Y)  // P=X, Q=second Y
+    (-1 1 5)  (P X   Q Y)  // P not matched, Q=Y
+    ( 0 1 5)  (P X   Q Y)  // P=X, Q=Y
 )
