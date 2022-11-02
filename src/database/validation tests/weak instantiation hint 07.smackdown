@@ -8,35 +8,39 @@ testing:
 // global constants 
 (∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{
 
-  // ND Prop rule library
-  :{ :W :V  (∧ W V) }               \label{∧+}
-  :{ :(∧ W V) W V }                 \label{∧-}
-  :{ :W  (∨ W V) (∨ V W) }          \label{∨+}
-  :{ :(∨ W V) :{:W U} :{:V U}  U }  \label{∨-}
-  :{ :{:W V}  (⇒ W V) }             \label{⇒+}
-  :{ :W :(⇒ W V)  V }               \label{⇒-}
-  :{ :{:W V} :{:V W}  (⇒ W V) }     \label{⇔+}
-  :{ :(⇔ W V)  {:W V} {:V W} }      \label{⇔-}
-  :{ :{:W V (¬ V)}  (¬ W) }         \label{¬+}
-  :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
-    
-  // Theorem (alt or-)
-  { :(∨ P Q) :(¬ Q) P \valid }  
-                                   
-  // Altertnate or- proof (not needed but motivates the instantiations
-  {
-    { :(∨ P Q) 
-      :(¬ Q)
-      { :P
-        P                          \valid // no instantiation needed
-      }
-      { :Q
-        { :(¬ P)
-          (¬ Q)                    \valid // no instantiation needed
+    // ND Prop rule library
+    :{ :W :V  (∧ W V) }               \label{∧+}
+    :{ :(∧ W V) W V }                 \label{∧-}
+    :{ :W  (∨ W V) (∨ V W) }          \label{∨+}
+    :{ :(∨ W V) :{:W U} :{:V U}  U }  \label{∨-}
+    :{ :{:W V}  (⇒ W V) }             \label{⇒+}
+    :{ :W :(⇒ W V)  V }               \label{⇒-}
+    :{ :{:W V} :{:V W}  (⇒ W V) }     \label{⇔+}
+    :{ :(⇔ W V)  {:W V} {:V W} }      \label{⇔-}
+    :{ :{:W V (¬ V)}  (¬ W) }         \label{¬+}
+    :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
+
+    // Theorem (alt or-)
+    // { :(∨ P Q) :(¬ Q) P \valid }   // this would not validate here
+
+    // Altertnate or- proof (not needed but motivates the instantiations
+    {
+        {
+            :(∨ P Q) 
+            :(¬ Q)
+            {
+                :P
+                P                      \valid // no instantiation needed
+            }
+            {
+                :Q
+                {
+                    :(¬ P)
+                    (¬ Q)              \valid // no instantiation needed
+                }
+                P           \ref{¬-}   \valid
+            }
+            P               \ref{∨-}   \valid
         }
-        P               \ref{¬-}   \valid
-      }
-      P                 \ref{∨-}   \valid
     }
-  }  
 }

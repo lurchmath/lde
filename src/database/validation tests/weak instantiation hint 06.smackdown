@@ -5,31 +5,30 @@ testing:
   description: "Natural Deduction Propositional Proof of (P⇒P)"
 ---
 
-// document
+(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{
 
-(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{       
+    // ND Prop rule library
+    :{ :W :V  (∧ W V) }               \label{∧+}
+    :{ :(∧ W V) W V }                 \label{∧-}
+    :{ :W  (∨ W V) (∨ V W) }          \label{∨+}
+    :{ :(∨ W V) :{:W U} :{:V U}  U }  \label{∨-}
+    :{ :{:W V}  (⇒ W V) }             \label{⇒+}
+    :{ :W :(⇒ W V)  V }               \label{⇒-}
+    :{ :{:W V} :{:V W}  (⇒ W V) }     \label{⇔+}
+    :{ :(⇔ W V)  {:W V} {:V W} }      \label{⇔-}
+    :{ :{:W V (¬ V)}  (¬ W) }         \label{¬+}
+    :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
 
-  // ND Prop rule library
-  :{ :W :V  (∧ W V) }               \label{∧+}
-  :{ :(∧ W V) W V }                 \label{∧-}
-  :{ :W  (∨ W V) (∨ V W) }          \label{∨+}
-  :{ :(∨ W V) :{:W U} :{:V U}  U }  \label{∨-}
-  :{ :{:W V}  (⇒ W V) }             \label{⇒+}
-  :{ :W :(⇒ W V)  V }               \label{⇒-}
-  :{ :{:W V} :{:V W}  (⇒ W V) }     \label{⇔+}
-  :{ :(⇔ W V)  {:W V} {:V W} }      \label{⇔-}
-  :{ :{:W V (¬ V)}  (¬ W) }         \label{¬+}
-  :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
-
-  // Theorem  (note this will STILL validate)
-  { (⇒ P P )  \valid }
+    // Theorem  (note this will STILL validate)
+    { (⇒ P P )  \ref{⇒+}  \valid }
   
-  // Baby warm up proof... just for kicks
-  {
-    { :P 
-      P                       \valid 
+    // Baby warm up proof... just for kicks
+    {
+        {
+            :P 
+            P             \valid 
+        }
+        (⇒ P P )          \valid
     }
-    (⇒ P P )       \ref{⇒+}   \valid             
-  }
   
 }

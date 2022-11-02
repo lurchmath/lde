@@ -5,15 +5,13 @@ testing:
   description: "A valid instantiation, but the formula is inaccessible."
 ---
 
-// document
-
-(⇒ ¬ or),{ 
+(⇒ ¬ or),{
  
-  {  
-     :(⇒ A B)                             
-     (or (¬ A) B)  \ref{"reflexive of ⇒"}  \invalid
-  }  
+    {  
+        :(⇒ A B)                             
+        (or (¬ A) B)            \ref{reflexive of ⇒}  \invalid
+    }  
   
-  // too late
-  :{ :(⇒ P Q) (or (¬ P) Q) }     \label{"alt def of ⇒"} 
+    // too late
+    :{ :(⇒ P Q) (or (¬ P) Q) }  \label{alt def of ⇒}
 }
