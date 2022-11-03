@@ -632,9 +632,7 @@ function *possibleSufficientInstantiations (
         candidates = candidates.map( duplicateLCsRemoved )
         numRequired = removeDuplicatePatterns(
             patterns, candidates, numRequired )
-        // Now run the optional multi-matching algorithm.
-        const generator = Matching.allOptionalInstantiations(
-            patterns, candidates, numRequired )
+        // Now prepare to run the optional multi-matching algorithm.
         if ( options.debug ) {
             console.log( 'Patterns:   [ '
                        + patterns.map( x => x.toPutdown() ).join( ', ' ) + ' ]' )
@@ -648,6 +646,11 @@ function *possibleSufficientInstantiations (
                        + sequentOEs.both.map( x => x.toPutdown() ).join( ', ' )
                        + ' ]' )
         }
+        const generator = Matching.allOptionalInstantiations(
+            patterns, candidates, numRequired )
+        // Before returning its results, convert the expression indices back to
+        // ones the client will expect, since we have permuted the client's
+        // inputs as needed for matching purposes.
         for ( let solObj of generator ) {
             if ( options.debug )
                 console.log( 'Before: '
