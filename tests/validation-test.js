@@ -593,13 +593,12 @@ describe( 'Validation', () => {
         return parsed
     }
 
-    // Utility function used by tests below.  Find the mapping of label texts
-    // to labeled LCs.
-    const labelMapping = LC => {
-        const result = { }
-        LC.descendantsSatisfying( d => d.hasAttribute( 'label' ) ).forEach(
-            labeled => result[labeled.getAttribute( 'label' )] = labeled )
-        return result
+    // Utility function used by tests below.  Find an LC with the given label
+    // that's anywhere inside the given LC.
+    const descendantLabelLookup = ( insideThis, withThisLabel ) => {
+        for ( const descendant of insideThis.descendantsIterator() )
+            if ( descendant.getAttribute( 'label' ) == withThisLabel )
+                return descendant
     }
 
     // Utility function:  Often we know that a LogicConcept has failed a
@@ -709,18 +708,16 @@ describe( 'Validation', () => {
                     `parsing instantiation #${index+1} in ${key}`
                 ).not.to.throw()
             } )
-            // Get mapping from labels to LCs
-            const labelLookup = labelMapping( document )
 
             // Now run the instantiation tests in that test file
             instantiationTests.forEach( test => {
                 // Ensure cited formula exists
-                if ( !labelLookup.hasOwnProperty( test.formula ) )
+                const original = descendantLabelLookup( document, test.formula )
+                if ( !original )
                     return expectInvalidity(
                         `Should fail to find ${test.formula} in ${key}`,
                         'no such formula',
                         test.result, test.reason )
-                const original = labelLookup[test.formula]
                 const formula = Formula.from( original )
                 // Ensure the correct set of metavariables was used
                 const testDomain = new Set()
@@ -836,8 +833,6 @@ describe( 'Validation', () => {
                     d => !!Scoping.scopeErrors( d ) ),
                 `Ensuring no scoping errors in document for ${key}`
             ).to.equal( false )
-            // Get mapping from labels to LCs
-            const labelLookup = labelMapping( document )
 
             // Process all blatant instantiation hints as follows:
             const BIHs = document.descendantsSatisfying(
@@ -856,7 +851,8 @@ describe( 'Validation', () => {
                 // Does it cite a formula that is accessible to the BIH?  If not,
                 // mark it invalid, and then check that it was indeed expected
                 // to be \invalid{} in the test file.
-                const cited = labelLookup[BIH.getAttribute( 'ref' )]
+                const cited = descendantLabelLookup(
+                    document, BIH.getAttribute( 'ref' ) )
                 // Might fail because no such cited thing
                 if ( !cited )
                     return expectInvalidity(
@@ -1024,7 +1020,6 @@ describe( 'Validation', () => {
             Validation.setOptions( 'tool',
                 'classical propositional logic on conclusions' )
             let docCopy = document.copy()
-            let labelLookup = labelMapping( docCopy )
             let WIHs = docCopy.descendantsSatisfying(
                 d => d.hasAttribute( 'ref' ) )
             // console.log( 'Before loop in '+key+':' )
@@ -1054,7 +1049,8 @@ describe( 'Validation', () => {
                 // Does it cite a formula that is accessible to the WIH?  If not,
                 // mark it invalid, and then check that it was indeed expected
                 // to be \invalid{} in the test file.
-                const cited = labelLookup[WIH.getAttribute( 'ref' )]
+                const cited = descendantLabelLookup(
+                    docCopy, WIH.getAttribute( 'ref' ) )
                 // Might fail because no such cited thing
                 if ( !cited )
                     return expectInvalidity(
@@ -1149,7 +1145,6 @@ describe( 'Validation', () => {
             Validation.setOptions( 'tool',
                 'intuitionistic propositional logic on conclusions' )
             docCopy = document.copy()
-            labelLookup = labelMapping( docCopy )
             WIHs = docCopy.descendantsSatisfying(
                 d => d.hasAttribute( 'ref' ) )
             // console.log( 'Before loop in '+key+':' )
@@ -1179,7 +1174,8 @@ describe( 'Validation', () => {
                 // Does it cite a formula that is accessible to the WIH?  If not,
                 // mark it invalid, and then check that it was indeed expected
                 // to be \invalid{} in the test file.
-                const cited = labelLookup[WIH.getAttribute( 'ref' )]
+                const cited = descendantLabelLookup(
+                    docCopy, WIH.getAttribute( 'ref' ) )
                 // Might fail because no such cited thing
                 if ( !cited )
                     return expectInvalidity(
