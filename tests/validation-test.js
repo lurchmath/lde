@@ -1058,9 +1058,7 @@ describe( 'Validation', () => {
 
                 // OK, the cited formula can be used, so let's build a sequent,
                 // ensure the formula is outside of it, convert it into a
-                // formula, and get some candidate instantiations to test.
-                // Clear all irrelevant attributes.
-                // This test suite assumes the option direct = true.
+                // formula, and clear all irrelevant attributes.
                 const cleanWIH = WIH.copy()
                 Scoping.clearImplicitDeclarations( cleanWIH )
                 Array.from( cleanWIH.descendantsIterator() ).forEach( d =>
@@ -1074,6 +1072,7 @@ describe( 'Validation', () => {
                 // Use the Formula.possibleSufficientInstantiations() function
                 // to try to find some instantiations of the WIH that will make
                 // validation succeed for the sequent in question.
+                // This test suite assumes the option direct = true.
                 const generator = Formula.possibleSufficientInstantiations(
                     sequent, formula, { direct : true } )
                 let goodInstantiation = null
