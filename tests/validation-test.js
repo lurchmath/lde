@@ -720,11 +720,8 @@ describe( 'Validation', () => {
                         test.result, test.reason )
                 const formula = Formula.from( original )
                 // Ensure the correct set of metavariables was used
-                const testDomain = new Set()
-                Object.keys( test.instantiation ).forEach( key => {
-                    if ( test.instantiation.hasOwnProperty( key ) )
-                        testDomain.add( key )
-                } )
+                const testDomain = new Set(
+                    Object.getOwnPropertyNames( test.instantiation ) )
                 const formulaDomain = Formula.domain( formula )
                 // Could be the instantiation contains some non-metavars:
                 const badNonMetaVars = testDomain.difference( formulaDomain )
