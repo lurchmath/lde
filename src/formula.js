@@ -444,6 +444,57 @@ const duplicateLCsRemoved = listOfLCs => {
     return result
 }
 
+// Utility function used by possibleSufficientInstantiations(), below.
+// Takes a pattern list [ p_1, ..., p_n ] and a list of lists of candidate
+// matches, [ L_1, ..., L_n ] (each L_i being a list of LCs) and an index of
+// the first optional match.
+// Modifies the first two arguments in place and returns a new index of the
+// first optional match, ensuring that no p_i.equals( p_j ), but all constraints
+// on the same pattern have been united into one list of candidate matches.
+const removeDuplicatePatterns = (
+    patterns, candidateLists, firstOptionalIndex
+) => {
+    // Drop any optional patterns that are also required patterns (and thus
+    // appearing earlier in the patterns list, as a requirement).
+    const requiredPatterns = patterns.slice( 0, firstOptionalIndex )
+    for ( let i = patterns.length - 1 ; i >= firstOptionalIndex ; i-- ) {
+        if ( requiredPatterns.some(
+                required => required.equals( patterns[i] ) ) ) {
+            patterns.splice( i, 1 )
+            candidateLists.splice( i, 1 )
+        }
+    }
+    // For any two requirements that share the same pattern, merge it into a
+    // single requirement for that pattern, with the candidate list being the
+    // intersection of the original two candidate lists (since both must match).
+    const LCListIntersection = ( LCList1, LCList2 ) =>
+        LCList1.filter( LC1 => LCList2.some( LC2 => LC1.equals( LC2 ) ) )
+    for ( let i = firstOptionalIndex - 1 ; i >= 0 ; i-- ) {
+        const earlierIndex = patterns.slice( 0, i ).findIndex(
+            earlierPattern => earlierPattern.equals( patterns[i] ) )
+        if ( earlierIndex > -1 ) {
+            candidateLists[earlierIndex] = LCListIntersection(
+                candidateLists[earlierIndex], candidateLists[i] )
+            patterns.splice( i, 1 )
+            candidateLists.splice( i, 1 )
+            firstOptionalIndex-- // because we removed a required pattern
+        }
+    }
+    // Now do the same thing for optional patterns as well.
+    for ( let i = patterns.length - 1 ; i >= firstOptionalIndex ; i-- ) {
+        const earlierIndex = patterns.slice( firstOptionalIndex, i ).findIndex(
+            earlierPattern => earlierPattern.equals( patterns[i] ) )
+        if ( earlierIndex > -1 ) {
+            candidateLists[earlierIndex] = LCListIntersection(
+                candidateLists[earlierIndex], candidateLists[i] )
+            patterns.splice( i, 1 )
+            candidateLists.splice( i, 1 )
+        }
+    }
+    // Done--return new firstOptionalIndex
+    return firstOptionalIndex
+}
+
 /**
  * Given a sequent and a formula, is there an instantiation of the formula that,
  * if added as another premise to the sequent, would make the sequent true?  The
@@ -575,8 +626,13 @@ function *possibleSufficientInstantiations (
                 result[origPatternIndex( patterns[i] )] = anyArray[i]
             return result
         }
-        // Ensure each candidate list is a set, not a list (no duplicates!).
+        // Make the optional multi-matching problem we're about to run as
+        // efficient as possible, by removing duplicate candidates and by
+        // combining constraints where possible.
         candidates = candidates.map( duplicateLCsRemoved )
+        numRequired = removeDuplicatePatterns(
+            patterns, candidates, numRequired )
+        // Now run the optional multi-matching algorithm.
         const generator = Matching.allOptionalInstantiations(
             patterns, candidates, numRequired )
         if ( options.debug ) {
