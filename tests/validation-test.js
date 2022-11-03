@@ -595,10 +595,27 @@ describe( 'Validation', () => {
 
     // Utility function used by tests below.  Find an LC with the given label
     // that's anywhere inside the given LC.
-    const descendantLabelLookup = ( insideThis, withThisLabel ) => {
-        for ( const descendant of insideThis.descendantsIterator() )
-            if ( descendant.getAttribute( 'label' ) == withThisLabel )
+    const descendantLabelLookup = (
+        insideThis, withThisLabel, accessibleToThis, debugText,
+        expectedResult, expectedReason
+    ) => {
+        for ( const descendant of insideThis.descendantsIterator() ) {
+            if ( descendant.getAttribute( 'label' ) == withThisLabel ) {
+                // If they expect it to be accessible to something, check that:
+                if ( accessibleToThis
+                  && !descendant.isAccessibleTo( accessibleToThis ) )
+                    return expectInvalidity(
+                        `${debugText}: inaccessible \\ref{}`,
+                        'formula not accessible',
+                        expectedResult, expectedReason )
+                // Otherwise we're good to return this as the cited LC:
                 return descendant
+            }
+        }
+        // Could not find the referenced thing...expect that this was supposed
+        // to happen:
+        expectInvalidity( `${debugText}: bad \\ref{}`, 'no such formula',
+                          expectedResult, expectedReason )
     }
 
     // Utility function:  Often we know that a LogicConcept has failed a
@@ -712,12 +729,10 @@ describe( 'Validation', () => {
             // Now run the instantiation tests in that test file
             instantiationTests.forEach( test => {
                 // Ensure cited formula exists
-                const original = descendantLabelLookup( document, test.formula )
-                if ( !original )
-                    return expectInvalidity(
-                        `Should fail to find ${test.formula} in ${key}`,
-                        'no such formula',
-                        test.result, test.reason )
+                const original = descendantLabelLookup(
+                    document, test.formula, null, `${test.formula} in ${key}`,
+                    test.result, test.reason )
+                if ( !original ) return
                 const formula = Formula.from( original )
                 // Ensure the correct set of metavariables was used
                 const testDomain = new Set(
@@ -767,8 +782,7 @@ describe( 'Validation', () => {
             // Now run the validation tests in that file
             // What was marked valid/invalid, and thus needs validating?
             const arrayToValidate = document.descendantsSatisfying(
-                d => d.hasAttribute( 'expected validation result' )
-            )
+                d => d.hasAttribute( 'expected validation result' ) )
             // First, ensure all are conclusions
             arrayToValidate.forEach( toValidate => {
                 // ensure it's a conclusion
@@ -847,21 +861,12 @@ describe( 'Validation', () => {
 
                 // Does it cite a formula that is accessible to the BIH?  If not,
                 // mark it invalid, and then check that it was indeed expected
-                // to be \invalid{} in the test file.
+                // to be \invalid{} in the test file.  This function includes
+                // expectations taht the cited thing exists and is accessible.
                 const cited = descendantLabelLookup(
-                    document, BIH.getAttribute( 'ref' ) )
-                // Might fail because no such cited thing
-                if ( !cited )
-                    return expectInvalidity(
-                        `${location}: bad \\ref{}`,
-                        'no such formula',
-                        test.result, test.reason )
-                // Might fail because the cited thing is inaccessible
-                if ( !cited.isAccessibleTo( BIH ) )
-                    return expectInvalidity(
-                        `${location}: inaccessible \\ref{}`,
-                        'formula not accessible',
-                        test.result, test.reason )
+                    document, BIH.getAttribute( 'ref' ), BIH,
+                    location, test.result, test.reason )
+                if ( !cited ) return
 
                 // OK, the cited formula can be used, so let's prepare to do so
                 // by making it a formula and normalizing attributes across
@@ -1047,19 +1052,9 @@ describe( 'Validation', () => {
                 // mark it invalid, and then check that it was indeed expected
                 // to be \invalid{} in the test file.
                 const cited = descendantLabelLookup(
-                    docCopy, WIH.getAttribute( 'ref' ) )
-                // Might fail because no such cited thing
-                if ( !cited )
-                    return expectInvalidity(
-                        `${location}: bad \\ref{}`,
-                        'no such formula',
-                        test.result, test.reason )
-                // Might fail because the cited thing is inaccessible
-                if ( !cited.isAccessibleTo( WIH ) )
-                    return expectInvalidity(
-                        `${location}: inaccessible \\ref{}`,
-                        'formula not accessible',
-                        test.result, test.reason )
+                    docCopy, WIH.getAttribute( 'ref' ), WIH, location,
+                    test.result, test.reason )
+                if ( !cited ) return
 
                 // OK, the cited formula can be used, so let's build a sequent,
                 // ensure the formula is outside of it, convert it into a
@@ -1172,19 +1167,9 @@ describe( 'Validation', () => {
                 // mark it invalid, and then check that it was indeed expected
                 // to be \invalid{} in the test file.
                 const cited = descendantLabelLookup(
-                    docCopy, WIH.getAttribute( 'ref' ) )
-                // Might fail because no such cited thing
-                if ( !cited )
-                    return expectInvalidity(
-                        `${location}: bad \\ref{}`,
-                        'no such formula',
-                        test.result, test.reason )
-                // Might fail because the cited thing is inaccessible
-                if ( !cited.isAccessibleTo( WIH ) )
-                    return expectInvalidity(
-                        `${location}: inaccessible \\ref{}`,
-                        'formula not accessible',
-                        test.result, test.reason )
+                    docCopy, WIH.getAttribute( 'ref' ), WIH, location,
+                    test.result, test.reason )
+                if ( !cited ) return
 
                 // OK, the cited formula can be used, so let's build a sequent,
                 // ensure the formula is outside of it, convert it into a
