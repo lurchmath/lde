@@ -1,0 +1,17 @@
+---
+testing:
+  type: validation
+  subtype: strong instantiation hint
+  description: "More than one formula to choose from."
+---
+
+(⇒ ¬ or),{
+    :{ :(⇒ P Q) (or (¬ P) Q) }     \label{alt def of ⇒}
+    :{ (⇒ P P) }                   \label{reflexive of ⇒}
+
+    // start a proof
+    {  
+        :(⇒ A B)                             
+        (or (¬ A) B)               \invalid
+    }
+}

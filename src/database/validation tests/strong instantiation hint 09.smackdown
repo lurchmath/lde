@@ -1,0 +1,44 @@
+---
+testing:
+  type: validation
+  subtype: strong instantiation hint
+  description: "Testing Pierce."
+---
+
+// global constants 
+(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{
+
+    // ND Prop rule library
+    :{ :W :V  (∧ W V) }               \label{∧+}
+    :{ :(∧ W V) W V }                 \label{∧-}
+    :{ :W  (∨ W V) (∨ V W) }          \label{∨+}
+    :{ :(∨ W V) :{:W U} :{:V U}  U }  \label{∨-}
+    :{ :{:W V}  (⇒ W V) }             \label{⇒+}
+    :{ :W :(⇒ W V)  V }               \label{⇒-}
+    :{ :{:W V} :{:V W}  (⇒ W V) }     \label{⇔+}
+    :{ :(⇔ W V)  {:W V} {:V W} }      \label{⇔-}
+    :{ :{:W V (¬ V)}  (¬ W) }         \label{¬+}
+    :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
+
+    // Theorem (Pierce) 
+    // { (⇒ (⇒ (⇒ P Q) P) P) \valid } // this would not validate
+
+    // proof
+    { 
+        {
+            :(⇒ (⇒ P Q) P)
+            {
+                :(¬ P)
+                {
+                    :P
+                    Q          \valid  // should instantiate ¬-
+                }
+                (⇒ P Q)        \valid  // should instantiate ⇒+
+                P              \valid  // should instantiate ⇒-
+            }
+            P                  \valid  // should instantiate ¬-
+        }
+        (⇒ (⇒ (⇒ P Q) P) P)    \valid  // should instantiate ⇒+
+    }
+
+}

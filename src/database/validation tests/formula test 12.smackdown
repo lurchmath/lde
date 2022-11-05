@@ -19,9 +19,12 @@ testing:
   :{ :(⇔ W V)  {:W V} {:V W} }      \label{⇔-}
   :{ :{:W V (¬ V)}  (¬ W) }         \label{¬+}
   :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
-    
+  
+  // Corollary:  (should be invalid here)
+  { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \invalid } 
+  
   // Theorem (alt or-)
-  { :(∨ P Q) :(¬ Q) P \valid }  \label{alt or-} // motivates or- instantiation
+  { :(∨ P Q) :(¬ Q) P \valid }  \label{alt or-}
 
   // Alternate or- proof (not needed but motivates the instantiations
   {
@@ -36,12 +39,10 @@ testing:
         }
         P               \valid // motivates ¬- instantiation
       }
-      P                 \valid // follows from the theorem
+      P                 \valid // motivates or- instantiation
     }
   }
   
-  // Corollary: (follows from the instantiated theorem)
-  { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \valid } 
 }
 
 

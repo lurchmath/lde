@@ -9,7 +9,7 @@ testing:
     :{ :(⇒ P Q) (or (¬ P) Q) }            \label{alt def of ⇒}
   
     // simulating a blatant instantiation hint as a weak instantiation hint
-    :{
+    {
         :(⇒ A A) (or (¬ A) A)             \ref{alt def of ⇒}
                                           \valid
     }
