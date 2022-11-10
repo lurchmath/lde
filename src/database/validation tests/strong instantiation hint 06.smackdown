@@ -1,0 +1,34 @@
+---
+testing:
+  type: validation
+  subtype: strong instantiation hint
+  description: "Natural Deduction Propositional Proof of (P⇒P)"
+---
+
+(∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =),{
+
+    // ND Prop rule library
+    :{ :W :V  (∧ W V) }               \label{∧+}
+    :{ :(∧ W V) W V }                 \label{∧-}
+    :{ :W  (∨ W V) (∨ V W) }          \label{∨+}
+    :{ :(∨ W V) :{:W U} :{:V U}  U }  \label{∨-}
+    :{ :{:W V}  (⇒ W V) }             \label{⇒+}
+    :{ :W :(⇒ W V)  V }               \label{⇒-}
+    :{ :{:W V} :{:V W}  (⇒ W V) }     \label{⇔+}
+    :{ :(⇔ W V)  {:W V} {:V W} }      \label{⇔-}
+    :{ :{:W V (¬ V)}  (¬ W) }         \label{¬+}
+    :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
+
+    // Theorem  (because the premise is trivial, this will STILL validate)
+    { (⇒ P P )   \valid }
+  
+    // Baby warm up proof... just for kicks
+    {
+        {
+            :P 
+            P             \valid  // no justification needed
+        }
+        (⇒ P P )          \valid  // follows from theorem
+    }
+  
+}

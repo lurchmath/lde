@@ -1,7 +1,7 @@
 ---
 testing:
   type: validation
-  subtype: weak instantiation hint
+  subtype: strong instantiation hint
   description: "ND using a Theorem as a Formula"
 ---
 
@@ -20,10 +20,11 @@ testing:
     :{ :{:W V (¬ V)}  (¬ W) }         \label{¬+}
     :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
     
+    // Corollary:  (should be invalid here)
+    { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \invalid } 
     
-    // Theorem (alt or-) (needs two passes to validate)
-    // Q: why does including a \valid or \invalid tag after P throw an error?
-    { :(∨ P Q) :(¬ Q) P \invalid \ref{∨-} }  \label{alt or-}
+    // Theorem (alt or-)
+    // { :(∨ P Q) :(¬ Q) P \valid }  \label{alt or-} // this would not validate
 
     // Alternate or- proof
     {
@@ -39,14 +40,12 @@ testing:
                 :(¬ P)
                 (¬ Q)       \valid // no instantiation needed
             }
-            P               \ref{¬-}    \valid 
+            P               \valid   // should instantiate ¬- 
         }
-        P                   \valid // follows from the theorem 
+        P                   \valid   // should instantiate ∨- 
     }
- 
-    // Corollary: 
-    // Q: why does commenting this next line out create a mismatched grouper
-    // error in the test?
-    // { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C)  \ref{alt or-}  \valid } 
+
+    // Corollary: (follows from incorrect corollary above)
+    { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C) \valid } 
 
 }

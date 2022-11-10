@@ -1,7 +1,7 @@
 ---
 testing:
   type: validation
-  subtype: weak instantiation hint
+  subtype: strong instantiation hint
   description: "ND using a Theorem as a Formula"
 ---
 
@@ -22,8 +22,8 @@ testing:
     
     
     // Theorem (alt or-) (needs two passes to validate)
-    // Q: why does including a \valid or \invalid tag after P throw an error?
-    { :(∨ P Q) :(¬ Q) P \invalid \ref{∨-} }  \label{alt or-}
+    // Fix errors in WIH 11 before testing this
+    { :(∨ P Q) :(¬ Q) P \invalid }  \label{alt or-}
 
     // Alternate or- proof
     {
@@ -39,14 +39,14 @@ testing:
                 :(¬ P)
                 (¬ Q)       \valid // no instantiation needed
             }
-            P               \ref{¬-}    \valid 
+            P               \valid // should instantiate ¬-
         }
         P                   \valid // follows from the theorem 
     }
  
     // Corollary: 
     // Q: why does commenting this next line out create a mismatched grouper
-    // error in the test?
+    // error in the test in WIH 11?  Does it cause it here too?
     // { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C)  \ref{alt or-}  \valid } 
 
 }

@@ -1,0 +1,19 @@
+---
+testing:
+  type: validation
+  subtype: strong instantiation hint
+  description: "A valid instantiation, but not the one needed to justify the conclusion.  But it finds the correct one anyway."
+---
+
+(⇒ ¬ or),{
+    :{ :(⇒ P Q) (or (¬ P) Q) }            \label{alt def of ⇒}
+  
+    // simulating a blatant instantiation hint as a strong instantiation hint
+    { :(⇒ A A) (or (¬ A) A) \valid }
+
+    // start a proof
+    {  
+        :(⇒ A B)
+        (or (¬ A) B)                      \valid
+    }
+}

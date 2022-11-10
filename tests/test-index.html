@@ -22,7 +22,8 @@
     <script class="mocha-init">
       mocha.setup( {
         ui: 'bdd',
-        fullTrace: true
+        fullTrace: true,
+        timeout: 5000
       } );
       window.expect = chai.expect;
       mocha.checkLeaks();

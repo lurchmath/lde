@@ -63,10 +63,11 @@ const recur = folder => [
 ]
 const baseFolder = path.dirname( import.meta.url.substring( 7 ) )
 const allFilenames = recur( baseFolder )
+console.log( `Reading ${allFilenames.length} files ...` )
 
 // for each file, read it and split out its YAML header (if any) into metadata
 const database = allFilenames.map( filename => {
-    console.log( `Reading contents of ${filename}...` )
+    // console.log( `Reading contents of ${filename}...` )
     const content = String( fs.readFileSync( filename ) )
     const yaml = /^---\n(?:.|\n)*\n---(?:\n|$)/.exec( content )
     return yaml ? {

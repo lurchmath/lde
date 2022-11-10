@@ -1,8 +1,8 @@
 ---
 testing:
   type: validation
-  subtype: weak instantiation hint
-  description: "ND using a Theorem as a Formula"
+  subtype: strong instantiation hint
+  description: "Natural Deduction Propositional Proof (alt or-)"
 ---
 
 // global constants 
@@ -19,34 +19,27 @@ testing:
     :{ :(⇔ W V)  {:W V} {:V W} }      \label{⇔-}
     :{ :{:W V (¬ V)}  (¬ W) }         \label{¬+}
     :{ :{:(¬ W) V (¬ V)}  W }         \label{¬-}
-    
-    
-    // Theorem (alt or-) (needs two passes to validate)
-    // Q: why does including a \valid or \invalid tag after P throw an error?
-    { :(∨ P Q) :(¬ Q) P \invalid \ref{∨-} }  \label{alt or-}
 
-    // Alternate or- proof
+    // Theorem (alt or-)
+    // { :(∨ P Q) :(¬ Q) P \valid }   // this would not validate here
+
+    // Altertnate or- proof (not needed but motivates the instantiations
     {
         :(∨ P Q) 
         :(¬ Q)
         {
             :P
-            P               \valid // no instantiation needed
+            P                      \valid // no instantiation needed
         }
         {
             :Q
             {
                 :(¬ P)
-                (¬ Q)       \valid // no instantiation needed
+                (¬ Q)              \valid // no instantiation needed
             }
-            P               \ref{¬-}    \valid 
+            P                      \valid // should instantiate ¬-
         }
-        P                   \valid // follows from the theorem 
+        P                          \valid // should instantiate ∨-
     }
- 
-    // Corollary: 
-    // Q: why does commenting this next line out create a mismatched grouper
-    // error in the test?
-    // { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C)  \ref{alt or-}  \valid } 
 
 }

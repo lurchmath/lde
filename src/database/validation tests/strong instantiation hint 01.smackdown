@@ -1,0 +1,17 @@
+---
+testing:
+  type: validation
+  subtype: strong instantiation hint
+  description: "Basic test of a strong instantiation hint."
+---
+
+(⇒ ¬ or),{
+
+    :{ :(⇒ P Q) (or (¬ P) Q) }  \label{alt def of ⇒}
+     
+    // start a proof
+    {  
+        :(⇒ A B)
+        (or (¬ A) B)  \valid
+    }
+}
