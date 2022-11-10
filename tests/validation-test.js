@@ -963,7 +963,7 @@ describe( 'Validation', () => {
     }
 
     it( 'Should pass weak instantiation hint tests from the database', () => {
-        // Get all blatant instantiation tests from the database
+        // Get all weak instantiation tests from the database
         const weakInstTests = Database.filterByMetadata( metadata =>
             metadata.testing && metadata.testing.type &&
             metadata.testing.type == 'validation' &&
@@ -1067,8 +1067,10 @@ describe( 'Validation', () => {
                     MathConcept.typeAttributeKey( 'given' ) )
                 const sequent = new Validation.Sequent( WIH )
                 const formula = Formula.from( cited.copy() )
+                Array.from( formula.descendantsIterator() ).forEach( d =>
+                    d.clearAttributes( 'ref', 'expected validation result' ) )
                 formula.clearAttributes()
-                
+
                 // Use the Formula.possibleSufficientInstantiations() function
                 // to try to find some instantiations of the WIH that will make
                 // validation succeed for the sequent in question.
@@ -1183,6 +1185,8 @@ describe( 'Validation', () => {
                     MathConcept.typeAttributeKey( 'given' ) )
                 const sequent = new Validation.Sequent( WIH )
                 const formula = Formula.from( cited.copy() )
+                Array.from( formula.descendantsIterator() ).forEach( d =>
+                    d.clearAttributes( 'ref', 'expected validation result' ) )
                 formula.clearAttributes()
                 
                 // Use the Formula.possibleSufficientInstantiations() function
