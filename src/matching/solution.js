@@ -325,15 +325,19 @@ export class Solution {
             const newValue = sub.expression
             // Check #1: The metavariable may already be mapped to something else
             if ( oldValue && !oldValue.equals( newValue ) )
-                throw `Function condition failed for metavariable ${mvName}`
+                throw new Error(
+                    `Function condition failed for metavariable ${mvName}` )
             // Check #2: The substitution might make us try to bind a non-var
             if ( this._bound.has( mvName )
               && !( newValue instanceof LurchSymbol ) )
-                throw `Cannot set bound metavariable ${mvName} to a non-symbol`
+                throw new Error(
+                    `Cannot set bound metavariable ${mvName} to a non-symbol` )
             // Check #3: The substitution might violate a capture constraint
             if ( this._captureConstraints.constraints.some( cc =>
                     cc.afterSubstituting( sub ).violated() ) )
-                throw `Assignment for ${mvName} would violate capture constraints`
+                throw new Error(
+                    `Assignment for ${mvName} would violate capture constraints`
+                )
         }
         // modify inner substitutions and capture constraints
         this.substitute( sub )
