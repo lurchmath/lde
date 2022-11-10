@@ -45,8 +45,6 @@ testing:
     }
  
     // Corollary: 
-    // Q: why does commenting this next line out create a mismatched grouper
-    // error in the test in WIH 11?  Does it cause it here too?
-    // { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C)  \ref{alt or-}  \valid } 
+    // { :(¬ (∨ A B))  :(∨ (⇒ A C) (∨ A B))  (⇒ A C)  ref{alt or-}  valid } 
 
 }
