@@ -495,6 +495,26 @@ const removeDuplicatePatterns = (
     return firstOptionalIndex
 }
 
+// Utility function used by possibleSufficientInstantiations(), below.
+// Given a pattern P and a list L of possible instantiations of the pattern,
+// this function returns a (typically smaller) list L' that contains only those
+// entries from L that have the same top-level signature as P.
+// P and Q have the same top-level signature iff:
+// - P is a single metavariable, meaning it could match anything, or
+// - P is a compound expression whose operator and number of operands match
+//   those of Q
+const filterBySignature = ( P, L ) => {
+    // a single metavariable matches anything
+    if ( P.isAtomic() ) return L
+    // filter first by number of children
+    L = L.filter( entry => entry.numChildren() == P.numChildren() )
+    // filter next by operator, unless that operator is a metavariable
+    const operator = P.firstChild()
+    if ( !operator.isA( Matching.metavariable ) )
+        L = L.filter( entry => entry.firstChild().equals( operator ) )
+    return L
+}
+
 /**
  * Given a sequent and a formula, is there an instantiation of the formula that,
  * if added as another premise to the sequent, would make the sequent true?  The
@@ -627,11 +647,13 @@ function *possibleSufficientInstantiations (
             return result
         }
         // Make the optional multi-matching problem we're about to run as
-        // efficient as possible, by removing duplicate candidates and by
-        // combining constraints where possible.
+        // efficient as possible, by removing duplicate candidates, combining
+        // constraints where possible, and applying signature filtering.
         candidates = candidates.map( duplicateLCsRemoved )
         numRequired = removeDuplicatePatterns(
             patterns, candidates, numRequired )
+        for ( let i = 0 ; i < patterns.length ; i++ )
+            candidates[i] = filterBySignature( patterns[i], candidates[i] )
         // Now prepare to run the optional multi-matching algorithm.
         if ( options.debug ) {
             console.log( 'Patterns:   [ '
