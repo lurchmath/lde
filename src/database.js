@@ -1452,7 +1452,7 @@ const testingDatabase = [
         "description": "More than one formula to choose from."
       }
     },
-    "content": "\n(⇒ ¬ or),{\n    :{ :(⇒ P Q) (or (¬ P) Q) }     \\label{alt def of ⇒}\n    :{ (⇒ P P) }                   \\label{reflexive of ⇒}\n\n    // start a proof\n    {  \n        :(⇒ A B)                             \n        (or (¬ A) B)               \\invalid\n    }\n}\n"
+    "content": "\n(⇒ ¬ or),{\n    :{ :(⇒ P Q) (or (¬ P) Q) }     \\label{alt def of ⇒}\n    :{ (⇒ P P) }                   \\label{reflexive of ⇒}\n\n    // start a proof\n    {  \n        :(⇒ A B)                             \n        (or (¬ A) B)               \\valid\n    }\n}\n"
   },
   {
     "filename": "/validation tests/strong instantiation hint 05.smackdown",
