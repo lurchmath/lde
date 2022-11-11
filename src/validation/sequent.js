@@ -105,6 +105,10 @@ export class Sequent extends Environment {
             !( acc.parent() instanceof BindingEnvironment )
          || acc == acc.parent().lastChild() )
         
+        // Keep original premises and conclusion for later reference if needed.
+        // This lets us know where the copies stored in this object came from.
+        const originals = [ ...accessibles, conclusion ]
+
         // now make copies of all the accessibles, because code below may
         // modify the contents of the accessibles array, and we must ensure
         // that we do not alter the original LogicConcepts
@@ -113,11 +117,13 @@ export class Sequent extends Environment {
         // TO DO LATER:
         // add support for including document dependencies, when that feature
         // is added more broadly across the entire project
+        // (Note: If you add/remove accessibles, adjust "originals" list also.)
 
         // TO DO LATER:
         // add support for filtering certain claims out of premise environments
         // containing constant declarations, when support for declarations is
         // added more broadly to the validation module
+        // (Note: If you add/remove accessibles, adjust "originals" list also.)
 
         // ensure that all accessibles are marked as givens and that the
         // conclusion is marked as a claim (but don't modify the original)
@@ -126,6 +132,8 @@ export class Sequent extends Environment {
 
         // form an Environment from the premises and the conclusion
         super( ...accessibles, conclusion )
+        // and store the originals list in it for later lookup
+        this._originals = originals
 
         // remove any attribute that will not be used subsequently by any
         // validation algorithm applied to this sequent.  see the documentation
@@ -176,5 +184,58 @@ export class Sequent extends Environment {
      * @see {@link Sequent#premises premises()}
      */
     conclusion () { return this.lastChild() }
+
+    /**
+     * Construct a copy of this object.  Because a Sequent is also an
+     * {@link Environment}, this overrides the {@link Environment#copy copy()}
+     * function in that class, so that it does not return an
+     * {@link Environment} instance only, but a full Sequent instance.
+     * The copy will share the same {@link Sequent#originalPremises
+     * originalPremises()} and {@link Sequent#originalConclusion
+     * originalConclusion()} as this object.
+     * 
+     * @returns {Sequent} a deep copy of this object
+     */
+    copy () {
+        const result = new Sequent( this.conclusion() )
+        result._originals = this._originals
+        return result
+    }
+
+    /**
+     * Since the constructor of a Sequent makes copies of the given conclusion
+     * and all of its relevant accessibles, it is not possible to tell, based
+     * only on the return values of {@link Sequent#premises premises()} and
+     * {@link Sequent#conclusion conclusion()}, what the original premises or
+     * conclusion were.  Consequently, that constructor stores references to
+     * those originals, and you can get access to the originals through the use
+     * of this function, and {@link Sequent#originalConclusion
+     * originalConclusion()}.
+     * 
+     * @returns {LogicConcept[]} the array of LogicConcepts from which the
+     *   children of this Sequent were copied (excluding the last child, which
+     *   is the conclusion)
+     * 
+     * @see {@link Sequent#originalConclusion originalConclusion()}
+     */
+    originalPremises () { return this._originals.slice( 0, -1 ) }
+
+    /**
+     * Since the constructor of a Sequent makes copies of the given conclusion
+     * and all of its relevant accessibles, it is not possible to tell, based
+     * only on the return values of {@link Sequent#premises premises()} and
+     * {@link Sequent#conclusion conclusion()}, what the original premises or
+     * conclusion were.  Consequently, that constructor stores references to
+     * those originals, and you can get access to the originals through the use
+     * of this function, and {@link Sequent#originalPremises
+     * originalPremises()}.
+     * 
+     * @returns {LogicConcept} the LogicConcept from which the last child of
+     *   this Sequent was copied (the last child being the conclusion, and the
+     *   others being the premises)
+     * 
+     * @see {@link Sequent#originalPremises originalPremises()}
+     */
+    originalConclusion () { return this._originals.last() }
 
 }
