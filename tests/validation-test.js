@@ -1066,7 +1066,7 @@ describe( 'Validation', () => {
                 cleanWIH.clearAttributes(
                     MathConcept.typeAttributeKey( 'given' ) )
                 const sequent = new Validation.Sequent( WIH )
-                const formula = Formula.from( cited.copy() )
+                const formula = Formula.from( cited )
                 Array.from( formula.descendantsIterator() ).forEach( d =>
                     d.clearAttributes( 'ref', 'expected validation result' ) )
                 formula.clearAttributes()
@@ -1184,7 +1184,7 @@ describe( 'Validation', () => {
                 cleanWIH.clearAttributes(
                     MathConcept.typeAttributeKey( 'given' ) )
                 const sequent = new Validation.Sequent( WIH )
-                const formula = Formula.from( cited.copy() )
+                const formula = Formula.from( cited )
                 Array.from( formula.descendantsIterator() ).forEach( d =>
                     d.clearAttributes( 'ref', 'expected validation result' ) )
                 formula.clearAttributes()
