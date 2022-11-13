@@ -1535,4 +1535,128 @@ describe( 'Validation', function () {
         //            + Number( totIntTime / totClTime ).toFixed( 2 ) )
     } )
 
+    it( 'Should do modifications that enable an instantiation loop', () => {
+        // create a simple document that can be fully validated only through
+        // multiple passes (since earlier things depend on later things):
+        const document = LogicConcept.fromPutdown( `
+            (∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =) , {
+                // rules:
+                :{ :X (∨ X Y) (∨ Y X) }  // ∨+ rule
+                :{ :X :Y (∧ X Y) }       // ∧+ rule
+
+                // one solitary premise to give us something to reason with:
+                :P
+
+                // conclusions:
+                (∧ (∨ P Q) (∨ Q P))      // This is true because...
+                (∨ P Q)                  // ...of this...
+                (∨ Q P)                  // ...and this.
+            }
+        ` )[0]
+        const concl1 = document.child( 8, 3 ) // (∧ (∨ P Q) (∨ Q P))
+        const concl2 = document.child( 8, 4 ) // (∨ P Q)
+        const concl3 = document.child( 8, 5 ) // (∨ Q P)
+        // now prepare a function that does a pass of the document, trying to
+        // validate all conclusions by seeking formulas that may justify them:
+        const doOnePass = () => {
+            document.body().conclusions().forEach( conclusion => {
+                // Is the conclusion already marked valid?  If so, do nothing.
+                if ( Validation.result( conclusion )
+                  && Validation.result( conclusion ).result == 'valid' ) {
+                    const tmp = conclusion.copy()
+                    Validation.clearResult( tmp )
+                    // console.log( 'Not re-validating this:', tmp.toPutdown() )
+                    return
+                }
+                // console.log( 'Validating:', conclusion.toPutdown() )
+                // Is the conclusion valid without using any formula?
+                // If so, we are done already!
+                Validation.validate( conclusion )
+                let temp = Validation.result( conclusion )
+                if ( temp.result == 'valid' ) {
+                    const tmp = conclusion.copy()
+                    Validation.clearResult( tmp )
+                    // console.log( 'Valid without instantiation:', tmp.toPutdown() )
+                    return
+                }
+                // Okay, consider each environment accessible to the conclusion
+                // as a possibility for a formula that justifies it:
+                let done = false
+                conclusion.accessibles().forEach( accessible => {
+                    if ( done ) return
+                    if ( !( accessible instanceof Environment ) ) return
+                    // console.log( 'Trying formula:', accessible.toPutdown() )
+                    const formula = Formula.from( accessible )
+                    formula.clearAttributes()
+                    const parent = accessible.parent()
+                    const insertionPoint = accessible.indexInParent() + 1
+                    const generator = Formula.possibleSufficientInstantiations(
+                        new Validation.Sequent( conclusion ), formula,
+                        { direct : true } )
+                    for ( const solution of generator ) {
+                        const instantiation = Formula.instantiate(
+                            formula, solution.solution ).asA( 'given' )
+                        // console.log( 'Trying instantiation:',
+                        //     instantiation.toPutdown() )
+                        parent.insertChild( instantiation, insertionPoint )
+                        Validation.validate( conclusion )
+                        // console.log( document.toPutdown() )
+                        if ( Validation.result( conclusion ).result == 'valid' ) {
+                            done = true
+                            break
+                        } else {
+                            parent.child( insertionPoint ).remove()
+                        }
+                    }
+                    // if ( !done ) console.log( 'No instantiation worked.' )
+                } )
+                const result = Validation.result( conclusion )
+                if ( result.result != 'valid' )
+                    Validation.setResult( conclusion, {
+                        result : 'invalid',
+                        reason : 'No formula makes this valid',
+                        method : result.reason
+                    } )
+            } )
+        }
+        // run the first pass over the document.  we should find that the last
+        // two conclusions are both valid, but the first conclusion is not.
+        // console.log( 'Current state of document:', document.toPutdown() )
+        // console.log( 'PASS #1 STARTS HERE.' )
+        Validation.setOptions( 'tool',
+            'classical propositional logic on conclusions' )
+        expect( doOnePass ).not.to.throw()
+        expect( Validation.result( concl1 ) ).to.eql( {
+            result : 'invalid',
+            reason : 'No formula makes this valid',
+            method : 'Classical Propositional Logic'
+        } )
+        expect( Validation.result( concl2 ) ).to.eql( {
+            result : 'valid',
+            reason : 'Classical Propositional Logic'
+        } )
+        expect( Validation.result( concl3 ) ).to.eql( {
+            result : 'valid',
+            reason : 'Classical Propositional Logic'
+        } )
+        // run the second pass over the document.  we should find that all
+        // three conclusions are valid.
+        // console.log( 'Current state of document:', document.toPutdown() )
+        // console.log( 'PASS #2 STARTS HERE.' )
+        expect( doOnePass ).not.to.throw()
+        expect( Validation.result( concl1 ) ).to.eql( {
+            result : 'valid',
+            reason : 'Classical Propositional Logic'
+        } )
+        expect( Validation.result( concl2 ) ).to.eql( {
+            result : 'valid',
+            reason : 'Classical Propositional Logic'
+        } )
+        expect( Validation.result( concl3 ) ).to.eql( {
+            result : 'valid',
+            reason : 'Classical Propositional Logic'
+        } )
+        // console.log( 'Current state of document:', document.toPutdown() )
+    } )
+
 } )
