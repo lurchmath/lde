@@ -951,9 +951,9 @@ describe( 'Validation', function () {
     // given claim, and return the time the actual validation algorithm took,
     // but don't actually use expect(); just also return the validation result.
     const validateSequentWithoutExpectation = claim => {
-        // Validate the conclusion propositionally and compare the
-        // validation result to the \[in]valid{} marker on the
-        // conclusion as part of the test.
+        // Validate the conclusion propositionally and return the result without
+        // bothering to do any comparisons, since this function is explicity
+        // about NOT doing that.
         const sequent = new Validation.Sequent( claim )
         const startTime = new Date
         Validation.validate( sequent )
@@ -1434,7 +1434,7 @@ describe( 'Validation', function () {
                 // console.log( SIH.toPutdown() )
                 // console.log( JSON.stringify( test ) )
                 
-                // Is the SIH valid without even referring to the cited formula?
+                // Is the SIH valid without even referring to any cited formula?
                 // If so, give feedback saying as much.
                 let temp = validateSequentWithoutExpectation( SIH )
                 intTime += temp.time
