@@ -18,8 +18,11 @@ import { makeSpy } from './test-utils.js'
 
 // Test suite begins here.
 
-describe( 'Validation', () => {
+describe( 'Validation', function () {
 
+    // This takes a long time, so increase the timeout threshold.
+    this.timeout( 25000 )
+        
     it( 'Module should import successfully', () => {
         expect( Validation ).to.be.ok
     } )
@@ -948,9 +951,9 @@ describe( 'Validation', () => {
     // given claim, and return the time the actual validation algorithm took,
     // but don't actually use expect(); just also return the validation result.
     const validateSequentWithoutExpectation = claim => {
-        // Validate the conclusion propositionally and compare the
-        // validation result to the \[in]valid{} marker on the
-        // conclusion as part of the test.
+        // Validate the conclusion propositionally and return the result without
+        // bothering to do any comparisons, since this function is explicity
+        // about NOT doing that.
         const sequent = new Validation.Sequent( claim )
         const startTime = new Date
         Validation.validate( sequent )
@@ -1066,7 +1069,7 @@ describe( 'Validation', () => {
                 cleanWIH.clearAttributes(
                     MathConcept.typeAttributeKey( 'given' ) )
                 const sequent = new Validation.Sequent( WIH )
-                const formula = Formula.from( cited.copy() )
+                const formula = Formula.from( cited )
                 Array.from( formula.descendantsIterator() ).forEach( d =>
                     d.clearAttributes( 'ref', 'expected validation result' ) )
                 formula.clearAttributes()
@@ -1184,7 +1187,7 @@ describe( 'Validation', () => {
                 cleanWIH.clearAttributes(
                     MathConcept.typeAttributeKey( 'given' ) )
                 const sequent = new Validation.Sequent( WIH )
-                const formula = Formula.from( cited.copy() )
+                const formula = Formula.from( cited )
                 Array.from( formula.descendantsIterator() ).forEach( d =>
                     d.clearAttributes( 'ref', 'expected validation result' ) )
                 formula.clearAttributes()
@@ -1250,6 +1253,410 @@ describe( 'Validation', () => {
         } )
         // console.log( `INT / CL = ${intTime}ms / ${clTime}ms = `
         //            + Number( intTime / clTime ).toFixed( 2 ) )
+    } )
+
+    it( 'Should pass strong instantiation hint tests from the database', () => {
+        // Get all strong instantiation tests from the database
+        const strongInstTests = Database.filterByMetadata( metadata =>
+            metadata.testing && metadata.testing.type &&
+            metadata.testing.type == 'validation' &&
+            metadata.testing.subtype &&
+            metadata.testing.subtype == 'strong instantiation hint' )
+        // they are all entitled "/path/filename N.smackdown" for some N,
+        // so sort them by that value of N in increasing order.
+        const getNum = key => {
+            const parts = key.split( ' ' )
+            return parseInt( parts.last().split( '.' )[0] )
+        }
+        strongInstTests.sort( ( a, b ) => getNum( a ) - getNum( b ) )
+
+        let clTime = 0
+        let intTime = 0
+        let totClTime = 0
+        let totIntTime = 0
+        // Now run each test as follows...
+        strongInstTests.forEach( key => {
+            // Look up the test with the given key and ensure it contains
+            // exactly one LogicConcept, the "document."
+            const LCs = Database.getObjects( key )
+            expect( LCs ).to.have.length( 1,
+                `Malformed test: ${key} should have one LogicConcept in it` )
+            let document = LCs[0]
+            // Process \[in]valid[{...}] commands
+            expect(
+                () => processValidityCommands( document ),
+                `Processing \\[in]valid[{...}] commands in ${key}`
+            ).not.to.throw()
+            // Now we should be able to convert the document to an LC
+            document = document.interpret()
+            // Ensure the document passes a scoping check
+            Scoping.validate( document, Scoping.declareInAncestor )
+            expect(
+                document.hasDescendantSatisfying(
+                    d => !!Scoping.scopeErrors( d ) ),
+                `Ensuring no scoping errors in document for ${key}`
+            ).to.equal( false )
+
+            // Now test all strong instantiation hints classically:
+            //
+            // Compute a few data about the document that we will use below.
+            // We will recompute these later when we do the same validation
+            // intuitionistically, so we start with fresh copies of everything.
+            let fileStartTime = new Date
+            Validation.setOptions( 'tool',
+                'classical propositional logic on conclusions' )
+            let docCopy = document.copy()
+            let SIHs = docCopy.descendantsSatisfying(
+                d => d.hasAttribute( 'expected validation result' ) )
+            // console.log( 'Before loop in '+key+':' )
+            // console.log( docCopy.toPutdown() )
+            SIHs.forEach( SIH => {
+                // Fetch the expectations the database file gives
+                const test = SIH.getAttribute( 'expected validation result' )
+                const location = `In ${key} at ${SIH.address()}`
+                // console.log( 'SIH @'+SIH.address()+':' )
+                // console.log( SIH.toPutdown() )
+                // console.log( JSON.stringify( test ) )
+                
+                // Is the SIH valid without even referring to the cited formula?
+                // If so, give feedback saying as much.
+                let temp = validateSequentWithoutExpectation( SIH )
+                clTime += temp.time
+                if ( temp.result.result == 'valid' ) {
+                    expectValidity(
+                        `${location}: extra \\ref{}`,
+                        'formula citation unnecessary',
+                        test.result, test.reason )
+                    // console.log( 'Was valid alone!' )
+                    // console.log( new Validation.Sequent( SIH ).toPutdown() )
+                    return
+                }
+
+                // Build a sequent and then let's walk through all of its
+                // premises and see which ones can be tried as a formula:
+                const cleanSIH = SIH.copy()
+                Scoping.clearImplicitDeclarations( cleanSIH )
+                Array.from( cleanSIH.descendantsIterator() ).forEach( d =>
+                    d.clearAttributes( 'ref', 'expected validation result' ) )
+                cleanSIH.clearAttributes(
+                    MathConcept.typeAttributeKey( 'given' ) )
+                const sequent = new Validation.Sequent( SIH )
+                let sequentWasValid = false
+                sequent.premises().forEach( ( premise, premIndex ) => {
+                    // should we break out of this loop?
+                    if ( sequentWasValid ) return
+
+                    // can this even be a formula?
+                    if ( !( premise instanceof Environment ) ) return
+
+                    // make a copy of the sequent without the given premise
+                    const smallerSequent = sequent.copy()
+                    smallerSequent.child( premIndex ).remove()
+                    // sanitize the copied premise for use as a formula
+                    const origPrem = sequent.originalPremises()[premIndex]
+                    const formula = Formula.from( origPrem )
+                    Array.from( formula.descendantsIterator() ).forEach( d =>
+                        d.clearAttributes( 'ref', 'expected validation result' ) )
+                    formula.clearAttributes()
+
+                    // Use the Formula.possibleSufficientInstantiations()
+                    // function to try to find some instantiations of the SIH
+                    // that will make validation succeed for the sequent in
+                    // question.  This test suite assumes the option
+                    // direct = true.
+                    const generator = Formula.possibleSufficientInstantiations(
+                        smallerSequent, formula, { direct : true } )
+                    let goodInstantiation = null
+                    // let count = 0
+                    for ( const solution of generator ) {
+                        const instantiation = Formula.instantiate(
+                            formula, solution.solution )
+                        smallerSequent.insertChild( instantiation, 0 )
+                        temp = validateSequentWithoutExpectation( 
+                            smallerSequent.conclusion() )
+                        clTime += temp.time
+                        if ( temp.result.result == 'valid' )
+                            goodInstantiation = instantiation
+                        // cleanup and possibly stop
+                        smallerSequent.removeChild( 0 )
+                        if ( goodInstantiation ) break
+                    }
+                    if ( goodInstantiation ) {
+                        // console.log( `------------------------------\n${key}` )
+                        // console.log( `Sequent: ${smallerSequent.toPutdown()}` )
+                        // console.log( `Formula: ${formula.toPutdown()}` )
+                        // console.log( `Instantiation: ${goodInstantiation.toPutdown()}` )
+    
+                        sequentWasValid = true
+                        expectValidity(
+                            `${location} (${SIH.toPutdown()}): valid step`,
+                            undefined, test.result, test.reason )
+                        // Since the SIH was valid, insert the good instantiation we
+                        // found after the cited formula.
+                        // console.log( 'Added @'+cited.address(), docCopy.toPutdown() )
+                        // console.log( `Made me add ${goodInstantiation.toPutdown()}` )
+                        Formula.addCachedInstantiation( premise,
+                            goodInstantiation )
+                    }
+                } )
+
+                if ( !sequentWasValid ) {
+                    // console.log( 'No good instantiations:' )
+                    // console.log( sequent.toPutdown() )
+                    return expectInvalidity(
+                        `${location} (${SIH.toPutdown()}): invalid step`,
+                        undefined, test.result, test.reason )
+                }
+            } )
+            let fileEndTime = new Date
+            let fileElapsed = fileEndTime - fileStartTime
+            totClTime += fileElapsed
+            // console.log( `CPL on ${key} took ${fileElapsed}ms` )
+
+            // Now test all strong instantiation hints classically:
+            //
+            // Compute a few data about the document that we will use below.
+            // We will recompute these later when we do the same validation
+            // intuitionistically, so we start with fresh copies of everything.
+            fileStartTime = new Date
+            Validation.setOptions( 'tool',
+                'intuitionistic propositional logic on conclusions' )
+            docCopy = document.copy()
+            SIHs = docCopy.descendantsSatisfying(
+                d => d.hasAttribute( 'expected validation result' ) )
+            // console.log( 'Before loop in '+key+':' )
+            // console.log( docCopy.toPutdown() )
+            SIHs.forEach( SIH => {
+                // Fetch the expectations the database file gives
+                const test = SIH.getAttribute( 'expected validation result' )
+                const location = `In ${key} at ${SIH.address()}`
+                // console.log( 'SIH @'+SIH.address()+':' )
+                // console.log( SIH.toPutdown() )
+                // console.log( JSON.stringify( test ) )
+                
+                // Is the SIH valid without even referring to any cited formula?
+                // If so, give feedback saying as much.
+                let temp = validateSequentWithoutExpectation( SIH )
+                intTime += temp.time
+                if ( temp.result.result == 'valid' ) {
+                    expectValidity(
+                        `${location}: extra \\ref{}`,
+                        'formula citation unnecessary',
+                        test.result, test.reason )
+                    // console.log( 'Was valid alone!' )
+                    // console.log( new Validation.Sequent( SIH ).toPutdown() )
+                    return
+                }
+
+                // Build a sequent and then let's walk through all of its
+                // premises and see which ones can be tried as a formula:
+                const cleanSIH = SIH.copy()
+                Scoping.clearImplicitDeclarations( cleanSIH )
+                Array.from( cleanSIH.descendantsIterator() ).forEach( d =>
+                    d.clearAttributes( 'ref', 'expected validation result' ) )
+                cleanSIH.clearAttributes(
+                    MathConcept.typeAttributeKey( 'given' ) )
+                const sequent = new Validation.Sequent( SIH )
+                let sequentWasValid = false
+                sequent.premises().forEach( ( premise, premIndex ) => {
+                    // should we break out of this loop?
+                    if ( sequentWasValid ) return
+
+                    // can this even be a formula?
+                    if ( !( premise instanceof Environment ) ) return
+
+                    // make a copy of the sequent without the given premise
+                    const smallerSequent = sequent.copy()
+                    smallerSequent.child( premIndex ).remove()
+                    // sanitize the copied premise for use as a formula
+                    const origPrem = sequent.originalPremises()[premIndex]
+                    const formula = Formula.from( origPrem )
+                    Array.from( formula.descendantsIterator() ).forEach( d =>
+                        d.clearAttributes( 'ref', 'expected validation result' ) )
+                    formula.clearAttributes()
+
+                    // Use the Formula.possibleSufficientInstantiations()
+                    // function to try to find some instantiations of the SIH
+                    // that will make validation succeed for the sequent in
+                    // question.  This test suite assumes the option
+                    // direct = true.
+                    const generator = Formula.possibleSufficientInstantiations(
+                        smallerSequent, formula, { direct : true } )
+                    let goodInstantiation = null
+                    // let count = 0
+                    for ( const solution of generator ) {
+                        const instantiation = Formula.instantiate(
+                            formula, solution.solution )
+                        smallerSequent.insertChild( instantiation, 0 )
+                        temp = validateSequentWithoutExpectation( 
+                            smallerSequent.conclusion() )
+                        intTime += temp.time
+                        if ( temp.result.result == 'valid' )
+                            goodInstantiation = instantiation
+                        // cleanup and possibly stop
+                        smallerSequent.removeChild( 0 )
+                        if ( goodInstantiation ) break
+                    }
+                    if ( goodInstantiation ) {
+                        // console.log( `------------------------------\n${key}` )
+                        // console.log( `Sequent: ${smallerSequent.toPutdown()}` )
+                        // console.log( `Formula: ${formula.toPutdown()}` )
+                        // console.log( `Instantiation: ${goodInstantiation.toPutdown()}` )
+    
+                        sequentWasValid = true
+                        expectValidity(
+                            `${location} (${SIH.toPutdown()}): valid step`,
+                            undefined, test.result, test.reason )
+                        // Since the SIH was valid, insert the good instantiation we
+                        // found after the cited formula.
+                        // console.log( 'Added @'+cited.address(), docCopy.toPutdown() )
+                        // console.log( `Made me add ${goodInstantiation.toPutdown()}` )
+                        Formula.addCachedInstantiation( premise,
+                            goodInstantiation )
+                    }
+                } )
+
+                if ( !sequentWasValid ) {
+                    // console.log( 'No good instantiations:' )
+                    // console.log( sequent.toPutdown() )
+                    return expectInvalidity(
+                        `${location} (${SIH.toPutdown()}): invalid step`,
+                        undefined, test.result, test.reason )
+                }
+            } )
+            fileEndTime = new Date
+            fileElapsed = fileEndTime - fileStartTime
+            totIntTime += fileElapsed
+            // console.log( `IPL on ${key} took ${fileElapsed}ms` )
+        } )
+        // console.log( `Validation: INT / CL = ${intTime}ms / ${clTime}ms = `
+        //            + Number( intTime / clTime ).toFixed( 2 ) )
+        // console.log( `Val + Mtch: INT / CL = ${totIntTime}ms / ${totClTime}ms = `
+        //            + Number( totIntTime / totClTime ).toFixed( 2 ) )
+    } )
+
+    it( 'Should do modifications that enable an instantiation loop', () => {
+        // create a simple document that can be fully validated only through
+        // multiple passes (since earlier things depend on later things):
+        const document = LogicConcept.fromPutdown( `
+            (∧ ∨ ⇒ ⇔ ¬ ∀ ∃ =) , {
+                // rules:
+                :{ :X (∨ X Y) (∨ Y X) }  // ∨+ rule
+                :{ :X :Y (∧ X Y) }       // ∧+ rule
+
+                // one solitary premise to give us something to reason with:
+                :P
+
+                // conclusions:
+                (∧ (∨ P Q) (∨ Q P))      // This is true because...
+                (∨ P Q)                  // ...of this...
+                (∨ Q P)                  // ...and this.
+            }
+        ` )[0]
+        const concl1 = document.child( 8, 3 ) // (∧ (∨ P Q) (∨ Q P))
+        const concl2 = document.child( 8, 4 ) // (∨ P Q)
+        const concl3 = document.child( 8, 5 ) // (∨ Q P)
+        // now prepare a function that does a pass of the document, trying to
+        // validate all conclusions by seeking formulas that may justify them:
+        const doOnePass = () => {
+            document.body().conclusions().forEach( conclusion => {
+                // Is the conclusion already marked valid?  If so, do nothing.
+                if ( Validation.result( conclusion )
+                  && Validation.result( conclusion ).result == 'valid' ) {
+                    const tmp = conclusion.copy()
+                    Validation.clearResult( tmp )
+                    // console.log( 'Not re-validating this:', tmp.toPutdown() )
+                    return
+                }
+                // console.log( 'Validating:', conclusion.toPutdown() )
+                // Is the conclusion valid without using any formula?
+                // If so, we are done already!
+                Validation.validate( conclusion )
+                let temp = Validation.result( conclusion )
+                if ( temp.result == 'valid' ) {
+                    const tmp = conclusion.copy()
+                    Validation.clearResult( tmp )
+                    // console.log( 'Valid without instantiation:', tmp.toPutdown() )
+                    return
+                }
+                // Okay, consider each environment accessible to the conclusion
+                // as a possibility for a formula that justifies it:
+                let done = false
+                conclusion.accessibles().forEach( accessible => {
+                    if ( done ) return
+                    if ( !( accessible instanceof Environment ) ) return
+                    // console.log( 'Trying formula:', accessible.toPutdown() )
+                    const formula = Formula.from( accessible )
+                    formula.clearAttributes()
+                    const parent = accessible.parent()
+                    const insertionPoint = accessible.indexInParent() + 1
+                    const generator = Formula.possibleSufficientInstantiations(
+                        new Validation.Sequent( conclusion ), formula,
+                        { direct : true } )
+                    for ( const solution of generator ) {
+                        const instantiation = Formula.instantiate(
+                            formula, solution.solution ).asA( 'given' )
+                        // console.log( 'Trying instantiation:',
+                        //     instantiation.toPutdown() )
+                        parent.insertChild( instantiation, insertionPoint )
+                        Validation.validate( conclusion )
+                        // console.log( document.toPutdown() )
+                        if ( Validation.result( conclusion ).result == 'valid' ) {
+                            done = true
+                            break
+                        } else {
+                            parent.child( insertionPoint ).remove()
+                        }
+                    }
+                    // if ( !done ) console.log( 'No instantiation worked.' )
+                } )
+                const result = Validation.result( conclusion )
+                if ( result.result != 'valid' )
+                    Validation.setResult( conclusion, {
+                        result : 'invalid',
+                        reason : 'No formula makes this valid',
+                        method : result.reason
+                    } )
+            } )
+        }
+        // run the first pass over the document.  we should find that the last
+        // two conclusions are both valid, but the first conclusion is not.
+        // console.log( 'Current state of document:', document.toPutdown() )
+        // console.log( 'PASS #1 STARTS HERE.' )
+        Validation.setOptions( 'tool',
+            'classical propositional logic on conclusions' )
+        expect( doOnePass ).not.to.throw()
+        expect( Validation.result( concl1 ) ).to.eql( {
+            result : 'invalid',
+            reason : 'No formula makes this valid',
+            method : 'Classical Propositional Logic'
+        } )
+        expect( Validation.result( concl2 ) ).to.eql( {
+            result : 'valid',
+            reason : 'Classical Propositional Logic'
+        } )
+        expect( Validation.result( concl3 ) ).to.eql( {
+            result : 'valid',
+            reason : 'Classical Propositional Logic'
+        } )
+        // run the second pass over the document.  we should find that all
+        // three conclusions are valid.
+        // console.log( 'Current state of document:', document.toPutdown() )
+        // console.log( 'PASS #2 STARTS HERE.' )
+        expect( doOnePass ).not.to.throw()
+        expect( Validation.result( concl1 ) ).to.eql( {
+            result : 'valid',
+            reason : 'Classical Propositional Logic'
+        } )
+        expect( Validation.result( concl2 ) ).to.eql( {
+            result : 'valid',
+            reason : 'Classical Propositional Logic'
+        } )
+        expect( Validation.result( concl3 ) ).to.eql( {
+            result : 'valid',
+            reason : 'Classical Propositional Logic'
+        } )
+        // console.log( 'Current state of document:', document.toPutdown() )
     } )
 
 } )
