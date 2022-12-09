@@ -154,7 +154,7 @@ export class PropositionalForm {
      * representing a conditional expression, that is, one of the form
      * $A\to B$, where $A$ is called the "antecedent" and $B$ the
      * "consequent."  Note that this is not a member function, but a static
-     * method, so you would invoke it using `PropositionalForm.atomic(A,C,c)`.
+     * method, so you would invoke it using `PropositionalForm.conditional(A,C,c)`.
      * In fact, one does not ever construct instances of the PropositionalForm
      * class in any way other than using the static methods of this class that
      * create specific types of PropositionalForms.

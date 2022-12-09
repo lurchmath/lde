@@ -19,6 +19,8 @@ import repl from 'repl'
 import disableEventTarget from './disable-event-target.js'
 // load everything from index.js
 import * as Lurch from '../src/index.js'
+// load CNFTools
+import CNF from '../src/validation/conjunctive-normal-form.js'
 // load PropositionalForm
 import { PropositionalForm } from '../src/validation/propositional-form.js'
 // load Algebrite
@@ -64,6 +66,7 @@ const rpl = repl.start( {
 Object.assign( global, Lurch )
 global.Algebrite = Algebrite
 global.compute = Algebrite.run
+global.CNF = CNF
 global.PropositionalForm = PropositionalForm
 global.satSolve = satSolve
 global.chalk = chalk
