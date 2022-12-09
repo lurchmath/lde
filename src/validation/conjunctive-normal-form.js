@@ -22,8 +22,8 @@
  * Tools in this namespace let you construct CNFs for atomic propositions,
  * including:
  * 
- *  * {@link CNF.constantTrue the constrant true}
- *  * {@link CNF.constantFalse the constrant false}
+ *  * {@link CNF.constantTrue the constant true}
+ *  * {@link CNF.constantFalse the constant false}
  *  * {@link CNF.proposition any atomic proposition or its negation}
  * 
  * and non-atomic propositional expressions as well, including:
