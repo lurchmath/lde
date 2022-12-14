@@ -152,6 +152,46 @@ Array.prototype.without = function ( index ) {
 Array.prototype.last = function () { return this[this.length-1] }
 
 /**
+ * An array containing a finite arithmetic sequence of integers. 
+ * - `Array.range()` returns `[ ]`.
+ * - `Array.range(n)` returns `[0,1,2,...,n-1]`.
+ * - `Array.range(a,b)` returns `[a,a+1,...,b]`. 
+ * - `Array.range(a,b,d)` returns the finite arithmetic sequence `[a,a+d,...,a+k*d]` where $\left|a+kd\right|\leq \left|b\right| < \left|a+(k+1)d\right|$.
+ * @returns {array} 
+ */
+Array.range = function ( ...args ) { 
+   const n = args.length
+   // if one argument return [0..n-1] immediately for efficiency
+   if (n === 1) return [ ...Array(args[0]).keys() ]
+   // if no arguments return [ ]
+   if (n === 0) return []
+   // at least two arguments
+   const start = args[0]
+   const stop  = args[1]
+   // if exactly two arguments, step = 1, otherwise the third arg
+   const step =  (n === 2) ? 1 : args[2]
+   // do the general case.  Note step=0 returns an empty array
+   return ((stop>start && step>0) || (stop<start && step<0) ||
+           (stop===start && step!==0)) ?
+          [ ...Array(Math.floor(Math.abs((stop-start)/step))+1) ].map((_,k)=>start+step*k) : [ ]
+ }
+
+ /**
+  * An array containing the finite arithmetic sequence,
+  * $\left[f(a),f(a+1),\ldots,f(b)\right]$. 
+  * @example
+  * `Array.seq(n=>2*n,3,5)` returns `[6,8,10]`
+  * @param {function} f a univariate function
+  * @param {integer} a the lower index
+  * @param {integer} b the upper index
+  * @returns {array} 
+  */
+ Array.seq = function ( f, a, b) { 
+    if (b<a) return []
+    return [ ...Array(b-a+1) ].map( (_,k)=>f(a+k) )
+  }
+
+/**
  * The functions below extend the built-in Set class with new functionality.
  * 
  * @class Set

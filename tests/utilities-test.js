@@ -231,6 +231,30 @@ describe( 'Prototype extensions', () => {
         expect( [ ].last() ).to.equal( undefined )
     } )
 
+    it( 'The Array.range() function works as expected', () => {
+        expect( Array.range() ).to.have.ordered.members( [ ] )
+        expect( Array.range(6) ).to.have.ordered.members( [0,1,2,3,4,5] )
+        expect( Array.range(1) ).to.have.ordered.members( [0] )
+        expect( Array.range(0) ).to.have.ordered.members( [ ] )
+        expect( Array.range(2,6) ).to.have.ordered.members( [2,3,4,5,6] )
+        expect( Array.range(0,6) ).to.have.ordered.members( [0,1,2,3,4,5,6] )
+        expect( Array.range(-2,2) ).to.have.ordered.members( [-2,-1,0,1,2] )
+        expect( Array.range(-5,5,3) ).to.have.ordered.members( [-5,-2,1,4] )
+        expect( Array.range(-5,4,3) ).to.have.ordered.members( [-5,-2,1,4] )
+        expect( Array.range(-5,3,3) ).to.have.ordered.members( [-5,-2,1] )
+        expect( Array.range(5,1,-1) ).to.have.ordered.members( [5,4,3,2,1] )
+        expect( Array.range(5,-5,-2) ).to.have.ordered.members( [5,3,1,-1,-3,-5] )
+        expect( Array.range(2,2) ).to.have.ordered.members( [ 2 ] )
+        expect( Array.range(2,1) ).to.have.ordered.members( [  ] )
+        expect( Array.range(1, 2, 0) ).to.have.ordered.members( [ ] )
+    } )
+
+    it( 'The Array.seq() function works as expected', () => {
+        expect( Array.seq(n=>2*n,3,5) ).to.have.ordered.members( [6,8,10] )
+        expect( Array.seq(n=>n,0,4) ).to.have.ordered.members( [0,1,2,3,4] )
+        expect( Array.seq((n,m)=>n+1,0,4) ).to.have.ordered.members( [1,2,3,4,5] )
+    } )
+
     it( 'The Set.prototype.equals() function works as expected', () => {
         // equal sets
         expect( new Set( [ 1, 2, 3 ] ).equals( new Set( [ 1, 2, 3 ] ) ) )
