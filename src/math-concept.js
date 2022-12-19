@@ -1549,13 +1549,15 @@ export class MathConcept extends Superclass {
      * @returns {boolean} true if and only if this MathConcept equals `other`
      * @see {@link MathConcept#copy copy()}
      */
-    equals ( other ) {
+    equals ( other, attributesToIgnore = [ ] ) {
         // other must be a MathConcept with same specific subclass
         if ( !( other instanceof MathConcept ) ) return false
         if ( this.constructor !== other.constructor ) return false
         // other must have the same number of attribute keys
-        const keys1 = Array.from( this._attributes.keys() )
-        const keys2 = Array.from( other._attributes.keys() )
+        const keys1 = Array.from( this._attributes.keys() ).filter(
+            key => !attributesToIgnore.includes( key ) )
+        const keys2 = Array.from( other._attributes.keys() ).filter(
+            key => !attributesToIgnore.includes( key ) )
         if ( keys1.length != keys2.length ) return false
         // other must have the same set of attribute keys
         keys1.sort()

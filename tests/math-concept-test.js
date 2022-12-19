@@ -2010,7 +2010,7 @@ describe( 'MathConcept copying and serialization', () => {
     } )
 
     it( 'Supports deep equality comparisons correctly', () => {
-        // Create four MathConcepts for testing
+        // Create five MathConcepts for testing
         const S1 = new MathConcept(
             new MathConcept,
             new MathConcept().attr( { 'x' : 'y' } )
@@ -2079,6 +2079,41 @@ describe( 'MathConcept copying and serialization', () => {
         expect( S4.equals( S2 ) ).to.equal( false )
         expect( S4.equals( S3 ) ).to.equal( false )
         expect( S4.equals( S4 ) ).to.equal( true )
+    } )
+
+    it( 'Supports attribute filtering during equality comparisons', () => {
+        // Make some things that are the same except for attributes
+        const S1 = new MathConcept().attr( { a : 1, b : 2, c : 3 } )
+        const S2 = new MathConcept().attr( { a : 1, c : 3 } )
+        const S3 = new MathConcept().attr( { a : 1, b : 3, c : 2 } )
+        // Verify that none are actually equal as is
+        expect( S1.equals( S2 ) ).to.equal( false )
+        expect( S1.equals( S3 ) ).to.equal( false )
+        expect( S2.equals( S1 ) ).to.equal( false )
+        expect( S2.equals( S3 ) ).to.equal( false )
+        expect( S3.equals( S1 ) ).to.equal( false )
+        expect( S3.equals( S2 ) ).to.equal( false )
+        // But if we ignore attribute b, then just S1 and S2 become equal
+        expect( S1.equals( S2, [ 'b' ] ) ).to.equal( true )
+        expect( S1.equals( S3, [ 'b' ] ) ).to.equal( false )
+        expect( S2.equals( S1, [ 'b' ] ) ).to.equal( true )
+        expect( S2.equals( S3, [ 'b' ] ) ).to.equal( false )
+        expect( S3.equals( S1, [ 'b' ] ) ).to.equal( false )
+        expect( S3.equals( S2, [ 'b' ] ) ).to.equal( false )
+        // But if we also ignore attribute c, then just all 3 become equal
+        expect( S1.equals( S2, [ 'b', 'c' ] ) ).to.equal( true )
+        expect( S1.equals( S3, [ 'b', 'c' ] ) ).to.equal( true )
+        expect( S2.equals( S1, [ 'b', 'c' ] ) ).to.equal( true )
+        expect( S2.equals( S3, [ 'b', 'c' ] ) ).to.equal( true )
+        expect( S3.equals( S1, [ 'b', 'c' ] ) ).to.equal( true )
+        expect( S3.equals( S2, [ 'b', 'c' ] ) ).to.equal( true )
+        // But ignoring just attribute a doesn't actually do anything
+        expect( S1.equals( S2, [ 'a' ] ) ).to.equal( false )
+        expect( S1.equals( S3, [ 'a' ] ) ).to.equal( false )
+        expect( S2.equals( S1, [ 'a' ] ) ).to.equal( false )
+        expect( S2.equals( S3, [ 'a' ] ) ).to.equal( false )
+        expect( S3.equals( S1, [ 'a' ] ) ).to.equal( false )
+        expect( S3.equals( S2, [ 'a' ] ) ).to.equal( false )
     } )
 
     it( 'Does a simple toString() representation as S-expressions', () => {
