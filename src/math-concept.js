@@ -1572,7 +1572,7 @@ export class MathConcept extends Superclass {
         if ( this._children.length != other._children.length ) return false
         // other must have the same children, structurally, recursively compared
         for ( let i = 0 ; i < this._children.length ; i++ )
-            if ( !this.child( i ).equals( other.child( i ) ) )
+            if ( !this.child( i ).equals( other.child( i ), attributesToIgnore ) )
                 return false
         // that is the complete set of requirements for equality
         return true
