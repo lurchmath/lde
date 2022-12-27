@@ -168,6 +168,10 @@ import { NewSymbolStream } from "./matching/new-symbol-stream.js"
 import {
     metavariable, containsAMetavariable, metavariablesIn, metavariableNamesIn
 } from "./matching/metavariables.js"
+import {
+    deBruijn, equal, encodeSymbol, encodeExpression, encodedIndices,
+    decodeSymbol, decodeExpression
+} from './matching/de-bruijn.js'
 import { Constraint } from "./matching/constraint.js"
 import { Substitution } from "./matching/substitution.js"
 import {
@@ -186,9 +190,10 @@ import {
 
 export default {
     NewSymbolStream,
-    Constraint, CaptureConstraint, CaptureConstraints,
     metavariable, containsAMetavariable, metavariablesIn, metavariableNamesIn,
-    Substitution,
+    deBruijn, equal, encodeSymbol, encodeExpression, encodedIndices,
+    decodeSymbol, decodeExpression,
+    Constraint, CaptureConstraint, CaptureConstraints, Substitution,
     newEF, isAnEF, arityOfEF, applyEF, constantEF, projectionEF, applicationEF,
     newEFA, isAnEFA, canBetaReduce, betaReduce, fullBetaReduce, alphaEquivalent,
     bodyOfEF, parametersOfEF,
