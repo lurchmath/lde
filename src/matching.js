@@ -180,7 +180,7 @@ import {
 import {
     newEF, isAnEF, arityOfEF, applyEF, constantEF, projectionEF, applicationEF,
     newEFA, isAnEFA, canBetaReduce, betaReduce, fullBetaReduce, alphaEquivalent,
-    bodyOfEF, parametersOfEF
+    bodyOfEF, parametersOfEF, expressionFunction, expressionFunctionApplication
 } from '../src/matching/expression-functions.js'
 import { Problem } from "./matching/problem.js"
 import { Solution } from "./matching/solution.js"
@@ -189,7 +189,7 @@ import {
 } from "./matching/multiple.js"
 
 export default {
-    NewSymbolStream,
+    NewSymbolStream, expressionFunction, expressionFunctionApplication,
     metavariable, containsAMetavariable, metavariablesIn, metavariableNamesIn,
     deBruijn, equal, encodeSymbol, encodeExpression, encodedIndices,
     decodeSymbol, decodeExpression,

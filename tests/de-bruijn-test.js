@@ -1,7 +1,6 @@
 
 import { Symbol as LurchSymbol } from '../src/symbol.js'
 import { Application } from '../src/application.js'
-import { Environment } from '../src/environment.js'
 import { Expression } from '../src/expression.js'
 import { BindingExpression } from '../src/binding-expression.js'
 import { LogicConcept } from '../src/logic-concept.js'
@@ -188,6 +187,93 @@ describe( 'de Bruijn indices', () => {
         expr1.child( 1 ).clearAttributes( 'x' )
         expect( expr1.equals( expr2 ) ).to.equal( false )
         expect( M.equal( expr1, expr2 ) ).to.equal( false )
+    } )
+
+    it( 'Supports encoding and decoding Constraints as well', () => {
+        // We just do one test here, because the Constraint class's de Bruijn
+        // functions just distribute, over the components in the Constraint, the
+        // functions we've already tested above.
+
+        // Make a constraint (∀ x , (@ P x)) ~ (∀ t , (>= (^ t 2) 0))
+        const original = new M.Constraint(
+            new Application(
+                new LurchSymbol( '∀' ),
+                new BindingExpression(
+                    new LurchSymbol( 'x' ),
+                    M.newEFA(
+                        new LurchSymbol( 'P' ).asA( M.metavariable ),
+                        new LurchSymbol( 'x' )
+                    )
+                )
+            ),
+            LogicConcept.fromPutdown( '(∀ t , (>= (^ t 2) 0))' )[0]
+        )
+
+        // Make a copy of it and de Bruijn-encode the copy
+        const copy = original.copy()
+        copy.deBruijnEncode()
+
+        // Verify that the copy contains no bindings
+        expect( copy.pattern.hasDescendantSatisfying(
+            d => d instanceof BindingExpression )
+        ).to.equal( false )
+        expect( copy.expression.hasDescendantSatisfying(
+            d => d instanceof BindingExpression )
+        ).to.equal( false )
+
+        // Spot check the encoding of the pattern and expression
+        // Pattern should be:
+        //     (∀ ("LDE DB" (@ P "['LDE DB',0,0]"))) plus some attributes,
+        //     plus the ∀ and P are also encoded (without indices),
+        //     but the @ ("LDE EFA") symbol is *NOT* encoded
+        // Expression should be:
+        //     (∀ ("LDE DB" (>= (^ "['LDE DB',0,0]" 2) 0))) plus the same
+        //     caveats/tweaks as described above (now for ∀, >=, ^, 2, and 0)
+        let test
+        test = copy.pattern
+        expect( test.child( 0 ) ).to.be.instanceOf( LurchSymbol )
+        expect( M.decodeSymbol( test.child( 0 ) ).equals(
+            new LurchSymbol( '∀' )
+        ) ).to.equal( true )
+        expect( test.child( 1, 0 ) ).to.be.instanceOf( LurchSymbol )
+        expect( test.child( 1, 0 ).text() ).to.equal( M.deBruijn )
+        expect( M.isAnEFA( test.child( 1, 1 ) ) ).to.equal( true )
+        expect( test.child( 1, 1, 1 ) ).to.be.instanceof( LurchSymbol )
+        expect( M.decodeSymbol( test.child( 1, 1, 1 ) ).equals(
+            new LurchSymbol( 'P' ).asA( M.metavariable )
+        ) ).to.equal( true )
+        expect( test.child( 1, 1, 2 ) ).to.be.instanceOf( LurchSymbol )
+        expect( M.encodedIndices( test.child( 1, 1, 2 ) ) ).to.eql( [ 0, 0 ] )
+        test = copy.expression
+        expect( test.child( 0 ) ).to.be.instanceOf( LurchSymbol )
+        expect( M.decodeSymbol( test.child( 0 ) ).equals(
+            new LurchSymbol( '∀' )
+        ) ).to.equal( true )
+        expect( test.child( 1, 0 ) ).to.be.instanceOf( LurchSymbol )
+        expect( test.child( 1, 0 ).text() ).to.equal( M.deBruijn )
+        expect( test.child( 1, 1, 0 ) ).to.be.instanceof( LurchSymbol )
+        expect( M.decodeSymbol( test.child( 1, 1, 0 ) ).equals(
+            new LurchSymbol( '>=' )
+        ) ).to.equal( true )
+        expect( test.child( 1, 1, 1, 0 ) ).to.be.instanceof( LurchSymbol )
+        expect( M.decodeSymbol( test.child( 1, 1, 1, 0 ) ).equals(
+            new LurchSymbol( '^' )
+        ) ).to.equal( true )
+        expect( test.child( 1, 1, 1, 1 ) ).to.be.instanceof( LurchSymbol )
+        expect( M.encodedIndices( test.child( 1, 1, 1, 1 ) ) ).to.eql( [ 0, 0 ] )
+        expect( test.child( 1, 1, 1, 2 ) ).to.be.instanceof( LurchSymbol )
+        expect( M.decodeSymbol( test.child( 1, 1, 1, 2 ) ).equals(
+            new LurchSymbol( '2' )
+        ) ).to.equal( true )
+        expect( test.child( 1, 1, 2 ) ).to.be.instanceof( LurchSymbol )
+        expect( M.decodeSymbol( test.child( 1, 1, 2 ) ).equals(
+            new LurchSymbol( '0' )
+        ) ).to.equal( true )
+
+        // Decode the copy and ensure it's back to its original state
+        expect( copy.equals( original ) ).to.equal( false )
+        copy.deBruijnDecode()
+        expect( copy.equals( original ) ).to.equal( true )
     } )
 
 } )

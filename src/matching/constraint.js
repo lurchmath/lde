@@ -4,7 +4,10 @@ import { Application } from '../application.js'
 import { BindingExpression } from '../binding-expression.js'
 import { LogicConcept } from '../logic-concept.js'
 import { metavariable, containsAMetavariable } from './metavariables.js'
-import { isAnEFA } from './expression-functions.js'
+import {
+    isAnEFA, expressionFunction, expressionFunctionApplication
+} from './expression-functions.js'
+import { encodeExpression, decodeExpression } from './de-bruijn.js'
 
 /**
  * A Constraint is a pattern-expression pair often written $(p,e)$ and used to
@@ -185,6 +188,60 @@ export class Constraint {
         }
         this._pattern = withoutBindings( this._pattern )
         this._expression = withoutBindings( this._expression )
+    }
+
+    /**
+     * Apply the {@link module:deBruijn.encodeExpression de Bruijn encoding} to
+     * the pattern and the expression in this Constraint, in place.
+     * 
+     * This function should be applied only once to any given Constraint,
+     * because even though it is possible to do it more than once, one should
+     * think of the set of ordinary {@link MathConcept MathConcepts} as distinct
+     * from the set of de Bruijn-encoded ones, and this function maps the former
+     * set to the latter, but does not map the latter anywhere.
+     * 
+     * @see {@link Constraint#deBruijnDecode deBruijnDecode()}
+     */
+    deBruijnEncode () {
+        // Do the usual encoding
+        this._pattern = encodeExpression( this._pattern )
+        this._expression = encodeExpression( this._expression )
+        // But it also encoded our EFs and EFAs, which we do not want, so
+        // reverse that process now
+        const encodedEF = encodeExpression( expressionFunction )
+        const encodedEFA = encodeExpression( expressionFunctionApplication )
+        this._pattern.descendantsSatisfying( d => d.equals( encodedEF ) )
+            .forEach( d => d.replaceWith( expressionFunction.copy() ) )
+        this._pattern.descendantsSatisfying( d => d.equals( encodedEFA ) )
+            .forEach( d => d.replaceWith( expressionFunctionApplication.copy() ) )
+    }
+    
+    /**
+     * Apply the {@link module:deBruijn.decodeExpression de Bruijn decoding} to
+     * the pattern and the expression in this Constraint, in place.
+     * 
+     * This function should be applied only to a Constraint that has been de
+     * Bruijn encoded first, because even though it is possible to call this
+     * function on any Consraint, one should think of the set of ordinary
+     * {@link MathConcept MathConcepts} as distinct from the set of de
+     * Bruijn-encoded ones, and this function maps the latter set to the former,
+     * but does not map the former anywhere.
+     * 
+     * @see {@link Constraint#deBruijnEncode deBruijnEncode()}
+     */
+    deBruijnDecode () {
+        // Recall that deBruijnEncode() altered EF and EFA symbols after the
+        // usual de Bruijn encoding was applied.  We must reverse that now, so
+        // that the decoding process will not reject those symbols.
+        const encodedEF = encodeExpression( expressionFunction )
+        const encodedEFA = encodeExpression( expressionFunctionApplication )
+        this._pattern.descendantsSatisfying( d => d.equals( expressionFunction ) )
+            .forEach( d => d.replaceWith( encodedEF.copy() ) )
+        this._pattern.descendantsSatisfying( d => d.equals( expressionFunctionApplication ) )
+            .forEach( d => d.replaceWith( encodedEFA.copy() ) )
+        // Now do the usual decoding
+        this._pattern = decodeExpression( this._pattern )
+        this._expression = decodeExpression( this._expression )
     }
 
     /**
