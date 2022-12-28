@@ -340,3 +340,18 @@ export const decodeExpression = expression => {
 export const equal = ( expression1, expression2 ) =>
     expression1.equals( expression2, [ deBruijn ] )
 
+// TO DO:
+//
+// Don't let any constraints contain bound metavariables, because that's no
+// longer needed, now that we support alpha equivalence natively.  This also
+// means that you can remove all the convertAllBoundVarsToMetavars() calls, and
+// that function itself.
+//
+// Where we currently have removeBindings() and restoreBindings(), instead do
+// encoding of expressions into de Bruijn form, and decoding therefrom.
+//
+// When checking the trivial (e,e) constraint, use the equality function defined
+// above.
+//
+// Completely eliminate the idea of capture constraints and the checking
+// thereof.
