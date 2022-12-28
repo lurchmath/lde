@@ -91,7 +91,7 @@ export const expressionFunction = new LurchSymbol( 'LDE lambda' )
  * For example, if `x` and `y` are {@link Symbol Symbol} instances with the
  * names "x" and "y" and `B` is an Application, such as `(+ x y)`, then
  * `newEF(x,y,B)` will be the {@link Expression Expression}
- * `("LDE lambda" (x y , (+ x y)))`.
+ * `("LDE lambda" (x y) , (+ x y))`.
  * 
  * @param  {...Expression} args a list of {@link Expression Expressions} to use
  *   in forming the expression function, which must begin with one or more
