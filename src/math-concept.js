@@ -8,8 +8,8 @@ import { SourceMap  } from './source-map.js'
 // for all other clients is to allow it.  Note that we have to test if global is 
 // undeclared first, for when this module is being imported in a browser.
 //
-let Superclass = (!(typeof global==='undefined') && global.disableEventTarget) ? 
-                  class { emit(){} } : EventTarget
+let Superclass = typeof global !== 'undefined' && global.disableEventTarget ? 
+                 class { emit () { } } : EventTarget
 
 /**
  * The MathConcept class, an n-ary tree of MathConcept instances, using functions
