@@ -395,6 +395,11 @@ export class Problem {
                 .asA( metavariable ) )
         return alphaRenamed( copy, newBoundVars )
     }
+    deBruijnEncode () {
+        this.constraints = this.constraints.map(
+            constraint => constraint.copy() )
+        this.constraints.forEach( constraint => constraint.deBruijnEncode() )
+    } //
 
     // for internal use only, by *solutions()
     *allSolutions ( soFar ) {

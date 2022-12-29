@@ -8,6 +8,7 @@ import { Problem } from "./problem.js"
 import { CaptureConstraints } from "./capture-constraint.js"
 import { fullBetaReduce, alphaEquivalent, isAnEFA, bodyOfEF, parametersOfEF }
     from './expression-functions.js'
+import { equal as deBruijnEquals } from './de-bruijn.js'
 
 /**
  * A Solution is a set of {@link Substitution Substitutions}, together with
@@ -469,6 +470,13 @@ export class Solution {
         d.sort()
         return `{${d.map(x=>this._substitutions[x].toString()).join(',')}}/cc`
              + this._captureConstraints.toString()
+    }
+
+    // for internal use only, by *solutions() member of "friend" class Problem
+    deBruijnDecode () {
+        for ( let metavariable in this._substitutions )
+            if ( this._substitutions.hasOwnProperty( metavariable ) )
+                this._substitutions[metavariable].deBruijnDecode()
     }
 
 }

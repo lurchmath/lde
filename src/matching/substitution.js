@@ -4,6 +4,7 @@ import { Symbol as LurchSymbol } from '../symbol.js'
 import { LogicConcept } from '../logic-concept.js'
 import { Expression } from '../expression.js'
 import { Constraint } from './constraint.js'
+import { encodeExpression, decodeExpression } from './de-bruijn.js'
 
 /**
  * A substitution is a metavariable-expression pair $(m,e)$ that can be used for
@@ -256,6 +257,30 @@ export class Substitution {
         const result = this.copy()
         result.substitute( ...subs )
         return result
+    }
+
+    /**
+     * Apply the {@link module:deBruijn.encodeExpression de Bruijn encoding} to
+     * the expression in this Substitution, in place.  This function is
+     * analogous to {@link Constraint#deBruijnEncode the Constraint class's
+     * deBruijnEncode() function}; see there for more details.
+     * 
+     * @see {@link Substitution#deBruijnDecode deBruijnDecode()}
+     */
+    deBruijnEncode () {
+        this._expression = encodeExpression( this._expression )
+    }
+    
+    /**
+     * Apply the {@link module:deBruijn.decodeExpression de Bruijn decoding} to
+     * the expression in this Substitution, in place.  This function is
+     * analogous to {@link Constraint#deBruijnDecode the Constraint class's
+     * deBruijnDecode() function}; see there for more details.
+     * 
+     * @see {@link Substitution#deBruijnEncode deBruijnEncode()}
+     */
+    deBruijnDecode () {
+        this._expression = decodeExpression( this._expression )
     }
 
     /**
