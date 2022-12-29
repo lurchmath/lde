@@ -298,6 +298,11 @@ export class Constraint {
      */
     toString () {
         return `(${this.pattern.toPutdown()},${this.expression.toPutdown()})`
+            .replace( / \+\{"LDE DB":[^\n]+\}\n/g, '' )
+            .replace( /"\[\\"LDE DB\\"\,\\"(.*?)\\"\]"/g, '.$1' )
+            .replace( /"\[\\"LDE DB\\"\,(.*?)\]"/g, '($1)' )
+            .replace( /"LDE DB"/g, 'DB' )
+            .replace( /\n      /g, '' )
             .replace( / \+\{"_type_LDE MV":true\}\n/g, '__' )
             .replace( /"LDE EFA"/g, '@' )
             .replace( /"LDE lambda"/g, '𝝺' )

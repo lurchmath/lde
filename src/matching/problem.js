@@ -294,7 +294,11 @@ export class Problem {
      * @see {@link Constraint#toString toString() for individual Constraints}
      */
     toString () {
-        return `{${this.constraints.map(x=>x.toString()).join(',')}}`
+        return '{\n\t'
+             + this.constraints.map(
+                   x => `${x.complexity()}  ${x.toString()}`
+               ).join('\n\t')
+             + '\n}'
     }
 
     // For internal use.  Applies beta reduction to all the patterns in all the
@@ -357,8 +361,7 @@ export class Problem {
     *allSolutions ( soFar ) {
 
         const dbg = ( ...args ) => { if ( this._debug ) console.log( ...args ) }
-        dbg( `solve ${this} / ${this.constraints.map(x=>x.complexity())}` )
-        dbg( `\tw/soFar = ${soFar}` )
+        dbg( `solve ${this} w/soFar = ${soFar}` )
 
         // We need our own personal symbol stream that will avoid all symbols in
         // this matching problem.  If we don't have one yet, create one.

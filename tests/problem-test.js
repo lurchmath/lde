@@ -1224,6 +1224,11 @@ describe( 'Problem', function () {
           + `\t    ${constraint.expression.toPutdown()} )`
           + ( index == P.constraints.length - 1 ? ' }' : ',' )
         ).join( '\n' )
+        .replace( / \+\{"LDE DB":[^\n]+\}\n/g, '' )
+        .replace( /"\[\\"LDE DB\\"\,\\"(.*?)\\"\]"/g, '.$1' )
+        .replace( /"\[\\"LDE DB\\"\,(.*?)\]"/g, '($1)' )
+        .replace( /"LDE DB"/g, 'DB' )
+        .replace( /\n      /g, '' )
         .replace( / \+\{"_type_LDE MV":true\}\n/g, '__' )
         .replace( /"LDE EFA"/g, '@' )
         .replace( /"LDE lambda"/g, '𝝺' )
