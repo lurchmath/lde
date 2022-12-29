@@ -244,8 +244,6 @@ export class Problem {
      * @see {@link Problem#afterSubstituting afterSubstituting()}
      */
     substitute ( ...subs ) {
-        // save the capture constraints for processing later
-        const savedCache = this._captureConstraints
         // flatten arrays of substitutions into the main list
         subs = subs.flat()
         // figure out which constraints in this object actually need processing
@@ -265,12 +263,6 @@ export class Problem {
             for ( let i = 0 ; i < patternsWrapper.numChildren() ; i++ )
                 this.add( new Constraint( patternsWrapper.child( i ),
                                           toReplace[i].expression ) )
-        }
-        // now restore and process the capture constraints
-        if ( savedCache ) {
-            savedCache.constraints.forEach( cc =>
-                subs.forEach( sub => sub.applyTo( cc ) ) )
-            this._captureConstraints = savedCache
         }
     }
 
@@ -333,31 +325,11 @@ export class Problem {
      */
     *solutions () {
         const solutionsSeen = [ ]
-        // Turn every bound variable into a metavariable, to simulate support
-        // for alpha-equivalence during matching.  We will use a proxy Problem
-        // object for this, so that our own set of metavariables (and thus
-        // expected Solution domain) does not get altered.
-        const stream = new NewSymbolStream(
-            ...this.constraints.map( constraint => constraint.pattern ),
-            ...this.constraints.map( constraint => constraint.expression )
-        )
-        const proxy = new Problem()
-        if ( this._debug ) proxy._debug = this._debug
-        this.constraints.forEach( constraint => proxy.add( new Constraint(
-            this.convertAllBoundVarsToMetavars( constraint.pattern, stream ),
-            constraint.expression ) ) )
-        // Now compute the set of all solutions to this Problem, using the
-        // *allSolutions() method of the proxy, but the metavariables list of
-        // the original problem.
-        const start = new Solution( proxy )
-        start._metavariables = this.constraints.map(
-            constraint => metavariableNamesIn( constraint.pattern )
-        ).reduce( ( A, B ) => new Set( [ ...A, ...B ] ), new Set() )
-        proxy.constraints.forEach( constraint => constraint.removeBindings() )
-        for ( let solution of proxy.allSolutions( start ) ) {
+        const proxy = this.copy()
+        proxy.deBruijnEncode()
+        for ( let solution of proxy.allSolutions( new Solution( proxy ) ) ) {
             // Is this really a solution?  Only if no capture would occur...
-            solution.restoreBindings()
-            if ( solution.betaWouldCapture() ) continue
+            solution.deBruijnDecode()
             // When we find a solution, though, yield it iff we have not seen it
             // before (nor any other solution to which it's alpha-equivalent):
             if ( !solutionsSeen.some( old => old.equals( solution ) ) ) {
@@ -375,26 +347,6 @@ export class Problem {
     }
 
     // for internal use only, by *solutions()
-    convertAllBoundVarsToMetavars ( pattern, stream ) {
-        // base case
-        if ( pattern.isAtomic() ) return pattern.copy()
-        // recursive case 1: application
-        if ( pattern instanceof Application )
-            return new Application(
-                ...pattern.children().map( child =>
-                    this.convertAllBoundVarsToMetavars( child, stream ) ) )
-        // recursive case 2: binding
-        if ( !( pattern instanceof BindingExpression ) )
-            throw new Error( `Invalid pattern: ${pattern}` )
-        const copy = pattern.copy()
-        copy.body().replaceWith( this.convertAllBoundVarsToMetavars(
-            copy.body(), stream ) )
-        const newBoundVars = copy.boundSymbols().map( old =>
-            old.isA( metavariable ) ? old :
-            new LurchSymbol( `${old.text()}_${stream.next().text()}` )
-                .asA( metavariable ) )
-        return alphaRenamed( copy, newBoundVars )
-    }
     deBruijnEncode () {
         this.constraints = this.constraints.map(
             constraint => constraint.copy() )

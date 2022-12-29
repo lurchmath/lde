@@ -143,15 +143,8 @@
  * solution to the matching problem inherent in that attempted inference.
  * 
  * To ensure that our matching algorithm does not introduce variable capture,
- * we compute, for any matching problem posed, the set of *variable capture
- * constraints* inherent in the problem.  Each such constraint records the
- * fact that a certain metavariable cannot be replaced by an expression that
- * contains a certain other variable free.  Our algorithm, as it executes,
- * will discard solutions that violate any such constraints.  We represent
- * them using instances of the
- * {@link CaptureConstraint CaptureConstraint class}, and we collect sets of
- * such constraints in instances of the
- * {@link CaptureConstraints CaptureConstraints (plural) class}.
+ * we use {@link module:deBruijn de Bruijn indices} to represent patterns and
+ * expressions internally during the matching process.
  * 
  * Recall the example above, in which an expression function $Q$ was assigned
  * the value $t\mapsto 3t+e^t$.  This dummy variable $t$ was chosen because it
@@ -175,9 +168,6 @@ import {
 import { Constraint } from "./matching/constraint.js"
 import { Substitution } from "./matching/substitution.js"
 import {
-    CaptureConstraint, CaptureConstraints
-} from "./matching/capture-constraint.js"
-import {
     newEF, isAnEF, arityOfEF, applyEF, constantEF, projectionEF, applicationEF,
     newEFA, isAnEFA, canBetaReduce, betaReduce, fullBetaReduce, alphaEquivalent,
     bodyOfEF, parametersOfEF, expressionFunction, expressionFunctionApplication
@@ -193,7 +183,7 @@ export default {
     metavariable, containsAMetavariable, metavariablesIn, metavariableNamesIn,
     deBruijn, equal, encodeSymbol, encodeExpression, encodedIndices,
     decodeSymbol, decodeExpression,
-    Constraint, CaptureConstraint, CaptureConstraints, Substitution,
+    Constraint, Substitution,
     newEF, isAnEF, arityOfEF, applyEF, constantEF, projectionEF, applicationEF,
     newEFA, isAnEFA, canBetaReduce, betaReduce, fullBetaReduce, alphaEquivalent,
     bodyOfEF, parametersOfEF,

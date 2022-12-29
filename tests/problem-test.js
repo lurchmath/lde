@@ -907,9 +907,9 @@ describe( 'Problem', function () {
     it( 'Should support substitution in-place', () => {
         // Let us adopt the convention in the following comments that capital
         // letters stand for metavariables, and lower-case ones do not.
-        // problem: { (M,foo), ((a b),(c d)), ((x Y , Z),7) }
-        // substitutions: (M,was_m), (Y,was_Y), (Z,was_Z)
-        // result: { (was_M,foo), ((a b),(c d)), ((x was_Y , was_Z),7) }
+        // problem: { (M,foo), ((a b),(c d)), ((x y , Z),7) }
+        // substitutions: (M,was_m), (Z,was_Z)
+        // result: { (was_M,foo), ((a b),(c d)), ((x y , was_Z),7) }
         let P, C1, C2, C3, S1, S2, S3
         C1 = new M.Constraint(
             new LurchSymbol( 'M' ).asA( M.metavariable ),
@@ -923,7 +923,7 @@ describe( 'Problem', function () {
             new Application(
                 new LurchSymbol( 'x' ),
                 new BindingExpression(
-                    new LurchSymbol( 'Y' ).asA( M.metavariable ),
+                    new LurchSymbol( 'y' ),
                     new LurchSymbol( 'Z' ).asA( M.metavariable )
                 )
             ),
@@ -935,26 +935,22 @@ describe( 'Problem', function () {
             new LurchSymbol( 'was_M' )
         )
         S2 = new M.Substitution(
-            new LurchSymbol( 'Y' ).asA( M.metavariable ),
-            new LurchSymbol( 'was_Y' )
-        )
-        S3 = new M.Substitution(
             new LurchSymbol( 'Z' ).asA( M.metavariable ),
             new LurchSymbol( 'was_Z' )
         )
-        expect( () => P.substitute( S1, S2, S3 ) ).not.to.throw()
+        expect( () => P.substitute( S1, S2 ) ).not.to.throw()
         expect( P.length ).to.equal( 3 )
         expect( P.constraints.some( c =>
             c.pattern.equals( S1.expression )
          && c.expression.equals( C1.expression ) ) ).to.equal( true )
         expect( P.constraints.some( c => c.equals( C2 ) ) ).to.equal( true )
         expect( P.constraints.some( c =>
-            c.pattern.equals( LogicConcept.fromPutdown( '(x was_Y , was_Z)' )[0] )
+            c.pattern.equals( LogicConcept.fromPutdown( '(x y , was_Z)' )[0] )
          && c.expression.equals( new LurchSymbol( 7 ) ) ) ).to.equal( true )
         // now repeat the same test, but call substitute() on an array of
         // substitutions rather than on 3 substitutions separately
         P = new M.Problem( C1, C2, C3 )
-        expect( () => P.substitute( [ S1, S2, S3 ] ) ).not.to.throw()
+        expect( () => P.substitute( [ S1, S2 ] ) ).not.to.throw()
         expect( P.length ).to.equal( 3 )
         expect( P.constraints.some( c =>
             c.pattern.equals( S1.expression )
@@ -962,7 +958,7 @@ describe( 'Problem', function () {
         expect( P.constraints.some( c => c.equals( C2 ) ) ).to.equal( true )
         expect( P.constraints.some( c =>
             c.pattern.equals(
-                LogicConcept.fromPutdown( '(x was_Y , was_Z)' )[0] )
+                LogicConcept.fromPutdown( '(x y , was_Z)' )[0] )
          && c.expression.equals( new LurchSymbol( 7 ) ) ) ).to.equal( true )
     } )
 
@@ -983,7 +979,7 @@ describe( 'Problem', function () {
             new Application(
                 new LurchSymbol( 'x' ),
                 new BindingExpression(
-                    new LurchSymbol( 'Y' ).asA( M.metavariable ),
+                    new LurchSymbol( 'y' ),
                     new LurchSymbol( 'Z' ).asA( M.metavariable )
                 )
             ),
@@ -995,14 +991,10 @@ describe( 'Problem', function () {
             new LurchSymbol( 'was_M' )
         )
         S2 = new M.Substitution(
-            new LurchSymbol( 'Y' ).asA( M.metavariable ),
-            new LurchSymbol( 'was_Y' )
-        )
-        S3 = new M.Substitution(
             new LurchSymbol( 'Z' ).asA( M.metavariable ),
             new LurchSymbol( 'was_Z' )
         )
-        expect( () => newP = P.afterSubstituting( S1, S2, S3 ) ).not.to.throw()
+        expect( () => newP = P.afterSubstituting( S1, S2 ) ).not.to.throw()
         // ensure that P is just as it was before
         expect( P.length ).to.equal( 3 )
         expect( P.constraints.some( c => c.equals( C1 ) ) ).to.equal( true )
@@ -1019,12 +1011,12 @@ describe( 'Problem', function () {
         expect( newP.constraints.some( c => c.equals( C2 ) ) ).to.equal( true )
         expect( newP.constraints.some( c =>
             c.pattern.equals(
-                LogicConcept.fromPutdown( '(x was_Y , was_Z)' )[0] )
+                LogicConcept.fromPutdown( '(x y , was_Z)' )[0] )
          && c.expression.equals( new LurchSymbol( 7 ) ) ) ).to.equal( true )
         // now repeat the same test, but call afterSubstituting() on an array of
         // substitutions rather than on 3 substitutions separately
         P = new M.Problem( C1, C2, C3 )
-        expect( () => newP = P.afterSubstituting( [ S1, S2, S3 ] ) )
+        expect( () => newP = P.afterSubstituting( [ S1, S2 ] ) )
             .not.to.throw()
         // ensure that P is just as it was before
         expect( P.length ).to.equal( 3 )
@@ -1042,7 +1034,7 @@ describe( 'Problem', function () {
         expect( newP.constraints.some( c => c.equals( C2 ) ) ).to.equal( true )
         expect( newP.constraints.some( c =>
             c.pattern.equals(
-                LogicConcept.fromPutdown( '(x was_Y , was_Z)' )[0] )
+                LogicConcept.fromPutdown( '(x y , was_Z)' )[0] )
          && c.expression.equals( new LurchSymbol( 7 ) ) ) ).to.equal( true )
     } )
 

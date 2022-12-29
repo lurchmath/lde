@@ -23,9 +23,7 @@ describe( 'Solution', () => {
         expect( () => S = new M.Solution( P1, true ) ).not.to.throw()
         expect( S._problem ).to.equal( P1 )
         expect( JSON.equals( S._substitutions, {} ) ).to.equal( true )
-        expect( S.hasOwnProperty( '_captureConstraints' ) ).to.equal( false )
         expect( S.hasOwnProperty( '_metavariables' ) ).to.equal( false )
-        expect( S.hasOwnProperty( '_bound' ) ).to.equal( false )
         const P2 = new M.Problem( new M.Constraint(
             LogicConcept.fromPutdown( '(= (+ 1 1) 2)' )[0],
             LogicConcept.fromPutdown( '(= (+ 1 1) 2)' )[0]
@@ -33,16 +31,12 @@ describe( 'Solution', () => {
         expect( () => S = new M.Solution( P2, true ) ).not.to.throw()
         expect( S._problem ).to.equal( P2 )
         expect( JSON.equals( S._substitutions, {} ) ).to.equal( true )
-        expect( S.hasOwnProperty( '_captureConstraints' ) ).to.equal( false )
         expect( S.hasOwnProperty( '_metavariables' ) ).to.equal( false )
-        expect( S.hasOwnProperty( '_bound' ) ).to.equal( false )
     } )
 
     it( 'Should correctly construct Solutions from Problems', () => {
         // Construct a problem containing two Constraints
         const pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
-        pat1.child( 1, 0 ).makeIntoA( M.metavariable ) // outer x
-        pat1.child( 1, 1, 1, 1, 1, 1 ).makeIntoA( M.metavariable ) // inner x
         const pat2 = new LurchSymbol( 'foo' ).asA( M.metavariable )
         const C1 = new M.Constraint(
             pat1,
@@ -59,76 +53,26 @@ describe( 'Solution', () => {
         expect( () => S = new M.Solution( P ) ).not.to.throw()
         expect( S._problem ).to.equal( P )
         expect( JSON.equals( S._substitutions, {} ) ).to.equal( true )
-        // Now ensure that it computed the correct set of capture constraints
-        expect( S._captureConstraints )
-            .to.be.instanceof( M.CaptureConstraints )
-        expect( S._captureConstraints.empty() ).to.equal( false )
-        expect( S._captureConstraints.constraints.length ).to.equal( 5 )
-        expect( S._captureConstraints.constraints[0].equals(
-            new M.CaptureConstraint(
-                new LurchSymbol( 'x' ).asA( M.metavariable ),
-                new LurchSymbol( '∃' )
-            )
-        ) ).to.equal( true )
-        expect( S._captureConstraints.constraints[1].equals(
-            new M.CaptureConstraint(
-                new LurchSymbol( 'x' ).asA( M.metavariable ),
-                new LurchSymbol( '=' )
-            )
-        ) ).to.equal( true )
-        expect( S._captureConstraints.constraints[2].equals(
-            new M.CaptureConstraint(
-                new LurchSymbol( 'x' ).asA( M.metavariable ),
-                new LurchSymbol( '+' )
-            )
-        ) ).to.equal( true )
-        expect( S._captureConstraints.constraints[3].equals(
-            new M.CaptureConstraint(
-                new LurchSymbol( 'y' ),
-                new LurchSymbol( 'x' ).asA( M.metavariable )
-            )
-        ) ).to.equal( true )
-        expect( S._captureConstraints.constraints[4].equals(
-            new M.CaptureConstraint(
-                new LurchSymbol( 'x' ).asA( M.metavariable ),
-                new LurchSymbol( '1' )
-            )
-        ) ).to.equal( true )
         // Now ensure that it computed the correct set of metavariables
         expect( S._metavariables ).to.be.instanceof( Set )
-        expect( S._metavariables.size ).to.equal( 2 )
-        expect( S._metavariables.has( 'x' ) ).to.equal( true )
+        expect( S._metavariables.size ).to.equal( 1 )
         expect( S._metavariables.has( 'foo' ) ).to.equal( true )
-        // Now ensure that it computed the correct set of bound metavariables
-        expect( S._bound ).to.be.instanceof( Set )
-        expect( S._bound.size ).to.equal( 1 )
-        expect( S._bound.has( 'x' ) ).to.equal( true )
 
-        // Now do the degenerate case--an empty problem has no capture
-        // constraints, but still caches that value
+        // Now do the degenerate case--an empty problem
         const emptyP = new M.Problem()
         // Create a solution for this problem and ensure that it worked
         expect( () => S = new M.Solution( emptyP ) ).not.to.throw()
         expect( S._problem ).to.equal( emptyP )
         expect( JSON.equals( S._substitutions, {} ) ).to.equal( true )
-        // Now ensure that it computed the correct set of capture constraints
-        expect( S._captureConstraints )
-            .to.be.instanceof( M.CaptureConstraints )
-        expect( S._captureConstraints.empty() ).to.equal( true )
         // Now ensure that it computed the correct set of metavariables
         expect( S._metavariables ).to.be.instanceof( Set )
         expect( S._metavariables.size ).to.equal( 0 )
-        // Now ensure that it computed the correct set of metavariables
-        expect( S._bound ).to.be.instanceof( Set )
-        expect( S._bound.size ).to.equal( 0 )
     } )
 
     it( 'Should make partially-deep copies', () => {
         // Construct a problem containing the same two Constraints as in the
         // previous test, and then a solution from it, as before.
         const pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
-        pat1.child( 1, 0 ).makeIntoA( M.metavariable ) // outer x
-        pat1.child( 1, 1, 1, 1, 1, 1 ).makeIntoA( M.metavariable ) // inner x
         const pat2 = new LurchSymbol( 'foo' ).asA( M.metavariable )
         const C1 = new M.Constraint(
             pat1,
@@ -147,27 +91,6 @@ describe( 'Solution', () => {
         expect( S1._problem ).equals( S2._problem )
         // Do they have the same metavariable set?  They should.
         expect( S1._metavariables ).equals( S2._metavariables )
-        // Do they have the same bound metavariable set?  They should.
-        expect( S1._bound ).equals( S2._bound )
-        // Do they have the same capture constraint set?  It should be the
-        // same set contents, but a different set instance.
-        expect( S1._captureConstraints )
-            .to.be.instanceof( M.CaptureConstraints )
-        expect( S2._captureConstraints )
-            .to.be.instanceof( M.CaptureConstraints )
-        expect( S1._captureConstraints ).not.equals( S2._captureConstraints )
-        expect( S1._captureConstraints.constraints.length ).equals( 5 )
-        expect( S2._captureConstraints.constraints.length ).equals( 5 )
-        expect( S1._captureConstraints.constraints[0].equals(
-            S2._captureConstraints.constraints[0] ) ).to.equal( true )
-        expect( S1._captureConstraints.constraints[1].equals(
-            S2._captureConstraints.constraints[1] ) ).to.equal( true )
-        expect( S1._captureConstraints.constraints[2].equals(
-            S2._captureConstraints.constraints[2] ) ).to.equal( true )
-        expect( S1._captureConstraints.constraints[3].equals(
-            S2._captureConstraints.constraints[3] ) ).to.equal( true )
-        expect( S1._captureConstraints.constraints[4].equals(
-            S2._captureConstraints.constraints[4] ) ).to.equal( true )
         // Do they have the same substitutions?  In this case, they should
         // both be empty, but we will consider a case below that's nonempty.
         expect( S1.domain().size ).equals( 0 )
@@ -189,14 +112,6 @@ describe( 'Solution', () => {
         expect( () => S2 = S1.copy() ).not.to.throw()
         expect( S1._problem ).equals( S2._problem )
         expect( S1._metavariables ).equals( S2._metavariables )
-        expect( S1._bound ).equals( S2._bound )
-        expect( S1._captureConstraints )
-            .to.be.instanceof( M.CaptureConstraints )
-        expect( S2._captureConstraints )
-            .to.be.instanceof( M.CaptureConstraints )
-        expect( S1._captureConstraints ).not.equals( S2._captureConstraints )
-        expect( S1._captureConstraints.empty() ).to.equal( true )
-        expect( S2._captureConstraints.empty() ).to.equal( true )
         expect( S1.domain().size ).equals( 2 )
         expect( S2.domain().size ).equals( 2 )
         expect( S2.domain().has( 'one' ) ).equals( true )
@@ -280,8 +195,6 @@ describe( 'Solution', () => {
         // Construct a problem containing the same two Constraints as in the
         // previous test, and then a solution from it, as before.
         const pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
-        pat1.child( 1, 0 ).makeIntoA( M.metavariable ) // outer x
-        pat1.child( 1, 1, 1, 1, 1, 1 ).makeIntoA( M.metavariable ) // inner x
         const pat2 = new LurchSymbol( 'foo' ).asA( M.metavariable )
         const C1 = new M.Constraint(
             pat1,
@@ -293,8 +206,8 @@ describe( 'Solution', () => {
         )
         const P = new M.Problem( C1, C2 )
         const S = new M.Solution( P )
-        // Try to add a Substitution that violates rule #1: the metavariable is
-        // already mapped to something else.
+        // Try to add a Substitution in which the metavariable is already mapped
+        // to something else.
         S._substitutions['foo'] = new M.Substitution(
             new LurchSymbol( 'foo' ).asA( M.metavariable ),
             new LurchSymbol( 'bar' )
@@ -305,21 +218,7 @@ describe( 'Solution', () => {
         )
         expect( () => S.add( sub ) ).to.throw( /Function condition failed/ )
         delete S._substitutions['foo'] // cleanup
-        // Try to add a Substitution that violates rule #2: replacing a bound
-        // metavariable with a non-variable.
-        sub = new M.Substitution(
-            new LurchSymbol( 'x' ).asA( M.metavariable ),
-            LogicConcept.fromPutdown( '(not atomic)' )[0]
-        )
-        expect( () => S.add( sub ) ).to.throw( /Cannot set .* to a non-symbol/ )
-        // Try to add a Substitution that violates rule #3: violating variable
-        // capture constraints
-        sub = new M.Substitution(
-            new LurchSymbol( 'x' ).asA( M.metavariable ),
-            LogicConcept.fromPutdown( 'y' )[0]
-        )
-        expect( () => S.add( sub ) ).to.throw( /would violate capture constraints/ )
-        // Try to add Substitutions that violate none of the 3 rules.
+        // Try to add Substitutions that do not violate the above rule.
         expect( () => S.plus( new M.Substitution(
             new LurchSymbol( 'x' ).asA( M.metavariable ),
             LogicConcept.fromPutdown( 'this_should_work' )[0]
@@ -335,8 +234,6 @@ describe( 'Solution', () => {
         // Construct a problem containing the same two Constraints as in the
         // previous test, and then a solution from it, as before.
         const pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
-        pat1.child( 1, 0 ).makeIntoA( M.metavariable ) // outer x
-        pat1.child( 1, 1, 1, 1, 1, 1 ).makeIntoA( M.metavariable ) // inner x
         const pat2 = new LurchSymbol( 'foo' ).asA( M.metavariable )
         const C1 = new M.Constraint(
             pat1,
@@ -351,44 +248,12 @@ describe( 'Solution', () => {
         // Verify initial state:
         //  - The domain is the empty set
         //  - Looking up any metavariable yields undefined
-        //  - Capture constraints are the 5 we tested earlier
         //  - Solution is neither satisfied nor complete
         expect( S.domain() ).to.be.instanceOf( Set )
         expect( S.domain().size ).to.equal( 0 )
         expect( S.get( 'foo' ) ).to.be.undefined
         expect( S.get( 'x' ) ).to.be.undefined
         expect( S.get( 'y' ) ).to.be.undefined
-        expect( S._captureConstraints.constraints.length ).to.equal( 5 )
-        expect( S._captureConstraints.constraints[0].equals(
-            new M.CaptureConstraint(
-                new LurchSymbol( 'x' ).asA( M.metavariable ),
-                new LurchSymbol( '∃' )
-            )
-        ) ).to.equal( true )
-        expect( S._captureConstraints.constraints[1].equals(
-            new M.CaptureConstraint(
-                new LurchSymbol( 'x' ).asA( M.metavariable ),
-                new LurchSymbol( '=' )
-            )
-        ) ).to.equal( true )
-        expect( S._captureConstraints.constraints[2].equals(
-            new M.CaptureConstraint(
-                new LurchSymbol( 'x' ).asA( M.metavariable ),
-                new LurchSymbol( '+' )
-            )
-        ) ).to.equal( true )
-        expect( S._captureConstraints.constraints[3].equals(
-            new M.CaptureConstraint(
-                new LurchSymbol( 'y' ),
-                new LurchSymbol( 'x' ).asA( M.metavariable )
-            )
-        ) ).to.equal( true )
-        expect( S._captureConstraints.constraints[4].equals(
-            new M.CaptureConstraint(
-                new LurchSymbol( 'x' ).asA( M.metavariable ),
-                new LurchSymbol( '1' )
-            )
-        ) ).to.equal( true )
         expect( S.complete() ).to.equal( false )
         // Now add a Substitution to the Solution; verify that it's allowed.
         // This substitution is the one required by constraint C2:
@@ -400,8 +265,7 @@ describe( 'Solution', () => {
         //  - The domain is { foo }
         //  - Looking up any metavariable other than foo gives undefined
         //  - Looking up foo yields C2.expression.copy()
-        //  - Capture constraints are unchanged, because none mentions foo
-        //  - Solution is neither satisfied nor complete
+        //  - Solution is satisfied satisfied and complete
         expect( S.domain() ).to.be.instanceOf( Set )
         expect( S.domain().size ).to.equal( 1 )
         expect( S.domain().has( 'foo' ) ).to.equal( true )
@@ -409,77 +273,6 @@ describe( 'Solution', () => {
         expect( S.get( 'foo' ).equals( C2.expression ) ).to.equal( true )
         expect( S.get( 'x' ) ).to.be.undefined
         expect( S.get( 'y' ) ).to.be.undefined
-        expect( S._captureConstraints.constraints.length ).to.equal( 5 )
-        expect( S._captureConstraints.constraints[0].equals(
-            new M.CaptureConstraint(
-                new LurchSymbol( 'x' ).asA( M.metavariable ),
-                new LurchSymbol( '∃' )
-            )
-        ) ).to.equal( true )
-        expect( S._captureConstraints.constraints[1].equals(
-            new M.CaptureConstraint(
-                new LurchSymbol( 'x' ).asA( M.metavariable ),
-                new LurchSymbol( '=' )
-            )
-        ) ).to.equal( true )
-        expect( S._captureConstraints.constraints[2].equals(
-            new M.CaptureConstraint(
-                new LurchSymbol( 'x' ).asA( M.metavariable ),
-                new LurchSymbol( '+' )
-            )
-        ) ).to.equal( true )
-        expect( S._captureConstraints.constraints[3].equals(
-            new M.CaptureConstraint(
-                new LurchSymbol( 'y' ),
-                new LurchSymbol( 'x' ).asA( M.metavariable )
-            )
-        ) ).to.equal( true )
-        expect( S._captureConstraints.constraints[4].equals(
-            new M.CaptureConstraint(
-                new LurchSymbol( 'x' ).asA( M.metavariable ),
-                new LurchSymbol( '1' )
-            )
-        ) ).to.equal( true )
-        expect( S.complete() ).to.equal( false )
-        // Now add a Substitution to the Solution; verify that it's allowed.
-        // This substitution is the one required by constraint C1: x -> t
-        expect( () =>
-            S.add( new M.Substitution(
-                new LurchSymbol( 'x' ).asA( M.metavariable ),
-                new LurchSymbol( 't' )
-            ) )
-        ).not.to.throw()
-        // Verify the new state:
-        //  - The domain is { foo, x }
-        //  - Looking up any metavariable other than foo, x gives undefined
-        //  - Looking up foo yields C2.expression.copy()
-        //  - Looking up x yields t
-        //  - Capture constraints all deleted, because all satisfied
-        //  - Solution is both satisfied and complete
-        expect( S.domain() ).to.be.instanceOf( Set )
-        expect( S.domain().size ).to.equal( 2 )
-        expect( S.domain().has( 'foo' ) ).to.equal( true )
-        expect( S.domain().has( 'x' ) ).to.equal( true )
-        expect( S.get( 'foo' ) ).to.be.instanceOf( LogicConcept )
-        expect( S.get( 'foo' ).equals( C2.expression ) ).to.equal( true )
-        expect( S.get( 'x' ) ).to.be.instanceOf( LogicConcept )
-        expect( S.get( 'x' ).equals( new LurchSymbol( 't' ) ) )
-            .to.equal( true )
-        expect( S.get( 'y' ) ).to.be.undefined
-        expect( S._captureConstraints.constraints.length ).to.equal( 0 )
-        // But if we redo all the same stuff as above, except we replace
-        // x with y, we should find that an error is thrown, because we
-        // violate capture constraints.
-        const badS = new M.Solution( P )
-        expect( () =>
-            badS.add( new M.Substitution( pat2, C2.expression.copy() ) )
-        ).not.to.throw()
-        expect( () =>
-            badS.add( new M.Substitution(
-                new LurchSymbol( 'x' ).asA( M.metavariable ),
-                new LurchSymbol( 'y' )
-            ) )
-        ).to.throw( /would violate capture constraints/ )
         expect( S.complete() ).to.equal( true )
     } )
 
@@ -534,8 +327,6 @@ describe( 'Solution', () => {
         // Construct a problem containing the same two Constraints as in
         // earlier tests, and then a solution from it, as before.
         const pat1 = LogicConcept.fromPutdown( '(∀ x , (∃ y , (= (+ x 1) y)))' )[0]
-        pat1.child( 1, 0 ).makeIntoA( M.metavariable ) // outer x
-        pat1.child( 1, 1, 1, 1, 1, 1 ).makeIntoA( M.metavariable ) // inner x
         const pat2 = new LurchSymbol( 'foo' ).asA( M.metavariable )
         const C1 = new M.Constraint(
             pat1,
@@ -576,22 +367,21 @@ describe( 'Solution', () => {
         expect( resS.domain().size ).equals( 1 )
         expect( resS.domain().has( 'foo' ) ).equals( true )
         expect( S.get( 'foo' ).equals( resS.get( 'foo' ) ) ).equals( true )
-        // Add another Substitution, now the other relevant one
+        // Add another Substitution, also not relevant
         S.add( new M.Substitution(
             new LurchSymbol( 'x' ).asA( M.metavariable ),
             new LurchSymbol( 't' )
         ) )
-        // Ensure that restricting it drops the extraneous Substitution
+        // Ensure that restricting it drops the extraneous Substitutions
         expect( S.domain().size ).equals( 3 )
         expect( S.domain().has( 'foo' ) ).equals( true )
         expect( S.domain().has( 'bar' ) ).equals( true )
         expect( S.domain().has( 'x' ) ).equals( true )
         resS = S.restricted()
-        expect( resS.domain().size ).equals( 2 )
+        expect( resS.domain().size ).equals( 1 )
         expect( resS.domain().has( 'foo' ) ).equals( true )
         expect( S.get( 'foo' ).equals( resS.get( 'foo' ) ) ).equals( true )
-        expect( resS.domain().has( 'x' ) ).equals( true )
-        expect( S.get( 'x' ).equals( resS.get( 'x' ) ) ).equals( true )
+        expect( resS.domain().has( 'x' ) ).equals( false )
         // Add another Substitution, another extraneous one
         S.add( new M.Substitution(
             new LurchSymbol( 'y' ).asA( M.metavariable ),
@@ -604,18 +394,16 @@ describe( 'Solution', () => {
         expect( S.domain().has( 'x' ) ).equals( true )
         expect( S.domain().has( 'y' ) ).equals( true )
         resS = S.restricted()
-        expect( resS.domain().size ).equals( 2 )
+        expect( resS.domain().size ).equals( 1 )
         expect( resS.domain().has( 'foo' ) ).equals( true )
         expect( S.get( 'foo' ).equals( resS.get( 'foo' ) ) ).equals( true )
-        expect( resS.domain().has( 'x' ) ).equals( true )
-        expect( S.get( 'x' ).equals( resS.get( 'x' ) ) ).equals( true )
+        expect( resS.domain().has( 'x' ) ).equals( false )
         // Now apply restrict() to S and ensure it works in-place, too
         S.restrict()
-        expect( S.domain().size ).equals( 2 )
+        expect( S.domain().size ).equals( 1 )
         expect( S.domain().has( 'foo' ) ).equals( true )
         expect( resS.get( 'foo' ).equals( S.get( 'foo' ) ) ).equals( true )
-        expect( S.domain().has( 'x' ) ).equals( true )
-        expect( resS.get( 'x' ).equals( S.get( 'x' ) ) ).equals( true )
+        expect( S.domain().has( 'x' ) ).equals( false )
     } )
 
 } )
