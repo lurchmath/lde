@@ -420,24 +420,30 @@ export class Problem {
             this.remove( 0 )
             const toAdd = constraint.children()
             // Special case: If we're about to recur inside a binding encoded as
-            // an Application, we must decrease the indices before we enter and
-            // then increase them again in any solution we find, to compensate
-            // for the disassembly of the binding necessary for recursion.
-            dbg( constraint.toString(),
-                 isEncodedBinding( constraint.pattern ),
-                 isEncodedBinding( constraint.expression ) )
-            const borderline = isEncodedBinding( constraint.expression )
+            // an Application, we may need to decreas the indices before we
+            // enter and then increase them again in any solution we find, to
+            // compensate for the disassembly of the binding necessary for
+            // recursion.  This does not apply if the pattern is also an encoded
+            // binding, but only if there is a disbalance between the two.
+            const mustAdjust = isEncodedBinding( constraint.expression )
                             && !isEncodedBinding( constraint.pattern )
-            if ( borderline ) {
+            if ( mustAdjust ) {
                 adjustIndices( toAdd[1].expression, -1, 0 )
-                dbg( '! crossing border ! -> ' + toAdd[1].toString() )
+                dbg( '! decreasing indices ! -> ' + toAdd[1].toString() )
             }
             this.add( ...toAdd )
             for ( let solution of this.allSolutions( soFar ) ) {
-                if ( borderline )
+                if ( mustAdjust )
                     toAdd[1].pattern.descendantsSatisfying(
-                        d => d.isA( metavariable ) ).forEach(
-                            mv => adjustIndices( solution.get( mv ), 1, 0 ) )
+                        d => d.isA( metavariable )
+                    ).forEach( toAdjust => {
+                        const instantiation = solution.get( toAdjust )
+                        if ( instantiation ) {
+                            adjustIndices( instantiation, 1, 0 )
+                            dbg( '! increasing indices ! -> '
+                               + solution._substitutions[toAdjust.text()] )
+                        }
+                    } )
                 yield solution
             }
             return
