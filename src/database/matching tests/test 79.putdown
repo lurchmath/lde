@@ -4,7 +4,7 @@ testing:
 ---
 
 // Declare the metavariables in this matching problem:
-(metavariables x P y)
+(metavariables P y)
 
 // List the pattern-expression pairs in this matching problem:
 (problem
@@ -15,7 +15,6 @@ testing:
 // List all solutions in this matching problem:
 (solutions
 	(
-        x  t
         y  n
         P  (@lambda v , (exists p , (b v p)))
     )
