@@ -1,13 +1,12 @@
 
 import { Symbol as LurchSymbol } from '../symbol.js'
 import { Application } from '../application.js'
-import { BindingExpression } from '../binding-expression.js'
 import { LogicConcept } from '../logic-concept.js'
 import { metavariable, containsAMetavariable } from './metavariables.js'
+import { isAnEFA } from './expression-functions.js'
 import {
-    isAnEFA, expressionFunction, expressionFunctionApplication
-} from './expression-functions.js'
-import { encodeExpression, decodeExpression } from './de-bruijn.js'
+    equal as deBruijnEquals, encodeExpression, decodeExpression
+} from './de-bruijn.js'
 
 /**
  * A Constraint is a pattern-expression pair often written $(p,e)$ and used to
@@ -230,7 +229,7 @@ export class Constraint {
             return this._complexity = 4
         if ( !containsAMetavariable( this.pattern ) ) // success/failure
             return this._complexity =
-                this.pattern.equals( this.expression ) ? 1 : 0
+                deBruijnEquals( this.pattern, this.expression ) ? 1 : 0
         // Now we know the pattern is nonatomic, because it contains no
         // metavariables, but is also not a lone metavariable.
         // Since it is not an EFA, and we have converted all bindings to

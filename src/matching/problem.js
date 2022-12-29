@@ -1,16 +1,18 @@
 
 import { Symbol as LurchSymbol } from '../symbol.js'
 import { Application } from "../application.js"
-import { BindingExpression } from "../binding-expression.js"
 import { LogicConcept } from "../logic-concept.js"
-import { metavariable, metavariableNamesIn } from "./metavariables.js"
+import { metavariable } from "./metavariables.js"
 import { Constraint } from "./constraint.js"
 import { Substitution } from "./substitution.js"
 import { Solution } from "./solution.js"
 import {
-    constantEF, projectionEF, applicationEF, fullBetaReduce, alphaRenamed
+    constantEF, projectionEF, applicationEF, fullBetaReduce
 } from './expression-functions.js'
 import { NewSymbolStream } from "./new-symbol-stream.js"
+import {
+    isEncodedBinding, adjustIndices, free as deBruijnFree
+} from "./de-bruijn.js"
 
 /**
  * This class expresses a matching problem, that is, a set of matching
@@ -333,6 +335,10 @@ export class Problem {
         proxy.deBruijnEncode()
         for ( let solution of proxy.allSolutions( new Solution( proxy ) ) ) {
             // Is this really a solution?  Only if no capture would occur...
+            if ( [ ...solution.domain() ].some( metavar =>
+                solution.get( metavar ).hasDescendantSatisfying(
+                    d => deBruijnFree( d ) === true ) ) ) continue
+            // It's acceptable, so we can now convert it out of de Bruijn form:
             solution.deBruijnDecode()
             // When we find a solution, though, yield it iff we have not seen it
             // before (nor any other solution to which it's alpha-equivalent):
@@ -412,8 +418,28 @@ export class Problem {
         // and expression, do so, updating this problem object and recurring.
         if ( complexity == 3 ) {
             this.remove( 0 )
-            this.add( ...constraint.children() )
-            yield* this.allSolutions( soFar )
+            const toAdd = constraint.children()
+            // Special case: If we're about to recur inside a binding encoded as
+            // an Application, we must decrease the indices before we enter and
+            // then increase them again in any solution we find, to compensate
+            // for the disassembly of the binding necessary for recursion.
+            dbg( constraint.toString(),
+                 isEncodedBinding( constraint.pattern ),
+                 isEncodedBinding( constraint.expression ) )
+            const borderline = isEncodedBinding( constraint.expression )
+                            && !isEncodedBinding( constraint.pattern )
+            if ( borderline ) {
+                adjustIndices( toAdd[1].expression, -1, 0 )
+                dbg( '! crossing border ! -> ' + toAdd[1].toString() )
+            }
+            this.add( ...toAdd )
+            for ( let solution of this.allSolutions( soFar ) ) {
+                if ( borderline )
+                    toAdd[1].pattern.descendantsSatisfying(
+                        d => d.isA( metavariable ) ).forEach(
+                            mv => adjustIndices( solution.get( mv ), 1, 0 ) )
+                yield solution
+            }
             return
         }
 

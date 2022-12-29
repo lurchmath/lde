@@ -90,7 +90,7 @@ import { metavariable } from './metavariables.js'
  *    `(A B)`, where `A` is a special symbol indicating that a
  *    {@link BindingExpression} has been encoded, and `B` is the encoding of the
  *    body of the original {@link BindingExpression}.
- *  * Each such `(A B)` will be decorated with an attribute that records the
+ *  * Each such `A` will be decorated with an attribute that records the
  *    original names of the bound symbols, so that this encoding is invertible
  *    (using {@link module:deBruijn.decodeExpression decodeExpression()}).
  * 
@@ -104,14 +104,18 @@ import { metavariable } from './metavariables.js'
  * 
  * ```
  * (forall
- *   ("LDE DB"
+ *   ("LDE DB" +{"LDE DB":"['x','y']"} // list of bound variable names
  *     (>
  *       "['LDE DB',0,0]" +{"LDE DB":"JSON encoding of original x symbol"}
  *       "['LDE DB',0,1]" +{"LDE DB":"JSON encoding of original y symbol"}
  *     )
- *   ) +{"LDE DB":"['x','y']"} // list of bound variable names
+ *   )
  * )
  * ```
+ * 
+ * The module also provides a {@link module:deBruijn.free freeness test} for de
+ * Bruijn indices, which returns true for an index $(n,m)$ iff there are at
+ * least $n+1$ encoded bindings surrounding the symbol.
  * 
  * ## Coordinating with matching
  * 
@@ -149,15 +153,15 @@ import { metavariable } from './metavariables.js'
  * ```
  * // Encoding of (lambda x , x):
  * (lambda
- *   ("LDE DB"
+ *   ("LDE DB" +{"LDE DB":['x']}
  *     "['LDE DB',0,0]" +{"LDE DB":"JSON encoding of the symbol x"}
- *   ) +{"LDE DB":['x']}
+ *   )
  * )
  * // Encoding of (lambda y , y):
  * (lambda
- *   ("LDE DB"
+ *   ("LDE DB" +{"LDE DB":['y']}
  *     "['LDE DB',0,0]" +{"LDE DB":"JSON encoding of the symbol y"}
- *   ) +{"LDE DB":['y']}
+ *   )
  * )
  * ```
  * 
@@ -189,7 +193,7 @@ import { metavariable } from './metavariables.js'
  *    string as its text.
  */
 export const deBruijn = 'LDE DB'
-// We then create a symbol with that text, for use in a few routines below.
+// A symbol whose value is the above constant
 const deBruijnSymbol = new LurchSymbol( deBruijn )
 
 // Given any symbol, compute the i and j that form its index pair (i,j),
@@ -264,6 +268,34 @@ export const encodedIndices = symbol => {
 }
 
 /**
+ * Alter the name of a de Bruijn index (an encoded {@link Symbol}) so that it
+ * still encodes a de Bruijn index, but the two components have been adjusted
+ * (up or down) by the differences given in the latter two arguments.  That is,
+ * a de Bruijn index $(i,j)$ can be adjusted with $(\Delta_i,\Delta_j)$ to
+ * become $(i+\Delta_i,j+\Delta_j)$.
+ * 
+ * If the first argument is an {@link Application}, this function distributes
+ * itself across the {@link Application}'s children.  If it is neither a
+ * {@link Symbol} nor an {@link Application}, this function does nothing.
+ * 
+ * @function
+ * @param {Symbol} target an encoded de Bruijn index
+ * @param {integer} deltaI the amount by which to adjust the first component of
+ *   the index
+ * @param {integer} deltaJ the amount by which to adjust teh second component of
+ *   the index
+ */
+export const adjustIndices = ( target, deltaI, deltaJ ) => {
+    if ( target instanceof Application )
+        return target.children().forEach( child =>
+            adjustIndices( child, deltaI, deltaJ ) )
+    const original = encodedIndices( target )
+    if ( !original ) return
+    target.setAttribute( 'symbol text', JSON.stringify(
+        [ deBruijn, original[0] + deltaI, original[1] + deltaJ ] ) )
+}
+
+/**
  * This function takes a {@link Symbol} encoded by the
  * {@link module:deBruijn.encodeSymbol encodeSymbol()} function and returns (a
  * copy of) the original symbol that was passed to the encoding function.  The
@@ -314,10 +346,14 @@ export const encodeExpression = expression =>
         ...expression.children().map( encodeExpression ) ) :
     // therefore expression instanceof BindingExpression:
     new Application(
-        deBruijnSymbol.copy(), encodeExpression( expression.body() )
-    ).attr( [ [
-        deBruijn, expression.boundSymbols().map( symbol => symbol.toJSON() )
-    ] ] )
+        deBruijnSymbol.copy().attr( [ [
+            deBruijn, expression.boundSymbols().map( symbol => symbol.toJSON() )
+        ] ] ),
+        encodeExpression( expression.body() ) )
+
+export const isEncodedBinding = expression =>
+    ( expression instanceof Application )
+ && equal( expression.child( 0 ), deBruijnSymbol )
 
 /**
  * This function takes an {@link Expression} encoded by the
@@ -344,9 +380,9 @@ export const decodeExpression = expression => {
         )
     // Case 3: (Other) Applications
     if ( expression instanceof Application ) {
-        if ( expression.child( 0 ).equals( deBruijnSymbol ) ) {
+        if ( equal( expression.child( 0 ), deBruijnSymbol ) ) {
             // subcase 1: application that encodes what used to be a binding
-            const symbolNames = expression.getAttribute( deBruijn )
+            const symbolNames = expression.child( 0 ).getAttribute( deBruijn )
             if ( !symbolNames )
                 throw new Error( 'Missing de Bruijn attribute on Application' )
             return new BindingExpression(
@@ -383,18 +419,28 @@ export const decodeExpression = expression => {
 export const equal = ( expression1, expression2 ) =>
     expression1.equals( expression2, [ deBruijn ] )
 
-// TO DO:
-//
-// Don't let any constraints contain bound metavariables, because that's no
-// longer needed, now that we support alpha equivalence natively.  This also
-// means that you can remove all the convertAllBoundVarsToMetavars() calls, and
-// that function itself.
-//
-// Where we currently have removeBindings() and restoreBindings(), instead do
-// encoding of expressions into de Bruijn form, and decoding therefrom.
-//
-// When checking the trivial (e,e) constraint, use the equality function defined
-// above.
-//
-// Completely eliminate the idea of capture constraints and the checking
-// thereof.
+/**
+ * A de Bruijn index, as defined at the top of this module, is a symbol encoding
+ * a pair of natural numbers, the first of which says how many bindings one must
+ * pass as one walks up the ancestor chain of this symbol before we encounter
+ * the binding that binds this symbol.  Thus a de Bruijn index is free if the
+ * number of bindings in its ancestor chain is greater than or equal to that
+ * first index.
+ * 
+ * This function tests that and returns true if that freeness condition is met,
+ * false if the first component of the de Bruijn index is smaller than the
+ * number of bindings above the symbol, and undefined if the argument given is
+ * not a de Bruijn index.  Note that, because we are working with
+ * {@link Expressions} that have been encoded with
+ * {@link module:deBruijn.encodeExpression encodeExpression()}, a binding is not
+ * a {@link BindingExpression}, but an encoded version thereof.
+ * 
+ * @param {Symbol} symbol the symbol to test for freeness
+ * @returns {boolean} whether the symbol is a free de Bruijn index
+ */
+export const free = symbol => {
+    const indices = encodedIndices( symbol )
+    if ( !indices ) return undefined
+    const encodedBindings = symbol.ancestorsSatisfying( isEncodedBinding )
+    return indices[0] >= encodedBindings.length
+}
