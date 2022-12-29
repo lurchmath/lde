@@ -3,6 +3,10 @@ import { LogicConcept } from '../logic-concept.js'
 import { Application } from '../application.js'
 import { BindingExpression } from '../binding-expression.js'
 import { Symbol as LurchSymbol } from '../symbol.js'
+import {
+    expressionFunctionApplication, isAnEF, newEF, parametersOfEF, bodyOfEF
+} from './expression-functions.js'
+import { metavariable } from './metavariables.js'
 
 /**
  * ## What are de Bruijn indices?
@@ -109,6 +113,28 @@ import { Symbol as LurchSymbol } from '../symbol.js'
  * )
  * ```
  * 
+ * ## Coordinating with matching
+ * 
+ * There are two exceptions to the above encoding description, each of which
+ * helps this module integrate correctly with the larger module in which it
+ * sits, {@link module:Matching the Matching module}.
+ * 
+ * First, when encoding a symbol, if the symbol is a metavariable, then don't
+ * encode it at all, but leave it in its original form.
+ * 
+ * Second, one of the special symbols in the matching package, the one that
+ * marks Expression Functions Applications, is not encoded, but is left
+ * unchanged under the de Bruijn encoding.  That way, Expression Function
+ * Applications retain their meanings under the de Bruijn encoding.
+ * 
+ * Finally, we do not need to apply the same protection to the Expression
+ * Function symbol, because we will not be applying the de Bruijn encoding to
+ * Expression Functions, and it would break them anyway, since it removes all
+ * bindings.  But when decoding the image of a metavariable in a solution, an
+ * Expression Function may be present, so the
+ * {@link module:deBruijn.decodeExpression decodeExpression()} function recurs
+ * inside such structures.
+ * 
  * ## Expression equality
  * 
  * As mentioned above, one of the benefits of de Bruijn indices is that two
@@ -190,7 +216,9 @@ const symbolToIndices = symbol => {
  * 
  * The encoded symbol returned by this function has an attribute that stores the
  * original name of this symbol, so that this encoding can be reversed by
- * {@link module:deBruijn.decodeSymbol decodeSymbol()}.
+ * {@link module:deBruijn.decodeSymbol decodeSymbol()}.  For two important
+ * details about how symbol encoding coordinates with the Matching module, see
+ * the documentation at the top of this module.
  * 
  * @function
  * @param {Symbol} symbol the symbol to be encoded
@@ -201,6 +229,11 @@ const symbolToIndices = symbol => {
  * @see {@link module:deBruijn.encodeExpression encodeExpression()}
  */
 export const encodeSymbol = symbol => {
+    // Exceptions: Don't modify special symbol used for EFAs, nor metavariables:
+    if ( symbol.equals( expressionFunctionApplication )
+      || symbol.isA( metavariable ) )
+        return symbol.copy()
+    // Okay, now do the normal de Bruijn encoding:
     const indices = symbolToIndices( symbol )
     return new LurchSymbol( JSON.stringify(
         indices ? [ deBruijn, ...indices ] : [ deBruijn, symbol.text() ]
@@ -237,6 +270,9 @@ export const encodedIndices = symbol => {
  * de Bruijn indices encoded in the input are discarded, and its original name
  * (stored in an attribute) is restored.
  * 
+ * If it receives a symbol that has no de Bruijn encoding information stored in
+ * an attribute, it returns the symbol untouched.
+ * 
  * @function
  * @param {Symbol} symbol a symbol that was de Bruijn-encoded
  * @returns {Symbol} a copy of the original {@link Symbol} that was encoded to
@@ -247,8 +283,7 @@ export const encodedIndices = symbol => {
  */
 export const decodeSymbol = symbol => {
     const serialized = symbol.getAttribute( deBruijn )
-    if ( !serialized ) throw new Error( 'No de Bruijn information to decode' )
-    return LogicConcept.fromJSON( serialized )
+    return serialized ? LogicConcept.fromJSON( serialized ) : symbol.copy()
 }
 
 /**
@@ -298,8 +333,16 @@ export const encodeExpression = expression =>
  * @see {@link module:deBruijn.decodeSymbol decodeSymbol()}
  */
 export const decodeExpression = expression => {
+    // Case 1: Symbols have their own decoding routine
     if ( expression instanceof LurchSymbol )
         return decodeSymbol( expression )
+    // Case 2: Expression Functions
+    if ( isAnEF( expression ) )
+        return newEF(
+            ...parametersOfEF( expression ).map( v => v.copy() ),
+            decodeExpression( bodyOfEF( expression ) )
+        )
+    // Case 3: (Other) Applications
     if ( expression instanceof Application ) {
         if ( expression.child( 0 ).equals( deBruijnSymbol ) ) {
             // subcase 1: application that encodes what used to be a binding

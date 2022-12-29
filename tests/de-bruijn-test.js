@@ -189,6 +189,33 @@ describe( 'de Bruijn indices', () => {
         expect( M.equal( expr1, expr2 ) ).to.equal( false )
     } )
 
+    it( 'Should respect special Matching symbols and attributes', () => {
+        let toEncode
+        let encoded
+        // If we encode an Expression Function Application, it stays an
+        // Expression Function Application
+        toEncode = M.newEFA( new LurchSymbol( 'P' ), new LurchSymbol( 'x' ) )
+        expect( M.isAnEFA( toEncode ) ).to.equal( true )
+        encoded = M.encodeExpression( toEncode )
+        expect( M.isAnEFA( encoded ) ).to.equal( true )
+        // If we encode something with metavariables in it, each of them stays
+        // a metavariable
+        toEncode = new Application(
+            new LurchSymbol( 'a' ).asA( M.metavariable ),
+            new Application(
+                new LurchSymbol( 'b' ),
+                new LurchSymbol( 'c' ).asA( M.metavariable )
+            )
+        )
+        expect( toEncode.child( 0 ).isA( M.metavariable ) ).to.equal( true )
+        expect( toEncode.child( 1, 0 ).isA( M.metavariable ) ).to.equal( false )
+        expect( toEncode.child( 1, 1 ).isA( M.metavariable ) ).to.equal( true )
+        encoded = M.encodeExpression( toEncode )
+        expect( encoded.child( 0 ).isA( M.metavariable ) ).to.equal( true )
+        expect( encoded.child( 1, 0 ).isA( M.metavariable ) ).to.equal( false )
+        expect( encoded.child( 1, 1 ).isA( M.metavariable ) ).to.equal( true )
+    } )
+
     it( 'Supports encoding and decoding Constraints as well', () => {
         // We just do one test here, because the Constraint class's de Bruijn
         // functions just distribute, over the components in the Constraint, the
