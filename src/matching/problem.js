@@ -85,8 +85,8 @@ export class Problem {
             if ( args[0].length == 0 ) return
             // if it looks like it might be p1,e1,..., or c1,c2,...,
             // handle via recursion
-            if ( args[0][0] instanceof LogicConcept
-              || args[0][0] instanceof Constraint ) {
+            if ( ( args[0][0] instanceof LogicConcept )
+              || ( args[0][0] instanceof Constraint ) ) {
                 this.add( ...args[0] )
                 return
             }
