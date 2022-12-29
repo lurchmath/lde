@@ -62,7 +62,11 @@ export class Constraint {
      */
     constructor ( pattern, expression ) {
         if ( containsAMetavariable( expression ) )
-            throw 'The expression in a constraint may not contain metavariables'
+            throw new Error(
+                'The expression in a constraint may not contain metavariables' )
+        if ( pattern.hasDescendantSatisfying(
+                d => d.isA( metavariable ) && !d.isFree( pattern ) ) )
+            throw new Error( 'The pattern may not contain bound metavariables' )
         this._pattern = pattern
         this._expression = expression
     }
