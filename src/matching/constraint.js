@@ -203,17 +203,8 @@ export class Constraint {
      * @see {@link Constraint#deBruijnDecode deBruijnDecode()}
      */
     deBruijnEncode () {
-        // Do the usual encoding
         this._pattern = encodeExpression( this._pattern )
         this._expression = encodeExpression( this._expression )
-        // But it also encoded our EFs and EFAs, which we do not want, so
-        // reverse that process now
-        const encodedEF = encodeExpression( expressionFunction )
-        const encodedEFA = encodeExpression( expressionFunctionApplication )
-        this._pattern.descendantsSatisfying( d => d.equals( encodedEF ) )
-            .forEach( d => d.replaceWith( expressionFunction.copy() ) )
-        this._pattern.descendantsSatisfying( d => d.equals( encodedEFA ) )
-            .forEach( d => d.replaceWith( expressionFunctionApplication.copy() ) )
     }
     
     /**
@@ -230,16 +221,6 @@ export class Constraint {
      * @see {@link Constraint#deBruijnEncode deBruijnEncode()}
      */
     deBruijnDecode () {
-        // Recall that deBruijnEncode() altered EF and EFA symbols after the
-        // usual de Bruijn encoding was applied.  We must reverse that now, so
-        // that the decoding process will not reject those symbols.
-        const encodedEF = encodeExpression( expressionFunction )
-        const encodedEFA = encodeExpression( expressionFunctionApplication )
-        this._pattern.descendantsSatisfying( d => d.equals( expressionFunction ) )
-            .forEach( d => d.replaceWith( encodedEF.copy() ) )
-        this._pattern.descendantsSatisfying( d => d.equals( expressionFunctionApplication ) )
-            .forEach( d => d.replaceWith( encodedEFA.copy() ) )
-        // Now do the usual decoding
         this._pattern = decodeExpression( this._pattern )
         this._expression = decodeExpression( this._expression )
     }
