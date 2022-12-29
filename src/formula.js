@@ -34,15 +34,16 @@ import Matching from './matching.js'
  * 
  * Which {@link Symbol Symbols} should be converted into metavariables?  Any
  * one that is not in the scope of a {@link Declaration Declaration} of that
- * same {@link Symbol Symbol}.  For example, if we consider the
- * {@link LogicConcept LogicConcept} indicated by the
- * {@link LogicConcept.fromPutdown putdown notation} `{ :(= a b) (= b a) }`
- * and we assume it is in the scope of a {@link Declaration Declaration} of
- * the `=` {@link Symbol Symbol}, but not of the `a` or `b` {@link Symbol
- * Symbols}.  Then converting `{ :(= a b) (= b a) }` to a formula would
- * produce a copy in which each instance of `a` and `b` have had their
+ * same {@link Symbol}.  For example, if we consider the {@link LogicConcept}
+ * indicated by the {@link LogicConcept.fromPutdown putdown notation}
+ * `{ :(= a b) (= b a) }` and we assume it is in the scope of a
+ * {@link Declaration} of the `=` {@link Symbol}, but not of the `a` or `b`
+ * {@link Symbol Symbols}, then converting `{ :(= a b) (= b a) }` to a formula
+ * would produce a copy in which each instance of `a` and `b` have had their
  * metavariable attribute set to "true" (via a call to the
- * {@link LogicConcept#makeIntoA makeIntoA()} member).
+ * {@link MathConcept#makeIntoA makeIntoA()} member).
+ * 
+ * The exception is that bound variables are never marked as metavariables.
  * 
  * @param {LogicConcept} LC - the {@link LogicConcept LogicConcept} to convert
  *   into a formula
@@ -57,17 +58,16 @@ const from = LC => {
     const declared = new Set( LC.accessibles().filter(
         a => a instanceof Declaration
     ).map( d => d.symbols() ).flat().map( s => s.text() ) )
-    // and what were bound?
+    // and what were bound outside of the LC?
     const bound = new Set( LC.ancestors().filter(
         a => a != LC && ( a instanceof BindingEnvironment )
     ).map( be => be.boundSymbolNames() ).flat() )
     // make a copy and change all of its undeclared symbols into metavariables
     const result = LC.copy()
     result.descendantsSatisfying( d => d instanceof LurchSymbol )
-    .forEach( s => {
-        if ( !declared.has( s.text() ) && !bound.has( s.text() ) )
-            s.makeIntoA( Matching.metavariable )
-    } )
+          .filter( s => !declared.has( s.text() ) && !bound.has( s.text() )
+                                                  && s.isFree() )
+          .forEach( s => s.makeIntoA( Matching.metavariable ) )
     // return it
     return result
 }
