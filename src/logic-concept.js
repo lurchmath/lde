@@ -670,7 +670,6 @@ export class LogicConcept extends MathConcept {
         // up above the switch statement, as you can see below.
         const indent = text => `  ${text.replace( /\n/g, '\n  ' )}`
         const isTooBig = text => /\n/.test( text ) || text.length > 50
-        const childResults = this.children().map( child => child.toPutdown() )
         const Environment = MathConcept.subclasses.get( 'Environment' )
         const Declaration = MathConcept.subclasses.get( 'Declaration' )
         const given = ( !( this instanceof Declaration )
@@ -688,6 +687,7 @@ export class LogicConcept extends MathConcept {
                 return putdown + '\n    '
                      + keys.map( attrText ).join( '    ' )
         }
+        const childResults = this.children().map( child => child.toPutdown(formatter) )
         const finalize = ( text, skip = [ ] ) => {
             let keys = [ ]
             skip.push( '_type_given' ) // bad style, but concise
