@@ -9,9 +9,9 @@ A simple JavaScript SAT solver, see http://www.comp.nus.edu.sg/~gregory/sat/ for
 
 A js CAS, see http://algebrite.org for a live demo and documentation.
 
-*Lurch modifications*
+We made the following modifications when importing Algebrite into this repository.
 
- - recompiled algebrite with the command 
+ - Recompiled it with the command 
    ```
    cat runtime/defs.coffee \
        sources/*.coffee \
@@ -29,42 +29,39 @@ A js CAS, see http://algebrite.org for a live demo and documentation.
        ../coffeescript/bin/coffee -sc --bare > \
        ../../dependencies/algebrite.js
    ```
-   script to create a --bare version of algebrite.js in the dependencies folder.
- - added 
+   to create a bare version.
+ - Added 
    ```
    const exports = { }
    ``` 
-   to the top of the file to allow importing it
- - commented out the declaration of the variable, `bigInt`,
-   (since it's now imported instead of required)
- - changed 
-    ```
-    bigInt = require('big-integer');
-    ```
-    to 
-    ```
-    import bigInt from './BigInteger.js'
-    ```
- - added 
+   to the top of the file to allow importing it.
+ - Commented out the declaration of the variable, `bigInt`,
+   since it's now imported instead of required.
+ - Changed 
+   ```
+   bigInt = require('big-integer');
+   ```
+   to 
+   ```
+   import bigInt from './BigInteger.js'
+   ```
+ - Added 
    ```
    export default exports
    ``` 
-   to the bottom of the file
- - note that there is no need to do any of this if you just 
-   use the version that is in the `dependencies` folder of 
-   the git repo.
+   to the bottom of the file.
+ - Note that there is no need to do any of this if you use the version that
+   is in this folder, which has all these modifications included.
  
 ## BigInteger.js
 
-Algebrite depends on the node module `big-integer`, for 
-arbitrary precision integers. 
+Algebrite depends on the module `big-integer`, for arbitrary precision integers.
 See https://www.npmjs.com/package/big-integer for details.
 
-*Lurch modifications*
+We made the following modifications when importing `big-integer` into this repository.
 
- - added 
+ - Added 
    ```
    export default bigInt
    ```
-   to the bottom of the file so it can be imported by our
-   modified Algebrite.
+   to the bottom of the file so it can be imported by our modified Algebrite.
