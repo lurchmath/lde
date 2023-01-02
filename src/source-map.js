@@ -49,7 +49,7 @@
  * 
  * To use this class, the user creates an instance, passing the original
  * (unmodified) source text.  Then the user can do modifications (that is,
- * replcements) on the source text by calling {@link SourceMap#modify
+ * replacements) on the source text by calling {@link SourceMap#modify
  * modify()}, taking care to make such calls in increasing order of index into
  * the modified text.  (See documentation for {@link SourceMap#modify
  * modify()}, below.)  At any point, functions such as
