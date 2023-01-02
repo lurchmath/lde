@@ -3,11 +3,11 @@
 
 ## LSAT.js
 
-A simple JavaScript SAT solver, see http://www.comp.nus.edu.sg/~gregory/sat/ for a live demo & more information.
+A simple JavaScript SAT solver.  See http://www.comp.nus.edu.sg/~gregory/sat/ for a live demo and more information.
 
 ## algebrite.js
 
-A js CAS, see http://algebrite.org for a live demo and documentation.
+A JavaScript CAS.  See http://algebrite.org for a live demo and documentation.
 
 We made the following modifications when importing Algebrite into this repository.
 
@@ -29,14 +29,11 @@ We made the following modifications when importing Algebrite into this repositor
        ../coffeescript/bin/coffee -sc --bare > \
        ../../dependencies/algebrite.js
    ```
-   to create a bare version.
- - Added 
+   (run from within `node_modules/algebrite`) to create a bare version.
+ - Added the following line to the top of the file, to support ES6 module style.
    ```
    const exports = { }
    ``` 
-   to the top of the file to allow importing it.
- - Commented out the declaration of the variable, `bigInt`,
-   since it's now imported instead of required.
  - Changed 
    ```
    bigInt = require('big-integer');
@@ -45,13 +42,16 @@ We made the following modifications when importing Algebrite into this repositor
    ```
    import bigInt from './BigInteger.js'
    ```
+   for the same reason.  (Note the necessary corresponding change to `BigInteger.js`, below.)
  - Added 
    ```
    export default exports
    ``` 
-   to the bottom of the file.
- - Note that there is no need to do any of this if you use the version that
-   is in this folder, which has all these modifications included.
+   to the bottom of the file for the same reason.
+ - Commented out the declaration of the variable, `bigInt`, since it's now `import`ed instead of `require`d.
+
+Note that there is no need to do any of this if you use the version that
+is in this folder, which has all these modifications included.
  
 ## BigInteger.js
 
