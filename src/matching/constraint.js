@@ -1,10 +1,12 @@
 
 import { Symbol as LurchSymbol } from '../symbol.js'
 import { Application } from '../application.js'
-import { BindingExpression } from '../binding-expression.js'
 import { LogicConcept } from '../logic-concept.js'
 import { metavariable, containsAMetavariable } from './metavariables.js'
 import { isAnEFA } from './expression-functions.js'
+import {
+    equal as deBruijnEquals, encodeExpression, decodeExpression
+} from './de-bruijn.js'
 
 /**
  * A Constraint is a pattern-expression pair often written $(p,e)$ and used to
@@ -59,7 +61,11 @@ export class Constraint {
      */
     constructor ( pattern, expression ) {
         if ( containsAMetavariable( expression ) )
-            throw 'The expression in a constraint may not contain metavariables'
+            throw new Error(
+                'The expression in a constraint may not contain metavariables' )
+        if ( pattern.hasDescendantSatisfying(
+                d => d.isA( metavariable ) && !d.isFree( pattern ) ) )
+            throw new Error( 'The pattern may not contain bound metavariables' )
         this._pattern = pattern
         this._expression = expression
     }
@@ -148,43 +154,38 @@ export class Constraint {
     }
 
     /**
-     * It is not possible to recursively solve a constraint set if some are
-     * bindings, because of one fiddly detail regarding the structure of
-     * binding expressions:  All children of a binding expression, other than
-     * the first and last, must be symbols.  However, when solving, there are
-     * times when we need to replace arbitrary children with expression
-     * functions that will later match those children, which would therefore
-     * be prevented if we followed the requirement that certain children must
-     * always be symbols.  This function helps us solve that problem.
+     * Apply the {@link module:deBruijn.encodeExpression de Bruijn encoding} to
+     * the pattern and the expression in this Constraint, in place.
      * 
-     * It replaces every binding expression `(h v1 ... vn , b)` with an
-     * isomorphic application expression `("LDE binding" h v1 ... vn b)`.  The
-     * corresponding information on bound variables is therefore lost, so this
-     * transformation should be done only after that information has already
-     * been processed, but it will allow us to proceed safely with matching
-     * thereafter.
+     * This function should be applied only once to any given Constraint,
+     * because even though it is possible to do it more than once, one should
+     * think of the set of ordinary {@link MathConcept MathConcepts} as distinct
+     * from the set of de Bruijn-encoded ones, and this function maps the former
+     * set to the latter, but does not map the latter anywhere.
      * 
-     * This function recursively performs the transformation described in the
-     * previous paragraph, on both the pattern and expression of this
-     * constraint, in place.
-     * 
-     * @see {@link Solution#restoreBindings restoreBindings() in the Solution
-     *   class}
+     * @see {@link Constraint#deBruijnDecode deBruijnDecode()}
      */
-    removeBindings () {
-        const withoutBindings = expression => {
-            if ( expression.isAtomic() ) return expression.copy()
-            if ( expression instanceof Application )
-                return new Application(
-                    ...expression.children().map( withoutBindings ) )
-            if ( expression instanceof BindingExpression )
-                return new Application(
-                    new LurchSymbol( 'LDE binding' ),
-                    ...expression.children().map( withoutBindings ) )
-            throw new Error( 'Invalid expression in removeBindings' )
-        }
-        this._pattern = withoutBindings( this._pattern )
-        this._expression = withoutBindings( this._expression )
+    deBruijnEncode () {
+        this._pattern = encodeExpression( this._pattern )
+        this._expression = encodeExpression( this._expression )
+    }
+    
+    /**
+     * Apply the {@link module:deBruijn.decodeExpression de Bruijn decoding} to
+     * the pattern and the expression in this Constraint, in place.
+     * 
+     * This function should be applied only to a Constraint that has been de
+     * Bruijn encoded first, because even though it is possible to call this
+     * function on any Consraint, one should think of the set of ordinary
+     * {@link MathConcept MathConcepts} as distinct from the set of de
+     * Bruijn-encoded ones, and this function maps the latter set to the former,
+     * but does not map the former anywhere.
+     * 
+     * @see {@link Constraint#deBruijnEncode deBruijnEncode()}
+     */
+    deBruijnDecode () {
+        this._pattern = decodeExpression( this._pattern )
+        this._expression = decodeExpression( this._expression )
     }
 
     /**
@@ -228,7 +229,7 @@ export class Constraint {
             return this._complexity = 4
         if ( !containsAMetavariable( this.pattern ) ) // success/failure
             return this._complexity =
-                this.pattern.equals( this.expression ) ? 1 : 0
+                deBruijnEquals( this.pattern, this.expression ) ? 1 : 0
         // Now we know the pattern is nonatomic, because it contains no
         // metavariables, but is also not a lone metavariable.
         // Since it is not an EFA, and we have converted all bindings to
@@ -296,6 +297,11 @@ export class Constraint {
      */
     toString () {
         return `(${this.pattern.toPutdown()},${this.expression.toPutdown()})`
+            .replace( / \+\{"LDE DB":[^\n]+\}\n/g, '' )
+            .replace( /"\[\\"LDE DB\\"\,\\"(.*?)\\"\]"/g, '.$1' )
+            .replace( /"\[\\"LDE DB\\"\,(.*?)\]"/g, '($1)' )
+            .replace( /"LDE DB"/g, 'DB' )
+            .replace( /\n      /g, '' )
             .replace( / \+\{"_type_LDE MV":true\}\n/g, '__' )
             .replace( /"LDE EFA"/g, '@' )
             .replace( /"LDE lambda"/g, '𝝺' )

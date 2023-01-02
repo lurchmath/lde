@@ -8,8 +8,8 @@ import { SourceMap  } from './source-map.js'
 // for all other clients is to allow it.  Note that we have to test if global is 
 // undeclared first, for when this module is being imported in a browser.
 //
-let Superclass = (!(typeof global==='undefined') && global.disableEventTarget) ? 
-                  class { emit(){} } : EventTarget
+let Superclass = typeof global !== 'undefined' && global.disableEventTarget ? 
+                 class { emit () { } } : EventTarget
 
 /**
  * The MathConcept class, an n-ary tree of MathConcept instances, using functions
@@ -1549,13 +1549,15 @@ export class MathConcept extends Superclass {
      * @returns {boolean} true if and only if this MathConcept equals `other`
      * @see {@link MathConcept#copy copy()}
      */
-    equals ( other ) {
+    equals ( other, attributesToIgnore = [ ] ) {
         // other must be a MathConcept with same specific subclass
         if ( !( other instanceof MathConcept ) ) return false
         if ( this.constructor !== other.constructor ) return false
         // other must have the same number of attribute keys
-        const keys1 = Array.from( this._attributes.keys() )
-        const keys2 = Array.from( other._attributes.keys() )
+        const keys1 = Array.from( this._attributes.keys() ).filter(
+            key => !attributesToIgnore.includes( key ) )
+        const keys2 = Array.from( other._attributes.keys() ).filter(
+            key => !attributesToIgnore.includes( key ) )
         if ( keys1.length != keys2.length ) return false
         // other must have the same set of attribute keys
         keys1.sort()
@@ -1570,7 +1572,7 @@ export class MathConcept extends Superclass {
         if ( this._children.length != other._children.length ) return false
         // other must have the same children, structurally, recursively compared
         for ( let i = 0 ; i < this._children.length ; i++ )
-            if ( !this.child( i ).equals( other.child( i ) ) )
+            if ( !this.child( i ).equals( other.child( i ), attributesToIgnore ) )
                 return false
         // that is the complete set of requirements for equality
         return true

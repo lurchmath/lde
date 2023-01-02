@@ -4,6 +4,7 @@ import { Symbol as LurchSymbol } from '../symbol.js'
 import { LogicConcept } from '../logic-concept.js'
 import { Expression } from '../expression.js'
 import { Constraint } from './constraint.js'
+import { encodeExpression, decodeExpression } from './de-bruijn.js'
 
 /**
  * A substitution is a metavariable-expression pair $(m,e)$ that can be used for
@@ -259,6 +260,30 @@ export class Substitution {
     }
 
     /**
+     * Apply the {@link module:deBruijn.encodeExpression de Bruijn encoding} to
+     * the expression in this Substitution, in place.  This function is
+     * analogous to {@link Constraint#deBruijnEncode the Constraint class's
+     * deBruijnEncode() function}; see there for more details.
+     * 
+     * @see {@link Substitution#deBruijnDecode deBruijnDecode()}
+     */
+    deBruijnEncode () {
+        this._expression = encodeExpression( this._expression )
+    }
+    
+    /**
+     * Apply the {@link module:deBruijn.decodeExpression de Bruijn decoding} to
+     * the expression in this Substitution, in place.  This function is
+     * analogous to {@link Constraint#deBruijnDecode the Constraint class's
+     * deBruijnDecode() function}; see there for more details.
+     * 
+     * @see {@link Substitution#deBruijnEncode deBruijnEncode()}
+     */
+    deBruijnDecode () {
+        this._expression = decodeExpression( this._expression )
+    }
+
+    /**
      * The string representation of a Substitution $(m,e)$ is simply the string
      * "(M,E)" where M is the {@link LogicConcept#toPutdown putdown}
      * representation of $m$ and E is the {@link LogicConcept#toPutdown putdown}
@@ -281,6 +306,11 @@ export class Substitution {
      */
     toString () {
         return `(${this._metavariable.toPutdown()},${this._expression.toPutdown()})`
+            .replace( / \+\{"LDE DB":[^\n]+\}\n/g, '' )
+            .replace( /"\[\\"LDE DB\\"\,\\"(.*?)\\"\]"/g, '.$1' )
+            .replace( /"\[\\"LDE DB\\"\,(.*?)\]"/g, '($1)' )
+            .replace( /"LDE DB"/g, 'DB' )
+            .replace( /\n      /g, '' )
             .replace( / \+\{"_type_LDE MV":true\}\n/g, '__' )
             .replace( /"LDE EFA"/g, '@' )
             .replace( /"LDE lambda"/g, '𝝺' )

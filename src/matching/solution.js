@@ -1,13 +1,12 @@
 
-import { Application } from "../application.js"
-import { BindingExpression } from "../binding-expression.js"
 import { Symbol as LurchSymbol } from "../symbol.js"
 import { metavariable, metavariableNamesIn } from "./metavariables.js"
 import { Substitution } from "./substitution.js"
 import { Problem } from "./problem.js"
-import { CaptureConstraints } from "./capture-constraint.js"
-import { fullBetaReduce, alphaEquivalent, isAnEFA, bodyOfEF, parametersOfEF }
-    from './expression-functions.js'
+import {
+    fullBetaReduce, alphaEquivalent, isAnEFA
+} from './expression-functions.js'
+import { equal as deBruijnEquals } from './de-bruijn.js'
 
 /**
  * A Solution is a set of {@link Substitution Substitutions}, together with
@@ -32,11 +31,10 @@ export class Solution {
      * 
      * @param {Problem} problem the problem for which the contructed object is
      *   to be the solution.  The newly constructed object is not yet a
-     *   solution to the given `problem`, but caches several data about the
-     *   problem so that it is prepared to grow into a solution for it later.
-     *   Those data include the `problem`'s
-     *   {@link module:Metavariables.metavariable metavariables} and
-     *   {@link CaptureConstraints CaptureConstraints}.
+     *   solution to the given `problem`, but caches the problem's
+     *   {@link module:Metavariables.metavariable metavariables} and Expression
+     *   Function Applications, so that it is prepared to grow into a solution
+     *   for it later.
      * @param {boolean} skip Clients should not use this parameter; it is for
      *   internal use only, to make copying Solution objects more efficient.
      * 
@@ -54,15 +52,8 @@ export class Solution {
         if ( !skip ) {
             const pats = problem.constraints.map(
                 constraint => constraint.pattern )
-            this._captureConstraints = new CaptureConstraints( ...pats )
             this._metavariables = pats.map( metavariableNamesIn )
                 .reduce( ( A, B ) => new Set( [ ...A, ...B ] ), new Set() )
-            this._bound = new Set( pats.map( pattern =>
-                pattern.descendantsSatisfying( d => d.binds() )
-                       .map( b => b.boundSymbols()
-                                   .filter( v => v.isA( metavariable ) )
-                                   .map( mv => mv.text() ) )
-            ).flat( 2 ) )
             this._EFAs = pats.map( pattern =>
                 pattern.descendantsSatisfying( isAnEFA ) ).flat( 1 )
         }
@@ -82,8 +73,6 @@ export class Solution {
      *    internally, since these are typically immutable objects anyway, but
      *    it creates its own set of those instances, so that adding or
      *    removing entries changes only the copy.
-     *  * It makes a copy of the {@link CaptureConstraints CaptureConstraints}
-     *    set, but as documented in that class, such copies are shallow.
      *  * It uses the same metavariable and bound metavariable sets as in the
      *    original object, because those members do not change throughout the
      *    lifetime of a Solution.
@@ -96,9 +85,7 @@ export class Solution {
             if ( this._substitutions.hasOwnProperty( metavariable ) )
                 result._substitutions[metavariable] =
                     this._substitutions[metavariable]
-        result._captureConstraints = this._captureConstraints.copy()
         result._metavariables = this._metavariables
-        result._bound = this._bound
         result._EFAs = this._EFAs
         // Done, return the copy:
         return result
@@ -157,16 +144,11 @@ export class Solution {
      */
     substitute ( ...subs ) {
         subs.forEach( sub => {
-            // Apply sub to each Substitution in this Solution
             for ( let metavariable in this._substitutions )
                 if ( this._substitutions.hasOwnProperty( metavariable ) )
                     this._substitutions[metavariable] =
                         this._substitutions[metavariable].afterSubstituting(
                             sub )
-            // Apply sub to each Capture Constraint in this Solution
-            this._captureConstraints = new CaptureConstraints(
-                ...this._captureConstraints.constraints.map( cc =>
-                    sub.appliedTo( cc ) ) )
         } )
     }
 
@@ -186,47 +168,6 @@ export class Solution {
         return result
     }
 
-    /**
-     * It is not possible to recursively solve a constraint set if some are
-     * bindings, as documented in {@link Constraint#removeBindings the
-     * removeBindings() function in the Constraint class}.  That function
-     * removes binding expressions to avoid the problem documented there, but
-     * that operation needs to be reversed if a solution is eventually found.
-     * Thus, in this class, we provide this method that does exactly that.
-     * 
-     * It replaces every virtual binding, encoded as an application expression
-     * of the form `("LDE binding" h v1 ... vn b)`, with the corresponding
-     * original binding expression, `(h v1 ... vn , b)`.  It does so in-place
-     * in all of the substitutions in this object.
-     * 
-     * @see {@link Constraint#removeBindings removeBindings() in the Constraint class}
-     */
-    restoreBindings () {
-        const withBindings = expression => {
-            if ( expression.isAtomic() ) return expression.copy()
-            if ( expression instanceof Application ) {
-                const head = expression.firstChild()
-                if ( head instanceof LurchSymbol && head.text() == 'LDE binding' )
-                    return new BindingExpression(
-                        ...expression.children().slice( 1 ).map( withBindings ) )
-                else
-                    return new Application(
-                        ...expression.children().map( withBindings ) )
-            }
-            if ( expression instanceof BindingExpression )
-                return new BindingExpression(
-                    ...expression.children().map( withBindings ) )
-            throw `Invalid expression in restoreBindings: ${expression.toPutdown()}`
-        }
-        for ( let metavarName in this._substitutions ) {
-            if ( this._substitutions.hasOwnProperty( metavarName ) ) {
-                const sub = this._substitutions[metavarName]
-                this._substitutions[metavarName] = new Substitution(
-                    sub.metavariable, withBindings( sub.expression ) )
-            }
-        }
-    }
-
     // For internal use.  Applies beta reduction to all the patterns in all the
     // solution's substitutions.
     betaReduce () {
@@ -240,73 +181,17 @@ export class Solution {
     }
 
     /**
-     * If we applied the current solution to the original problem, which could
-     * include applying $\beta$-reduction to any instantiated expression
-     * functions, would that result in any variable capture?  For example, if
-     * we had a solution that instantiated $P\mapsto\lambda x.\exists y.f(x)$
-     * and the original problem had $P$ applied to $2+y$, then computing
-     * $P(2+y)$ would result in variable capture.
-     * 
-     * This function detects whether there are any such instances, and returns
-     * true if and only if there are.  It expects to be called after all
-     * metavariable instantiations have been computed, i.e., not when the
-     * solution is only partially formed.
-     * 
-     * @returns {boolean} whether $\beta$-reduction would cause variable
-     *   capture
-     */
-    betaWouldCapture () {
-        for ( let i = 0 ; i < this._EFAs.length ; i++ ) {
-            const efa = this._EFAs[i]
-            // get the EFA head's instantiation, or move on if there is none
-            const ef = this.get( efa.child( 1 ) )
-            if ( !ef ) continue
-            // for each of its parameters...
-            const parameters = parametersOfEF( ef )
-            for ( let j = 0 ; j < parameters.length ; j++ ) {
-                // compute what we would plug in for that parameter
-                let argument = efa.child( 2 + j )
-                for ( const metavar in this._substitutions )
-                    if ( this._substitutions.hasOwnProperty( metavar ) )
-                        argument = this._substitutions[metavar].appliedTo(
-                            argument )
-                // is it actually free to replace the parameter, though?
-                const body = bodyOfEF( ef )
-                const freeToReplace = body.descendantsSatisfying(
-                    d => d.equals( parameters[j] ) && d.isFree( body )
-                ).every( d => argument.isFreeToReplace( d, body ) )
-                // if not, we've found a capture example; return true
-                if ( !freeToReplace ) return true
-            }
-        }
-        // no capture examples exist; return false
-        return false
-    }
-
-    /**
      * Add a new {@link Substitution Substitution} to this object.  (Recall
      * from the definition of this class that it functions as a set of
      * {@link Substitution Substitutions}.)  Or, if the
      * {@link Substitution Substitution} fails, throw an error instead.
      * 
-     * The function can fail for any of the following three reasons.
-     * 
-     *  1. If the {@link Substitution Substitution}'s metavariable already
-     *     appears in the given Solution, but mapped to a different
-     *     {@link Expression Expression}.  This fails because a
-     *     {@link Substitution Substitution} is a function, and so it cannot
-     *     map the same input to more than one output.
-     *  2. If the {@link Substitution Substitution} maps a metavariable to a
-     *     non-{@link Symbol Symbol}, and yet the metavariable appears as the
-     *     bound variable in a quantifier.  This fails because quantifiers can
-     *     bind only variables, so we cannot replace a bound metavariable with
-     *     anything but another variable.
-     *  3. If applying the given {@link Substitution Substitution} violates
-     *     any one of the {@link CaptureConstraints CaptureConstraints} stored
-     *     in this Solution.  This fails because if we later apply the
-     *     Solution to the original {@link Problem Problem} from which it was
-     *     created, we must avoid variable capture, and those constraints are
-     *     precisely what must be satisfied in order to do so.
+     * The function can fail if the {@link Substitution}'s metavariable already
+     * appears in the given Solution, but mapped to a different
+     * {@link Expression}.  This fails because a {@link Substitution} is a
+     * function, and so it cannot map the same input to more than one output.
+     * This comparison is done {@link module:deBruijn.equal modulo de Bruijn
+     * attributes}.
      * 
      * This also includes applying the given {@link Substitution Substitution}
      * to the contents of this object before inserting the given
@@ -322,32 +207,15 @@ export class Solution {
         if ( check ) {
             const mvName = sub.metavariable.text()
             const oldValue = this.get( mvName )
-            const newValue = sub.expression
-            // Check #1: The metavariable may already be mapped to something else
-            if ( oldValue && !oldValue.equals( newValue ) )
+            if ( oldValue && !deBruijnEquals( oldValue, sub.expression ) )
                 throw new Error(
                     `Function condition failed for metavariable ${mvName}` )
-            // Check #2: The substitution might make us try to bind a non-var
-            if ( this._bound.has( mvName )
-              && !( newValue instanceof LurchSymbol ) )
-                throw new Error(
-                    `Cannot set bound metavariable ${mvName} to a non-symbol` )
-            // Check #3: The substitution might violate a capture constraint
-            if ( this._captureConstraints.constraints.some( cc =>
-                    cc.afterSubstituting( sub ).violated() ) )
-                throw new Error(
-                    `Assignment for ${mvName} would violate capture constraints`
-                )
         }
-        // modify inner substitutions and capture constraints
+        // modify inner substitutions
         this.substitute( sub )
         this.betaReduce()
         // add the sub to our list
         this._substitutions[sub.metavariable.text()] = sub
-        // delete now-satisfied capture constraints
-        this._captureConstraints.constraints =
-            this._captureConstraints.constraints.filter(
-                cc => !cc.satisfied() )
     }
 
     /**
@@ -467,8 +335,14 @@ export class Solution {
     toString () {
         const d = Array.from( this.domain() )
         d.sort()
-        return `{${d.map(x=>this._substitutions[x].toString()).join(',')}}/cc`
-             + this._captureConstraints.toString()
+        return `{${d.map(x=>this._substitutions[x].toString()).join(',')}}`
+    }
+
+    // for internal use only, by *solutions() member of "friend" class Problem
+    deBruijnDecode () {
+        for ( let metavariable in this._substitutions )
+            if ( this._substitutions.hasOwnProperty( metavariable ) )
+                this._substitutions[metavariable].deBruijnDecode()
     }
 
 }

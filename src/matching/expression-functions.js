@@ -75,9 +75,12 @@ import { BindingExpression } from "../binding-expression.js"
 import { metavariable } from "./metavariables.js"
 import { NewSymbolStream } from "./new-symbol-stream.js"
 
-// We use this symbol for encoding expression functions as LogicConcepts, as
-// described above.
-const expressionFunction = new LurchSymbol( 'LDE lambda' )
+/**
+ * The constant used in this module as the operator when encoding Expression
+ * Functions as LogicConcepts.  See the documentation at the top of this module
+ * for more information.
+ */
+export const expressionFunction = new LurchSymbol( 'LDE lambda' )
 
 /**
  * Creates a new expression function, encoded as a
@@ -88,7 +91,7 @@ const expressionFunction = new LurchSymbol( 'LDE lambda' )
  * For example, if `x` and `y` are {@link Symbol Symbol} instances with the
  * names "x" and "y" and `B` is an Application, such as `(+ x y)`, then
  * `newEF(x,y,B)` will be the {@link Expression Expression}
- * `("LDE lambda" (x y , (+ x y)))`.
+ * `("LDE lambda" (x y) , (+ x y))`.
  * 
  * @param  {...Expression} args a list of {@link Expression Expressions} to use
  *   in forming the expression function, which must begin with one or more
@@ -308,9 +311,12 @@ export const applicationEF = ( arity, symbols ) => {
                     ...parameters.map( p => p.copy() ) ) ) ) )
 }
 
-// We use this symbol for encoding Expression Function Applications as
-// LogicConcepts, as described above.
-const expressionFunctionApplication = new LurchSymbol( 'LDE EFA' )
+/**
+ * The constant used in this module as the operator when encoding Expression
+ * Function Applications as LogicConcepts.  See the documentation at the top of
+ * this module for more information.
+ */
+export const expressionFunctionApplication = new LurchSymbol( 'LDE EFA' )
 
 /**
  * Creates a new Expression Function Application, encoded as an

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Lurch Deductive Engine: connection.js</title>
+    <title>Lurch Deductive Engine: matching/de-bruijn.js</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
@@ -37,7 +37,7 @@
 <main class="layout-main  layout-content--source">
   <div class="container">
     <p class="page-kind">source</p>
-    <h1 class="page-title">connection.js</h1>
+    <h1 class="page-title">matching/de-bruijn.js</h1>
     
 
 
@@ -47,440 +47,450 @@
 <section>
     <article>
         <pre id="source" class="source-page line-numbers"><code class="language-js">
-import { MathConcept } from './math-concept.js'
+import { LogicConcept } from '../logic-concept.js'
+import { Application } from '../application.js'
+import { BindingExpression } from '../binding-expression.js'
+import { Symbol as LurchSymbol } from '../symbol.js'
+import {
+    expressionFunctionApplication, isAnEF, newEF, parametersOfEF, bodyOfEF
+} from './expression-functions.js'
+import { metavariable } from './metavariables.js'
 
 /**
- * The Connection class is a thin API to make it easy to access connection data
- * stored in {@link MathConcept MathConcept} instances.  Specifically, the
- * construction and destruction of Connection objects has nothing to do with the
- * actual connections that exist among nodes in a {@link MathConcept MathConcept}
- * hierarchy, but rather these objects are created for convenience in accessing
- * and modifying those connections.
+ * ## What are de Bruijn indices?
  * 
- * Specifically, the data for a connection between two MathConcepts is stored as
- * follows.  Assume we have MathConcepts X and Y with IDs idX and idY,
- * respectively, and a connection from X to Y that has ID C and associated data
- * D (which is an arbitrary Map stored as JSON).  This information is stored by
- * the following convention.
+ * One way to express bound variables without giving them explicit names is to
+ * use *de Bruijn indices,* a technique that replaces symbols with numbers.  The
+ * standard version of this method applies to the $\lambda$-calculus, replacing
+ * a bound variable $x$ with a natural number $n$ that is equal to the number of
+ * levels of nested $\lambda$ expressions one must walk up the syntax tree to
+ * find the one that binds $x$.
  * 
- *  * MathConcept X will have an attribute with key "_conn target C" and value
- *    idY.
- *  * MathConcept Y will have an attribute with key "_conn source C" and value
- *    idX.
- *  * MathConcept X will have an attribute with key "_conn data C" and value D.
+ * For example, $\lambda f.\lambda g.(f~(g~x))$ could be expressed as
+ * $\lambda.\lambda.(2~(1~x))$.  Notice these properties of the example:
  * 
- * In each of the above examples, the literal value C is not in the attribute
- * key, but rather the ID of the connection we're referring to as C.
+ *  1. The inner $f$ of the original expression is replaced with a 2, because
+ *     one must walk out two "$\lambda$ levels" to find the $\lambda$ that
+ *     originally bound $f$.
+ *  1. The inner $g$ is now a 1 because it was bound by the first $\lambda$
+ *     above it.
+ *  1. The bound variable names are not needed, because the order of
+ *     quantification is clear from the indices.
  * 
- * While it would be possible to create, edit, and/or remove such data with just
- * the attribute getters and setters on {@link MathConcept MathConcept} instances,
- * this would be very inconvenient.  It will produce cleaner code if we treat
- * connections as first-class citizens by creating this class.  But its
- * instances merely hide the details of manipulating the data as described
- * above; they do not store their own data.  In particular:
+ * Had the example been something like $(\circ~(\lambda~x.x)~(\lambda~y.y))$,
+ * it would have become $(\circ~(\lambda.1)~(\lambda.1))$, showcasing how de
+ * Bruijn indices reduce $\alpha$-equivalence to mere expression equality.
  * 
- *  * We might have multiple instances of the Connection class all in existence
- *    at once, all referring to the exact same connection.  This does not make
- *    multiple copies of the connection; it merely gives us multiple ways to
- *    refer to it.
- *  * We might have no instances of the Connection class in existence for some
- *    particular connection.  This does not make the connection go away; it
- *    merely means we don't currently have objects that refer to it.
+ * ## Purpose of this module
+ * 
+ * This module provides tools to encode {@link MathConcept} instances using de
+ * Bruijn indices, but we make the following changes to extend the method from
+ * the standard version introduced above to a version that supports the full
+ * range of {@link MathConcept MathConcepts}.
+ * 
+ *  1. It is not only $\lambda$ expressions that are supported, but any kind of
+ *     {@link BindingExpression}.  For example, we can encode $\forall~x.(P~x)$
+ *     as $\forall.(P~1)$.
+ *  2. Because a {@link BindingExpression} can bind multiple variables, we must
+ *     distinguish them, so our indices will be pairs, one index for the binding
+ *     level (as above) and one index for which position within that binding was
+ *     occupied by the symbol being encoded.  For example, $\forall x,y.(>~x~y)$
+ *     can be encoded as $\forall.(>~(1,1)~(1,2))$, where I'm using the
+ *     standard notation for pairs.  This applies even if the binder binds only
+ *     one variable, so the example from item 1., above, would actually be
+ *     encoded as $\forall.(P~(1,1))$.
+ *  3. Unlike the original de Bruijn notation, we will use zero-based indexing,
+ *     to be consistent with everything else in our codebase, which uses
+ *     zero-based indexing.  Thus the two examples from item 2., above, would
+ *     actually be encoded as $\forall.(>~(0,0)~(0,1))$ and $\forall.(P~(0,0))$,
+ *     respectively.
+ * 
+ * The notation used above is to illustrate the general concept of the de Bruijn
+ * conversion only.  Obviously pairs like $(a,b)$ and bindings with no bound
+ * symbols like $\lambda.1$ are not valid {@link LogicConcept#fromPutdown
+ * putdown notation}, so they do not represent the actual encoding.  The details
+ * of that encoding appear in the next section.
+ * 
+ * ## Functions in this module
+ * 
+ * Given a {@link Symbol}, we can compute its encoding as a pair of de Bruijn
+ * indices with {@link module:deBruijn.encodeSymbol encodeSymbol()}.  We
+ * represent that pair as another {@link Symbol} whose name is a JSON encoding
+ * that includes the pair of indices, and that has the original symbol name
+ * stored as an attribute, so that the conversion can
+ * be inverted later (with {@link module:deBruijn.decodeSymbol decodeSymbol()}).
+ * However, if you wish to fetch just the indices of the encoded symbol, you can
+ * do so with {@link module:deBruijn.encodedIndices encodedIndices()}.
+ * 
+ * The {@link module:deBruijn.encodeSymbol encodeSymbol()} function is not,
+ * however, of much use to clients, who typically want to encode entire
+ * {@link Expression Expressions}, not just individual symbols within them.
+ * Given an {@link Expression}, we can compute its de Bruijn encoding using
+ * {@link module:deBruijn.encodeExpression encodeExpression()}.  It yields
+ * another expression with the following properties.
+ * 
+ *  * At each position where a {@link Symbol} had sat, its encoding (under
+ *    {@link module:deBruijn.encodeSymbol encodeSymbol()}) will sit instead.
+ *  * The entire resulting expression contains no
+ *    {@link BindingExpression BindingExpressions}.
+ *  * At each position where a {@link BindingExpression} had sat as a
+ *    subexpression, instead an {@link Application} now sits, of the form
+ *    `(A B)`, where `A` is a special symbol indicating that a
+ *    {@link BindingExpression} has been encoded, and `B` is the encoding of the
+ *    body of the original {@link BindingExpression}.
+ *  * Each such `A` will be decorated with an attribute that records the
+ *    original names of the bound symbols, so that this encoding is invertible
+ *    (using {@link module:deBruijn.decodeExpression decodeExpression()}).
+ * 
+ * To give one full, explicit example, consider the {@link Expression} (in
+ * {@link LogicConcept#fromPutdown putdown notation})
+ * `(forall (x y) , (> x y))`.  Its de Bruijn encoding, according to this
+ * module, would be the following.  I will use the symbol `"LDE DB"` as the
+ * special symbol meaning "encoded binding" and also as the attribute key for
+ * all de Bruijn attributes.  Some JSON encodings have been simplified for
+ * readability, as you can see below.
+ * 
+ * ```
+ * (forall
+ *   ("LDE DB" +{"LDE DB":"['x','y']"} // list of bound variable names
+ *     (>
+ *       "['LDE DB',0,0]" +{"LDE DB":"JSON encoding of original x symbol"}
+ *       "['LDE DB',0,1]" +{"LDE DB":"JSON encoding of original y symbol"}
+ *     )
+ *   )
+ * )
+ * ```
+ * 
+ * The module also provides a {@link module:deBruijn.free freeness test} for de
+ * Bruijn indices, which returns true for an index $(n,m)$ iff there are at
+ * least $n+1$ encoded bindings surrounding the symbol.
+ * 
+ * ## Coordinating with matching
+ * 
+ * There are two exceptions to the above encoding description, each of which
+ * helps this module integrate correctly with the larger module in which it
+ * sits, {@link module:Matching the Matching module}.
+ * 
+ * First, when encoding a symbol, if the symbol is a metavariable, then don't
+ * encode it at all, but leave it in its original form.
+ * 
+ * Second, one of the special symbols in the matching package, the one that
+ * marks Expression Functions Applications, is not encoded, but is left
+ * unchanged under the de Bruijn encoding.  That way, Expression Function
+ * Applications retain their meanings under the de Bruijn encoding.
+ * 
+ * Finally, we do not need to apply the same protection to the Expression
+ * Function symbol, because we will not be applying the de Bruijn encoding to
+ * Expression Functions, and it would break them anyway, since it removes all
+ * bindings.  But when decoding the image of a metavariable in a solution, an
+ * Expression Function may be present, so the
+ * {@link module:deBruijn.decodeExpression decodeExpression()} function recurs
+ * inside such structures.
+ * 
+ * ## Expression equality
+ * 
+ * As mentioned above, one of the benefits of de Bruijn indices is that two
+ * expressions are $\alpha$-equivalent iff their de Bruijn encodings are exactly
+ * equal.  However, the implementation above mentions that our encoding function
+ * stores the original names of the bound symbols as attributes so that the
+ * encoding is invertible.  Thus if we encode the identity function
+ * $\lambda x.x$ and also encode the identity function $\lambda y.y$, although
+ * the resulting expressions would seem equal, both being something like
+ * $\lambda.(0,0)$, but their attributes would distinguish them:
+ * 
+ * ```
+ * // Encoding of (lambda x , x):
+ * (lambda
+ *   ("LDE DB" +{"LDE DB":['x']}
+ *     "['LDE DB',0,0]" +{"LDE DB":"JSON encoding of the symbol x"}
+ *   )
+ * )
+ * // Encoding of (lambda y , y):
+ * (lambda
+ *   ("LDE DB" +{"LDE DB":['y']}
+ *     "['LDE DB',0,0]" +{"LDE DB":"JSON encoding of the symbol y"}
+ *   )
+ * )
+ * ```
+ * 
+ * Without the attributes, we would be comparing
+ * `(lambda ("LDE DB" "['LDE DB',0,0]"))` to itself.  With the attributes, we
+ * can still distinguish formerly-$x$ from formerly-$y$, which is undesirable.
+ * 
+ * Thus we need a way to compare two expressions for equality, but ignore these
+ * hidden attributes that are present only to enable the inversion of the de
+ * Bruijn encoding.  We define the {@link module:deBruijn.equal equal()}
+ * function for this purpose.  It simply calls the {@link MathConcept#equals
+ * equals()} function in the {@link MathConcept} class, passing an optional
+ * argument that tells it to ignore the attributes in question when doing its
+ * comparison.
+ * 
+ * @module deBruijn
  */
-export class Connection {
 
-    /**
-     * Each Connection should have a globally unique ID, and there should be a
-     * dictionary of such IDs that give us a way to create a Connection instance
-     * with that ID.
-     * 
-     * This Map stores the association of Connection IDs (keys) with MathConcept
-     * instances (values), such that the MathConcept `IDs[x]` is the source of the
-     * Connection with ID `x`.
-     * 
-     * This data structure should not be accessed by clients; it is private to
-     * this class.  Use {@link Connection.withID withID()} instead.
-     * 
-     * @see {@link Connection.withID withID()}
-     */
-    static IDs = new Map
+/**
+ * This string is used for several purposes in this module.
+ * 
+ *  * Encoded {@link Symbol Symbols} use this string as the key for the
+ *    attribute that stores their original text.
+ *  * Encoded {@link BindingExpression BindingExpressions} use this string as
+ *    the key for the attribute that stores their original list of bound symbol
+ *    names.
+ *  * Encoded {@link BindingExpression BindingExpressions} are
+ *    {@link Application Applications} whose operator is a symbol with this
+ *    string as its text.
+ */
+export const deBruijn = 'LDE DB'
+// A symbol whose value is the above constant
+const deBruijnSymbol = new LurchSymbol( deBruijn )
 
-    /**
-     * Create a Connection instance representing the connection with the given
-     * ID.  Keep in mind that connections among MathConcepts are stored as data
-     * within those MathConcepts, and this class is merely a convenient API for
-     * manipulating that data.  So a connection exists independently of how many
-     * (zero or more) Connection instances exist in memory.  If you want to
-     * query or manipulate a connection, it is handy to get a Connection
-     * instance for it, using this function.
-     * 
-     * @param {string} id - The globally unique ID of a connection among
-     *   MathConcept instances
-     * @return {Connection} A Connection instance representing the connection
-     *   whose ID was given, or undefined if the given ID is not in the
-     *   {@link Connection.IDs IDs} mapping
-     */
-    static withID ( id ) {
-        return Connection.IDs.has( id ) ? new Connection( id ) : undefined
+// Given any symbol, compute the i and j that form its index pair (i,j),
+// defined in the documentation at the top of this module.
+// Or, if the symbol is free where it sits, return undefined.
+const symbolToIndices = symbol => {
+    const binders = symbol.ancestorsSatisfying(
+        a => a instanceof BindingExpression )
+    for ( let i = 0 ; i &lt; binders.length ; i++ ) {
+        const boundSymbols = binders[i].boundSymbols()
+        for ( let j = 0 ; j &lt; boundSymbols.length ; j++ )
+            if ( boundSymbols[j].text() == symbol.text() )
+                return [ i, j ]
     }
+}
 
-    /**
-     * This function constructs a new instance, and in that sense behaves very
-     * much like {@link Connection.withID withID()}, but that function is to be
-     * preferred over this one for two reasons.
-     * 
-     *  1. This function always returns a Connection instance, since it is the
-     *     constructor, even if the parameter passed is not the ID of any
-     *     existing Connection.  The resulting Connection instance will not be
-     *     of any use to the client.
-     *  2. Calling a constructor gives the illusion that the connection object
-     *     is forming a connection between two {@link MathConcept MathConcept}s,
-     *     while the {@link Connection.withID withID()} function suggests the
-     *     truth more accurately, that we are simply getting ahold of an
-     *     already-existing connection.  To form a new connection between two
-     *     MathConcepts, use the {@link Connection.create create()} function
-     *     instead.
-     * 
-     * @param {string} id - The globally unique ID of a connection among
-     *   MathConcept instances
-     * @see {@link Connection.withID withID()}
-     * @see {@link Connection.create create()}
-     */
-    constructor ( id ) { this.id = id }
+/**
+ * This function takes an input {@link Symbol} and returns an output
+ * {@link Symbol} whose name encodes the de Bruijn index of the first symbol.
+ * Recall from the definition at the top of this module that, in this module, a
+ * de Bruijn index is a pair of natural numbers.  Note that the context of the
+ * input {@link Symbol} (its ancestor chain, and whether it is bound by any of
+ * those ancestors) is what determines the result of this function.
+ * 
+ * The encoded symbol returned by this function has an attribute that stores the
+ * original name of this symbol, so that this encoding can be reversed by
+ * {@link module:deBruijn.decodeSymbol decodeSymbol()}.  For two important
+ * details about how symbol encoding coordinates with the Matching module, see
+ * the documentation at the top of this module.
+ * 
+ * @function
+ * @param {Symbol} symbol the symbol to be encoded
+ * @returns {Symbol} a new symbol whose name encodes the de Bruijn indices of
+ *   the input
+ * @see {@link module:deBruijn.encodedIndices encodedIndices()}
+ * @see {@link module:deBruijn.decodeSymbol decodeSymbol()}
+ * @see {@link module:deBruijn.encodeExpression encodeExpression()}
+ */
+export const encodeSymbol = symbol => {
+    // Exceptions: Don't modify special symbol used for EFAs, nor metavariables:
+    if ( symbol.equals( expressionFunctionApplication )
+      || symbol.isA( metavariable ) )
+        return symbol.copy()
+    // Okay, now do the normal de Bruijn encoding:
+    const indices = symbolToIndices( symbol )
+    return new LurchSymbol( JSON.stringify(
+        indices ? [ deBruijn, ...indices ] : [ deBruijn, symbol.text() ]
+    ) ).attr( [ [ deBruijn, symbol.toJSON() ] ] )
+}
 
-    /**
-     * Create a new connection between two {@link MathConcept MathConcept}
-     * instances.  This writes data into the attributes of those two instances,
-     * data representing the connection, and then returns a Connection instance
-     * that gives convenient access to that data.
-     * 
-     * @param {string} connectionID - The ID to be used for the newly formed
-     *   connection.  This must not already exist in the
-     *   {@link Connection.IDs IDs} mapping; if it does, this function takes no
-     *   action.
-     * @param {string} sourceID - The ID of the MathConcept that should be the
-     *   source of the new connection.  If no MathConcept has this ID, this
-     *   function takes no action.
-     * @param {string} targetID - The ID of the MathConcept that should be the
-     *   target of the new connection.  If no MathConcept has this ID, this
-     *   function takes no action.
-     * @param {*} [data] - Optional data to be assigned to the newly formed
-     *   connection.  This parameter will be passed directly to the
-     *   {@link Connection#attr attr()} function; see its documentation for the
-     *   acceptable types and their meanings.
-     * @return {Connection} A Connection instance for the newly created
-     *   connection between the source and target.  This return value can be
-     *   safely ignored, because the connection data is stored in the source and
-     *   target MathConcepts, and is not dependent on the Connection object
-     *   itself.  But this return value will be false if any step in the
-     *   process fails, including if the connection ID is already in use or the
-     *   source or target IDs are invalid.
-     */
-    static create ( connectionID, sourceID, targetID, data = null ) {
-        if ( Connection.IDs.has( connectionID ) ) return false
-        const source = MathConcept.instanceWithID( sourceID )
-        if ( !source ) return false
-        const target = MathConcept.instanceWithID( targetID )
-        if ( !target ) return false
-        source.setAttribute( `_conn target ${connectionID}`, targetID )
-        target.setAttribute( `_conn source ${connectionID}`, sourceID )
-        Connection.IDs.set( connectionID, source )
-        const result = new Connection( connectionID )
-        if ( data ) result.attr( data )
-        return result
+/**
+ * This function takes a {@link Symbol} encoded by the
+ * {@link module:deBruijn.encodeSymbol encodeSymbol()} function and returns the
+ * de Bruijn indices stored within its name.
+ * 
+ * @function
+ * @param {Symbol} symbol a symbol that was de Bruijn-encoded
+ * @returns {number[]} a pair of natural numbers, the de Bruijn indices of the
+ *   input
+ * @see {@link module:deBruijn.encodeSymbol encodeSymbol()}
+ * @see {@link module:deBruijn.decodeSymbol decodeSymbol()}
+ */
+export const encodedIndices = symbol => {
+    if ( !( symbol instanceof LurchSymbol ) ) return
+    try {
+        const parts = JSON.parse( symbol.text() )
+        return parts.length == 3 &amp;&amp; parts[0] == deBruijn ?
+            parts.slice( 1 ) : undefined
+    } catch {
+        return undefined
     }
+}
 
-    /**
-     * Get the source {@link MathConcept MathConcept} for this connection.  This is
-     * taken directly from the {@link Connection.IDs IDs} mapping.
-     * 
-     * @return {MathConcept} The source {@link MathConcept MathConcept}
-     * @see {@link Connection#target target()}
-     */
-    source () { return Connection.IDs.get( this.id ) }
+/**
+ * Alter the name of a de Bruijn index (an encoded {@link Symbol}) so that it
+ * still encodes a de Bruijn index, but the two components have been adjusted
+ * (up or down) by the differences given in the latter two arguments.  That is,
+ * a de Bruijn index $(i,j)$ can be adjusted with $(\Delta_i,\Delta_j)$ to
+ * become $(i+\Delta_i,j+\Delta_j)$.
+ * 
+ * If the first argument is an {@link Application}, this function distributes
+ * itself across the {@link Application}'s children.  If it is neither a
+ * {@link Symbol} nor an {@link Application}, this function does nothing.
+ * 
+ * @function
+ * @param {Symbol} target an encoded de Bruijn index
+ * @param {integer} deltaI the amount by which to adjust the first component of
+ *   the index
+ * @param {integer} deltaJ the amount by which to adjust teh second component of
+ *   the index
+ */
+export const adjustIndices = ( target, deltaI, deltaJ ) => {
+    if ( target instanceof Application )
+        return target.children().forEach( child =>
+            adjustIndices( child, deltaI, deltaJ ) )
+    const original = encodedIndices( target )
+    if ( !original ) return
+    target.setAttribute( 'symbol text', JSON.stringify(
+        [ deBruijn, original[0] + deltaI, original[1] + deltaJ ] ) )
+}
 
-    /**
-     * Get the target {@link MathConcept MathConcept} for this connection.
-     * 
-     * @return {MathConcept} The target {@link MathConcept MathConcept}
-     * @see {@link Connection#source source()}
-     */
-    target () {
-        const source = this.source()
-        if ( !source ) return undefined
-        const targetID = source.getAttribute( `_conn target ${this.id}` )
-        if ( !targetID ) return undefined
-        return MathConcept.instanceWithID( targetID )
-    }
+/**
+ * This function takes a {@link Symbol} encoded by the
+ * {@link module:deBruijn.encodeSymbol encodeSymbol()} function and returns (a
+ * copy of) the original symbol that was passed to the encoding function.  The
+ * de Bruijn indices encoded in the input are discarded, and its original name
+ * (stored in an attribute) is restored.
+ * 
+ * If it receives a symbol that has no de Bruijn encoding information stored in
+ * an attribute, it returns the symbol untouched.
+ * 
+ * @function
+ * @param {Symbol} symbol a symbol that was de Bruijn-encoded
+ * @returns {Symbol} a copy of the original {@link Symbol} that was encoded to
+ *   produce the input `symbol`
+ * @see {@link module:deBruijn.encodeSymbol encodeSymbol()}
+ * @see {@link module:deBruijn.encodedIndices encodedIndices()}
+ * @see {@link module:deBruijn.decodeExpression decodeExpression()}
+ */
+export const decodeSymbol = symbol => {
+    const serialized = symbol.getAttribute( deBruijn )
+    return serialized ? LogicConcept.fromJSON( serialized ) : symbol.copy()
+}
 
-    /**
-     * Get the JSON data associated with this connection.  Such data is stored
-     * in the source {@link MathConcept MathConcept}, as documented in the
-     * conventions described for {@link Connection this class}.
-     * 
-     * @private
-     * @return {Object} The JSON data stored in the connection data attribute
-     *   of the source {@link MathConcept MathConcept}, as long as it is an object.
-     *   If it is not, this function returns a new, empty object instead, to
-     *   guarantee that its return value is an object.  The return value will be
-     *   undefined only if this object has no
-     *   {@link Connection#source source()}.
-     */
-    _getData () {
-        const source = this.source()
-        if ( !source ) return undefined
-        const result = source.getAttribute( `_conn data ${this.id}` )
-        return result instanceof Object ? result : { }
-    }
+/**
+ * This function takes an input {@link Expression} and returns an output
+ * {@link Expression} that is the de Bruijn-encoded form of the input.  The full
+ * list of guarantees this function provides, and the properties its output will
+ * have, is given in the documentation at the top of this module.
+ * 
+ * In summary, all of its {@link BindingExpression BindingExpressions} have been
+ * replaced with {@link Application Applications} with no bound symbols, and all
+ * formerly-bound symbols have been replaced with their encoded versions as de
+ * Bruijn indices, as computed by the
+ * {@link module:deBruijn.encodeSymbol encodeSymbol()}) function.
+ * 
+ * This operation can be reversed by applying the
+ * {@link module:deBruijn.decodeExpression decodeExpression()} function.
+ * 
+ * @function
+ * @param {Expression} expression the expression to be encoded
+ * @returns {Expression} the encoded version, with the properties described
+ *   above
+ * @see {@link module:deBruijn.encodeSymbol encodeSymbol()}
+ * @see {@link module:deBruijn.decodeExpression decodeExpression()}
+ */
+export const encodeExpression = expression =>
+    expression instanceof LurchSymbol ? encodeSymbol( expression ) :
+    expression instanceof Application ? new Application(
+        ...expression.children().map( encodeExpression ) ) :
+    // therefore expression instanceof BindingExpression:
+    new Application(
+        deBruijnSymbol.copy().attr( [ [
+            deBruijn, expression.boundSymbols().map( symbol => symbol.toJSON() )
+        ] ] ),
+        encodeExpression( expression.body() ) )
 
-    /**
-     * Set the JSON data associated with this connection.  Such data is stored
-     * in the source {@link MathConcept MathConcept}, as documented in the
-     * conventions described for {@link Connection this class}.
-     * 
-     * @private
-     * @param {Object} json - A JavaScript object amenable to JSON encoding,
-     *   holding the key-value pairs that are to be the data associated with
-     *   this connection.
-     * @return {boolean} True if and only if it succeeded in writing the data
-     *   into the source {@link MathConcept MathConcept}.  This fails only if this
-     *   object has no {@link Connection#source source()}.
-     */
-    _setData ( json ) {
-        const source = this.source()
-        if ( !source ) return false
-        source.setAttribute( `_conn data ${this.id}`, json )
-        return true
-    }
+export const isEncodedBinding = expression =>
+    ( expression instanceof Application )
+ &amp;&amp; equal( expression.child( 0 ), deBruijnSymbol )
 
-    /**
-     * This function is equivalent to zero or more calls to the
-     * {@link Connection#setAttribute setAttribute()} function in immediate
-     * succession, except that they are combined into a single modification of
-     * the source MathConcept, to minimize the number of events generated.
-     * 
-     * @param {*} attributes - If this is an array, it is treated as an array of
-     *   key-value pairs, and we use each such pair to update the data for this
-     *   connection.  If this is a Map, then all of its key-value pairs are used
-     *   instead, in the same way.  If this is any other kind of JavaScript
-     *   object, then all of its keys and values are used instead, in the same
-     *   way.
-     * @return {boolean} True if and only if it succeeded in writing the data
-     *   into the source {@link MathConcept MathConcept}.  This fails only if this
-     *   object has no {@link Connection#source source()}.
-     * @see {@link Connection#setAttribute setAttribute()}
-     */
-    attr ( attributes = [ ] ) {
-        const newData = JSON.copy( this._getData() )
-        if ( attributes instanceof Array ) {
-            for ( const [ key, value ] of attributes ) {
-                newData[key] = value
-            }
-        } else if ( attributes instanceof Map ) {
-            for ( const [ key, value ] of attributes ) {
-                newData[key] = value
-            }
-        } else if ( attributes instanceof Object ) {
-            for ( const key of Object.keys( attributes ) ) {
-                newData[key] = attributes[key]
-            }
+/**
+ * This function takes an {@link Expression} encoded by the
+ * {@link module:deBruijn.encodeExpression encodeExpression()} function
+ * and returns (a copy of) the original expression that was passed to the
+ * encoding function.
+ * 
+ * @function
+ * @param {Symbol} symbol an expression that was de Bruijn-encoded
+ * @returns {Symbol} a copy of the original {@link Expression} that was encoded
+ *   to produce the input `expression`
+ * @see {@link module:deBruijn.encodeExpression encodeExpression()}
+ * @see {@link module:deBruijn.decodeSymbol decodeSymbol()}
+ */
+export const decodeExpression = expression => {
+    // Case 1: Symbols have their own decoding routine
+    if ( expression instanceof LurchSymbol )
+        return decodeSymbol( expression )
+    // Case 2: Expression Functions
+    if ( isAnEF( expression ) )
+        return newEF(
+            ...parametersOfEF( expression ).map( v => v.copy() ),
+            decodeExpression( bodyOfEF( expression ) )
+        )
+    // Case 3: (Other) Applications
+    if ( expression instanceof Application ) {
+        if ( equal( expression.child( 0 ), deBruijnSymbol ) ) {
+            // subcase 1: application that encodes what used to be a binding
+            const symbolNames = expression.child( 0 ).getAttribute( deBruijn )
+            if ( !symbolNames )
+                throw new Error( 'Missing de Bruijn attribute on Application' )
+            return new BindingExpression(
+                ...symbolNames.map( json => LogicConcept.fromJSON( json ) ),
+                decodeExpression( expression.child( 1 ) ) )
+        } else {
+            // subcase 2: application that is just an application
+            return new Application(
+                ...expression.children().map( decodeExpression ) )
         }
-        return this._setData( newData )
     }
+    // therefore expression instanceof BindingExpression, which means this is
+    // not a correctly-encoded de Bruijn expression
+    throw new Error( 'No bindings permitted in de Bruijn encodings' )
+}
 
-    /**
-     * Look up a value in the data associated with this connection.  The data
-     * for a connection is a set of key-value pairs, stored in the source
-     * {@link MathConcept MathConcept} for the connection, as described in the
-     * conventions documented at the top of {@link Connection this class}.
-     * This function looks up one value in that set of key-value pairs, given a
-     * key.
-     * 
-     * @param {string} key - The key for the attribute to look up
-     * @return {*} The value corresponding to the given key
-     * @see {@link Connection#setAttribute setAttribute()}
-     * @see {@link Connection#getAttributeKeys getAttributeKeys()}
-     */
-    getAttribute ( key ) {
-        const data = this._getData()
-        return data ? data[key] : undefined
-    }
+/**
+ * See the documentation at the top of this module for why it is important to be
+ * able to test two expressions for equivalence, ignoring the attributes that
+ * may have been added during the de Bruijn encoding process that produced those
+ * two expressions.  This function does exactly that, using the
+ * `attributesToIgnore` feature of the {@link MathConcept#equals equals()}
+ * function in the {@link MathConcept} class.
+ * 
+ * @function
+ * @param {Expression} expression1 the left-hand side of the equality test; this
+ *   function asks if this is equal to `expression2`
+ * @param {Expression} expression2 the right-hand side of the equality test;
+ *   this function asks if this is equal to `expression1`
+ * @returns {boolean} whether the two {@link Expression Expressions} are equal
+ *   except for any attributes that were added as part of the de Bruijn encoding
+ *   process
+ */
+export const equal = ( expression1, expression2 ) =>
+    expression1.equals( expression2, [ deBruijn ] )
 
-    /**
-     * Store a value in the data associated with this connection.  The data
-     * for a connection is a set of key-value pairs, stored in the source
-     * {@link MathConcept MathConcept} for the connection, as described in the
-     * conventions documented at the top of {@link Connection this class}.
-     * This function adds or overwrites a pair in that set, given the new key
-     * and value to use.  This therefore generates one
-     * {@link MathConcept#willBeChanged willBeChanged} event and one
-     * {@link MathConcept#wasChanged wasChanged} event in the source
-     * {@link MathConcept MathConcept}.
-     * 
-     * @param {string} key - The key for the attribute to add or change
-     * @param {*} value - The new value to associate with the key.  This should
-     *   be data that is amenable to JSON encoding.
-     * @return {boolean} True if and only if it succeeded in writing the data
-     *   into the source {@link MathConcept MathConcept}.  This fails only if this
-     *   object has no {@link Connection#source source()}.
-     * @see {@link Connection#getAttribute getAttribute()}
-     * @see {@link Connection#getAttributeKeys getAttributeKeys()}
-     * @see {@link Connection#attr attr()}
-     */
-    setAttribute ( key, value ) {
-        const newData = JSON.copy( this._getData() )
-        newData[key] = value
-        return this._setData( newData )
-    }
-
-    /**
-     * The list of keys for all attributes of this connection.  The data for a
-     * connection is a set of key-value pairs, stored in the source
-     * {@link MathConcept MathConcept} for the connection, as described in the
-     * conventions documented at the top of {@link Connection this class}.
-     * This function looks up all the keys in that data and returns them.
-     * 
-     * @return {string[]} A list of strings, each one a key.  If this Connection
-     *   instance has an invalid ID or any other misconfiguration, this result
-     *   will be undefined.
-     * @see {@link Connection#getAttribute getAttribute()}
-     * @see {@link Connection#setAttribute setAttribute()}
-     */
-    getAttributeKeys () {
-        const data = this._getData()
-        return data ? Object.keys( data ) : undefined
-    }
-
-    /**
-     * Check whether a key exists in the data associated with this connection.
-     * The data for a connection is a set of key-value pairs, stored in the
-     * source {@link MathConcept MathConcept} for the connection, as described in
-     * the conventions documented at the top of {@link Connection this class}.
-     * This function looks up a key and returns whether or not that key is
-     * present in the data.
-     * 
-     * @param {string} key - The key to look up
-     * @return {boolean} True if the key exists in the data, false if it does
-     *   not or if there is any other problem with the lookup (such as this
-     *   instance's ID being invalid)
-     * @see {@link Connection#setAttribute setAttribute()}
-     * @see {@link Connection#getAttribute getAttribute()}
-     */
-    hasAttribute ( key ) { return this._getData().hasOwnProperty( key ) }
-
-    /**
-     * Remove zero or more key-value pairs from the data associated with this
-     * connection.  The data for a connection is a set of key-value pairs,
-     * stored in the source {@link MathConcept MathConcept} for the connection, as
-     * described in the conventions documented at the top of
-     * {@link Connection this class}.  This function removes zero or more pairs
-     * from that set, based on the list of keys it is given.  It makes only one
-     * call to the {@link MathConcept#setAttribute setAttribute()} function in the
-     * source {@link MathConcept MathConcept}, therefore generating only one
-     * {@link MathConcept#willBeChanged willBeChanged} event and one
-     * {@link MathConcept#wasChanged wasChanged} event in that
-     * {@link MathConcept MathConcept}.
-     * 
-     * @param {string[]} keys - The keys to remove
-     * @return {boolean} True if and only if it succeeded in altering the data
-     *   in the source {@link MathConcept MathConcept}.  This fails only if this
-     *   object has no {@link Connection#source source()}.
-     * @see {@link Connection#setAttribute setAttribute()}
-     * @see {@link Connection#getAttributeKeys getAttributeKeys()}
-     */
-    clearAttributes ( ...keys ) {
-        const newData = JSON.copy( this._getData() )
-        for ( const key of keys ) delete newData[key]
-        return this._setData( newData )
-    }
-
-    /**
-     * Delete a new connection between two {@link MathConcept MathConcept}
-     * instances.  This deletes data from the attributes of those two instances,
-     * data representing the connection, and thus generates one
-     * {@link MathConcept#willBeChanged willBeChanged} event and one
-     * {@link MathConcept#wasChanged wasChanged} event in each.  It also removes
-     * this Connection's ID from {@link Connection.IDs the global mapping}.
-     * 
-     * @return {boolean} True if and only if it succeeded in deleting the data
-     *   in the source and target {@link MathConcept MathConcept}s.  This fails only
-     *   if this object has no {@link Connection#source source()} or no
-     *   {@link Connection#target target()}.
-     */
-    remove () {
-        const source = this.source()
-        const target = this.target()
-        if ( source )
-            source.clearAttributes( `_conn target ${this.id}`,
-                                    `_conn data ${this.id}` )
-        if ( target )
-            target.clearAttributes( `_conn source ${this.id}` )
-        Connection.IDs.delete( this.id )
-        return !!source &amp;&amp; !!target
-    }
-
-    /**
-     * When replacing a MathConcept in a hierarchy with another, we often want to
-     * transfer all connections that went into or out of the old MathConcept to
-     * its replacement instead.  This function performs that task.
-     * 
-     * @param {MathConcept} giver - The MathConcept that will lose its connections
-     * @param {MathConcept} receiver - The MathConcept that will gain them
-     * @return {boolean} Whether the operation succeeds, which happens as long
-     *   as the receiver has a tracked ID and all relevant connections can be
-     *   successfully removed from one place and recreated in another
-     * @see {@link MathConcept#transferConnectionsTo transferConnectionsTo()}
-     */
-    static transferConnections ( giver, receiver ) {
-        if ( !receiver.idIsTracked() ) return false
-        for ( const connection of giver.getConnections() ) {
-            // find connection source; replace giver -> receiver if needed
-            let source = connection.source()
-            if ( !source ) continue
-            if ( source == giver ) source = receiver
-            // find connection target; replace giver -> receiver if needed
-            let target = connection.target()
-            if ( !target ) continue
-            if ( target == giver ) target = receiver
-            // find connection data; if there is none, make it null
-            let data = connection._getData()
-            if ( Object.keys( data ).length == 0 ) data = null
-            // delete the old and add the new
-            if ( !connection.remove() ) return false
-            if ( !Connection.create( connection.id, source.ID(),
-                                     target.ID(), data ) ) return false
-        }
-        return true
-    }
-
-    /**
-     * When a MathConcept is undergoing a change of ID, if it is part of any
-     * connection, that connection will need to update how it is stored in the
-     * attributes of either the source or target, to stay consistent with the
-     * MathConcept's change of ID.
-     * 
-     * This function can be called when a MathConcept's ID changes, and if that
-     * MathConcept exists on either end of this connection, it will update the
-     * data on the other end to stay in sync with the ID change.
-     * 
-     * Clients should never need to call this; it is for use exclusively by the
-     * {@link MathConcept MathConcept} class.
-     * 
-     * @param {string} oldID - The old ID of the changing MathConcept
-     * @param {string} newID - The new ID of the changing MathConcept
-     * @see {@link Connection#changeTargetID changeTargetID()}
-     * @see {@link MathConcept#changeID changeID()}
-     */
-    handleIDChange ( oldID, newID ) {
-        const source = this.source()
-        const target = this.target()
-        if ( !source || !target ) return
-        if ( source.ID() == oldID )
-            target.setAttribute( `_conn source ${this.id}`, newID )
-        if ( target.ID() == oldID )
-            source.setAttribute( `_conn target ${this.id}`, newID )
-    }
-
+/**
+ * A de Bruijn index, as defined at the top of this module, is a symbol encoding
+ * a pair of natural numbers, the first of which says how many bindings one must
+ * pass as one walks up the ancestor chain of this symbol before we encounter
+ * the binding that binds this symbol.  Thus a de Bruijn index is free if the
+ * number of bindings in its ancestor chain is greater than or equal to that
+ * first index.
+ * 
+ * This function tests that and returns true if that freeness condition is met,
+ * false if the first component of the de Bruijn index is smaller than the
+ * number of bindings above the symbol, and undefined if the argument given is
+ * not a de Bruijn index.  Note that, because we are working with
+ * {@link Expressions} that have been encoded with
+ * {@link module:deBruijn.encodeExpression encodeExpression()}, a binding is not
+ * a {@link BindingExpression}, but an encoded version thereof.
+ * 
+ * @param {Symbol} symbol the symbol to test for freeness
+ * @returns {boolean} whether the symbol is a free de Bruijn index
+ */
+export const free = symbol => {
+    const indices = encodedIndices( symbol )
+    if ( !indices ) return undefined
+    const encodedBindings = symbol.ancestorsSatisfying( isEncodedBinding )
+    return indices[0] >= encodedBindings.length
 }
 </code></pre>
     </article>

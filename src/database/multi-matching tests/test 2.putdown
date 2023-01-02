@@ -4,7 +4,7 @@ testing:
 ---
 
 // Declare the metavariables in this multi-matching problem:
-(metavariables P x t)
+(metavariables P t)
 
 // List the pattern-then-expressions tuples in this multi-matching problem:
 (problem
@@ -23,7 +23,6 @@ testing:
 (solutions
     (2 0)
     (
-        x  q
         t  9
         P  (@lambda v , (= (+ v r) t))
     )

@@ -165,61 +165,6 @@ describe( 'Constraint', () => {
         expect( C.isAnInstantiation() ).to.equal( false )
     } )
 
-    it( 'Can remove all bindings in its pattern and expression', () => {
-        // create a Constraint with no bindings; ensure no change happens
-        let C1 = new M.Constraint(
-            LogicConcept.fromPutdown( '"atomic expression"' )[0],
-            LogicConcept.fromPutdown( '(nested (application expressions) only)' )[0]
-        )
-        let copy = C1.copy()
-        expect( C1.equals( copy ) ).to.equal( true )
-        C1.removeBindings()
-        expect( C1.equals( copy ) ).to.equal( true )
-        // create a Constraint with one binding in each of its parts;
-        // ensure both are removed upon request
-        let C2 = new M.Constraint(
-            LogicConcept.fromPutdown( '(forall x , (P x))' )[0],
-            LogicConcept.fromPutdown( '(and (exists y , (Q y 3)) (R z))' )[0]
-        )
-        copy = C2.copy()
-        expect( C2.equals( copy ) ).to.equal( true )
-        C2.removeBindings()
-        expect( C2.equals( copy ) ).to.equal( false )
-        expect( C2.pattern.equals( LogicConcept.fromPutdown(
-            '(forall ("LDE binding" x (P x)))'
-        )[0] ) ).to.equal( true )
-        expect( C2.expression.equals( LogicConcept.fromPutdown(
-            '(and (exists ("LDE binding" y (Q y 3))) (R z))'
-        )[0] ) ).to.equal( true )
-        // create a Constraint with a nested binding in its pattern;
-        // ensure the expansion takes place recursively/nested
-        let C3 = new M.Constraint(
-            LogicConcept.fromPutdown( '(forall x , (exists y , (> x y)))' )[0],
-            LogicConcept.fromPutdown( '"nothing to see here"' )[0]
-        )
-        copy = C3.copy()
-        expect( C3.equals( copy ) ).to.equal( true )
-        C3.removeBindings()
-        expect( C3.equals( copy ) ).to.equal( false )
-        expect( C3.pattern.equals( LogicConcept.fromPutdown(
-            '(forall ("LDE binding" x (exists ("LDE binding" y (> x y)))))'
-        )[0] ) ).to.equal( true )
-        expect( C3.expression.equals( copy.expression ) ).to.equal( true )
-        // same test as previous, but put it in the expression instead
-        let C4 = new M.Constraint(
-            LogicConcept.fromPutdown( '"nothing to see here"' )[0],
-            LogicConcept.fromPutdown( '(forall x , (exists y , (> x y)))' )[0]
-        )
-        copy = C4.copy()
-        expect( C4.equals( copy ) ).to.equal( true )
-        C4.removeBindings()
-        expect( C4.equals( copy ) ).to.equal( false )
-        expect( C4.pattern.equals( copy.pattern ) ).to.equal( true )
-        expect( C4.expression.equals( LogicConcept.fromPutdown(
-            '(forall ("LDE binding" x (exists ("LDE binding" y (> x y)))))'
-        )[0] ) ).to.equal( true )
-    } )
-
     it( 'Can become a Substitution that works in-place or functionally', () => {
         // create a Constraint that is an instantiation
         let X = new LurchSymbol( 'X' ).asA( M.metavariable )

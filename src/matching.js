@@ -143,15 +143,8 @@
  * solution to the matching problem inherent in that attempted inference.
  * 
  * To ensure that our matching algorithm does not introduce variable capture,
- * we compute, for any matching problem posed, the set of *variable capture
- * constraints* inherent in the problem.  Each such constraint records the
- * fact that a certain metavariable cannot be replaced by an expression that
- * contains a certain other variable free.  Our algorithm, as it executes,
- * will discard solutions that violate any such constraints.  We represent
- * them using instances of the
- * {@link CaptureConstraint CaptureConstraint class}, and we collect sets of
- * such constraints in instances of the
- * {@link CaptureConstraints CaptureConstraints (plural) class}.
+ * we use {@link module:deBruijn de Bruijn indices} to represent patterns and
+ * expressions internally during the matching process.
  * 
  * Recall the example above, in which an expression function $Q$ was assigned
  * the value $t\mapsto 3t+e^t$.  This dummy variable $t$ was chosen because it
@@ -168,15 +161,16 @@ import { NewSymbolStream } from "./matching/new-symbol-stream.js"
 import {
     metavariable, containsAMetavariable, metavariablesIn, metavariableNamesIn
 } from "./matching/metavariables.js"
+import {
+    deBruijn, equal, encodeSymbol, encodeExpression, encodedIndices,
+    decodeSymbol, decodeExpression
+} from './matching/de-bruijn.js'
 import { Constraint } from "./matching/constraint.js"
 import { Substitution } from "./matching/substitution.js"
 import {
-    CaptureConstraint, CaptureConstraints
-} from "./matching/capture-constraint.js"
-import {
     newEF, isAnEF, arityOfEF, applyEF, constantEF, projectionEF, applicationEF,
     newEFA, isAnEFA, canBetaReduce, betaReduce, fullBetaReduce, alphaEquivalent,
-    bodyOfEF, parametersOfEF
+    bodyOfEF, parametersOfEF, expressionFunction, expressionFunctionApplication
 } from '../src/matching/expression-functions.js'
 import { Problem } from "./matching/problem.js"
 import { Solution } from "./matching/solution.js"
@@ -185,10 +179,11 @@ import {
 } from "./matching/multiple.js"
 
 export default {
-    NewSymbolStream,
-    Constraint, CaptureConstraint, CaptureConstraints,
+    NewSymbolStream, expressionFunction, expressionFunctionApplication,
     metavariable, containsAMetavariable, metavariablesIn, metavariableNamesIn,
-    Substitution,
+    deBruijn, equal, encodeSymbol, encodeExpression, encodedIndices,
+    decodeSymbol, decodeExpression,
+    Constraint, Substitution,
     newEF, isAnEF, arityOfEF, applyEF, constantEF, projectionEF, applicationEF,
     newEFA, isAnEFA, canBetaReduce, betaReduce, fullBetaReduce, alphaEquivalent,
     bodyOfEF, parametersOfEF,
