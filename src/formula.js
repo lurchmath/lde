@@ -47,13 +47,16 @@ import Matching from './matching.js'
  * 
  * @param {LogicConcept} LC - the {@link LogicConcept LogicConcept} to convert
  *   into a formula
+ * @param {boolean} [inPlace] - if `true`, the metavariables will be attributed in
+ * `LC` itself, and the resulting modified `LC` is returned.  If `false`, it will
+ * attribute and return a separate copy of `LC`, leaving the original unchanged.  
  * @returns {LogicConcept} a structural copy of `LC`, except with the relevant
  *   {@link Symbol Symbol} atoms converted into
  *   {@link module:Matching.metavariable metavariables}
  * @memberof Formula
  * @alias Formula.from
  */
-const from = LC => {
+const from = (LC, inPlace=false) => {
     // what symbol names were already declared?
     const declared = new Set( LC.accessibles().filter(
         a => a instanceof Declaration
@@ -63,7 +66,7 @@ const from = LC => {
         a => a != LC && ( a instanceof BindingEnvironment )
     ).map( be => be.boundSymbolNames() ).flat() )
     // make a copy and change all of its undeclared symbols into metavariables
-    const result = LC.copy()
+    const result = (inPlace) ? LC : LC.copy()
     result.descendantsSatisfying( d => d instanceof LurchSymbol )
           .filter( s => !declared.has( s.text() ) && !bound.has( s.text() )
                                                   && s.isFree() )

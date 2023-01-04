@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Lurch Deductive Engine: Array</title>
+    <title>Lurch Deductive Engine: CNFProp</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
@@ -44,7 +44,7 @@
 <main class="layout-main ">
   <div class="container">
     <p class="page-kind">Class</p>
-    <h1 class="page-title">Array</h1>
+    <h1 class="page-title">CNFProp</h1>
     
 
 
@@ -58,12 +58,15 @@
 
     
         
-        <!-- <h2>Array</h2> -->
+        <!-- <h2>CNFProp</h2> -->
 
         
 
         
 
+        
+            
+            <div class="class-description"><p>Temporary trash dump for all of my code</p></div>
         
     
 </header>
@@ -84,22 +87,19 @@
 
 
     
+    <h3 class="subtitle">Constructor</h3>
+    
 
     <div class="method-type">
     
     </div>
 
-    <h4 class="method-name" id="Array">new Array<span class="signature">()</span><span class="return-type-signature"></span>
+    <h4 class="method-name" id="CNFProp">new CNFProp<span class="signature">()</span><span class="return-type-signature"></span>
     </h4>
 
 
 
 
-
-<div class="method-description">
-    
-    <p>The functions below extend the built-in Array class with new functionality.</p>
-</div>
 
 
 
@@ -165,7 +165,7 @@
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="utilities.js.html">utilities.js</a><a href="utilities.js.html#source.123">, line 123</a>
+            <a href="validation_conjunctive-normal-form.js.html">validation/conjunctive-normal-form.js</a><a href="validation_conjunctive-normal-form.js.html#source.188">, line 188</a>
         </li>
     </ul>
 
@@ -176,6 +176,13 @@
 
     
 
+    
+        <h3 class="subsection-title">Classes</h3>
+
+        <dl>
+            <dt><a href="CNFProp.html">CNFProp</a></dt>
+            <dd></dd>
+        </dl>
     
 
      
@@ -187,605 +194,6 @@
 
     
 
-    
-        <h3 class="subtitle">Methods</h3>
-
-        
-            
-
-
-    <article class="method">
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    <span class="method-type-signature is-static">static</span>
-    </div>
-
-    <h4 class="method-name" id=".range">range<span class="signature">()</span><span class="return-type-signature"> &rarr; {array}</span>
-    </h4>
-
-
-
-
-
-<div class="method-description">
-    
-    <p>An array containing a finite arithmetic sequence of integers.</p>
-<ul>
-<li><code>Array.range()</code> returns <code>[ ]</code>.</li>
-<li><code>Array.range(n)</code> returns <code>[0,1,2,...,n-1]</code>.</li>
-<li><code>Array.range(a,b)</code> returns <code>[a,a+1,...,b]</code>.</li>
-<li><code>Array.range(a,b,d)</code> returns the finite arithmetic sequence <code>[a,a+d,...,a+k*d]</code> where $\left|a+kd\right|\leq \left|b\right| &lt; \left|a+(k+1)d\right|$.</li>
-</ul>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-    <h4 class="method-heading">Returns</h4>
-    <ul>
-    
-        <li class="method-returns">
-            
-                <code>array</code>
-            
-            
-        </li>
-    
-    </ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="utilities.js.html">utilities.js</a><a href="utilities.js.html#source.162">, line 162</a>
-        </li>
-    </ul>
-
-
-
-    </article>
-
-        
-            
-
-
-    <article class="method">
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    <span class="method-type-signature is-static">static</span>
-    </div>
-
-    <h4 class="method-name" id=".seq">seq<span class="signature">(f, a, b)</span><span class="return-type-signature"> &rarr; {array}</span>
-    </h4>
-
-
-
-
-
-<div class="method-description">
-    
-    <p>An array containing the finite arithmetic sequence,
-$\left[f(a),f(a+1),\ldots,f(b)\right]$.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Parameters</h4>
-    
-
-<ul class="method-params">
-    
-
-        <li>
-            
-                <span class="param-name">f</span>
-            
-
-            
-                
-
-
-    <span class="param-type">
-        <code>function</code>
-    </span>
-    
-
-            
-
-            
-
-            
-
-            <div class="param-description"><p>a univariate function</p></div>
-            
-        </li>
-
-    
-
-        <li>
-            
-                <span class="param-name">a</span>
-            
-
-            
-                
-
-
-    <span class="param-type">
-        <code>integer</code>
-    </span>
-    
-
-            
-
-            
-
-            
-
-            <div class="param-description"><p>the lower index</p></div>
-            
-        </li>
-
-    
-
-        <li>
-            
-                <span class="param-name">b</span>
-            
-
-            
-                
-
-
-    <span class="param-type">
-        <code>integer</code>
-    </span>
-    
-
-            
-
-            
-
-            
-
-            <div class="param-description"><p>the upper index</p></div>
-            
-        </li>
-
-    
-</ul>
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-    <h4 class="method-heading">Returns</h4>
-    <ul>
-    
-        <li class="method-returns">
-            
-                <code>array</code>
-            
-            
-        </li>
-    
-    </ul>
-
-
-
-
-    <h4 class="method-heading">Example</h4>
-    
-    <pre><code class="language-js">`Array.seq(n=>2*n,3,5)` returns `[6,8,10]`</code></pre>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="utilities.js.html">utilities.js</a><a href="utilities.js.html#source.189">, line 189</a>
-        </li>
-    </ul>
-
-
-
-    </article>
-
-        
-            
-
-
-    <article class="method">
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    
-    </div>
-
-    <h4 class="method-name" id="last">last<span class="signature">()</span><span class="return-type-signature"> &rarr; {*}</span>
-    </h4>
-
-
-
-
-
-<div class="method-description">
-    
-    <p>The last element of the array, equivalent to <code>A[A.length-1]</code> (if the array is
-named <code>A</code>)</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-    <h4 class="method-heading">Returns</h4>
-    <ul>
-    
-        <li class="method-returns">
-            
-                <code>*</code>
-            
-            
-                <p>The last element of the array, or undefined if the array is
-empty</p>
-            
-        </li>
-    
-    </ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="utilities.js.html">utilities.js</a><a href="utilities.js.html#source.152">, line 152</a>
-        </li>
-    </ul>
-
-
-
-    </article>
-
-        
-            
-
-
-    <article class="method">
-
-
-
-
-    
-
-
-    
-
-    <div class="method-type">
-    
-    </div>
-
-    <h4 class="method-name" id="without">without<span class="signature">(index)</span><span class="return-type-signature"> &rarr; {<a href="Array.html">Array</a>}</span>
-    </h4>
-
-
-
-
-
-<div class="method-description">
-    
-    <p>Return a shallow copy of the array, but without one (specified) element.</p>
-<p>If the given index is not a valid index into the array, then a shallow copy
-of the array is returned with <em>no</em> change to its elements (all included).</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Parameters</h4>
-    
-
-<ul class="method-params">
-    
-
-        <li>
-            
-                <span class="param-name">index</span>
-            
-
-            
-                
-
-
-    <span class="param-type">
-        <code>number</code>
-    </span>
-    
-
-            
-
-            
-
-            
-
-            <div class="param-description"><p>Which entry to remove, as a zero-based index</p></div>
-            
-        </li>
-
-    
-</ul>
-
-
-
-
-
-<div class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</div>
-
-
-
-    <h4 class="method-heading">Returns</h4>
-    <ul>
-    
-        <li class="method-returns">
-            
-                <code>Array</code>
-            
-            
-                <p>A shallow copy of the array, but without the element whose
-index was given</p>
-            
-        </li>
-    
-    </ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h4 class="method-heading">Source</h4>
-    <ul>
-        <li class="method-source">
-            <a href="utilities.js.html">utilities.js</a><a href="utilities.js.html#source.139">, line 139</a>
-        </li>
-    </ul>
-
-
-
-    </article>
-
-        
     
 
     

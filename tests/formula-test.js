@@ -53,6 +53,19 @@ describe( 'Formulas', () => {
             .equals( true )
         expect( formula.child( 2, 2 ).isA( Matching.metavariable ) )
             .equals( true )
+        // check if it works in place (i.e., second arg is true)   
+        formula = Formula.from( target, true )
+        expect( formula ).equals( target )   
+        expect( formula.child( 0 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 1 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 2, 0 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 2, 1 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 2, 2 ).isA( Matching.metavariable ) )
+            .equals( true )
 
         // Consider a single expression with one symbol declared;
         // every other symbol in it should become a metavariable.
@@ -84,7 +97,20 @@ describe( 'Formulas', () => {
             .equals( true )
         expect( formula.child( 2, 2 ).isA( Matching.metavariable ) )
             .equals( false )
-
+        // check if it works in place (i.e., second arg is true)   
+        formula = Formula.from( target , true )
+        expect( formula ).equals( target ) 
+        expect( formula.child( 0 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 1 ).isA( Matching.metavariable ) )
+            .equals( false )
+        expect( formula.child( 2, 0 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 2, 1 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 2, 2 ).isA( Matching.metavariable ) )
+            .equals( false )
+            
         // Consider an environment with one symbol declared;
         // every other symbol in it should become a metavariable.
         context = LogicConcept.fromPutdown( ` {
@@ -107,6 +133,21 @@ describe( 'Formulas', () => {
             .equals( false )
         // But if we make a formula, everything except i becomes a metavar:
         formula = Formula.from( target )
+        expect( formula.child( 0, 0 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 0, 1 ).isA( Matching.metavariable ) )
+            .equals( false )
+        expect( formula.child( 0, 2 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 1, 0 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 1, 1 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 1, 2 ).isA( Matching.metavariable ) )
+            .equals( true )
+        // check if it works in place (i.e., second arg is true)   
+        formula = Formula.from( target )
+        expect( formula ).equals( target ) 
         expect( formula.child( 0, 0 ).isA( Matching.metavariable ) )
             .equals( true )
         expect( formula.child( 0, 1 ).isA( Matching.metavariable ) )
@@ -153,7 +194,23 @@ describe( 'Formulas', () => {
             .equals( true )
         expect( formula.child( 1, 2 ).isA( Matching.metavariable ) )
             .equals( true )
-
+        // check if it works in place (i.e., second arg is true)   
+        formula = Formula.from( target , true )
+        expect( formula ).equals( target ) 
+        expect( formula.child( 0, 0 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 0, 1 ).isA( Matching.metavariable ) )
+            .equals( false )
+        expect( formula.child( 0, 2 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 1, 0 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 1, 1 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 1, 2 ).isA( Matching.metavariable ) )
+            .equals( true )
+        
+        
         // Consider two nested environment with many symbols declared at
         // different points, so that some environments have a symbol declared
         // while earlier environments do not have that same symbol declared.
@@ -191,6 +248,20 @@ describe( 'Formulas', () => {
             .equals( true )
         expect( formula.child( 1, 1 ).isA( Matching.metavariable ) )
             .equals( true )
+        // check if it works in place (i.e., second arg is true)   
+        formula = Formula.from( target , true )
+        expect( formula ).equals( target ) 
+        expect( formula.child( 0, 0 ).isA( Matching.metavariable ) )
+            .equals( false )
+        expect( formula.child( 0, 1 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 0, 2 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 1, 0 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 1, 1 ).isA( Matching.metavariable ) )
+            .equals( true )
+            
         // Next consider target #2, as marked above.
         target = context.child( 2, 1 )
         // No metavariables in target 2 right now:
@@ -216,6 +287,21 @@ describe( 'Formulas', () => {
             .equals( false )
         expect( formula.child( 2, 1 ).isA( Matching.metavariable ) )
             .equals( true )
+        // check if it works in place (i.e., second arg is true)               
+        formula = Formula.from( target , true )
+        expect( formula ).equals( target ) 
+        expect( formula.child( 0 ).isA( Matching.metavariable ) )
+            .equals( false )
+        expect( formula.child( 1, 0 ).isA( Matching.metavariable ) )
+            .equals( false )
+        expect( formula.child( 1, 1 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 2, 0 ).isA( Matching.metavariable ) )
+            .equals( false )
+        expect( formula.child( 2, 1 ).isA( Matching.metavariable ) )
+            .equals( true )
+            
+            
         // Finally consider target #3, as marked above.
         target = context.child( 3, 0 )
         // No metavariables in target 3 right now:
@@ -237,6 +323,18 @@ describe( 'Formulas', () => {
             .equals( true )
         expect( formula.child( 3 ).isA( Matching.metavariable ) )
             .equals( true )
+        // check if it works in place (i.e., second arg is true)
+        formula = Formula.from( target , true )
+        expect( formula ).equals( target ) 
+        expect( formula.child( 0 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 1 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 2 ).isA( Matching.metavariable ) )
+            .equals( true )
+        expect( formula.child( 3 ).isA( Matching.metavariable ) )
+            .equals( true )
+
     } )
 
     it( 'Should compute the correct domain of any formula', () => {
