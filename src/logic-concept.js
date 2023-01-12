@@ -457,8 +457,10 @@ export class LogicConcept extends MathConcept {
                 // handle meaning of a declaration, or errors it might contain:
                 if ( group.type == '[ ]' ) {
                     // 1. cannot mark a declaration as given
-                    if ( isLast( givenRE ) )
-                        problem( 'Cannot mark a declaration as given' )
+                    // KM Temporarily commenting this out
+                    // if ( isLast( givenRE ) )
+                    //     problem( 'Cannot mark a declaration as given' )
+                    // END KM
                     // 2. not enough children
                     if ( group.contents.length == 0 )
                         problem( 'Empty declarations are not permitted' )
