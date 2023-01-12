@@ -4,6 +4,11 @@
         "template": "./node_modules/tidy-jsdoc",
         "prism-theme": "prism-default"
     },
+    "templates": {
+        "default": {
+            "includeDate": false
+        }
+    },
     "metadata": {
         "title": "Lurch Deductive Engine"
     },
