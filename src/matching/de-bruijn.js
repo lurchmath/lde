@@ -282,7 +282,7 @@ export const encodedIndices = symbol => {
  * @param {Symbol} target an encoded de Bruijn index
  * @param {integer} deltaI the amount by which to adjust the first component of
  *   the index
- * @param {integer} deltaJ the amount by which to adjust teh second component of
+ * @param {integer} deltaJ the amount by which to adjust the second component of
  *   the index
  */
 export const adjustIndices = ( target, deltaI, deltaJ ) => {
@@ -351,6 +351,20 @@ export const encodeExpression = expression =>
         ] ] ),
         encodeExpression( expression.body() ) )
 
+/**
+ * It is often necessary to test whether an {@link Expression} is the encoding
+ * (under the de Bruijn encoding implemented in
+ * {@link module:deBruijn.encodeExpression encodeExpression()}) of a
+ * {@link BindingExpression}.  For example, we may wish to look at a de Bruijn
+ * index and discern which of its ancestors binds it, by traversing the ancestor
+ * chain and inspecting which ones represent bindings.  This function answers
+ * that question.
+ * 
+ * @param {LogicConcept} expression the expression to test
+ * @returns {boolean} whether the expression is the encoding of a
+ *   {@link BindingExpression} under the de Bruijn encoding implemented in
+ *   {@link module:deBruijn.encodeExpression encodeExpression()}
+ */
 export const isEncodedBinding = expression =>
     ( expression instanceof Application )
  && equal( expression.child( 0 ), deBruijnSymbol )

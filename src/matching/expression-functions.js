@@ -221,13 +221,14 @@ export const applyEF = ( ef, ...args ) => {
         throw 'applyEF() requires an expression function as first argument'
     if ( args.length != arityOfEF( ef ) )
         throw 'Incorrect number of arguments given to expression function'
-    // if it's a projection function, replaceWith() won't work correctly
+    // prepare the necessary components used below
     const parameters = ef.lastChild().boundSymbolNames()
     const lookup = symbol => {
         const paramIndex = parameters.indexOf( symbol.text() )
         return paramIndex > -1 ? args[paramIndex].copy() : symbol.copy()
     }
     const body = bodyOfEF( ef )
+    // if it's a projection function, replaceWith() won't work correctly
     if ( body instanceof LurchSymbol ) return lookup( body )
     // otherwise we actually have to do replacement within a copy of the body
     const result = body.copy()

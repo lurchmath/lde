@@ -337,7 +337,11 @@ export class Problem {
             // Is this really a solution?  Only if no capture would occur...
             if ( [ ...solution.domain() ].some( metavar =>
                 solution.get( metavar ).hasDescendantSatisfying(
-                    d => deBruijnFree( d ) === true ) ) ) continue
+                    d => deBruijnFree( d ) === true ) ) ) {
+                if ( this._debug )
+                    console.log( 'xxx - That solution would include variable capture' )
+                continue
+            }
             // It's acceptable, so we can now convert it out of de Bruijn form:
             solution.deBruijnDecode()
             // When we find a solution, though, yield it iff we have not seen it
@@ -345,6 +349,9 @@ export class Problem {
             if ( !solutionsSeen.some( old => old.equals( solution ) ) ) {
                 solutionsSeen.push( solution.copy() )
                 yield solution
+            } else {
+                if ( this._debug )
+                    console.log( 'xxx - That solution is a repeat' )
             }
         }
         // For debugging purposes, at the end, show all solutions found.
@@ -433,6 +440,7 @@ export class Problem {
             }
             this.add( ...toAdd )
             for ( let solution of this.allSolutions( soFar ) ) {
+                // Reverse the adjustment mentioned above here:
                 if ( mustAdjust )
                     toAdd[1].pattern.descendantsSatisfying(
                         d => d.isA( metavariable )
