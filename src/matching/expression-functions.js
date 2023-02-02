@@ -74,6 +74,7 @@ import { Application } from "../application.js"
 import { BindingExpression } from "../binding-expression.js"
 import { metavariable } from "./metavariables.js"
 import { NewSymbolStream } from "./new-symbol-stream.js"
+import { isEncodedBinding, adjustIndices } from "./de-bruijn.js"
 
 /**
  * The constant used in this module as the operator when encoding Expression
@@ -232,9 +233,14 @@ export const applyEF = ( ef, ...args ) => {
     if ( body instanceof LurchSymbol ) return lookup( body )
     // otherwise we actually have to do replacement within a copy of the body
     const result = body.copy()
+    const replaceRespectingDeBruijn = ( toReplace, replacement ) => {
+        const depth = toReplace.ancestorsSatisfying( isEncodedBinding ).length
+        adjustIndices( replacement, depth, 0 )
+        toReplace.replaceWith( replacement )
+    }
     result.descendantsSatisfying(
         d => ( d instanceof LurchSymbol ) && d.isFree( result )
-    ).forEach( sym => sym.replaceWith( lookup( sym ) ) )
+    ).forEach( sym => replaceRespectingDeBruijn( sym, lookup( sym ) ) )
     return result
 }
 

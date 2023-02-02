@@ -1,0 +1,35 @@
+---
+testing:
+  type: matching
+---
+
+// Declare the metavariables in this matching problem:
+(metavariables P t)
+
+// List the pattern-expression pairs in this matching problem:
+(problem
+	(@apply P t)  (∀ y , (P y))
+)
+
+// List all solutions in this matching problem:
+(solutions
+    (
+        P    (@lambda v1 , (∀ y , (P y)))
+    )
+    (
+        P    (@lambda v1 , (v1 y , (P y)))
+        t    ∀
+    )
+    (
+        P    (@lambda v1 , (∀ y , (v1 y)))
+        t    P
+    )
+    (
+        P    (@lambda v1 , (∀ v1))
+        t    y , (P y)
+    )
+    (
+        P    (@lambda v1 , v1)
+        t    (∀ y , (P y))
+    )
+)

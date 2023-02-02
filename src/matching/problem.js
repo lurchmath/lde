@@ -513,11 +513,17 @@ export class Problem {
             // already converted bindings to applications with removeBindings(),
             // we know this case will involve only applications.
             dbg( '--3--' )
-            const children = expr.children()
-            if ( children.length > 0 ) {
-                const metavars = this._stream.nextN( children.length )
+            const numChildren = expr.children().length
+            if ( numChildren > 0 ) {
+                const metavars = this._stream.nextN( numChildren )
                     .map( symbol => symbol.asA( metavariable ) )
-                yield* addEF( head, applicationEF( args.length, metavars ) )
+                const ef = applicationEF( args.length, metavars )
+                // If the expression is an ecoded binding, do not let the matching
+                // algorithm attempt to synthesize its first child, (de Bruijn
+                // constant with embedded codes).  Just let that one match always:
+                if ( isEncodedBinding( expr ) )
+                    ef.child( 1 ).body().child( 0 ).replaceWith( expr.child( 0 ).copy() )
+                yield* addEF( head, ef )
             } else dbg( 'case 3 does not apply' )
 
             // Those are the only three solution methods for the EFA case.
