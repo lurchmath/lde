@@ -214,7 +214,12 @@ const replaceIfPossible = ( target, replacement, preserve ) => {
       && !( replacement instanceof Expression ) )
         throw new Error( 'Cannot place a non-expression inside an expression' )
     // no restrictions forbid us, so proceed
-    target.replaceWith( replacement )
+    // but note: replacing a declaration's body requires special care
+    if ( ( target.parent() instanceof Declaration )
+      && ( target == target.parent().body() ) )
+        target.parent().replaceBody( replacement )
+    else
+        target.replaceWith( replacement )
     preserve.forEach( attrKey => {
         if ( target.hasAttribute( attrKey ) )
             replacement.setAttribute( attrKey,

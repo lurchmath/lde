@@ -1068,6 +1068,45 @@ describe( 'Formulas', () => {
         expect( instantiated.equals( expected ) ).equals( true )
     } )
 
+    it( 'Should correctly instantiate formulas with Declarations', () => {
+        let formula
+        let instantiated
+        let expected
+
+        // Create a formula with a few declarations of different kinds
+        formula = LogicConcept.fromPutdown( `
+            :{
+                :[x y , ("LDE EFA" B (x y))]
+                [z w]
+                (A b c)
+            }
+        ` )[0]
+
+        // Here's where we mark metavariables:
+        formula.descendantsSatisfying( d => d instanceof LurchSymbol )
+            .filter( s => ['B','A','b','c'].includes( s.text() ) )
+            .forEach( s => s.makeIntoA( Matching.metavariable ) )
+
+        // Now we try instantiating
+        instantiated = Formula.instantiate( formula, {
+            'B' : Matching.newEF( new LurchSymbol( 'v' ),
+                LogicConcept.fromPutdown( '(> v 1)' )[0] ),
+            'A' : new LurchSymbol( '=' ),
+            'b' : new LurchSymbol( 'foo' ),
+            'c' : LogicConcept.fromPutdown( '(b a r)' )[0]
+        } )
+        
+        // And check that it came out correctly
+        expected = LogicConcept.fromPutdown( `
+            :{
+                :[x y , (> (x y) 1)]
+                [z w]
+                (= foo (b a r))
+            }
+        ` )[0]
+        expect( instantiated.equals( expected ) ).equals( true )
+    } )
+
     // Utility function used below to construct a Formula whose metavariables
     // do not include those on the given list.
     const buildFormula = ( putdown, nonMetavarNames = [ ] ) => {

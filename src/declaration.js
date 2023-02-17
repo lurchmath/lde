@@ -145,9 +145,30 @@ export class Declaration extends LogicConcept {
      *   {@link LogicConcept LogicConcept} class.
      *
      * @see {@link Declaration#symbols symbols()}
+     * @see {@link Declaration#replaceBody replaceBody()}
      */
     body () {
         return this._body == this.lastChild() ? this._body : undefined
+    }
+
+    /**
+     * Replace the existing body of this declaration with the given parameter.
+     * If the declaration has a body, this function just calls
+     * {@link MathConcept#replaceWith replaceWith()} on that body, and then
+     * updates its internal records to recognize the new {@link LogicConcept}
+     * as its body thereafter.  If the declaration did not have a body before
+     * calling this function, the parameter will be added as a new child at
+     * the end of the declaration and noted internally as its new body.
+     * 
+     * @param {LogicConcept} replacement the new body for this declaration
+     * 
+     * @see {@link Declaration#body body()}
+     */
+    replaceBody ( replacement ) {
+        if ( !this._body )
+            this.pushChild( this._body = replacement )
+        else
+            this.body().replaceWith( this._body = replacement )
     }
 
 }
