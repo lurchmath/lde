@@ -78,16 +78,16 @@ describe( 'Declaration', () => {
     it( 'Should not permit Declarations with zero symbols', () => {
         expect( () => {
             const D = new Declaration()
-        } ).to.throw( /^Second argument to Declaration constructor / )
+        } ).to.throw( /^First argument to Declaration constructor / )
         expect( () => {
             const D = new Declaration( L1 )
-        } ).to.throw( /^Second argument to Declaration constructor / )
+        } ).to.throw( /^First argument to Declaration constructor / )
     } )
 
     it( 'Should not permit Declarations of non-symbols', () => {
         expect( () => {
             const D = new Declaration( L1, L2 )
-        } ).to.throw( /^Second argument to Declaration constructor must be / )
+        } ).to.throw( /^First argument to Declaration constructor must be / )
         expect( () => {
             const D = new Declaration( [ x, y, L2 ], L3 )
         } ).to.throw( /^Not every entry in the array.*was a Symbol$/ )
@@ -137,8 +137,7 @@ describe( 'Declaration', () => {
         // can't be anything but a LogicConcept
         expect( () => {
             const D = new Declaration( x, [ 5 ] )
-        } ).to.throw(
-            /^Optional third parameter.*LogicConcept$/ )
+        } ).to.throw( /^Optional second parameter.*LogicConcept$/ )
     } )
 
     it( 'Should let us query the body of any Declaration', () => {

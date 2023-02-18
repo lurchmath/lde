@@ -74,14 +74,14 @@ export class Declaration extends LogicConcept {
                 + `expected 2, got ${arguments.length}` )
         if ( symbols instanceof LurchSymbol ) symbols = [ symbols ]
         if ( !( symbols instanceof Array ) )
-            throw 'Second argument to Declaration constructor must be '
+            throw 'First argument to Declaration constructor must be '
                 + 'either a Symbol or an array'
         if ( !symbols.every( symbol => symbol instanceof LurchSymbol ) )
             throw 'Not every entry in the array given to the '
                 + 'Declaration constructor was a Symbol'
         if ( body ) {
             if ( !( body instanceof LogicConcept ) )
-                throw 'Optional third parameter to Declaration constructor, '
+                throw 'Optional second parameter to Declaration constructor, '
                     + 'if provided, must be a LogicConcept'
             super( ...symbols, body )
         } else {
