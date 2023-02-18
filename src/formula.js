@@ -208,7 +208,7 @@ const replaceIfPossible = ( target, replacement, preserve ) => {
     if ( ( parent instanceof Declaration )
       && !( replacement instanceof LurchSymbol )
       && parent.symbols().includes( target ) )
-        throw new Error( 'Cannot replace a declared symbol with a non-symbol' )
+        throw new Error( 'Cannot replace a delcared symbol with a non-symbol' )
     // expressions can contain only other expressions
     if ( ( parent instanceof Expression )
       && !( replacement instanceof Expression ) )
