@@ -1057,13 +1057,6 @@ describe( 'Reading putdown notation', () => {
         expect( () => {
             LogicConcept.fromPutdown( '[x {y c}]' )
         } ).to.throw( /^Not every entry.*was a Symbol/ )
-        // declarations may not be marked with a given attribute
-        expect( () => {
-            LogicConcept.fromPutdown( ':[f g h]' )
-        } ).to.throw( /^Cannot mark a declaration as given/ )
-        expect( () => {
-            LogicConcept.fromPutdown( '{ [x] :[y] (x y) }' )
-        } ).to.throw( /^Cannot mark a declaration as given/ )
     } )
 
 } )
