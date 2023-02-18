@@ -31,6 +31,8 @@ export class Declaration extends LogicConcept {
     
     static className = MathConcept.addSubclass( 'Declaration', Declaration )
 
+    static emptyBody = new LurchSymbol( 'LDE empty' )
+
     /**
      * Construct a declaration.  The first argument must be either the
      * {@link Symbol Symbol} to be declared or an array of one or more
@@ -83,11 +85,10 @@ export class Declaration extends LogicConcept {
             if ( !( body instanceof LogicConcept ) )
                 throw 'Optional second parameter to Declaration constructor, '
                     + 'if provided, must be a LogicConcept'
-            super( ...symbols, body )
         } else {
-            super( ...symbols )
+            body = Declaration.emptyBody.copy()
         }
-        this._body = body
+        super( ...symbols, body )
     }
 
     /**
@@ -117,8 +118,9 @@ export class Declaration extends LogicConcept {
      * construction time.  This will be of length at least one, since the
      * constructor requires there to be at least one symbol.  The only
      * exception to this rule is that Declarations, once constructed, can be
-     * modified by removing their children, but this creates invalid forms,
-     * so clients should not do so.
+     * modified by removing their children, so one could theoretically remove
+     * all symbols from a Declaration, putting it into an invalid form, so
+     * clients of this class should not do so.
      * 
      * @returns {Symbol[]} An array of {@link Symbol Symbol} instances, those
      *   symbols being declared by this object
@@ -126,7 +128,7 @@ export class Declaration extends LogicConcept {
      * @see {@link Declaration#body body()}
      */
     symbols () {
-        return this._body ? this.allButLastChild() : this.children()
+        return this.allButLastChild()
     }
 
     /**
@@ -135,9 +137,10 @@ export class Declaration extends LogicConcept {
      * {@link Declaration the documentation for the constructor}.
      *
      * In those cases where the Declaration has a body, it will also be the
-     * Declaration's last child.  If the body has been deleted by modifying
-     * this Declaration after its construction, this function returns
-     * undefined.
+     * Declaration's last child.  Declarations that were not constructed with a
+     * body will have a simple placeholder object as their last child, a symbol
+     * indicating where the body would go if there were one.  For such
+     * Declarations, this function returns undefined.
      * 
      * @returns {LogicConcept|undefined} The body provided to this object at
      *   construction time, if there was one, or undefined if not.
@@ -148,27 +151,34 @@ export class Declaration extends LogicConcept {
      * @see {@link Declaration#replaceBody replaceBody()}
      */
     body () {
-        return this._body == this.lastChild() ? this._body : undefined
+        const last = this.lastChild()
+        return last.equals( Declaration.emptyBody ) ? undefined : last
     }
 
     /**
-     * Replace the existing body of this declaration with the given parameter.
-     * If the declaration has a body, this function just calls
-     * {@link MathConcept#replaceWith replaceWith()} on that body, and then
-     * updates its internal records to recognize the new {@link LogicConcept}
-     * as its body thereafter.  If the declaration did not have a body before
-     * calling this function, the parameter will be added as a new child at
-     * the end of the declaration and noted internally as its new body.
-     * 
-     * @param {LogicConcept} replacement the new body for this declaration
+     * Remove the body of this Declaration, if there is one, replacing it with
+     * a placeholder indicating that the Declaration now has no body.
+     * Thereafter, calling {@link Declaration#body body()} will return
+     * undefined.
      * 
      * @see {@link Declaration#body body()}
+     * @see {@link Declaration#setBody setBody()}
      */
-    replaceBody ( replacement ) {
-        if ( !this._body )
-            this.pushChild( this._body = replacement )
-        else
-            this.body().replaceWith( this._body = replacement )
+    removeBody () {
+        this.setBody( Declaration.emptyBody.copy() )
+    }
+
+    /**
+     * Set a new body for this Declaration, replacing any old body that it had
+     * before (or, if it had none, replacing the placeholder that sits where a
+     * body would go).  Thereafter, calling {@link Declaration#body body()} will
+     * return the new body provided to this function.
+     * 
+     * @see {@link Declaration#body body()}
+     * @see {@link Declaration#removeBody removeBody()}
+     */
+    setBody ( newBody ) {
+        this.lastChild().replaceWith( newBody )
     }
 
 }

@@ -638,10 +638,10 @@ describe( 'Reading putdown notation', () => {
         expect( test.length ).to.equal( 1 )
         expect( test[0].equals(
             new Environment(
-                new Declaration(
+                new Declaration( [
                     new LurchSymbol( 'x' ).attr( { 'A' : 'B' } ),
                     new LurchSymbol( 'y' )
-                ),
+                ] ),
                 new LurchSymbol( 'z' )
             )
         ) ).to.equal( true )
@@ -691,10 +691,10 @@ describe( 'Reading putdown notation', () => {
         expect( test[0].equals(
             new Declaration(
                 new LurchSymbol( 'pi' ),
-                new Declaration(
+                new Declaration( [
                     new LurchSymbol( 'm' ),
                     new LurchSymbol( 'n' )
-                )
+                ] )
             )
         ) ).to.equal( true )
         // ----------
@@ -705,10 +705,10 @@ describe( 'Reading putdown notation', () => {
         expect( test[0].equals(
             new Declaration(
                 new LurchSymbol( 'pi' ).attr( { foo : 3 } ),
-                new Declaration(
+                new Declaration( [
                     new LurchSymbol( 'm' ),
                     new LurchSymbol( 'n' ).attr( { bar : 4 } )
-                )
+                ] )
             )
         ) ).to.equal( true )
         // ----------

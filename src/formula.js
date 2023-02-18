@@ -61,6 +61,8 @@ const from = (LC, inPlace=false) => {
     const declared = new Set( LC.accessibles().filter(
         a => a instanceof Declaration
     ).map( d => d.symbols() ).flat().map( s => s.text() ) )
+    // add to that the special symbol for empty declaration bodies
+    declared.add( Declaration.emptyBody.text() )
     // and what were bound outside of the LC?
     const bound = new Set( LC.ancestors().filter(
         a => a != LC && ( a instanceof BindingEnvironment )
@@ -215,11 +217,7 @@ const replaceIfPossible = ( target, replacement, preserve ) => {
         throw new Error( 'Cannot place a non-expression inside an expression' )
     // no restrictions forbid us, so proceed
     // but note: replacing a declaration's body requires special care
-    if ( ( target.parent() instanceof Declaration )
-      && ( target == target.parent().body() ) )
-        target.parent().replaceBody( replacement )
-    else
-        target.replaceWith( replacement )
+    target.replaceWith( replacement )
     preserve.forEach( attrKey => {
         if ( target.hasAttribute( attrKey ) )
             replacement.setAttribute( attrKey,

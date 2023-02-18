@@ -719,10 +719,10 @@ export class LogicConcept extends MathConcept {
                     '(' + childResults.join( ' ' ) + ')' : childResults[0]
                 return finalize( first + ' , ' + last )
             case 'Declaration':
+                const bodyPutdown = childResults.pop()
                 if ( this.body() ) {
-                    const body = childResults.pop()
                     return finalize(
-                        `[${childResults.join( ' ' )} , ${body}]` )
+                        `[${childResults.join( ' ' )} , ${bodyPutdown}]` )
                 } else {
                     return finalize( `[${childResults.join( ' ' )}]` )
                 }
