@@ -660,10 +660,17 @@ export class LogicConcept extends MathConcept {
      *   attributes that should be included in the output.  The formatter
      *   function is responsible for creating the corresponding JSON for these
      *   attributes.
-     * 
+     *
      * @returns {String} putdown notation for this LogicConcept instance
      */
-    toPutdown ( formatter ) {
+     // * @param {Function} [isTooBig] - an optional function that takes a 
+     // *   single string as a input and returns the length of that string for the
+     // *   purpose of determining where line breaks go.  This is useful,
+     // *   for a formatter that adds extra typesetting information to strings
+     // *   like ANSI codes for the terminal, HTML, or LaTeX which do not add to 
+     // *   the string length when rendered.
+    toPutdown ( formatter, 
+                isTooBig = text => /\n/.test( text ) || text.length > 50 ) {
         // Although normally it would make sense to use the dynamic dispatch
         // built into the JavaScript language to accompish this task, we will
         // reinvent the wheel a little bit here just in order to keep this
@@ -671,7 +678,6 @@ export class LogicConcept extends MathConcept {
         // Doing it all here also allows us to factor some common tools out,
         // up above the switch statement, as you can see below.
         const indent = text => `  ${text.replace( /\n/g, '\n  ' )}`
-        const isTooBig = text => /\n/.test( text ) || text.length > 50
         const Environment = MathConcept.subclasses.get( 'Environment' )
         const Declaration = MathConcept.subclasses.get( 'Declaration' )
         const given = ( !( this instanceof Declaration )
@@ -689,7 +695,7 @@ export class LogicConcept extends MathConcept {
                 return putdown + '\n    '
                      + keys.map( attrText ).join( '    ' )
         }
-        const childResults = this.children().map( child => child.toPutdown(formatter) )
+        const childResults = this.children().map( child => child.toPutdown(formatter,isTooBig) )
         const finalize = ( text, skip = [ ] ) => {
             let keys = [ ]
             skip.push( '_type_given' ) // bad style, but concise
