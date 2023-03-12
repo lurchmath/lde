@@ -1,0 +1,22 @@
+////////////////////////////////////////////////////////////////////////////
+// Peano Lurch Lib
+//
+
+  ////////////////////////////////
+  // Peano Axioms
+  ////////////////////////////////
+{
+  :[ 0 𝜎 + ⋅ ≤ ]
+  :{ :(= (𝜎 m) (𝜎 n)) (= m n) }                                 // N2
+  :{ (¬ (= 0 (𝜎 n))) }                                         // N3
+  :{ :(@ P 0) :{ :[k] :(@ P k) (@ P (𝜎 k)) } (∀ n , (@ P n)) }  // N4
+  // the next line is a theorem, provable from N4, and would be a speedup
+  // allowing us to skip the need for a ∀ statement, but currently it 
+  // won't instantiate without a BIH.
+  // :{ :(@ P 0) :{ :[k] :(@ P k) (@ P (𝜎 k)) } (@ P n) }          // alt N4
+  :{ (= (+ n 0) n) }                                            // A0
+  :{ (= (+ m (𝜎 n)) (𝜎 (+ m n))) }                              // A1
+  :{ (= (⋅ n 0) 0) }                                            // M0
+  :{ (= (⋅ n (𝜎 m)) (+ m (⋅ m n))) }                            // M1       
+  :{ (≤ m n) ≡ (∃ k , (= (+ m k) n))}                           // I
+} 

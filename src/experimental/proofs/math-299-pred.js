@@ -1,0 +1,390 @@
+////////////////////////////////////////////////////////////////////
+// Math 299 Proofs
+// Predicate Logic
+//
+
+{
+  // Alpha Equivalence for ∀ (in-class example) Problem 5.1
+  // { :(∀ x , (P x) ) { :[s] (P s) } (∀ y, (P y) ) } 
+  (<<< 'Problem 5.1')
+  (<<< 'Amazingly requires no proof!')
+  { (⇒ (∀ x , (P x) ) (∀ y , (P y) )) }  
+}
+
+{
+  // Second in-class example. Similer to Problem 5.2
+  (<<< 'Second in-class example (similar to Problem 5.2)')
+  { :(∃ x , (and (P x) (Q x))) 
+    [ c , (and (P c) (Q c)) ]
+    (P c)
+    (∃ y , (P y)) 
+  }
+}
+
+{
+  // Assignment #7 (a)
+  (<<< 'Assignment #7 (a)')
+  { { :(∃ x , (Q x))
+      [ c , (Q c) ]
+      { :(P c)
+        (Q c)
+      }
+      (⇒ (P c) (Q c))
+      (∃ x , (⇒ (P x) (Q x)) )
+    }
+    (⇒ (∃ x , (Q x)) (∃ x , (⇒ (P x) (Q x)))) 
+  }
+}
+
+{
+  // Assignment #7 (b)
+  (<<< 'Assignment #7 (b)')
+  { { :(∀ x , (¬ (P x)) )
+      { :(∃ y , (P y))
+        [ n , (P n) ]
+        (¬ (P n))
+        →←
+      }
+      (¬ (∃ y , (P y)))
+    }
+    (⇒ (∀ x , (¬ (P x)) ) (¬ (∃ y , (P y))) ) 
+  }
+}
+{
+  // Problem 5.3 Distributivity of ∀ over and
+  (<<< "Problem 5.3 - Distributivity of ∀ over 'and'")
+  { { :(and (∀ y, (P y)) (∀ z , (Q z)))
+      (∀ y, (P y)) (∀ z , (Q z))
+      { :[x]
+        (P x) (Q x)
+        (and (P x) (Q x))
+      }
+      (∀ x , (and (P x) (Q x)) )
+    }
+    (⇒ (and (∀ y, (P y)) (∀ z , (Q z))) (∀ x , (and (P x) (Q x))) )
+    { :(∀ x , (and (P x) (Q x)))
+      { :[x]
+        (and (P x) (Q x))
+        (P x) (Q x)
+      }
+      (∀ y, (P y)) (∀ z , (Q z))
+      (and (∀ y, (P y)) (∀ z , (Q z)) )
+    }
+    (⇒ (∀ x , (and (P x) (Q x))) (and (∀ y, (P y)) (∀ z , (Q z))) )
+    (⇔ (∀ x , (and (P x) (Q x))) (and (∀ y, (P y)) (∀ z , (Q z))) )
+  }
+}
+
+{
+  // Problem 5.4 Distributivity of ∃ over or
+  (<<< "Problem 5.3 - Distributivity of ∃ over 'or'")
+  { 
+    { :(or (∃ y, (P y)) (∃ z , (Q z)))
+      { :(∃ y, (P y))
+        [ c , (P c) ]
+        (or (P c) (Q c))   
+        (∃ x , (or (P x) (Q x)))
+      } 
+      { :(∃ z , (Q z))
+        [ c , (Q c) ]
+        (or (P c) (Q c))   
+        (∃ x , (or (P x) (Q x)))  
+      }
+      (∃ x , (or (P x) (Q x)))    // by
+                                  { :(or (∃ y, (P y)) (∃ z , (Q z)))
+                                    :{ :(∃ y, (P y))   
+                                      (∃ x , (or (P x) (Q x)))
+                                    } 
+                                    :{ :(∃ z , (Q z))
+                                      (∃ x , (or (P x) (Q x)))  
+                                    }
+                                    (∃ x , (or (P x) (Q x)))
+                                  } <<
+    }
+    (⇒ (or (∃ y, (P y)) (∃ z , (Q z))) (∃ x , (or (P x) (Q x))) )
+    { :(∃ x , (or (P x) (Q x)))
+      [ c , (or (P c) (Q c)) ]
+      { :(P c)
+        (or (∃ y, (P y)) (∃ z , (Q z)))  
+      }
+      { :(Q c)
+        (or (∃ y, (P y)) (∃ z , (Q z)))
+      }
+      (or (∃ y, (P y)) (∃ z , (Q z)))     // by
+                                          { :(or (P c) (Q c))
+                                            :{ :(P c)
+                                              (or (∃ y, (P y)) (∃ z , (Q z)))  
+                                            }
+                                            :{ :(Q c)
+                                              (or (∃ y, (P y)) (∃ z , (Q z)))
+                                            }
+                                            (or (∃ y, (P y)) (∃ z , (Q z)))
+                                          } <<
+    }
+    (⇒ (∃ x , (or (P x) (Q x))) (or (∃ y, (P y)) (∃ z , (Q z))) )
+    (⇔ (∃ x , (or (P x) (Q x))) (or (∃ y, (P y)) (∃ z , (Q z))) )
+  }
+}
+
+{
+  // Assignment #8 (b)
+  (<<< 'Assignment #8 (b)')
+  { :[ < 0 7 ] <<
+    { :(< 0 7)
+      (∃ x , (< 0 x))
+      (∃ x , (< x 7))
+      (and (∃ x , (< 0 x)) (∃ x , (< x 7)))
+    }
+    (⇒ (< 0 7) (and (∃ x , (< 0 x)) (∃ x , (< x 7))))
+  }
+}
+
+{
+  // Assignment #8 (c)
+  (<<< 'Assignment #8 (c)')
+  { :[ Alice Bob L ] <<
+    { :(∀ x , (∀ y, (L x y))) 
+      (∀ y, (L Alice y)) 
+      (L Alice Bob)
+    }
+    (⇒ (∀ x , (∀ y, (L x y))) (L Alice Bob) )
+  }
+}
+
+{
+  // Assignment #8 (d)
+  (<<< 'Assignment #8 (d)')
+  { { :(and (= x y) (= y z))
+      (= x y)
+      (= y z)
+      (= x z)  { :(= y z) :(= x y) (= x z) } <<
+    }
+    (⇒ (and (= x y) (= y z)) (= x z) )
+  }
+}
+
+{
+  // Assignment #8 (e)
+  (<<< 'Assignment #8 (e)')
+  { 
+    // Amazingly, it validates the iff even without this subproof because of 
+    // previous instantiations.  It also validates this subproof immediately
+    // { :(⇒ (∀ y, (P y)) (∃ z, (Q z)))
+    //   (∃ x , (⇒ (P x) (Q x)))
+    // }
+    { :(∃ x , (⇒ (P x) (Q x)))
+      [ c , (⇒ (P c) (Q c))]
+      { :(∀ y, (P y))
+        (P c)
+        (Q c)
+        (∃ z, (Q z))
+      }
+      (⇒ (∀ y, (P y)) (∃ z, (Q z)))
+    }
+    (⇔ (∃ x , (⇒ (P x) (Q x)))  (⇒ (∀ y, (P y)) (∃ z, (Q z))) ) 
+  }
+}
+
+// Assignment #8 (f)
+{
+  (<<< 'Assignment #8 (f)')
+  (<<< ' ')
+  (<<< 'Theorem: If everyone loves exactly one person, and Alice and Bob')
+  (<<< 'are not the same person, then Cathy does not love them both.')
+  (<<< ' ')
+  (<<< '(Note we can list the theorem before the proof.)')
+  {
+    (⇒ (and (∀ x, (∃! y, (L x y))) (¬ (= a b))) (¬ (and (L c a) (L c b))) )
+  }
+  (<<< 'Proof:')
+  { 
+    (<<< "We don't really need this declaration,")
+    (<<< "But in class we've been using L(x,y) to mean 'x Loves y'")
+    :[ L ] <<
+    { (<<< "Assume the conjunction...")
+      :(and (∀ x, (∃! y, (L x y))) (¬ (= a b)))
+      (<<< "Use and- twice...")
+      (¬ (= a b))
+      (∀ x, (∃! y, (L x y)))
+      (<<< "Use ∀- on that using the free 'c' in the theorem...")
+      (∃! y, (L c y))
+      (<<< "Apply the definition of ∃! ...")
+      (∃ y, (and (L c y) (∀ z , (⇒ (L c z) (= z y)))))
+      (<<< "It exists, so let's name it w ...")
+      [ w , (and (L c w) (∀ z , (⇒ (L c z) (= z w))))]
+      (<<< "Use and- twice on the body of that declaration...")
+      (L c w)
+      (∀ z , (⇒ (L c z) (= z w)))
+      (<<< "Now it's just a short a proof by contradiction...")
+      { :(and (L c a) (L c b))
+        (L c a) (L c b)
+        (⇒ (L c a) (= a w))
+        (⇒ (L c b) (= b w))
+        (= a w) (= b w) 
+        (<<< "Substitution still requires BIH's for now ...")
+        { :(= b w) :(= b b) (= w b) } <<
+        { :(= w b) :(= a w) (= a b) } <<
+        →←
+      }
+      (<<< "Thus since the assumption led to a contradiction ...")
+      (¬ (and (L c a) (L c b)))
+    }
+    (<<< "And we have the theorem ...")
+    (⇒ (and (∀ x, (∃! y, (L x y))) (¬ (= a b))) (¬ (and (L c a) (L c b))) )
+  }
+}
+
+{
+  // Assignment #9.1
+  // Thm: Pierce's Law
+  (<<< 'Assignment #9.1')
+  (<<< ' ')
+  (<<< "Theorem: Pierce's Law")
+  { (⇒ (⇒ (⇒ P Q) P) P)}
+  (<<< 'Proof:')
+  { 
+    :(⇒ (⇒ P Q) P)
+    { :(¬ P)
+      { :P
+        { :(¬ Q) 
+          →←
+        }
+        Q
+      }
+      (⇒ P Q)
+      P
+      →←
+    }
+    P   
+  }
+}
+
+{
+  // Assignment #9.2
+  // Thm: A case of cases
+  (<<< 'Assignment #9.2')
+  (<<< ' ')
+  (<<< "Theorem: (P⇒R) or (Q⇒R) ⇒ ((P and Q)⇒R)")
+  { (⇒ (or (⇒ P R) (⇒ Q R)) (⇒ (and P Q) R) ) }
+  (<<< 'Proof:')
+  { :(or (⇒ P R) (⇒ Q R))
+    { :(and P Q)
+      P Q
+      { :(⇒ P R) R}
+      { :(⇒ Q R) R}
+      R {:(or (⇒ P R) (⇒ Q R)) :{ :(⇒ P R) R} :{ :(⇒ Q R) R} R } <<
+    }
+    (⇒ (and P Q) R)
+  }
+  (⇒ (or (⇒ P R) (⇒ Q R)) (⇒ (and P Q) R) ) 
+}
+
+{
+  // Assignment #9.3
+  // Thm: If everyone loves themselves then everyone loves someone.
+  (<<< 'Assignment #9.3')
+  (<<< ' ')
+  (<<< "Theorem: If everyone loves themselves then everyone loves someone.")
+  { :(∀ x , (L x x)) (∀ x, (∃ y, (L x y))) }
+  (<<< 'Proof:')
+  { :(∀ x , (L x x))
+    { :[z]
+      (L z z)
+      (∃ y, (L z y))
+    }
+    (∀ x, (∃ y, (L x y)))
+  }
+}
+
+{
+  // Assignment #9.4
+  // Thm: If everyone loves themselves then everyone loves someone.
+  (<<< 'Assignment #9.4')
+  (<<< ' ')
+  (<<< "Theorem:")
+  // { (⇔ ( ∃! x , (P x) ) (∃ x , (and (P x) (∀ y, (⇒ (¬ (= y x)) (¬ (P y))))))) }
+  (<<< 'Proof:')
+  { { :( ∃! x , (P x) )
+      (∃ x , (and (P x) (∀ y, (⇒ (P y) (= y x)))))
+      [ c , (and (P c) (∀ y, (⇒ (P y) (= y c))))]
+      (P c) (∀ y, (⇒ (P y) (= y c)))
+      { :[ z ]
+        { :(¬ (= z c))
+          { :(P z)
+            (⇒ (P z) (= z c))
+            (= z c)
+            →←
+          }
+          (¬ (P z))
+        }
+        (⇒ (¬ (= z c)) (¬ (P z)))
+      }
+      (∀ y, (⇒ (¬ (= y c)) (¬ (P y))))
+      (and (P c) (∀ y, (⇒ (¬ (= y c)) (¬ (P y)))))
+      (∃ x , (and (P x) (∀ y, (⇒ (¬ (= y x)) (¬ (P y))))))
+    }
+    
+    { :(∃ x , (and (P x) (∀ y, (⇒ (¬ (= y x)) (¬ (P y))))))
+      [ c , (and (P c) (∀ y, (⇒ (¬ (= y c)) (¬ (P y))))) ]
+      (P c) (∀ y, (⇒ (¬ (= y c)) (¬ (P y))))
+      { :[ z ]
+        { :(P z) 
+          (⇒ (¬ (= z c)) (¬ (P z)))
+          { :(¬ (= z c))
+            (¬ (P z))
+            →←
+          }
+          (= z c)
+        }
+        (⇒ (P z) (= z c))
+      }
+      (∀ y, (⇒ (P y) (= y c)))
+      (and (P c) (∀ y, (⇒ (P y) (= y c))))
+      (∃ x , (and (P x) (∀ y, (⇒ (P y) (= y x)))))
+      ( ∃! x , (P x) ) 
+    }
+  }
+}
+
+
+(⇒ (¬ (∀ x, (∃ y, (∀ z, (P x y z))))) (∃ x, (∀ y, (∃ z, (¬ (P x y z))))))
+
+{
+  // Assignment #10.3
+  // Thm: DeMorgan extravaganza
+  (<<< 'Assignment #10.2')
+  (<<< ' ')
+  (<<< 'Theorem:')
+  { (⇒ (¬ (∀ x, (∃ y, (∀ z, (P x y z))))) (∃ x, (∀ y, (∃ z, (¬ (P x y z)))))) }
+  (<<< 'Proof:')
+  { :(¬ (∀ x, (∃ y, (∀ z, (P x y z)))))
+    { :(¬ (∃ x, (∀ y, (∃ z, (¬ (P x y z))))))
+      { :[a]
+        { :(¬ (∃ y, (∀ z, (P a y z))))
+          { :[b]
+            { :(¬ (∃ z, (¬ (P a b z))))
+              { :[c]
+                { :(¬ (P a b c))
+                  (∃ z, (¬ (P a b z)))
+                  →←
+                }
+                (P a b c)
+              }
+              (∀ z, (P a b z))
+              (∃ y, (∀ z, (P a y z)))
+              →←
+            }
+            (∃ z, (¬ (P a b z)))
+          }
+          (∀ y, (∃ z, (¬ (P a y z))))
+          (∃ x, (∀ y, (∃ z, (¬ (P x y z)))))
+          →←
+        }
+        (∃ y, (∀ z, (P a y z)))
+      }
+      (∀ x, (∃ y, (∀ z, (P x y z))))
+      →←
+    }
+    (∃ x, (∀ y, (∃ z, (¬ (P x y z)))))  
+  }
+}
