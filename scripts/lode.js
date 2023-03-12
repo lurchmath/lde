@@ -95,6 +95,7 @@ const decPen = chalk.ansi256(30)           // aqua-ish
 const commentPen = chalk.ansi256(19)       // dim purple-blue 
 const headingPen = chalk.ansi256(226)      // bright Yellow
 const docPen = chalk.ansi256(248)          // light grey text
+const linenumPen = chalk.ansi256(22)       // slightly darker blue than default
 // const smallPen (maybe TODO some day) \u{1D5BA} is the code for small a
 
 // compute once for efficiency
@@ -377,6 +378,7 @@ global.chalk = chalk
 global.erase = erase
 global.instantiationPen = instantiationPen
 global.defaultPen = defaultPen
+global.linenumPen = linenumPen
 global.headingPen = headingPen
 global.docPen = docPen
 global.goldstar = goldstar

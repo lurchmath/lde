@@ -8,13 +8,10 @@ process.stdout.write(defaultPen(`Loading proofs ...`))
 let start = Date.now()
 ////////////////////////////////////////////////////////////////////////////
 
-// peano = load('math-299-peano',
-//              ['Prop','PropThm','Pred','PredThm','Peano','Number Theory'])
-// console.log('peano loaded')
-// peano.lastChild().report(user)
-
-ex=lc(`(∀ y , (⇒ (< 2 y)) (∀ x , (< 1 x)))`)
-renameBindings(ex)
+peano = load('math-299-peano',
+             ['Prop','PropThm','Pred','PredThm','Peano','Number Theory'])
+console.log('peano loaded')
+peano.lastChild().report(user)
 
 ///////////////////////////////////////////////////////////
 // closing    

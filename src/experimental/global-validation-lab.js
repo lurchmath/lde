@@ -135,6 +135,7 @@ import { execSync } from 'child_process'
 //
 const lc = (s) => { return LogicConcept.fromPutdown(s)[0] }
 const metavariable = 'LDE MV'
+const instantiation = 'LDE CI'
 const subscriptDigits = '₀₁₂₃₄₅₆₇₈₉'
 const subscript = n => [...n.toString()].map( d => subscriptDigits[d]).join('')
 const execStr = command => String(execSync(command))
@@ -1300,11 +1301,11 @@ Environment.prototype.validateall = function ( target = this ) {
           const toggle = matchGivens(f,i);
           try {
             [...Formula.allPossibleInstantiations(f,i)].forEach( s => {
-              const instantiation = Formula.instantiate(f,s)
-              assignProperNames(instantiation)
-              if (toggle) instantiation.toggleGiven()
-              instantiation.instantiation=true
-              Formula.addCachedInstantiation( f , instantiation )
+              const inst = Formula.instantiate(f,s)
+              assignProperNames(inst)
+              if (toggle) inst.toggleGiven()
+              inst.instantiation=true
+              Formula.addCachedInstantiation( f , inst )
             })
           } catch { }
           if (toggle) { f.toggleGiven() }
@@ -1646,7 +1647,8 @@ LogicConcept.prototype.report = function ( options={numbered:true}) {
           !c.instantiation) return
       linenum = `${c.indexInParent()}`
       linenum += tab(4-linenum.length)
-      linenum = instantiationPen(linenum)
+      linenum = (!c.isA(instantiation)) ? linenumPen(linenum) 
+                                        : instantiationPen(linenum)
       if (options.showProperNames) numberedTheme.showProperNames=true
       ans += linenum+format(c,numberedTheme).replace(/\n/g,'\n    ')+'\n'
     })
