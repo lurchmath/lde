@@ -474,7 +474,7 @@ export class Problem {
         // Finally, the complicated case.  If the constraint is an expression
         // function application case, then we may generate multiple solutions,
         // in all the ways documented below.
-        if ( complexity == 4 ) {
+        if ( complexity >= 4 ) {
 
             // We need a utility function for extending recursively computed
             // solutions with new constraints.
@@ -515,11 +515,22 @@ export class Problem {
             // Solution method 1: Head instantiated with a constant function.
             // dbg( '--1--' )
             yield* addEF( head, constantEF( args.length, expr ) )
+
+            // If it can't be anything but a constant function, stop here.
+            if ( constraint.canBeOnlyConstantEFA() ) {
+                // dbg( '-- complexity=4 => constant function --' )
+                return
+            }
             
             // Solution method 2: Head instantiated with a projection function.
-            for ( let i = 0 ; i < args.length ; i++ )
-                yield* addEF( head, projectionEF( args.length, i ) )
             // dbg( '--2--' )
+            for ( let i = 0 ; i < args.length ; i++ ) {
+                if ( constraint.canBeAProjectionEFA( i ) ) // slight speedup
+                    yield* addEF( head, projectionEF( args.length, i ) )
+                // else
+                //     dbg( `-- arg ${i} is an expr with ${copies} copies (not 1)`
+                //        + ' => not a projection function --' )
+            }
             
             // Solution method 3: If the expression is compound, we could
             // imitate each child using a different expression function,
