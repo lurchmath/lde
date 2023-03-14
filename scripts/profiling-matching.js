@@ -111,10 +111,10 @@ const timeThis = ( title, func, iterations = 1 ) => {
 timeThis(
     'Small EFA Problems (not all unary)',
     () => smallEFAProblems.forEach( P => Array.from( P.solutions() ) ),
-    10
+    100
 )
 timeThis(
     'Full Matching database (all unary)',
     () => allDatabaseEntries.forEach( P => Array.from( P.solutions() ) ),
-    10
+    25
 )
