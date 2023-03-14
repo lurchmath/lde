@@ -31,7 +31,12 @@ export class Declaration extends LogicConcept {
     
     static className = MathConcept.addSubclass( 'Declaration', Declaration )
 
-    static emptyBody = new LurchSymbol( 'LDE empty' )
+    static _emptyBody = null
+    static emptyBody = () => {
+        if ( !Declaration._emptyBody )
+            Declaration._emptyBody = new LurchSymbol( 'LDE empty' )
+        return Declaration._emptyBody
+    }
 
     /**
      * Construct a declaration.  The first argument must be either the
@@ -86,7 +91,7 @@ export class Declaration extends LogicConcept {
                 throw 'Optional second parameter to Declaration constructor, '
                     + 'if provided, must be a LogicConcept'
         } else {
-            body = Declaration.emptyBody.copy()
+            body = Declaration.emptyBody().copy()
         }
         super( ...symbols, body )
     }
@@ -152,7 +157,7 @@ export class Declaration extends LogicConcept {
      */
     body () {
         const last = this.lastChild()
-        return last.equals( Declaration.emptyBody ) ? undefined : last
+        return last.equals( Declaration.emptyBody() ) ? undefined : last
     }
 
     /**
@@ -165,7 +170,7 @@ export class Declaration extends LogicConcept {
      * @see {@link Declaration#setBody setBody()}
      */
     removeBody () {
-        this.setBody( Declaration.emptyBody.copy() )
+        this.setBody( Declaration.emptyBody().copy() )
     }
 
     /**
