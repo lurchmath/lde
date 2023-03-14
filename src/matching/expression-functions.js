@@ -240,6 +240,7 @@ export const applyEF = ( ef, ...args ) => {
     }
     result.descendantsSatisfying(
         d => ( d instanceof LurchSymbol ) && d.isFree( result )
+          && parameters.includes( d.text() )
     ).forEach( sym => replaceRespectingDeBruijn( sym, lookup( sym ) ) )
     return result
 }

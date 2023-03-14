@@ -62,7 +62,7 @@ const from = (LC, inPlace=false) => {
         a => a instanceof Declaration
     ).map( d => d.symbols() ).flat().map( s => s.text() ) )
     // add to that the special symbol for empty declaration bodies
-    declared.add( Declaration.emptyBody.text() )
+    declared.add( Declaration.emptyBody().text() )
     // and what were bound outside of the LC?
     const bound = new Set( LC.ancestors().filter(
         a => a != LC && ( a instanceof BindingEnvironment )
