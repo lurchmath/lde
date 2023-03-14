@@ -336,7 +336,7 @@ export class Problem {
         for ( let solution of proxy.allSolutions( new Solution( proxy ) ) ) {
             // Is this really a solution?  Only if no capture would occur...
             if ( [ ...solution.domain() ].some( metavar =>
-                solution.get( metavar ).hasDescendantSatisfying(
+                solution.get( metavar ).copy().hasDescendantSatisfying(
                     d => deBruijnFree( d ) === true ) ) ) {
                 if ( this._debug )
                     console.log( 'xxx - That solution would include variable capture' )
@@ -518,7 +518,7 @@ export class Problem {
                 const metavars = this._stream.nextN( numChildren )
                     .map( symbol => symbol.asA( metavariable ) )
                 const ef = applicationEF( args.length, metavars )
-                // If the expression is an ecoded binding, do not let the matching
+                // If the expression is an encoded binding, do not let the matching
                 // algorithm attempt to synthesize its first child, (de Bruijn
                 // constant with embedded codes).  Just let that one match always:
                 if ( isEncodedBinding( expr ) )
