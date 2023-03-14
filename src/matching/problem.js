@@ -11,7 +11,8 @@ import {
 } from './expression-functions.js'
 import { NewSymbolStream } from "./new-symbol-stream.js"
 import {
-    isEncodedBinding, adjustIndices, free as deBruijnFree
+    isEncodedBinding, adjustIndices, free as deBruijnFree,
+    decodeExpression, deBruijn
 } from "./de-bruijn.js"
 
 /**
@@ -296,9 +297,21 @@ export class Problem {
      * @see {@link Constraint#toString toString() for individual Constraints}
      */
     toString () {
+        const maybeWithDeBruijn = c => {
+            if ( !this._deBruijnEncoded
+              || ( c.pattern instanceof LurchSymbol )
+              && c.pattern.text() == deBruijn ) return c.toString()
+            return c.toString() + '\n\t   '
+                 + ( '(' + decodeExpression( c.pattern ).toPutdown()
+                   + ',' + decodeExpression( c.expression ).toPutdown() + ')' )
+            .replace( /\n      /g, '' )
+            .replace( / \+\{"_type_LDE MV":true\}\n/g, '__' )
+            .replace( /"LDE EFA"/g, '@' )
+            .replace( /"LDE lambda"/g, '𝝺' )
+        }
         return '{\n\t'
-             + this.constraints.map(
-                   x => `${x.complexity()}  ${x.toString()}`
+             + this.constraints.map( x =>
+                   x => `${x.complexity()}  ${maybeWithDeBruijn(x)}`
                ).join('\n\t')
              + '\n}'
     }
@@ -365,6 +378,7 @@ export class Problem {
 
     // for internal use only, by *solutions()
     deBruijnEncode () {
+        this._deBruijnEncoded = true
         this.constraints = this.constraints.map(
             constraint => constraint.copy() )
         this.constraints.forEach( constraint => constraint.deBruijnEncode() )
