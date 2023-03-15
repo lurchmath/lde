@@ -164,7 +164,7 @@ import {
 import {
     deBruijn, equal, encodeSymbol, encodeExpression, encodedIndices,
     adjustIndices, decodeSymbol, decodeExpression, isEncodedBinding,
-    free
+    free, numberOfOccurrences
 } from './matching/de-bruijn.js'
 import { Constraint } from "./matching/constraint.js"
 import { Substitution } from "./matching/substitution.js"
@@ -184,7 +184,7 @@ export default {
     metavariable, containsAMetavariable, metavariablesIn, metavariableNamesIn,
     deBruijn, equal, encodeSymbol, encodeExpression, encodedIndices,
     adjustIndices, decodeSymbol, decodeExpression, isEncodedBinding,
-    free,
+    free, numberOfOccurrences,
     Constraint, Substitution,
     newEF, isAnEF, arityOfEF, applyEF, constantEF, projectionEF, applicationEF,
     newEFA, isAnEFA, canBetaReduce, betaReduce, fullBetaReduce, alphaEquivalent,

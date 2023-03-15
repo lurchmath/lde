@@ -20,6 +20,7 @@ describe( 'de Bruijn indices', () => {
         expect( M.isEncodedBinding ).to.be.ok
         expect( M.equal ).to.be.ok
         expect( M.free ).to.be.ok
+        expect( M.numberOfOccurrences ).to.be.ok
     } )
 
     it( 'Should encode/decode symbols correctly at any level of binding', () => {
@@ -500,6 +501,80 @@ describe( 'de Bruijn indices', () => {
         expect( M.free( subexpr.child( 1, 0 ) ) ).to.equal( undefined )
         expect( M.free( subexpr.child( 1, 1, 0 ) ) ).to.equal( undefined )
         expect( M.free( subexpr.child( 1, 1, 1 ) ) ).to.equal( false )
+    } )
+
+    it( 'Should count number of occurrences correctly', () => {
+        let parent, A, B
+
+        // The first test is the one given in the documentation itself:
+        // Parent = (forall x , (and (Q x) (forall y , (or (Q x) (P x y)))))
+        //      --> (forall (db (and
+        //            (Q (0,0))
+        //            (forall (db (or (Q (1,0)) (P (1,0) (0,0)))))
+        //          )))
+        // A = the first (Q x) descendant inside the parent
+        // --> (Q (0,0))
+        // B = the (forall y , (or (Q x) (P x y))) descendant inside the parent
+        // --> (forall (db (or (Q (1,0)) (P (1,0) (0,0)))))
+        parent = LogicConcept.fromPutdown(
+            '(forall x , (and (Q x) (forall y , (or (Q x) (P x y)))))'
+        )[0]
+        parent = M.encodeExpression( parent )
+        A = parent.child( 1, 1, 1 )
+        B = parent.child( 1, 1, 2 )
+        // Ensure we selected the correct A and B that we think we did:
+        expect( M.decodeSymbol( A.child( 0 ) ).text() ).to.equal( 'Q' )
+        expect( M.decodeSymbol( B.child( 0 ) ).text() ).to.equal( 'forall' )
+        // Computing it the naive way gives the wrong answer:
+        expect(
+            B.descendantsSatisfying( d => M.equal( d, A ) ).length
+        ).to.equal( 0 )
+        // But computing it with the de Bruijn # occurrences function works:
+        expect( M.numberOfOccurrences( A, B ) ).to.equal( 1 )
+
+        // We get the same answers even if A is a copy of itself rather than
+        // the original.
+        A = A.copy()
+        expect(
+            B.descendantsSatisfying( d => M.equal( d, A ) ).length
+        ).to.equal( 0 )
+        expect( M.numberOfOccurrences( A, B ) ).to.equal( 1 )
+
+        // But if we had used the (Q (1,0)) that sits inside B, we would have
+        // gotten the wrong answer, because its indices are calibrated to the
+        // ancestry of B, but the numberOfOccurrences() function requires A and
+        // B to have all ancestor bindings in common.  It doesn't matter whether
+        // we use the original (Q (1,0)) in B or a copy.
+        A = B.child( 1, 1, 1 )
+        expect( M.decodeSymbol( A.child( 0 ) ).text() ).to.equal( 'Q' )
+        expect(
+            B.descendantsSatisfying( d => M.equal( d, A ) ).length
+        ).to.equal( 1 )
+        expect( M.numberOfOccurrences( A, B ) ).to.equal( 0 )
+        A = A.copy()
+        expect(
+            B.descendantsSatisfying( d => M.equal( d, A ) ).length
+        ).to.equal( 1 )
+        expect( M.numberOfOccurrences( A, B ) ).to.equal( 0 )
+
+        // If we repeat the first test, but now let B be the immediate parent of
+        // A, we still get correct answers, because the have all binding
+        // ancestors in common.  But the answers are now different, because A
+        // appears in B twice.
+        A = parent.child( 1, 1, 1 )
+        B = parent.child( 1, 1 )
+        expect(
+            B.descendantsSatisfying( d => M.equal( d, A ) ).length
+        ).to.equal( 1 )
+        expect( M.numberOfOccurrences( A, B ) ).to.equal( 2 )
+
+        // We get the same answers even if A is a copy of itself rather than
+        // the original.
+        A = A.copy()
+        expect(
+            B.descendantsSatisfying( d => M.equal( d, A ) ).length
+        ).to.equal( 1 )
+        expect( M.numberOfOccurrences( A, B ) ).to.equal( 2 )
     } )
 
 } )

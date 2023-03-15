@@ -475,3 +475,42 @@ export const free = symbol => {
     const encodedBindings = symbol.ancestorsSatisfying( isEncodedBinding )
     return encodedBindings.length <= indices[0]
 }
+
+/**
+ * Take two subexpressions $A,B$ that share the same parent expression and are
+ * in de Bruijn form.  We may want to ask whether a copy of $A$ occurs in $B$,
+ * but we cannot do so just by checking simple structural equality, as in the
+ * following example.
+ * 
+ * Take the expression $\forall x,(Q(x)\wedge\forall y,(Q(x)\vee P(x,y)))$.
+ * Let $A=Q(x)$ (the one appearing before the $\wedge$) and
+ * $B=\forall y,(Q(x)\vee P(x,y))$.  In de Bruijn form, we would have the outer
+ * expression $\forall(Q((0,0))\wedge\forall(Q((1,0)\vee P((1,0),(0,0))))$ and
+ * $A=Q((0,0))$ and $B=Q((1,0))\vee P((1,0),(0,0))$.  By comparing syntax trees
+ * alone, we would not say that $A$ occurs in $B$.  But clearly in non-de Bruijn
+ * form, it does.  Thus we need a more sophisticated way to count occurrences,
+ * when the expressions are in de Bruijn form.
+ * 
+ * Note that this comparison depends upon $A$ and $B$ having a common parent, or
+ * at least that any binding expression containing $A$ also contains $B$, so
+ * that symbols that are free in one (such as the $(0,0)$ in $A$) have the same
+ * meaning that they do in $B$ (referring to the outermost $\forall$ that is an
+ * ancestor of both $A$ and $B$).  This property of $A$ and $B$ is a
+ * precondition on this routine; its results may be meaningless if this
+ * condition does not hold.
+ * 
+ * @param {LogicConcept} ofThis the expression to search for in the other
+ * @param {LogicConcept} inThis the expression in which to search
+ * @returns {Number} the number of occurrences found
+ */
+export const numberOfOccurrences = ( ofThis, inThis ) => {
+    if ( equal( ofThis, inThis ) ) return 1
+    if ( isEncodedBinding( inThis ) ) {
+        const copy = ofThis.copy()
+        adjustIndices( copy, 1, 0 )
+        return numberOfOccurrences( copy, inThis.lastChild() )
+    }
+    return inThis.children().map(
+        child => numberOfOccurrences( ofThis, child )
+    ).reduce( ( a, b ) => a + b, 0 )
+}
