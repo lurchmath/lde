@@ -276,7 +276,7 @@ export const encodedIndices = symbol => {
  * 
  * Note that only free indices are adjusted, not bound indices.  For example, if
  * `(forall x , (= x t))` is represented as an encoded binding wrapped around
- * `(= (0,0) (1,0))` and we increment indices, we would not want the bound `x`
+ * `(= (0,0) t)` and we increment indices, we would not want the bound `x`
  * in the first expression to become free.  The reason for this is that we are
  * typically adjusting indices in an expression that will be moved/substituted
  * inside another expression, and we need to use the standard de Bruijn method
@@ -455,8 +455,8 @@ export const equal = ( expression1, expression2 ) =>
  * a pair of natural numbers, the first of which says how many bindings one must
  * pass as one walks up the ancestor chain of this symbol before we encounter
  * the binding that binds this symbol.  Thus a de Bruijn index is free if the
- * number of bindings in its ancestor chain is greater than or equal to that
- * first index.
+ * number of bindings in its ancestor chain is less than or equal to that first
+ * index.
  * 
  * This function tests that and returns true if that freeness condition is met,
  * false if the first component of the de Bruijn index is smaller than the
@@ -473,5 +473,5 @@ export const free = symbol => {
     const indices = encodedIndices( symbol )
     if ( !indices ) return undefined
     const encodedBindings = symbol.ancestorsSatisfying( isEncodedBinding )
-    return indices[0] >= encodedBindings.length
+    return encodedBindings.length <= indices[0]
 }
