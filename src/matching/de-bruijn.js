@@ -274,6 +274,15 @@ export const encodedIndices = symbol => {
  * a de Bruijn index $(i,j)$ can be adjusted with $(\Delta_i,\Delta_j)$ to
  * become $(i+\Delta_i,j+\Delta_j)$.
  * 
+ * Note that only free indices are adjusted, not bound indices.  For example, if
+ * `(forall x , (= x t))` is represented as an encoded binding wrapped around
+ * `(= (0,0) t)` and we increment indices, we would not want the bound `x`
+ * in the first expression to become free.  The reason for this is that we are
+ * typically adjusting indices in an expression that will be moved/substituted
+ * inside another expression, and we need to use the standard de Bruijn method
+ * of avoiding "capture" by ensuring that free indices stay free even in the new
+ * context.
+ * 
  * If the first argument is an {@link Application}, this function distributes
  * itself across the {@link Application}'s children.  If it is neither a
  * {@link Symbol} nor an {@link Application}, this function does nothing.
@@ -284,15 +293,23 @@ export const encodedIndices = symbol => {
  *   the index
  * @param {integer} deltaJ the amount by which to adjust the second component of
  *   the index
+ * @param {integer} [depth] for recursive use only; clients should omit this.
+ *   It is used to avoid capture by tracking the number of bindings already
+ *   traversed in the recursion.
  */
-export const adjustIndices = ( target, deltaI, deltaJ ) => {
-    if ( target instanceof Application )
+export const adjustIndices = ( target, deltaI, deltaJ, depth = 0 ) => {
+    if ( target instanceof Application ) {
+        const depthAdjustment = isEncodedBinding( target ) ? 1 : 0
         return target.children().forEach( child =>
-            adjustIndices( child, deltaI, deltaJ ) )
+            adjustIndices( child, deltaI, deltaJ, depth + depthAdjustment ) )
+    }
     const original = encodedIndices( target )
     if ( !original ) return
-    target.setAttribute( 'symbol text', JSON.stringify(
-        [ deBruijn, original[0] + deltaI, original[1] + deltaJ ] ) )
+    target.setAttribute( 'symbol text', JSON.stringify( [
+        deBruijn,
+        original[0] + ( original[0] >= depth ? deltaI : 0 ),
+        original[1] + ( original[0] >= depth ? deltaJ : 0 )
+    ] ) )
 }
 
 /**
@@ -438,8 +455,8 @@ export const equal = ( expression1, expression2 ) =>
  * a pair of natural numbers, the first of which says how many bindings one must
  * pass as one walks up the ancestor chain of this symbol before we encounter
  * the binding that binds this symbol.  Thus a de Bruijn index is free if the
- * number of bindings in its ancestor chain is greater than or equal to that
- * first index.
+ * number of bindings in its ancestor chain is less than or equal to that first
+ * index.
  * 
  * This function tests that and returns true if that freeness condition is met,
  * false if the first component of the de Bruijn index is smaller than the
@@ -456,5 +473,44 @@ export const free = symbol => {
     const indices = encodedIndices( symbol )
     if ( !indices ) return undefined
     const encodedBindings = symbol.ancestorsSatisfying( isEncodedBinding )
-    return indices[0] >= encodedBindings.length
+    return encodedBindings.length <= indices[0]
+}
+
+/**
+ * Take two subexpressions $A,B$ that share the same parent expression and are
+ * in de Bruijn form.  We may want to ask whether a copy of $A$ occurs in $B$,
+ * but we cannot do so just by checking simple structural equality, as in the
+ * following example.
+ * 
+ * Take the expression $\forall x,(Q(x)\wedge\forall y,(Q(x)\vee P(x,y)))$.
+ * Let $A=Q(x)$ (the one appearing before the $\wedge$) and
+ * $B=\forall y,(Q(x)\vee P(x,y))$.  In de Bruijn form, we would have the outer
+ * expression $\forall(Q((0,0))\wedge\forall(Q((1,0)\vee P((1,0),(0,0))))$ and
+ * $A=Q((0,0))$ and $B=Q((1,0))\vee P((1,0),(0,0))$.  By comparing syntax trees
+ * alone, we would not say that $A$ occurs in $B$.  But clearly in non-de Bruijn
+ * form, it does.  Thus we need a more sophisticated way to count occurrences,
+ * when the expressions are in de Bruijn form.
+ * 
+ * Note that this comparison depends upon $A$ and $B$ having a common parent, or
+ * at least that any binding expression containing $A$ also contains $B$, so
+ * that symbols that are free in one (such as the $(0,0)$ in $A$) have the same
+ * meaning that they do in $B$ (referring to the outermost $\forall$ that is an
+ * ancestor of both $A$ and $B$).  This property of $A$ and $B$ is a
+ * precondition on this routine; its results may be meaningless if this
+ * condition does not hold.
+ * 
+ * @param {LogicConcept} ofThis the expression to search for in the other
+ * @param {LogicConcept} inThis the expression in which to search
+ * @returns {Number} the number of occurrences found
+ */
+export const numberOfOccurrences = ( ofThis, inThis ) => {
+    if ( equal( ofThis, inThis ) ) return 1
+    if ( isEncodedBinding( inThis ) ) {
+        const copy = ofThis.copy()
+        adjustIndices( copy, 1, 0 )
+        return numberOfOccurrences( copy, inThis.lastChild() )
+    }
+    return inThis.children().map(
+        child => numberOfOccurrences( ofThis, child )
+    ).reduce( ( a, b ) => a + b, 0 )
 }

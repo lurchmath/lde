@@ -5,7 +5,8 @@ import { LogicConcept } from '../logic-concept.js'
 import { metavariable, containsAMetavariable } from './metavariables.js'
 import { isAnEFA } from './expression-functions.js'
 import {
-    equal as deBruijnEquals, encodeExpression, decodeExpression
+    equal as deBruijnEquals, encodeExpression, decodeExpression,
+    numberOfOccurrences
 } from './de-bruijn.js'
 
 // If an EFA constraint has one or more of its arguments containing a
@@ -249,8 +250,7 @@ export class Constraint {
             this._argumentComplexity = [ ]
             for ( let i = 2 ; i < this.pattern.numChildren() ; i++ ) {
                 const arg = this.pattern.child( i )
-                const copyCount = this.expression.descendantsSatisfying(
-                    d => deBruijnEquals( d, arg ) ).length
+                const copyCount = numberOfOccurrences( arg, this.expression )
                 const hasMetavariable = containsAMetavariable( arg )
                 this._argumentCopyCount.push( copyCount )
                 this._argumentContainsMetavariable.push( hasMetavariable )

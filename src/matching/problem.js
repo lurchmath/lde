@@ -441,7 +441,7 @@ export class Problem {
             this.remove( 0 )
             const toAdd = constraint.children()
             // Special case: If we're about to recur inside a binding encoded as
-            // an Application, we may need to decreas the indices before we
+            // an Application, we may need to decrease the indices before we
             // enter and then increase them again in any solution we find, to
             // compensate for the disassembly of the binding necessary for
             // recursion.  This does not apply if the pattern is also an encoded

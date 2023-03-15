@@ -13,10 +13,14 @@ describe( 'de Bruijn indices', () => {
         expect( typeof M.deBruijn ).to.equal( 'string' )
         expect( M.encodeSymbol ).to.be.ok
         expect( M.encodedIndices ).to.be.ok
+        expect( M.adjustIndices ).to.be.ok
         expect( M.decodeSymbol ).to.be.ok
         expect( M.encodeExpression ).to.be.ok
         expect( M.decodeExpression ).to.be.ok
+        expect( M.isEncodedBinding ).to.be.ok
         expect( M.equal ).to.be.ok
+        expect( M.free ).to.be.ok
+        expect( M.numberOfOccurrences ).to.be.ok
     } )
 
     it( 'Should encode/decode symbols correctly at any level of binding', () => {
@@ -129,6 +133,58 @@ describe( 'de Bruijn indices', () => {
         expect( M.encodedIndices( encoded.child( 2, 1, 1, 1 ) ) ).to.eql( [ 0, 0 ] )
         decoded = M.decodeExpression( encoded )
         expect( decoded.equals( expression ) )
+    } )
+
+    it( 'Should correctly detect when an LC is an encoded binding', () => {
+        let expression
+        let encoded
+        // Re-using Expression 1 from the previous test
+        // x , y , (f x y) ----> (db (db (f db_1_0 db_0_0)))
+        expression = LogicConcept.fromPutdown( 'x , y , (f x y)' )[0]
+        encoded = M.encodeExpression( expression )
+        // We spot-check several descendants, but not every one.
+        expect( M.isEncodedBinding( encoded ) ).to.equal( true )
+        expect( M.isEncodedBinding( encoded.child( 1 ) ) ).to.equal( true )
+        expect( M.isEncodedBinding( encoded.child( 1, 0 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 1, 1 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 1, 1, 0 ) ) ).to.equal( false )
+        // Re-using Expression 2 from the previous test
+        // (sum 1 n i , (sum 1 i j , (* i j)))
+        //     ----> (sum 1 n (db (sum 1 db_0_0 (db (* db_1_0 db_0_0)))))
+        expression = LogicConcept.fromPutdown(
+            '(sum 1 n i , (sum 1 i j , (* i j)))' )[0]
+            encoded = M.encodeExpression( expression )
+        // We spot-check several descendants, but not every one.
+        expect( M.isEncodedBinding( encoded ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 0 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 1 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 2 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 3 ) ) ).to.equal( true )
+        expect( M.isEncodedBinding( encoded.child( 3, 0 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 3, 1 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 3, 1, 0 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 3, 1, 1 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 3, 1, 2 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 3, 1, 3 ) ) ).to.equal( true )
+        // Re-using Expression 3 from the previous test
+        // (and (forall x , (P x)) (exists x , (Q x)))
+        //     ----> (and (forall (db (P db_0_0))) (exists (db (Q db_0_0))))
+        expression = LogicConcept.fromPutdown(
+            '(and (forall x , (P x)) (exists x , (Q x)))' )[0]
+        encoded = M.encodeExpression( expression )
+        // We spot-check several descendants, but not every one.
+        expect( M.isEncodedBinding( encoded ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 0 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 1 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 1, 0 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 1, 1 ) ) ).to.equal( true )
+        expect( M.isEncodedBinding( encoded.child( 1, 1, 0 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 1, 1, 1 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 2 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 2, 0 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 2, 1 ) ) ).to.equal( true )
+        expect( M.isEncodedBinding( encoded.child( 2, 1, 0 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 2, 1, 1 ) ) ).to.equal( false )
     } )
 
     it( 'Should correctly check equality without de Bruijn attributes', () => {
@@ -301,6 +357,224 @@ describe( 'de Bruijn indices', () => {
         expect( copy.equals( original ) ).to.equal( false )
         copy.deBruijnDecode()
         expect( copy.equals( original ) ).to.equal( true )
+    } )
+
+    it( 'Should adjust indices correctly in de Bruijn expressions', () => {
+        let expr, copy
+        // Create (+ x y) which converts to include no de Bruijn symbols, and
+        // thus adjustIndices() has no effect on it.
+        expr = LogicConcept.fromPutdown( '(+ x y)' )[0]
+        expr = M.encodeExpression( expr )
+        expect( Array.from( expr.descendantsIterator() ).every(
+            d => M.encodedIndices( d ) === undefined
+        ) ).to.equal( true )
+        copy = expr.copy()
+        M.adjustIndices( copy, 1, 1 )
+        expect( copy.equals( expr ) ).to.equal( true )
+        expect( M.equal( copy, expr ) ).to.equal( true )
+        // Create (x y) , (+ x y) which converts to include 2 de Bruijn symbols,
+        // both bound, and thus adjustIndices() has no effect on it.
+        expr = LogicConcept.fromPutdown( '(x y) , (+ x y)' )[0]
+        expr = M.encodeExpression( expr )
+        expect( Array.from( expr.descendantsIterator() ).filter(
+            d => M.encodedIndices( d ) !== undefined
+        ).length ).to.equal( 2 )
+        copy = expr.copy()
+        M.adjustIndices( copy, 1, 1 )
+        expect( copy.equals( expr ) ).to.equal( true )
+        expect( M.equal( copy, expr ) ).to.equal( true )
+        // Create (x y) , (+ x y) which converts to include 2 de Bruijn symbols,
+        // both bound, then lift the body out from the binding, and thus
+        // adjustIndices() should actually affect it.
+        expr = LogicConcept.fromPutdown( '(x y) , (+ x y)' )[0]
+        expr = M.encodeExpression( expr )
+        expect( Array.from( expr.descendantsIterator() ).filter(
+            d => M.encodedIndices( d ) !== undefined
+        ).length ).to.equal( 2 )
+        expr = expr.lastChild().copy() // the lifting mentioned above
+        expect( M.encodedIndices( expr.child( 1 ) ) ).to.eql( [ 0, 0 ] )
+        expect( M.encodedIndices( expr.child( 2 ) ) ).to.eql( [ 0, 1 ] )
+        copy = expr.copy()
+        M.adjustIndices( copy, 1, 1 )
+        expect( copy.equals( expr ) ).to.equal( false )
+        expect( M.equal( copy, expr ) ).to.equal( false )
+        expect( M.encodedIndices( expr.child( 1 ) ) ).to.eql( [ 0, 0 ] )
+        expect( M.encodedIndices( expr.child( 2 ) ) ).to.eql( [ 0, 1 ] )
+        expect( M.encodedIndices( copy.child( 1 ) ) ).to.eql( [ 1, 1 ] )
+        expect( M.encodedIndices( copy.child( 2 ) ) ).to.eql( [ 1, 2 ] )
+        // Create x , y , (+ x y) which converts to include 2 de Bruijn symbols,
+        // both bound, then lift the inner binding out from the outer binding,
+        // and thus adjustIndices() should affect only the x, not the y.
+        expr = LogicConcept.fromPutdown( 'x , y , (+ x y)' )[0]
+        expr = M.encodeExpression( expr )
+        expect( Array.from( expr.descendantsIterator() ).filter(
+            d => M.encodedIndices( d ) !== undefined
+        ).length ).to.equal( 2 )
+        expr = expr.lastChild().copy() // the lifting mentioned above
+        expect( M.encodedIndices( expr.child( 1, 1 ) ) ).to.eql( [ 1, 0 ] )
+        expect( M.encodedIndices( expr.child( 1, 2 ) ) ).to.eql( [ 0, 0 ] )
+        copy = expr.copy()
+        M.adjustIndices( copy, 1, 1 )
+        expect( copy.equals( expr ) ).to.equal( false )
+        expect( M.equal( copy, expr ) ).to.equal( false )
+        expect( M.encodedIndices( expr.child( 1, 1 ) ) ).to.eql( [ 1, 0 ] )
+        expect( M.encodedIndices( expr.child( 1, 2 ) ) ).to.eql( [ 0, 0 ] )
+        expect( M.encodedIndices( copy.child( 1, 1 ) ) ).to.eql( [ 2, 1 ] )
+        expect( M.encodedIndices( copy.child( 1, 2 ) ) ).to.eql( [ 0, 0 ] )
+    } )
+
+    it( 'Should check free-ness of a de Bruijn encoded symbol', () => {
+        let expression
+        let encoded
+        // Re-using Expression 1 from the previous test
+        // x , y , (f x y) ----> (db (db (f db_1_0 db_0_0)))
+        expression = LogicConcept.fromPutdown( 'x , y , (f x y)' )[0]
+        encoded = M.encodeExpression( expression )
+        // Of the 5 symbols in the encoding, only the last 2 are bound,
+        // and all non-bound ones are undefined
+        expect( M.free( encoded.child( 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 1, 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 1, 1, 1 ) ) ).to.equal( false )
+        expect( M.free( encoded.child( 1, 1, 2 ) ) ).to.equal( false )
+        // But if we were to pop off the outermost binding, that changes one
+        // bound to free, but non-de Bruijn symbols are still undefined
+        encoded = encoded.child( 1 ).copy()
+        expect( M.free( encoded.child( 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 1, 1 ) ) ).to.equal( true )
+        expect( M.free( encoded.child( 1, 2 ) ) ).to.equal( false )
+        // Re-using Expression 2 from the previous test
+        // (sum 1 n i , (sum 1 i j , (* i j)))
+        //     ----> (sum 1 n (db (sum 1 db_0_0 (db (* db_1_0 db_0_0)))))
+        expression = LogicConcept.fromPutdown(
+            '(sum 1 n i , (sum 1 i j , (* i j)))' )[0]
+            encoded = M.encodeExpression( expression )
+        // Of the 11 symbols in the encoding, only 3 are bound,
+        // and all non-bound ones are undefined
+        expect( M.free( encoded.child( 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 1 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 2 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 3, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 3, 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 3, 1, 1 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 3, 1, 2 ) ) ).to.equal( false )
+        expect( M.free( encoded.child( 3, 1, 3, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 3, 1, 3, 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 3, 1, 3, 1, 1 ) ) ).to.equal( false )
+        expect( M.free( encoded.child( 3, 1, 3, 1, 2 ) ) ).to.equal( false )
+        // But if we were to pop off the outermost binding, that changes two
+        // bound to free, but non-de Bruijn symbols are still undefined
+        encoded = encoded.child( 3, 1 ).copy()
+        expect( M.free( encoded.child( 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 1 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 2 ) ) ).to.equal( true )
+        expect( M.free( encoded.child( 3, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 3, 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 3, 1, 1 ) ) ).to.equal( true )
+        expect( M.free( encoded.child( 3, 1, 2 ) ) ).to.equal( false )
+        // Re-using Expression 3 from the previous test
+        // (and (forall x , (P x)) (exists x , (Q x)))
+        //     ----> (and (forall (db (P db_0_0))) (exists (db (Q db_0_0))))
+        expression = LogicConcept.fromPutdown(
+            '(and (forall x , (P x)) (exists x , (Q x)))' )[0]
+        encoded = M.encodeExpression( expression )
+        // Of the 9 symbols in the encoding, only 2 are bound,
+        // and all non-bound ones are undefined
+        expect( M.free( encoded.child( 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 1, 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 1, 1, 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 1, 1, 1, 1 ) ) ).to.equal( false )
+        expect( M.free( encoded.child( 2, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 2, 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 2, 1, 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 2, 1, 1, 1 ) ) ).to.equal( false )
+        // And if we were to pop off the outermost expression, nothing changes
+        let subexpr = encoded.child( 1 ).copy()
+        expect( M.free( subexpr.child( 0 ) ) ).to.equal( undefined )
+        expect( M.free( subexpr.child( 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( subexpr.child( 1, 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( subexpr.child( 1, 1, 1 ) ) ).to.equal( false )
+        subexpr = encoded.child( 2 ).copy()
+        expect( M.free( subexpr.child( 0 ) ) ).to.equal( undefined )
+        expect( M.free( subexpr.child( 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( subexpr.child( 1, 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( subexpr.child( 1, 1, 1 ) ) ).to.equal( false )
+    } )
+
+    it( 'Should count number of occurrences correctly', () => {
+        let parent, A, B
+
+        // The first test is the one given in the documentation itself:
+        // Parent = (forall x , (and (Q x) (forall y , (or (Q x) (P x y)))))
+        //      --> (forall (db (and
+        //            (Q (0,0))
+        //            (forall (db (or (Q (1,0)) (P (1,0) (0,0)))))
+        //          )))
+        // A = the first (Q x) descendant inside the parent
+        // --> (Q (0,0))
+        // B = the (forall y , (or (Q x) (P x y))) descendant inside the parent
+        // --> (forall (db (or (Q (1,0)) (P (1,0) (0,0)))))
+        parent = LogicConcept.fromPutdown(
+            '(forall x , (and (Q x) (forall y , (or (Q x) (P x y)))))'
+        )[0]
+        parent = M.encodeExpression( parent )
+        A = parent.child( 1, 1, 1 )
+        B = parent.child( 1, 1, 2 )
+        // Ensure we selected the correct A and B that we think we did:
+        expect( M.decodeSymbol( A.child( 0 ) ).text() ).to.equal( 'Q' )
+        expect( M.decodeSymbol( B.child( 0 ) ).text() ).to.equal( 'forall' )
+        // Computing it the naive way gives the wrong answer:
+        expect(
+            B.descendantsSatisfying( d => M.equal( d, A ) ).length
+        ).to.equal( 0 )
+        // But computing it with the de Bruijn # occurrences function works:
+        expect( M.numberOfOccurrences( A, B ) ).to.equal( 1 )
+
+        // We get the same answers even if A is a copy of itself rather than
+        // the original.
+        A = A.copy()
+        expect(
+            B.descendantsSatisfying( d => M.equal( d, A ) ).length
+        ).to.equal( 0 )
+        expect( M.numberOfOccurrences( A, B ) ).to.equal( 1 )
+
+        // But if we had used the (Q (1,0)) that sits inside B, we would have
+        // gotten the wrong answer, because its indices are calibrated to the
+        // ancestry of B, but the numberOfOccurrences() function requires A and
+        // B to have all ancestor bindings in common.  It doesn't matter whether
+        // we use the original (Q (1,0)) in B or a copy.
+        A = B.child( 1, 1, 1 )
+        expect( M.decodeSymbol( A.child( 0 ) ).text() ).to.equal( 'Q' )
+        expect(
+            B.descendantsSatisfying( d => M.equal( d, A ) ).length
+        ).to.equal( 1 )
+        expect( M.numberOfOccurrences( A, B ) ).to.equal( 0 )
+        A = A.copy()
+        expect(
+            B.descendantsSatisfying( d => M.equal( d, A ) ).length
+        ).to.equal( 1 )
+        expect( M.numberOfOccurrences( A, B ) ).to.equal( 0 )
+
+        // If we repeat the first test, but now let B be the immediate parent of
+        // A, we still get correct answers, because the have all binding
+        // ancestors in common.  But the answers are now different, because A
+        // appears in B twice.
+        A = parent.child( 1, 1, 1 )
+        B = parent.child( 1, 1 )
+        expect(
+            B.descendantsSatisfying( d => M.equal( d, A ) ).length
+        ).to.equal( 1 )
+        expect( M.numberOfOccurrences( A, B ) ).to.equal( 2 )
+
+        // We get the same answers even if A is a copy of itself rather than
+        // the original.
+        A = A.copy()
+        expect(
+            B.descendantsSatisfying( d => M.equal( d, A ) ).length
+        ).to.equal( 1 )
+        expect( M.numberOfOccurrences( A, B ) ).to.equal( 2 )
     } )
 
 } )
