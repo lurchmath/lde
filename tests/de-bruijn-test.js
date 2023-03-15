@@ -17,6 +17,7 @@ describe( 'de Bruijn indices', () => {
         expect( M.decodeSymbol ).to.be.ok
         expect( M.encodeExpression ).to.be.ok
         expect( M.decodeExpression ).to.be.ok
+        expect( M.isEncodedBinding ).to.be.ok
         expect( M.equal ).to.be.ok
     } )
 
@@ -130,6 +131,58 @@ describe( 'de Bruijn indices', () => {
         expect( M.encodedIndices( encoded.child( 2, 1, 1, 1 ) ) ).to.eql( [ 0, 0 ] )
         decoded = M.decodeExpression( encoded )
         expect( decoded.equals( expression ) )
+    } )
+
+    it( 'Should correctly detect when an LC is an encoded binding', () => {
+        let expression
+        let encoded
+        // Re-using Expression 1 from the previous test
+        // x , y , (f x y) ----> (db (db (f db_1_0 db_0_0)))
+        expression = LogicConcept.fromPutdown( 'x , y , (f x y)' )[0]
+        encoded = M.encodeExpression( expression )
+        // We spot-check several descendants, but not every one.
+        expect( M.isEncodedBinding( encoded ) ).to.equal( true )
+        expect( M.isEncodedBinding( encoded.child( 1 ) ) ).to.equal( true )
+        expect( M.isEncodedBinding( encoded.child( 1, 0 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 1, 1 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 1, 1, 0 ) ) ).to.equal( false )
+        // Re-using Expression 2 from the previous test
+        // (sum 1 n i , (sum 1 i j , (* i j)))
+        //     ----> (sum 1 n (db (sum 1 db_0_0 (db (* db_1_0 db_0_0)))))
+        expression = LogicConcept.fromPutdown(
+            '(sum 1 n i , (sum 1 i j , (* i j)))' )[0]
+            encoded = M.encodeExpression( expression )
+        // We spot-check several descendants, but not every one.
+        expect( M.isEncodedBinding( encoded ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 0 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 1 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 2 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 3 ) ) ).to.equal( true )
+        expect( M.isEncodedBinding( encoded.child( 3, 0 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 3, 1 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 3, 1, 0 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 3, 1, 1 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 3, 1, 2 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 3, 1, 3 ) ) ).to.equal( true )
+        // Re-using Expression 3 from the previous test
+        // (and (forall x , (P x)) (exists x , (Q x)))
+        //     ----> (and (forall (db (P db_0_0))) (exists (db (Q db_0_0))))
+        expression = LogicConcept.fromPutdown(
+            '(and (forall x , (P x)) (exists x , (Q x)))' )[0]
+        encoded = M.encodeExpression( expression )
+        // We spot-check several descendants, but not every one.
+        expect( M.isEncodedBinding( encoded ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 0 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 1 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 1, 0 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 1, 1 ) ) ).to.equal( true )
+        expect( M.isEncodedBinding( encoded.child( 1, 1, 0 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 1, 1, 1 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 2 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 2, 0 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 2, 1 ) ) ).to.equal( true )
+        expect( M.isEncodedBinding( encoded.child( 2, 1, 0 ) ) ).to.equal( false )
+        expect( M.isEncodedBinding( encoded.child( 2, 1, 1 ) ) ).to.equal( false )
     } )
 
     it( 'Should correctly check equality without de Bruijn attributes', () => {
