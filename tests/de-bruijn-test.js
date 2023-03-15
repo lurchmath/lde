@@ -19,6 +19,7 @@ describe( 'de Bruijn indices', () => {
         expect( M.decodeExpression ).to.be.ok
         expect( M.isEncodedBinding ).to.be.ok
         expect( M.equal ).to.be.ok
+        expect( M.free ).to.be.ok
     } )
 
     it( 'Should encode/decode symbols correctly at any level of binding', () => {
@@ -419,6 +420,86 @@ describe( 'de Bruijn indices', () => {
         expect( M.encodedIndices( expr.child( 1, 2 ) ) ).to.eql( [ 0, 0 ] )
         expect( M.encodedIndices( copy.child( 1, 1 ) ) ).to.eql( [ 2, 1 ] )
         expect( M.encodedIndices( copy.child( 1, 2 ) ) ).to.eql( [ 0, 0 ] )
+    } )
+
+    it( 'Should check free-ness of a de Bruijn encoded symbol', () => {
+        let expression
+        let encoded
+        // Re-using Expression 1 from the previous test
+        // x , y , (f x y) ----> (db (db (f db_1_0 db_0_0)))
+        expression = LogicConcept.fromPutdown( 'x , y , (f x y)' )[0]
+        encoded = M.encodeExpression( expression )
+        // Of the 5 symbols in the encoding, only the last 2 are bound,
+        // and all non-bound ones are undefined
+        expect( M.free( encoded.child( 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 1, 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 1, 1, 1 ) ) ).to.equal( false )
+        expect( M.free( encoded.child( 1, 1, 2 ) ) ).to.equal( false )
+        // But if we were to pop off the outermost binding, that changes one
+        // bound to free, but non-de Bruijn symbols are still undefined
+        encoded = encoded.child( 1 ).copy()
+        expect( M.free( encoded.child( 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 1, 1 ) ) ).to.equal( true )
+        expect( M.free( encoded.child( 1, 2 ) ) ).to.equal( false )
+        // Re-using Expression 2 from the previous test
+        // (sum 1 n i , (sum 1 i j , (* i j)))
+        //     ----> (sum 1 n (db (sum 1 db_0_0 (db (* db_1_0 db_0_0)))))
+        expression = LogicConcept.fromPutdown(
+            '(sum 1 n i , (sum 1 i j , (* i j)))' )[0]
+            encoded = M.encodeExpression( expression )
+        // Of the 11 symbols in the encoding, only 3 are bound,
+        // and all non-bound ones are undefined
+        expect( M.free( encoded.child( 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 1 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 2 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 3, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 3, 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 3, 1, 1 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 3, 1, 2 ) ) ).to.equal( false )
+        expect( M.free( encoded.child( 3, 1, 3, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 3, 1, 3, 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 3, 1, 3, 1, 1 ) ) ).to.equal( false )
+        expect( M.free( encoded.child( 3, 1, 3, 1, 2 ) ) ).to.equal( false )
+        // But if we were to pop off the outermost binding, that changes two
+        // bound to free, but non-de Bruijn symbols are still undefined
+        encoded = encoded.child( 3, 1 ).copy()
+        expect( M.free( encoded.child( 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 1 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 2 ) ) ).to.equal( true )
+        expect( M.free( encoded.child( 3, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 3, 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 3, 1, 1 ) ) ).to.equal( true )
+        expect( M.free( encoded.child( 3, 1, 2 ) ) ).to.equal( false )
+        // Re-using Expression 3 from the previous test
+        // (and (forall x , (P x)) (exists x , (Q x)))
+        //     ----> (and (forall (db (P db_0_0))) (exists (db (Q db_0_0))))
+        expression = LogicConcept.fromPutdown(
+            '(and (forall x , (P x)) (exists x , (Q x)))' )[0]
+        encoded = M.encodeExpression( expression )
+        // Of the 9 symbols in the encoding, only 2 are bound,
+        // and all non-bound ones are undefined
+        expect( M.free( encoded.child( 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 1, 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 1, 1, 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 1, 1, 1, 1 ) ) ).to.equal( false )
+        expect( M.free( encoded.child( 2, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 2, 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 2, 1, 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( encoded.child( 2, 1, 1, 1 ) ) ).to.equal( false )
+        // And if we were to pop off the outermost expression, nothing changes
+        let subexpr = encoded.child( 1 ).copy()
+        expect( M.free( subexpr.child( 0 ) ) ).to.equal( undefined )
+        expect( M.free( subexpr.child( 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( subexpr.child( 1, 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( subexpr.child( 1, 1, 1 ) ) ).to.equal( false )
+        subexpr = encoded.child( 2 ).copy()
+        expect( M.free( subexpr.child( 0 ) ) ).to.equal( undefined )
+        expect( M.free( subexpr.child( 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( subexpr.child( 1, 1, 0 ) ) ).to.equal( undefined )
+        expect( M.free( subexpr.child( 1, 1, 1 ) ) ).to.equal( false )
     } )
 
 } )
