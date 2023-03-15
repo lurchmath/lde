@@ -274,6 +274,15 @@ export const encodedIndices = symbol => {
  * a de Bruijn index $(i,j)$ can be adjusted with $(\Delta_i,\Delta_j)$ to
  * become $(i+\Delta_i,j+\Delta_j)$.
  * 
+ * Note that only free indices are adjusted, not bound indices.  For example, if
+ * `(forall x , (= x t))` is represented as an encoded binding wrapped around
+ * `(= (0,0) (1,0))` and we increment indices, we would not want the bound `x`
+ * in the first expression to become free.  The reason for this is that we are
+ * typically adjusting indices in an expression that will be moved/substituted
+ * inside another expression, and we need to use the standard de Bruijn method
+ * of avoiding "capture" by ensuring that free indices stay free even in the new
+ * context.
+ * 
  * If the first argument is an {@link Application}, this function distributes
  * itself across the {@link Application}'s children.  If it is neither a
  * {@link Symbol} nor an {@link Application}, this function does nothing.
@@ -284,15 +293,23 @@ export const encodedIndices = symbol => {
  *   the index
  * @param {integer} deltaJ the amount by which to adjust the second component of
  *   the index
+ * @param {integer} [depth] for recursive use only; clients should omit this.
+ *   It is used to avoid capture by tracking the number of bindings already
+ *   traversed in the recursion.
  */
-export const adjustIndices = ( target, deltaI, deltaJ ) => {
-    if ( target instanceof Application )
+export const adjustIndices = ( target, deltaI, deltaJ, depth = 0 ) => {
+    if ( target instanceof Application ) {
+        const depthAdjustment = isEncodedBinding( target ) ? 1 : 0
         return target.children().forEach( child =>
-            adjustIndices( child, deltaI, deltaJ ) )
+            adjustIndices( child, deltaI, deltaJ, depth + depthAdjustment ) )
+    }
     const original = encodedIndices( target )
     if ( !original ) return
-    target.setAttribute( 'symbol text', JSON.stringify(
-        [ deBruijn, original[0] + deltaI, original[1] + deltaJ ] ) )
+    target.setAttribute( 'symbol text', JSON.stringify( [
+        deBruijn,
+        original[0] + ( original[0] >= depth ? deltaI : 0 ),
+        original[1] + ( original[0] >= depth ? deltaJ : 0 )
+    ] ) )
 }
 
 /**

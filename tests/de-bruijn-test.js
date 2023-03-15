@@ -13,6 +13,7 @@ describe( 'de Bruijn indices', () => {
         expect( typeof M.deBruijn ).to.equal( 'string' )
         expect( M.encodeSymbol ).to.be.ok
         expect( M.encodedIndices ).to.be.ok
+        expect( M.adjustIndices ).to.be.ok
         expect( M.decodeSymbol ).to.be.ok
         expect( M.encodeExpression ).to.be.ok
         expect( M.decodeExpression ).to.be.ok
@@ -301,6 +302,70 @@ describe( 'de Bruijn indices', () => {
         expect( copy.equals( original ) ).to.equal( false )
         copy.deBruijnDecode()
         expect( copy.equals( original ) ).to.equal( true )
+    } )
+
+    it( 'Should adjust indices correctly in de Bruijn expressions', () => {
+        let expr, copy
+        // Create (+ x y) which converts to include no de Bruijn symbols, and
+        // thus adjustIndices() has no effect on it.
+        expr = LogicConcept.fromPutdown( '(+ x y)' )[0]
+        expr = M.encodeExpression( expr )
+        expect( Array.from( expr.descendantsIterator() ).every(
+            d => M.encodedIndices( d ) === undefined
+        ) ).to.equal( true )
+        copy = expr.copy()
+        M.adjustIndices( copy, 1, 1 )
+        expect( copy.equals( expr ) ).to.equal( true )
+        expect( M.equal( copy, expr ) ).to.equal( true )
+        // Create (x y) , (+ x y) which converts to include 2 de Bruijn symbols,
+        // both bound, and thus adjustIndices() has no effect on it.
+        expr = LogicConcept.fromPutdown( '(x y) , (+ x y)' )[0]
+        expr = M.encodeExpression( expr )
+        expect( Array.from( expr.descendantsIterator() ).filter(
+            d => M.encodedIndices( d ) !== undefined
+        ).length ).to.equal( 2 )
+        copy = expr.copy()
+        M.adjustIndices( copy, 1, 1 )
+        expect( copy.equals( expr ) ).to.equal( true )
+        expect( M.equal( copy, expr ) ).to.equal( true )
+        // Create (x y) , (+ x y) which converts to include 2 de Bruijn symbols,
+        // both bound, then lift the body out from the binding, and thus
+        // adjustIndices() should actually affect it.
+        expr = LogicConcept.fromPutdown( '(x y) , (+ x y)' )[0]
+        expr = M.encodeExpression( expr )
+        expect( Array.from( expr.descendantsIterator() ).filter(
+            d => M.encodedIndices( d ) !== undefined
+        ).length ).to.equal( 2 )
+        expr = expr.lastChild().copy() // the lifting mentioned above
+        expect( M.encodedIndices( expr.child( 1 ) ) ).to.eql( [ 0, 0 ] )
+        expect( M.encodedIndices( expr.child( 2 ) ) ).to.eql( [ 0, 1 ] )
+        copy = expr.copy()
+        M.adjustIndices( copy, 1, 1 )
+        expect( copy.equals( expr ) ).to.equal( false )
+        expect( M.equal( copy, expr ) ).to.equal( false )
+        expect( M.encodedIndices( expr.child( 1 ) ) ).to.eql( [ 0, 0 ] )
+        expect( M.encodedIndices( expr.child( 2 ) ) ).to.eql( [ 0, 1 ] )
+        expect( M.encodedIndices( copy.child( 1 ) ) ).to.eql( [ 1, 1 ] )
+        expect( M.encodedIndices( copy.child( 2 ) ) ).to.eql( [ 1, 2 ] )
+        // Create x , y , (+ x y) which converts to include 2 de Bruijn symbols,
+        // both bound, then lift the inner binding out from the outer binding,
+        // and thus adjustIndices() should affect only the x, not the y.
+        expr = LogicConcept.fromPutdown( 'x , y , (+ x y)' )[0]
+        expr = M.encodeExpression( expr )
+        expect( Array.from( expr.descendantsIterator() ).filter(
+            d => M.encodedIndices( d ) !== undefined
+        ).length ).to.equal( 2 )
+        expr = expr.lastChild().copy() // the lifting mentioned above
+        expect( M.encodedIndices( expr.child( 1, 1 ) ) ).to.eql( [ 1, 0 ] )
+        expect( M.encodedIndices( expr.child( 1, 2 ) ) ).to.eql( [ 0, 0 ] )
+        copy = expr.copy()
+        M.adjustIndices( copy, 1, 1 )
+        expect( copy.equals( expr ) ).to.equal( false )
+        expect( M.equal( copy, expr ) ).to.equal( false )
+        expect( M.encodedIndices( expr.child( 1, 1 ) ) ).to.eql( [ 1, 0 ] )
+        expect( M.encodedIndices( expr.child( 1, 2 ) ) ).to.eql( [ 0, 0 ] )
+        expect( M.encodedIndices( copy.child( 1, 1 ) ) ).to.eql( [ 2, 1 ] )
+        expect( M.encodedIndices( copy.child( 1, 2 ) ) ).to.eql( [ 0, 0 ] )
     } )
 
 } )
