@@ -531,12 +531,13 @@ export const alphaRenamed = ( binding, newBoundSyms ) => {
  *   omit this parameter
  */
 export const alphaEquivalent = ( expr1, expr2, stream ) => {
-    if ( !stream ) stream = new NewSymbolStream( expr1, expr2 )
     // atomic case:
     if ( expr1.isAtomic() ) return expr1.equals( expr2 )
     // easy cases:
     if ( expr1.numChildren() != expr2.numChildren() ) return false
     if ( expr1.binds() != expr2.binds() ) return false
+    // we may need the stream, so create it
+    if ( !stream ) stream = new NewSymbolStream( expr1, expr2 )
     // compound case 1: no symbols bound
     if ( !expr1.binds() ) {
         for ( let i = 0 ; i < expr1.numChildren() ; i++ )
