@@ -421,8 +421,8 @@ global.showkeys = showkeys
 global.list = list
 global.isNestedArrayofLCs = isNestedArrayofLCs
 // user initialization file
-global.initialize = function(fname='initproofs.js') { 
-  const init = fs.readFileSync(fname,{ encoding:'utf8'}) 
+global.initialize = function(fname='initproofs') { 
+  const init = fs.readFileSync(fname+'.js',{ encoding:'utf8'}) 
   eval.apply(this,[init+'\n'])  
 }
 global.Report = Report
