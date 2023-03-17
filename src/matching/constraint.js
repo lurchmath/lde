@@ -5,8 +5,19 @@ import { LogicConcept } from '../logic-concept.js'
 import { metavariable, containsAMetavariable } from './metavariables.js'
 import { isAnEFA } from './expression-functions.js'
 import {
-    equal as deBruijnEquals, encodeExpression, decodeExpression
+    equal as deBruijnEquals, encodeExpression, decodeExpression,
+    numberOfOccurrences
 } from './de-bruijn.js'
+
+// If an EFA constraint has one or more of its arguments containing a
+// metavariable, its complexity is unknown, because it is contingent upon the
+// (as yet undetermined) value of that metavariable.  So we need some constant
+// to use as a reasonable estimate for the complexity of (that part of) the
+// constraint in such a case, for triaging constraints.  The following constant
+// is used for that purpose, and can be tweaked through experimentation and
+// profiling to find the best value for the efficiency of the matching
+// algorithm.
+const EFAComplexityEstimate = 2
 
 /**
  * A Constraint is a pattern-expression pair often written $(p,e)$ and used to
@@ -204,7 +215,7 @@ export class Constraint {
      *    compound expressions with the same structure, so that the appropriate
      *    next step en route to a solution is to pair up their corresponding
      *    children and see if a solution exists to that Constraint set
-     *  * 4, or "EFA": any constraint $(p,e)$ where $p$ is an Expression
+     *  * 4 and up, or "EFA": any constraint $(p,e)$ where $p$ is an Expression
      *    Function Application, as defined in the documentation for the
      *    {@link ExpressionFunctions ExpressionFunctions} namespace
      * 
@@ -225,8 +236,30 @@ export class Constraint {
         // First 3 cases are easy:
         if ( this.isAnInstantiation() ) // instantiation type
             return this._complexity = 2
-        if ( isAnEFA( this.pattern ) ) // EFA type
+        if ( isAnEFA( this.pattern ) ) { // EFA type
+            // The complexity of the EFA P(x) is determined by the number of
+            // copies of x appearing in the expression.  More copies implies
+            // greater complexity.  We sum the complexity of all arguments in
+            // the non-unary case, which is logical, given that they are
+            // actually exponents in running time, and higher arity multiplies
+            // running times.  If the x contains a metavariable, we cannot do
+            // such a computation, but just use the estimate documented at the
+            // top of this file instead.
+            this._argumentCopyCount = [ ]
+            this._argumentContainsMetavariable = [ ]
+            this._argumentComplexity = [ ]
+            for ( let i = 2 ; i < this.pattern.numChildren() ; i++ ) {
+                const arg = this.pattern.child( i )
+                const copyCount = numberOfOccurrences( arg, this.expression )
+                const hasMetavariable = containsAMetavariable( arg )
+                this._argumentCopyCount.push( copyCount )
+                this._argumentContainsMetavariable.push( hasMetavariable )
+                this._argumentComplexity.push(
+                    hasMetavariable ? EFAComplexityEstimate : copyCount )
+            }
             return this._complexity = 4
+                 + this._argumentComplexity.reduce( (a,b)=>a+b, 0 )
+        }
         if ( !containsAMetavariable( this.pattern ) ) // success/failure
             return this._complexity =
                 deBruijnEquals( this.pattern, this.expression ) ? 1 : 0
@@ -237,6 +270,24 @@ export class Constraint {
         // if the # children match, and return children or failure.
         return this._complexity = this.pattern.numChildren()
                                == this.expression.numChildren() ? 3 : 0
+    }
+
+    // For use only by the Problem class.  If a constraint's complexity is
+    // exactly 4, that means that it is an EFA and all of its arguments are
+    // expressions (not patterns) but none of them appear in the expression of
+    // the constraint, meaning that the EFA metavariable can be instantiated
+    // only with a constant function.  This can prune branches of recursion.
+    canBeOnlyConstantEFA () { return this._complexity == 4 }
+    // For use only by the Problem class.  There are certain circumstances in
+    // which it's easy to tell that an EFA constraint can't be a projection
+    // function (on a given argument index).  In particular, if the argument at
+    // that index is an expression (not a pattern) that appears exactly once in
+    // the constraint's expression, then a projection function might work, but
+    // if either of those conditions is false, then it cannot, and we can skip
+    // even constructing the projection EFA in that case.
+    canBeAProjectionEFA ( index ) {
+        return this._argumentCopyCount[index] == 1
+            || this._argumentContainsMetavariable[index]
     }
 
     /**
@@ -253,7 +304,7 @@ export class Constraint {
     complexityName () {
         return [
             'failure', 'success', 'instantiation', 'children', 'EFA'
-        ][this.complexity()]
+        ][Math.min( this.complexity(), 4 )]
     }
 
     /**

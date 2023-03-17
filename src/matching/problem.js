@@ -11,7 +11,8 @@ import {
 } from './expression-functions.js'
 import { NewSymbolStream } from "./new-symbol-stream.js"
 import {
-    isEncodedBinding, adjustIndices, free as deBruijnFree
+    isEncodedBinding, adjustIndices, free as deBruijnFree,
+    decodeExpression, deBruijn
 } from "./de-bruijn.js"
 
 /**
@@ -296,9 +297,21 @@ export class Problem {
      * @see {@link Constraint#toString toString() for individual Constraints}
      */
     toString () {
+        const maybeWithDeBruijn = c => {
+            if ( !this._deBruijnEncoded
+              || ( c.pattern instanceof LurchSymbol )
+              && c.pattern.text() == deBruijn ) return c.toString()
+            return c.toString() + '\n\t   '
+                 + ( '(' + decodeExpression( c.pattern ).toPutdown()
+                   + ',' + decodeExpression( c.expression ).toPutdown() + ')' )
+            .replace( /\n      /g, '' )
+            .replace( / \+\{"_type_LDE MV":true\}\n/g, '__' )
+            .replace( /"LDE EFA"/g, '@' )
+            .replace( /"LDE lambda"/g, '𝝺' )
+        }
         return '{\n\t'
-             + this.constraints.map(
-                   x => `${x.complexity()}  ${x.toString()}`
+             + this.constraints.map( x =>
+                   x => `${x.complexity()}  ${maybeWithDeBruijn(x)}`
                ).join('\n\t')
              + '\n}'
     }
@@ -336,7 +349,7 @@ export class Problem {
         for ( let solution of proxy.allSolutions( new Solution( proxy ) ) ) {
             // Is this really a solution?  Only if no capture would occur...
             if ( [ ...solution.domain() ].some( metavar =>
-                solution.get( metavar ).hasDescendantSatisfying(
+                solution.get( metavar ).copy().hasDescendantSatisfying(
                     d => deBruijnFree( d ) === true ) ) ) {
                 if ( this._debug )
                     console.log( 'xxx - That solution would include variable capture' )
@@ -365,6 +378,7 @@ export class Problem {
 
     // for internal use only, by *solutions()
     deBruijnEncode () {
+        this._deBruijnEncoded = true
         this.constraints = this.constraints.map(
             constraint => constraint.copy() )
         this.constraints.forEach( constraint => constraint.deBruijnEncode() )
@@ -373,8 +387,8 @@ export class Problem {
     // for internal use only, by *solutions()
     *allSolutions ( soFar ) {
 
-        const dbg = ( ...args ) => { if ( this._debug ) console.log( ...args ) }
-        dbg( `solve ${this} w/soFar = ${soFar}` )
+        // const dbg = ( ...args ) => { if ( this._debug ) console.log( ...args ) }
+        // dbg( `solve ${this} w/soFar = ${soFar}` )
 
         // We need our own personal symbol stream that will avoid all symbols in
         // this matching problem.  If we don't have one yet, create one.
@@ -427,7 +441,7 @@ export class Problem {
             this.remove( 0 )
             const toAdd = constraint.children()
             // Special case: If we're about to recur inside a binding encoded as
-            // an Application, we may need to decreas the indices before we
+            // an Application, we may need to decrease the indices before we
             // enter and then increase them again in any solution we find, to
             // compensate for the disassembly of the binding necessary for
             // recursion.  This does not apply if the pattern is also an encoded
@@ -436,7 +450,7 @@ export class Problem {
                             && !isEncodedBinding( constraint.pattern )
             if ( mustAdjust ) {
                 adjustIndices( toAdd[1].expression, -1, 0 )
-                dbg( '! decreasing indices ! -> ' + toAdd[1].toString() )
+                // dbg( '! decreasing indices ! -> ' + toAdd[1].toString() )
             }
             this.add( ...toAdd )
             for ( let solution of this.allSolutions( soFar ) ) {
@@ -448,8 +462,8 @@ export class Problem {
                         const instantiation = solution.get( toAdjust )
                         if ( instantiation ) {
                             adjustIndices( instantiation, 1, 0 )
-                            dbg( '! increasing indices ! -> '
-                               + solution._substitutions[toAdjust.text()] )
+                            // dbg( '! increasing indices ! -> '
+                            //    + solution._substitutions[toAdjust.text()] )
                         }
                     } )
                 yield solution
@@ -460,27 +474,27 @@ export class Problem {
         // Finally, the complicated case.  If the constraint is an expression
         // function application case, then we may generate multiple solutions,
         // in all the ways documented below.
-        if ( complexity == 4 ) {
+        if ( complexity >= 4 ) {
 
             // We need a utility function for extending recursively computed
             // solutions with new constraints.
             const problem = this
             function* addEF ( metavar, expressionFunction ) {
                 const newSub = new Substitution( metavar, expressionFunction )
-                dbg( `try this EF: ${newSub}` )
+                // dbg( `try this EF: ${newSub}` )
                 let extended
                 try {
                     extended = soFar.plus( newSub )
                 } catch {
-                    dbg( `\tcannot add to current solution:\n\t${soFar}` )
+                    // dbg( `\tcannot add to current solution:\n\t${soFar}` )
                     return
                 }
                 const copy = problem.afterSubstituting( newSub )
-                dbg( `gives this problem: ${copy}` )
+                // dbg( `gives this problem: ${copy}` )
                 copy.betaReduce()
-                dbg( `\t=β=>` )
+                // dbg( `\t=β=>` )
                 for ( let solution of copy.allSolutions( extended ) ) {
-                    dbg( `recursive solution: ${solution}` )
+                    // dbg( `recursive solution: ${solution}` )
                     yield solution.restricted()
                 }
             }
@@ -499,32 +513,43 @@ export class Problem {
                 throw 'Empty argument list in expression function application'
 
             // Solution method 1: Head instantiated with a constant function.
-            dbg( '--1--' )
+            // dbg( '--1--' )
             yield* addEF( head, constantEF( args.length, expr ) )
+
+            // If it can't be anything but a constant function, stop here.
+            if ( constraint.canBeOnlyConstantEFA() ) {
+                // dbg( '-- complexity=4 => constant function --' )
+                return
+            }
             
             // Solution method 2: Head instantiated with a projection function.
-            dbg( '--2--' )
-            for ( let i = 0 ; i < args.length ; i++ )
-                yield* addEF( head, projectionEF( args.length, i ) )
+            // dbg( '--2--' )
+            for ( let i = 0 ; i < args.length ; i++ ) {
+                if ( constraint.canBeAProjectionEFA( i ) ) // slight speedup
+                    yield* addEF( head, projectionEF( args.length, i ) )
+                // else
+                //     dbg( `-- arg ${i} is an expr with ${copies} copies (not 1)`
+                //        + ' => not a projection function --' )
+            }
             
             // Solution method 3: If the expression is compound, we could
             // imitate each child using a different expression function,
             // combining the results into one big answer.  Because we have
             // already converted bindings to applications with removeBindings(),
             // we know this case will involve only applications.
-            dbg( '--3--' )
+            // dbg( '--3--' )
             const numChildren = expr.children().length
             if ( numChildren > 0 ) {
                 const metavars = this._stream.nextN( numChildren )
                     .map( symbol => symbol.asA( metavariable ) )
                 const ef = applicationEF( args.length, metavars )
-                // If the expression is an ecoded binding, do not let the matching
+                // If the expression is an encoded binding, do not let the matching
                 // algorithm attempt to synthesize its first child, (de Bruijn
                 // constant with embedded codes).  Just let that one match always:
                 if ( isEncodedBinding( expr ) )
                     ef.child( 1 ).body().child( 0 ).replaceWith( expr.child( 0 ).copy() )
                 yield* addEF( head, ef )
-            } else dbg( 'case 3 does not apply' )
+            } // else dbg( 'case 3 does not apply' )
 
             // Those are the only three solution methods for the EFA case.
             return
