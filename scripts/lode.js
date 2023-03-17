@@ -95,7 +95,7 @@ const decPen = chalk.ansi256(30)           // aqua-ish
 const commentPen = chalk.ansi256(19)       // dim purple-blue 
 const headingPen = chalk.ansi256(226)      // bright Yellow
 const docPen = chalk.ansi256(248)          // light grey text
-const linenumPen = chalk.ansi256(22)       // slightly darker blue than default
+const linenumPen = chalk.ansi256(22)       // darkish green
 // const smallPen (maybe TODO some day) \u{1D5BA} is the code for small a
 
 // compute once for efficiency
@@ -117,6 +117,8 @@ const idunno     = '❓'  // the emoji itself is red
 // showInstantiations
 // showFormulas
 // showUserOnly
+// showUserThms
+// showUserFormulas
 //
 // useful unicode chars: ✔︎★✗
 
@@ -145,27 +147,34 @@ const detailed = {
   hideFinished:false,
   showProperNames:true,
   simpleProperNames:false,
-  showInstantiation:true
+  showInstantiation:true,
+  showUserFormulas:true
 } 
 // clean report option
 const clean = {
   numbered:true, 
-  hideFinished:true
+  hideFinished:true,
+  showUserFormulas:true
 } 
 // user report option
 const user = {
   numbered:false, 
   hideFinished:true,
-  showUserOnly:true
+  showUserOnly:true,
+  showValidation:true,
+  showUserFormulas:false
 } 
 
 // custom formatter
 const formatter = (options={showValidation:true}) => {
   return (L, S, attr) => {
     let ans = ''
-
+    
+    // optionally hide userThms
+    if (L.userFormula && !options.showUserFormulas) { 
+      // do nothing
     // hint markers
-    if (L.isA(hint) || (L instanceof LurchSymbol && L.text()==='<<')) {  
+    } else if (L.isA(hint) || (L instanceof LurchSymbol && L.text()==='<<')) {  
       ans += hintPen(S)
     // metavariables        
     } else if (L.isA(metavariable)) {

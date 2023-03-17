@@ -144,6 +144,8 @@ let Debug = true
 const time = (description) => { if (Debug) console.time(description) }
 const timeEnd = (description) => { if (Debug) console.timeEnd(description) }
 /////////////////////////////////////////////////////////////////////////////////
+
+//////////  Begin CNFProp ////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
 //
 // CNFProp
@@ -168,7 +170,7 @@ export class CNFProp {
     if ( L.isAProposition() ) { 
       // propositions accessible to the target (nonreflexive) are 
       // treated as given when the target is present.
-      let sign = (L.isA(`given`) || L.isAccessibleTo(target)) ? -1 : 1
+      let sign = (L.isA('given') || L.isAccessibleTo(target)) ? -1 : 1
       return sign*L.lookup(catalog)  
     // if it's an environment process the relevant children, skipping over
     // anything irrelevant to the target and Declare's which have no prop form.
@@ -904,6 +906,11 @@ Environment.prototype.validateall = function ( target = this ) {
   //     symbol "LDE EFA" (which then will still print as '@' but it's what is
   //     needed under the hood).
   //
+  //   * Scan for occurrences of the symbol '<<thm' and mark it's previous
+  //     sibling as a user theorem, and make a copy of that user theorem,
+  //     ans insert it after the user's theorem and mark it as a formula and
+  //     user formula.
+  //
   // Naturally we have to run this FIRST before anything else.  These changes are
   // made in-place - they don't return a copy of the document.
   //
@@ -922,10 +929,21 @@ Environment.prototype.validateall = function ( target = this ) {
       .forEach( m => { 
         const target = m.previousSibling()
         if (target instanceof Declaration) {
-          m.previousSibling().makeIntoA('Declare')
+          target.makeIntoA('Declare')
         } else { 
-          m.previousSibling().makeIntoA('blatant instantiation')
+          target.makeIntoA('blatant instantiation')
         }  
+        m.remove()
+      } )
+    L.descendantsSatisfying( x => (x instanceof LurchSymbol) &&
+                                   x.text() === '<<thm' )
+      .forEach( m => {
+        let thm = m.previousSibling()
+        thm.userThm = true
+        let formula = thm.copy()
+        formula.insertAfter(thm)
+        formula.makeIntoA('formula')
+        formula.userFormula = true
         m.remove()
       } )
     L.descendantsSatisfying( x => (x instanceof LurchSymbol) && x.text()==='@' )
@@ -1192,7 +1210,7 @@ Environment.prototype.validateall = function ( target = this ) {
   //
   // Note: the second arg of .from() tells it to mark them in place rather than 
   //       making a copy, so this marks them in place.
-  const markMetavars = doc => doc.formulas().forEach( x => Formula.from(x,true))
+  const markMetavars = doc => doc.formulas().forEach( x => Formula.from(x,true) )
   
   ///////////////////////////////////////////////////////////////////////
   //
@@ -1338,7 +1356,7 @@ Environment.prototype.validateall = function ( target = this ) {
   //
   
   // Get all of the user proposition in the document, but don't include any
-  // duplicates, i.e., no two expressions should have the same prop form.
+  // duplicates, i.e., no two expressions should have the same prop form. 
   const getUserPropositions = (document) => {
     // We cache these for multiple pass n-compact validation
     if (document.lastChild().userPropositions) 
@@ -1425,6 +1443,8 @@ Environment.prototype.validateall = function ( target = this ) {
                                           // time('Instantiate a formula')
                  try { inst = Formula.instantiate(f,s) } catch { return }
                                           // timeEnd('Instantiate a formula')
+                 // all instantiations are givens
+                 inst.makeIntoA('given')                         
                  // if we made it here, we have a valid instantation
                  inst.formula = true
                  // let's also remember which expression created this 
@@ -1451,10 +1471,6 @@ Environment.prototype.validateall = function ( target = this ) {
                  // TODO: * we might want to upgrade .bodyof to an LC attribute
                  //         since Formula.instantiate doesn't copy that attribute
                  // 
-                 //       * This next line breaks everything if uncommented.
-                 //           assignProperNames(inst)
-                 //         go through and clean the code to make sure this 
-                 //         algorithm is clean and tight.
                  //
                  // also rename the bindings to match what the user would have
                  // for the same expressions in his document
@@ -1624,11 +1640,7 @@ const processDoc = (d,n=0) => {
 // We assume 'this' is a document with all of the above simplifying assumptions.
 LogicConcept.prototype.report = function ( options={numbered:true}) {
   if (options.showUserOnly) {
-    const userOnlyTheme = {
-      showAttributes:true,
-      showValidation:true,
-      simpleProperNames:true}
-    console.log(defaultPen(this.lastChild().toPutdown(formatter(userOnlyTheme), 
+   console.log(defaultPen(this.lastChild().toPutdown(formatter(options), 
       text => /\n/.test( text ) || erase(text).length > 1 )))
   } else if (options.numbered) {
     let ans = defaultPen('  {\n')
@@ -1650,6 +1662,7 @@ LogicConcept.prototype.report = function ( options={numbered:true}) {
       linenum = (!c.isA(instantiation)) ? linenumPen(linenum) 
                                         : instantiationPen(linenum)
       if (options.showProperNames) numberedTheme.showProperNames=true
+      if (options.showUserFormulas) numberedTheme.showUserFormulas=true
       ans += linenum+format(c,numberedTheme).replace(/\n/g,'\n    ')+'\n'
     })
     ans += defaultPen('  }') +
