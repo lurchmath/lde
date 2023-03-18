@@ -3,6 +3,8 @@
 // Propositional Logic
 //
 
+{ // group them all for efficient validation
+  
 // 4.1 P⇒P
 { (⇒ P P) }  // validates automatically!
 
@@ -175,7 +177,7 @@
     P
   }
   (⇒ (and (or P Q) (¬ Q)) P)
-} 
+}  
 
 
 {
@@ -209,4 +211,6 @@
     →←
   }
   (or (or (¬ (⇒ P Q)) (¬ P)) Q)
-}
+} 
+// end all
+} ✔︎ 

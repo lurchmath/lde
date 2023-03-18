@@ -5,9 +5,9 @@
 
 (<<< "Example 10 from END")
 {
-    (<<< "Lets now have a specific meaning, so this should not work.")
-    :{ :[x] B }  // given
+    (<<< "This should be incorrect for an empty domain of discourse.")
+    :{ :[x] B } 
     {
-      B            // this should trivially validate, 
-    }              // even if B contains x
+      B ✗  
+    }     
 }

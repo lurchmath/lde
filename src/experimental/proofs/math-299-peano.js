@@ -2,6 +2,8 @@
 // Peano Test Proofs
 // 
 
+{ // wrap them all
+  
 (<<< "Peano Axiom Proofs")
 
 {
@@ -139,3 +141,5 @@
     (∀ p, (= (+ (+ m n) p) (+ m (+ n p)) ))
   }
 }
+// end of all
+} ✔︎

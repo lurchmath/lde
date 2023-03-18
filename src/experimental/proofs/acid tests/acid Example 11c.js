@@ -7,8 +7,8 @@
 {
    (<<< "Trying even harder to cheat the subset plus rule.")
    // Thm/Pf attempt 
-   { { :[ x ] :(∈ x T) }
+   { { :[ x ] :(∈ x T) } ✗
      (<<< "Expected to fail here.")
-     (⊆ S T)
+     (⊆ S T) ✗
    }
 }

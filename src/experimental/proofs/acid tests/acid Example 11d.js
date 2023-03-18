@@ -7,7 +7,7 @@
 {
    (<<< "Trying even more harder to cheat the subset plus rule.")
    // Thm/Pf attempt 
-   { {:[ x ] :(∈ x T) (∈ x T) }
-      (⊆ S T)
+   { {:[ x ] :(∈ x T) (∈ x T) } ✔︎
+      (⊆ S T) ✗
    }
 }

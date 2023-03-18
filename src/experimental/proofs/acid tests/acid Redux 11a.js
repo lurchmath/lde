@@ -10,6 +10,6 @@
     (<<< "But not if we do!")
     // Thm/Pf attempt 
     { :(∈ x T)
-      (⊆ S T)
+      (⊆ S T) ✗
     }
 }

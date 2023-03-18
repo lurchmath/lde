@@ -3,6 +3,8 @@
 // Predicate Logic
 //
 
+{ // wrap all of them for efficient validation
+
 {
   // Alpha Equivalence for ∀ (in-class example) Problem 5.1
   // { :(∀ x , (P x) ) { :[s] (P s) } (∀ y, (P y) ) } 
@@ -387,4 +389,6 @@
     }
     (∃ x, (∀ y, (∃ z, (¬ (P x y z)))))  
   }
-}
+} 
+// end of all
+} ✔︎

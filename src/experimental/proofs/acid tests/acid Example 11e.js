@@ -3,7 +3,7 @@
 // 
 // These are the example and counterexample proofs from the END document
 
-(<<< "Example 11d from END")
+(<<< "Example 11e from END")
 {
    (<<< "Cheaty, cheatin, cheater.")
    (<<< "This does validate... and it should!")
@@ -11,4 +11,4 @@
    { :{:[ x ] (∈ x T) }
      (⊆ S T)
    }  
-}
+} ✔︎

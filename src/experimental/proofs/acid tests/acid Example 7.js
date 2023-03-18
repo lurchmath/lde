@@ -12,8 +12,7 @@
       [ c , (P z c) ]
     }
     (<<< "Expect incorrect:")
-    (∀ x , (P x c))          
-    (∃ y , (∀ x , (P z c)))     
-  }
-      
+    (∀ x , (P x c)) ✗         
+    (∃ y , (∀ x , (P z c))) ✗    
+  }  
 }
