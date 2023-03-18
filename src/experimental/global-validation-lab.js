@@ -911,6 +911,10 @@ Environment.prototype.validateall = function ( target = this ) {
   //     ans insert it after the user's theorem and mark it as a formula and
   //     user formula.
   //
+  //   * Scan for occurrences of the symbol `<<✔︎` and `<<✗` and mark its 
+  //     previous sibling with .expectedResult 'valid' or 'invalid', 
+  //     respectively.
+  //
   // Naturally we have to run this FIRST before anything else.  These changes are
   // made in-place - they don't return a copy of the document.
   //
@@ -960,6 +964,18 @@ Environment.prototype.validateall = function ( target = this ) {
         RHS.replaceWith(new Environment(B2,A2))
         m.remove()
       } )
+      L.descendantsSatisfying( x => (x instanceof LurchSymbol) &&
+                                     x.text() === '✔︎' )
+        .forEach( m => { 
+          m.previousSibling().expectedResult = 'valid'
+          m.remove() 
+        } )
+      L.descendantsSatisfying( x => (x instanceof LurchSymbol) &&
+                                     x.text() === '✗' )
+        .forEach( m => { 
+          m.previousSibling().expectedResult = 'indeterminate' 
+          m.remove()
+        } )
   }
 
   

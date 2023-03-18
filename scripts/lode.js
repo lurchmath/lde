@@ -336,40 +336,6 @@ const showkeys = L => {
   })
 }
 
-// Welcome splash screen
-console.log(`\nWelcome to ${blueText("𝕃𝕠𝕕𝕖")} - the Lurch Node app\n(type .help for help)\n`)
-// start a new context
-//
-// Note: that we use the useGlobal parameter so the current context
-// is shared with this script.  Otherwise by importing things below
-// into the repl context we ended up with errors due to there being two contexts
-// and uncertainty about which one is running what.  That's why we use global.
-// below to import things.
-//
-const rpl = repl.start( { 
-    ignoreUndefined: true,
-    prompt: defaultPen('▶︎')+' ',
-    useGlobal: true,
-    writer: ( expr ) => {
-        if (isNestedArrayofLCs(expr)) {
-          let ans=format(expr)
-          return (ans==='')?format(expr,All):ans             
-        } else if ( expr instanceof MathConcept ) {
-          try { return defaultPen(expr.toSmackdown()) }
-          catch { return defaultPen(expr.toString()) }
-        } else { 
-          return util.inspect( expr, 
-            {
-              customInspect: false,
-              showHidden: false,
-              depth: Depth,
-              colors: true
-            } 
-          )
-        } 
-    }
-} )
-
 // Load all of the following into the Lode global object
 Object.assign( global, Lurch )
 Object.assign( global, Compact )
@@ -437,6 +403,51 @@ LogicConcept.prototype.shownice = function() { shownice(this) }
 LogicConcept.prototype.showall = function() { showall(this) }
 LogicConcept.prototype.print = function() { console.log(defaultPen(this)) }
 LogicConcept.prototype.inspect = function(...args) { inspect(this,...args) }
+
+// Welcome splash screen
+console.log(`\nWelcome to ${blueText("𝕃𝕠𝕕𝕖")} - the Lurch Node app\n(type .help for help)\n`)
+
+// if there is an argument to lode.js, i.e., if someone runs this script as
+//
+// > node lode fname
+//  
+// then initialize the lode instance with the script named fname.js
+if (process.argv.length>2) {
+  let fname=process.argv[2]
+  initialize(fname)
+}
+
+// start a new context
+//
+// Note: that we use the useGlobal parameter so the current context
+// is shared with this script.  Otherwise by importing things below
+// into the repl context we ended up with errors due to there being two contexts
+// and uncertainty about which one is running what.  That's why we use global.
+// below to import things.
+//
+const rpl = repl.start( { 
+    ignoreUndefined: true,
+    prompt: defaultPen('▶︎')+' ',
+    useGlobal: true,
+    writer: ( expr ) => {
+        if (isNestedArrayofLCs(expr)) {
+          let ans=format(expr)
+          return (ans==='')?format(expr,All):ans             
+        } else if ( expr instanceof MathConcept ) {
+          try { return defaultPen(expr.toSmackdown()) }
+          catch { return defaultPen(expr.toString()) }
+        } else { 
+          return util.inspect( expr, 
+            {
+              customInspect: false,
+              showHidden: false,
+              depth: Depth,
+              colors: true
+            } 
+          )
+        } 
+    }
+} )
 
 rpl.defineCommand( "features", {
     help: "Show Lode features",
