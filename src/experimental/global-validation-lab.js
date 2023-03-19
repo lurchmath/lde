@@ -133,6 +133,10 @@ import { execSync } from 'child_process'
 //
 // Convenience Utilities
 //
+export const LurchFileExtension = 'lurch'  // don't include the . here for easy use in RegExp's
+const checkLurchExtension = name => name + 
+  ( !new RegExp(`\.${LurchFileExtension}$`).test(name)) ? name + '.' + LurchFileExtension : name 
+const checkjsExtension = name => name + ( !/\.js$/.test(name)) ? name + '.js' : ''
 const lc = (s) => { return LogicConcept.fromPutdown(s)[0] }
 const metavariable = 'LDE MV'
 const instantiation = 'LDE CI'
@@ -732,14 +736,12 @@ Environment.prototype.validateall = function ( target = this ) {
   // Load just the string for a library and return that.  You can omit the .js 
   // extension.
   const loadLibStr = (name) => {
-        return fs.readFileSync(libPath+name+((!/\.js$/.test(name))?'.js':''),
-        { encoding:'utf8'}) 
-      }
+    return fs.readFileSync( libPath+checkLurchExtension(name) , { encoding:'utf8'} ) 
+  }
   // Load just the string for a proof document and return that.    
   const loadProofStr = (name) => {
-        return fs.readFileSync(proofPath+name+((!/\.js$/.test(name))?'.js':''),
-        { encoding:'utf8'}) 
-      }
+    return fs.readFileSync( proofPath+checkLurchExtension(name) , { encoding:'utf8'} ) 
+  }
 
   //////////////////////////////////////////////////////////////////////////
   //
@@ -817,7 +819,7 @@ Environment.prototype.validateall = function ( target = this ) {
   // brackets, wrap the whole thing in environment brackets, and convert the
   // resulting string to an LC with lc().
   const loadProofs = (...proofstr) => {
-    return lc('{'+proofstr.map(x=>loadProofStr(x)).join('}{')+'}')
+    return lc('{{'+proofstr.map(x=>loadProofStr(x)).join('}{')+'}}')
   }
 
   // To make a user's 'document' we will just add an environment with
@@ -1780,8 +1782,8 @@ const Benchmark = function ( f , name ) {
 export default { cnf2Algebraic, getUserPropositions, instantiate, 
    LurchLib, propdoc, newpropdoc, doc, newdoc, markDeclaredSymbols, markMetavars,
    markDeclarationContexts, list, listLibs, listProofs, loadLibStr, loadProofStr,
-   loadLib, loadProofs, load, makeLib, mergeLibs, loadLibs, 
-   makeDoc, processShorthands, processHints, processLetBodies,
+   loadLib, loadProofs, load, makeLib, mergeLibs, loadLibs, checkLurchExtension,
+   checkjsExtension, makeDoc, processShorthands, processHints, processLetBodies,
    processForSomeBodies, assignProperNames, processDeclarationBodies, processDoc,
    cacheFormulaDomainInfo, processDomains, subscript, renameBindings,
    replaceFormulaBindings, makeBindingsCanonical, Report, Benchmark }

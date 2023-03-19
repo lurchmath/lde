@@ -31,7 +31,7 @@ import { Problem } from '../src/matching/problem.js'
 // load CNFTools
 import CNF from '../src/validation/conjunctive-normal-form.js'
 // load Ken's experimental code
-import Compact, { CNFProp } from '../src/experimental/global-validation-lab.js'
+import Compact, { CNFProp , LurchFileExtension } from '../src/experimental/global-validation-lab.js'
 // load PropositionalForm
 import { PropositionalForm } from '../src/validation/propositional-form.js'
 // load Solution class
@@ -339,6 +339,7 @@ const showkeys = L => {
 // Load all of the following into the Lode global object
 Object.assign( global, Lurch )
 Object.assign( global, Compact )
+global.LurchFileExtension = LurchFileExtension
 global.Depth = Infinity
 global.Algebrite = Algebrite
 global.compute = Algebrite.run
@@ -388,7 +389,7 @@ global.list = list
 global.isNestedArrayofLCs = isNestedArrayofLCs
 // user initialization file
 global.initialize = function(fname='initproofs') { 
-  const init = fs.readFileSync(fname+'.js',{ encoding:'utf8'}) 
+  const init = fs.readFileSync(checkjsExtension(fname),{ encoding:'utf8'}) 
   eval.apply(this,[init+'\n'])  
 }
 global.Report = Report
