@@ -98,8 +98,8 @@
   :{  :(= (Codomain f) B) (→ f A B) }                            // Codomain-
   :{  :(→ f A B) (= (Codomain f) B) }                            // Codomain+
   
-  :{ :(⊆ S (Domain f)) :(y ∈ f(S)) [ x , {(∈ x S) (= y (f x))} ] } // image-
-  :{ :(⊆ S (Domain f)) :(∈ x S) (x ∈ (f S)) }                    // image+
+  :{ :(⊆ S (Domain f)) :(∈ y (f S)) [ x , {(∈ x S) (= y (f x))} ] } // image-
+  :{ :(⊆ S (Domain f)) :(∈ x S) (∈ (f x) (f S)) }                // image+
   
   :{ (= (Range f) (f (Domain f))) }                              // Range
   
