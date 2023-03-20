@@ -514,6 +514,13 @@ LogicConcept.prototype.insertAfter = function( target ) {
   target.parent().insertChild(this,target.indexInParent()+1)
 }
 
+// This utility is also useful for what we need to do here. Insert this LC as the
+// previous sibling of LC target. You might have to make a copy of 'this' if it is
+// already in the same tree as the target. We don't check that here.
+LogicConcept.prototype.insertBefore = function( target ) { 
+  target.parent().insertChild(this,target.indexInParent())
+}
+
 // rename a symbol in place
 LurchSymbol.prototype.rename = function( newname ) { 
   this.setAttribute( 'symbol text' , newname )
@@ -547,7 +554,7 @@ Expression.prototype.prop = function () {
 // symbol it declares, whether or not it has a body, since if it is a ForSome
 // with a body processForSomes will put a copy of the body after the declaration,
 // which then will get its own propositional form. If it is a Let with a body
-// processLetBodies will only use the body to rename the declared symbols with 
+// processLets will only use the body to rename the declared symbols with 
 // that body, and use it to flag preemies. If it eventually appears outside the
 // Let environment it gets its own prop form. Declare's don't have a prop form.
 //
@@ -849,8 +856,7 @@ Environment.prototype.validateall = function ( target = this ) {
   // * docs are a single string, array of strings or a single LC environment. 
   //   It is not optional.
   // * libs is the same thing for libraries, but defaults to LurchLib if omitted
-  // TODO: maybe add the n-compactness level as an argument or go until a fixed
-  //       point
+  // TODO: maybe go until a fixed point
   const load = (docs,libs = LurchLib, n=4) => {
                                                  // console.log()
                                                  // time('Load User Doc')
@@ -1045,7 +1051,20 @@ Environment.prototype.validateall = function ( target = this ) {
   //       Let.
 
   // Get the Lets with body and flag any 'preemies'.
-  const processLetBodies = doc => {
+  const processLets = doc => {
+    // Get all of the Let's whether or not they have bodies and make sure they are the 
+    // first child of their enclosing environment.  If not, wrap their scope in an 
+    // environment so that they are.
+    doc.lets().forEach( decl => {
+      const i = decl.indexInParent()
+      const parent = decl.parent()
+      if (i) parent.insertChild( new Environment(...parent.children().slice(i)) , i )
+    })
+    // Depricated (we hope)
+    //
+    // But we keep it here because it's an interesting idea, and might actually be useful
+    // in certain teaching situations.  
+    //
     // Get the lets with body (hence the 'true').
     // If a let has no body, no problem.  It means they are taking the risk
     // the Lurch won't catch a premature generalization that is inside the
@@ -1059,6 +1078,8 @@ Environment.prototype.validateall = function ( target = this ) {
     //       instead of a slow down, and there would be no harm in flagging a
     //       preemie in a formula (and in fact might actually give the formula
     //       author or user some feedback about his formula or theorem.
+    //     
+    //       Make it an option to help efficiency at some point.
     doc.lets(true).forEach( decl => {
       // TODO:Once again, we are assuming the Let environments start with a Let.
       //      We also are assuming all declaration bodies are Expressions.
@@ -1113,11 +1134,11 @@ Environment.prototype.validateall = function ( target = this ) {
            .forEach(s => s.setAttribute('ProperName',c.getAttribute('ProperName')))
        })
      })
-  }  
-    
+  }
+ 
   // Handle the bodies of the declarations
   const processDeclarationBodies = doc => {
-    processLetBodies(doc)
+    processLets(doc)
     processForSomeBodies(doc)
   }
   
@@ -1783,7 +1804,7 @@ export default { cnf2Algebraic, getUserPropositions, instantiate,
    LurchLib, propdoc, newpropdoc, doc, newdoc, markDeclaredSymbols, markMetavars,
    markDeclarationContexts, list, listLibs, listProofs, loadLibStr, loadProofStr,
    loadLib, loadProofs, load, makeLib, mergeLibs, loadLibs, checkLurchExtension,
-   checkjsExtension, makeDoc, processShorthands, processHints, processLetBodies,
+   checkjsExtension, makeDoc, processShorthands, processHints, processLets,
    processForSomeBodies, assignProperNames, processDeclarationBodies, processDoc,
    cacheFormulaDomainInfo, processDomains, subscript, renameBindings,
    replaceFormulaBindings, makeBindingsCanonical, Report, Benchmark }
