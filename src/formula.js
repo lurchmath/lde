@@ -170,6 +170,73 @@ const instantiate = (
     return result
 }
 
+/**
+ * The concept of variable capture in a quantifier (or, more generically, in a
+ * {@link BindingExpression}) is a well-known one, and is also documented
+ * in functions such as {@link MathConcept#isFree this one}.  But
+ * {@link Declaration Declarations} function similarly to bindings, except their
+ * scope spans multiple expressions in the same (or inner) environments.  So we
+ * can consider a secondary type of symbol capture, one in which we substitute
+ * into an expression $E$ in the scope of a declaration $D$, and doing so
+ * inserts an instance of a symbol $s$ that is free in $E$ but is declared by
+ * $D$.  This function checks to see whether that would happen if we applied an
+ * instantiation to a formula.
+ * 
+ * For example, if we create a formula from the putdown notation
+ * `{ :[x] (+ a 1) }`, with both `x` and `a` as metavariables, we could imagine
+ * an instantiation of `a` with the expression `(* x 2)`.  No capture would
+ * occur from the point of view of binding expressions, but capture would occur
+ * from the point of view of the declaration of `x` at the start of the
+ * environment, which functions conceptually like a binding.  This function
+ * would return true in such a case, because capture of this type would occur.
+ * 
+ * Note that this function does *not* report on capture of the *other* type.
+ * That is, it may be the case that, for some expression `E` inside the formula,
+ * if we asked `E.isFreeToReplace(a,b)` where `b` is `(* x 2)`, we would get
+ * false, but this function returns true, because it's not checking for capture
+ * inside of expressions by a {@link BindingExpression}, but rather it is
+ * checking only for capture that happens due to a declaration.
+ */
+export const hasDeclarationCapture = ( formula, instantiation ) => {
+    const dbg = foo => foo.toPutdown().replace( / \+\{"_type_LDE MV"\:true\}\n/g, '_' )
+    // console.log( 'Formula: ' + dbg( formula ) )
+    // console.log( 'Instantiation:' )
+    // Object.keys( instantiation ).map( key =>
+    //     console.log( `\t${key} => ${dbg(instantiation[key])}` ) )
+    const whatMightGetCaptured = subIntoThis => {
+        const result = [ ...new Set( subIntoThis.descendantsSatisfying(
+            d => ( d instanceof LurchSymbol ) && d.isA( Matching.metavariable )
+        ) ) ].map( mv => {
+            const image = lookup( instantiation, mv )
+            return image == mv ? [ ] :
+                image.freeSymbolNames().map( sym => [ mv.text(), sym ] )
+        } ).flat()
+        // console.log( 'In ' + dbg(subIntoThis) + ', possible captures are: '
+        //     + result.join( ' ; ' ) )
+        return result
+    }
+    const expressionsIn = target =>
+        target instanceof Expression ? [ target ] :
+        target instanceof Array ? target.map( expressionsIn ).flat() :
+        expressionsIn( target.children() )
+    const expressionScope = target =>
+        expressionsIn( target.scope().filter( LC =>
+            ( LC instanceof Expression ) && LC.isOutermost() ) )
+    return formula.descendantsSatisfying(
+        d => d instanceof Declaration
+    ).some( d => {
+        const declaredNames = d.symbols().map( s => s.text() )
+        const declaredImages = d.symbols().map(
+            s => lookup( instantiation, s ).text() )
+        // console.log( 'Ignore: ' + declaredNames )
+        // console.log( 'Seek:   ' + declaredImages )
+        return expressionScope( d ).some( expr =>
+            whatMightGetCaptured( expr ).some( data =>
+                !declaredNames.includes( data[0] )
+             && declaredImages.includes( data[1] ) ) )
+    } )
+}
+
 // Helper function:  Look up a given metavariable in a given instantiation,
 // whether that instantiation is a Solution, a Substitution, a Map, or an
 // Object, and return a copy of the image, if there is one.
@@ -708,5 +775,6 @@ export default {
     from, domain, instantiate,
     allPossibleInstantiations, possibleSufficientInstantiations,
     cachedInstantiation, addCachedInstantiation,
-    allCachedInstantiations, clearCachedInstantiations
+    allCachedInstantiations, clearCachedInstantiations,
+    hasDeclarationCapture
 }

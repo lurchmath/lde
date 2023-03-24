@@ -1484,4 +1484,149 @@ describe( 'Formulas', () => {
         expect( Formula.allCachedInstantiations( formula ) ).to.eql( [ ] )
     } )
 
+    it( 'Should detect when declaration capture would occur', () => {
+        let formula, instantiation
+
+        // Test 1:
+        // In a formula with no declarations, there can be no declaration
+        // capture.
+        formula = buildFormula( `
+            { :{ :A B } (=> A B) }
+        `, [ '=>' ] )
+        instantiation = {
+            A : LogicConcept.fromPutdown( '(+ x 3)' )[0],
+            B : LogicConcept.fromPutdown( '(- B 2)' )[0]
+        }
+        expect( Formula.hasDeclarationCapture( formula, instantiation ) )
+            .to.equal( false )
+        
+        // Test 2:
+        // If the instantiation has all different symbols than the formula,
+        // then even when there are declarations, there can be no capture.
+        formula = buildFormula( `
+            { :{ :[x] ("LDE EFA" P x) } (∀ x , ("LDE EFA" P x)) }
+        `, [ '=>','"LDE EFA"' ] )
+        instantiation = {
+            P : LogicConcept.fromPutdown( '("LDE lambda" v , (= v 7))' )[0],
+            x : LogicConcept.fromPutdown( 'K' )[0]
+        }
+        expect( Formula.hasDeclarationCapture( formula, instantiation ) )
+            .to.equal( false )
+        
+        // Test 3:
+        // If the instantiation avoids capture, then that is reported correctly,
+        // even if the instantiation shares some symbols with the formula.
+        formula = buildFormula( `
+            { :{ :[x] ("LDE EFA" P x) } (∀ x , ("LDE EFA" P x)) }
+        `, [ '=>','"LDE EFA"' ] )
+        instantiation = {
+            P : LogicConcept.fromPutdown( '("LDE lambda" v , (= v x))' )[0],
+            x : LogicConcept.fromPutdown( 'K' )[0]
+        }
+        expect( Formula.hasDeclarationCapture( formula, instantiation ) )
+            .to.equal( false )
+        
+        // Test 4:
+        // If the instantiation would capture, we better notice that.
+        // First, consider the case where the capture is of a declared metavar.
+        formula = buildFormula( `
+            { :{ :[x] ("LDE EFA" P x) } (∀ x , ("LDE EFA" P x)) }
+        `, [ '=>','"LDE EFA"' ] )
+        instantiation = {
+            P : LogicConcept.fromPutdown( '("LDE lambda" v , (= v K))' )[0],
+            x : LogicConcept.fromPutdown( 'K' )[0]
+        }
+        expect( Formula.hasDeclarationCapture( formula, instantiation ) )
+            .to.equal( true )
+        
+        // Test 5:
+        // If the instantiation would capture, we better notice that.
+        // Now, consider the case where the capture is of a declared non-metavar.
+        formula = buildFormula( `
+            { :{ :[x] ("LDE EFA" P x) } (∀ x , ("LDE EFA" P x)) }
+        `, [ '=>','"LDE EFA"','x' ] )
+        instantiation = {
+            P : LogicConcept.fromPutdown( '("LDE lambda" v , (= v x))' )[0]
+        }
+        expect( Formula.hasDeclarationCapture( formula, instantiation ) )
+            .to.equal( true )
+        
+        // Test 6:
+        // Repeat test 2, but with the declaration outside the environment.
+        // (This rule no longer makes sense logically, but is a good scope test.)
+        formula = buildFormula( `
+            { [x] { ("LDE EFA" P x) } (∀ x , ("LDE EFA" P x)) }
+        `, [ '=>','"LDE EFA"' ] )
+        instantiation = {
+            P : LogicConcept.fromPutdown( '("LDE lambda" v , (= v 7))' )[0],
+            x : LogicConcept.fromPutdown( 'K' )[0]
+        }
+        expect( Formula.hasDeclarationCapture( formula, instantiation ) )
+            .to.equal( false )
+        
+        // Test 7:
+        // Repeat test 3, but with the declaration outside the environment.
+        // (This rule no longer makes sense logically, but is a good scope test.)
+        formula = buildFormula( `
+            { [x] { ("LDE EFA" P x) } (∀ x , ("LDE EFA" P x)) }
+        `, [ '=>','"LDE EFA"' ] )
+        instantiation = {
+            P : LogicConcept.fromPutdown( '("LDE lambda" v , (= v x))' )[0],
+            x : LogicConcept.fromPutdown( 'K' )[0]
+        }
+        expect( Formula.hasDeclarationCapture( formula, instantiation ) )
+            .to.equal( false )
+        
+        // Test 8:
+        // Repeat test 4, but with the declaration outside the environment.
+        // (This rule no longer makes sense logically, but is a good scope test.)
+        formula = buildFormula( `
+            { [x] { ("LDE EFA" P x) } (∀ x , ("LDE EFA" P x)) }
+        `, [ '=>','"LDE EFA"' ] )
+        instantiation = {
+            P : LogicConcept.fromPutdown( '("LDE lambda" v , (= v K))' )[0],
+            x : LogicConcept.fromPutdown( 'K' )[0]
+        }
+        expect( Formula.hasDeclarationCapture( formula, instantiation ) )
+            .to.equal( true )
+        
+        // Test 9:
+        // Repeat test 5, but with the declaration outside the environment.
+        // (This rule no longer makes sense logically, but is a good scope test.)
+        formula = buildFormula( `
+            { [x] { ("LDE EFA" P x) } (∀ x , ("LDE EFA" P x)) }
+        `, [ '=>','"LDE EFA"','x' ] )
+        instantiation = {
+            P : LogicConcept.fromPutdown( '("LDE lambda" v , (= v x))' )[0]
+        }
+        expect( Formula.hasDeclarationCapture( formula, instantiation ) )
+            .to.equal( true )
+        
+        // Test 10:
+        // Repeat test 2, but with two declarations, so a new opportunity to
+        // create capture.  And we use that opportunity, so capture happens.
+        formula = buildFormula( `
+            { [x y] { ("LDE EFA" P x) } (∀ x , ("LDE EFA" P x)) }
+        `, [ '=>','"LDE EFA"' ] )
+        instantiation = {
+            P : LogicConcept.fromPutdown( '("LDE lambda" v , (= v y))' )[0],
+            x : LogicConcept.fromPutdown( 'K' )[0]
+        }
+        expect( Formula.hasDeclarationCapture( formula, instantiation ) )
+            .to.equal( true )
+        
+        // Test 11:
+        // Repeat test 3, but with many declarations, so new opportunities to
+        // create capture.  And we use such an opportunity, so capture happens.
+        formula = buildFormula( `
+            { [R E x Y F] { ("LDE EFA" P x) } (∀ x , ("LDE EFA" P x)) }
+        `, [ '=>','"LDE EFA"' ] )
+        instantiation = {
+            P : LogicConcept.fromPutdown( '("LDE lambda" v , (F R v))' )[0],
+            x : LogicConcept.fromPutdown( 'K' )[0]
+        }
+        expect( Formula.hasDeclarationCapture( formula, instantiation ) )
+            .to.equal( true )
+    } )
+
 } )
