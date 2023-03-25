@@ -197,7 +197,7 @@ const instantiate = (
  * inside of expressions by a {@link BindingExpression}, but rather it is
  * checking only for capture that happens due to a declaration.
  */
-export const hasDeclarationCapture = ( formula, instantiation ) => {
+const hasDeclarationCapture = ( formula, instantiation ) => {
     const dbg = foo => foo.toPutdown().replace( / \+\{"_type_LDE MV"\:true\}\n/g, '_' )
     // console.log( 'Formula: ' + dbg( formula ) )
     // console.log( 'Instantiation:' )
