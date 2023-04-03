@@ -3,9 +3,9 @@
 // 
 // These are the example and counterexample proofs from the END document
 
-(<<< "Example 8 from END (generalizing a constant expression)")
+(--- "Example 8 from END (generalizing a constant expression)")
 {
-  (<<< "Thm: 1<1")
+  (--- "Thm: 1<1")
   { 
     {:[ z ]
      :(< 1 1) 

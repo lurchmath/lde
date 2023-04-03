@@ -3,12 +3,12 @@
 // 
 // These are the example and counterexample proofs from the END document
 
-(<<< "Example 11b from END")
+(--- "Example 11e from END")
 {
-   (<<< "Trying again to cheat the subset plus rule.")
-   (<<< "Note this DOES validate if we define ⊆+ using a Let with no body!")
+   (--- "Cheaty, cheatin, cheater.")
+   (--- "This does validate... and it should!")
    // Thm/Pf attempt 
-   { :[ x ] :(∈ x T) 
+   { :{:[ x ] (∈ x T) }
      (⊆ S T)
-   }
+   }  
 } ✔︎

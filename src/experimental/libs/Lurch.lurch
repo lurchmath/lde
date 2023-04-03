@@ -13,7 +13,7 @@
 //
 
 { // Global Constants - we don't want any of these to be metavariables
-  :[ and or ⇒ ⇔ ¬ →← ∀ ∃ = @ Set ∈ ⊆ ℘ - → Domain Codomain Range id ∘ injective ]
+  :[ and or ⇒ ⇔ ¬ →← ∀ ∃ = Set ∈ ⊆ ℘ - → Domain Codomain Range id ∘ injective ]
   
   ////////////////////////////////
   // ND Propositional Logic Axioms

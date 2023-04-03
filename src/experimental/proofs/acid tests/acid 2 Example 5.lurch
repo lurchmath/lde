@@ -3,10 +3,10 @@
 // 
 // These are the example and counterexample proofs from the END document
 
-(<<< "Example 5 from END")
+(--- "Example 5 from END")
 {
   // Thm: Equality is symmetric and transitive.
-  (<<< "Thm: Equality is symmetric and transitive.")
+  (--- "Thm: Equality is symmetric and transitive.")
   { :(= x y) :(= y z) (= y x) (= x z) }
   
   // Proof:

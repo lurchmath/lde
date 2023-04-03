@@ -10,11 +10,8 @@ let start = Date.now()
 
 const biglib = ['Prop','PropThm','Pred','PredThm','Peano','Number Theory']
 // Load Acid Tests
-acid=[1,4,5,6,7,8,9,10,'11a','11b','11c','11d','11e'].map( n => 
-     load('acid tests/acid Example '+n,'Acid Tests'))
-// Load Acid Redux tests
-acid.push(load('acid tests/acid Redux 11a','Acid Tests Let-body'))
-acid.push(load('acid tests/acid Redux 11b','Acid Tests Let-body'))
+acid=[1,4,5,6,7,8,9,10,'11a','11b','11c','11d','11e'].map( (ex,k) => 
+     load(`acid tests/acid ${k} Example ${ex}.lurch`,`Acid Tests`))
 // Load Math 299 tests
 acid.push(load('math-299-prop','Prop'))
 acid.push(load('math-299-pred',['Prop','Pred']))
@@ -28,10 +25,10 @@ let failed = 0
 acid.forEach( (T,k) => {
   T.descendantsSatisfying( x => x.expectedResult ).forEach( (s,i) => {
     if (Validation.result(s) && Validation.result(s).result==s.expectedResult) {
-      console.log(`Test #${k}.${i} -> ok`)
+      console.log(`Test ${k}.${i} -> ok`)
       passed++
     } else {
-      console.log(`\nTest #${k}.${i} -> FAIL!!\n`)
+      console.log(`\nTest ${k}.${i} -> FAIL!!\n`)
       failed++
     }
   })

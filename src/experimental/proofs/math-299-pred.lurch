@@ -8,14 +8,14 @@
 {
   // Alpha Equivalence for ∀ (in-class example) Problem 5.1
   // { :(∀ x , (P x) ) { :[s] (P s) } (∀ y, (P y) ) } 
-  (<<< "Problem 5.1")
-  (<<< "Amazingly requires no proof!")
+  (--- "Problem 5.1")
+  (--- "Amazingly requires no proof!")
   { (⇒ (∀ x , (P x) ) (∀ y , (P y) )) }  
 }
 
 {
   // Second in-class example. Similer to Problem 5.2
-  (<<< "Second in-class example (similar to Problem 5.2)")
+  (--- "Second in-class example (similar to Problem 5.2)")
   { :(∃ x , (and (P x) (Q x))) 
     [ c , (and (P c) (Q c)) ]
     (P c)
@@ -25,7 +25,7 @@
 
 {
   // Assignment #7 (a)
-  (<<< "Assignment #7 (a)")
+  (--- "Assignment #7 (a)")
   { { :(∃ x , (Q x))
       [ c , (Q c) ]
       { :(P c)
@@ -40,7 +40,7 @@
 
 {
   // Assignment #7 (b)
-  (<<< "Assignment #7 (b)")
+  (--- "Assignment #7 (b)")
   { { :(∀ x , (¬ (P x)) )
       { :(∃ y , (P y))
         [ n , (P n) ]
@@ -54,7 +54,7 @@
 }
 {
   // Problem 5.3 Distributivity of ∀ over and
-  (<<< "Problem 5.3 - Distributivity of ∀ over 'and'")
+  (--- "Problem 5.3 - Distributivity of ∀ over 'and'")
   { { :(and (∀ y, (P y)) (∀ z , (Q z)))
       (∀ y, (P y)) (∀ z , (Q z))
       { :[x]
@@ -79,7 +79,7 @@
 
 {
   // Problem 5.4 Distributivity of ∃ over or
-  (<<< "Problem 5.3 - Distributivity of ∃ over 'or'")
+  (--- "Problem 5.3 - Distributivity of ∃ over 'or'")
   { 
     { :(or (∃ y, (P y)) (∃ z , (Q z)))
       { :(∃ y, (P y))
@@ -130,7 +130,7 @@
 
 {
   // Assignment #8 (b)
-  (<<< "Assignment #8 (b)")
+  (--- "Assignment #8 (b)")
   { :[ < 0 7 ] <<
     { :(< 0 7)
       (∃ x , (< 0 x))
@@ -143,7 +143,7 @@
 
 {
   // Assignment #8 (c)
-  (<<< "Assignment #8 (c)")
+  (--- "Assignment #8 (c)")
   { :[ Alice Bob L ] <<
     { :(∀ x , (∀ y, (L x y))) 
       (∀ y, (L Alice y)) 
@@ -155,7 +155,7 @@
 
 {
   // Assignment #8 (d)
-  (<<< "Assignment #8 (d)")
+  (--- "Assignment #8 (d)")
   { { :(and (= x y) (= y z))
       (= x y)
       (= y z)
@@ -167,7 +167,7 @@
 
 {
   // Assignment #8 (e)
-  (<<< "Assignment #8 (e)")
+  (--- "Assignment #8 (e)")
   { 
     // Amazingly, it validates the iff even without this subproof because of 
     // previous instantiations.  It also validates this subproof immediately
@@ -189,49 +189,49 @@
 
 // Assignment #8 (f)
 {
-  (<<< "Assignment #8 (f)")
-  (<<< " ")
-  (<<< "Theorem: If everyone loves exactly one person, and Alice and Bob")
-  (<<< "are not the same person, then Cathy does not love them both.")
-  (<<< " ")
-  (<<< "(Note we can list the theorem before the proof.)")
+  (--- "Assignment #8 (f)")
+  (--- " ")
+  (--- "Theorem: If everyone loves exactly one person, and Alice and Bob")
+  (--- "are not the same person, then Cathy does not love them both.")
+  (--- " ")
+  (--- "(Note we can list the theorem before the proof.)")
   {
     (⇒ (and (∀ x, (∃! y, (L x y))) (¬ (= a b))) (¬ (and (L c a) (L c b))) )
   }
-  (<<< "Proof:")
+  (--- "Proof:")
   { 
-    (<<< "We don't really need this declaration,")
-    (<<< "But in class we've been using L(x,y) to mean 'x Loves y'")
+    (--- "We don't really need this declaration,")
+    (--- "But in class we've been using L(x,y) to mean 'x Loves y'")
     :[ L ] <<
-    { (<<< "Assume the conjunction...")
+    { (--- "Assume the conjunction...")
       :(and (∀ x, (∃! y, (L x y))) (¬ (= a b)))
-      (<<< "Use and- twice...")
+      (--- "Use and- twice...")
       (¬ (= a b))
       (∀ x, (∃! y, (L x y)))
-      (<<< "Use ∀- on that using the free 'c' in the theorem...")
+      (--- "Use ∀- on that using the free 'c' in the theorem...")
       (∃! y, (L c y))
-      (<<< "Apply the definition of ∃! ...")
+      (--- "Apply the definition of ∃! ...")
       (∃ y, (and (L c y) (∀ z , (⇒ (L c z) (= z y)))))
-      (<<< "It exists, so let's name it w ...")
+      (--- "It exists, so let's name it w ...")
       [ w , (and (L c w) (∀ z , (⇒ (L c z) (= z w))))]
-      (<<< "Use and- twice on the body of that declaration...")
+      (--- "Use and- twice on the body of that declaration...")
       (L c w)
       (∀ z , (⇒ (L c z) (= z w)))
-      (<<< "Now it's just a short a proof by contradiction...")
+      (--- "Now it's just a short a proof by contradiction...")
       { :(and (L c a) (L c b))
         (L c a) (L c b)
         (⇒ (L c a) (= a w))
         (⇒ (L c b) (= b w))
         (= a w) (= b w) 
-        (<<< "Substitution still requires BIH's for now ...")
+        (--- "Substitution still requires BIH's for now ...")
         { :(= b w) :(= b b) (= w b) } <<
         { :(= w b) :(= a w) (= a b) } <<
         →←
       }
-      (<<< "Thus since the assumption led to a contradiction ...")
+      (--- "Thus since the assumption led to a contradiction ...")
       (¬ (and (L c a) (L c b)))
     }
-    (<<< "And we have the theorem ...")
+    (--- "And we have the theorem ...")
     (⇒ (and (∀ x, (∃! y, (L x y))) (¬ (= a b))) (¬ (and (L c a) (L c b))) )
   }
 }
@@ -239,11 +239,11 @@
 {
   // Assignment #9.1
   // Thm: Pierce's Law
-  (<<< "Assignment #9.1")
-  (<<< " ")
-  (<<< "Theorem: Pierce's Law")
+  (--- "Assignment #9.1")
+  (--- " ")
+  (--- "Theorem: Pierce's Law")
   { (⇒ (⇒ (⇒ P Q) P) P)}
-  (<<< "Proof:")
+  (--- "Proof:")
   { 
     :(⇒ (⇒ P Q) P)
     { :(¬ P)
@@ -264,11 +264,11 @@
 {
   // Assignment #9.2
   // Thm: A case of cases
-  (<<< "Assignment #9.2")
-  (<<< " ")
-  (<<< "Theorem: (P⇒R) or (Q⇒R) ⇒ ((P and Q)⇒R)")
+  (--- "Assignment #9.2")
+  (--- " ")
+  (--- "Theorem: (P⇒R) or (Q⇒R) ⇒ ((P and Q)⇒R)")
   { (⇒ (or (⇒ P R) (⇒ Q R)) (⇒ (and P Q) R) ) }
-  (<<< "Proof:")
+  (--- "Proof:")
   { :(or (⇒ P R) (⇒ Q R))
     { :(and P Q)
       P Q
@@ -284,11 +284,11 @@
 {
   // Assignment #9.3
   // Thm: If everyone loves themselves then everyone loves someone.
-  (<<< "Assignment #9.3")
-  (<<< " ")
-  (<<< "Theorem: If everyone loves themselves then everyone loves someone.")
+  (--- "Assignment #9.3")
+  (--- " ")
+  (--- "Theorem: If everyone loves themselves then everyone loves someone.")
   { :(∀ x , (L x x)) (∀ x, (∃ y, (L x y))) }
-  (<<< "Proof:")
+  (--- "Proof:")
   { :(∀ x , (L x x))
     { :[z]
       (L z z)
@@ -301,11 +301,11 @@
 {
   // Assignment #9.4
   // Thm: If everyone loves themselves then everyone loves someone.
-  (<<< "Assignment #9.4")
-  (<<< " ")
-  (<<< "Theorem:")
+  (--- "Assignment #9.4")
+  (--- " ")
+  (--- "Theorem:")
   // { (⇔ ( ∃! x , (P x) ) (∃ x , (and (P x) (∀ y, (⇒ (¬ (= y x)) (¬ (P y))))))) }
-  (<<< "Proof:")
+  (--- "Proof:")
   { { :( ∃! x , (P x) )
       (∃ x , (and (P x) (∀ y, (⇒ (P y) (= y x)))))
       [ c , (and (P c) (∀ y, (⇒ (P y) (= y c))))]
@@ -354,11 +354,11 @@
 {
   // Assignment #10.3
   // Thm: DeMorgan extravaganza
-  (<<< "Assignment #10.2")
-  (<<< " ")
-  (<<< "Theorem:")
+  (--- "Assignment #10.2")
+  (--- " ")
+  (--- "Theorem:")
   { (⇒ (¬ (∀ x, (∃ y, (∀ z, (P x y z))))) (∃ x, (∀ y, (∃ z, (¬ (P x y z)))))) }
-  (<<< "Proof:")
+  (--- "Proof:")
   { :(¬ (∀ x, (∃ y, (∀ z, (P x y z)))))
     { :(¬ (∃ x, (∀ y, (∃ z, (¬ (P x y z))))))
       { :[a]

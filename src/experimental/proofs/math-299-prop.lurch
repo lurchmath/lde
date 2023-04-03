@@ -182,11 +182,11 @@
 
 {
   // Assignment #10.4
-  (<<< "Assignment #10.4")
-  (<<< " ")
-  (<<< "Theorem:")
+  (--- "Assignment #10.4")
+  (--- " ")
+  (--- "Theorem:")
   { :(or (or (¬ (⇒ P Q)) (¬ P)) Q) }
-  (<<< "Proof:")
+  (--- "Proof:")
   { :(¬ (or (or (¬ (⇒ P Q)) (¬ P)) Q ) )
     { :(¬ (or (¬ (⇒ P Q)) (¬ P)))
       { :Q

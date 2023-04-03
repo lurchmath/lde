@@ -4,14 +4,14 @@
 // const or let for things you want to export.
 ////////////////////////////////////////////////////////////////////////////
 // opening
-process.stdout.write(defaultPen(`Loading proofs ...`))
+process.stdout.write(defaultPen(`Loading proofs ...\n`))
 let start = Date.now()
 ////////////////////////////////////////////////////////////////////////////
 
 peano = load('math-299-peano',
              ['Prop','PropThm','Pred','PredThm','Peano','Number Theory'])
 console.log('peano loaded')
-peano.lastChild().report(user)
+// peano.lastChild().report(user)
 
 ///////////////////////////////////////////////////////////
 // closing    
