@@ -175,6 +175,12 @@ export const processShorthands = L => {
     m.remove()
   } )
   
+  processSymbol( 'thm>' , m => {
+    // Same as the previous, but attributes the next sibling.
+    m.nextSibling().userThm = true
+    m.remove()
+  } )
+  
   processSymbol( '✔︎' , m => { 
     m.previousSibling().expectedResult = 'valid'
     m.remove() 
@@ -400,7 +406,7 @@ export const assignProperNames = doc => {
 //   * allow a .lurch library string file to contain an array of strings, and
 //     when such a thing is loaded, treat it as if it were the libs argument.
 //     This allows us to have libraries that load other libraries are prerequisites.
-export const myLoadLibs = (...libs) => {
+export const loadLibs = (...libs) => {
   // the reserved constants are declared at the top of every document, 
   // even if no library is specified
   const system = lc(`:[ 'LDE EFA' '---' ]`).asA('Declare')
@@ -495,7 +501,7 @@ export const myLoadLibs = (...libs) => {
 // The user's content is stored in an Environment as the last child of the
 // Document. A typical user's document will contain one or more theorems,
 // definitions, and proofs.
-const myLoadDocs = (...docs) => {
+const loadDocs = (...docs) => {
   // create an empty environment to wrap the final answer
   let ans = new Environment()
 
@@ -559,11 +565,11 @@ export class Document extends Environment {
 
     // get the array of children of the merged libs and push it onto this
     // Document
-    myLoadLibs(...libs).forEach( x => this.pushChild(x) )
+    loadLibs(...libs).forEach( x => this.pushChild(x) )
 
     // load the merged docs and push the resulting environment onto the end
     // of this Document
-    this.pushChild( myLoadDocs(...docs) )
+    this.pushChild( loadDocs(...docs) )
     
     // process the user's theorems. This has to be done after prepending the library
     // so the user's theorems are in the scope of declared constants in the library.

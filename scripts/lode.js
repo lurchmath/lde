@@ -39,7 +39,7 @@ import Compact from '../src/experimental/global-validation-lab.js'
 // load the custom formatter class
 import Reporting from '../src/experimental/reporting.js' 
 // load the Document class
-import { Document , myLoadLibs } from '../src/experimental/document.js'
+import { Document } from '../src/experimental/document.js'
 // load the lc command
 import { lc , mc , checkExtension } from '../src/experimental/extensions.js'
 
@@ -86,7 +86,6 @@ global.lc = lc
 global.mc = mc
 // see if a filename has the correct extension and add it if it doesn't
 global.checkExtension = checkExtension
-global.myLoadLibs = myLoadLibs
 // for controlling the inspect-level for the default REPL echo
 global.Depth = Infinity
 // just a shorthand
