@@ -186,6 +186,7 @@ ${headingPen('Lode Features')}
     ${itemPen('X.inspect(x,d)')}: prints the object structure of X to depth d. If d
                     is omitted the default is 1
     ${itemPen('.list')}         : show the list of known libs and proofs
+    ${itemPen('.test')}         : run the acidtests script
     ${itemPen('exec(command)')} : execute the given shell commmand and print the result
     ${itemPen('initialize()')}  : loads and executes 'initproof.js' from the scripts
                     folder. A different file can be executed by calling it with
@@ -214,5 +215,14 @@ rpl.defineCommand( "list", {
       this.displayPrompt()
     }
   })
+
+  // define the Lode .list command
+rpl.defineCommand( "test", {
+  help: "Run the default test script ('acidtests.js').",
+  action() { 
+    initialize('acidtests')
+    this.displayPrompt()
+  }
+})
 
 /////////////////////////////////////////////
