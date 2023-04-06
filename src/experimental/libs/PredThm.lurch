@@ -12,9 +12,9 @@
 //   the best way to do that in practice yet
 
 { 
-  // :{ :(= x y) (= y x) }            // symmetry of equality
+  // :{ :(= x y) (= y x) }               // symmetry of equality
   // :{ :(= x y) :(= y z) (= x z) }      // transitivity of equality
-  :{ :(= x y) :(@ P y) (@ P x) }     // alternate substutition
+  :{ :(= x y) :(@ P y) (@ P x) }         // alternate substutition
   // :( :(∀ x, (∀ y, (@ P x y))) (∀ y, (∀ x, (@ P x y))) } // commutativity
   // :( :(∃ x, (∃ y, (@ P x y))) (∃ y, (∃ x, (@ P x y))) } // commutativity
   :{ { (∀ x, (@ P x)) (∀ y, (@ Q y)) } ≡ 
