@@ -96,10 +96,14 @@ LogicConcept.prototype.showkeys = function() {
 //
 // show LC attributes
 const showAttributes =  true
+// show Declares
+const showDeclares =  true
 // show red subscripts for declaration contexts
 const showContexts = true
 // show formulas
 const showRules = true
+// show partial instantiations
+const showPartials = true
 // show instantiations of formulas in the library
 const showInstantiations = true
 // show Bodies of ForSome declarations
@@ -124,11 +128,14 @@ const showValidation = true
 // useful sets of options
 //
 // show everything report option
-const everything = { showAttributes , showBodies, showContexts , showRules , showUserThms ,
+const everything = { showDeclares, showAttributes , showBodies, showContexts,
+                     showRules , showUserThms , showPartials,
                      showInstantiations , showNumbers , showProperNames ,
-                     showUserRules , showUserInstantiations , showValidation }  
+                     showUserRules , showUserInstantiations , showValidation
+                     }  
+
 // detailed report option
-const detailed = {  showRules , showInstantiations , showNumbers , showBodies,
+const detailed = {  showDeclares, showRules , showPartials, showInstantiations , showNumbers , showBodies,
                     showProperNames , showUserRules , showUserThms , showValidation } 
 // clean report option
 const clean = { showInstantiations, showNumbers, showSimpleProperNames , showUserThms ,
@@ -137,7 +144,7 @@ const clean = { showInstantiations, showNumbers, showSimpleProperNames , showUse
 const user = { showNumbers, showUserThms , showSimpleProperNames, showUserOnly , 
                showValidation }
 // user report option
-const defaultOptions = { showNumbers, showRules , showSimpleProperNames , 
+const defaultOptions = { showDeclares, showNumbers, showRules , showSimpleProperNames , 
                          showUserThms , showValidation }
 
 
@@ -311,8 +318,10 @@ LogicConcept.prototype.report = function ( options ) {
     this.children().forEach( c => {
       // hide Formulas, Instantiations, Partials, and Bodies unless they ask for them
       if ( (!options.showRules && c.isA('Rule')) ||
-           (!options.showInstantiations && c.isA('LDE CI')) ||
-           (!options.showBodies && c.isA('Body')) 
+           (!options.showPartials && c.isA('Part')) ||
+           (!options.showInstantiations && c.isA('Inst')) ||
+           (!options.showBodies && c.isA('Body')) ||
+           (!options.showDeclares && c.isA('Declare'))
          ) return
       linenum = `${c.indexInParent()}`
       linenum += tab(4-linenum.length)
