@@ -607,7 +607,15 @@ const instantiate = (document,n=1) => {
                                         // timeEnd('Cache Formula Domain Info')
                 // if there are no more metavars, flag it as a completed 
                 // instantiation
-                if (inst.domain.size===0) { inst.instantiation=true }
+                if (inst.domain.size===0) { 
+                  inst.unmakeIntoA('Rule')
+                  inst.unmakeIntoA('Part')
+                  inst.makeIntoA('Inst')
+                  inst.instantiation=true 
+                } else {
+                  inst.unmakeIntoA('Rule')
+                  inst.makeIntoA('Part')
+                }
                 // either way, rename ForSome constants that aren't metavars We
                 // should not have to insert a copy of the bodies of ForSomes
                 // since they should be there automatically because they were

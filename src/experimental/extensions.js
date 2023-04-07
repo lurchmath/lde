@@ -163,7 +163,7 @@ LogicConcept.prototype.forSomes = function ( onlywithbodies ) {
 
 // Compute the array of all formulas in this LC
 LogicConcept.prototype.formulas = function () {
-  return [...this.descendantsSatisfyingIterator( x => x.isA('Rule') )]
+  return [...this.descendantsSatisfyingIterator( x => x.isA('Rule') || x.isA('Part'))]
 }
 
 // Compute the array of all propositions in this LC

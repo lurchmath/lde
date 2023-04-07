@@ -570,10 +570,19 @@ export class Document extends Environment {
     // load the merged docs and push the resulting environment onto the end
     // of this Document
     this.pushChild( loadDocs(...docs) )
-    
-    // process the user's theorems. This has to be done after prepending the library
-    // so the user's theorems are in the scope of declared constants in the library.
-    ;[ ...this.descendantsSatisfyingIterator( x => x.userThm ) ].forEach( thm => {
+        
+    // assign the Proper Names for symbols declared by a ForSome with body or a
+    // Let
+    assignProperNames(this)
+  
+    // now that the doc is in the scope of the library, mark all of the declared
+    // symbols
+    markDeclaredSymbols( this )
+
+    // process the user's theorems. This has to be done after prepending the
+    // library so the user's theorems are in the scope of declared constants in
+    // the library, which then prevents them from being metavariables
+    ;[ ...this.lastChild().descendantsSatisfyingIterator( x => x.userThm ) ].forEach( thm => {
       // make a copy of the thm after the theorem
       let formula = thm.copy()
       formula.insertAfter(thm)
@@ -583,14 +592,6 @@ export class Document extends Environment {
       // convert it to a formula
       Formula.from(formula,true)
     })
-    
-    // assign the Proper Names for symbols declared by a ForSome with body or a
-    // Let
-    assignProperNames(this)
-  
-    // now that the doc is in the scope of the library, mark all of the declared
-    // symbols
-    markDeclaredSymbols( this )
 
   }
 
