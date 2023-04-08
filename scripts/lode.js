@@ -181,7 +181,7 @@ ${headingPen('Lode Features')}
     ${itemPen('lc(s)')}         : constructs an LC from the putdown string s
     ${itemPen('mc(s)')}         : constructs an MC from the smackdown string s
     ${itemPen('X.report()')}    : prints a syntax highlighted, numbered view of LC X
-                    Optional args 'everything', 'detailed', 'clean' and 'user' 
+                    Optional args 'everything', 'show', 'detailed', 'clean' and 'user' 
                     (with no quotes) show variations
     ${itemPen('X.inspect(x,d)')}: prints the object structure of X to depth d. If d
                     is omitted the default is 1

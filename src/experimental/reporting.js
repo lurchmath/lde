@@ -132,11 +132,18 @@ const everything = { showDeclares, showAttributes , showBodies, showContexts,
                      showRules , showUserThms , showPartials,
                      showInstantiations , showNumbers , showProperNames ,
                      showUserRules , showUserInstantiations , showValidation
-                     }  
-
+                   }  
+// simple report option
+const show = { showDeclares, showAttributes , showBodies, showContexts,
+               showRules , showUserThms , showPartials,
+               showInstantiations , showProperNames ,
+               showUserRules , showUserInstantiations , showValidation 
+             }
 // detailed report option
-const detailed = {  showDeclares, showRules , showPartials, showInstantiations , showNumbers , showBodies,
-                    showProperNames , showUserRules , showUserThms , showValidation } 
+const detailed = {  showDeclares, showRules , showPartials, showInstantiations ,
+                    showNumbers , showBodies, showProperNames , showUserRules ,
+                    showUserThms , showValidation 
+                 }
 // clean report option
 const clean = { showInstantiations, showNumbers, showSimpleProperNames , showUserThms ,
                 showValidation } 
@@ -145,7 +152,7 @@ const user = { showNumbers, showUserThms , showSimpleProperNames, showUserOnly ,
                showValidation }
 // user report option
 const defaultOptions = { showDeclares, showNumbers, showRules , showSimpleProperNames , 
-                         showUserThms , showValidation }
+  showUserThms , showValidation }
 
 
 // Syntactic sugar for the formatter
@@ -355,7 +362,7 @@ export default {
   decPen , commentPen , headingPen , docPen , linenumPen , itemPen ,
   
   // report definitions
-  everything, detailed , clean , user ,
+  everything, show, detailed , clean , user ,
   
   // report options
   showAttributes , showContexts , showRules , showInstantiations , 

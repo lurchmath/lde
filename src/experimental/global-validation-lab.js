@@ -90,7 +90,7 @@
 //    JS attributes: instantiation environments & BIH's 
 //    * 'instantiation' - boolean indicating that this is an instantiation with
 //                        no metavars left
-//    * 'origin'   - the user proposition(s) that caused this instantiation
+//    * 'creators'   - the user proposition(s) that caused this instantiation
 //
 //    JS attributes: declarations body copy and premature generalizations
 //    * 'bodyof'   - indicates an Expression is a copy of the body of the LC
@@ -430,6 +430,8 @@ const processHints = L => {
             inst.unmakeIntoA('Part')
             inst.makeIntoA('Inst')
             inst.instantiation=true
+            if (!inst.creators) inst.creators = new Set()
+            inst.creators.add(i)
             Formula.addCachedInstantiation( f , inst )
           })
         } catch { }
@@ -453,7 +455,7 @@ const processHints = L => {
 //   3. For each f in F,
 //      a. Match each maximally weeny p in f to each e in E.
 //      b. Every time a match is found.
-//         i. Insert the relevant instantiation, and store e in its .origin
+//         i. Insert the relevant instantiation, and store e in its .creators
 //            js attribute (it can have more than one) along with other info.
 //         ii. Cache its domain and update its weenies.
 //   4. Mark f as 'finished'.  It cannot be instantiated again on future passes
@@ -603,8 +605,8 @@ const instantiate = (document,n=1) => {
                 // instantiation, and which pass for debugging and feedback
                 // Note that .pass is the number of passes remaining. 
                 //
-                // TODO: do the same for BIH's
-                inst.origin = e
+                if (!inst.creators) inst.creators = new Set()
+                inst.creators.add(e)
                 inst.pass = n
                 inst.numsolns = solns.length
                 inst.weenienum = f.weenies.length 
