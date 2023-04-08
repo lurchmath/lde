@@ -171,6 +171,15 @@ LogicConcept.prototype.propositions = function () {
   return [...this.descendantsSatisfyingIterator( x => x.isAProposition() )]
 }
 
+// Compute the array of all instantiations in the document that contain a
+// proposition that has the same propositional form as a given proposition e
+LogicConcept.prototype.mentions = function (e) {
+  const eprop = e.prop()
+  return [...this.descendantsSatisfyingIterator( x => {
+    return (x.isA('Inst')) && x.propositions().some( p => p.prop() === eprop )
+  })]
+}
+
 // We say an LC is an Inference of an environment L if it is either
 //
 //    (a) a conclusion of that environment or
