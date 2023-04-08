@@ -286,9 +286,18 @@ const isNestedArrayofLCs = A => {
          )
 }
 
+// Nested Sets of LCs may also come up in Lode (e.g. X.creators) so we want to 
+// be able to syntax highlight them.  This identifies them.
+const isNestedSetofLCs = A => {
+  return ((A instanceof LogicConcept) || 
+          (A instanceof Set) && ([...A].every(isNestedSetofLCs))
+         )
+}
+
+
 // Apply the custom formatter to nested arrays of LCs.
 // Indent and number lines as needed.  Note that for arrays we usually are
-// debugging something, so we show everything by default.
+// debugging something, so we show everything.
 const format = (x,options,indentlevel=0) => {
   if (x instanceof LogicConcept) {
     return defaultPen(indent(
@@ -297,6 +306,10 @@ const format = (x,options,indentlevel=0) => {
            indentlevel))
   } else if (isNestedArrayofLCs(x)) { 
     return indent(`[\n${x.map(y=>format(y,everything,indentlevel+1))
+                  .join(',\n')}\n]`,
+                  indentlevel)
+  } else if (isNestedSetofLCs(x)) { 
+    return indent(`[\n${[...x].map(y=>format(y,everything,indentlevel+1))
                   .join(',\n')}\n]`,
                   indentlevel)
   } else {
@@ -348,10 +361,28 @@ LogicConcept.prototype.report = function ( options ) {
   }
 }
 
+// Number arrays or sets of LCs
+const numberedIterable  = function (options=everything) {
+    let ans = '  [\n'
+    let linenum = ''
+    this.forEach( (c,k) => {
+      linenum = `${k}`
+      linenum += tab(4-linenum.length)
+      linenum = (!c.isA(instantiation)) ? linenumPen(linenum) 
+                                        : instantiationPen(linenum)
+      ans += linenum+format(c,options).replace(/\n/g,'\n    ')+'\n'
+    })
+    ans += '  ]'      
+    console.log(ans)
+}
+Array.prototype.numbered = numberedIterable
+Set.prototype.numbered = numberedIterable
+
 export default {
   
   // formatting utiltiies
-  formatter, format, isNestedArrayofLCs, tab, indent, erase, timer, chalk,
+  formatter, format, isNestedArrayofLCs, isNestedSetofLCs, tab, indent, 
+  erase, timer, chalk,
   
   // special symbols
   goldstar, greencheck, redx, idunno,
