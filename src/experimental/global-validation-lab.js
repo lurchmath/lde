@@ -602,11 +602,15 @@ const instantiate = (document,n=1) => {
                 //     processForSomes( inst )
                 //
                 // let's also remember which expression created this
-                // instantiation, and which pass for debugging and feedback
-                // Note that .pass is the number of passes remaining. 
+                // instantiation, what original Rule it instantiates, and which
+                // pass for debugging and feedback.
                 //
                 if (!inst.creators) inst.creators = new Set()
                 inst.creators.add(e)
+                // Rules aren't an instanceof anything, but partials and 
+                // instantiations are.
+                inst.instanceOf = (f.instanceOf) ? f.instanceOf : f
+                //  Note that .pass is the number of passes remaining. 
                 inst.pass = n
                 inst.numsolns = solns.length
                 inst.weenienum = f.weenies.length 
