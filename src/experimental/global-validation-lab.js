@@ -362,14 +362,20 @@ const cacheFormulaDomainInfo = f => {
 // Apply that to the entire document
 const processDomains = doc => doc.formulas().forEach( f => {
   cacheFormulaDomainInfo(f) 
-  // If there are no metavariables in this formula, instantiate it so it is 
-  // available for validation
+  // If there are no metavariables in this formula, instantiate it so it is
+  // available for validation.
+  //
+  // TODO:
+  // * at some point go through and clean up the difference between 'formula'
+  //   and 'Rule', and things lke inst.instantiation vs inst.isA('Inst')
   if (f.domain.size===0) {
-    let inst=f.copy()
-    assignProperNames(inst)
-    inst=inst.unmakeIntoA('formula')
-    inst.instantiation = true
-    Formula.addCachedInstantiation( f , inst )
+    // let inst=f.copy()
+    // assignProperNames(inst)
+    f.unmakeIntoA('formula')
+    f.makeIntoA('Inst')
+    f.makeIntoA(instantiation)
+    f.instantiation = true
+    // Formula.addCachedInstantiation( f , inst )
   }
 })
 
@@ -420,6 +426,9 @@ const processHints = L => {
             const inst = Formula.instantiate(f,s)
             assignProperNames(inst)
             if (toggle) inst.toggleGiven()
+            inst.unmakeIntoA('Rule')
+            inst.unmakeIntoA('Part')
+            inst.makeIntoA('Inst')
             inst.instantiation=true
             Formula.addCachedInstantiation( f , inst )
           })
