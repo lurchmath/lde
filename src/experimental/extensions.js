@@ -152,6 +152,12 @@ LogicConcept.prototype.lets = function ( onlywithbodies ) {
          )]
 }
 
+// Determine the topmost ancestor of this LC.  This corresponds to the 
+// Document containing the LC.
+LogicConcept.prototype.root = function ( ) {
+  return this.ancestorsSatisfying( x => !x.parent() )[0]
+}
+
 // Compute the array of all ForSomes's in this LC.  If the argument is true,
 // only return those with bodies.
 LogicConcept.prototype.forSomes = function ( onlywithbodies ) {
@@ -179,6 +185,8 @@ LogicConcept.prototype.mentions = function (e) {
     return (x.isA('Inst')) && x.propositions().some( p => p.prop() === eprop )
   })]
 }
+
+
 
 // We say an LC is an Inference of an environment L if it is either
 //

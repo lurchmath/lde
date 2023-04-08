@@ -430,8 +430,8 @@ const processHints = L => {
             inst.unmakeIntoA('Part')
             inst.makeIntoA('Inst')
             inst.instantiation=true
-            if (!inst.creators) inst.creators = new Set()
-            inst.creators.add(i)
+            if (!inst.creators) inst.creators = []
+            inst.creators.push(i)
             Formula.addCachedInstantiation( f , inst )
           })
         } catch { }
@@ -605,8 +605,8 @@ const instantiate = (document,n=1) => {
                 // instantiation, what original Rule it instantiates, and which
                 // pass for debugging and feedback.
                 //
-                if (!inst.creators) inst.creators = new Set()
-                inst.creators.add(e)
+                if (!inst.creators) inst.creators = []
+                inst.creators.push(e)
                 // Rules aren't an instantiationOf anything, but partials and 
                 // instantiations are.
                 inst.instantiationOf = (f.instantiationOf) ? f.instantiationOf : f

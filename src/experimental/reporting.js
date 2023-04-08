@@ -378,6 +378,53 @@ const numberedIterable  = function (options=everything) {
 Array.prototype.numbered = numberedIterable
 Set.prototype.numbered = numberedIterable
 
+///////////////////////////////////////////////////////////////////////////////
+// Investigate
+//
+// Investigate an LC in a document.
+LogicConcept.prototype.investigate = function ( options ) {
+  // a utility
+  const display = x => `\n  ${format(x,detailed).replace(/\n/g,'\n  ')}\n`
+
+  let ans = ''
+  // investigate an instantiation
+  if (this.isA('Inst')) {
+    const n = this.creators.length
+    ans += `The instantiation ${display(this)}` +
+           `is an instantiation of the rule ${display(this.instantiationOf)}`
+    if (n) 
+      ans += `and motivated by the expression${(n>1)?'s':''}` +
+             this.creators.map(display).join('')
+  // for now, assume it's an expression in the user's document            
+  } else {
+    // get the instantiations that mention it
+    const root = this.root()
+    const mentions = root.mentions(this)
+    ans += `The expression ${display(this)}`
+    if (!mentions.length) {
+      ans += `does not appear in any instantiations.`
+    } else {
+      console.log(`There are ${mentions.length} places where ${display(this)}`+
+                  `is mentioned.\n`)
+    
+      ans += `It appears in ${display(mentions[0])}` + 
+             `which is an instantiation of the rule ${display(mentions[0].instantiationOf)}`
+      let n = mentions[0].creators.length 
+      if (n) ans += `motivated by the expression${(n>1)?'s':''}` +
+                    mentions[0].creators.map(display).join('')
+
+      mentions.slice(1).forEach( inst => {
+        ans += `\nIt also appears in ${display(inst)}` + 
+               `which is an instantiation of the rule ${display(inst.instantiationOf)}`
+        let n = inst.creators.length 
+        if (n) ans += `motivated by the expression${(n>1)?'s':''}` +
+                      inst.creators.map(display).join('')
+        })
+    }
+  }
+  console.log(ans)
+}
+
 export default {
   
   // formatting utiltiies
