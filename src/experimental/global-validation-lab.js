@@ -607,9 +607,9 @@ const instantiate = (document,n=1) => {
                 //
                 if (!inst.creators) inst.creators = new Set()
                 inst.creators.add(e)
-                // Rules aren't an instanceof anything, but partials and 
+                // Rules aren't an instantiationOf anything, but partials and 
                 // instantiations are.
-                inst.instanceOf = (f.instanceOf) ? f.instanceOf : f
+                inst.instantiationOf = (f.instantiationOf) ? f.instantiationOf : f
                 //  Note that .pass is the number of passes remaining. 
                 inst.pass = n
                 inst.numsolns = solns.length
