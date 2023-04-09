@@ -381,49 +381,92 @@ Set.prototype.numbered = numberedIterable
 ///////////////////////////////////////////////////////////////////////////////
 // Investigate
 //
-// Investigate an LC in a document.
-LogicConcept.prototype.investigate = function ( options ) {
+// Investigate an LC in a document. The optional argument 'verbose' will 
+// use more English, but the default is more succint.
+const _investigate = function ( suspect , options ) {
   // a utility
-  const display = x => `\n  ${format(x,detailed).replace(/\n/g,'\n  ')}\n`
+  const display = x => `\n  ${format(x,detailed).replace(/\n/g,'\n  ')}`
 
-  let ans = ''
-  // investigate an instantiation
-  if (this.isA('Inst')) {
-    const n = this.creators.length
-    ans += `The instantiation ${display(this)}` +
-           `is an instantiation of the rule ${display(this.instantiationOf)}`
-    if (n) 
-      ans += `and motivated by the expression${(n>1)?'s':''}` +
-             this.creators.map(display).join('')
-  // for now, assume it's an expression in the user's document            
-  } else {
-    // get the instantiations that mention it
-    const root = this.root()
-    const mentions = root.mentions(this)
-    ans += `The expression ${display(this)}`
-    if (!mentions.length) {
-      ans += `does not appear in any instantiations.`
+  if (options === 'verbose' ) {
+    let ans = ''
+    // investigate an instantiation
+    if (suspect.isA('Inst')) {
+      const n = suspect.creators.length
+      ans += `The instantiation ${display(suspect)}` +
+             `is an instantiation of the rule ${display(suspect.instantiationOf)}`
+      if (n) 
+        ans += `and motivated by the expression${(n>1)?'s':''}` +
+               suspect.creators.map(display).join('')
+    // for now, assume it's an expression in the user's document            
     } else {
-      console.log(`There are ${mentions.length} places where ${display(this)}`+
-                  `is mentioned.\n`)
-    
-      ans += `It appears in ${display(mentions[0])}` + 
-             `which is an instantiation of the rule ${display(mentions[0].instantiationOf)}`
-      let n = mentions[0].creators.length 
-      if (n) ans += `motivated by the expression${(n>1)?'s':''}` +
-                    mentions[0].creators.map(display).join('')
-
-      mentions.slice(1).forEach( inst => {
-        ans += `\nIt also appears in ${display(inst)}` + 
-               `which is an instantiation of the rule ${display(inst.instantiationOf)}`
-        let n = inst.creators.length 
-        if (n) ans += `motivated by the expression${(n>1)?'s':''}` +
-                      inst.creators.map(display).join('')
-        })
+      // get the instantiations that mention it
+      const root = suspect.root()
+      const mentions = root.mentions(suspect)
+      ans += `The expression ${display(suspect)}`
+      if (!mentions.length) {
+        ans += `does not appear in any instantiations.`
+      } else {
+        console.log(`There are ${mentions.length} places where ${display(suspect)}`+
+                    ` is mentioned.\n`)
+      
+        ans += `It appears in ${display(mentions[0])}` + 
+               ` which is an instantiation of the rule ${display(mentions[0].instantiationOf)}`
+        let n = mentions[0].creators.length 
+        if (n) ans += ` motivated by the expression${(n>1)?'s':''}` +
+                      mentions[0].creators.map(display).join('')
+  
+        mentions.slice(1).forEach( inst => {
+          ans += `\nIt also appears in ${display(inst)}` + 
+                 ` which is an instantiation of the rule ${display(inst.instantiationOf)}`
+          let n = inst.creators.length 
+          if (n) ans += ` motivated by the expression${(n>1)?'s':''}` +
+                        inst.creators.map(display).join('')
+          })
+      }
     }
+    return ans
+
+  // otherwise, give the succint report
+  } else {
+    const arrows = hintPen('\n  ↓ ↓ ↓')
+    let ans = ''
+    // investigate an instantiation
+    if (suspect.isA('Inst')) {
+      // first list the creators with BIH pen
+      if (suspect.creators.length>0) {
+        let arrow = false
+        suspect.creators.forEach( c => {
+          if (c !== suspect) {
+            arrow = true       //⇩↓⇣
+            ans += display(c)
+          }
+        })
+        if ( arrow ) ans += arrows 
+      }
+      ans += display(suspect.instantiationOf)
+      ans += arrows 
+      ans += display(suspect)
+    // for now, assume it's an expression in the user's document            
+    } else {
+      // get the instantiations that mention it
+      const root = suspect.root()
+      const mentions = root.mentions(suspect)
+      if (!mentions.length) {
+        ans += `does not appear in any instantiations.`
+      } else {
+        console.log(`The statement ${display(suspect)}`+
+                    `\nappears in the following ${mentions.length} places.`)
+        mentions.forEach( inst => {
+          ans += _investigate(inst)+'\n'
+        })
+      }
+    }
+    return ans
   }
-  console.log(ans)
 }
+
+// The actual function prints the string so it syntax highlights
+LogicConcept.prototype.investigate = function(option) {console.log(_investigate(this,option))}
 
 export default {
   

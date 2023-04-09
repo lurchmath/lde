@@ -582,11 +582,9 @@ const instantiate = (document,n=1) => {
                 // if we made it here, we have a valid instantation
                 inst.formula = true
                 // it might contain a Let which was instantiated by some other
-                // statment, so we might have to add the tickmarks, but don't
-                // add yet another headless copy to an instantiation (there are
-                // probably too many already)
+                // statment, so we might have to add the tickmarks.
                 //
-                // TODO: we need to check that in a rule like :{:{:Let(x) (@ P
+                // Note: we had to check that in a rule like :{:{:Let(x) (@ P
                 //       x)} (@ P y)} that it doesn't instantiate (@ P y) first
                 //       with a constant lambda expression like 𝜆y,Q(z) which
                 //       has z free and then instantiate the metavar x with z,
@@ -605,11 +603,11 @@ const instantiate = (document,n=1) => {
                 // instantiation, what original Rule it instantiates, and which
                 // pass for debugging and feedback.
                 //
-                if (!inst.creators) inst.creators = []
+                inst.creators = (f.creators)?[...f.creators]:[]
                 inst.creators.push(e)
                 // Rules aren't an instantiationOf anything, but partials and 
                 // instantiations are.
-                inst.instantiationOf = (f.instantiationOf) ? f.instantiationOf : f
+                inst.instantiationOf = (f.instantiationOf)?f.instantiationOf:f
                 //  Note that .pass is the number of passes remaining. 
                 inst.pass = n
                 inst.numsolns = solns.length
