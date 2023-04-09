@@ -9,6 +9,6 @@
     (--- "Note this DOES validate if we define ⊆+ using a Let with no body!")
     // Thm/Pf attempt 
     { :(∈ x T)
-      (⊆ S T)
-    }
-} ✔︎
+      (⊆ S T) ✗
+    } ✗
+} ✗

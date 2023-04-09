@@ -35,6 +35,7 @@ export class CNFProp {
     // Propositions have atomic prop form. ForSome declarations have an atomic
     // propositional form with constants renamed by the body.  A copy of the
     // body is added afterwards, and treated like any other LC in the document.
+    // Note that .isAProposition ignores anything that is marked .ignore.
     if ( L.isAProposition() ) { 
       // propositions accessible to the target (nonreflexive) are treated as
       // given when the target is present.
@@ -61,7 +62,9 @@ export class CNFProp {
          let A = kids.pop()
          // skip it if it's a Declare
          if (A.isA('Declare')) continue
-         // skip it if it's a Comment or anything with .ignore 
+         // skip it if it's a Comment or anything with .ignore.  This eliminates
+         // entire subenvironments and everything inside them because of this
+         // recursion is top-down.
          if (A.ignore) continue
          // otherwise get it's prop form  
          let Aprop = CNFProp.fromLC(A,catalog,target)

@@ -486,6 +486,8 @@ export const loadLibs = (...libs) => {
     f.makeIntoA('Rule')
     // the second arg specifies it should be done in place
     Formula.from(f,true)
+    // if it has metavariables, ignore it as a proposition
+    if (Formula.domain(f).size>0) f.ignore = true
     // replace all bound variables with y₀, y₁, ... etc and rename them to
     // ProperNames x₀, x₁, ... etc to make them canonical
     f.statements().forEach( expr => { 

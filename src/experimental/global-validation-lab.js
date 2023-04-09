@@ -628,6 +628,8 @@ const instantiate = (document,n=1) => {
                 } else {
                   inst.unmakeIntoA('Rule')
                   inst.makeIntoA('Part')
+                  // since it still has metavariables, ignore it for propositional form
+                  inst.ignore = true
                 }
                 // either way, rename ForSome constants that aren't metavars We
                 // should not have to insert a copy of the bodies of ForSomes
