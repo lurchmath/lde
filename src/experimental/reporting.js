@@ -313,7 +313,7 @@ const format = (x,options,indentlevel=0) => {
                   .join(',\n')}\n]`,
                   indentlevel)
   } else {
-    return x
+    return `${x}`
   }
 }
 
@@ -368,8 +368,9 @@ const numberedIterable  = function (options=everything) {
     this.forEach( (c,k) => {
       linenum = `${k}`
       linenum += tab(4-linenum.length)
-      linenum = (!c.isA(instantiation)) ? linenumPen(linenum) 
-                                        : instantiationPen(linenum)
+      linenum = (c instanceof LogicConcept && !c.isA(instantiation))
+                  ? linenumPen(linenum) 
+                  : instantiationPen(linenum)
       ans += linenum+format(c,options).replace(/\n/g,'\n    ')+'\n'
     })
     ans += '  ]'      
