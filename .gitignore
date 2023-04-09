@@ -3,5 +3,5 @@ node_modules/
 for-reference-only/
 .DS_Store
 tutorials/output/
-src/experimental/backups/
+backups/
 scripts/initmisc.js
