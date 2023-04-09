@@ -60,7 +60,7 @@ const idunno     = '❓'  // the emoji itself is red
 //
 
 // Return a string of spaces of length n
-const tab = n => { return Array.seq(()=>'',1,n+1).join(' ') }
+const tab = (n , char=' ') => { return Array.seq(()=>'',1,n+1).join(char) }
 
 // indent string s with a tab of size n
 const indent = (s,n) => {
@@ -428,10 +428,12 @@ const _investigate = function ( suspect , options ) {
 
   // otherwise, give the succint report
   } else {
-    const arrows = hintPen('\n  ↓ ↓ ↓')
+    const arrows = '\n'+tab(15)+hintPen('↓ ↓ ↓')
+    const hrule = tab(40,'_')
     let ans = ''
     // investigate an instantiation
     if (suspect.isA('Inst')) {
+      ans += hrule+'\n'
       // first list the creators with BIH pen
       if (suspect.creators.length>0) {
         let arrow = false
