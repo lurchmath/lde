@@ -387,7 +387,7 @@ Set.prototype.numbered = numberedIterable
 const _investigate = function ( suspect , options ) {
   // a utility
   const display = x => `\n  ${format(x,detailed).replace(/\n/g,'\n  ')}`
-
+  
   if (options === 'verbose' ) {
     let ans = ''
     // investigate an instantiation
@@ -455,7 +455,7 @@ const _investigate = function ( suspect , options ) {
       const root = suspect.root()
       const mentions = root.mentions(suspect)
       if (!mentions.length) {
-        ans += `does not appear in any instantiations.`
+        ans += `The expression ${display(suspect)}\ndoes not appear in any instantiations.`
       } else {
         console.log(`The statement ${display(suspect)}`+
                     `\nappears in the following ${mentions.length} places.`)
@@ -469,7 +469,9 @@ const _investigate = function ( suspect , options ) {
 }
 
 // The actual function prints the string so it syntax highlights
-LogicConcept.prototype.investigate = function(option) {console.log(_investigate(this,option))}
+LogicConcept.prototype.investigate = function(option) {
+  console.log(_investigate(this,option))
+}
 
 export default {
   
