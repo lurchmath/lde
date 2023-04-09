@@ -190,6 +190,10 @@ export const processShorthands = L => {
     m.previousSibling().expectedResult = 'indeterminate' 
     m.remove()
   } )
+
+  processSymbol( '---' , m => { 
+    if (m.parent().isAComment()) m.parent().ignore=true 
+  })
 }
 
 //////////////////////////////////////////////////////////////////////////////

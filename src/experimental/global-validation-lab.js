@@ -266,8 +266,8 @@ Environment.prototype.validateall = function ( target = this ) {
     // validateall the inference children of this target
     } else {
       target.children().forEach( C => {
-        // skip givens
-        if (C.isA('given') || C.isAComment()) return 
+        // skip givens and things marked .ignore, e.g. Comments
+        if (C.isA('given') || C.ignore) return 
         this.validateall(C)
       })
     }

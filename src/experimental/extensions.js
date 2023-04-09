@@ -91,8 +91,6 @@ LogicConcept.prototype.toggleGiven = LogicConcept.prototype.negate
 // A Statement is any outermost Expression that is not a declaration or a 
 // declared symbol inside a declaration. The body of a declaration can contain
 // statements. 
-// TODO: We are assuming declaration bodies are expressions for now. 
-//       Either Update or keep it that way.
 LogicConcept.prototype.isAStatement = function () {
   return (this instanceof Expression) && this.isOutermost() &&
          !((this.parent() instanceof Declaration) &&
@@ -108,9 +106,11 @@ LogicConcept.prototype.isADeclaration = function () {
 // We say an LC is a Propositon iff it has a .prop form and is not an
 // environment. This includes all Statements but also Let's, and ForSome's. It
 // does not include the bodies inside ForSome declarations since each of those
-// declarations will have atomic propositional forms and a separate copy of the body.
+// declarations will have atomic propositional forms and a separate copy of the
+// body. It ignores anything flagged with .ignore for defining shortucts and
+// other content that is supposed to be ignored.
 LogicConcept.prototype.isAProposition = function () { 
-  return (this.isAStatement() && 
+  return (this.isAStatement() && (!this.ignore) &&
          !this.hasAncestorSatisfying( A => A instanceof Declaration)) || 
          (this.isADeclaration() && !this.isA('Declare'))  
 }

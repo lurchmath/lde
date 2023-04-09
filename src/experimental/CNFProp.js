@@ -61,8 +61,8 @@ export class CNFProp {
          let A = kids.pop()
          // skip it if it's a Declare
          if (A.isA('Declare')) continue
-         // skip it if it's a Comment. 
-         if (A.isAComment()) continue
+         // skip it if it's a Comment or anything with .ignore 
+         if (A.ignore) continue
          // otherwise get it's prop form  
          let Aprop = CNFProp.fromLC(A,catalog,target)
          if ( Aprop === null ) continue 
