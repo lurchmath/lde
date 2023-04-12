@@ -1,0 +1,77 @@
+////////////////////////////////////////////////////////////////////
+// Circle-Dot Theorems
+// 
+
+(--- "Circle Dot Theorems")
+
+(○ ●)
+(● ○)
+●
+○
+(● (● ●))
+(● ●)
+(○ (● ○))
+(○ ○)
+(○ (● ●))
+((● ●) (● (○ ●)))
+((● ○) (● (● ●)))
+(((● ○) ●) (● ●))
+((● (○ ●)) (● ●))
+(● (○ ●))
+(● (● ○))
+((● ○) (● ●))
+((● ○) ○)
+(● (○ ○))
+((○ ○) (● ●))
+((○ ○) ○)
+(○ (○ ○))
+(--- " ")
+(--- "Every circle-dot expressions (right assoc) of length 1,2, and 3")
+(--- "has now been proven, so we have an algorithm from this point")
+(--- "forward to add any three character extension except (○ (○ ●)) to")
+(--- "any already constructed expression. So let's prove all the levels")
+(--- "of the current Toy Proofs implementation.")
+
+(--- "Recall the axioms.")
+(○ ●)       // Axiom A
+(● ○)       // Axiom B
+ 
+(--- "Theorem A:")  ● 
+(--- "Theorem B:")  (● (● ●))  
+(--- "Theorem C:")  (● (● ○))
+(--- "Theorem D:")  ○
+(--- "Theorem E:")  (● (○ ○))
+(--- "Theorem F:")  (○ (● (● ○)))
+(--- "Theorem G:")  (● (● (● ●)))
+(--- "Theorem H:")  (○ (● ○))
+(--- " ")
+(--- "The next Theorem needs a little proof from us.")
+(((● ○) ○) (● ●))
+(((● ○) ○) ○)
+(--- " ")
+(--- "Theorem I:")  (● (○ (○ ○)))
+(--- "Theorem J:")  (○ (○ ○))
+(--- "Theorem K:")  (● (● (○ (○ (● ●)))))
+(--- " ")
+(--- "This next one too.")
+((○ ○) (● (● ●)))
+(--- " ")
+(--- "Theorem M:")  (○ (○ (● (● ●))))
+(--- " ")
+(--- "Same here.  Note these only require help with the associativity")
+(--- "because all our theorems (and hence instantiations) are right")
+(--- "associative")
+( ((○ ●) ○) (● (○ ●)))
+(--- " ")
+(--- "Theorem N:")  (○ (● (○ (● (○ ●)))))
+(--- "Theorem O:")  (● (● (○ (● ●))))
+(--- "Theorem P:")  (○ ○)
+(--- "Theorem Q:")  (● (● (● (○ (○ ○)))))
+
+(--- " ")
+(--- "And one more.")
+((● ○) (● (○ (● ○))))
+(--- " ")
+(--- "Theorem R:")  (● (○ (● (○ (● ○)))))
+
+ 

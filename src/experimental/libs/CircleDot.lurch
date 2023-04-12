@@ -1,0 +1,38 @@
+////////////////////////////////////////////////////////////////////////////
+//
+// Circle Dot Library
+//
+
+{ 
+  
+  // Constants Circle & Dot. We use Application for binary (and unary)
+  :[ ○ ● ]
+  
+  ////////////////////////////////////
+  // Concatenation Rule (free monoid)
+  ////////////////////////////////////
+  :{ ((W V) U) ≡ (W (V U))}               // associative          
+  // without this next rule we cannot prove (● (○ ●)) This is because above
+  // associative rule you cannot obtain every possible way to parenthesize an
+  // expressions from a given expression. Note that you can prove that (● (○ ●))
+  // is not derivable with just the above rule and that axioms/rules by the
+  // usual argument that to get an expression that starts / ends with ((● ○) ●)
+  // / (● (○ ●)) you need one to begin with. It turns out we can fix the problem
+  // (for circle-dot) by just adding the following case of associativity that we
+  // need.
+  :{ (((W V) U) X) ≡ ((W (V U)) X) }      // associative
+  
+  ////////////////////////////////
+  // Circle Dot Axioms
+  ////////////////////////////////
+  :{ (○ ● ) }                             // Axiom A
+  :{ (● ○ ) }                             // Axiom B
+  
+  ////////////////////////////////
+  // Circle Dot Rules
+  ////////////////////////////////
+  :{ :(W V) :(V W) W }                    // Rule 1
+  :{ :W :V (W (● V))  }                   // Rule 2
+  :{ :(W (V ●)) (W ○) }                   // Rule 3
+  
+}
