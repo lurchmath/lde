@@ -322,6 +322,7 @@ export const markDeclaredSymbols = doc => {
 // Let-environment. We make this restriction, so that a Let-env is a type of LC
 // that can be used as a rule premise and can only be satisfied by another
 // Let-env.  We don't upgrade that to a subclass for now.
+// TODO: consider upgrading let-envs to a subclass of environment
 export const processLets = ( doc ) => {
   // Get all of the Let's whether or not they have bodies and make sure they are
   // the first child of their enclosing environment.  If not, wrap their scope
@@ -391,7 +392,48 @@ export const assignProperNames = doc => {
     })
   })
 }
- 
+
+//////////////////////////////////////////////////////////////////////////////
+// Load Parser
+//
+// Load a peggy parser from the parser folder, convert it to a parser, and 
+// customize it's error formatting in Lode, and return it the parser.
+export const loadParser = (name) => {
+  const parserstr = Document.loadParserStr(name)
+  const opts = { cache:true }
+  const traceopts = { ...opts , trace:true }
+  const rawparser = peggy.generate(parserstr,opts)
+  const rawtraceparser = peggy.generate(parserstr,traceopts)
+  const parser = s => {
+    try { 
+      return rawparser.parse(s)
+    } catch(e) {
+      if (typeof e.format === 'function') {
+        console.log(e.format([{
+           grammarSource:Document.parserPath+name,
+           text:s
+        }]))
+      } else {    
+      console.log(e.toString())
+      }
+      return undefined
+    }
+  }
+  const traceparser = s => {
+    try { 
+      return rawtraceparser.parse(s)
+    } catch(e) {
+      if (typeof e.format === 'function') {
+        console.log(e.format({ }))
+      } else {    
+      console.log(e.toString())
+      }
+      return undefined
+    }
+  }
+  return [parser,traceparser]
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -409,8 +451,8 @@ export const assignProperNames = doc => {
 // TODO: 
 //   * allow a .lurch library string file to contain an array of strings, and
 //     when such a thing is loaded, treat it as if it were the libs argument.
-//     This allows us to have libraries that load other libraries are prerequisites.
-export const loadLibs = (...libs) => {
+//     This allows us to have libraries that load other libraries as prerequisites.
+const loadLibs = (...libs) => {
   // the reserved constants are declared at the top of every document, 
   // even if no library is specified
   const system = lc(`:[ 'LDE EFA' '---' ]`).asA('Declare')
@@ -440,6 +482,7 @@ export const loadLibs = (...libs) => {
     }
 
     // Process any shorthands, like ≡.
+    // TODO: Replace with Peggy Parser
     processShorthands(lib)
 
     // Now that we have this lib, add its kids to the answer environment,
@@ -473,6 +516,9 @@ export const loadLibs = (...libs) => {
   // TODO: is this the efficient way to do this?
   //   * idea: maybe make decs with body be treated as a shortHand that gets
   //     converted to a dec-without-body plus a copy of the body?
+  //   * Is this being called at the right time?  Don't we have to mark the
+  //     the Rules and convert them to formulas first before running this?
+  //     Check this.
   processForSomeBodies(ans)
 
   // Check and mark the Rules and make them into formulas
@@ -534,6 +580,7 @@ const loadDocs = (...docs) => {
   // Now we have the entire merged document. Time to polish it.
   
   // process all of the shortHands like ≡, <<, <thm, ✔︎, and ✗
+  // TODO: replace with peggy parsing
   processShorthands(ans)
   
   // process Let's to ensure they are Let-environments
@@ -587,8 +634,15 @@ export class Document extends Environment {
 
     // process the user's theorems. This has to be done after prepending the
     // library so the user's theorems are in the scope of declared constants in
-    // the library, which then prevents them from being metavariables
-    ;[ ...this.lastChild().descendantsSatisfyingIterator( x => x.userThm ) ].forEach( thm => {
+    // the library, which then prevents them from being metavariables 
+    //
+    // TODO:
+    //   * these are being processed after we've already inserted ForSome bodies
+    //     for ForSomes not containing metavars.  But that means every ForSome
+    //     body will be copied.  Check if this should be run before copying
+    //     the ForSome bodies or if it's ok as is.
+    ;[ ...this.lastChild().descendantsSatisfyingIterator( x => x.userThm ) ].forEach( 
+      thm => {
       // make a copy of the thm after the theorem
       let formula = thm.copy()
       formula.insertAfter(thm)
@@ -637,8 +691,14 @@ export class Document extends Environment {
   // the path to proof definition files
   static proofPath = '../src/experimental/proofs/'
   
+  // the path to parser definition files
+  static parserPath = '../src/experimental/parsers/'
+  
   // the file extension used by default for libraries and proof files
   static LurchFileExtension = 'lurch'  // don't include the . here for easy use in RegExp's
+  
+  // the file extension used by default for libraries and proof files
+  static ParserFileExtension = 'peggy'  // don't include the . here for easy use in RegExp's
   
   // check a file name to see if it has the .lurch extension and if not, add it
   static checkLurchExtension = name => checkExtension(name , Document.LurchFileExtension )
@@ -657,6 +717,17 @@ export class Document extends Environment {
   // Load just the string for a proof document and return that.    
   static loadProofStr = (name) => {
     const filename = Document.proofPath + Document.checkLurchExtension(name)
+    if (!fs.existsSync(filename)) {
+      console.log(`No such file or folder: ${name}`)
+      return
+    }
+    return fs.readFileSync( filename , { encoding:'utf8'} )
+  }
+  
+  // Load just the string for a parser grammar and return that.
+  static loadParserStr = (name) => {
+    const filename = Document.parserPath + 
+      checkExtension(name, Document.ParserFileExtension)
     if (!fs.existsSync(filename)) {
       console.log(`No such file or folder: ${name}`)
       return

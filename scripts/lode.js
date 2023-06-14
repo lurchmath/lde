@@ -21,6 +21,8 @@ import repl from 'repl'
 import fs from 'fs'
 import { execSync } from 'child_process'
 import util from 'util'
+import peggy from 'peggy'
+import { Tokenizer, Grammar } from 'earley-parser'
 
 // In LODE we have no need for EventTarget because we don't edit MCs in 
 // real time and react to changes.  Importing this BEFORE importing 
@@ -39,7 +41,7 @@ import Compact from '../src/experimental/global-validation-lab.js'
 // load the custom formatter class
 import Reporting from '../src/experimental/reporting.js' 
 // load the Document class
-import { Document } from '../src/experimental/document.js'
+import { Document , loadParser } from '../src/experimental/document.js'
 // load the lc command
 import { lc , mc , checkExtension } from '../src/experimental/extensions.js'
 
@@ -67,10 +69,14 @@ global.CNF = CNF
 global.Problem = Problem
 // additional experimental code
 global.Document = Document
+global.loadParser = loadParser
 //
 // External packages
 global.satSolve = satSolve
 global.Algebrite = Algebrite
+global.peggy = peggy
+global.Tokenizer = Tokenizer
+global.Grammar = Grammar
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
