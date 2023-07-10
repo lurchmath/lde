@@ -34,6 +34,7 @@ const constantPen = chalk.ansi256(226)     // yellowish
 const instantiationPen = chalk.ansi256(8)  // dirt
 const hintPen = chalk.ansi256(93)          // purpleish
 const attributePen = chalk.ansi256(249)    // shade of grey
+const declaredPen = chalk.ansi256(212)     // pinkish
 const attributeKeyPen = chalk.ansi256(2)   // matches string green
 const checkPen = chalk.ansi256(46)         // bright green
 const starPen = chalk.ansi256(226)         // bright gold
@@ -50,10 +51,11 @@ const stringPen =  chalk.ansi256(2)        // the green that node useds for stri
 
 // compute once for efficiency
 const goldstar   = starPen('★')
+const redstar    = xPen('☆')
 const greencheck = checkPen('✔︎')
 const redx       = xPen('✗')
 const idunno     = '❓'  // the emoji itself is red
-
+const preemiex   = xPen('!✗') 
 
 /////////////////////////////////////////////////////////////////////////
 // Utilities
@@ -194,11 +196,14 @@ const formatter = ( options=defaultOptions ) => {
     } else if (options.showProperNames && L.hasAttribute(ProperName)) {
       const propname = L.getAttribute(ProperName)
       // we put quotes around the properName if it contains whitespace
-      ans += attributePen((/\s/g.test(propname))?`'${propname}'`:propname)
+      ans += (L.constant)
+              ?declaredPen((/\s/g.test(propname))?`'${propname}'`:propname) 
+              :attributePen((/\s/g.test(propname))?`'${propname}'`:propname) 
     // proper names color but not text for constants with body but not bound 
     } else if (options.showSimpleProperNames && L.hasAttribute(ProperName)) {
-      // we put quotes around the properName if it contains whitespace
-      ans += attributePen(S)
+      ans += (L.constant)
+            ?declaredPen(S)
+            :attributePen(S)
     // constants
     } else if (L.constant) {
       ans += constantPen(S)
@@ -256,14 +261,18 @@ const formatter = ( options=defaultOptions ) => {
     // show validation except for hidden ForSome bodies
     if (options.showValidation && ans.length>0 ) {
       if (Validation.result(L) && Validation.result(L).result==='valid') {
+        // a valid BIH has to be propositionally valid, so a green check
+        // isn't necessary when there's a gold star
         if (L.isA(hint)) {  
-          ans += goldstar
+          ans += (L.badBIH)?greencheck+redstar:goldstar
         } else {
           ans += greencheck
         }
-      } else if ((Validation.result(L) && Validation.result(L)!=='valid') || 
-                 L.preemie) {
-        ans += redx
+        // Propositionally invalid ones. Add a red x even if it's a BIH  
+      } else if ((Validation.result(L) && Validation.result(L).result!=='valid')) {
+        ans += (Validation.result(L).reason==='preemie') ? preemiex : redx
+        // if it's a BIH append it's star
+        if (L.isA(hint)) ans += (L.badBIH)?redstar:redx
       }
     }
     // mark redeclared symbols
@@ -293,7 +302,6 @@ const isNestedSetofLCs = A => {
           (A instanceof Set) && ([...A].every(isNestedSetofLCs))
          )
 }
-
 
 // Apply the custom formatter to nested arrays of LCs.
 // Indent and number lines as needed.  Note that for arrays we usually are
@@ -403,24 +411,24 @@ const _investigate = function ( suspect , options ) {
       // get the instantiations that mention it
       const root = suspect.root()
       const mentions = root.mentions(suspect)
-      ans += `The expression ${display(suspect)}`
       if (!mentions.length) {
+        ans += `The expression ${display(suspect)}`
         ans += `does not appear in any instantiations.`
       } else {
         console.log(`There are ${mentions.length} places where ${display(suspect)}`+
                     ` is mentioned.\n`)
       
         ans += `It appears in ${display(mentions[0])}` + 
-               ` which is an instantiation of the rule ${display(mentions[0].instantiationOf)}`
+               `\n   which is an instantiation of the rule ${display(mentions[0].instantiationOf)}`
         let n = mentions[0].creators.length 
-        if (n) ans += ` motivated by the expression${(n>1)?'s':''}` +
+        if (n) ans += `\n   motivated by the expression${(n>1)?'s':''}` +
                       mentions[0].creators.map(display).join('')
   
         mentions.slice(1).forEach( inst => {
           ans += `\nIt also appears in ${display(inst)}` + 
-                 ` which is an instantiation of the rule ${display(inst.instantiationOf)}`
+                 `\n   which is an instantiation of the rule ${display(inst.instantiationOf)}`
           let n = inst.creators.length 
-          if (n) ans += ` motivated by the expression${(n>1)?'s':''}` +
+          if (n) ans += `\n   motivated by the expression${(n>1)?'s':''}` +
                         inst.creators.map(display).join('')
           })
       }
@@ -480,7 +488,7 @@ export default {
   erase, timer, chalk,
   
   // special symbols
-  goldstar, greencheck, redx, idunno,
+  goldstar, greencheck, redx, idunno, stringPen,
   
   // Pens
   defaultPen , metavariablePen , constantPen , instantiationPen, hintPen, 

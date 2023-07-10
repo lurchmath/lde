@@ -1,6 +1,7 @@
 ////////////////////////////////////////////////////////////////////
-// Math 299 Proofs
-// for testing Peggy Parser
+// Tests for Peggy Parser
+//
+
 {
 // Misc parsing tests
 // Symbols
@@ -238,15 +239,11 @@ P(c,w) ⇒ Q(c,y) for some c
 :{ :@(P,t) (∃x.@(P,x)) }                          // ∃+
 :{ :x=y :@(P,x) @(P,y) }                          // substitution
 :{ W=W }                                          // reflexive =
-:{ (∃!x.@(P,x)) ≡        
-   { (∃x.@(P,x)) (∀y.@(P,y)⇒y=x) }                // ∃!
- }        
+:{ (∃!x.@(P,x)) ≡ { (∃x.@(P,x)) (∀y.@(P,y)⇒y=x) } }         // ∃!
 // Pred Theorems
 :{ :x=y :@(P,y) @(P,x) }                          // alternate substutition
-:{ { (∀x. @(P,x)) (∀y.@(Q,y)) } ≡ 
-   (∀x. @(P,x) and @(Q,x)) }                      // distributivity
-:{ { (∃x. @(P,x)) (∃y.@(Q,y)) } ≡ 
-   (∃x. @(P,x) or @(Q,x)) }                       // distributivity
+:{ { (∀x. @(P,x)) (∀y.@(Q,y)) } ≡ (∀x. @(P,x) and @(Q,x)) } // distributivity
+:{ { (∃x. @(P,x)) (∃y.@(Q,y)) } ≡ (∃x. @(P,x) or @(Q,x)) }  // distributivity
 :{ (∃!x.@(W,x)) ≡ (∃c.∀z. @(W,z) ⇔ z=c) }         // alternate def of ∃!
 ////////////////////////////////
 // Peano Axioms

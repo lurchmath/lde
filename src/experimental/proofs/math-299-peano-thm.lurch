@@ -1,0 +1,71 @@
+////////////////////////////////////////////////////////////////////
+// Peano Test Proofs 
+//
+// (with user Theorems to allow previous results) 
+//
+// From lecture notes: 7.8, 7.10, 7.12, 7.23, no tweens, and 4 is not prime
+
+(--- "Peano Axiom Proofs (using previous results)")
+(--- "We begin by supplying earlier proofs we will need before each theorem.")
+
+// (--- "Thm 7.4: Alternate definition of 𝞼")
+// // thm> :{ 𝞼(m) = m + 1 } 
+// thm> :{ (= (𝜎 m) (+ m 1)) } 
+// (--- "Thm 7.5: Associativity of addition")
+// // thm> :{ (m + n) + p = m+(n+p) } 
+// thm> :{ (= (+ (+ m  n) p) (+ m (+ n p))) } 
+// (--- "Thm 7.6: Additive identity")
+// // thm> :{ 0+m = m }  
+// thm> :{ (= m (+ 0 m) ) }  
+// (--- "Thm 7.7: Commutivity of adding 1")
+// // thm> :{ 1+m = m+1 } 
+// thm> :{ (= (+ 1 m) (+ m 1)) } 
+
+{
+  (--- "Theorem 7.8: Commutativity of Addition")
+  // thm> { ∀m,∀n, m+n = n+m } 
+  // thm> :{ (∀ m , (∀ n , (= (+ m n) (+ n m)))) } 
+  (--- "Proof:")
+  { 
+    (--- "We will proceed by induction on n for arbitrary m.")
+    {  :[m] 
+      // (--- "Base case.")
+      // // m+0=m
+      // //    =0+m
+      // { :(= (+ m 0) m)
+        // :(= m (+ 0 m))
+        // (= (+ m 0) (+ 0 m)) }  <<
+      // (= (+ m 0) m)
+      // (= m (+ 0 m)) 
+      // (= (+ m 0) (+ 0 m))  
+      // // (--- "Inductive step.")
+      { :[k]
+        //     :m+k=k+m
+        :(= (+ m k) (+ k m))
+
+        //     m+𝞼(k) = 𝞼(m+k)
+        //            = 𝞼(k+m)
+        //            = k+𝞼(m)
+        //            = k+(m+1)
+        //            = k+(1+m)
+        //            = (k+1)+m
+        //            = 𝞼(k)+m
+        // (= (+ m (𝜎 k)) (𝜎 (+ m k)))   
+        // (= (+ m (𝜎 k)) (𝜎 (+ k m)))
+        // (= (+ m (𝜎 k)) (+ k (𝜎 m)))
+        // (= (+ m (𝜎 k)) (+ k (+ m 1)))
+        // (= (+ m (𝜎 k)) (+ k (+ 1 m)))
+        // (= (+ m (𝜎 k)) (+ (+ k 1) m))
+
+// HUGE ERROR.  This validates as is.  The reason is that the forall statement
+// instantiates the ∀- rule to give the equation, and the two premises above
+// satisfy its required premise.
+
+        (= (+ m (𝜎 k)) (+ (𝜎 k) m))   // this equation should not validate
+      }
+      (∀ n , (= (+ m n) (+ n m))) 
+    }
+    // (∀ m , (∀ n , m+n = n+m))
+    // (∀ m , (∀ n , (= (+ m n) (+ n m))))
+  }
+}

@@ -7,12 +7,17 @@
 // Sample documents and libs to load at startup so there is something to play with.
 // You can customize this to be whatever you like locally.
 
-LurchLib = ['Prop','Pred','Peano','Number Theory']
-LurchThmLib = ['Prop','PropThm','Pred','PredThm','Peano','Number Theory']
+// LurchLib = ['Prop','Pred','Peano','Number Theory']
+// LurchThmLib = ['Prop','PropThm','Pred','PredThm','Peano','Number Theory']
 
-propdoc = load('propdoc','Prop')
-preddoc = load('preddoc',['Prop','Pred'])
-thmdoc  = load('thm2',LurchLib)
+// propdoc = load('propdoc','Prop')
+// preddoc = load('preddoc',['Prop','Pred'])
+// thmdoc  = load('thm2',LurchLib)
+
+parsers = loadParser('toy')
+parse = parsers[0]
+trace = parsers[1]
+$ = s => lc(parse(s))
 
 // don't echo anything
 undefined

@@ -93,9 +93,10 @@
 //    * 'creators'   - the user proposition(s) that caused this instantiation
 //
 //    JS attributes: declarations body copy and premature generalizations
-//    * 'bodyof'   - indicates an Expression is a copy of the body of the LC
-//    * 'preemie'  - a expression that is a generalization associated with a Let
-//      stored as its value (equal to its body) that is in the scope of that Let
+//    * 'bodyof'   - indicates an Expression is a copy of the body of a declaration
+//    * 'preemie'  - a expression that is justified by a Let that it is in the
+//                   scope
+//    * 'badBIH'   - an environment marked asA 'BIH' that isn't one
 //
 //    JS attributes - Symbols 
 //    * 'constant' - boolean that indicates whether a free symbol is explicitly
@@ -119,11 +120,7 @@ import Formula from '../formula.js'
 import Scoping from '../scoping.js'
 import Validation from '../validation.js'
 
-// import system tools
-import { execSync } from 'child_process'
-
 // import experimental tools
-import { CNFProp } from '../experimental/CNFProp.js'
 import { Document , renameBindings , processLets , markDeclaredSymbols ,
          assignProperNames , processForSomeBodies } 
          from '../experimental/document.js'
@@ -132,12 +129,9 @@ import { Document , renameBindings , processLets , markDeclaredSymbols ,
 //
 // Convenience Utilities
 //
-// const lc = (s) => { return LogicConcept.fromPutdown(s)[0] }
-const metavariable = 'LDE MV'
 const instantiation = 'LDE CI'
 const subscriptDigits = '₀₁₂₃₄₅₆₇₈₉'
 const subscript = n => [...n.toString()].map( d => subscriptDigits[d]).join('')
-const execStr = command => String(execSync(command))
 
 // Debug is a global boolean
 const time = (description) => { if (Debug) console.time(description) }
@@ -152,131 +146,342 @@ const timeEnd = (description) => { if (Debug) console.timeEnd(description) }
 // to implement the Global n-compact validation algorithm.  It is currently not
 // implemented as a validation tool.
 
-////////////////////////////////////////////////////////////////////////////////
-// Extensions of the LogicConcept class
-
-// return the Proper Name for a Lurch symbol if it has one, otherwise just
-// return the name of the symbol
-LurchSymbol.prototype.properName = function () {
-  return (this.hasAttribute('ProperName')) ? this.getAttribute('ProperName') :
-                                             this.text() 
-}
-
-// Compute the Prop Form string for an expression.  This is the .putdown form
-// except that we must use the ProperName for symbols instead of their text. For
-// bound symbols, this is their canonical name so alpha equivalent expressions
-// have the same propositional form.  For symbols declared with a body this is
-// the renaming that accounts for the body. Note that the Prop form does not
-// include the leading : for givens. We cache the results in a .propform js
-// attribute and return them if present.
-//
-Expression.prototype.prop = function () {
-  if (!this.propform) this.propform = this.toPutdown((L,S,A) => {
-    let ans = (L instanceof LurchSymbol) ? L.properName() : S
-    return ans.replace( /^[:]/, '' )
-  }) 
-  return this.propform
-}
-
-// Compute the Prop Form string for a Let or ForSome Declaration. We will format
-// both as [s1 ... sn] where s_i is the properName of the ith symbol it
-// declares, whether or not it has a body, since if it is a ForSome with a body
-// processForSomes will put a copy of the body after the declaration, which then
-// will get its own propositional form. A Let should not have a body for not, so
-// this is already its prop form.  Declare's don't have a prop form.
-//
-// Note that the Prop form does not include the leading : for givens.
-Declaration.prototype.prop = function () {
-    if (!this.propform) this.propform = this.isA('Declare') ? '' : 
-           '['+this.symbols().map(s=>s.properName()).join(' ')+']'
-    return this.propform
-}
-
-// Compute the catalog for this LC environment.
-LogicConcept.prototype.catalog = function ( ) { 
-  let catalog = new Set()
-  this.propositions()
-      .map( s => s.prop() )
-      .forEach( x => catalog.add( x ) )
-  return [ ...catalog ] 
-}
-
-// look up this expression's numerical prop form in the catalog
-Expression.prototype.lookup = function (catalog) {
-  return catalog.indexOf(this.prop()) + 1
-}
-
-// look up this declaration's numerical prop form in the catalog
-Declaration.prototype.lookup = function (catalog) {
-  return catalog.indexOf(this.prop()) + 1
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Validate
 //
-// Validate this LC, store the result, and return true or false
-LogicConcept.prototype.validate = function (target=this) {
-  
-  // If it's a preemie, it's wrong by definition. 
-  //
-  // TODO:
-  // * implement the preemie check by checking Let-environments validity
-  //   a second time where the Let is ignored and making sure it still 
-  //   validates.
-  if (this.preemie) { 
-    Validation.setResult(conc,{ result:'invalid', reason:'preemie' })
-    return false 
-  } 
-  
-  // Validate everything else
-  //
+// Validate the target of this LC, store the result, and return true or false.
+//
+// This routine currently can use one or both of two validation tools: the
+// propositional checker and the preemie checker.  The second and third optional
+// arguments are booleans which specify whether it should be prop checked and
+// preemie checked respectively.  This is useful for calling this efficiently
+// from .validateall.  If both are false, it does nothing and returns undefined.)
+//
+// With both tools, in order for this to provide more localized information
+// about what is wrong with a proof, everything that is accessible to the target
+// is temporarily treated as a Given, so that the propositional validity of a
+// target is not dependent on the propositional validity of the things
+// accessible to it.  
+//
+// We assume that every instantiation that will be required for computing the
+// prop form and propositional validation has already been added to the
+// document.  Thus, other Validation Tools, like BIH, and CAS, which might
+// create instantiations, need to be run on the entire document before this
+// final step as part of the instantiation phase.
+//
+// There are also some validation checks that may not need to instantiate
+// anything, like checking that Let-environments don't violate the 'preemie'
+// restriction by validating them without the initial Let() and making sure they
+// are still valid and ignoring all tick marks on non-constant variables in
+// instantiations or that are in the scope of a deleted Let. This check only
+// makes sense when a target is propositionally valid, but should not be valid
+// because of violating the preemie condition. So we only need to check for
+// preemies only after doing propositional validation, and then only check the
+// valid inferences in the scope of a Let or containing a Let.
+//
+// Just as for propositional checking, when checking to see if the target is a
+// preemie, we do not care if anything accessible to it is a preemie. Keep in
+// mind that by ignoring Lets, some of the things accessible to it might have a
+// different propositional form (no tick marks on some variables in addition to
+// being givens), but since they are temporarily treated as givens, even if they
+// are preemies themselves, they will not be flagged as such.
+//
+// For targets which are Expressions or ForSomes we only check the target to see
+// if it is a preemie, regardless of whether there might be other preemies in
+// the LC.  But when the target is an environment, we only check if it is a
+// preemie by ignoring the Lets it is in the scope of and its own Let if it is
+// a Let-env. Thus, this routine assumes that all descendant Let-environments of
+// this environment have already been preemie-checked (which will be the case
+// when .validateall has been called).  Thus, this routine will tell you if the
+// target is, itself, a preemie, but not if contains any preemies if you don't
+// check for those first.  So it could return 'valid' for an environment, which
+// is useful for .validateall, but might be misleading if you don't interpret it
+// correctly.
+//
+// Moral: use only for targets that do not contain any descendant
+//        Let-environments, or just call .validateall for environments that do.
+//
+LogicConcept.prototype.validate = function ( target = this,  
+                                             checkPreemies = false ) {
+
+  // store the answer and result here
+  let ans,result
+  const checkProps = !checkPreemies
+
   // TODO: to get it into form that CNF.isSatisfiable accepts we have to
   //       temporarily negate this, then toggle it back afterwards.  Modify
   //       CNF.isSatisfiable to make this unnecessary.
-  this.negate()
-  let ans = !CNF.isSatisfiable(this.cnf(target))
-  this.negate()
-  const result = (ans)?'valid':'indeterminate'
-  Validation.setResult(target,{ result , reason:'n-compact' })
+  
+  // to prevent this routine from exiting while this LC is still negated we wrap
+  // up the negation and un-negation with the CNF.isSatisfiable call
+  const satCheck = (target,checkPreemies) => {
+    // negate this
+    this.negate()
+    const ans = !CNF.isSatisfiable(this.cnf(target,checkPreemies = false))
+    // un-negate this
+    this.negate()
+    return ans
+  }
+
+  // if we have to check props or we have to check preemies but it hasn't
+  // already been prop checked, prop check it
+  if (checkProps) {
+    // say(`Checking prop`)
+    // if it is already validated, just return that
+    if (Validation.result(target) &&
+        Validation.result(target).reason==='n-compact') { 
+          // say(`Already validated by n-compact, so returning that`)
+          ans = Validation.result(target).result==='valid'
+    } else {
+      // say(`Not already validated by n-compact.. checking`)
+      // negate this
+      this.negate()
+      // no second arg to .cnf is for prop checking
+      ans = !CNF.isSatisfiable(this.cnf(target))
+      // un-negate this
+      this.negate()
+      // determine the appropriate feedback
+      result = (ans)
+               ? { result:'valid'         , reason:'n-compact' }
+               : { result:'indeterminate' , reason:'n-compact' }
+      Validation.setResult(target,result)
+    }
+  }
+  
+  // if we have to check preemies, check them
+  if (checkPreemies) {
+    // say(`Checking preemie`)
+    // if it's already a preemie return the same thing
+    if (Validation.result(target) && 
+        Validation.result(target).reason==='preemie') { 
+        // say(`Already a preemie`)
+        ans = false
+    // otherwise 
+    } else { 
+      // if it's not already validated propositionally, validate it
+      if (!(Validation.result(target) && 
+            Validation.result(target).reason==='n-compact')) { 
+        // say(`Not already validated, so doing it`)
+        ans = this.validate(target)
+        result = (ans)
+                 ? { result:'valid'         , reason:'n-compact' }
+                 : { result:'indeterminate' , reason:'n-compact' }
+        Validation.setResult(target,result)
+      } 
+      // if it is propositionally valid, check it for preemies           
+      if (Validation.result(target).result==='valid') {
+        // say(`Prop valid, so checking for preemies`)
+        // say(`this is currently a given ${this.isA('given')}`)
+        // negate this
+        this.negate()
+        // second arg to .cnf is for preemie checking
+        ans = !CNF.isSatisfiable(this.cnf(target,true))
+        // un-negate this
+        this.negate()
+        // determine the appropriate feedback
+        result = (ans)
+          ? { result:'valid'   , reason:'n-compact' }
+          : { result:'invalid' , reason:'preemie' }
+        Validation.setResult(target,result)  
+      // finally, it is invalid propositionally, so just return that
+      } else {
+         ans = false
+      }
+    }
+  }
+  
   return ans
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Validate All
-// 
+//
 // Validate every claim in this LC, store the result, and return true or false.
-// We do this efficiently as follows. check the entire document.  If it's valid
-// we are done and can mark everything valid.  If not, most likely previous
-// proofs were already valid, but the one we are working on isn't.  So check the
-// children of the document. The ones that are valid, mark everything in them as
-// valid. Then recurse in the children of any invalid proof until we reach just
-// the individual propositions that are invalid.
-Environment.prototype.validateall = function ( target = this ) {
-  // validate this environment (which saves the result in the environment)
-  const result = this.validate(target)
-  // if the target is an environment, recurse
-  if (target instanceof Environment) {
-    // if it was valid, so are all of its inferences, unless they were
-    // already marked invalid (e.g. preemies) and we're done
-    if (result) { 
-      return target.inferences().forEach( C => {
-        if (!C.preemie) Validation.setResult(C,
-          { result:'valid' , reason:'n-compact'})
-        })
-    // validateall the inference children of this target
-    } else {
-      target.children().forEach( C => {
-        // skip givens and things marked .ignore, e.g. Comments
-        if (C.isA('given') || C.ignore) return 
-        this.validateall(C)
-      })
+// The optional second argument, if false tells it to do an ordinary
+// propositional check but not check for preemies. This may be all that is
+// needed in the case where the library or document doesn't contain any Lets and
+// thus doesn't have to check for preemies.
+//
+// We do the propositional check efficiently as follows. First, check the entire
+// document. If it's valid we are done and can mark everything valid. If not,
+// frequently it will be the case that previous proofs were already valid, but
+// the one we are working on isn't. So check the children of the document. The
+// ones that are valid, mark everything inside them as valid. Then recurse in
+// the children of any invalid proof until we reach just the individual
+// conclusions that are invalid.
+//
+// If checkPreemies is true, we have to additionally check if any
+// propositionally valid inferences were preemies or valid because they contain
+// preemies.  This must only be checked after propositional validation is
+// complete since it relies on those results to know what to check.
+//
+// We do the preemie check efficiently as follows.
+// * If the target is not valid, we don't have to do anything.
+// * If the target is valid and not an environment, we just call .validate on
+//   the target with checkPreemies=true. Update the validation result of the
+//   target and its valid ancestors if it is a preemie. 
+// * If the target is a valid environment we do the following.  
+//   - Get all top level Let-env descendants of X (those not nested inside
+//     another Let-env descendant of X).  
+//   - If any exist, call .validateall(-,true) on each of those recursively
+//     until we reach one that has no Let-env descendants.
+//   - for the base case of the recursion, when a Let environment is reached
+//     that does not contain any Let-environment descendants, validate it with
+//     checkPreemies=true, and follow the same algorithm as for the
+//     Propositional check above (if it's preemie-valid we're done because
+//     everything is already prop valid, and if any of the conclusions were
+//     preemies the whole thing would be invalid. So if it's not preemie valid,
+//     recurse into the environment tree to locate the individual preemies it
+//     contains as for prop checking).
+//   - when the recursion is complete, do the same check on the ancestor
+//     Let-env, by omitting just it's own Let and the Let's it is in the scope
+//     of, but not the ones that are descendants.  This will detect any
+//     additional preemies that are descendants but not inside descendant
+//     Let-envs. If any new ones are found or if one of the recursive checks
+//     found a preemie, in either case mark them and the parent being checked as
+//     invalid for reason 'contains preemie'.
+//
+// This routine does not return anything, it just marks the document.
+
+// a helper utility called by .validateall.  If checkPreemies is false it only
+// checks the target propositionally, otherwise it only checks the target for
+// preemies.
+Environment.prototype.validateall = function ( 
+  target = this , checkPreemies = false 
+) {
+  const checkProps = !checkPreemies
+  
+  // Props
+  if (checkProps) {
+
+    // validate this environment (which saves the result in the target)
+    const result = this.validate(target)
+    
+    // if the target is an Environment, recurse
+    if (target instanceof Environment) {
+  
+      // if it was prop valid, so are all of its inferences
+      if (checkProps) {
+
+        if (result) {
+          // mark all of the target's inferences propositionally valid 
+          target.inferences().forEach( C => {
+            Validation.setResult(C,{ result:'valid' , reason:'n-compact'})
+          })
+
+          // otherwise .validateall the inference children of this target
+        } else {
+          target.children().forEach( kid => {
+            // skip givens and things marked .ignore, e.g. Comments
+            if (kid.isA('given') || kid.ignore) return 
+            this.validateall(kid , false)
+          })
+        }
+
+      }
     }
+  }
+
+  // if we are supposed to check for preemies.  This assumes we've already
+  // validated propositionally.  This should only be called once on the entire
+  // document (i.e. it's not recursive) and it will mark all of the preemies in
+  // one pass.
+  //
+  // TODO: it probably makes more sense to separate the prop and preemie parts
+  // of this routine into two separate functions since they are dissimilar.
+  if (checkPreemies) {
+    
+    // get the set of all Lets in inference let environments of this environment
+    let lets = this.lets().filter(x=>!x.parent().ancestors().some(y=>y.isA('given')))
+
+    // sort them by the number of lets in their scope so we can check them from
+    // the inside out (this modifies the lets array)
+    lets.sort( (a,b) => a.letsInScope().length - b.letsInScope().length )
+
+    // validate each of the lets in order
+    lets.forEach( L => {
+      
+      // see if this Let environment is a preemie (it should delete it's own let)
+      let preemie = !this.validate(L.parent(),true)
+      
+      // if it is a preemie, mark it, and then narrow down which of it's
+      // children is the offender
+      if (preemie) {
+
+        // mark it and all of it's ancestors as a preemie
+        L.parent().ancestors().forEach( a => {
+          Validation.setResult( a , { result:'invalid' , reason:'preemie'})
+        })
+        
+        // narrow it down to the specific preemies causing this let-environment
+        // to be a preemie
+        //
+        // TODO: for now we're just brute force checking all of the conclusions
+        // of the offending preemie let-environment.  Upgrade this to do the
+        // recursive descent like we do for the prop check above.
+        L.parent().conclusions().filter(x=>!x.ignore)
+         .forEach( conc => {
+          let result = this.validate(conc,true)
+          if (!result) {
+            conc.ancestors().forEach( a => {
+              Validation.setResult( a , { result:'invalid' , reason:'preemie'})
+            })  
+          }
+        })
+
+
+      }
+    }) 
   }
 }
 
+// the exposed routine
+// Environment.prototype.validateall = function ( target = this , checkPreemies = true ) {
+  // always prop check it first
+  // this._validateall(target, false)
+  // then check preemies if we want to
+  // if (checkPreemies) this._validateall(target, true)
+  // // if the target is not an environment, and we have to check Preemies, check
+  // // them and return
+  // if (!(target instanceof Environment)) { 
+  //   result = this.validate(target, false, true)
+  // // if the target is an environment, recurse
+  // } else {
+  //   // if it was prop valid, so are all of its inferences, unless they
+  //   // contain a preemie
+  //   if (result) {
+  //     // mark all of the target's inferences propositionally valid 
+  //     target.inferences().forEach( C => {
+  //       if (!C.preemie) Validation.setResult(C,
+  //         { result:'valid' , reason:'n-compact'})
+  //       })
+  //     // if we are also supposed to check for preemies
+  //     if (checkPreemies) {
+  //       // check each of the top level Lets of the target
+  //       [...target.descendantsSatisfyingIterator( x => {
+  //         (x instanceof Environment) && (x.child(0) instanceof Declaration)
+  //       })].forEach( L => { 
+  //         // we already know L is propositionally valid, but we want to recurse,
+  //         // so we just call .validateall on it
+          
+  //       })
+  //     }
+  //   // otherwise validateall the inference children of this target
+  //   } else {
+  //     target.children().forEach( C => {
+  //       // skip givens and things marked .ignore, e.g. Comments
+  //       if (C.isA('given') || C.ignore) return 
+  //       this.validateall(C , checkPreemies)
+  //     })
+  //   }
+  // }
+// }
+
 ////////////////////////////////////////////////////////////////////////////////
 //
-//        Load, Process, and Validate an entire document from scratch
+//  Load , Process, and Validate an entire document from scratch
 //
 // This is an all-in-one workhorse for making and testing documents. 
 // * docs are a single string, array of strings or a single LC environment. It
@@ -284,19 +489,20 @@ Environment.prototype.validateall = function ( target = this ) {
 // * libs is the same thing for libraries, but defaults to LurchLib if omitted
 //
 // TODO: maybe go until a fixed point
-const load = (docs, libs=undefined, n=4) => {
-                                                // time('Make Document') 
+const load = (docs, libs=undefined, n=10) => {
+  // make a new document
   const doc = new Document(docs,libs)
-                                                // timeEnd('Make Document')
-                                                // time('Process Document') 
+  // process the pre-instantiated document
   let ans = processDoc(doc)
-                                                // timeEnd('Process Document')
-                                                // time('Instantiate')     
+  // instantiate everything
   instantiate(ans,n)
-                                                // timeEnd('Instantiate')
-                                                // time('Validate Everything')
+  // cache the let-scopes in the root
+  ans.letScopes = ans.scopes()
+  // cache the catalog in the root
+  ans.cat = ans.catalog()
+  // validate everything
   ans.validateall()
-                                                // timeEnd('Validate Everything')
+  // return the final validated document
   return ans
 }
 
@@ -410,35 +616,43 @@ const matchGivens = (a,b) => {
 // Process BIHs
 //
 // Go through and create the appropriate instantiations from the Blatant Hints
-// in document L, mark each as valid or not, and insert the relevant 
-// instantiation when they are valid.
+// in document L, mark each as BIH-valid or not, and insert the relevant 
+// instantiation when they are BIH-valid.  Note that we are keeping track of
+// the distinction between being propositionally valid, and being BIH-valid.
+// Namely, a particular environment, marked as a BIH, could be propositionally
+// valid in the user's document, but not a BIH. e.g. { :P (⇒ P P)} << would be
+// propositionally valid in a document that depends on Prop lib but not an 
+// instatiation of the ⇒+ rule.
 //
 // TODO: Store the validation information in a more standard and sensible way.
 const processHints = L => {
   const formulas = L.formulas()
-  const BIH = [...L.descendantsSatisfyingIterator( x => 
-    (x instanceof Environment && x.isA('BIH') ) )]
+  const BIH = [...L.descendantsSatisfyingIterator( x => x.isA('BIH') )]
   BIH.forEach( i => {
-      formulas.forEach( f => {  
-        const toggle = matchGivens(f,i);
-        try {
-          [...Formula.allPossibleInstantiations(f,i)].forEach( s => {
-            const inst = Formula.instantiate(f,s)
-            assignProperNames(inst)
-            if (toggle) inst.toggleGiven()
-            inst.unmakeIntoA('Rule')
-            inst.unmakeIntoA('Part')
-            inst.makeIntoA('Inst')
-            inst.instantiation=true
-            if (!inst.creators) inst.creators = []
-            inst.creators.push(i)
-            Formula.addCachedInstantiation( f , inst )
-          })
-        } catch { }
-        if (toggle) { f.toggleGiven() }
-      })
+    formulas.forEach( f => {  
+      const toggle = matchGivens(f,i);
+      try {
+        let found = false;
+        [...Formula.allPossibleInstantiations(f,i)].forEach( s => {
+          found = true
+          const inst = Formula.instantiate(f,s)
+          assignProperNames(inst)
+          if (toggle) inst.toggleGiven()
+          inst.unmakeIntoA('Rule')
+          inst.unmakeIntoA('Part')
+          inst.makeIntoA('Inst')
+          inst.instantiation=true
+          if (!inst.creators) inst.creators = []
+          inst.creators.push(i)
+          Formula.addCachedInstantiation( f , inst )
+        })
+        // if it's not a BIH, mark it as such with .badBIH
+        if (!found) { i.badBIH = true }
+      } catch { }
+      if (toggle) { f.toggleGiven() }
     })
-  }
+  })
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -545,7 +759,7 @@ const matchPropositions = (p,e) => {
 const instantiate = (document,n=1) => {
   if (n==0) return
                                         // time('Get the user propositions')
-  // get the user's Propisitions to match
+  // get the user's Propositions to match
   const E = getUserPropositions(document)
                                         // timeEnd('Get the user propositions') 
                                         
@@ -605,20 +819,20 @@ const instantiate = (document,n=1) => {
                 //
                 inst.creators = (f.creators)?[...f.creators]:[]
                 inst.creators.push(e)
-                // Rules aren't an instantiationOf anything, but partials and 
+                // Rules aren't an instantiationOf anything, but partials and
                 // instantiations are.
                 inst.instantiationOf = (f.instantiationOf)?f.instantiationOf:f
                 //  Note that .pass is the number of passes remaining. 
                 inst.pass = n
                 inst.numsolns = solns.length
                 inst.weenienum = f.weenies.length 
-                // if the instantiation left some metavariables, we will want
-                // to cache it's domain info and mark it as a formula for use
+                // if the instantiation left some metavariables, we will want to
+                // cache it's domain info and mark it as a formula for use
                 // possible use in the next round
                                         // time('Cache Formula Domain Info')
                 cacheFormulaDomainInfo(inst)
                                         // timeEnd('Cache Formula Domain Info')
-                // if there are no more metavars, flag it as a completed 
+                // if there are no more metavars, flag it as a completed
                 // instantiation
                 if (inst.domain.size===0) { 
                   inst.unmakeIntoA('Rule')
@@ -628,15 +842,18 @@ const instantiate = (document,n=1) => {
                 } else {
                   inst.unmakeIntoA('Rule')
                   inst.makeIntoA('Part')
-                  // since it still has metavariables, ignore it for propositional form
+                  // since it still has metavariables, ignore it for
+                  // propositional form
                   inst.ignore = true
                 }
-                // either way, rename ForSome constants that aren't metavars We
+                // either way, rename ForSome constants that aren't metavars. We
                 // should not have to insert a copy of the bodies of ForSomes
-                // since they should be there automatically because they were
-                // in the formulas. TODO: * we might want to upgrade .bodyof to
-                // an LC attribute since Formula.instantiate doesn't copy that
-                // attribute
+                // since they should be there automatically because they were in
+                // the formulas. 
+                //
+                // TODO: 
+                //  * we might want to upgrade .bodyof to an LC attribute since
+                //    Formula.instantiate doesn't copy that attribute
                 //
                 // also rename the bindings to match what the user would have
                 // for the same expressions in his document
@@ -682,6 +899,7 @@ const instantiate = (document,n=1) => {
 // created by expressions that appear in the user's document that come after the
 // target.
 LogicConcept.prototype.irrelevantTo = function (target) {
+  if (!target.ancestors()) console.error(`No f'n way for ${target}`);
   return target.ancestors().indexOf(this)<0 && 
     !this.hasAncestorSatisfying( z => { return z.isAccessibleTo(target,true) } )
 }

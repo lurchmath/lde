@@ -18,6 +18,7 @@ import { LogicConcept } from '../logic-concept.js'
 import { Environment } from '../environment.js'
 import { Symbol as LurchSymbol } from '../symbol.js'
 import { Declaration } from '../declaration.js'
+import { Application } from '../application.js'
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -108,11 +109,17 @@ LogicConcept.prototype.isADeclaration = function () {
 // does not include the bodies inside ForSome declarations since each of those
 // declarations will have atomic propositional forms and a separate copy of the
 // body. It ignores anything flagged with .ignore for defining shortucts and
-// other content that is supposed to be ignored.
-LogicConcept.prototype.isAProposition = function () { 
-  return (this.isAStatement() && (!this.ignore) &&
-         !this.hasAncestorSatisfying( A => A instanceof Declaration)) || 
-         (this.isADeclaration() && !this.isA('Declare'))  
+// other content that is supposed to be ignored, and ignores anything passed in
+// the argument ignores. 
+LogicConcept.prototype.isAProposition = function ( ignores = []) { 
+  return ( this.isAStatement()   && 
+          !this.ignore           &&
+          !this.hasAncestorSatisfying( A => A instanceof Declaration)
+         ) || 
+         ( this.isADeclaration() && 
+          !this.isA('Declare')   &&
+          !ignores.includes(this)
+         ) 
 }
 
 // Check if an LC is a Let-environment 
@@ -143,13 +150,45 @@ LogicConcept.prototype.declarations = function ( onlywithbodies ) {
          )]
 }
 
+// A Let is defined to be a given declaration that is not marked as a 'Declare'
+// whether or not it has a body
+LogicConcept.prototype.isALet = function ( ) {
+  return (this instanceof Declaration && this.isA('given') && !this.isA('Declare'))
+}
+
+// Get the array of all of the Let ancestors of this LC Note: since everything
+// is its own ancestor by default, the Let that is the first child of a Let
+// environment is considered to be a letAncestor of the Let environment.
+LogicConcept.prototype.letAncestors = function ( ) {
+  return this.ancestorsSatisfying(x => 
+    x instanceof Environment && 
+    x.numChildren()>0 && 
+    x.firstChild().isALet()).map(a=>a.firstChild())
+}
+
+// Get the array of all of the Let's in the scope of this Let.
+Declaration.prototype.letsInScope = function ( ) {
+  return this.scope().filter( x => x.isALet() )
+}
+
 // Compute the array of all Let's in this LC. If the argument is true, only
 // return those with bodies.
 LogicConcept.prototype.lets = function ( onlywithbodies ) {
   return [...this.descendantsSatisfyingIterator( x => 
-           x instanceof Declaration && x.isA('given') && 
-           !x.isA('Declare') &&  (!onlywithbodies || x.body())
-         )]
+     x instanceof Declaration && x.isA('given') && 
+     !x.isA('Declare') &&  (!onlywithbodies || x.body())
+  )]
+}
+
+// Compute the array of all Let's in this environment whose parent is an
+// inference in this environment
+Environment.prototype.letInferences = function ( inThis ) {
+  return this.lets().filter( L => L.parent().hasOnlyClaimAncestors( inThis ) )
+}
+
+// Compute the array of arrays containing the user's various let scopes, labled by their  
+Environment.prototype.scopes = function ( ) {
+  return this.letInferences().map( y => y.letAncestors() )
 }
 
 // Determine the topmost ancestor of this LC.  This corresponds to the 
@@ -186,8 +225,6 @@ LogicConcept.prototype.mentions = function (e) {
   })]
 }
 
-
-
 // We say an LC is an Inference of an environment L if it is either
 //
 //    (a) a conclusion of that environment or
@@ -196,7 +233,7 @@ LogicConcept.prototype.mentions = function (e) {
 //
 // i.e., it extends the notion of a conclusion to include environments.  L is
 // not considered to be a conclusion or inference of itself.
-//
+
 // Compute the array of all inferences in this LC.  
 Environment.prototype.inferences = function () {
   // this is effectively the same code as for .conclusions
@@ -251,6 +288,48 @@ LogicConcept.prototype.inspect = function(...args) { inspect(this,...args) }
 
 //////////////////////////////////////////////////////////////////////////
 // Generic utiltiies
+
+// Expression Diff
+//
+// Given two Application LC's which differ only at one node, return the address
+// of that node (or undefined if no such node exists). This is useful in
+// transitive chains for determining when a substitution occurs within a
+// compound expression.  
+//
+// For example, in (x+1)+(x^2+x)=(x+1)+(x⋅x+x) we want to know that the LHS can
+// be obtained from the RHS by substituting x^2=x⋅x. 
+export const diff = (LHS,RHS) => {
+  let ans=[]
+  // a Symbol doesn't match an Application.
+  if ( 
+    ((LHS instanceof LurchSymbol) && (RHS instanceof Application)) ||
+    ((LHS instanceof Application) && (RHS instanceof LurchSymbol)) 
+  ) return [[]]
+  // two Symbols match iff they are .equal
+  if ((LHS instanceof LurchSymbol) && (RHS instanceof LurchSymbol))  
+    return (LHS.equals(RHS))?undefined:[[]]
+  // two Applications  
+  if ((LHS instanceof Application) && (RHS instanceof Application)) {
+    // they don't match if they don't have the same number of children
+    if (LHS.numChildren()!==RHS.numChildren()) return [[]]
+    // check the children one at a time
+    const n = LHS.numChildren()
+    for (let k=0 ; k<n ; k++) {
+      let nodeans = diff(LHS.child(k),RHS.child(k))
+      // if an array is returned, it should be an array of arrays containing the
+      // relative address inside the node of the various discrepancies, so
+      // unshift each of them with the index of this node, unless this is the
+      // first node in which case just abort so that the answer points to the
+      // entire Application
+      if (Array.isArray(nodeans)) {
+        if (k>0) nodeans.forEach(node=>node.unshift(k)) 
+        else k=n
+        ans.push(...nodeans)
+      }
+    }
+    return (ans.length)?ans:undefined
+  }
+}
 
 // useful abbreviations
 export const lc = s => { return LogicConcept.fromPutdown(s)[0] }

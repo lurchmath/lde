@@ -13,7 +13,7 @@
 // this reason.
 //
 // TODO: 
-//  * add x≠y but have it parse as (¬ (= x y))
+//  * add x≠y but have it parse as (¬ (= x y)), & same for other negated ops
 //  * add f:A→B, ∘, injective, surjective, bijective, ^inv, etc.
 //  * Integrate Declare() with the parser creation.  For example, if we want to
 //    Declare reserved symbols like < or = at the top of the document we don't
@@ -63,46 +63,52 @@
       } , op )
     }
   }
-    
+
   // convert signed sums to lisp
   const lispSum = (first,rest) => {
     let ans = `(+ ${first}`
     rest.forEach( term => {
-      ans = ans + ((term[0]==='-')?` (- ${term[1]})`: ` ${term[1]}`)
-    }) 
+      ans = ans + ( (term[0]==='-') ? ` (- ${term[1]})` : ` ${term[1]}` )
+    })
     return ans + ')'
   }
-    
+
   // for debugging, shorthand for console.log
-  const say = (s,t) => console.log(t+': '+s)
+  const say = s => {
+    const lines = s.split('\n')
+    const lineNumberWidth = String(lines.length).length
+    lines.forEach( (line, index) => {
+      const lineNumber = String(index + 1).padStart(lineNumberWidth, ' ')
+      console.log(`${lineNumber}: ${line}`)
+    })
+  }
 
 }}
 
 // Preprocess the input string
 { 
   //   * delete comments (but leave any \n's to keep the line counts right)
-  input = input.replace(/\/\/.*(\n|\r|$)/g, '\n');
+  input = input.replace(/\/\/.*(\n|\r|$)/g, '\n')
   //   * Replace tabs with a space
   input = input.replace(/\t/g, ' ')
-  //   * remove spaces from the start and end
-  input = input.trim()
   //   * shrink consecutive spaces to a single space
   input = input.replace(/ ( *)/g,' ') 
-  //   * remove spaces around reserved infix ops so the 
-  //     parser doesn't have to find and avoid them
-  input = input.replace(/\s*([,.+⋅/^=<≤⇒⇔|∩∪×∈⊆∖])\s*/g,'$1')
+  //   * remove spaces around reserved infix ops not inside literal putdown so
+  //     the parser doesn't have to find and avoid them
+  input = input.replace(/(?<!«[^«»]*)\s*([,.+⋅/^=<≤⇒⇔|∩∪×∈⊆∖])\s*(?![^«»]*»)/g,'$1')
   //   * same for prefix ops
-  input = input.replace(/([-({∀∃])\s*/g,'$1')
+  input = input.replace(/(?<!«[^«»]*)([-({∀∃])\s*(?![^«»]*»)/g,'$1')
   //   * same for postfix ops
-  input = input.replace(/\s*([⁻)}])/g,'$1')
+  input = input.replace(/(?<!«[^«»]*)\s*([⁻)}])(?![^«»]*»)/g,'$1')
   //   * replace all '/' with '⋅/'
-  input = input.replace(/\//g,'⋅/')
-
-  // console.log(`Parsing:\n${input}`)
+  input = input.replace(/(?<!«[^«»]*)\/(?![^«»]*»)/g,'⋅/')
+  
+  // uncomment the following for debugging
+  // say(input)
 }
 
 // The start rule for a Peggy grammar is the first rule.  For us, it's an LC.
-LC = Given / Declaration / Equivalence / Environment / Expression
+LC = _ @(Putdown / Given / Declaration / Equivalence / Environment / Expression) _
 
 // givens
 Given = (':' / 'Assume'i __ ) 
@@ -113,10 +119,14 @@ Given = (':' / 'Assume'i __ )
 Equivalence = '{' _ a:( Declaration / Environment / Expression ) _ '≡' _
                     b:( Declaration / Environment / Expression ) _  '}'
   { return `{ { :${a} ${b} } { :${b} ${a} } }` }
+
 // environments
 Environment = 
-  '{' _ a:( Declaration / Given / Environment / Expression )|..,__| _ '}'
+  '{' _ a:( Putdown / Declaration / Given / Environment / Expression )|..,__| _ '}'
   { return `{ ${a.join(' ')} }` }
+
+// unprocessed putdown notation (cannot include // comments)
+Putdown = '«' @$([^»]*) '»'
 
 // declarations
 Declaration = ForSome / Declare / Let
@@ -197,7 +207,7 @@ Natural = $( [1-9][0-9]* / '0' )
 // Symbols can't start with a digit or contain constants
 SymbolSeq = a:Symbol|1..,comma| { return a.join(',') }
 Symbol "Symbol" =  $( !([0-9]/'or'/'and'/'loves') 
-                      [^-\][() \t\n{},.:+⋅/^=<≤¬⇒⇔|∀∃∩∪×∈⊆∖⁻∧∨≡]+ )  
+                      [^-\][() \t\n✦{},.:+⋅/^=<≤¬⇒⇔|∀∃∩∪×∈⊆∖⁻∧∨≡]+ )  
 BindingSymbol = '∃!'/[∀∃]
 
 // punctuation

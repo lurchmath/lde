@@ -1,0 +1,21 @@
+////////////////////////////////////////////////////////////////////
+// Preemie Tests
+// 
+// This is a simple test for the preemie checker
+
+(--- "Example of a Preemie test")
+{
+  // Pf attempt 
+  { 
+    { :[ k ] 
+      :(Q k)
+      (--- "Please don't validate")
+      (∀ y,(Q y))
+    }
+    { {:[ k ] 
+       (= k k)
+      }
+      (∀ y,(= y y))
+    }  
+  }
+}

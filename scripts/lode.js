@@ -41,9 +41,11 @@ import Compact from '../src/experimental/global-validation-lab.js'
 // load the custom formatter class
 import Reporting from '../src/experimental/reporting.js' 
 // load the Document class
-import { Document , loadParser } from '../src/experimental/document.js'
+import { Document , loadParser , assignProperNames , markDeclaredSymbols } from '../src/experimental/document.js'
 // load the lc command
-import { lc , mc , checkExtension } from '../src/experimental/extensions.js'
+import { lc , mc , checkExtension, diff } from '../src/experimental/extensions.js'
+// load the CNFProp tools for testing
+import { CNFProp } from '../src/experimental/CNFProp.js'
 
 // External packages
 // load Algebrite
@@ -70,6 +72,10 @@ global.Problem = Problem
 // additional experimental code
 global.Document = Document
 global.loadParser = loadParser
+global.CNFProp = CNFProp
+// exposing commands for debugging
+global.assignProperNames = assignProperNames
+global.markDeclaredSymbols = markDeclaredSymbols
 //
 // External packages
 global.satSolve = satSolve
@@ -90,8 +96,14 @@ global.execStr = command => String(execSync(command))
 // a convenient way to make an lc or mc at the Lode prompt or in scripts
 global.lc = lc 
 global.mc = mc
+// just syntactic sugar
+global.say = console.log
+// because it's easier to remember
+global.metavariable = 'LDE MV'
 // see if a filename has the correct extension and add it if it doesn't
 global.checkExtension = checkExtension
+// find the subtitution delta between two Application expressions if it exists
+global.diff = diff
 // for controlling the inspect-level for the default REPL echo
 global.Depth = Infinity
 // just a shorthand
@@ -111,7 +123,7 @@ global.catproof = function(fname) {
 // display a library file by filename
 global.catlib = function(fname) {
   console.log(defaultPen(execStr(
-    3`cat ${Document.libPath}${checkExtension(fname,'lurch')}`)))
+    `cat ${Document.libPath}${checkExtension(fname,'lurch')}`)))
 }
 // List both libs and proofs
 const list = () => { console.log(
