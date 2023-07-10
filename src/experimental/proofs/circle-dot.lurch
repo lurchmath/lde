@@ -26,7 +26,7 @@
 ((○ ○) ○)
 (○ (○ ○))
 (--- " ")
-(--- "Every circle-dot expressions (right assoc) of length 1,2, and 3")
+(--- "Every circle-dot expression (right assoc) of length 1,2, and 3")
 (--- "has now been proven, so we have an algorithm from this point")
 (--- "forward to add any three character extension except (○ (○ ●)) to")
 (--- "any already constructed expression. So let's prove all the levels")
@@ -73,5 +73,70 @@
 ((● ○) (● (○ (● ○))))
 (--- " ")
 (--- "Theorem R:")  (● (○ (● (○ (● ○)))))
+
+(--- " ")
+(--- "Now, what if we allow one level of environment for the user")
+(--- "and they can state theorems using it?")
+(--- " ")
+(--- "Theorem X:")  
+{ :(○ (○ ● )) (● (● (○ (○ ● )))) }
+(--- " ")
+(--- "Thm ★:")  
+{ :(○ (○ ● )) (● (○ (○ ● ))) }
+(--- "Proof:")  
+{ :(○ (○ ● ))
+  ● 	
+  (● (● (○ (○ ●))))
+  (● ○)
+  (● (○ (● ●)))
+  (● (○ ○))
+  (● (○ (○ (● ●))))
+  ((● ○) (○ (● ●)))
+  (((● ○) ○) (● ●))
+  ((((● ○) ○) ●) ●)
+  ((● (○ (○ ●))) ●)
+}
+
+(--- "Thm (*):")  
+{ :{:(○ (○ ●))  (● (○ (○ ●)))} {:(● (○ (○ ●)))  (○ (○ ●)) } }
+(--- "Proof:")  
+{ 
+	(--- "(this hypothesis is not needed)")  
+	:{:(○ (○ ●))  (● (○ (○ ●)))} 
+	{ :(● (○ (○ ●)))
+	  ( ●  (● (● (○ (○ ●)))) )
+	  ( (● (● ●))  (○ (○ ●)) ) 
+	  ( ((● ●) ●)  (○ (○ ●)) ) 
+	  ( (○ (○ (● ●)))  (● ●) )
+	  ( ((○ ○) (● ●))  (● ●) )
+	  ( (((○ ○) ●) ●)  (● ●) )
+	  ( ((○ ○) ●)  (● (● ●)) )
+	  ( (○ (○ ●))  (● (● ●)) )
+	  ( ○  (○ ●) )
+	}
+}
+
+(--- "(of course, this still can't be proven)")  
+(○ (○ ●))
+
+(--- "A Free-Range Theorem")  
+{  :(○ (○ ●)) { :●  (○ (○ ●)) } } 
+(--- "More humorously... we can even get rid of the parentheses.")  
+{  :○○● { :●  ○○● } } 
+(--- "... or switch to Tasty, mid document, with no parens.")  
+{  :🌳🍒 { :🧺🍎  🌳🍒 } } 
+(--- " ")
+:🍒
+(🍒 (● 🍒))
+
+
+(--- " ")
+(--- " ")
+:{ :{:A B} A }
+A
+
+(--- " ")
+(--- "Theorem 1:")
+{ :W :V (W (● V)) }
 
  
