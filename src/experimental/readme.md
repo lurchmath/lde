@@ -78,6 +78,7 @@ At this point the document has been loaded and constructed. It is ready to be va
 
 2. Process Hints
    1. process all Blatant Instantiation Hints (BIH's) $^4$
+   2. if a BIH is valid as a BIH, it has to be valid propositionally by definition, and will be marked with a gold star after validation, but if it is not a valid BIH, it might still be propositionally valid or invalid, so in that case it will receive both a propositional green check or redx in additio to a red star
 
 3. Check for Scoping errors
    1. run the built-in scoping tool to check for scoping errors. $^4$
@@ -104,7 +105,7 @@ It is now ready for the main validation algorithm to work its magic.
 14. assign the Proper Names to the bindings in the instantiation to give them a canonical Prop form for alpha-equivalence
 15. mark each formula .finished when it is done so we don't try to match it again on a future pass
 16. mark the declared constant symbols in the document again $^5$
-17. instantiate another pass for $n-1$-compact
+17. instantiate another pass for $(n-1)$-compact
 
 ### VII. Propositionally Validate Everything
 1. to validate the entire document at this point we just compute its propositional form and ask SAT (or FIC $^8$) if it is a tautology
@@ -112,6 +113,10 @@ It is now ready for the main validation algorithm to work its magic.
 3. to validate a particular inference in the document the prop form computation ignores anything that is not relevant to the propositional validation of the inference (for example anything not accessible to it)
 4. to validate every inference in the document, first validate the entire document - if it is valid mark every inference as valid and we are done
 5. if not valid recurse on the children - any valid child can have all of its inferences marked as valid immediately, and invalid ones are recursed into and their children checked until the everything is checked
+
+### VIII. Preemie Check
+1. If the document contains any Let environments, check any propositionally valid inferences in the scope of each Let for preemies by validating each one as a target with the Let omitted and tick marks only on free variables in instantiations that are actually in the scope of a Let. For example, if there is an instantiation which contains no Let's, but has free symbols whose proper name has ticks from the creator of the instantiation, don't use it's Proper Name.
+2. If a preemie is found, mark it and all of its ancestors as invalid.
 
 <div style="color:cadetblue;font-size:9pt">
 TODO footnotes: 
