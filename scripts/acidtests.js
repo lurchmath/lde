@@ -25,10 +25,10 @@ let failed = 0
 acid.forEach( (T,k) => {
   T.descendantsSatisfying( x => x.expectedResult ).forEach( (s,i) => {
     if (Validation.result(s) && Validation.result(s).result==s.expectedResult) {
-      console.log(`Test ${k}.${i} -> ok`)
+      console.log(`Test ${k}.${i} → ok`)
       passed++
     } else {
-      console.log(`\nTest ${k}.${i} -> FAIL!!\n`)
+      console.log(`\nTest ${k}.${i} → FAIL!!\n`)
       failed++
     }
   })
