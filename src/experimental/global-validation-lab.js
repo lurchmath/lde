@@ -121,9 +121,11 @@ import Scoping from '../scoping.js'
 import Validation from '../validation.js'
 
 // import experimental tools
-import { Document , renameBindings , processLets , markDeclaredSymbols ,
-         assignProperNames , processForSomeBodies } 
-         from '../experimental/document.js'
+import {
+  Document, renameBindings, processLets, markDeclaredSymbols,
+  assignProperNames, processForSomeBodies
+}
+  from '../experimental/document.js'
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -131,7 +133,7 @@ import { Document , renameBindings , processLets , markDeclaredSymbols ,
 //
 const instantiation = 'LDE CI'
 const subscriptDigits = '₀₁₂₃₄₅₆₇₈₉'
-const subscript = n => [...n.toString()].map( d => subscriptDigits[d]).join('')
+const subscript = n => [...n.toString()].map(d => subscriptDigits[d]).join('')
 
 // Debug is a global boolean
 const time = (description) => { if (Debug) console.time(description) }
@@ -202,26 +204,34 @@ const timeEnd = (description) => { if (Debug) console.timeEnd(description) }
 // Moral: use only for targets that do not contain any descendant
 //        Let-environments, or just call .validateall for environments that do.
 //
-LogicConcept.prototype.validate = function ( target = this,  
-                                             checkPreemies = false ) {
+LogicConcept.prototype.validate = function (target = this,
+  checkPreemies = false) {
 
   // store the answer and result here
-  let ans,result
+  let ans, result
   const checkProps = !checkPreemies
 
   // TODO: to get it into form that CNF.isSatisfiable accepts we have to
   //       temporarily negate this, then toggle it back afterwards.  Modify
   //       CNF.isSatisfiable to make this unnecessary.
-  
+
   // to prevent this routine from exiting while this LC is still negated we wrap
   // up the negation and un-negation with the CNF.isSatisfiable call
-  const satCheck = (target,checkPreemies) => {
+  const satCheck = (doc, target, checkPreemies = false) => {
+    let answer
     // negate this
-    this.negate()
-    const ans = !CNF.isSatisfiable(this.cnf(target,checkPreemies = false))
+    doc.negate()
+    try {
+      answer = !CNF.isSatisfiable(this.cnf(target, checkPreemies))
+    } catch (e) {
+      doc.negate()
+      say(`\nError validating the following for ${(checkPreemies) ? 'preemies' : 'prop'}:\n`)
+      write(target)
+      say(`at address: ${target.address()}`)
+    }
     // un-negate this
-    this.negate()
-    return ans
+    doc.negate()
+    return answer
   }
 
   // if we have to check props or we have to check preemies but it hasn't
@@ -230,67 +240,57 @@ LogicConcept.prototype.validate = function ( target = this,
     // say(`Checking prop`)
     // if it is already validated, just return that
     if (Validation.result(target) &&
-        Validation.result(target).reason==='n-compact') { 
-          // say(`Already validated by n-compact, so returning that`)
-          ans = Validation.result(target).result==='valid'
+      Validation.result(target).reason === 'n-compact') {
+      // say(`Already validated by n-compact, so returning that`)
+      ans = Validation.result(target).result === 'valid'
     } else {
       // say(`Not already validated by n-compact.. checking`)
-      // negate this
-      this.negate()
-      // no second arg to .cnf is for prop checking
-      ans = !CNF.isSatisfiable(this.cnf(target))
-      // un-negate this
-      this.negate()
+      ans = satCheck(this, target)
       // determine the appropriate feedback
       result = (ans)
-               ? { result:'valid'         , reason:'n-compact' }
-               : { result:'indeterminate' , reason:'n-compact' }
-      Validation.setResult(target,result)
+        ? { result: 'valid', reason: 'n-compact' }
+        : { result: 'indeterminate', reason: 'n-compact' }
+      Validation.setResult(target, result)
     }
   }
-  
+
   // if we have to check preemies, check them
   if (checkPreemies) {
     // say(`Checking preemie`)
     // if it's already a preemie return the same thing
-    if (Validation.result(target) && 
-        Validation.result(target).reason==='preemie') { 
-        // say(`Already a preemie`)
-        ans = false
-    // otherwise 
-    } else { 
+    if (Validation.result(target) &&
+      Validation.result(target).reason === 'preemie') {
+      // say(`Already a preemie`)
+      ans = false
+      // otherwise 
+    } else {
       // if it's not already validated propositionally, validate it
-      if (!(Validation.result(target) && 
-            Validation.result(target).reason==='n-compact')) { 
+      if (!(Validation.result(target) &&
+        Validation.result(target).reason === 'n-compact')) {
         // say(`Not already validated, so doing it`)
         ans = this.validate(target)
         result = (ans)
-                 ? { result:'valid'         , reason:'n-compact' }
-                 : { result:'indeterminate' , reason:'n-compact' }
-        Validation.setResult(target,result)
-      } 
+          ? { result: 'valid', reason: 'n-compact' }
+          : { result: 'indeterminate', reason: 'n-compact' }
+        Validation.setResult(target, result)
+      }
       // if it is propositionally valid, check it for preemies           
-      if (Validation.result(target).result==='valid') {
+      if (Validation.result(target).result === 'valid') {
         // say(`Prop valid, so checking for preemies`)
         // say(`this is currently a given ${this.isA('given')}`)
-        // negate this
-        this.negate()
-        // second arg to .cnf is for preemie checking
-        ans = !CNF.isSatisfiable(this.cnf(target,true))
-        // un-negate this
-        this.negate()
+        ans = satCheck(this, target, true)
         // determine the appropriate feedback
         result = (ans)
-          ? { result:'valid'   , reason:'n-compact' }
-          : { result:'invalid' , reason:'preemie' }
-        Validation.setResult(target,result)  
-      // finally, it is invalid propositionally, so just return that
+          ? { result: 'valid', reason: 'n-compact' }
+          : { result: 'invalid', reason: 'preemie' }
+        Validation.setResult(target, result)
+        // finally, it is invalid propositionally, so just return that
       } else {
-         ans = false
+        ans = false
       }
     }
   }
-  
+
   return ans
 
 }
@@ -345,38 +345,38 @@ LogicConcept.prototype.validate = function ( target = this,
 //
 // This routine does not return anything, it just marks the document.
 
-// a helper utility called by .validateall.  If checkPreemies is false it only
+// If checkPreemies is false it only
 // checks the target propositionally, otherwise it only checks the target for
 // preemies.
-Environment.prototype.validateall = function ( 
-  target = this , checkPreemies = false 
+Environment.prototype.validateall = function (
+  target = this, checkPreemies = false
 ) {
   const checkProps = !checkPreemies
-  
+
   // Props
   if (checkProps) {
 
     // validate this environment (which saves the result in the target)
     const result = this.validate(target)
-    
+
     // if the target is an Environment, recurse
     if (target instanceof Environment) {
-  
+
       // if it was prop valid, so are all of its inferences
       if (checkProps) {
 
         if (result) {
           // mark all of the target's inferences propositionally valid 
-          target.inferences().forEach( C => {
-            Validation.setResult(C,{ result:'valid' , reason:'n-compact'})
+          target.inferences().forEach(C => {
+            Validation.setResult(C, { result: 'valid', reason: 'n-compact' })
           })
 
           // otherwise .validateall the inference children of this target
         } else {
-          target.children().forEach( kid => {
+          target.children().forEach(kid => {
             // skip givens and things marked .ignore, e.g. Comments
-            if (kid.isA('given') || kid.ignore) return 
-            this.validateall(kid , false)
+            if (kid.isA('given') || kid.ignore) return
+            this.validateall(kid, false)
           })
         }
 
@@ -392,29 +392,33 @@ Environment.prototype.validateall = function (
   // TODO: it probably makes more sense to separate the prop and preemie parts
   // of this routine into two separate functions since they are dissimilar.
   if (checkPreemies) {
-    
+
     // get the set of all Lets in inference let environments of this environment
-    let lets = this.lets().filter(x=>!x.parent().ancestors().some(y=>y.isA('given')))
+    // unless their parent has no conclusions
+    let lets = this.lets().filter(x =>
+      !x.parent().ancestors().some(y => y.isA('given'))
+      // && x.parent().conclusions().length>0   // inefficient but ok for now
+    )
 
     // sort them by the number of lets in their scope so we can check them from
     // the inside out (this modifies the lets array)
-    lets.sort( (a,b) => a.letsInScope().length - b.letsInScope().length )
+    lets.sort((a, b) => a.letsInScope().length - b.letsInScope().length)
 
     // validate each of the lets in order
-    lets.forEach( L => {
-      
+    lets.forEach(L => {
+
       // see if this Let environment is a preemie (it should delete it's own let)
-      let preemie = !this.validate(L.parent(),true)
-      
+      let preemie = !this.validate(L.parent(), true)
+
       // if it is a preemie, mark it, and then narrow down which of it's
       // children is the offender
       if (preemie) {
 
         // mark it and all of it's ancestors as a preemie
-        L.parent().ancestors().forEach( a => {
-          Validation.setResult( a , { result:'invalid' , reason:'preemie'})
+        L.parent().ancestors().forEach(a => {
+          Validation.setResult(a, { result: 'invalid', reason: 'preemie' })
         })
-        
+
         // narrow it down to the specific preemies causing this let-environment
         // to be a preemie
         //
@@ -430,53 +434,51 @@ Environment.prototype.validateall = function (
             })  
           }
         })
-
-
       }
-    }) 
+    })
   }
 }
 
 // the exposed routine
 // Environment.prototype.validateall = function ( target = this , checkPreemies = true ) {
-  // always prop check it first
-  // this._validateall(target, false)
-  // then check preemies if we want to
-  // if (checkPreemies) this._validateall(target, true)
-  // // if the target is not an environment, and we have to check Preemies, check
-  // // them and return
-  // if (!(target instanceof Environment)) { 
-  //   result = this.validate(target, false, true)
-  // // if the target is an environment, recurse
-  // } else {
-  //   // if it was prop valid, so are all of its inferences, unless they
-  //   // contain a preemie
-  //   if (result) {
-  //     // mark all of the target's inferences propositionally valid 
-  //     target.inferences().forEach( C => {
-  //       if (!C.preemie) Validation.setResult(C,
-  //         { result:'valid' , reason:'n-compact'})
-  //       })
-  //     // if we are also supposed to check for preemies
-  //     if (checkPreemies) {
-  //       // check each of the top level Lets of the target
-  //       [...target.descendantsSatisfyingIterator( x => {
-  //         (x instanceof Environment) && (x.child(0) instanceof Declaration)
-  //       })].forEach( L => { 
-  //         // we already know L is propositionally valid, but we want to recurse,
-  //         // so we just call .validateall on it
-          
-  //       })
-  //     }
-  //   // otherwise validateall the inference children of this target
-  //   } else {
-  //     target.children().forEach( C => {
-  //       // skip givens and things marked .ignore, e.g. Comments
-  //       if (C.isA('given') || C.ignore) return 
-  //       this.validateall(C , checkPreemies)
-  //     })
-  //   }
-  // }
+// always prop check it first
+// this._validateall(target, false)
+// then check preemies if we want to
+// if (checkPreemies) this._validateall(target, true)
+// // if the target is not an environment, and we have to check Preemies, check
+// // them and return
+// if (!(target instanceof Environment)) { 
+//   result = this.validate(target, false, true)
+// // if the target is an environment, recurse
+// } else {
+//   // if it was prop valid, so are all of its inferences, unless they
+//   // contain a preemie
+//   if (result) {
+//     // mark all of the target's inferences propositionally valid 
+//     target.inferences().forEach( C => {
+//       if (!C.preemie) Validation.setResult(C,
+//         { result:'valid' , reason:'n-compact'})
+//       })
+//     // if we are also supposed to check for preemies
+//     if (checkPreemies) {
+//       // check each of the top level Lets of the target
+//       [...target.descendantsSatisfyingIterator( x => {
+//         (x instanceof Environment) && (x.child(0) instanceof Declaration)
+//       })].forEach( L => { 
+//         // we already know L is propositionally valid, but we want to recurse,
+//         // so we just call .validateall on it
+
+//       })
+//     }
+//   // otherwise validateall the inference children of this target
+//   } else {
+//     target.children().forEach( C => {
+//       // skip givens and things marked .ignore, e.g. Comments
+//       if (C.isA('given') || C.ignore) return 
+//       this.validateall(C , checkPreemies)
+//     })
+//   }
+// }
 // }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -489,13 +491,13 @@ Environment.prototype.validateall = function (
 // * libs is the same thing for libraries, but defaults to LurchLib if omitted
 //
 // TODO: maybe go until a fixed point
-const load = (docs, libs=undefined, n=10) => {
+const load = (docs, libs = undefined, n = 10) => {
   // make a new document
-  const doc = new Document(docs,libs)
+  const doc = new Document(docs, libs)
   // process the pre-instantiated document
   let ans = processDoc(doc)
   // instantiate everything
-  instantiate(ans,n)
+  instantiate(ans, n)
   // cache the let-scopes in the root
   ans.letScopes = ans.scopes()
   // cache the catalog in the root
@@ -532,20 +534,20 @@ const load = (docs, libs=undefined, n=10) => {
 //
 // for benchmarking use: const forbiddenWeeny = L => (L instanceof Environment)
 const forbiddenWeeny = L => (
-  (L instanceof Environment) || (L instanceof LurchSymbol) || isAnEFA(L) )
-    
+  (L instanceof Environment) || (L instanceof LurchSymbol) || isAnEFA(L))
+
 // Cache the domain information for a formula.  
 //
 // This should be done after processing the Declarations so it applies, e.g. to
 // declaration bodies.
 const cacheFormulaDomainInfo = f => {
   let max = 0
-  f.propositions().forEach( p => {
-    if (!forbiddenWeeny(p)) { 
+  f.propositions().forEach(p => {
+    if (!forbiddenWeeny(p)) {
       p.domain = Formula.domain(p)
-      max = Math.max(max,p.domain.size) 
-    } else { 
-      p.domain=undefined
+      max = Math.max(max, p.domain.size)
+    } else {
+      p.domain = undefined
     }
   })
   // the js Set of text names of the metavariables
@@ -554,27 +556,27 @@ const cacheFormulaDomainInfo = f => {
   // forbidden, it can't be instantiated, so mark it finished.  
   // Note that max===0 is not the same as f.domain.size===0 because of
   // forbidden lone metavariables
-  if (max===0)  f.finished=true
+  if (max === 0) f.finished = true
   // boolean that is true iff f is Weeny
-  f.isWeeny = (f.domain.size === max && max>0)
+  f.isWeeny = (f.domain.size === max && max > 0)
   // the array of maximally Weeny expressions in this formula (whether or not
   // it is Weeny).  Don't add any when max===0 or you can match already
   // partially instantiated expressions with the same expression when
   // forbidden metavars are still present but max===0.
-  f.weenies = f.propositions().filter( p => 
-                max>0 && p.domain && (p.domain.size === max) )
+  f.weenies = f.propositions().filter(p =>
+    max > 0 && p.domain && (p.domain.size === max))
 }
 
 // Apply that to the entire document
-const processDomains = doc => doc.formulas().forEach( f => {
-  cacheFormulaDomainInfo(f) 
+const processDomains = doc => doc.formulas().forEach(f => {
+  cacheFormulaDomainInfo(f)
   // If there are no metavariables in this formula, instantiate it so it is
   // available for validation.
   //
   // TODO:
   // * at some point go through and clean up the difference between 'formula'
   //   and 'Rule', and things lke inst.instantiation vs inst.isA('Inst')
-  if (f.domain.size===0) {
+  if (f.domain.size === 0) {
     // let inst=f.copy()
     // assignProperNames(inst)
     f.unmakeIntoA('formula')
@@ -601,12 +603,12 @@ const processDomains = doc => doc.formulas().forEach( f => {
 //
 // TODO: when this is made permanent, just upgrade Matching to make this hoop
 //       jumping unneccesary.
-const matchGivens = (a,b) => {
+const matchGivens = (a, b) => {
   let toggle = false
   if (a.isA('given') && !b.isA('given')) {
     toggle = true
     a.unmakeIntoA('given')
-  } else if (!a.isA('given') && b.isA('given')) { 
+  } else if (!a.isA('given') && b.isA('given')) {
     toggle = true
     a.makeIntoA('given')
   }
@@ -627,30 +629,30 @@ const matchGivens = (a,b) => {
 // TODO: Store the validation information in a more standard and sensible way.
 const processHints = L => {
   const formulas = L.formulas()
-  const BIH = [...L.descendantsSatisfyingIterator( x => x.isA('BIH') )]
-  BIH.forEach( i => {
-    formulas.forEach( f => {  
-      const toggle = matchGivens(f,i);
+  const BIH = [...L.descendantsSatisfyingIterator(x => x.isA('BIH'))]
+  BIH.forEach(i => {
+    let found = false
+    formulas.forEach(f => {
+      const toggle = matchGivens(f, i);
       try {
-        let found = false;
-        [...Formula.allPossibleInstantiations(f,i)].forEach( s => {
+        ;[...Formula.allPossibleInstantiations(f, i)].forEach(s => {
           found = true
-          const inst = Formula.instantiate(f,s)
+          const inst = Formula.instantiate(f, s)
           assignProperNames(inst)
           if (toggle) inst.toggleGiven()
           inst.unmakeIntoA('Rule')
           inst.unmakeIntoA('Part')
           inst.makeIntoA('Inst')
-          inst.instantiation=true
+          inst.instantiation = true
           if (!inst.creators) inst.creators = []
           inst.creators.push(i)
-          Formula.addCachedInstantiation( f , inst )
+          Formula.addCachedInstantiation(f, inst)
         })
         // if it's not a BIH, mark it as such with .badBIH
-        if (!found) { i.badBIH = true }
       } catch { }
       if (toggle) { f.toggleGiven() }
     })
+    if (!found) { i.badBIH = true }
   })
 }
 
@@ -684,19 +686,19 @@ const processHints = L => {
 // duplicates, i.e., no two expressions should have the same prop form. 
 const getUserPropositions = (document) => {
   // We cache these for multiple pass n-compact validation
-  if (document.lastChild().userPropositions) 
-      return document.lastChild().userPropositions
+  if (document.lastChild().userPropositions)
+    return document.lastChild().userPropositions
   // if not cached, fetch them   
-  const allE=document.lastChild().propositions()
+  const allE = document.lastChild().propositions()
   // filter out duplicates so we don't make multiple copies of the same
   // instantiation
   const E = []
   const dups = new Set()
-  allE.forEach( e => {
-    const eprop = e.prop().replace( /^[:]/, '' ) 
+  allE.forEach(e => {
+    const eprop = e.prop().replace(/^[:]/, '')
     if (!dups.has(eprop)) {
-        dups.add(eprop) 
-        E.push(e) 
+      dups.add(eprop)
+      E.push(e)
     }
   })
   // cache it
@@ -734,140 +736,140 @@ const getUserPropositions = (document) => {
 //
 // TODO: Add to Problem class and Matching as needed. We assume the bodies of
 //       ForSomes are expressions for now.
-const matchPropositions = (p,e) => {
+const matchPropositions = (p, e) => {
   // if they are both Expressions proceed as usual.
   if (p instanceof Expression && e instanceof Expression) {
-      return Array.from(new Problem(p,e).solutions())
-  // if they are declarations that declare the same number of symbols ...
+    return Array.from(new Problem(p, e).solutions())
+    // if they are declarations that declare the same number of symbols ...
   } else if (p instanceof Declaration && e instanceof Declaration &&
-              p.symbols().length===e.symbols().length) {
+    p.symbols().length === e.symbols().length) {
     // ... and neither has a body, just match their symbols
-    const esymbols=e.symbols()
-    let merged = p.symbols().map( (x,k) => [x,esymbols[k]] ).flat()
+    const esymbols = e.symbols()
+    let merged = p.symbols().map((x, k) => [x, esymbols[k]]).flat()
     if (!p.body() && !e.body()) {
       return Array.from(new Problem(...merged).solutions())
-    // ... but if both have bodies, include them in the problem  
+      // ... but if both have bodies, include them in the problem  
     } else if (p.body() && e.body()) {
-      return Array.from(new Problem(...merged,p.body(),e.body()).solutions())
+      return Array.from(new Problem(...merged, p.body(), e.body()).solutions())
     }
   }
   // if we made it to here it's not going to match      
   return []
-} 
+}
 
 // Instantiate!  The second argument is the n level for n-compact validation.
-const instantiate = (document,n=1) => {
-  if (n==0) return
-                                        // time('Get the user propositions')
+const instantiate = (document, n = 1) => {
+  if (n == 0) return
+  // time('Get the user propositions')
   // get the user's Propositions to match
   const E = getUserPropositions(document)
-                                        // timeEnd('Get the user propositions') 
-                                        
+  // timeEnd('Get the user propositions') 
+
   // now loop through all of the formulas, check if they are finished and if
   // not, match all of their Weeny propositions to all of the elements of E to
   // find instantiations and partial instantiations
-  document.formulas().forEach( f => {
-      // skip finished formulas
-      if (!f.finished && 
-          // only try full Weeny formulas when n=1 since this is the last pass
-          // and check that the formula has some non-forbidden patterns to
-          // match
-          ((n===1 && f.isWeeny) || (n>1 && f.weenies && f.weenies.length>0))) {
-        // get this formula's maximally weeny patterns (must be cached)   
-        f.weenies.forEach( p => {
-            // try to match this pattern p to every user proposition e
-            E.forEach( e => {
-              // get all valid solutions 
-              // declarations with body are a special case
-              
-              let solns =[]
-                                        // console.log(`${p} ${e}`)
-                                        // time('Solve one matching problem')
-              try { solns = matchPropositions(p,e) } catch { }
-                                        // timeEnd('Solve one matching problem')
-              // for each solution, try to make a valid instantiation of f
-              solns.forEach( s => {
-                let inst
-                                        // time('Instantiate a formula')
-                try { inst = Formula.instantiate(f,s) } catch { return }
-                                        // timeEnd('Instantiate a formula')
-                // all instantiations are givens
-                inst.makeIntoA('given')                         
-                // if we made it here, we have a valid instantation
-                inst.formula = true
-                // it might contain a Let which was instantiated by some other
-                // statment, so we might have to add the tickmarks.
-                //
-                // Note: we had to check that in a rule like :{:{:Let(x) (@ P
-                //       x)} (@ P y)} that it doesn't instantiate (@ P y) first
-                //       with a constant lambda expression like 𝜆y,Q(z) which
-                //       has z free and then instantiate the metavar x with z,
-                //       since then 'the free z becomes bound' in a sense.
-                //       Otherwise you could conclude, e.g. ∀y,Q(z) from {
-                //       :Let(z) Q(z) } instead of just ∀y,Q(y). 
-                assignProperNames(inst)
-                // TODO: when making a proper testing suite check if we need to
-                //       do any of these to the instantiation (and anything
-                //       else)
-                //
-                //     processLets( inst , false ) 
-                //     processForSomes( inst )
-                //
-                // let's also remember which expression created this
-                // instantiation, what original Rule it instantiates, and which
-                // pass for debugging and feedback.
-                //
-                inst.creators = (f.creators)?[...f.creators]:[]
-                inst.creators.push(e)
-                // Rules aren't an instantiationOf anything, but partials and
-                // instantiations are.
-                inst.instantiationOf = (f.instantiationOf)?f.instantiationOf:f
-                //  Note that .pass is the number of passes remaining. 
-                inst.pass = n
-                inst.numsolns = solns.length
-                inst.weenienum = f.weenies.length 
-                // if the instantiation left some metavariables, we will want to
-                // cache it's domain info and mark it as a formula for use
-                // possible use in the next round
-                                        // time('Cache Formula Domain Info')
-                cacheFormulaDomainInfo(inst)
-                                        // timeEnd('Cache Formula Domain Info')
-                // if there are no more metavars, flag it as a completed
-                // instantiation
-                if (inst.domain.size===0) { 
-                  inst.unmakeIntoA('Rule')
-                  inst.unmakeIntoA('Part')
-                  inst.makeIntoA('Inst')
-                  inst.instantiation=true 
-                } else {
-                  inst.unmakeIntoA('Rule')
-                  inst.makeIntoA('Part')
-                  // since it still has metavariables, ignore it for
-                  // propositional form
-                  inst.ignore = true
-                }
-                // either way, rename ForSome constants that aren't metavars. We
-                // should not have to insert a copy of the bodies of ForSomes
-                // since they should be there automatically because they were in
-                // the formulas. 
-                //
-                // TODO: 
-                //  * we might want to upgrade .bodyof to an LC attribute since
-                //    Formula.instantiate doesn't copy that attribute
-                //
-                // also rename the bindings to match what the user would have
-                // for the same expressions in his document
-                                        // time('Rename bindings')
-                inst.statements().forEach( x => renameBindings(x) )
-                                        // timeEnd('Rename bindings')
-                // then insert this intantiation after its formula
-                Formula.addCachedInstantiation( f , inst )
-              })
-            })
+  document.formulas().forEach(f => {
+    // skip finished formulas
+    if (!f.finished &&
+      // only try full Weeny formulas when n=1 since this is the last pass
+      // and check that the formula has some non-forbidden patterns to
+      // match
+      ((n === 1 && f.isWeeny) || (n > 1 && f.weenies && f.weenies.length > 0))) {
+      // get this formula's maximally weeny patterns (must be cached)   
+      f.weenies.forEach(p => {
+        // try to match this pattern p to every user proposition e
+        E.forEach(e => {
+          // get all valid solutions 
+          // declarations with body are a special case
+
+          let solns = []
+          // console.log(`${p} ${e}`)
+          // time('Solve one matching problem')
+          try { solns = matchPropositions(p, e) } catch { }
+          // timeEnd('Solve one matching problem')
+          // for each solution, try to make a valid instantiation of f
+          solns.forEach(s => {
+            let inst
+            // time('Instantiate a formula')
+            try { inst = Formula.instantiate(f, s) } catch { return }
+            // timeEnd('Instantiate a formula')
+            // all instantiations are givens
+            inst.makeIntoA('given')
+            // if we made it here, we have a valid instantation
+            inst.formula = true
+            // it might contain a Let which was instantiated by some other
+            // statment, so we might have to add the tickmarks.
+            //
+            // Note: we had to check that in a rule like :{:{:Let(x) (@ P
+            //       x)} (@ P y)} that it doesn't instantiate (@ P y) first
+            //       with a constant lambda expression like 𝜆y,Q(z) which
+            //       has z free and then instantiate the metavar x with z,
+            //       since then 'the free z becomes bound' in a sense.
+            //       Otherwise you could conclude, e.g. ∀y,Q(z) from {
+            //       :Let(z) Q(z) } instead of just ∀y,Q(y). 
+            assignProperNames(inst)
+            // TODO: when making a proper testing suite check if we need to
+            //       do any of these to the instantiation (and anything
+            //       else)
+            //
+            //     processLets( inst , false ) 
+            //     processForSomes( inst )
+            //
+            // let's also remember which expression created this
+            // instantiation, what original Rule it instantiates, and which
+            // pass for debugging and feedback.
+            //
+            inst.creators = (f.creators) ? [...f.creators] : []
+            inst.creators.push(e)
+            // Rules aren't an instantiationOf anything, but partials and
+            // instantiations are.
+            inst.instantiationOf = (f.instantiationOf) ? f.instantiationOf : f
+            //  Note that .pass is the number of passes remaining. 
+            inst.pass = n
+            inst.numsolns = solns.length
+            inst.weenienum = f.weenies.length
+            // if the instantiation left some metavariables, we will want to
+            // cache it's domain info and mark it as a formula for use
+            // possible use in the next round
+            // time('Cache Formula Domain Info')
+            cacheFormulaDomainInfo(inst)
+            // timeEnd('Cache Formula Domain Info')
+            // if there are no more metavars, flag it as a completed
+            // instantiation
+            if (inst.domain.size === 0) {
+              inst.unmakeIntoA('Rule')
+              inst.unmakeIntoA('Part')
+              inst.makeIntoA('Inst')
+              inst.instantiation = true
+            } else {
+              inst.unmakeIntoA('Rule')
+              inst.makeIntoA('Part')
+              // since it still has metavariables, ignore it for
+              // propositional form
+              inst.ignore = true
+            }
+            // either way, rename ForSome constants that aren't metavars. We
+            // should not have to insert a copy of the bodies of ForSomes
+            // since they should be there automatically because they were in
+            // the formulas. 
+            //
+            // TODO: 
+            //  * we might want to upgrade .bodyof to an LC attribute since
+            //    Formula.instantiate doesn't copy that attribute
+            //
+            // also rename the bindings to match what the user would have
+            // for the same expressions in his document
+            // time('Rename bindings')
+            inst.statements().forEach(x => renameBindings(x))
+            // timeEnd('Rename bindings')
+            // then insert this intantiation after its formula
+            Formula.addCachedInstantiation(f, inst)
+          })
+        })
         // we've matched every user proposition to every weenie pattern in
         // this formula, and don't want to do it again on future passes, so
         // mark it as finished.
-        f.finished=true
+        f.finished = true
       })
     }
   })
@@ -878,7 +880,7 @@ const instantiate = (document,n=1) => {
   //   are inserted, since this makes a pass through the entire document on each
   //   pass, which has a lot of redundancy (but perhaps not significant).
   markDeclaredSymbols(document)
-  instantiate(document,n-1)
+  instantiate(document, n - 1)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -899,9 +901,10 @@ const instantiate = (document,n=1) => {
 // created by expressions that appear in the user's document that come after the
 // target.
 LogicConcept.prototype.irrelevantTo = function (target) {
-  if (!target.ancestors()) console.error(`No f'n way for ${target}`);
-  return target.ancestors().indexOf(this)<0 && 
-    !this.hasAncestorSatisfying( z => { return z.isAccessibleTo(target,true) } )
+  // it's not an ancestor of the target and has an ancestor that is not
+  // accessible to the target
+  return target.ancestors().indexOf(this) < 0 &&
+    !this.hasAncestorSatisfying(z => { return z.isAccessibleTo(target, true) })
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -921,8 +924,8 @@ const context = 'context'
 // doesn't exit, create it, even if no args are supplied. If it already has one
 // add the symbol names to the end, whether or not they are duplicates.  We will
 // let scope checking worry about that.
-LogicConcept.prototype.addToContext = function ( ...names ) {
-  if (!this.hasAttribute(context)) { this.setAttribute(context,[]) }
+LogicConcept.prototype.addToContext = function (...names) {
+  if (!this.hasAttribute(context)) { this.setAttribute(context, []) }
   this.getAttribute(context).push(...names)
 }
 
@@ -931,12 +934,12 @@ LogicConcept.prototype.addToContext = function ( ...names ) {
 // TODO: this is no longer needed, but perhaps will be useful, so we keep it for
 //       now.
 const markDeclarationContexts = doc => {
-  doc.declarations().filter(d=>!d.isA('Declare'))
-    .forEach( decl => {
-      const syms = decl.symbols().map( x => x.text()) 
-      decl.scope(false).filter( x => x.isAStatement()||x.isADeclaration())
-      .forEach( s => { s.addToContext(...syms) })
-  })
+  doc.declarations().filter(d => !d.isA('Declare'))
+    .forEach(decl => {
+      const syms = decl.symbols().map(x => x.text())
+      decl.scope(false).filter(x => x.isAStatement() || x.isADeclaration())
+        .forEach(s => { s.addToContext(...syms) })
+    })
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -982,20 +985,21 @@ const processDoc = (doc) => {
 // TODO:
 // * finish this
 let Report = {}
-const Benchmark = function ( f , name ) {
-   const start = Date.now()
-   f()
-   const t = Date.now()-start
-   if (!Report[name]) { 
-     Report[name] = { calls:1 , time:t} 
-   } else { 
-     Report[name].calls++
-     Report[name].time += t
-   }
+const Benchmark = function (f, name) {
+  const start = Date.now()
+  f()
+  const t = Date.now() - start
+  if (!Report[name]) {
+    Report[name] = { calls: 1, time: t }
+  } else {
+    Report[name].calls++
+    Report[name].time += t
+  }
 }
 
-export default { getUserPropositions, instantiate, markDeclarationContexts,
-  load, processHints, processDoc, processDomains, subscript,  
+export default {
+  getUserPropositions, instantiate, markDeclarationContexts,
+  load, processHints, processDoc, processDomains, subscript,
   cacheFormulaDomainInfo, Benchmark, Report
 }
 ///////////////////////////////////////////////////////////////////////////////
