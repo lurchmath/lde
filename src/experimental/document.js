@@ -191,6 +191,11 @@ export const processShorthands = L => {
     m.remove()
   } )
 
+  processSymbol( '!✗' , m => { 
+    m.previousSibling().expectedResult = 'invalid' 
+    m.remove()
+  } )
+
   processSymbol( '---' , m => { 
     if (m.parent().isAComment()) m.parent().ignore=true 
   })
@@ -537,7 +542,7 @@ const loadLibs = (...libs) => {
     // an error
     if (!f instanceof Environment || f.isALetEnvironment() )
       throw new Error('A rule must be an environment that is not a Let-environment.')
-    // it's not, so mark it as a Rule, and convert it into a formula 
+    // it's not, so mark it as a Rule, and convert it into a formula
     f.makeIntoA('Rule')
     // the second arg specifies it should be done in place
     Formula.from(f,true)
