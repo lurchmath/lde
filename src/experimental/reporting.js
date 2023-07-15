@@ -20,6 +20,7 @@ import Compact from './global-validation-lab.js'
 // load chalk and stripAnsi
 import chalk from 'chalk'
 import erase from 'strip-ansi'
+import { tab,  indent } from './extensions.js'
 // load the commands from Lurch and Compact
 Object.assign( global, Lurch )
 Object.assign( global, Compact )
@@ -61,14 +62,14 @@ const preemiex   = xPen('!✗')
 // Utilities
 //
 
-// Return a string of spaces of length n
-const tab = (n , char=' ') => { return Array.seq(()=>'',1,n+1).join(char) }
+// // Return a string of spaces of length n
+// const tab = (n , char=' ') => { return Array.seq(()=>'',1,n+1).join(char) }
 
-// indent string s with a tab of size n
-const indent = (s,n) => {
-  const t = tab(n)
-  return t+s.replaceAll(/\n(.)/g,'\n'+t+'$1')
-}
+// // indent string s with a tab of size n
+// const indent = (s,n) => {
+//   const t = tab(n)
+//   return t+s.replaceAll(/\n(.)/g,'\n'+t+'$1')
+// }
 
 // report the time it took to execute function f
 const timer = f => {
@@ -134,7 +135,7 @@ const everything = { showDeclares, showAttributes , showBodies, showContexts,
                      showRules , showUserThms , showPartials,
                      showInstantiations , showNumbers , showProperNames ,
                      showUserRules , showUserInstantiations , showValidation
-                   }  
+                   }                     
 // simple report option
 const show = { showDeclares, showAttributes , showBodies, showContexts,
                showRules , showUserThms , showPartials,
@@ -146,6 +147,9 @@ const detailed = {  showDeclares, showRules , showPartials, showInstantiations ,
                     showNumbers , showBodies, showProperNames , showUserRules ,
                     showUserThms , showValidation 
                  }
+// clean report option
+const allclean = { showInstantiations, showNumbers, showProperNames, 
+                   showUserThms , showValidation } 
 // clean report option
 const clean = { showInstantiations, showNumbers, showSimpleProperNames , showUserThms ,
                 showValidation } 
@@ -496,7 +500,7 @@ export default {
   decPen , commentPen , headingPen , docPen , linenumPen , itemPen ,
   
   // report definitions
-  everything, show, detailed , clean , user ,
+  everything, show, detailed , allclean, clean , user ,
   
   // report options
   showAttributes , showContexts , showRules , showInstantiations , 
