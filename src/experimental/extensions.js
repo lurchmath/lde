@@ -339,3 +339,13 @@ export const mc = s => { return MathConcept.fromSmackdown(s)[0] }
 // if it doesn't. The default extension is 'js'.
 export const checkExtension = ( name , ext = 'js' ) => 
     ( !(new RegExp(`\\.${ext}$`).test(name)) ) ? name +'.' + ext : name 
+
+// string formatting utilities used in more than one place
+// Return a string of spaces of length n
+export const tab = (n , char=' ') => { return Array.seq(()=>'',1,n+1).join(char) }
+
+// indent string s with a tab of size n
+export const indent = (s,n) => {
+  const t = tab(n)
+  return t+s.replaceAll(/\n(.)/g,'\n'+t+'$1')
+}    
