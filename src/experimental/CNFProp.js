@@ -17,6 +17,7 @@ import { Symbol as LurchSymbol } from '../symbol.js'
 import { Expression } from '../expression.js'
 import { Declaration } from '../declaration.js'
 import Compact from '../experimental/global-validation-lab.js'
+import { tab, indent } from './extensions.js'
 let subscript = Compact.subscript
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -35,9 +36,9 @@ export class CNFProp {
   }
 
   // Make the CNFProp from an LC - this is the main purpose of this class
-  static fromLC ( L , catalog = L.catalog(), target = L , checkPreemies = false) {
+  static fromLC ( L , catalog = L.cat, target = L , checkPreemies = false) {
         
-    // catalog = catalog || L.catalog()
+    catalog = catalog || L.catalog()
 
     // TODO: for now, simply use two separate routines for checkPreemies vs not, and
     //       optionally merge them later
@@ -222,17 +223,21 @@ export class CNFProp {
   }
   
   // convert this CNFProp to a legible human readable form using the supplied catalog
-  toNice (catalog) {
+  toNice (catalog, level = 0) {
+    // get the array of nice kids, indented by level+1
     let ans = this.kids.map( x => {
       // lookup nonzero integers in the catalog
-      if ( Number.isInteger(x) ) { return ((x<0)?':':'')+catalog[Math.abs(x)-1]
+      if ( Number.isInteger(x) ) { // +`${Math.abs(x)}`
+        return indent(((x<0)?':':'')+catalog[Math.abs(x)-1],(level+1)*2) 
       // x must be a CNFProp
-      } else { return x.toNice(catalog) } 
+      } else { return x.toNice(catalog, level+1) } 
     } )
-    const joint = (this.op === 'and') ? ' and ' : ' '
-    ans = ans.join(joint)
-    return (this.negated) ? `:{ ${ans} }\n` : 
-           (this.op==='and') ? `{ ${ans} }\n` : ans
+    // join them with newlines
+    ans = ans.join('\n')
+    // wrap the whole thing appropriately
+    // say(`This is negated? ${this.negated}`)
+    return (this.negated) ? tab(level*2)+`:{\n${ans}}` :  
+           (this.op==='and') ? tab(level*2)+`{\n${ans}}` : tab(level*2)+`{\n${ans}}`  
   }
   
   // the variable name when showing switch variables in Algebraic form 
@@ -351,10 +356,13 @@ Expression.prototype.prop = function ( ignore = [] ) {
         ( L instanceof LurchSymbol &&   
             // either declared by one of the ignored lets, or
           ( (L.declaredBy && ignore.includes(L.declaredBy)) ||
-              // undeclared (e.g. in an instantiation) and 
+              // undeclared (e.g. in an instantiation or binding) and 
             ( !(L.declaredBy) && 
-              // has the same text as something declared by one of the ignored lets
-              ignore.some( x => x.symbols().some( x => x.text()===L.text()) ) 
+              // has the same propername as something declared by one of the
+              // ignored lets
+              ignore.some( x => x.symbols().some( x => 
+                x.properName()===L.properName()) 
+              ) 
             )
           )
         )
@@ -454,7 +462,7 @@ Declaration.prototype.lookup = function ( catalog, ignores = []) {
 Environment.prototype.cnf = function ( target=this , checkPreemies = false ) {
   // get the catalog.. this assumes this environment is a document and it has
   // been cached
-  let cat = this.cat
+  let cat = this.cat || this.catalog()
   // number the switch vars starting at one more than the catalog length
   let n = cat.length+2 
   // make the CNFProp from this LC, either with or without the preemie check
@@ -484,5 +492,11 @@ LogicConcept.prototype.toAlgebraic = function (
 LogicConcept.prototype.toEnglish = function ( target = this, checkPreemies = false ) { 
   let cat = this.catalog()
   return CNFProp.fromLC(this,cat,target,checkPreemies).toEnglish(cat)
+}
+
+// Even more useful for seeing the raw prop form of small LCs
+LogicConcept.prototype.toNice = function ( target = this, checkPreemies = false ) { 
+  let cat = this.catalog()
+  return say(stringPen(CNFProp.fromLC(this,cat,target,checkPreemies).toNice(cat)))
 }
 ////////////////////////////////////////////////////////////////////////////////
