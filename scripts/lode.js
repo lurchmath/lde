@@ -125,40 +125,41 @@ global.catlib = function(fname) {
   console.log(defaultPen(execStr(
     `cat ${Document.libPath}${checkExtension(fname,'lurch')}`)))
 }
+
 // List both libs and proofs
 const list = () => { console.log(
   `\n${headingPen('Available Libraries:')}\n`+
   `${docPen(execStr('cd '+Document.libPath+';ls -pRC '))}\n`+
   `${headingPen('Available Proofs:')}\n` +
   `${docPen(execStr('cd '+Document.proofPath+';ls -pRC;cd ../../../scripts '))}`
-)}
-
-////////////////////////////////////////////////////////////////////////////
-//
-// Welcome splash screen
-//
-console.log(`\nWelcome to ${defaultPen("𝕃𝕠𝕕𝕖")}`+
-            ` - the Lurch Node app\n(type .help for help)\n`)
-// if there is an argument to lode.js, i.e., if someone runs this script as
-//
-// > node lode fname
-//  
-// then initialize the lode instance with the script named fname.js
-if (process.argv.length>2) {
-  let fname=process.argv[2]
-  initialize(fname)
-// if there is no argument, try to load init.js in the current folder
-} else if ( fs.existsSync('init.js') ) {
-  initialize('init')
-}
-// start a new REPL context
-//
-// Note: that we use the useGlobal parameter so the current context is shared
-// with this script.  Otherwise by importing things into the repl context we
-// ended up with errors due to there being two contexts and uncertainty about
-// which one is running what.  That's why we use global.* above to import things.
-//
-const rpl = repl.start( { 
+  )}
+  
+  ////////////////////////////////////////////////////////////////////////////
+  //
+  // Welcome splash screen
+  //
+  console.log(`\nWelcome to ${defaultPen("𝕃𝕠𝕕𝕖")}`+
+  ` - the Lurch Node app\n(type .help for help)\n`)
+  // if there is an argument to lode.js, i.e., if someone runs this script as
+  //
+  // > node lode fname
+  //  
+  // then initialize the lode instance with the script named fname.js
+  if (process.argv.length>2) {
+    let fname=process.argv[2]
+    initialize(fname)
+    // if there is no argument, try to load init.js in the current folder
+  } else if ( fs.existsSync('init.js') ) {
+    initialize('init')
+  }
+  // start a new REPL context
+  //
+  // Note: that we use the useGlobal parameter so the current context is shared
+  // with this script.  Otherwise by importing things into the repl context we
+  // ended up with errors due to there being two contexts and uncertainty about
+  // which one is running what.  That's why we use global.* above to import things.
+  //
+  const rpl = repl.start( { 
     ignoreUndefined: true,
     prompt: defaultPen('▶︎')+' ',
     useGlobal: true,
@@ -180,61 +181,61 @@ const rpl = repl.start( {
         )
       } 
     }
-} )
-////////////////////////////////////////////////////////////////////////////
-
-// define the .features command
-rpl.defineCommand( "features", {
+  } )
+  ////////////////////////////////////////////////////////////////////////////
+  
+  // define the .features command
+  rpl.defineCommand( "features", {
     help: "Show Lode features",
     action() {
-        console.log( chalk.ansi256(248)(
-`
-${headingPen('Lode Features')}
-  Lode is the Node.js REPL with all of the LDE modules loaded at the
-  start. If the expression echoed is an LC (resp. MC) or array of those, its 
-  putdown (resp. smackdown) form is printed on the next line instead of the 
-  usual default (util.inspect). In addition, it provides the following.
-
-  ${headingPen('Useful Syntactic sugar')}
-    ${itemPen('lc(s)')}         : constructs an LC from the putdown string s
-    ${itemPen('mc(s)')}         : constructs an MC from the smackdown string s
-    ${itemPen('X.report()')}    : prints a syntax highlighted, numbered view of LC X
-                    Optional args 'everything', 'show', 'detailed', 'clean' and 'user' 
-                    (with no quotes) show variations
-    ${itemPen('X.inspect(x,d)')}: prints the object structure of X to depth d. If d
-                    is omitted the default is 1
-    ${itemPen('.list')}         : show the list of known libs and proofs
-    ${itemPen('.test')}         : run the acidtests script
-    ${itemPen('exec(command)')} : execute the given shell commmand and print the result
-    ${itemPen('initialize()')}  : loads and executes 'initproof.js' from the scripts
-                    folder. A different file can be executed by calling it with
-                    the optional filename, e.g. initialize('acidtests') 
-    ${itemPen('compute(s)')}    : calls Algebrite.run(s) 
-                    (see Algebrite docs at algebrite.org)')}
-    
-  ${headingPen('Extra Packages')}  
-    ${itemPen('Algebrite')}     : a computer algebra system (see algebrite.org)
-    ${itemPen('satSolve')}      : a boolean satisfiability program 
-                    (see www.comp.nus.edu.sg/~gregory/sat)
-    ${itemPen('chalk')}         : a Node package to colorize text output to the terminal 
-                    (see www.npmjs.com/package/chalk)
-                    
-`
+      console.log( chalk.ansi256(248)(
+        `
+        ${headingPen('Lode Features')}
+        Lode is the Node.js REPL with all of the LDE modules loaded at the
+        start. If the expression echoed is an LC (resp. MC) or array of those, its 
+        putdown (resp. smackdown) form is printed on the next line instead of the 
+        usual default (util.inspect). In addition, it provides the following.
+        
+        ${headingPen('Useful Syntactic sugar')}
+        ${itemPen('lc(s)')}         : constructs an LC from the putdown string s
+        ${itemPen('mc(s)')}         : constructs an MC from the smackdown string s
+        ${itemPen('X.report()')}    : prints a syntax highlighted, numbered view of LC X
+        Optional args 'everything', 'show', 'detailed', 'clean' and 'user' 
+        (with no quotes) show variations
+        ${itemPen('X.inspect(x,d)')}: prints the object structure of X to depth d. If d
+        is omitted the default is 1
+        ${itemPen('.list')}         : show the list of known libs and proofs
+        ${itemPen('.test')}         : run the acidtests script
+        ${itemPen('exec(command)')} : execute the given shell commmand and print the result
+        ${itemPen('initialize()')}  : loads and executes 'initproof.js' from the scripts
+        folder. A different file can be executed by calling it with
+        the optional filename, e.g. initialize('acidtests') 
+        ${itemPen('compute(s)')}    : calls Algebrite.run(s) 
+        (see Algebrite docs at algebrite.org)')}
+        
+        ${headingPen('Extra Packages')}  
+        ${itemPen('Algebrite')}     : a computer algebra system (see algebrite.org)
+        ${itemPen('satSolve')}      : a boolean satisfiability program 
+        (see www.comp.nus.edu.sg/~gregory/sat)
+        ${itemPen('chalk')}         : a Node package to colorize text output to the terminal 
+        (see www.npmjs.com/package/chalk)
+        
+        `
         ) )
         this.displayPrompt()
-    }
+      }
 } )
 
 // define the Lode .list command
 rpl.defineCommand( "list", {
-    help: "List currently available Lode libraries and proofs",
-    action() { 
-      list()
-      this.displayPrompt()
-    }
-  })
+  help: "List currently available Lode libraries and proofs",
+  action() { 
+    list()
+    this.displayPrompt()
+  }
+})
 
-  // define the Lode .list command
+// define the Lode .list command
 rpl.defineCommand( "test", {
   help: "Run the default test script ('acidtests.js').",
   action() { 
@@ -242,5 +243,8 @@ rpl.defineCommand( "test", {
     this.displayPrompt()
   }
 })
+
+// export the repl.writer to be available at the repl command line
+global.write = s => console.log(rpl.writer(s))
 
 /////////////////////////////////////////////
