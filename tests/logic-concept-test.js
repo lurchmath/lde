@@ -22,7 +22,7 @@ describe( 'LogicConcept module', () => {
         expect( LogicConcept ).to.be.ok
     } )
 
-    it( 'Should correcty construct LogicConcepts', () => {
+    it( 'Should correctly construct LogicConcepts', () => {
         // Can we create an empty one?
         let L = new LogicConcept()
         expect( L ).to.be.ok
