@@ -6,9 +6,8 @@
 (--- "Example 11b from END")
 {
    (--- "Trying again to cheat the subset plus rule.")
-   (--- "Note this DOES validate if we define ⊆+ using a Let with no body!")
    // Thm/Pf attempt 
    { :[ x ] :(∈ x T) 
-     (⊆ S T)
-   }
-} ✔︎
+     (⊆ S T) // preemie 
+   } // preemie 
+} ✔︎  

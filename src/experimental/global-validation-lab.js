@@ -422,11 +422,11 @@ Environment.prototype.validateall = function (
         // narrow it down to the specific preemies causing this let-environment
         // to be a preemie
         //
-        // TODO: for now we're just brute force checking all of the conclusions
+        // TODO: for now we're just brute force checking all of the valid conclusions
         // of the offending preemie let-environment.  Upgrade this to do the
         // recursive descent like we do for the prop check above.
-        L.parent().conclusions().filter(x=>!x.ignore)
-         .forEach( conc => {
+        L.parent().conclusions()
+         .filter( x => !x.ignore && Validation.result(x).result==='valid')         .forEach( conc => {
           let result = this.validate(conc,true)
           if (!result) {
             conc.ancestors().forEach( a => {
@@ -491,7 +491,7 @@ Environment.prototype.validateall = function (
 // * libs is the same thing for libraries, but defaults to LurchLib if omitted
 //
 // TODO: maybe go until a fixed point
-const load = (docs, libs = undefined, n = 10) => {
+const load = (docs, libs = undefined, n = 4) => {
   // make a new document
   const doc = new Document(docs, libs)
   // process the pre-instantiated document
@@ -630,12 +630,12 @@ const matchGivens = (a, b) => {
 const processHints = L => {
   const formulas = L.formulas()
   const BIH = [...L.descendantsSatisfyingIterator(x => x.isA('BIH'))]
-  BIH.forEach(i => {
+  BIH.forEach(b => {
     let found = false
     formulas.forEach(f => {
-      const toggle = matchGivens(f, i);
+      const toggle = matchGivens(f, b);
       try {
-        ;[...Formula.allPossibleInstantiations(f, i)].forEach(s => {
+        ;[...Formula.allPossibleInstantiations(f, b)].forEach(s => {
           found = true
           const inst = Formula.instantiate(f, s)
           assignProperNames(inst)
@@ -644,15 +644,16 @@ const processHints = L => {
           inst.unmakeIntoA('Part')
           inst.makeIntoA('Inst')
           inst.instantiation = true
+          inst.rule = f.rule || f
           if (!inst.creators) inst.creators = []
-          inst.creators.push(i)
+          inst.creators.push(b)
           Formula.addCachedInstantiation(f, inst)
         })
-        // if it's not a BIH, mark it as such with .badBIH
       } catch { }
       if (toggle) { f.toggleGiven() }
     })
-    if (!found) { i.badBIH = true }
+    // if it's not a BIH, mark it as such with .badBIH
+    if (!found) { b.badBIH = true }
   })
 }
 
@@ -848,6 +849,9 @@ const instantiate = (document, n = 1) => {
               // propositional form
               inst.ignore = true
             }
+            // whether it's a Part or an Inst, save the rule it originates from
+            inst.rule = f.rule || f
+
             // either way, rename ForSome constants that aren't metavars. We
             // should not have to insert a copy of the bodies of ForSomes
             // since they should be there automatically because they were in

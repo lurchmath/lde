@@ -10,7 +10,7 @@ let start = Date.now()
 
 const biglib = ['Prop','PropThm','Pred','PredThm','Peano','Number Theory']
 // Load Acid Tests
-acid=[1,4,5,6,7,8,9,10,'11a','11b','11c','11d','11e'].map( (ex,k) => 
+acid=[1,4,5,6,7,8,9,10,'11a','11b','11c','11d','11e','Induction'].map( (ex,k) => 
      load(`acid tests/acid ${k} Example ${ex}.lurch`,`Acid Tests`))
 // Load Math 299 tests
 acid.push(load('math-299-prop','Prop'))

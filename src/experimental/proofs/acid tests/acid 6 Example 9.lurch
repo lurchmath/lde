@@ -10,15 +10,13 @@
      {:[ z ]
        {:(< 2 z)
          (< 1 z) 
-         (∀ x , (< 1 x))  // the copy of this in the headless should be invalid
-                          // but it's not because the instantiations from below
-                          // actually justify it!
+         (∀ x , (< 1 x)) // a preemie !✗ 
        }
       (⇒ (< 2 z) (∀ x , (< 1 x)))
      } ✔︎
      (∀ y , (⇒ (< 2 y) (∀ x , (< 1 x))) ) ✔︎
      (⇒ (< 2 3) (∀ x , (< 1 x))) ✔︎
-     (∀ x , (< 1 x)) ✔
+     (∀ x , (< 1 x)) ✔︎
      (< 1 1) ✔︎
-   } 
+   }
 }

@@ -348,12 +348,22 @@ export const processForSomeBodies = doc => {
   // metavariables
   const forSomes = doc.forSomes(true).filter( dec =>
      Formula.domain(dec).size===0)
+
+  // TODO: delete this if not needed.   
+  // get the lets with a body (hence the 'true') that don't contain 
+  // metavariables
+  const lets = doc.lets(true).filter( dec =>
+    Formula.domain(dec).size===0)
+  // push the lets onto the forSomes array
+  forSomes.push(...lets) 
+
   // insert a copy of the body after the declaration and mark where it came from
   // with the js attribute .bodyof, unless it's already there
   forSomes.forEach( decl => {
     if (!(decl.nextSibling() && decl.nextSibling().bodyof &&
           decl.nextSibling().bodyof === decl )) {      
       let decbody = decl.body().copy()
+      if (decl.isA('given')) decbody.makeIntoA('given')
       decbody.insertAfter(decl)
       decbody.bodyof = decl
       decbody.makeIntoA('Body')
@@ -364,18 +374,19 @@ export const processForSomeBodies = doc => {
 //////////////////////////////////////////////////////////////////////////////
 // Assign Proper Names
 //
-// Rename any symbol declared by a declartion with body by appending the
-// putdown form of their body. Rename any symbol in the scope of a Let-without body
-// by appending a tick mark.
+// Rename any symbol declared by a declartion with body by appending the putdown
+// form of their body. Rename any symbol in the scope of a Let-without body by
+// appending a tick mark.
 //
-// For bodies that have a binding we want to use the alpha-equivalent canonical form. 
+// For bodies that have a binding we want to use the alpha-equivalent canonical
+// form.
 export const assignProperNames = doc => {
   
   const metavariable = "LDE MV"
   
   // get the declarations with a body (hence the 'true') which is an expression
   // TODO: we don't support environments as bodies yet.  Decide or upgrade.
-  const declarations = doc.declarations(true).filter( x => 
+  let declarations = doc.declarations(true).filter( x => 
                          x.body() instanceof Expression)
   
   // rename all of the declared symbols with body that aren't metavars
@@ -390,11 +401,28 @@ export const assignProperNames = doc => {
     })
   })
 
-  // Now add tick marks for all symbols declared with a the Let's without body.
+  // if it is an instantiation it is possible that some of the declarations
+  // without bodies have been instantiated with ProperNames already (from the
+  // user's expressions) that are not the correct ProperNames for the
+  // instantiation, so we fix them.  
+  // TODO: merge this with the code immediately above.
+  declarations = doc.declarations().filter( x => x.body()===undefined )
+  declarations.forEach( decl => {
+    decl.symbols().filter(s=>!s.isA(metavariable)).forEach( c => {
+      // Compute the new ProperName
+      c.setAttribute('ProperName', c.text())
+      // apply it to all c's in it's scope
+      decl.scope().filter( x => x instanceof LurchSymbol && x.text()===c.text())
+        .forEach(s => s.setAttribute('ProperName',c.getAttribute('ProperName')))
+    })
+  })
+
+  // Now add tick marks for all symbols declared with a the Let's.
   doc.lets().forEach( decl => {
     decl.symbols().filter(s=>!s.isA(metavariable)).forEach( c => {
       // Compute the new ProperName
-      c.setAttribute( 'ProperName' , c.text() + "'" )
+      let cname = c.properName()
+      if (!cname.endsWith("'")) c.setAttribute( 'ProperName' , cname + "'" )
       c.declaredBy = decl
       // apply it to all c's in it's scope
       decl.scope().filter( x => x instanceof LurchSymbol && x.text()===c.text())
