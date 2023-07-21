@@ -6,3 +6,4 @@ tutorials/output/
 backups/
 scripts/initmisc.js
 .vscode/extensions.json
+scripts/initproofs.js
