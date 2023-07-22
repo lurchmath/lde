@@ -572,14 +572,10 @@ const processDomains = doc => doc.formulas().forEach(f => {
   cacheFormulaDomainInfo(f)
   // If there are no metavariables in this formula, instantiate it so it is
   // available for validation.
-  //
-  // TODO:
-  // * at some point go through and clean up the difference between 'formula'
-  //   and 'Rule', and things lke inst.instantiation vs inst.isA('Inst')
   if (f.domain.size === 0) {
     // let inst=f.copy()
     // assignProperNames(inst)
-    f.unmakeIntoA('formula')
+    f.unmakeIntoA('Rule')
     f.makeIntoA('Inst')
     f.makeIntoA(instantiation)
     f.instantiation = true
@@ -797,7 +793,9 @@ const instantiate = (document, n = 1) => {
             // all instantiations are givens
             inst.makeIntoA('given')
             // if we made it here, we have a valid instantation
-            inst.formula = true
+            //
+            // inst.formula = true // replaced by 'Rule', 'Part', 'Inst', .finished
+            //
             // it might contain a Let which was instantiated by some other
             // statment, so we might have to add the tickmarks.
             //

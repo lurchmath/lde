@@ -406,7 +406,7 @@ const _investigate = function ( suspect , options ) {
     if (suspect.isA('Inst')) {
       const n = suspect.creators.length
       ans += `The instantiation ${display(suspect)}` +
-             `is an instantiation of the rule ${display(suspect.instantiationOf)}`
+             `is an instantiation of the rule ${display(suspect.rule)}`
       if (n) 
         ans += `and motivated by the expression${(n>1)?'s':''}` +
                suspect.creators.map(display).join('')
@@ -423,14 +423,14 @@ const _investigate = function ( suspect , options ) {
                     ` is mentioned.\n`)
       
         ans += `It appears in ${display(mentions[0])}` + 
-               `\n   which is an instantiation of the rule ${display(mentions[0].instantiationOf)}`
+               `\n   which is an instantiation of the rule ${display(mentions[0].rule)}`
         let n = mentions[0].creators.length 
         if (n) ans += `\n   motivated by the expression${(n>1)?'s':''}` +
                       mentions[0].creators.map(display).join('')
   
         mentions.slice(1).forEach( inst => {
           ans += `\nIt also appears in ${display(inst)}` + 
-                 `\n   which is an instantiation of the rule ${display(inst.instantiationOf)}`
+                 `\n   which is an instantiation of the rule ${display(inst.rule)}`
           let n = inst.creators.length 
           if (n) ans += `\n   motivated by the expression${(n>1)?'s':''}` +
                         inst.creators.map(display).join('')
@@ -458,7 +458,7 @@ const _investigate = function ( suspect , options ) {
         })
         if ( arrow ) ans += arrows 
       }
-      ans += display(suspect.instantiationOf)
+      ans += display(suspect.rule)
       ans += arrows 
       ans += display(suspect)
     // for now, assume it's an expression in the user's document            
