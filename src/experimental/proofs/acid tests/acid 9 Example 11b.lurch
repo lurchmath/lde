@@ -8,6 +8,6 @@
    (--- "Trying again to cheat the subset plus rule.")
    // Thm/Pf attempt 
    { :[ x ] :(∈ x T) 
-     (⊆ S T) // preemie 
-   } // preemie 
-} ✔︎  
+     (⊆ S T) !✗ // preemie 
+   } !✗ // preemie 
+} !✗  

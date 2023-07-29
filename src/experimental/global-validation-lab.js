@@ -504,6 +504,7 @@ const load = (docs, libs = undefined, n = 4) => {
   ans.cat = ans.catalog()
   // validate everything
   ans.validateall()
+  ans.validateall(undefined,true)
   // return the final validated document
   return ans
 }
