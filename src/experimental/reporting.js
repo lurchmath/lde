@@ -147,6 +147,10 @@ const detailed = {  showDeclares, showRules , showPartials, showInstantiations ,
                     showNumbers , showBodies, showProperNames , showUserRules ,
                     showUserThms , showValidation 
                  }
+// moderate report option
+const moderate = { showInstantiations, showNumbers, showSimpleProperNames, showRules,
+  showUserThms , showValidation } 
+
 // clean report option
 const allclean = { showInstantiations, showNumbers, showProperNames, 
                    showUserThms , showValidation } 
@@ -500,7 +504,7 @@ export default {
   decPen , commentPen , headingPen , docPen , linenumPen , itemPen ,
   
   // report definitions
-  everything, show, detailed , allclean, clean , user ,
+  everything, show, detailed , moderate, allclean, clean , user ,
   
   // report options
   showAttributes , showContexts , showRules , showInstantiations , 
