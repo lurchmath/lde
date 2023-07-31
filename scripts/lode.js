@@ -41,7 +41,8 @@ import Compact from '../src/experimental/global-validation-lab.js'
 // load the custom formatter class
 import Reporting from '../src/experimental/reporting.js' 
 // load the Document class
-import { Document , loadParser , assignProperNames , markDeclaredSymbols } from '../src/experimental/document.js'
+import { Document , loadParser , assignProperNames , markDeclaredSymbols ,
+         processShorthands } from '../src/experimental/document.js'
 // load the lc command
 import { lc , mc , checkExtension, diff } from '../src/experimental/extensions.js'
 // load the CNFProp tools for testing
@@ -76,6 +77,7 @@ global.CNFProp = CNFProp
 // exposing commands for debugging
 global.assignProperNames = assignProperNames
 global.markDeclaredSymbols = markDeclaredSymbols
+global.processShorthands = processShorthands
 //
 // External packages
 global.satSolve = satSolve
