@@ -108,7 +108,7 @@
 }
 
 // The start rule for a Peggy grammar is the first rule.  For us, it's an LC.
-LC = _ @( Comment / BIH / Putdown / Given / Declaration / Equivalence / Environment / Expression) _
+LC = _ @( Meta / Given / Declaration / Equivalence / Environment / Expression) _
 
 // givens
 Given = (':' / 'Assume'i __ ) 
@@ -122,14 +122,20 @@ Equivalence = '{' _ a:( Declaration / Environment / Expression ) _ '≡' _
 
 // environments
 Environment = 
-  '{' _ a:( Comment / BIH / Putdown / Declaration / Given / Environment / Expression )|..,__| _ '}'
+  '{' _ a:( Meta / Declaration / Given / Environment / Expression )|..,__| _ '}'
   { return `{ ${a.join(' ')} }` }
+
+// things it searches for and replaces up front
+Meta = Putdown / BIH / Comment / Thm
 
 // unprocessed putdown notation (cannot include // comments)
 Putdown = '«' @$([^»]*) '»'
 
 // flag the next environment as a BIH
 BIH = 'Notice'i { return '>>' }
+
+// flag the next environment as a BIH
+Thm = ('Theorem'i / 'Thm'i) { return 'thm>' }
 
 // String Literals for comments
 StringLiteral = $("'" [^']* "'")
