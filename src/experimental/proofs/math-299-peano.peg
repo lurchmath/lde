@@ -50,11 +50,7 @@
     ➤ "We will proceed by induction on n for arbitrary m."
     { :Let m 
       ➤ "Base case."
-      0+m=m
-      m+0=m
-      Notice { :m+0=m   :m+0=m+0 m=m+0   }  
-      Notice { :m=m+0   :0+m=m   0+m=m+0 }
-      Notice { :0+m=m+0 :0+m=0+m m+0=0+m }  
+      Notice { :0+m=m :m+0=m m+0=0+m }
       m+0=0+m 
       ➤ "Inductive step."
       { :Let k be such that m+k=k+m
