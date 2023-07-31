@@ -283,6 +283,7 @@ P(c,w) ⇒ Q(c,y) for some c
 
 {
   // Assignment #8 (c)
+  // Theorem: If everyone loves everyone else then Alice loves Bob.
   { Declare Alice, Bob
     { Assume ∀x.∀y.x loves y
       ∀y.Alice loves y 
