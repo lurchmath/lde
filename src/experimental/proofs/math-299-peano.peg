@@ -67,8 +67,6 @@
         Notice { :m+k=k+m :𝜎(m+k)=𝜎(m+k) 𝜎(m+k)=𝜎(k+m) }
         // 𝜎(m+k)=𝜎(k+m)
         Notice { :𝜎(m+k)=𝜎(k+m) :m+𝜎(k)=𝜎(m+k)  m+𝜎(k)=𝜎(k+m) }
-        // 𝜎(m+k)=𝜎(k+m)
-        Notice { :𝜎(m+k)=𝜎(k+m) :m+𝜎(k)=𝜎(m+k)  m+𝜎(k)=𝜎(k+m) }
         // m+𝜎(k)=𝜎(k+m)
         Notice { :k+𝜎(m)=𝜎(k+m) :m+𝜎(k)=𝜎(k+m) m+𝜎(k)=k+𝜎(m) }
         // m+𝜎(k)=k+𝜎(m)
