@@ -415,5 +415,16 @@ P(c,w) ⇒ Q(c,y) for some c
     P   
   }
 }
+{
+  // BIH
+  Notice { "This is a BIH" }
+  Comment
+  ➤ "This is a comment"
+  // Theorems
+  Theorem { I_am_a_theorem }
+  Lemma: { So_am_I }
+  Thm { Me_too }
+  Corollary { And_me }
+}
 
 }

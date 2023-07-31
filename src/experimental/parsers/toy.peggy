@@ -134,11 +134,14 @@ Putdown = '«' @$([^»]*) '»'
 // flag the next environment as a BIH
 BIH = 'Notice'i { return '>>' }
 
+// synonyms for theorems
+ThmLabel = 'Theorem'i / 'Thm'i / 'Lemma'i / 'Corollary'i
+
 // flag the next environment as a BIH
-Thm = ('Theorem'i / 'Thm'i) { return 'thm>' }
+Thm = ThmLabel ':'? { return 'thm>' }
 
 // String Literals for comments
-StringLiteral = $("'" [^']* "'")
+StringLiteral = $('"' [^"]* '"')
 
 // insert a comment that gets echoed
 Comment = ('Comment'i / '➤') __ a:StringLiteral { return `(--- ${a})` }
