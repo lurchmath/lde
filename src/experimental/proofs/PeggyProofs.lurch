@@ -415,6 +415,7 @@ P(c,w) ⇒ Q(c,y) for some c
     P   
   }
 }
+
 {
   // BIH
   Notice { "This is a BIH" }
