@@ -163,6 +163,12 @@ export const processShorthands = L => {
       m.remove()
     } )
 
+  // Same as the previous, but attributes the next sibling.
+  processSymbol( '>>' , m => { 
+    m.nextSibling().makeIntoA('BIH')
+    m.remove()
+  } )
+
   processSymbol( '<thm' , m => {
     // There's a subtlety here.  We don't want top mark this as a 'Rule' yet
     // because it has not yet been converted to an LC Formula. We will need the
@@ -417,7 +423,7 @@ export const assignProperNames = doc => {
     })
   })
 
-  // Now add tick marks for all symbols declared with a the Let's.
+  // Now add tick marks for all symbols declared with Let's.
   doc.lets().forEach( decl => {
     decl.symbols().filter(s=>!s.isA(metavariable)).forEach( c => {
       // Compute the new ProperName
@@ -736,11 +742,16 @@ export class Document extends Environment {
   // the path to parser definition files
   static parserPath = '../src/experimental/parsers/'
   
-  // the file extension used by default for libraries and proof files
-  static LurchFileExtension = 'lurch'  // don't include the . here for easy use in RegExp's
+  // the file extension used by default for libraries and proof files. Don't
+  // include the . here for easy use in RegExp's
+  static LurchFileExtension = 'lurch'  
   
   // the file extension used by default for libraries and proof files
-  static ParserFileExtension = 'peggy'  // don't include the . here for easy use in RegExp's
+  static ParserFileExtension = 'peggy' 
+  
+  // the file extension used for libraries and proof files for parsing with the
+  // toy peggy parser
+  static PegFileExtension = 'peg' 
   
   // check a file name to see if it has the .lurch extension and if not, add it
   static checkLurchExtension = name => checkExtension(name , Document.LurchFileExtension )
@@ -757,7 +768,7 @@ export class Document extends Environment {
   }
   
   // Load just the string for a proof document and return that.    
-  static loadProofStr = (name) => {
+  static loadProofStr = (name,extension) => {
     const filename = Document.proofPath + Document.checkLurchExtension(name)
     if (!fs.existsSync(filename)) {
       console.log(`No such file or folder: ${name}`)
@@ -776,6 +787,18 @@ export class Document extends Environment {
     }
     return fs.readFileSync( filename , { encoding:'utf8'} )
   }
+
+  // Load just the string for a proof in toy format and return that
+  static loadPegStr = (name) => {
+    const filename = Document.proofPath + 
+      checkExtension(name, Document.PegFileExtension)
+    if (!fs.existsSync(filename)) {
+      console.log(`No such file or folder: ${name}`)
+      return
+    }
+    return fs.readFileSync( filename , { encoding:'utf8'} )
+  }
+  
   /////////////////////////////////////////////////////////////////////////////
 
 }

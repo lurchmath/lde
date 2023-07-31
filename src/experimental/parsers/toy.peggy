@@ -108,7 +108,7 @@
 }
 
 // The start rule for a Peggy grammar is the first rule.  For us, it's an LC.
-LC = _ @(Putdown / Given / Declaration / Equivalence / Environment / Expression) _
+LC = _ @( Comment / BIH / Putdown / Given / Declaration / Equivalence / Environment / Expression) _
 
 // givens
 Given = (':' / 'Assume'i __ ) 
@@ -122,11 +122,20 @@ Equivalence = '{' _ a:( Declaration / Environment / Expression ) _ '≡' _
 
 // environments
 Environment = 
-  '{' _ a:( Putdown / Declaration / Given / Environment / Expression )|..,__| _ '}'
+  '{' _ a:( Comment / BIH / Putdown / Declaration / Given / Environment / Expression )|..,__| _ '}'
   { return `{ ${a.join(' ')} }` }
 
 // unprocessed putdown notation (cannot include // comments)
 Putdown = '«' @$([^»]*) '»'
+
+// flag the next environment as a BIH
+BIH = 'Notice'i { return '>>' }
+
+// String Literals for comments
+StringLiteral = $("'" [^']* "'")
+
+// insert a comment that gets echoed
+Comment = ('Comment'i / '➤') __ a:StringLiteral { return `(--- ${a})` }
 
 // declarations
 Declaration = ForSome / Declare / Let
@@ -134,7 +143,9 @@ Declaration = ForSome / Declare / Let
 ForSome = body:Expression __ 'For'i __ 'some'i __ a:SymbolSeq 
           { return `[${spaced(a)}, ${body}]` }
 Declare = 'Declare'i __ a:DeclareSeq { return `:[${a}]` }
-Let = 'Let'i __ a:SymbolSeq { return `[${spaced(a)}]` }
+Let = 'Let'i __ a:SymbolSeq __ ('be'i __)? 'such'i __ 'that'i __ b:Expression 
+       { return `[${spaced(a)}, ${b}]` } /
+      'Let'i __ a:SymbolSeq { return `[${spaced(a)}]` }
 
 // expressions
 Expression = Binding / Prop // get's Stuff from Not
