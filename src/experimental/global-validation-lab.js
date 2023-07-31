@@ -60,6 +60,35 @@
 //   does will be almost instantaneous.  So optimization would mainly only
 //   affect batch mode instantiation of a large document from scratch.
 //
+// * Sometimes and instantiation will instantiate the variable in a Let with a
+//   constant, either directly or indirectly, e.g. `Let 0'`. This doesn't seem
+//   to hurt anything but it makes for stupid instantiations, and might speed
+//   things up if we eliminate it.
+// * For rules like transitivity, e.g. :{ :x=y y=z x=z }, if used successfully
+//   they get instantiated six times, once for each pair of metavariables, but
+//   produce the same instantiation, plus a lot more.  However, these rules do
+//   not have a forbidden expression like the metavar W or (@ P x), so they
+//   don't automatically require a BIH.  But it is clearly nice to have such
+//   rules.  So add an attribute marking it as 'inefficient', and treat Rule or
+//   Part containing only a forbidden W or (@ P x) as a special case of
+//   'inefficient' so that in every case a BIH is required.
+// * Make a substitution tool that does the following. 
+//   - find any expressions of the form (R A B) where R is a relation like =. <.
+//     etc, and A and B are expressions.
+//   - compute the expression diff() between A and B, and see if there is only
+//     one possible substitution, e.g. C=D, that when applied to A=A would
+//     produce A=B.
+//   - when making the CNF of the Propositional Form of the statement (R A B),
+//     use the fact that CNF's have an OR operator to make it's prop form be:
+//
+//         (R A B) OR (= C D)
+//
+//   - thus if either (R A B) itself is justified directly, OR (= C D) is
+//     justified, in both cases the original (R A B) will be justified.  
+//   - do this for all expressions of the form (R A B) in the document.  This
+//     gives us the main logic behind transitive chains by skipping the annoying
+//     substitution BIHs
+//
 // New LC attributes used here  
 // TODO: these are out of date... go through the code and update eventually
 //
@@ -93,7 +122,8 @@
 //    * 'creators'   - the user proposition(s) that caused this instantiation
 //
 //    JS attributes: declarations body copy and premature generalizations
-//    * 'bodyof'   - indicates an Expression is a copy of the body of a declaration
+//    * 'bodyof'   - indicates an Expression is a copy of the body of a
+//      declaration
 //    * 'preemie'  - a expression that is justified by a Let that it is in the
 //                   scope
 //    * 'badBIH'   - an environment marked asA 'BIH' that isn't one
@@ -821,9 +851,8 @@ const instantiate = (document, n = 1) => {
             //
             inst.creators = (f.creators) ? [...f.creators] : []
             inst.creators.push(e)
-            // Rules aren't an instantiationOf anything, but partials and
-            // instantiations are.
-            inst.instantiationOf = (f.instantiationOf) ? f.instantiationOf : f
+            // whether it's a Part or an Inst, save the rule it originates from
+            inst.rule = f.rule || f
             //  Note that .pass is the number of passes remaining. 
             inst.pass = n
             inst.numsolns = solns.length
@@ -848,8 +877,6 @@ const instantiate = (document, n = 1) => {
               // propositional form
               inst.ignore = true
             }
-            // whether it's a Part or an Inst, save the rule it originates from
-            inst.rule = f.rule || f
 
             // either way, rename ForSome constants that aren't metavars. We
             // should not have to insert a copy of the bodies of ForSomes
