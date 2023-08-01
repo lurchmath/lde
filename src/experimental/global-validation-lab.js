@@ -469,48 +469,6 @@ Environment.prototype.validateall = function (
   }
 }
 
-// the exposed routine
-// Environment.prototype.validateall = function ( target = this , checkPreemies = true ) {
-// always prop check it first
-// this._validateall(target, false)
-// then check preemies if we want to
-// if (checkPreemies) this._validateall(target, true)
-// // if the target is not an environment, and we have to check Preemies, check
-// // them and return
-// if (!(target instanceof Environment)) { 
-//   result = this.validate(target, false, true)
-// // if the target is an environment, recurse
-// } else {
-//   // if it was prop valid, so are all of its inferences, unless they
-//   // contain a preemie
-//   if (result) {
-//     // mark all of the target's inferences propositionally valid 
-//     target.inferences().forEach( C => {
-//       if (!C.preemie) Validation.setResult(C,
-//         { result:'valid' , reason:'n-compact'})
-//       })
-//     // if we are also supposed to check for preemies
-//     if (checkPreemies) {
-//       // check each of the top level Lets of the target
-//       [...target.descendantsSatisfyingIterator( x => {
-//         (x instanceof Environment) && (x.child(0) instanceof Declaration)
-//       })].forEach( L => { 
-//         // we already know L is propositionally valid, but we want to recurse,
-//         // so we just call .validateall on it
-
-//       })
-//     }
-//   // otherwise validateall the inference children of this target
-//   } else {
-//     target.children().forEach( C => {
-//       // skip givens and things marked .ignore, e.g. Comments
-//       if (C.isA('given') || C.ignore) return 
-//       this.validateall(C , checkPreemies)
-//     })
-//   }
-// }
-// }
-
 ////////////////////////////////////////////////////////////////////////////////
 //
 //  Load , Process, and Validate an entire document from scratch
