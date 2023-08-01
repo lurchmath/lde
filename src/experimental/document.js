@@ -77,6 +77,7 @@ import { LogicConcept } from '../logic-concept.js'
 import { Environment } from '../environment.js'
 import { Symbol as LurchSymbol } from '../symbol.js'
 import { lc , checkExtension } from '../experimental/extensions.js'
+import { Validation } from '../index.js'
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -702,6 +703,24 @@ export class Document extends Environment {
     })
 
   }
+
+  // If we want to revalidate a document from scratch after it has been
+  // validated, we can reset the document. To do that we remove all partial
+  // instantiations and instantiations, unmark the Rules as .finished, and
+  // remove all validation results stored in inferences. This does not reset
+  // things like constant declarations.
+  //
+  // TODO: 
+  // * this isn't quite right, so I'm commenting it out to finish later. I
+  //   basically need to go through the entire validation algorithm used by
+  //   load() and make sure everything that needs to be reset and recomputed is done.
+  //
+  // reset () { this.getAll('Rule').forEach(x=>x.finished=false)
+  //   this.getAll('Part').forEach(x=>x.remove())
+  //   this.getAll('Inst').forEach(x=>x.remove())
+  //   this.inferences().forEach(x=>Validation.clearResult(x))
+  //   Validation.clearResult(this)
+  // }
 
   // Since there's no way to separate just the library as an LC from the document,
   // we instead return the array of library children

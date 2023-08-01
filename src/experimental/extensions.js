@@ -286,6 +286,37 @@ LogicConcept.prototype.inspect = function(x) {
 
 LogicConcept.prototype.inspect = function(...args) { inspect(this,...args) }
 
+///////////////////////////////////////////////////////////////////////////////
+// isMinimal
+//
+// If the current document is valid, check if it is minimal in the sense that if
+// you delete any conclusion it becomes invalid. Currently, for testing
+// purposes, this resets the entire document and revalidates it from scratch. If
+// you don't ignore the existing instantations, deleting a conclusion will have
+// no effect on the outcome since after the instantiations are found the
+// document will validate even if you delete one of the conclusions.  But it is
+// inefficient to do this by deleting and recomputing all of the instantiations
+// since that is where the bulk of the time is used in the algorithm.  So while
+// it is good for testing purposed and gives the expected answer, it's very
+// inefficient. 
+//
+// TODO: 
+// * This routine doesn't work yet, so I'm commenting it out to finish later.
+//   The basic idea should work, but there are some prerequisites for validation
+//   that might need to be reset and recomputed rather than this naive attempt.
+// * upgrade it to optionally not do a full reset, but rather cache which
+//   instantiations were created by the conclusion being deleted
+//
+//
+// LogicConcept.prototype.isMinimal = function() { if (!this.validate()) {
+//   return false } let extraneous = [] this.reset() this.conclusions().forEach(
+//   c => { this.reset() let saveignore = c.ignore c.ignore=true if (!saveignore
+//   && this.validate() && this.validate(this,true)) extraneous.push(c) c.ignore
+//   = saveignore 
+//   })
+//   this.validateall() return extraneous
+// }
+
 //////////////////////////////////////////////////////////////////////////
 // Generic utiltiies
 
