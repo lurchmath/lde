@@ -42,7 +42,7 @@ x^(y^z)^w
 (x^y)^(z^w)
 (x^(y^z))^w
 // products
-x⋅y
+x cdot y
 2⋅x
 2⋅0
 0⋅2
@@ -152,6 +152,7 @@ A⊆B
 Set(1,2) ∈ PowerSet(Set(0,1,2,3))
 A∩B ⊆ A∪B
 A∩B⁻ ⊆ (A∪B)⁻∖A
+A×B ⊆ B×A
 // propositions
 ¬P
 ¬P or Q
