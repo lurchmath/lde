@@ -8,3 +8,4 @@ scripts/initmisc.js
 .vscode/extensions.json
 scripts/initproofs.js
 src/experimental/parsers/ascimathref.js
+scripts/initproofs.js

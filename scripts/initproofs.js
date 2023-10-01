@@ -8,20 +8,57 @@ process.stdout.write(defaultPen(`Loading proofs ...\n`))
 let start = Date.now()
 ////////////////////////////////////////////////////////////////////////////
 
+// comm = load($(Document.loadPegStr('math-299-peano')),['Prop','PropThm','Pred','PredThm','Peano2','Number Theory'])
+// ken = load($(Document.loadPegStr('ken')),['Prop','PropThm','Pred','PredThm','Peano2','Number Theory'])
+// write(ken.lastChild())
 // const trix = fs.readFileSync('../src/experimental/trix.js', 'utf8');
 // eval(trix)
 
-N = load('preddoc',['Prop','Pred'])
+// check = n => { acid[n].validateall(undefined,true); return acid[n] }
+// N = load('preddoc',['Prop','Pred'])
 
-preemie = load('preemie','Preemie')
-Q = preemie.lastChild().child(1,1,0,1)
-badguy = preemie.lastChild().child(1,0,0,3)
-// goodguy = preemie.lastChild().child(1,1,1,1)
-ghost = preemie.lastChild().child(1,0,0,0)
+// preemie = load('preemie','Preemie')
+// Q = preemie.lastChild().child(1,1,0,1)
+// badguy = preemie.lastChild().child(1,0,0,3)
+// // goodguy = preemie.lastChild().child(1,1,1,1)
+// ghost = preemie.lastChild().child(1,0,0,0)
 
-peano = load('math-299-peano-thm',
-             ['Prop','PropThm','Pred','PredThm','Peano','Number Theory'])
-badconc = peano.propositions()[257]
+// peano = load('math-299-peano-thm',['Prop','Pred','Peano'])
+// badconc = peano.child(51,2,2,1,1,2)
+// // say(stringPen(CNFProp.fromLC(peano,undefined,badconc,true).toNice(peano.cat)))
+
+// T=$(`{ :{ :{ :A B } C } :{ :D :{ :A :B E } C } :{ :C F } :D { F } }`)
+// T.cat=T.catalog()
+// T.validate()
+// T
+
+// initialize('acidtests')
+// // TODO: upgrade this as a utility
+// A=acid[13]
+// kids=A.children().filter(x=>x.isA('Inst')).map(x=>x.address()).flat()
+// write(kids)
+// C=A.lastChild().child(0,2,1,4,2)
+// write(C)
+// newkids = [...kids]
+// kids.forEach( n => {
+//   Validation.setResult(C , { result:'valid' , reason: 'n-compact' })
+//   let kid=A.child(n)
+//   kid.ignore=true
+//   if (A.validate(C , true)) { 
+//     newkids.splice(newkids.indexOf(n),1)
+//   } else {
+//     kid.ignore = false
+//   } 
+// })
+// A.toNice(C,true)
+// write(newkids)
+
+// bug = load('math-299-pred',['Prop','Pred'])
+// bug.validateall(bug,true)
+// tar = bug.child(545,0,4,1,0,3,3)
+
+// falseCNFProp = CNFProp.fromLC(bug,bug.cat,tar,false)
+// trueCNFProp = CNFProp.fromLC(bug,bug.cat,tar,true)
 
 // i = peano.getAll('Inst')[2]
 // console.log('\npeano loaded\n')
@@ -61,11 +98,16 @@ badconc = peano.propositions()[257]
 // $$ = parsers[0]
 // trace = parsers[1]
 
-// P = Document.loadProofStr('PeggyProofs')
-// testparsers = loadParser('test')
-// test = testparsers[0]
-// ttest = testparsers[1]
+testparsers = loadParser('toy')
+test = testparsers[0]
+ttest = testparsers[1]
 
+asciiparsers = loadParser('asciimath')
+ascii = asciiparsers[0]
+asciitrace = asciiparsers[1]
+
+PeggyTests = Document.loadProofStr('PeggyTests')
+PeggyTestsAscii = Document.loadProofStr('PeggyTestsAscii')
 ///////////////////////////////////////////////////////////
 // closing
 console.log(defaultPen(`done! (${(Date.now()-start)} ms)`))
