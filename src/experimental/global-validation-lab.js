@@ -44,12 +44,6 @@
 //   }` and when an expression is supposed to be validated by the CAS rule it
 //   can put 'instantiations' after that formula to make a valid CAS expression
 //   validate propositionally.
-// * It would be nice to be able to have the following variant of substitution
-//   which constructs 'virtual' e expressions to match formulas as follows.
-//   Suppose we have, say, a transitive chain. We look at the difference between
-//   two consecutive expressions and the operator connecting them and try to
-//   find an instantiation that matches the expression formed by connecting the
-//   differences with the operator.
 // * The following algorithm makes several passes through the entire document to
 //   process each step/phase separately for testing and experimenting. It might
 //   be more efficient to make one pass through the entire document, modifying
@@ -73,21 +67,56 @@
 //   Part containing only a forbidden W or (@ P x) as a special case of
 //   'inefficient' so that in every case a BIH is required.
 // * Make a substitution tool that does the following. 
-//   - find any expressions of the form (R A B) where R is a relation like =. <.
-//     etc, and A and B are expressions.
-//   - compute the expression diff() between A and B, and see if there is only
-//     one possible substitution, e.g. C=D, that when applied to A=A would
-//     produce A=B.
-//   - when making the CNF of the Propositional Form of the statement (R A B),
-//     use the fact that CNF's have an OR operator to make it's prop form be:
+//   - find any expressions of the form A~B (i.e., (~ A B)) where ~ is a
+//     reflexive relation like =. ≤ etc, and A and B are expressions.
+//   - compute the expression diff() between A and B, and see if there is a
+//     nontrivial possible substitution, e.g. X=Y, that when applied to A~A
+//     would produce A~B via substitution.
+//   - add the instantiations
 //
-//         (R A B) OR (= C D)
+//        :{ A~A }           (of the reflexive rule for ~)
 //
-//   - thus if either (R A B) itself is justified directly, OR (= C D) is
-//     justified, in both cases the original (R A B) will be justified.  
-//   - do this for all expressions of the form (R A B) in the document.  This
-//     gives us the main logic behind transitive chains by skipping the annoying
-//     substitution BIHs
+//     and
+//
+//        :{ :X=Y :A~A A~B } (of the substitution rule for =)
+//
+//   - do this for all expressions of the form A~B in the document.  This gives
+//     us the main logic behind substitution by skipping the annoying
+//     substitution BIHs for propositional expressions of this form. 
+//
+//     TODO: make a similar tool for other common propositions to specify
+//     substitutions, e.g. 
+// 
+//       `Substituting x=y in ∀z,f(x,y)<z yeilds ∀z,f(y,y)<z`
+//   
+//   - we may want to then add a special way to declare reflexive operators
+//     rather than just inserting the various reflexive rules, e.g.,
+//     reflexive_operator(=.≤,⊆)
+// * Make a transitive chain tool that generalized the previous feature that
+//   does the following.
+//   - Allows a special kind of Declaration, e.g., trans_op_chain(=,≤,<) or
+//     trans_op_chain(=,⊆) or trans_op_chain(⇔,⇒).  Note that not all such
+//     operators are reflexive.
+//   - Allows expressions that chain the operators in a single such declaration
+//     of the form (E₀ op₁ E₁ op₂ ... opₙ Eₙ) where op₁,op₂,...,opₙ are all in a
+//     single trans_op_chain declaration. Alternatively, this can be entered as
+//     the sequence of expressions (E₀ op₁ E₁), (op₂ E₂), ...  (opₙ Eₙ), where
+//     using the binary operators in prefix form indicates they should be
+//     concatenated to the chain. 
+//   - For each k from 1..n add the expression (Eₖ₋₁ opₖ Eₖ) to the pool of user
+//     expressions to match, and apply the substitution tool for reflexive
+//     operators to each such expression.
+//   - After propositioall add validation after Eₖ if it eventually
+//     validates
+//   - Add the following 'instantiation' to the list 
+//
+//         :{ :(E₀ op₁ E₁) :(E₁ op₂ E₂) ... :(Eₙ₋₁ opₙ Eₙ) (E₀ op Eₙ) ) }
+//
+//     where op is the last operator in any trans_op_chain containing
+//     op₀,...,opₙ that appears among op₀,...,opₙ.  For efficiency we don't
+//     insert every possible relation between the E's that are deducible from
+//     this chain.  If the user wants to use more than one, they should make a
+//     transitive chain for each one.
 //
 // New LC attributes used here  
 // TODO: these are out of date... go through the code and update eventually
