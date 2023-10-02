@@ -14,7 +14,7 @@
 // preddoc = load('preddoc',['Prop','Pred'])
 // thmdoc  = load('thm2',LurchLib)
 
-parsers = loadParser('toy')
+parsers = loadParser('asciimath')
 parse = parsers[0]
 trace = parsers[1]
 $ = s => lc(parse(s))

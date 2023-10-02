@@ -31,28 +31,28 @@ import { Tokenizer, Grammar } from 'earley-parser'
 import './disable-event-target.js'
 
 // with that disabled, now we can load everything from index.js and other LDE tools
-import * as Lurch from '../src/index.js'
-import { Problem } from '../src/matching/problem.js'
-import CNF from '../src/validation/conjunctive-normal-form.js'
+import * as Lurch from '..//index.js'
+import { Problem } from '..//matching/problem.js'
+import CNF from '..//validation/conjunctive-normal-form.js'
 
 // Experimental Code
 // everything in the global validation lab. 
-import Compact from '../src/experimental/global-validation-lab.js'
+import Compact from './global-validation-lab.js'
 // load the custom formatter class
-import Reporting from '../src/experimental/reporting.js' 
+import Reporting from './reporting.js' 
 // load the Document class
 import { Document , loadParser , assignProperNames , markDeclaredSymbols ,
-         processShorthands } from '../src/experimental/document.js'
+         processShorthands } from './document.js'
 // load the lc command
-import { lc , mc , checkExtension, diff } from '../src/experimental/extensions.js'
+import { lc , mc , checkExtension, diff } from './extensions.js'
 // load the CNFProp tools for testing
-import { CNFProp } from '../src/experimental/CNFProp.js'
+import { CNFProp } from './CNFProp.js'
 
 // External packages
 // load Algebrite
-import Algebrite from '../dependencies/algebrite.js'
+import Algebrite from '../../dependencies/algebrite.js'
 // load SAT
-import { satSolve } from '../dependencies/LSAT.js'
+import { satSolve } from '../../dependencies/LSAT.js'
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////

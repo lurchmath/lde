@@ -753,13 +753,13 @@ export class Document extends Environment {
   //
 
   // the path to library definition files
-  static libPath = '../src/experimental/libs/'
+  static libPath = './libs/'
   
   // the path to proof definition files
-  static proofPath = '../src/experimental/proofs/'
+  static proofPath = './proofs/'
   
   // the path to parser definition files
-  static parserPath = '../src/experimental/parsers/'
+  static parserPath = './parsers/'
   
   // the file extension used by default for libraries and proof files. Don't
   // include the . here for easy use in RegExp's

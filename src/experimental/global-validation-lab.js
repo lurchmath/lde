@@ -86,9 +86,9 @@
 //
 //     TODO: make a similar tool for other common propositions to specify
 //     substitutions, e.g. 
-// 
+//
 //       `Substituting x=y in ∀z,f(x,y)<z yeilds ∀z,f(y,y)<z`
-//   
+//
 //   - we may want to then add a special way to declare reflexive operators
 //     rather than just inserting the various reflexive rules, e.g.,
 //     reflexive_operator(=.≤,⊆)
@@ -106,8 +106,7 @@
 //   - For each k from 1..n add the expression (Eₖ₋₁ opₖ Eₖ) to the pool of user
 //     expressions to match, and apply the substitution tool for reflexive
 //     operators to each such expression.
-//   - After propositioall add validation after Eₖ if it eventually
-//     validates
+//   - After propositioall add validation after Eₖ if it eventually validates
 //   - Add the following 'instantiation' to the list 
 //
 //         :{ :(E₀ op₁ E₁) :(E₁ op₂ E₂) ... :(Eₙ₋₁ opₙ Eₙ) (E₀ op Eₙ) ) }
@@ -118,11 +117,26 @@
 //     this chain.  If the user wants to use more than one, they should make a
 //     transitive chain for each one.
 //
-// New LC attributes used here  
+// New attributes for LCs used here 
+// 
 // TODO: these are out of date... go through the code and update eventually
 //
-//    LC attributes: Environments 
-//    * 'Rule' - (isA) this environment is a library Formula 
+// One immediately question that arises when defining all of these new
+// attributes is whether they should be LC attributes or js attributes.  The
+// design principle we will use to make this decision in each case is roughly
+// the following. If the attribute is something that can always be computed from
+// the LC or its context we store it as a js attribute.  If it is some inherent
+// piece of information which sometimes cannot be computed on the fly, then we
+// store it as an LC attribute.  The exception might be any computed attribute
+// that we want to store with the user's document because it is expensive to
+// recompute.
+//
+// The advantage to this approach is that we can easily refresh all of the
+// computable attributes from scratch from the given user data e.g. after fixing
+// a bug or testing a coding change.
+//
+//    LC attributes: Environments
+//    * 'Rule' - (isA) this environment is a Formula which can be instantiated.
 //    * 'BIH'  - (isA) this environment is a blatant instantiation hint supplied
 //               by the user.
 //
@@ -130,10 +144,10 @@
 //    * 'Declare' - (isA) this declaration declares global constants and has no
 //                  propositional form, whether a given or claim.
 //
-//    LC attributes: Symbols 
+//    LC attributes: Symbols
 //    * 'ProperName' - its value is the proper name of this Lurch symbol
 //
-//    JS attributes: formula environments 
+//    JS attributes: formula environments
 //    * 'domain'   - the js Set of metavariable names (strings) in this formula 
 //    * 'isWeeny'  - boolean that is true iff this formula is Weeny (has at
 //                   least one metavariable and at least one Weeny expression 
@@ -157,7 +171,7 @@
 //                   scope
 //    * 'badBIH'   - an environment marked asA 'BIH' that isn't one
 //
-//    JS attributes - Symbols 
+//    JS attributes - Symbols
 //    * 'constant' - boolean that indicates whether a free symbol is explicitly
 //      declared by a Let, Declare, or ForSome
 
@@ -183,8 +197,7 @@ import Validation from '../validation.js'
 import {
   Document, renameBindings, processLets, markDeclaredSymbols,
   assignProperNames, processForSomeBodies
-}
-  from '../experimental/document.js'
+} from '../experimental/document.js'
 
 /////////////////////////////////////////////////////////////////////////////
 //

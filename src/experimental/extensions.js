@@ -71,9 +71,17 @@ LogicConcept.prototype.insertBefore = function( target ) {
   target.parent().insertChild(this,target.indexInParent())
 }
 
-// rename a symbol in place
+// rename a symbol (in place)
 LurchSymbol.prototype.rename = function( newname ) { 
   this.setAttribute( 'symbol text' , newname )
+}
+
+// return the Proper Name for a Lurch symbol if it has one, otherwise just
+// return the name of the symbol
+LurchSymbol.prototype.properName = function () {
+  return (this.hasAttribute('ProperName')) 
+         ? this.getAttribute('ProperName') 
+         : this.text() 
 }
 
 // Toggle the 'given' status of an lc (in place)

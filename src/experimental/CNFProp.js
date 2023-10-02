@@ -324,14 +324,6 @@ export class CNFProp {
 ////////////////////////////////////////////////////////////////////////////////
 // Extensions of the LogicConcept class
 
-// return the Proper Name for a Lurch symbol if it has one, otherwise just
-// return the name of the symbol
-LurchSymbol.prototype.properName = function () {
-  return (this.hasAttribute('ProperName')) 
-         ? this.getAttribute('ProperName') 
-         : this.text() 
-}
-
 // Compute the Prop Form string for an expression.  This is the .putdown form
 // except that we must use the ProperName for symbols instead of their text. For
 // bound symbols, this is their canonical name so alpha equivalent expressions
