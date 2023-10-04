@@ -204,8 +204,6 @@ import {
 // Convenience Utilities
 //
 const instantiation = 'LDE CI'
-const subscriptDigits = '₀₁₂₃₄₅₆₇₈₉'
-const subscript = n => [...n.toString()].map(d => subscriptDigits[d]).join('')
 
 // Debug is a global boolean
 const time = (description) => { if (Debug) console.time(description) }
@@ -1029,7 +1027,7 @@ const Benchmark = function (f, name) {
 
 export default {
   getUserPropositions, instantiate, markDeclarationContexts,
-  load, processHints, processDoc, processDomains, subscript,
+  load, processHints, processDoc, processDomains,
   cacheFormulaDomainInfo, Benchmark, Report
 }
 ///////////////////////////////////////////////////////////////////////////////

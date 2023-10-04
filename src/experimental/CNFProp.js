@@ -16,9 +16,7 @@ import { Environment } from '../environment.js'
 import { Symbol as LurchSymbol } from '../symbol.js'
 import { Expression } from '../expression.js'
 import { Declaration } from '../declaration.js'
-import Compact from '../experimental/global-validation-lab.js'
-import { tab, indent } from './extensions.js'
-let subscript = Compact.subscript
+import { tab, indent, subscript } from './extensions.js'
 
 /////////////////////////////////////////////////////////////////////////////////
 //

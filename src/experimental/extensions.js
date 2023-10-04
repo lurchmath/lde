@@ -388,3 +388,7 @@ export const indent = (s,n) => {
   const t = tab(n)
   return t+s.replaceAll(/\n(.)/g,'\n'+t+'$1')
 }    
+
+// unicode numerical subscripts
+const subscriptDigits = '₀₁₂₃₄₅₆₇₈₉'
+export const subscript = n => [...n.toString()].map(d => subscriptDigits[d]).join('')
