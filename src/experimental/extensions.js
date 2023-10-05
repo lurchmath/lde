@@ -371,8 +371,14 @@ export const diff = (LHS,RHS) => {
 }
 
 // useful abbreviations
-export const lc = s => { return LogicConcept.fromPutdown(s)[0] }
-export const mc = s => { return MathConcept.fromSmackdown(s)[0] }
+export const lc = s => { 
+  const L = LogicConcept.fromPutdown(s)
+  return (L.length===1) ? L[0] : L 
+}
+export const mc = s => { 
+  const M = MathConcept.fromSmackdown(s)
+  return (M.length===1) ? M[0] : M  
+}
 
 // check a filename to see if it has the right extension and add the extension
 // if it doesn't. The default extension is 'js'.

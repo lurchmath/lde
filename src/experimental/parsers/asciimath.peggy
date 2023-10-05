@@ -111,7 +111,7 @@
   input = input.replace(/(?<!«[^«»]*)\/(?![^«»]*»)/g,'⋅/')
   
   // uncomment the following for debugging
-  say(input)
+  // say(input)
 }
 
 // The start rule for a Peggy grammar is the first rule.  For us, it's a
