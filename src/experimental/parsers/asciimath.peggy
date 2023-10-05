@@ -95,32 +95,38 @@
 // Preprocess the input string
 { 
   //   * delete comments (but leave any \n's to keep the line counts right)
-  input = input.replace(/\/\/.*(\n|\r|$)/g, '\n')
+  input = input.replace(/\/\/[^\n\r]*(\n|\r)/g, '\n')
   //   * Replace tabs with a space
   input = input.replace(/\t/g, ' ')
   //   * shrink consecutive spaces to a single space
-  input = input.replace(/ ( *)/g,' ') 
+  input = input.replace(/ ( +)/g,' ') 
   //   * remove spaces around reserved infix unicode ops not inside literal putdown so
   //     the parser doesn't have to find and avoid them
   input = input.replace(/(?<!«[^«»]*)\s*([,.+⋅/^=<≤⇒⇔|∩∪×∈⊆∖])\s*(?![^«»]*»)/g,'$1')
   //   * same for prefix ops
-  input = input.replace(/(?<!«[^«»]*)([-({∀∃])\s*(?![^«»]*»)/g,'$1')
+  input = input.replace(/(?<!«[^«»]*)([-({∀∃])[ \t]*(?![^«»]*»)/g,'$1')
   //   * same for postfix ops
-  input = input.replace(/(?<!«[^«»]*)\s*([⁻)}])(?![^«»]*»)/g,'$1')
+  input = input.replace(/(?<!«[^«»]*)[ \t]*([⁻)}])(?![^«»]*»)/g,'$1')
   //   * replace all '/' with '⋅/'
   input = input.replace(/(?<!«[^«»]*)\/(?![^«»]*»)/g,'⋅/')
   
   // uncomment the following for debugging
-  // say(input)
+  say(input)
 }
 
-// The start rule for a Peggy grammar is the first rule.  For us, it's an LC.
-LC = _ @( Meta / Given / Declaration / Equivalence / Environment / Expression) _
+// The start rule for a Peggy grammar is the first rule.  For us, it's a
+// sequence of LCs.
+LCs "Sequence of LCs" = 
+_ a:(Meta / Given / Declaration / Equivalence / Environment / Expression)|..,__| _ 
+  { return a.join(' ') }
+
+// A single LC
+LC "LC" = _ @( Meta / Given / Declaration / Equivalence / Environment / Expression) _
 
 // givens
-Given = (':' / 'Assume'i __ ) 
-        a:(Declaration / Equivalence / Environment / Expression)
-        { return ':'+a }
+Given "Given" = (':' / 'Assume'i __ ) 
+  a:(Declaration / Equivalence / Environment / Expression)
+  { return ':'+a }
 
 // equivalence
 Equivalence = '{' _ a:( Declaration / Environment / Expression ) _ '≡' _
@@ -128,7 +134,7 @@ Equivalence = '{' _ a:( Declaration / Environment / Expression ) _ '≡' _
   { return `{ { :${a} ${b} } { :${b} ${a} } }` }
 
 // environments
-Environment = 
+Environment "Environment" = 
   '{' _ a:( Meta / Declaration / Given / Environment / Expression )|..,__| _ '}'
   { return `{ ${a.join(' ')} }` }
 
@@ -151,10 +157,10 @@ Thm = ThmLabel ':'? { return 'thm>' }
 StringLiteral = $('"' [^"]* '"')
 
 // insert a comment that gets echoed
-Comment = ('Comment'i / '➤') __ a:StringLiteral { return `(--- ${a})` }
+Comment "Comment" = ('Comment'i / '➤') __ a:StringLiteral { return `(--- ${a})` }
 
 // declarations
-Declaration = ForSome / Declare / Let
+Declaration "Declaration" = ForSome / Declare / Let
 
 ForSome = body:Expression __ 'For'i __ 'some'i __ a:SymbolSeq 
           { return `[${spaced(a)}, ${body}]` }
@@ -164,10 +170,10 @@ Let = 'Let'i __ a:SymbolSeq __ ('be'i __)? 'such'i __ 'that'i __ b:Expression
       'Let'i __ a:SymbolSeq { return `[${spaced(a)}]` }
 
 // expressions
-Expression = Binding / Prop // get's Stuff from Not
+Expression "Expression" = Binding / Prop // get's Stuff from Not
 
 // binding expressions
-Binding = a:BindingSymbol b:SymbolSeq period c:Expression
+Binding "Binding Expression" = a:BindingSymbol b:SymbolSeq period c:Expression
           { return `(${a} ${b}, ${c})` }
 
 // propositional expressions
@@ -235,7 +241,7 @@ Decimal = $( Natural '.' [0-9]+ )
 Natural = $( [1-9][0-9]* / '0' )
 
 // Symbols can't start with a digit, contain reserved constants, or keywords
-SymbolSeq = a:Symbol|1..,comma| { return a.join(',') }
+SymbolSeq "Sequence of Symbols" = a:Symbol|1..,comma| { return a.join(',') }
 Symbol "Symbol" =  $( !([0-9]/' or '/' and '/' loves ')
                       [^-\][() \t\n✦{},.:+⋅/^=<≤¬⇒⇔|∀∃∩∪×∈⊆∖⁻∧∨≡]+ )
 BindingSymbol = ('∃!'/'exists unique ') { return '∃!' } /
