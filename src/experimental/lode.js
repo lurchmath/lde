@@ -63,22 +63,20 @@ import { makeParser , processShorthands } from './parsing.js'
 //
 // LDE basic code
 Object.assign( global, Lurch )
-//
+
 // Experimental code
 Object.assign( global, Compact )
 Object.assign( global, Reporting )
-//
-// additional LDE code
 global.CNF = CNF
 global.Problem = Problem
-// additional experimental code
 global.Document = Document
 global.CNFProp = CNFProp
+
 // exposing commands for debugging
 global.assignProperNames = assignProperNames
 global.markDeclaredSymbols = markDeclaredSymbols
 global.processShorthands = processShorthands
-//
+
 // External packages
 global.satSolve = satSolve
 global.Algebrite = Algebrite
@@ -92,39 +90,47 @@ global.Grammar = Grammar
 //
 // Custom Lode commands and utilties
 global.compute = Algebrite.run
+
 // Run terminal commands from the Lode REPL
 global.exec = command => console.log(String(execSync(command)))
 global.execStr = command => String(execSync(command))
-// just syntactic sugar
-global.say = console.log
+
 // because it's easier to remember
 global.metavariable = 'LDE MV'
+
 // see if a filename has the correct extension and add it if it doesn't
 global.checkExtension = checkExtension
+
 // find the subtitution delta between two Application expressions if it exists
 global.diff = diff
+
 // for controlling the inspect-level for the default REPL echo
 global.Depth = Infinity
+
 // just a shorthand
 global.inspect = (x , depth=1) => console.log(util.inspect(x , {
   customInspect: false , showHidden: false , depth: depth , colors: true
 } ) )
+
 // load an initialization file or js script and execute it
 global.initialize = function(fname='initproofs') { 
   const init = fs.readFileSync(checkExtension(fname),{ encoding:'utf8'}) 
   eval.apply(this,[init+'\n'])  
 }
+
 // display a proof file by filename
 global.catproof = function(fname) {
   console.log(defaultPen(execStr(
     `cat "${proofPath}${checkExtension(fname,'lurch')}"`)))
   }
-// display a library file by filename
+
+  // display a library file by filename
 global.catlib = function(fname) {
   console.log(defaultPen(execStr(
     `cat "${libPath}${checkExtension(fname,'lurch')}"`)))
   } 
-// List both libs and proofs
+
+  // List both libs and proofs
 const list = () => { console.log(
   `\n${headingPen('Available Libraries:')}\n`+
   `${docPen(execStr('cd '+libPath+';ls -pRC '))}\n`+
@@ -216,6 +222,17 @@ global.trace = parsers[1]
 global.lc = lc 
 global.mc = mc
 global.$ = s => lc(parse(s))
+
+// print a string to the console with line numbers
+global.say = s => {
+  const lines = s.split('\n')
+  const lineNumberWidth = String(lines.length).length
+  lines.forEach( (line, index) => {
+    const lineNumber = String(index + 1).padStart(lineNumberWidth, ' ')
+    console.log(`${lineNumber}: ${line}`)
+  })
+}
+
 
 ////////////////////////////////////////////////////////////////////////////
 //
