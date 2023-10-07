@@ -9,3 +9,4 @@ scripts/initmisc.js
 scripts/initproofs.js
 src/experimental/parsers/ascimathref.js
 scripts/initproofs.js
+src/experimental/initproofs.js
