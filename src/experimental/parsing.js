@@ -30,7 +30,7 @@ export const makeParser = parserstr => {
     } catch(e) {
       if (typeof e.format === 'function') {
         console.log(e.format([{
-          grammarSource:parserstr, //Document.parserPath+name,
+          grammarSource:parserstr,
           text:s
         }]))
       } else {    
