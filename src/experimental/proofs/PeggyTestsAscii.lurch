@@ -433,4 +433,11 @@ P(c,w)  implies  Q(c,y) for some c
   Corollary { And_me }
 }
 
+Rules: {
+  { :P P }
+  { :Q Q }
+}
+ 
+Rule: { :A B⇒A }
+
 }

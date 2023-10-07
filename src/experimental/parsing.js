@@ -150,7 +150,25 @@ export const processShorthands = L => {
     m.nextSibling().userThm = true
     m.remove()
   } )
+
+  // Mark the next sibling as a RuleSet (should be an environment)
+  processSymbol( 'rules>' , m => {
+    const wrapper = m.nextSibling()
+    wrapper.children().forEach( kid => {
+      kid.makeIntoA('Rule')
+      wrapper.shiftChild()
+      kid.insertBefore(wrapper) 
+    } )
+    wrapper.remove()
+    m.remove()
+  } )
   
+  // Mark the next sibling as a Rule (should also be an environment)
+  processSymbol( 'rule>' , m => {
+    m.nextSibling().makeIntoA('Rule')
+    m.remove()
+  } )
+
   processSymbol( '✔︎' , m => { 
     m.previousSibling().expectedResult = 'valid'
     m.remove() 

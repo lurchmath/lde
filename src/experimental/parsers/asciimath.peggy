@@ -139,13 +139,25 @@ Environment "Environment" =
   { return `{ ${a.join(' ')} }` }
 
 // things it searches for and replaces up front
-Meta = Putdown / BIH / Comment / Thm
+Meta = Putdown / BIH / Comment / Thm / Ruleset / Rule
 
 // unprocessed putdown notation (cannot include // comments)
 Putdown = '«' @$([^»]*) '»'  // todo: add a non-unicode way to do this
 
 // flag the next environment as a BIH
 BIH = 'Notice'i { return '>>' }
+
+// synonyms for Rule sets
+RulesetLabel = 'Rules'i / 'Axioms'i / 'Givens'i
+
+// flag the next environment as a Ruleset
+Ruleset = RulesetLabel ':'? { return 'rules>' }
+
+// synonyms for Rules
+RuleLabel = 'Rule'i / 'Axiom'i / 'Given'i / 'Definition'i
+
+// flag the next environment as a Ruleset
+Rule = RuleLabel ':'? { return 'rule>' }
 
 // synonyms for theorems
 ThmLabel = 'Theorem'i / 'Thm'i / 'Lemma'i / 'Corollary'i
