@@ -98,16 +98,17 @@ let start = Date.now()
 // $$ = parsers[0]
 // trace = parsers[1]
 
-testparsers = loadParser('toy')
-test = testparsers[0]
-ttest = testparsers[1]
+// testparsers = loadParser('toy')
+// test = testparsers[0]
+// ttest = testparsers[1]
 
-asciiparsers = loadParser('asciimath')
-ascii = asciiparsers[0]
-asciitrace = asciiparsers[1]
+// asciiparsers = loadParser('asciimath')
+// ascii = asciiparsers[0]
+// asciitrace = asciiparsers[1]
 
 PeggyTests = Document.loadProofStr('PeggyTests')
 PeggyTestsAscii = Document.loadProofStr('PeggyTestsAscii')
+
 ///////////////////////////////////////////////////////////
 // closing
 console.log(defaultPen(`done! (${(Date.now()-start)} ms)`))
