@@ -18,7 +18,7 @@
 
 // REPL and file system utilities
 import repl from 'repl'
-import fs from 'fs'
+import fs, { write } from 'fs'
 import { execSync } from 'child_process'
 import util from 'util'
 import peggy from 'peggy'
@@ -94,6 +94,11 @@ global.compute = Algebrite.run
 // Run terminal commands from the Lode REPL
 global.exec = command => console.log(String(execSync(command)))
 global.execStr = command => String(execSync(command))
+global.ls = (args='') => {
+  const command = `ls -pC ${args}`
+  console.log(
+  `\n${docPen(execStr(command))}\n`)
+}
 
 // because it's easier to remember
 global.metavariable = 'LDE MV'
@@ -159,17 +164,13 @@ global.LurchFileExtension = 'lurch'
 // the file extension used by default for libraries and proof files
 global.ParserFileExtension = 'peggy' 
 
-// the file extension used for libraries and proof files for parsing with the
-// toy peggy parser
-global.PegFileExtension = 'peg' 
-
 // check a file name to see if it has the .lurch extension and if not, add it
 global.checkLurchExtension = name => checkExtension(name , LurchFileExtension )
 
-// Load just the string for a library and return that.  You can omit the .js 
-// extension.
-global.loadLibStr = (name) => {
-  const filename = libPath + checkLurchExtension(name)
+// Load just the string for a file and return that. You can omit the .lurch 
+// extension. The second argument is the folder.
+global.loadStr = ( name, folder='./', extension=LurchFileExtension) => {
+  const filename = folder + checkExtension(name,extension)
   if (!fs.existsSync(filename)) {
     console.log(`No such file or folder: ${name}`)
     return
@@ -177,37 +178,10 @@ global.loadLibStr = (name) => {
   return fs.readFileSync( filename , { encoding:'utf8'} )
 }
 
-// Load just the string for a proof document and return that.    
-global.loadProofStr = (name,extension) => {
-  const filename = proofPath + checkLurchExtension(name)
-  if (!fs.existsSync(filename)) {
-    console.log(`No such file or folder: ${name}`)
-    return
-  }
-  return fs.readFileSync( filename , { encoding:'utf8'} )
-}
-
-// Load just the string for a parser grammar and return that.
-global.loadParserStr = (name) => {
-  const filename = parserPath + 
-  checkExtension(name, ParserFileExtension)
-  if (!fs.existsSync(filename)) {
-    console.log(`No such file or folder: ${name}`)
-    return
-  }
-  return fs.readFileSync( filename , { encoding:'utf8'} )
-}
-
-// Load just the string for a proof in toy ascii format and return that
-global.loadPegStr = (name) => {
-  const filename = proofPath + 
-  checkExtension(name, PegFileExtension)
-  if (!fs.existsSync(filename)) {
-    console.log(`No such file or folder: ${name}`)
-    return
-  }
-  return fs.readFileSync( filename , { encoding:'utf8'} )
-}
+// Convenience versions of the same thing
+global.loadLibStr = (name) => loadStr(name,libPath)
+global.loadProofStr = (name) => loadStr(name,proofPath)
+global.loadParserStr = (name) => loadStr(name,parserPath,ParserFileExtension)
 
 // load a parser by specifying it's filename
 global.loadParser = (name) => {
@@ -231,9 +205,48 @@ global.say = s => {
   const lines = s.split('\n')
   const lineNumberWidth = String(lines.length).length
   lines.forEach( (line, index) => {
-    const lineNumber = String(index + 1).padStart(lineNumberWidth, ' ')
-    console.log(`${lineNumber}: ${line}`)
+    const lineNumber = linenumPen(
+      String(index + 1).padStart(lineNumberWidth, ' ')+':')
+    const coloredLine = (/^\s*\/\//.test(line)) ? instantiationPen(line) : line
+    console.log(`${lineNumber} ${coloredLine}`)
   })
+}
+
+// Concatenate the parsed contents of the specified files in order as children
+// of a single environment and return the environment. The arguments can be
+// strings interpreted as file names relative to the experimental folder, or LCs
+// that are already constructed in Lode.
+global.catdocs = ( ...files ) => {
+  // the reserved constants are declared at the top of every document, 
+  const system = lc(`:[ 'LDE EFA' '---' ]`).asA('Declare')
+  // create a temporary empty environment to hold the final answer
+  let ans = new Environment()
+  ans.pushChild(system)
+  // if no file is specified just return the system declaration
+  if ( files.length === 0 ) return ans
+  // for each file specified on the argument list, load it if necessary and
+  // add it to the answer environment
+  files.forEach( original => {
+    // create a place to store it
+    let file
+    // if it's already an LC, just make a copy
+    if (original instanceof LogicConcept) { 
+      file = original.copy() 
+      // otherwise it must be a string containing a filename, so load it  
+    } else {
+      const filestr = loadStr(original)
+      // if the file is not found it will print a message and return undefined,
+      // so just return 
+      if (!filestr) return
+      // it succeeded so convert it to an LC
+      file = lc(filestr)
+    }
+    // if it's not an array, make it be one
+    if (file instanceof LogicConcept) { file = [file] }
+    // then push all of the elements onto the answer environment
+    file.forEach( x => ans.pushChild(x) )
+  } )
+  return ans
 }
 
 
