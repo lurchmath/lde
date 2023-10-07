@@ -221,7 +221,10 @@ global.parse = parsers[0]
 global.trace = parsers[1]
 global.lc = lc 
 global.mc = mc
-global.$ = s => lc(parse(s))
+global.$ = s => {
+  let parsed = parse(s)
+  return (parsed) ? lc(parsed) : undefined
+}
 
 // print a string to the console with line numbers
 global.say = s => {
