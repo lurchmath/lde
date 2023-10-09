@@ -19,6 +19,9 @@
 // represent one half. We do not have an Integer or Rational constant type for
 // this reason.
 //
+// Note: Declare's have to be on a line by themselves and its declared
+// constants separated by spaces (not commas)
+//
 // TODO: 
 //  * add x≠y but have it parse as (¬ (= x y)), & same for other negated ops
 //  * add f:A→B, ∘, injective, surjective, bijective, ^inv, etc.
@@ -27,10 +30,7 @@
 //    want the parser to try to parse them as infix operators at that point
 //    Idea: make it possible to Declare the constants both syntactically and
 //    semantically at the same time.
-//  * discuss if it makes sense to just have a meta-grammar that first
-//    reads the user's document and finds 'parsing directives' and then
-//    generates the PEG grammar to use to make the parser which is then used to 
-//    parse the document. 
+
 {{
 
   // remove empty arrays from a nested array
@@ -94,6 +94,13 @@
 
 // Preprocess the input string
 { 
+  //   * replace toxic unicode chars with equivalents
+  input = input.replace(/𝜎/g, 'σ')
+  input = input.replace(/𝜆/g, 'λ')
+  //   * Declaring reserved constants is tricky since it tries to parse them as they are
+  //     intended to be used, so for now we convert any line of the form `Declare stuff`
+  //     to escaped putdown up front.
+  input = input.replace(/[Dd]eclare \s*([^\s].*)$/mg, 'declare> «:[$1]»\n')
   //   * delete comments (but leave any \n's to keep the line counts right)
   input = input.replace(/\/\/[^\n\r]*(\n|\r)/g, '\n')
   //   * Replace tabs with a space
@@ -116,7 +123,7 @@
 
 // The start rule for a Peggy grammar is the first rule.  For us, it's a
 // sequence of LCs.
-LCs "Sequence of LCs" = 
+LCs = 
 _ a:(Meta / Given / Declaration / Equivalence / Environment / Expression)|..,__| _ 
   { return a.join(' ') }
 
@@ -129,7 +136,7 @@ Given "Given" = (':' / 'Assume'i __ )
   { return ':'+a }
 
 // equivalence
-Equivalence = '{' _ a:( Declaration / Environment / Expression ) _ '≡' _
+Equivalence "Equivalence" = '{' _ a:( Declaration / Environment / Expression ) _ '≡' _
                     b:( Declaration / Environment / Expression ) _  '}'
   { return `{ { :${a} ${b} } { :${b} ${a} } }` }
 
@@ -139,53 +146,41 @@ Environment "Environment" =
   { return `{ ${a.join(' ')} }` }
 
 // things it searches for and replaces up front
-Meta = Putdown / BIH / Comment / Thm / Ruleset / Rule
+Meta = Putdown / Comment / Shorthand
 
 // unprocessed putdown notation (cannot include // comments)
 Putdown = '«' @$([^»]*) '»'  // todo: add a non-unicode way to do this
 
-// flag the next environment as a BIH
-BIH = 'Notice'i { return '>>' }
-
-// synonyms for Rule sets
-RulesetLabel = 'Rules'i / 'Axioms'i / 'Givens'i
-
-// flag the next environment as a Ruleset
-Ruleset = RulesetLabel ':'? { return 'rules>' }
-
-// synonyms for Rules
-RuleLabel = 'Rule'i / 'Axiom'i / 'Given'i / 'Definition'i
-
-// flag the next environment as a Ruleset
-Rule = RuleLabel ':'? { return 'rule>' }
-
-// synonyms for theorems
-ThmLabel = 'Theorem'i / 'Thm'i / 'Lemma'i / 'Corollary'i
-
-// flag the next environment as a BIH
-Thm = ThmLabel ':'? { return 'thm>' }
-
+// insert a comment that gets echoed
+Comment "Comment" = ('Comment'i / '➤') __ a:StringLiteral { return `(--- ${a})` }
 // String Literals for comments
 StringLiteral = $('"' [^"]* '"')
 
-// insert a comment that gets echoed
-Comment "Comment" = ('Comment'i / '➤') __ a:StringLiteral { return `(--- ${a})` }
+// Shorthand symbols that will be post-processed
+Shorthand = BIH / Ruleset / Rule / Thm
+
+BIH = 'Notice'i { return '>>' }
+RulesetLabel = 'Rules'i / 'Axioms'i / 'Givens'i
+Ruleset = RulesetLabel ':'? { return 'rules>' }
+RuleLabel = 'Rule'i / 'Axiom'i / 'Given'i / 'Definition'i
+Rule = RuleLabel ':'? { return 'rule>' }
+ThmLabel = 'Theorem'i / 'Thm'i / 'Lemma'i / 'Corollary'i
+Thm = ThmLabel ':'? { return 'thm>' }
 
 // declarations
-Declaration "Declaration" = ForSome / Declare / Let
+Declaration "Declaration" = ForSome / Let
 
-ForSome = body:Expression __ 'For'i __ 'some'i __ a:SymbolSeq 
+ForSome = body:Expression __ 'for'i __ 'some'i __ a:SymbolSeq 
           { return `[${spaced(a)}, ${body}]` }
-Declare = 'Declare'i __ a:DeclareSeq { return `:[${a}]` }
 Let = 'Let'i __ a:SymbolSeq __ ('be'i __)? 'such'i __ 'that'i __ b:Expression 
        { return `[${spaced(a)}, ${b}]` } /
       'Let'i __ a:SymbolSeq { return `[${spaced(a)}]` }
 
 // expressions
-Expression "Expression" = Binding / Prop // get's Stuff from Not
+Expression "Expression" = EFA / Binding / Prop  // get's Stuff from Not
 
 // binding expressions
-Binding "Binding Expression" = a:BindingSymbol b:SymbolSeq period c:Expression
+Binding = a:BindingSymbol b:SymbolSeq period c:Expression
           { return `(${a} ${b}, ${c})` }
 
 // propositional expressions
@@ -240,21 +235,25 @@ Exp       = a:Atomic|1..,'^'|                         { return lisp('^',a)    }
 // morally atomic (do not require parentheses)
 Atomic = Parenthesized / Prefix / Symbol / Number
 
+// For convenience we define 𝜆P(k) to be (λ P k) and replace λ with "LDE EFA"
+// as a shortcut
+EFA = 'λ' a:Symbol '(' b:Expression ')' { return `(λ ${a} ${b})` }
+
 Prefix = a:Symbol b:( '(' @Expression|..,comma| ')' )+ { return lispPrefix(a,b) }
 Parenthesized = '(' @Expression ')'
 
 // while we probably will never use a number or reserved symbol as a bound var, 
 // we might Declare one to be a constant, e.g. Peano or ops
 // TODO: try to unify the lists of reserved symbols in one place
-DeclareSeq = a:(Symbol/Number/[+⋅/^=<≤¬⇒⇔|∀∃∩∪×∈⊆∖⁻∧∨≡])|1..,comma| { return a.join(' ') }
+DeclareSeq = a:(Symbol/Number/ReservedChars)|1..,comma| { return a.join(' ') }
 // numbers
 Number  = Decimal / Natural
 Decimal = $( Natural '.' [0-9]+ )
 Natural = $( [1-9][0-9]* / '0' )
 
 // Symbols can't start with a digit, contain reserved constants, or keywords
-SymbolSeq "Sequence of Symbols" = a:Symbol|1..,comma| { return a.join(',') }
-Symbol "Symbol" =  $( !([0-9]/' or '/' and '/' loves ')
+SymbolSeq = a:(Symbol/Number)|1..,comma| { return a.join(',') }
+Symbol "Symbol" =  $( !([0-9]/ReservedWords)
                       [^-\][() \t\n✦{},.:+⋅/^=<≤¬⇒⇔|∀∃∩∪×∈⊆∖⁻∧∨≡]+ )
 BindingSymbol = ('∃!'/'exists unique ') { return '∃!' } /
                 ('∀'/'forall '/'for all ') { return '∀' } /
@@ -264,10 +263,10 @@ BindingSymbol = ('∃!'/'exists unique ') { return '∃!' } /
 // punctuation
 comma  =  ','
 period =  '.'
-__ "mandatory whitespace" = [ \t\n\r]+
-_  "optional whitespace"  = [ \t\n\r]*
+__  = [ \t\n\r]+
+_   = [ \t\n\r]*
 
-ReservedChars = [+⋅/^=<≤¬⇒⇔|∀∃∩∪×∈⊆∖⁻∧∨≡]
+ReservedChars = $([+⋅/^=<≤¬⇒⇔|∀∃∩∪×∈⊆∖⁻∧∨≡σλ])
 ReservedWords = ' or '/' and '/' loves '/' cdot '/' complement'/
                 ' setminus '/' cap '/' cup '/' times '/' lt '/' leq '/
                 ' in '/' subset '/' implies '/' iff '

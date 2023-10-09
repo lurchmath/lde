@@ -60,41 +60,36 @@ export const makeParser = parserstr => {
 // In order to make it convenient to enter large documents in putdown notation,
 // it is convenient to use fromPutdown to enter some reserved content in the
 // document that is preprocessed before evaluating the document.
-// 
+//
 // The following are what we have for Shorthands. More might be added later. 
 //
 //  * Scan a document looking for the symbol '<<', which we call a 'marker'. 
 //    For every marker, 
-//      (i) if the preceding sibling is an environment, attribute it 
-//          as a 'BIH'. 
-//      (ii) if the preceding sibling is a declaration, attribute it 
-//           as a 'Declare',
-//      (iii) in either case, finally, delete the marker.
 //
-//   * Scan for occurrences of the symbol '@' and replace that with the 
-//     symbol "LDE EFA" (which then will still print as '@' but it's what is
-//     needed under the hood).
+//    (i) if the preceding sibling is an environment, attribute it
+//    as a 'BIH'. 
 //
-//   * Scan for occurrences of the symbol '<thm' and mark its previous
-//     sibling as a user theorem.
+//    (ii) if the preceding sibling is a declaration, attribute it
+//    as a 'Declare', 
 //
-//   * Scan for occurrences of the symbol `✔︎` and `✗` and mark its 
-//     previous sibling with .expectedResult 'valid' or 'invalid', 
-//     respectively.
+//    (iii) in either case, finally, delete the marker.
+//
+//   * Scan for occurrences of the symbol 'λ' (or  '@' for backwards
+//     compatibility) and replace that with the symbol "LDE EFA" (which then
+//     will still print as '𝜆' but it's what is needed under the hood).
+//
+//   * Scan for occurrences of the symbol '<thm' and mark its previous sibling
+//     as a user theorem, or 'thm> and mark its next sibling as a Theorem.
+//
+//   * Scan for occurrences of the symbol `✔︎` and `✗` and mark its previous
+//     sibling with .expectedResult 'valid' or 'invalid', respectively.
 //
 // Naturally we have to run this FIRST before anything else.  These changes are
 // made in-place - they don't return a copy of the document.
 //
 // This does no error checking, so << has to be an outermost expression with a
-// previous sibling and @ has to appear in some sensible location.
+// previous sibling and λ has to appear in some sensible location.
 //
-// TODO: 
-//   * when this becomes permanent, just modify fromPutdown to support this
-//     functionality or generalize adding customized shorthands.  One can
-//     imagine wanting to add things like an easy way to enter labels or
-//     reasons or citations or mark things as a formula in the future that are
-//     easier than the current putdown attribute notation.  I have not played
-//     with smackdown notation yet either.  Consider that option.
 export const processShorthands = L => {
 
   // for each symbol named symb, do f
@@ -102,56 +97,36 @@ export const processShorthands = L => {
     L.descendantsSatisfying( x => (x instanceof LurchSymbol) && x.text()===symb )
      .forEach( s => f(s) )
   }
-
-  processSymbol( '@' , m => { 
-      m.replaceWith(new LurchSymbol('LDE EFA'))
-    } )
-
-  processSymbol( '≡' ,  m => { 
-    const LHS = m.previousSibling()
-    const RHS = m.nextSibling()
-    let A1=LHS.copy().asA('given'), A2=LHS.copy(),
-        B1=RHS.copy(), B2=RHS.copy().asA('given')
-    LHS.replaceWith(new Environment(A1,B1))
-    RHS.replaceWith(new Environment(B2,A2))
+  // make next sibling have a given type
+  const makeNext =  (m,type) => {
+    m.nextSibling().makeIntoA(type)
     m.remove()
-  } )
-
-  processSymbol( '<<' , m => { 
-      const target = m.previousSibling()
-      if (target instanceof Declaration) {
-        target.makeIntoA('Declare')
-      } else { 
-        target.makeIntoA('BIH')
-      }  
-      m.remove()
-    } )
-
-  // Same as the previous, but attributes the next sibling.
-  processSymbol( '>>' , m => { 
-    m.nextSibling().makeIntoA('BIH')
+  }
+  // make previous sibling have a given type
+  const makePrevious =  (m,type) => {
+    m.previousSibling().makeIntoA(type)
     m.remove()
-  } )
-
-  processSymbol( '<thm' , m => {
-    // There's a subtlety here.  We don't want top mark this as a 'Rule' yet
-    // because it has not yet been converted to an LC Formula. We will need the
-    // non-formula original (with no metavariables) for Matching so the user's
-    // theorem can be validated but also a Formula version that can be
-    // instantiated to prove Corollaries.  So for now we just flag this with an
-    // internal js attribute 'userthm' to indicated it was flagged by the
-    // shortHand '<thm' and process it later when processing the doc.
-    m.previousSibling().userThm = true
-    m.remove()
-  } )
+  }
   
-  processSymbol( 'thm>' , m => {
-    // Same as the previous, but attributes the next sibling.
-    m.nextSibling().userThm = true
+  // declare the type of the next or previous sibling 
+  processSymbol( 'BIH>'     , m => makeNext(m,'BIH') )
+  processSymbol( 'declare>' , m => makeNext(m,'Declare') )
+  processSymbol( 'rule>'    , m => makeNext(m,'Rule') )  
+  processSymbol( 'thm>'     , m => makeNext(m,'Theorem') )  
+  processSymbol( '<thm'     , m => makePrevious(m,'Theorem') )  
+  
+  // depricated but kept for backward compatibility
+  processSymbol( '<<' , m => { 
+    const target = m.previousSibling()
+    const type = (target instanceof Declaration) ? 'Declare' : 'BIH'
+    target.makeIntoA(type)
     m.remove()
   } )
-
-  // Mark the next sibling as a RuleSet (should be an environment)
+  // depricated but kept for backward compatibility
+  processSymbol( '>>'     , m => makeNext(m,'BIH') )
+  
+  // rules> - Mark each of the children of the next sibling (which should be an
+  // environment) as a Rule, and delete both the shorthand and the environment. 
   processSymbol( 'rules>' , m => {
     const wrapper = m.nextSibling()
     wrapper.children().forEach( kid => {
@@ -163,27 +138,42 @@ export const processShorthands = L => {
     m.remove()
   } )
   
-  // Mark the next sibling as a Rule (should also be an environment)
-  processSymbol( 'rule>' , m => {
-    m.nextSibling().makeIntoA('Rule')
+  // simple replacements
+  processSymbol( 'λ' , m => { 
+    m.replaceWith(new LurchSymbol('LDE EFA'))
+  } )  
+  processSymbol( '@' , m => { 
+    m.replaceWith(new LurchSymbol('LDE EFA'))
+  } )
+  
+  // expand equivalences
+  processSymbol( '≡' ,  m => { 
+    const LHS = m.previousSibling()
+    const RHS = m.nextSibling()
+    let A1=LHS.copy().asA('given'), A2=LHS.copy(),
+        B1=RHS.copy(), B2=RHS.copy().asA('given')
+    LHS.replaceWith(new Environment(A1,B1))
+    RHS.replaceWith(new Environment(B2,A2))
     m.remove()
   } )
 
+  // For testing purposes, flag the expected result
   processSymbol( '✔︎' , m => { 
-    m.previousSibling().expectedResult = 'valid'
+    m.previousSibling().setAttribute('ExpectedResult','valid')
     m.remove() 
   } )
 
   processSymbol( '✗' , m => { 
-    m.previousSibling().expectedResult = 'indeterminate' 
+    m.previousSibling().setAttribute('ExpectedResult','indeterminate') 
     m.remove()
   } )
 
   processSymbol( '!✗' , m => { 
-    m.previousSibling().expectedResult = 'invalid' 
+    m.previousSibling().setAttribute('ExpectedResult','invalid') 
     m.remove()
   } )
-
+  
+  // TODO: make this more consistent with the other shorthands
   processSymbol( '---' , m => { 
     if (m.parent().isAComment()) m.parent().ignore=true 
   })

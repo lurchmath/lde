@@ -1,0 +1,432 @@
+////////////////////////////////////////////////////////////////////
+// Tests for Peggy Parser
+//
+
+{
+// Misc parsing tests
+// Symbols
+x
+x1
+fred
+// Numbers
+0
+1
+12345
+10200
+0.5
+12.0
+12.0340
+// function applications
+f()
+fred(x)
+g0(fred,wilma)
+f(x)(y)
+f()(x,y)
+f()()(x)
+f(x,y)(a,b)(c,d,e)()
+// parentheticals
+(x)
+(0)
+(1.2)
+((x))
+(((x)))
+((((((x))))))
+// powers
+2^3
+0^10.3
+x^0
+x^y
+x^y^z
+x^y^z^w
+x^(y^z)^w
+(x^y)^(z^w)
+(x^(y^z))^w
+// products
+x cdot y
+2⋅x
+2⋅0
+0⋅2
+3⋅x^2
+3⋅x^2^3
+3^2⋅5^3⋅7^4
+2⋅x⋅y⋅z
+2⋅x^3⋅y⋅z^4
+(2⋅x^3)⋅(y⋅z^4)
+2⋅(x^3⋅(y⋅z^4))
+(2⋅(x^3⋅y)⋅z)^4
+2⋅(x^3⋅y)⋅z^4
+// quotients
+x/y
+2/x
+2/0
+0/2
+3/x^2
+3/x^2^3
+3^2/5^3⋅7^4
+3^2⋅5^3/7^4
+3^2/5^3/7^4
+2⋅x⋅y⋅z
+2/x⋅y⋅z
+2⋅x/y⋅z
+2⋅x⋅y/z
+2⋅x/y/z
+2/x⋅y/z
+2/x/y⋅z
+2/x/y/z
+2⋅x^3/y/z^4
+(2⋅x^3)/(y⋅z^4)
+2⋅(x^3/(y⋅z^4))
+(2/(x^3/y)⋅z)^4
+2⋅(x^3⋅y)/z^4
+// sums
+x+y
+2+x
+2+0
+0+2
+3+x^2
+3+x^2^3
+3+5^3+7^4
+3^2+5^3+7^4
+3^2+5⋅3/7+4
+2+x+y+z
+2+3⋅x^3+y/z^4
+(2+x^3)+(1+y⋅z^4)
+2+(x^3/(y⋅z^4))
+(2/(x+3/y)⋅z)^4
+2⋅(x^3+y)/z+4
+// negation and subtraction
+-x
+-2
+-0
+0-2
+3-x^2
+3-x^2^3
+3-5^3-7^4
+-3^2+5^3-7^4
+-3^2-5⋅3/7-4
+2+x+y+z
+2+3⋅x^3+y/z^4
+(2+x^3)-(1-y⋅z^4)
+-2-(x-3/(yz^4))
+(2/(x-3/y)⋅z)^(-4)
+-2⋅(x^3+y)/(-z)-4
+// sets
+A∩B
+A∪B
+A∖B
+A⁻
+A∩B∩C
+A∩(B∩C)
+(A∩B)∩C
+((A∩B)∩C)∩D
+(A∩(B∩C))∩D
+A∩(B∪C)
+(A∩B)∪C
+((A∪B)∩C)∪D
+(A∪(B∩C))∪D
+(A∪(B∩C))∩D
+A∪B∪C
+A∪(B∪C)
+(A⁻∩B⁻)⁻∩C⁻
+(((A∖B)⁻∩C⁻)∩D)⁻
+(A⁻∩(B∖C))∖D⁻
+A∩(B⁻∖C⁻)⁻
+(A∩B)∖C
+((A∖B)∩C)∪D
+A∖B∖C∖D
+(A⁻∪(B∖C⁻))∩D
+// arithmetic relations
+x=0
+fred<wilma
+x+1≤0
+-(-x^2+2⋅x-7)/((x-1)⋅(x+1))=(3⋅x+1)/2
+2|6
+12|24
+n|6
+k+1|n-1
+Fred loves wilma
+// set relations
+x∈A
+2∈Set(0,2,4,6)
+A⊆B
+Set(1,2) ∈ PowerSet(Set(0,1,2,3))
+A∩B ⊆ A∪B
+A∩B⁻ ⊆ (A∪B)⁻∖A
+A×B ⊆ B×A
+// propositions
+¬P
+¬P or Q
+¬(P or Q)
+¬P and Q
+¬(P and Q)
+¬P∨Q
+¬(P∨Q)
+¬P∧Q
+¬(P∧Q)
+¬P ⇒ Q
+¬(P ⇒ Q)
+¬P ⇔ Q
+¬(P ⇔ Q)
+((P⇒Q)⇒P)⇒P
+(((P⇒Q)⇒P)⇒P)
+¬P and Q ⇒ ¬R or S ⇔ ¬T ⇒ U
+// mixed
+x∈(A∩B)⁻ ⇔ x∈A⁻ or x∈B⁻
+1/(x^2-2⋅x+1)=1/(x-1)^2 ⇔ x∈R and ¬x=1
+//bindings
+∀x.P(x)
+∃x.P(x)
+∀x.∀y.P(x)
+∃x.∃y.P(x)
+∀x.∃y.P(x)
+∃x.∀y.P(x)
+∀x,y.P(x)
+∃x,y.P(x)
+(∃x.∀y.P(x,y)) ⇒ (∀y.∃x.P(x,y))
+(∃x.∀y.x loves y) ⇒ (∀y.∃x.x loves y)
+P and (∃x.P(x) ⇒ Q) ⇒ P and (∀y.Q)
+// declarations
+Let x
+let x,y,z,wilma
+Declare f
+declare fred, wilma, barney, #, !
+P(c) for some c
+P(c,w) ⇒ Q(c,y) for some c
+// environments
+{}
+{{{{{}}}}}
+{ A }
+{A B C}
+{ Assume X Y }
+{ :X Y }
+{ :{:X Y} {:X Z} }
+{ :{:{:P Q} P} P }
+{ Assume { Assume { Assume P Q} P} P }
+:{ :(x+1)⋅(x-1)≤0 x≤1 -1≤x }
+  
+////////////////////////////////
+// ND Propositional Logic Axioms
+////////////////////////////////
+:{ {W V} ≡ W and V }                     // and+
+:{ {:W V} ≡ W⇒V }                        // ⇒
+:{ { {:W V} {:V W} } ≡ W⇔V }             // ⇔
+:{ :W W or V V or W }                    // or+ 
+:{ :W or V :{:W U} :{:V U} U }           // or-
+:{ :{:W →←}  ¬W }                        // ¬+
+:{ :{:¬W →←}  W }                        // ¬-
+:{ :W :¬W →← }                           // →←+
+// Prop Thms
+:{ W or ¬W }                                      // exclusive middle
+:{ ¬(¬W) ≡ W }                                    // double negative
+:{ W or W ≡ W }                                   // idempotency of or
+:{ :W or V   V or W }                             // commutativity of or
+:{ (W or V) or U ≡ W or (V or U) }                // associativity of or
+:{ { W  (V or U) } ≡ (W and V) or (W and U) }     // distributivity of and/or
+:{  W or (V and U) ≡ { (W or V) (W or U) } }      // distributivity of or/and
+:{ :W⇒V :V⇒U W⇒U }                                // transitivity of ⇒
+:{ :W⇔V :V⇔U W⇔U }                                // transitivity of ⇔
+:{ W⇒V ≡ ¬W or V }                                // alternate def of ⇒
+:{ :W or V :¬W V }                                // alternate or-  
+:{ :W or V :¬V W }                                // alternate or-
+:{ ¬(W⇒V) ≡ { W ¬V } }                            // negated implication
+:{ W ⇒ V ≡  ¬V ⇒ ¬W }                             // contrapositive
+:{ ¬(W and V) ≡ ¬W or ¬V }                        // DeMorgan
+:{ (¬(W or V)) ≡ { ¬W ¬V } }                      // DeMorgan
+:{ :→← W }                                        // contradiction-
+// Pred Axioms
+:{ :(∀x.@(P,x)) @(P,t) }                          // ∀-
+:{ :{ :Let x @(P,x) }  (∀y.@(P,y)) }              // ∀+
+:{ :(∃x.@(P,x)) @(P,c) for some c }               // ∃-
+:{ :@(P,t) (∃x.@(P,x)) }                          // ∃+
+:{ :x=y :@(P,x) @(P,y) }                          // substitution
+:{ W=W }                                          // reflexive =
+:{ (∃!x.@(P,x)) ≡ { (∃x.@(P,x)) (∀y.@(P,y)⇒y=x) } }         // ∃!
+// Pred Theorems
+:{ :x=y :@(P,y) @(P,x) }                          // alternate substutition
+:{ { (∀x. @(P,x)) (∀y.@(Q,y)) } ≡ (∀x. @(P,x) and @(Q,x)) } // distributivity
+:{ { (∃x. @(P,x)) (∃y.@(Q,y)) } ≡ (∃x. @(P,x) or @(Q,x)) }  // distributivity
+:{ (∃!x.@(W,x)) ≡ (∃c.∀z. @(W,z) ⇔ z=c) }         // alternate def of ∃!
+////////////////////////////////
+// Peano Axioms
+////////////////////////////////
+:{ :𝜎(m)=𝜎(n) m=n }                                          // N2
+:{ ¬(0 = 𝜎(n)) }                                             // N3
+:{ :@(P,0) :{ :Let k :@(P,k) @(P,𝜎(k)) } (∀n.@(P,n)) }       // N4
+:{ n+0 = n }                                                 // A0
+:{ m+𝜎(n) = 𝜎(m+n) }                                         // A1
+:{ n⋅0 = 0 }                                                 // M0
+:{ n⋅𝜎(m) = m+m⋅n }                                          // M1       
+:{ m≤n ≡ (∃k.m+k=n) }                                        // I
+
+{
+  // Assignment #8 (b)
+  { Declare 0,<,7
+    {  
+      Assume 0<7
+      ∃x.0<x
+      ∃x.x<7
+      (∃x.0<x) and (∃x.x<7)
+    }
+    0<7 ⇒ (∃x.0<x) and (∃x.x<7)
+  }
+}
+
+{
+  // Assignment #8 (d)
+  { { Assume x=y and y=z
+      x=y
+      y=z
+      x=z      // by substitution
+    }
+    x=y and y=z ⇒ x=z
+  }
+}
+
+{
+  // Assignment #8 (c)
+  // Theorem: If everyone loves everyone else then Alice loves Bob.
+  { Declare Alice, Bob
+    { Assume ∀x.∀y.x loves y
+      ∀y.Alice loves y 
+      Alice loves Bob
+    }
+    (∀x.∀y.x loves y) ⇒ Alice loves Bob
+  }
+}
+
+{
+  // Assignment #8 (e)
+  { 
+    { Assume ∃x. P(x) ⇒ Q(x)
+      P(c) ⇒ Q(c) for some c
+      { Assume ∀y. P(y)
+        P(c)
+        Q(c)
+        ∃z. Q(z)
+      }
+      (∀y. P(y)) ⇒ (∃z. Q(z))
+    }
+    (∃x. P(x) ⇒ Q(x)) ⇒ ( (∀y. P(y)) ⇒ (∃z. Q(z)) )
+  }
+}
+
+// Assignment #5(b) ¬P or Q ⇒ (P ⇒ Q)
+{ 
+  { :¬P or Q
+    { :¬P 
+      { :P { :¬Q →← } Q } 
+      P⇒Q
+    }
+    { :Q
+      {:P Q}
+      P⇒Q
+    } 
+    P⇒Q
+  }
+  (¬P or Q) ⇒ (P⇒Q)
+}
+
+// Assignment #8 (f)
+{
+  // Theorem: If everyone loves exactly one person, and Alice and Bob
+  // are not the same person, then Cathy does not love them both."
+  {
+    :(∀x.(∃!y.x loves y)) :¬(Alice=Bob)  ¬((Cathy loves Alice) and (Cathy loves Bob))
+  }
+  // Proof:
+  { 
+    :(∀x.(∃!y.x loves y))   // given
+    :¬(Alice=Bob)           // given
+    //  "Use ∀- on that using the free 'Cathy' in the theorem...")
+    ∃!y.Cathy loves y
+    //  "Apply the definition of ∃! ...")
+    ∃y.Cathy loves y and (∀z.Cathy loves z ⇒ z = y)
+    //  "Cathy loves exactly one person, so let's name him Fred ...")
+    Cathy loves Fred and (∀z.Cathy loves z ⇒ z = Fred) for some Fred
+    //  "Use and- twice on the body of that declaration...")
+    Cathy loves Fred
+    ∀z.Cathy loves z ⇒ z = Fred
+    //  "Now it's just a short a proof by contradiction...")
+    { :Cathy loves Alice and Cathy loves Bob
+      Cathy loves Alice
+      Cathy loves Bob
+      Cathy loves Alice ⇒ Alice=Fred
+      Cathy loves Bob ⇒ Bob=Fred
+      Alice=Fred
+      Bob=Fred
+      Alice = Bob
+      →←
+    }
+    //  "Thus since the assumption led to a contradiction ...")
+    ¬(Cathy loves Alice and Cathy loves Bob) 
+  }
+}
+
+{
+  //  "Theorem 7.2: n≠0 ⇒ ∃m,n=𝜎(m)")
+  { :¬n=0 (∃m.n=𝜎(m)) }
+
+  //  "Proof:")
+  { :¬n=0
+    //  "P(n) is n≠0⇒∃k,n=𝜎(m)")
+    //  "Base Case")
+    { :¬0=0
+      { :¬(∃m.0=𝜎(m))
+        0=0
+        →←
+      }
+      ∃m.0=𝜎(m)
+    }
+    ¬0=0 ⇒ (∃m.0=𝜎(m))
+    // "Inductive step")
+    { :Let k // be arbitrary
+      { :¬k=0 ⇒ (∃m.k=𝜎(m))
+        { :¬𝜎(k)=0 
+          𝜎(k)=𝜎(k)
+          ∃m.𝜎(k)=𝜎(m)
+        }
+        ¬𝜎(k=0) ⇒ (∃m.𝜎(k)=𝜎(m))
+      } 
+    }
+    //  "It would be nice to avoid the need for ∀ and ⇒ in this proof.")
+    //  "But (@ P n) only matches expressions")
+    (∀j. ¬j=0⇒(∃m.j=𝜎(m)))
+    (¬n=0 ⇒ (∃m.n=𝜎(m)))
+    (∃m.n=𝜎(m))
+  }
+}
+
+{
+  // Assignment #9.1
+  // Thm: Pierce's Law
+  { ((P⇒Q)⇒P)⇒P }
+  { 
+    :((P⇒Q)⇒P)
+    { :¬P
+      { :P
+        { :¬Q 
+          →←
+        }
+        Q
+      }
+      P⇒Q
+      P
+      →←
+    }
+    P   
+  }
+}
+
+{
+  // BIH
+  Notice { "This is a BIH" }
+  Comment
+  ➤ "This is a comment"
+  // Theorems
+  Theorem { I_am_a_theorem }
+  Lemma: { So_am_I }
+  Thm { Me_too }
+  Corollary { And_me }
+}
+
+}

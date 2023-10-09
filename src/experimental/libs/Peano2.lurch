@@ -13,7 +13,7 @@
   // the next line is a theorem, provable from N4, and would be a speedup
   // allowing us to skip the need for a ∀ statement, but currently it 
   // won't instantiate without a BIH.
-  // :{ :(@ P 0) :{ :[k] :(@ P k) (@ P (𝜎 k)) } (@ P n) }       // alt N4
+  // :{ :(@ P 0) :{ :[k , (@ P k) (@ P (𝜎 k)) } (@ P n) }       // alt N4
   :{ (= (+ n 0) n) }                                            // A0
   :{ (= (+ m (𝜎 n)) (𝜎 (+ m n))) }                              // A1
   :{ (= (⋅ n 0) 0) }                                            // M0

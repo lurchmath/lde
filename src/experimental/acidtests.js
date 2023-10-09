@@ -23,8 +23,9 @@ acid.push(load('thm2',biglib))
 let passed = 0
 let failed = 0
 acid.forEach( (T,k) => {
-  T.descendantsSatisfying( x => x.expectedResult ).forEach( (s,i) => {
-    if (Validation.result(s) && Validation.result(s).result==s.expectedResult) {
+  T.descendantsSatisfying( x => x.hasAttribute('ExpectedResult') ).forEach( (s,i) => {
+    if (Validation.result(s) && 
+        Validation.result(s).result==s.getAttribute('ExpectedResult')) {
       console.log(`Test ${k}.${i} → ok`)
       passed++
     } else {

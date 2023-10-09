@@ -185,8 +185,8 @@ const formatter = ( options=defaultOptions ) => {
   return (L, S, attr) => {
     let ans = ''
     
-    // optionally hide userThms or userRules
-    if ((L.userThm && !options.showUserThms) ||
+    // optionally hide user Theorems or userRules
+    if ((L.isA('Theorem') && !options.showUserThms) ||
         (L.userRule && !options.showUserRules))  { // do nothing
     // hint markers
     } else if (L.isA(hint) || (L instanceof LurchSymbol && L.text()==='<<')) {  

@@ -372,7 +372,6 @@ const loadLibs = (...libs) => {
     }
 
     // Process any shorthands, like ≡.
-    // TODO: Replace with Peggy Parser
     processShorthands(lib)
 
     // Now that we have this lib, add its kids to the answer environment,
@@ -531,7 +530,7 @@ export class Document extends Environment {
     //     for ForSomes not containing metavars.  But that means every ForSome
     //     body will be copied.  Check if this should be run before copying
     //     the ForSome bodies or if it's ok as is.
-    ;[ ...this.lastChild().descendantsSatisfyingIterator( x => x.userThm ) ].forEach( 
+    ;[ ...this.lastChild().descendantsSatisfyingIterator( x => x.isA('Theorem') ) ].forEach( 
       thm => {
       // make a copy of the thm after the theorem
       let formula = thm.copy()

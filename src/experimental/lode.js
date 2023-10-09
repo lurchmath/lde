@@ -217,7 +217,9 @@ global.say = s => {
 // strings interpreted as file names relative to the experimental folder, or LCs
 // that are already constructed in Lode.
 global.catdocs = ( ...files ) => {
-  // the reserved constants are declared at the top of every document, 
+  // the reserved constants are declared at the top of every document
+  // Note: we temporarily include '/' here until we can fix the bug in the 
+  // ascii peggy parser that prevents it from being Declared. 
   const system = lc(`:[ 'LDE EFA' '---' ]`).asA('Declare')
   // create a temporary empty environment to hold the final answer
   let ans = new Environment()
@@ -239,7 +241,7 @@ global.catdocs = ( ...files ) => {
       // so just return 
       if (!filestr) return
       // it succeeded so convert it to an LC
-      file = lc(filestr)
+      file = $(filestr)
     }
     // if it's not an array, make it be one
     if (file instanceof LogicConcept) { file = [file] }

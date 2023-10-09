@@ -43,18 +43,18 @@ x^(y^z)^w
 (x^(y^z))^w
 // products
 x cdot y
-2⋅x
-2⋅0
-0⋅2
-3⋅x^2
-3⋅x^2^3
-3^2⋅5^3⋅7^4
-2⋅x⋅y⋅z
-2⋅x^3⋅y⋅z^4
-(2⋅x^3)⋅(y⋅z^4)
-2⋅(x^3⋅(y⋅z^4))
-(2⋅(x^3⋅y)⋅z)^4
-2⋅(x^3⋅y)⋅z^4
+2 cdot x
+2 cdot 0
+0 cdot 2
+3 cdot x^2
+3 cdot x^2^3
+3^2 cdot 5^3 cdot 7^4
+2 cdot x cdot y cdot z
+2 cdot x^3 cdot y cdot z^4
+(2 cdot x^3) cdot (y cdot z^4)
+2 cdot (x^3 cdot (y cdot z^4))
+(2 cdot (x^3 cdot y) cdot z)^4
+2 cdot (x^3 cdot y) cdot z^4
 // quotients
 x/y
 2/x
@@ -62,22 +62,22 @@ x/y
 0/2
 3/x^2
 3/x^2^3
-3^2/5^3⋅7^4
-3^2⋅5^3/7^4
+3^2/5^3 cdot 7^4
+3^2 cdot 5^3/7^4
 3^2/5^3/7^4
-2⋅x⋅y⋅z
-2/x⋅y⋅z
-2⋅x/y⋅z
-2⋅x⋅y/z
-2⋅x/y/z
-2/x⋅y/z
-2/x/y⋅z
+2 cdot x cdot y cdot z
+2/x cdot y cdot z
+2 cdot x/y cdot z
+2 cdot x cdot y/z
+2 cdot x/y/z
+2/x cdot y/z
+2/x/y cdot z
 2/x/y/z
-2⋅x^3/y/z^4
-(2⋅x^3)/(y⋅z^4)
-2⋅(x^3/(y⋅z^4))
-(2/(x^3/y)⋅z)^4
-2⋅(x^3⋅y)/z^4
+2 cdot x^3/y/z^4
+(2 cdot x^3)/(y cdot z^4)
+2 cdot (x^3/(y cdot z^4))
+(2/(x^3/y) cdot z)^4
+2 cdot (x^3 cdot y)/z^4
 // sums
 x+y
 2+x
@@ -87,13 +87,13 @@ x+y
 3+x^2^3
 3+5^3+7^4
 3^2+5^3+7^4
-3^2+5⋅3/7+4
+3^2+5 cdot 3/7+4
 2+x+y+z
-2+3⋅x^3+y/z^4
-(2+x^3)+(1+y⋅z^4)
-2+(x^3/(y⋅z^4))
-(2/(x+3/y)⋅z)^4
-2⋅(x^3+y)/z+4
+2+3 cdot x^3+y/z^4
+(2+x^3)+(1+y cdot z^4)
+2+(x^3/(y cdot z^4))
+(2/(x+3/y) cdot z)^4
+2 cdot (x^3+y)/z+4
 // negation and subtraction
 -x
 -2
@@ -103,95 +103,95 @@ x+y
 3-x^2^3
 3-5^3-7^4
 -3^2+5^3-7^4
--3^2-5⋅3/7-4
+-3^2-5 cdot 3/7-4
 2+x+y+z
-2+3⋅x^3+y/z^4
-(2+x^3)-(1-y⋅z^4)
+2+3 cdot x^3+y/z^4
+(2+x^3)-(1-y cdot z^4)
 -2-(x-3/(yz^4))
-(2/(x-3/y)⋅z)^(-4)
--2⋅(x^3+y)/(-z)-4
+(2/(x-3/y) cdot z)^(-4)
+-2 cdot (x^3+y)/(-z)-4
 // sets
-A∩B
-A∪B
-A∖B
+A cap B
+A cup B
+A setminus B
 A⁻
-A∩B∩C
-A∩(B∩C)
-(A∩B)∩C
-((A∩B)∩C)∩D
-(A∩(B∩C))∩D
-A∩(B∪C)
-(A∩B)∪C
-((A∪B)∩C)∪D
-(A∪(B∩C))∪D
-(A∪(B∩C))∩D
-A∪B∪C
-A∪(B∪C)
-(A⁻∩B⁻)⁻∩C⁻
-(((A∖B)⁻∩C⁻)∩D)⁻
-(A⁻∩(B∖C))∖D⁻
-A∩(B⁻∖C⁻)⁻
-(A∩B)∖C
-((A∖B)∩C)∪D
-A∖B∖C∖D
-(A⁻∪(B∖C⁻))∩D
+A cap B cap C
+A cap (B cap C)
+(A cap B) cap C
+((A cap B) cap C) cap D
+(A cap (B cap C)) cap D
+A cap (B cup C)
+(A cap B) cup C
+((A cup B) cap C) cup D
+(A cup (B cap C)) cup D
+(A cup (B cap C)) cap D
+A cup B cup C
+A cup (B cup C)
+(A⁻ cap B⁻)⁻ cap C⁻
+(((A setminus B)⁻ cap C⁻) cap D)⁻
+(A⁻ cap (B setminus C)) setminus D⁻
+A cap (B⁻ setminus C⁻)⁻
+(A cap B) setminus C
+((A setminus B) cap C) cup D
+A setminus B setminus C setminus D
+(A⁻ cup (B setminus C⁻)) cap D
+A times B  subset  B times A
 // arithmetic relations
 x=0
-fred<wilma
-x+1≤0
--(-x^2+2⋅x-7)/((x-1)⋅(x+1))=(3⋅x+1)/2
+fred lt wilma
+x+1 leq 0
+-(-x^2+2 cdot x-7)/((x-1) cdot (x+1))=(3 cdot x+1)/2
 2|6
 12|24
 n|6
 k+1|n-1
 Fred loves wilma
 // set relations
-x∈A
-2∈Set(0,2,4,6)
-A⊆B
-Set(1,2) ∈ PowerSet(Set(0,1,2,3))
-A∩B ⊆ A∪B
-A∩B⁻ ⊆ (A∪B)⁻∖A
-A×B ⊆ B×A
+x in A
+2 in Set(0,2,4,6)
+A subset B
+Set(1,2) in PowerSet(Set(0,1,2,3))
+A cap B  subset  A cup B
+A cap B⁻  subset  (A cup B)⁻ setminus A
 // propositions
-¬P
-¬P or Q
-¬(P or Q)
-¬P and Q
-¬(P and Q)
-¬P∨Q
-¬(P∨Q)
-¬P∧Q
-¬(P∧Q)
-¬P ⇒ Q
-¬(P ⇒ Q)
-¬P ⇔ Q
-¬(P ⇔ Q)
-((P⇒Q)⇒P)⇒P
-(((P⇒Q)⇒P)⇒P)
-¬P and Q ⇒ ¬R or S ⇔ ¬T ⇒ U
+not P
+not P or Q
+not (P or Q)
+not P and Q
+not (P and Q)
+not P∨Q
+not (P∨Q)
+not P∧Q
+not (P∧Q)
+not P  implies  Q
+not (P  implies  Q)
+not P  iff   Q
+not (P  iff   Q)
+((P implies Q) implies P) implies P
+(((P implies Q) implies P) implies P)
+not P and Q  implies  not R or S  iff   not T  implies  U
 // mixed
-x∈(A∩B)⁻ ⇔ x∈A⁻ or x∈B⁻
-1/(x^2-2⋅x+1)=1/(x-1)^2 ⇔ x∈R and ¬x=1
+x in (A cap B)⁻  iff   x in A⁻ or x in B⁻
+1/(x^2-2 cdot x+1)=1/(x-1)^2  iff   x in R and not x=1
 //bindings
-∀x.P(x)
-∃x.P(x)
-∀x.∀y.P(x)
-∃x.∃y.P(x)
-∀x.∃y.P(x)
-∃x.∀y.P(x)
-∀x,y.P(x)
-∃x,y.P(x)
-(∃x.∀y.P(x,y)) ⇒ (∀y.∃x.P(x,y))
-(∃x.∀y.x loves y) ⇒ (∀y.∃x.x loves y)
-P and (∃x.P(x) ⇒ Q) ⇒ P and (∀y.Q)
+for all x.P(x)
+exists x.P(x)
+for all x.for all y.P(x)
+exists x.exists y.P(x)
+for all x.exists y.P(x)
+exists x.for all y.P(x)
+for all x,y.P(x)
+exists x,y.P(x)
+(exists x.for all y.P(x,y))  implies  (for all y.exists x.P(x,y))
+(exists x.for all y.x loves y)  implies  (for all y.exists x.x loves y)
+P and (exists x.P(x)  implies  Q)  implies  P and (for all y.Q)
 // declarations
 Let x
 let x,y,z,wilma
 Declare f
 declare fred, wilma, barney, #, !
 P(c) for some c
-P(c,w) ⇒ Q(c,y) for some c
+P(c,w)  implies  Q(c,y) for some c
 // environments
 {}
 {{{{{}}}}}
@@ -202,72 +202,76 @@ P(c,w) ⇒ Q(c,y) for some c
 { :{:X Y} {:X Z} }
 { :{:{:P Q} P} P }
 { Assume { Assume { Assume P Q} P} P }
-:{ :(x+1)⋅(x-1)≤0 x≤1 -1≤x }
+:{ :(x+1) cdot (x-1) leq 0 x leq 1 -1 leq x }
   
 ////////////////////////////////
 // ND Propositional Logic Axioms
 ////////////////////////////////
 :{ {W V} ≡ W and V }                     // and+
-:{ {:W V} ≡ W⇒V }                        // ⇒
-:{ { {:W V} {:V W} } ≡ W⇔V }             // ⇔
+:{ {:W V} ≡ W implies V }                // implies 
+:{ { {:W V} {:V W} } ≡ W iff  V }        // iff  
 :{ :W W or V V or W }                    // or+ 
 :{ :W or V :{:W U} :{:V U} U }           // or-
-:{ :{:W →←}  ¬W }                        // ¬+
-:{ :{:¬W →←}  W }                        // ¬-
-:{ :W :¬W →← }                           // →←+
+:{ :{:W contradiction }  not W }                     // not +
+:{ :{:not W contradiction }  W }                     // not -
+:{ :W :not W contradiction }                        // contradiction+
 // Prop Thms
-:{ W or ¬W }                                      // exclusive middle
-:{ ¬(¬W) ≡ W }                                    // double negative
+:{ W or not W }                                   // exclusive middle
+:{ not (not W) ≡ W }                              // double negative
 :{ W or W ≡ W }                                   // idempotency of or
 :{ :W or V   V or W }                             // commutativity of or
 :{ (W or V) or U ≡ W or (V or U) }                // associativity of or
 :{ { W  (V or U) } ≡ (W and V) or (W and U) }     // distributivity of and/or
 :{  W or (V and U) ≡ { (W or V) (W or U) } }      // distributivity of or/and
-:{ :W⇒V :V⇒U W⇒U }                                // transitivity of ⇒
-:{ :W⇔V :V⇔U W⇔U }                                // transitivity of ⇔
-:{ W⇒V ≡ ¬W or V }                                // alternate def of ⇒
-:{ :W or V :¬W V }                                // alternate or-  
-:{ :W or V :¬V W }                                // alternate or-
-:{ ¬(W⇒V) ≡ { W ¬V } }                            // negated implication
-:{ W ⇒ V ≡  ¬V ⇒ ¬W }                             // contrapositive
-:{ ¬(W and V) ≡ ¬W or ¬V }                        // DeMorgan
-:{ (¬(W or V)) ≡ { ¬W ¬V } }                      // DeMorgan
-:{ :→← W }                                        // contradiction-
+:{ :W implies V :V implies U W implies U }        // transitivity of  implies 
+:{ :W iff  V :V iff  U W iff  U }                 // transitivity of  iff  
+:{ W implies V ≡ not W or V }                     // alternate def of  implies 
+:{ :W or V :not W V }                             // alternate or-  
+:{ :W or V :not V W }                             // alternate or-
+:{ not (W implies V) ≡ { W not V } }              // negated implication
+:{ W  implies  V ≡  not V  implies  not W }       // contrapositive
+:{ not (W and V) ≡ not W or not V }               // DeMorgan
+:{ (not (W or V)) ≡ { not W not V } }             // DeMorgan
+:{ :contradiction  W }                            // contradiction-
 // Pred Axioms
-:{ :(∀x.@(P,x)) @(P,t) }                          // ∀-
-:{ :{ :Let x @(P,x) }  (∀y.@(P,y)) }              // ∀+
-:{ :(∃x.@(P,x)) @(P,c) for some c }               // ∃-
-:{ :@(P,t) (∃x.@(P,x)) }                          // ∃+
+:{ :(for all x.@(P,x)) @(P,t) }                   // for all -
+:{ :{ :Let x @(P,x) }  (for all y.@(P,y)) }       // for all +
+:{ :(exists x.@(P,x)) @(P,c) for some c }         // exists -
+:{ :@(P,t) (exists x.@(P,x)) }                    // exists +
 :{ :x=y :@(P,x) @(P,y) }                          // substitution
 :{ W=W }                                          // reflexive =
-:{ (∃!x.@(P,x)) ≡ { (∃x.@(P,x)) (∀y.@(P,y)⇒y=x) } }         // ∃!
+:{ (exists unique x.@(P,x)) ≡ 
+   { (exists x.@(P,x)) (for all y.@(P,y) implies y=x) } }  // exists unique  
 // Pred Theorems
 :{ :x=y :@(P,y) @(P,x) }                          // alternate substutition
-:{ { (∀x. @(P,x)) (∀y.@(Q,y)) } ≡ (∀x. @(P,x) and @(Q,x)) } // distributivity
-:{ { (∃x. @(P,x)) (∃y.@(Q,y)) } ≡ (∃x. @(P,x) or @(Q,x)) }  // distributivity
-:{ (∃!x.@(W,x)) ≡ (∃c.∀z. @(W,z) ⇔ z=c) }         // alternate def of ∃!
+:{ { (for all x. @(P,x)) (for all y.@(Q,y)) } ≡ 
+     (for all x. @(P,x) and @(Q,x)) }             // distributivity
+:{ { (exists x. @(P,x)) (exists y.@(Q,y)) } ≡ 
+     (exists x. @(P,x) or @(Q,x)) }               // distributivity
+:{ (exists unique x.@(W,x)) ≡ 
+   (exists c.for all z. @(W,z)  iff  z=c) }       // alternate def of exists unique  
 ////////////////////////////////
 // Peano Axioms
 ////////////////////////////////
-:{ :𝜎(m)=𝜎(n) m=n }                                          // N2
-:{ ¬(0 = 𝜎(n)) }                                             // N3
-:{ :@(P,0) :{ :Let k :@(P,k) @(P,𝜎(k)) } (∀n.@(P,n)) }       // N4
-:{ n+0 = n }                                                 // A0
-:{ m+𝜎(n) = 𝜎(m+n) }                                         // A1
-:{ n⋅0 = 0 }                                                 // M0
-:{ n⋅𝜎(m) = m+m⋅n }                                          // M1       
-:{ m≤n ≡ (∃k.m+k=n) }                                        // I
+:{ :sigma(m)=sigma(n) m=n }                                         // N2
+:{ not (0 = sigma(n)) }                                             // N3
+:{ :@(P,0) :{ :Let k :@(P,k) @(P,sigma(k)) } (for all n.@(P,n)) }   // N4
+:{ n+0 = n }                                                        // A0
+:{ m+sigma(n) = sigma(m+n) }                                        // A1
+:{ n cdot 0 = 0 }                                                   // M0
+:{ n cdot sigma(m) = m+m cdot n }                                   // M1       
+:{ m leq n ≡ (exists k.m+k=n) }                                     // I
 
 {
   // Assignment #8 (b)
-  { Declare 0,<,7
+  { Declare 0, lt ,7
     {  
-      Assume 0<7
-      ∃x.0<x
-      ∃x.x<7
-      (∃x.0<x) and (∃x.x<7)
+      Assume 0 lt 7
+      exists x.0 lt x
+      exists x.x lt 7
+      (exists x.0 lt x) and (exists x.x lt 7)
     }
-    0<7 ⇒ (∃x.0<x) and (∃x.x<7)
+    0 lt 7  implies  (exists x.0 lt x) and (exists x.x lt 7)
   }
 }
 
@@ -278,7 +282,7 @@ P(c,w) ⇒ Q(c,y) for some c
       y=z
       x=z      // by substitution
     }
-    x=y and y=z ⇒ x=z
+    x=y and y=z  implies  x=z
   }
 }
 
@@ -286,44 +290,44 @@ P(c,w) ⇒ Q(c,y) for some c
   // Assignment #8 (c)
   // Theorem: If everyone loves everyone else then Alice loves Bob.
   { Declare Alice, Bob
-    { Assume ∀x.∀y.x loves y
-      ∀y.Alice loves y 
+    { Assume for all x.for all y.x loves y
+      for all y.Alice loves y 
       Alice loves Bob
     }
-    (∀x.∀y.x loves y) ⇒ Alice loves Bob
+    (for all x.for all y.x loves y)  implies  Alice loves Bob
   }
 }
 
 {
   // Assignment #8 (e)
   { 
-    { Assume ∃x. P(x) ⇒ Q(x)
-      P(c) ⇒ Q(c) for some c
-      { Assume ∀y. P(y)
+    { Assume exists x. P(x)  implies  Q(x)
+      P(c) implies Q(c) for some c
+      { Assume for all y. P(y)
         P(c)
         Q(c)
-        ∃z. Q(z)
+        exists z. Q(z)
       }
-      (∀y. P(y)) ⇒ (∃z. Q(z))
+      (for all y. P(y)) implies (exists z. Q(z))
     }
-    (∃x. P(x) ⇒ Q(x)) ⇒ ( (∀y. P(y)) ⇒ (∃z. Q(z)) )
+    (exists x. P(x) implies Q(x))  implies  ( (for all y. P(y))  implies  (exists z. Q(z)) )
   }
 }
 
-// Assignment #5(b) ¬P or Q ⇒ (P ⇒ Q)
+// Assignment #5(b) not P or Q  implies  (P  implies  Q)
 { 
-  { :¬P or Q
-    { :¬P 
-      { :P { :¬Q →← } Q } 
-      P⇒Q
+  { :not P or Q
+    { :not P 
+      { :P { :not Q contradiction } Q } 
+      P implies Q
     }
     { :Q
       {:P Q}
-      P⇒Q
+      P implies Q
     } 
-    P⇒Q
+    P implies Q
   }
-  (¬P or Q) ⇒ (P⇒Q)
+  (not P or Q)  implies  (P implies Q)
 }
 
 // Assignment #8 (f)
@@ -331,87 +335,87 @@ P(c,w) ⇒ Q(c,y) for some c
   // Theorem: If everyone loves exactly one person, and Alice and Bob
   // are not the same person, then Cathy does not love them both."
   {
-    :(∀x.(∃!y.x loves y)) :¬(Alice=Bob)  ¬((Cathy loves Alice) and (Cathy loves Bob))
+    :(for all x.(exists unique y.x loves y)) :not (Alice=Bob)  not ((Cathy loves Alice) and (Cathy loves Bob))
   }
   // Proof:
   { 
-    :(∀x.(∃!y.x loves y))   // given
-    :¬(Alice=Bob)           // given
-    //  "Use ∀- on that using the free 'Cathy' in the theorem...")
-    ∃!y.Cathy loves y
-    //  "Apply the definition of ∃! ...")
-    ∃y.Cathy loves y and (∀z.Cathy loves z ⇒ z = y)
+    :(for all x.(exists unique y.x loves y))   // given
+    :not (Alice=Bob)           // given
+    //  "Use for all - on that using the free 'Cathy' in the theorem...")
+    exists unique y.Cathy loves y
+    //  "Apply the definition of exists unique   ...")
+    exists y.Cathy loves y and (for all z.Cathy loves z  implies  z = y)
     //  "Cathy loves exactly one person, so let's name him Fred ...")
-    Cathy loves Fred and (∀z.Cathy loves z ⇒ z = Fred) for some Fred
+    Cathy loves Fred and (for all z.Cathy loves z  implies  z = Fred) for some Fred
     //  "Use and- twice on the body of that declaration...")
     Cathy loves Fred
-    ∀z.Cathy loves z ⇒ z = Fred
+    for all z.Cathy loves z  implies  z = Fred
     //  "Now it's just a short a proof by contradiction...")
     { :Cathy loves Alice and Cathy loves Bob
       Cathy loves Alice
       Cathy loves Bob
-      Cathy loves Alice ⇒ Alice=Fred
-      Cathy loves Bob ⇒ Bob=Fred
+      Cathy loves Alice  implies  Alice=Fred
+      Cathy loves Bob  implies  Bob=Fred
       Alice=Fred
       Bob=Fred
       Alice = Bob
-      →←
+      contradiction   
     }
     //  "Thus since the assumption led to a contradiction ...")
-    ¬(Cathy loves Alice and Cathy loves Bob) 
+    not (Cathy loves Alice and Cathy loves Bob) 
   }
 }
 
 {
-  //  "Theorem 7.2: n≠0 ⇒ ∃m,n=𝜎(m)")
-  { :¬n=0 (∃m.n=𝜎(m)) }
+  //  "Theorem 7.2: n≠0  implies  exists m,n=sigma(m)")
+  { :not n=0 (exists m.n=sigma(m)) }
 
   //  "Proof:")
-  { :¬n=0
-    //  "P(n) is n≠0⇒∃k,n=𝜎(m)")
+  { :not n=0
+    //  "P(n) is n≠0 implies exists k,n=sigma(m)")
     //  "Base Case")
-    { :¬0=0
-      { :¬(∃m.0=𝜎(m))
+    { :not 0=0
+      { :not (exists m.0=sigma(m))
         0=0
-        →←
+        contradiction   
       }
-      ∃m.0=𝜎(m)
+      exists m.0=sigma(m)
     }
-    ¬0=0 ⇒ (∃m.0=𝜎(m))
+    not 0=0  implies  (exists m.0=sigma(m))
     // "Inductive step")
     { :Let k // be arbitrary
-      { :¬k=0 ⇒ (∃m.k=𝜎(m))
-        { :¬𝜎(k)=0 
-          𝜎(k)=𝜎(k)
-          ∃m.𝜎(k)=𝜎(m)
+      { :not k=0  implies  (exists m.k=sigma(m))
+        { :not sigma(k)=0 
+          sigma(k)=sigma(k)
+          exists m.sigma(k)=sigma(m)
         }
-        ¬𝜎(k=0) ⇒ (∃m.𝜎(k)=𝜎(m))
+        not sigma(k=0)  implies  (exists m.sigma(k)=sigma(m))
       } 
     }
-    //  "It would be nice to avoid the need for ∀ and ⇒ in this proof.")
+    //  "It would be nice to avoid the need for for all  and  implies  in this proof.")
     //  "But (@ P n) only matches expressions")
-    (∀j. ¬j=0⇒(∃m.j=𝜎(m)))
-    (¬n=0 ⇒ (∃m.n=𝜎(m)))
-    (∃m.n=𝜎(m))
+    (for all j. not j=0 implies (exists m.j=sigma(m)))
+    (not n=0  implies  (exists m.n=sigma(m)))
+    (exists m.n=sigma(m))
   }
 }
 
 {
   // Assignment #9.1
   // Thm: Pierce's Law
-  { ((P⇒Q)⇒P)⇒P }
+  { ((P implies Q) implies P) implies P }
   { 
-    :((P⇒Q)⇒P)
-    { :¬P
+    :((P implies Q) implies P)
+    { :not P
       { :P
-        { :¬Q 
-          →←
+        { :not Q 
+          contradiction  
         }
         Q
       }
-      P⇒Q
+      P implies Q
       P
-      →←
+      contradiction  
     }
     P   
   }
@@ -428,5 +432,12 @@ P(c,w) ⇒ Q(c,y) for some c
   Thm { Me_too }
   Corollary { And_me }
 }
+
+Rules: {
+  { :P P }
+  { :Q Q }
+}
+ 
+Rule: { :A B⇒A }
 
 }
