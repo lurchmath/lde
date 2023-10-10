@@ -78,6 +78,8 @@ import { Environment } from '../environment.js'
 import { Symbol as LurchSymbol } from '../symbol.js'
 import { lc , checkExtension, subscript } from './extensions.js'
 import { processShorthands } from './parsing.js'
+import { markDeclaredSymbols } from './docify.js'
+
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -192,23 +194,23 @@ export const replaceBindings = ( expr , symb='y' ) => {
 //
 // Mark explicitly declared symbols s, throughout an LC by setting
 // s.constant=true
-export const markDeclaredSymbols = doc => {
-  const metavariable = 'LDE MV'
-  // fetch all of the declarations
-  let declarations = doc.descendantsSatisfying( x => x instanceof Declaration )
-  // fetch all of the symbols
-  let symbols = doc.descendantsSatisfying( x => x instanceof LurchSymbol )
-  // for each one, see if it is in the scope of any declaration of that symbol
-  symbols.forEach( s => {
-    if (!s.isA(metavariable)) {
-       if (declarations.some( d => 
-            (d.isAccessibleTo(s) || (s.parent()===d)) && 
-             d.symbols().map(x=>x.text()).includes(s.text())
-          ))
-       s.constant = true
-     }
-  })
-}
+// export const markDeclaredSymbols = doc => {
+//   const metavariable = 'LDE MV'
+//   // fetch all of the declarations
+//   let declarations = doc.descendantsSatisfying( x => x instanceof Declaration )
+//   // fetch all of the symbols
+//   let symbols = doc.descendantsSatisfying( x => x instanceof LurchSymbol )
+//   // for each one, see if it is in the scope of any declaration of that symbol
+//   symbols.forEach( s => {
+//     if (!s.isA(metavariable)) {
+//        if (declarations.some( d => 
+//             (d.isAccessibleTo(s) || (s.parent()===d)) && 
+//              d.symbols().map(x=>x.text()).includes(s.text())
+//           ))
+//        s.constant = true
+//      }
+//   })
+// }
 
 //////////////////////////////////////////////////////////////////////////////
 // Process Let Environments
@@ -521,6 +523,8 @@ export class Document extends Environment {
     // symbols
     markDeclaredSymbols( this )
 
+    processTheorems(this)  // new kid
+    
     // process the user's theorems. This has to be done after prepending the
     // library so the user's theorems are in the scope of declared constants in
     // the library, which then prevents them from being metavariables 
@@ -530,17 +534,17 @@ export class Document extends Environment {
     //     for ForSomes not containing metavars.  But that means every ForSome
     //     body will be copied.  Check if this should be run before copying
     //     the ForSome bodies or if it's ok as is.
-    ;[ ...this.lastChild().descendantsSatisfyingIterator( x => x.isA('Theorem') ) ].forEach( 
-      thm => {
-      // make a copy of the thm after the theorem
-      let formula = thm.copy()
-      formula.insertAfter(thm)
-      // mark it for easy identification later
-      formula.userRule = true
-      formula.makeIntoA('Rule')
-      // convert it to a formula
-      Formula.from(formula,true)
-    })
+    // ;[ ...this.lastChild().descendantsSatisfyingIterator( x => x.isA('Theorem') ) ].forEach( 
+    //   thm => {
+    //   // make a copy of the thm after the theorem
+    //   let formula = thm.copy()
+    //   formula.insertAfter(thm)
+    //   // mark it for easy identification later
+    //   formula.userRule = true
+    //   formula.makeIntoA('Rule')
+    //   // convert it to a formula
+    //   Formula.from(formula,true)
+    // })
 
   }
 

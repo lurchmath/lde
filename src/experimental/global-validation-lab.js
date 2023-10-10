@@ -195,9 +195,10 @@ import Validation from '../validation.js'
 
 // import experimental tools
 import {
-  Document, renameBindings, processLets, markDeclaredSymbols,
+  Document, renameBindings, processLets, 
   assignProperNames, processForSomeBodies
 } from '../experimental/document.js'
+import { markDeclaredSymbols } from './docify.js'
 
 /////////////////////////////////////////////////////////////////////////////
 //

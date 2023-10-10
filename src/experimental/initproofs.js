@@ -106,8 +106,13 @@ let start = Date.now()
 // ascii = asciiparsers[0]
 // asciitrace = asciiparsers[1]
 
-PeggyTests = Document.loadProofStr('PeggyTests')
-PeggyTestsAscii = Document.loadProofStr('PeggyTestsAscii')
+// PeggyTests = loadProofStr('PeggyTests')
+
+// write(lc(parse(PeggyTests)))
+
+doc=$(`{ Declare A \n Theorem: { :A B } }`)
+processTheorems(processShorthands(doc))
+doc.report(everything)
 
 ///////////////////////////////////////////////////////////
 // closing

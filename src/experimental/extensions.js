@@ -158,6 +158,11 @@ LogicConcept.prototype.declarations = function ( onlywithbodies ) {
          )]
 }
 
+// Compute the array of all Declare's in this LC
+LogicConcept.prototype.Declares = function () {
+  return [...this.descendantsSatisfyingIterator( x => x.isA('Declare') )]
+}
+
 // A Let is defined to be a given declaration that is not marked as a 'Declare'
 // whether or not it has a body
 LogicConcept.prototype.isALet = function ( ) {

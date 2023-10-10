@@ -16,32 +16,43 @@
 //
 // NOTE: all imports must be at the top of the file
 
-// REPL and file system utilities
+// REPL and file system utilities (non-Lurch modules)
 import repl from 'repl'
 import fs, { write } from 'fs'
 import { execSync } from 'child_process'
 import util from 'util'
-import peggy from 'peggy'
-import { Tokenizer, Grammar } from 'earley-parser'
 
-// In LODE we have no need for EventTarget because we don't edit MCs in 
-// real time and react to changes.  Importing this BEFORE importing 
-// math-concept.js disables that.  This keeps the size and complexity of LCs 
-// simpler and avoids spamming 'inspect' reports.
+// In LODE we have no need for EventTarget because we don't edit MCs in real
+// time and react to changes.  Importing this BEFORE importing math-concept.js
+// disables that.  This keeps the size and complexity of LCs simpler and avoids
+// spamming 'inspect' reports.
+//
+// NOTE: do not importan any lurch modules above this point (in class they load
+// something that loads MathConcept first before we get a chance to import the
+// following)
 import './disable-event-target.js'
 
 // with that disabled, now we can load everything from index.js and other LDE tools
-import * as Lurch from '..//index.js'
-import { Problem } from '..//matching/problem.js'
-import CNF from '..//validation/conjunctive-normal-form.js'
+import * as Lurch from '../index.js'
+import { Problem } from '../matching/problem.js'
+import CNF from '../validation/conjunctive-normal-form.js'
 
+//
 // Experimental Code
+//
+// parsers
+import peggy from 'peggy'
+import { Tokenizer, Grammar } from 'earley-parser'
+// docify utilities
+import { moveDeclaresToTop, processTheorems, markDeclaredSymbols, 
+         computedAttributes, resetComputedAttributes } 
+       from './docify.js'
 // everything in the global validation lab. 
 import Compact from './global-validation-lab.js'
 // load the custom formatter class
 import Reporting from './reporting.js' 
 // load the Document class
-import { Document , assignProperNames , markDeclaredSymbols } 
+import { Document , assignProperNames } 
        from './document.js'
 // load the lc command
 import { lc , mc , checkExtension, diff } from './extensions.js'
@@ -76,7 +87,10 @@ global.CNFProp = CNFProp
 global.assignProperNames = assignProperNames
 global.markDeclaredSymbols = markDeclaredSymbols
 global.processShorthands = processShorthands
-
+global.moveDeclaresToTop = moveDeclaresToTop
+global.computedAttributes = computedAttributes
+global.resetComputedAttributes = resetComputedAttributes
+global.processTheorems = processTheorems
 // External packages
 global.satSolve = satSolve
 global.Algebrite = Algebrite
@@ -148,6 +162,7 @@ const list = () => { console.log(
 //  File handling utilities
 //
 
+/** A library path */
 // the path to library definition files
 global.libPath = './libs/'
 
@@ -320,8 +335,8 @@ rpl.defineCommand( "features", {
       ${itemPen('lc(s)')}         : constructs an LC from the putdown string s
       ${itemPen('mc(s)')}         : constructs an MC from the smackdown string s
       ${itemPen('X.report()')}    : prints a syntax highlighted, numbered view of LC X
-                      Optional args 'everything', 'show', 'detailed',
-                      'clean' and 'user' (with no quotes) show variations
+                      Optional args 'everything', 'show', 'detailed', 'allclean'
+                      'clean'  and 'user' (with no quotes) show variations
       ${itemPen('X.inspect(x,d)')}: prints the object structure of X to depth d. If d
                       is omitted the default is 1
       ${itemPen('.list')}         : show the list of known libs and proofs
