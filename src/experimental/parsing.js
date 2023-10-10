@@ -130,7 +130,7 @@ export const processShorthands = L => {
   processSymbol( 'rules>' , m => {
     const wrapper = m.nextSibling()
     wrapper.children().forEach( kid => {
-      kid.makeIntoA('Rule')
+      if (kid instanceof Environment) { kid.makeIntoA('Rule') }
       wrapper.shiftChild()
       kid.insertBefore(wrapper) 
     } )
@@ -177,5 +177,7 @@ export const processShorthands = L => {
   processSymbol( '---' , m => { 
     if (m.parent().isAComment()) m.parent().ignore=true 
   })
+
+  return L
 }
 ///////////////////////////////////////////////////////////////////////////////
