@@ -1029,6 +1029,10 @@ describe( 'Reading putdown notation', () => {
         expect( () => {
             LogicConcept.fromPutdown( '{ :A ::B (and A B) }' )
         } ).to.throw( /^Cannot put two colons in a row/ )
+        // can't have a colon that doesn't modify anything
+        expect( () => {
+            LogicConcept.fromPutdown( ':' )
+        } ).to.throw( /^Cannot end the input with a colon/ )
         // must end your string literal before a newline shows up
         expect( () => {
             LogicConcept.fromPutdown( '"one\ntwo"' )

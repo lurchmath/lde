@@ -545,6 +545,8 @@ export class LogicConcept extends MathConcept {
             while ( i < sequence.length ) {
                 // if an entry is a colon, mark the next as a given
                 if ( givenRE.test( sequence[i] ) ) {
+                    if ( i + 1 == sequence.length )
+                        problem( 'Cannot end the input with a colon' )
                     sequence[i+1].makeIntoA( 'given' )
                     sequence = sequence.without( i )
                 // if an entry is an attributes object, modify the previous
