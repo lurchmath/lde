@@ -7,3 +7,4 @@ src/experimental/initmisc.js
 .vscode/extensions.json
 src/experimental/parsers/ascimathref.js
 src/experimental/initproofs.js
+for-reference-only/
