@@ -132,7 +132,9 @@ LogicConcept.prototype.isAProposition = function ( ignores = []) {
 
 // Check if an LC is a Let-environment 
 LogicConcept.prototype.isALetEnvironment = function () { 
-  return (this instanceof Environment && this.child(0) instanceof Declaration)
+  return (this instanceof Environment && 
+          this.child(0) instanceof Declaration &&
+          this.child(0).isA('given'))
 }
 
 // We say an LC expression is a Comment if it has the form `(--- "Comment string

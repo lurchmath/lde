@@ -78,116 +78,117 @@ import { Environment } from '../environment.js'
 import { Symbol as LurchSymbol } from '../symbol.js'
 import { lc , checkExtension, subscript } from './extensions.js'
 import { processShorthands } from './parsing.js'
-import { markDeclaredSymbols, processDeclarationBodies } from './docify.js'
+import { markDeclaredSymbols, processDeclarationBodies, renameBindings,
+         replaceBindings } from './docify.js'
 
 
-//////////////////////////////////////////////////////////////////////////////
-//
-// Utilities
-//
-// While the following are needed by the Document class, they can be useful
-// outside of the class as well, so we export them here.  The basic decision
-// regarding when a utility belongs in this module and when it belongs in the
-// global validation lab module is roughly made as follows.  If a utility
-// computes or caches or processes some aspect of a document that is independent
-// of validation, it is included here.  If it is validation tool-specific, then
-// it is not included here.
+// //////////////////////////////////////////////////////////////////////////////
+// //
+// // Utilities
+// //
+// // While the following are needed by the Document class, they can be useful
+// // outside of the class as well, so we export them here.  The basic decision
+// // regarding when a utility belongs in this module and when it belongs in the
+// // global validation lab module is roughly made as follows.  If a utility
+// // computes or caches or processes some aspect of a document that is independent
+// // of validation, it is included here.  If it is validation tool-specific, then
+// // it is not included here.
 
-//////////////////////////////////////////////////////////////////////////////
-// Rename bound variables for alpha equivalence
-//
-// We also need alpha equivalent statements to have the same propositional form.
-// This assigns canonical names x₀ , x₁ , etc. as the ProperName attribute of
-// bound variables, and that is what .prop uses to make the propositional form.
-export const renameBindings = ( expr , symb='x' ) => {
-  const stack = new Map()
-  const push = () => stack.forEach( value => value.push( value.last() ) )
-  const pop = () => stack.forEach( ( value, key ) => {
-      value.pop()
-      if ( value.length == 0 ) stack.delete( key )
-  } )
-  const get = name => stack.has( name ) ? stack.get( name ).last()
-                                        : undefined
-  const set = ( name, newname ) => {
-      if ( stack.has( name ) ) {
-          const array = stack.get( name )
-          array[array.length-1] = newname
-      } else {
-          stack.set( name, [ newname ] )
-      }
-  }
-  let counter = 0
-  const solve = e => {
-      if ( e instanceof LurchSymbol && stack.has(e.text()) ) 
-          e.setAttribute( 'ProperName' , get( e.text() ) )
-      if ( e instanceof BindingExpression ) {
-          push()
-          let savecounter = counter
-          e.boundSymbolNames().forEach( name => {
-              counter++
-              set( name, `${symb}${subscript(counter)}` ) 
-          })
-          e.children().forEach( c => solve(c) )
-          counter = savecounter
-          pop()
-      }
-      if ( e instanceof Application)
-          e.children().forEach( c => solve(c) )
-  }
-  solve( expr )
-}
+// //////////////////////////////////////////////////////////////////////////////
+// // Rename bound variables for alpha equivalence
+// //
+// // We also need alpha equivalent statements to have the same propositional form.
+// // This assigns canonical names x₀ , x₁ , etc. as the ProperName attribute of
+// // bound variables, and that is what .prop uses to make the propositional form.
+// export const renameBindings = ( expr , symb='x' ) => {
+//   const stack = new Map()
+//   const push = () => stack.forEach( value => value.push( value.last() ) )
+//   const pop = () => stack.forEach( ( value, key ) => {
+//       value.pop()
+//       if ( value.length == 0 ) stack.delete( key )
+//   } )
+//   const get = name => stack.has( name ) ? stack.get( name ).last()
+//                                         : undefined
+//   const set = ( name, newname ) => {
+//       if ( stack.has( name ) ) {
+//           const array = stack.get( name )
+//           array[array.length-1] = newname
+//       } else {
+//           stack.set( name, [ newname ] )
+//       }
+//   }
+//   let counter = 0
+//   const solve = e => {
+//       if ( e instanceof LurchSymbol && stack.has(e.text()) ) 
+//           e.setAttribute( 'ProperName' , get( e.text() ) )
+//       if ( e instanceof BindingExpression ) {
+//           push()
+//           let savecounter = counter
+//           e.boundSymbolNames().forEach( name => {
+//               counter++
+//               set( name, `${symb}${subscript(counter)}` ) 
+//           })
+//           e.children().forEach( c => solve(c) )
+//           counter = savecounter
+//           pop()
+//       }
+//       if ( e instanceof Application)
+//           e.children().forEach( c => solve(c) )
+//   }
+//   solve( expr )
+// }
 
-//////////////////////////////////////////////////////////////////////////////
-// Replace bound variables in formulas
-//
-// Matching checks if a match would violate variable capture, but
-// Formula.instantiate does not.  So we need to turn all bound variables in
-// formulas to a canonical form e.g. y₀, y₁, ... that cannot be entered by the
-// user. Applying this to formulas before instantiating fixes that.  
-//
-// TODO: 
-// * When making this permanent, just upgrade Formula.instantiate to respect
-//   ProperNames so we can delete this routine and just use the previous one
-//   instead. 
-// * Also enforce the requirement that user's can't enter any of y₀, y₁, ... .
-// * We might want to keep the user's original bound formula variable names
-//   somewhere for feedback purposes, but the canonical ones aren't that bad for
-//   now.
-export const replaceBindings = ( expr , symb='y' ) => {
-  const stack = new Map()
-  const push = () => stack.forEach( value => value.push( value.last() ) )
-  const pop = () => stack.forEach( ( value, key ) => {
-      if ( value.length > 0 ) value.pop()
-      else stack.delete( key )
-  } )
-  const get = name => stack.has( name ) ? stack.get( name ).last()
-                                        : undefined
-  const set = ( name, newname ) => {
-      if ( stack.has( name ) ) {
-          const array = stack.get( name )
-          array[array.length-1] = newname
-      } else {
-          stack.set( name, [ newname ] )
-      }
-  }
-  let counter = 0
-  const solve = e => {
-      if ( e instanceof LurchSymbol && stack.has(e.text()) ) 
-          e.rename( get( e.text() ) )
-      if ( e instanceof BindingExpression ) {
-          push()
-          e.boundSymbolNames().forEach( name => {
-              counter++
-              set( name, `${symb}${subscript(counter)}` ) 
-          })
-          e.children().forEach( c => solve(c) )
-          pop()
-      }
-      if ( e instanceof Application)
-          e.children().forEach( c => solve(c) )
-  }
-  solve( expr )
-}
+// //////////////////////////////////////////////////////////////////////////////
+// // Replace bound variables in formulas
+// //
+// // Matching checks if a match would violate variable capture, but
+// // Formula.instantiate does not.  So we need to turn all bound variables in
+// // formulas to a canonical form e.g. y₀, y₁, ... that cannot be entered by the
+// // user. Applying this to formulas before instantiating fixes that.  
+// //
+// // TODO: 
+// // * When making this permanent, just upgrade Formula.instantiate to respect
+// //   ProperNames so we can delete this routine and just use the previous one
+// //   instead. 
+// // * Also enforce the requirement that user's can't enter any of y₀, y₁, ... .
+// // * We might want to keep the user's original bound formula variable names
+// //   somewhere for feedback purposes, but the canonical ones aren't that bad for
+// //   now.
+// export const replaceBindings = ( expr , symb='y' ) => {
+//   const stack = new Map()
+//   const push = () => stack.forEach( value => value.push( value.last() ) )
+//   const pop = () => stack.forEach( ( value, key ) => {
+//       if ( value.length > 0 ) value.pop()
+//       else stack.delete( key )
+//   } )
+//   const get = name => stack.has( name ) ? stack.get( name ).last()
+//                                         : undefined
+//   const set = ( name, newname ) => {
+//       if ( stack.has( name ) ) {
+//           const array = stack.get( name )
+//           array[array.length-1] = newname
+//       } else {
+//           stack.set( name, [ newname ] )
+//       }
+//   }
+//   let counter = 0
+//   const solve = e => {
+//       if ( e instanceof LurchSymbol && stack.has(e.text()) ) 
+//           e.rename( get( e.text() ) )
+//       if ( e instanceof BindingExpression ) {
+//           push()
+//           e.boundSymbolNames().forEach( name => {
+//               counter++
+//               set( name, `${symb}${subscript(counter)}` ) 
+//           })
+//           e.children().forEach( c => solve(c) )
+//           pop()
+//       }
+//       if ( e instanceof Application)
+//           e.children().forEach( c => solve(c) )
+//   }
+//   solve( expr )
+// }
 
 //////////////////////////////////////////////////////////////////////////////
 // Mark Declared Symbols
@@ -480,7 +481,7 @@ const loadDocs = (...docs) => {
   // make copies of ForSome bodies after the ForSome
   processDeclarationBodies(ans)
 
-  // make all bindings canonical by assigning ProperNames x₀, x₁, ...
+  // make all bindings canonical by assigning properNames x₀, x₁, ...
   ans.statements().forEach( expr => renameBindings( expr ))
   
   return ans

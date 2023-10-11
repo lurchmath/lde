@@ -144,9 +144,6 @@
 //    * 'Declare' - (isA) this declaration declares global constants and has no
 //                  propositional form, whether a given or claim.
 //
-//    LC attributes: Symbols
-//    * 'ProperName' - its value is the proper name of this Lurch symbol
-//
 //    JS attributes: formula environments
 //    * 'domain'   - the js Set of metavariable names (strings) in this formula 
 //    * 'isWeeny'  - boolean that is true iff this formula is Weeny (has at
@@ -174,6 +171,7 @@
 //    JS attributes - Symbols
 //    * 'constant' - boolean that indicates whether a free symbol is explicitly
 //      declared by a Let, Declare, or ForSome
+//    * 'properName' - its value is the proper name of this Lurch symbol
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -194,10 +192,9 @@ import Scoping from '../scoping.js'
 import Validation from '../validation.js'
 
 // import experimental tools
-import { Document, renameBindings, assignProperNames } 
-         from '../experimental/document.js'
-import { markDeclaredSymbols, processDeclarationBodies, processLets } 
-         from './docify.js'
+import { Document, assignProperNames } from './document.js'
+import { markDeclaredSymbols, processDeclarationBodies, renameBindings,
+         processLets } from './docify.js'
 
 /////////////////////////////////////////////////////////////////////////////
 //

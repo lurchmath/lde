@@ -100,7 +100,16 @@ export const processDeclarationBodies = doc => {
     decbody.bodyOf = dec
     decbody.insertAfter(dec)
   })
+  return doc
 }  
+
+// Rename Bindings for Alpha Equivalence
+//
+// make all bindings canonical by assigning ProperNames x₀, x₁, ...
+export const processBindings = doc => {
+  doc.statements().forEach( expr => renameBindings( expr ))
+  return doc
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // Process Let Environments
@@ -121,12 +130,134 @@ export const processLets = ( doc ) => {
   })
 }
 
+//////////////////////////////////////////////////////////////
+// process Rules 
+//
+// Check and mark the Rules, make them into formulas, and replace
+// and rename their bound variables
+export const processRules = doc => {
+  // get all of the Rules
+  [...doc.descendantsSatisfyingIterator(x=>x.isA('Rule'))].forEach( f => {
+    // check if f is not an Environment, or is a Let-environment, and throw
+    // an error either way
+    if (!f instanceof Environment || f.isALetEnvironment() )
+      throw new Error('A rule must be an environment that is not a Let-environment.')
+    // it's not, so convert it to a formula
+    // the second arg specifies it should be done in place
+    Formula.from(f,true)
+    // if it has metavariables, ignore it as a proposition
+    if (Formula.domain(f).size>0) f.ignore = true
+    // // replace all bound variables with y₀, y₁, ... etc and rename them to
+    // // ProperNames x₀, x₁, ... etc to make them canonical
+    f.statements().forEach( expr => { 
+      replaceBindings( expr , 'y' )
+      renameBindings( expr )
+      } )
+  } )
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Replace bound variables in formulas
+//
+// Matching checks if a match would violate variable capture, but
+// Formula.instantiate does not.  So we need to turn all bound variables in
+// formulas to a canonical form e.g. y₀, y₁, ... that cannot be entered by the
+// user. Applying this to formulas before instantiating fixes that.  
+//
+// TODO: 
+// * When making this permanent, just upgrade Formula.instantiate to respect
+//   ProperNames so we can delete this routine and just use the previous one
+//   instead. 
+// * Also enforce the requirement that user's can't enter any of y₀, y₁, ... .
+// * We might want to keep the user's original bound formula variable names
+//   somewhere for feedback purposes, but the canonical ones aren't that bad for
+//   now.
+export const replaceBindings = ( expr , symb='y' ) => {
+  const stack = new Map()
+  const push = () => stack.forEach( value => value.push( value.last() ) )
+  const pop = () => stack.forEach( ( value, key ) => {
+      if ( value.length > 0 ) value.pop()
+      else stack.delete( key )
+  } )
+  const get = name => stack.has( name ) ? stack.get( name ).last()
+                                        : undefined
+  const set = ( name, newname ) => {
+      if ( stack.has( name ) ) {
+          const array = stack.get( name )
+          array[array.length-1] = newname
+      } else {
+          stack.set( name, [ newname ] )
+      }
+  }
+  let counter = 0
+  const solve = e => {
+      if ( e instanceof LurchSymbol && stack.has(e.text()) ) 
+          e.rename( get( e.text() ) )
+      if ( e instanceof BindingExpression ) {
+          push()
+          e.boundSymbolNames().forEach( name => {
+              counter++
+              set( name, `${symb}${subscript(counter)}` ) 
+          })
+          e.children().forEach( c => solve(c) )
+          pop()
+      }
+      if ( e instanceof Application)
+          e.children().forEach( c => solve(c) )
+  }
+  solve( expr )
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Rename bound variables for alpha equivalence
+//
+// We also need alpha equivalent statements to have the same propositional form.
+// This assigns canonical names x₀ , x₁ , etc. as the ProperName attribute of
+// bound variables, and that is what .prop uses to make the propositional form.
+export const renameBindings = ( expr , symb='x' ) => {
+  const stack = new Map()
+  const push = () => stack.forEach( value => value.push( value.last() ) )
+  const pop = () => stack.forEach( ( value, key ) => {
+    value.pop()
+    if ( value.length == 0 ) stack.delete( key )
+  } )
+  const get = name => stack.has( name ) ? stack.get( name ).last()
+                                        : undefined
+  const set = ( name, newname ) => {
+    if ( stack.has( name ) ) {
+      const array = stack.get( name )
+      array[array.length-1] = newname
+    } else {
+      stack.set( name, [ newname ] )
+    }
+  }
+  let counter = 0
+  const solve = e => {
+    if ( e instanceof LurchSymbol && stack.has(e.text()) ) 
+      e.setAttribute( 'ProperName' , get( e.text() ) )
+    if ( e instanceof BindingExpression ) {
+      push()
+      let savecounter = counter
+      e.boundSymbolNames().forEach( name => {
+        counter++
+        set( name, `${symb}${subscript(counter)}` ) 
+      })
+      e.children().forEach( c => solve(c) )
+      counter = savecounter
+      pop()
+    }
+    if ( e instanceof Application)
+      e.children().forEach( c => solve(c) )
+  }
+  solve( expr )
+}
+
 // We keep a list of js attribute names that are used by validation.  Since
 // these are computed from the original content of the LC supplied by the user
 // having this list lets us reset the entire LC by removing these attributes and
 // recomputing them to revalidate it from scratch when we need to. 
 export const computedAttributes = [
-  'Constant', 'ProperName'
+  'constant', 'properName'
 ] 
 
 // Reset all of the attributes computed by these docify utilities.  

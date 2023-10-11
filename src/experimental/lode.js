@@ -45,14 +45,14 @@ import peggy from 'peggy'
 import { Tokenizer, Grammar } from 'earley-parser'
 // docify utilities
 import { moveDeclaresToTop, processTheorems, processDeclarationBodies,
-         processLets, markDeclaredSymbols, computedAttributes, resetComputedAttributes } 
+         processBindings, processLets, processRules, markDeclaredSymbols, computedAttributes, resetComputedAttributes } 
        from './docify.js'
 // everything in the global validation lab. 
 import Compact from './global-validation-lab.js'
 // load the custom formatter class
 import Reporting from './reporting.js' 
 // load the Document class
-import { Document , assignProperNames } 
+import { Document, assignProperNames } 
        from './document.js'
 // load the lc command
 import { lc , mc , checkExtension, diff } from './extensions.js'
@@ -92,7 +92,9 @@ global.computedAttributes = computedAttributes
 global.resetComputedAttributes = resetComputedAttributes
 global.processTheorems = processTheorems
 global.processDeclarationBodies = processDeclarationBodies
+global.processBindings = processBindings
 global.processLets = processLets
+global.processRules = processRules
 // External packages
 global.satSolve = satSolve
 global.Algebrite = Algebrite
