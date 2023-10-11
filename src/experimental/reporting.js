@@ -196,7 +196,7 @@ const formatter = ( options=defaultOptions ) => {
       ans += metavariablePen(S)        
     // the LDE EFA constant symbols
     } else if (L instanceof LurchSymbol && L.text()===EFA) {
-      ans += (L.constant) ? constantPen('@') : defaultPen('@')
+      ans += (L.constant) ? constantPen('𝜆') : defaultPen('𝜆')
     // comments just display their string (second arg) with the comment pen 
     } else if (L.isAComment()) {
       ans += commentPen(L.child(1))
