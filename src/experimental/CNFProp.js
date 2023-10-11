@@ -4,7 +4,7 @@
 //
 //  (KEEP OUT!  Work in progress.)
 //
-//  This file is still under construction and subject to frequent change.
+//  This file is still under construction and subject to change.
 
 /////////////////////////////////////////////////////////////////////////////
 //

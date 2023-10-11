@@ -78,7 +78,7 @@ import { Environment } from '../environment.js'
 import { Symbol as LurchSymbol } from '../symbol.js'
 import { lc , checkExtension, subscript } from './extensions.js'
 import { processShorthands } from './parsing.js'
-import { markDeclaredSymbols } from './docify.js'
+import { markDeclaredSymbols, processDeclarationBodies } from './docify.js'
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -212,56 +212,56 @@ export const replaceBindings = ( expr , symb='y' ) => {
 //   })
 // }
 
-//////////////////////////////////////////////////////////////////////////////
-// Process Let Environments
-//
-// Get the Lets.  If they don't start an environment, wrap them to make a valid
-// Let-environment. We make this restriction, so that a Let-env is a type of LC
-// that can be used as a rule premise and can only be satisfied by another
-// Let-env.  We don't upgrade that to a subclass for now.
-// TODO: consider upgrading let-envs to a subclass of environment
-export const processLets = ( doc ) => {
-  // Get all of the Let's whether or not they have bodies and make sure they are
-  // the first child of their enclosing environment.  If not, wrap their scope
-  // in an environment so that they are.
-  doc.lets().forEach( decl => {
-    const i = decl.indexInParent()
-    const parent = decl.parent()
-    if (i) parent.insertChild( new Environment(...parent.children().slice(i)) , i )
-  })
-}
+// //////////////////////////////////////////////////////////////////////////////
+// // Process Let Environments
+// //
+// // Get the Lets.  If they don't start an environment, wrap them to make a valid
+// // Let-environment. We make this restriction, so that a Let-env is a type of LC
+// // that can be used as a rule premise and can only be satisfied by another
+// // Let-env.  We don't upgrade that to a subclass for now.
+// // TODO: consider upgrading let-envs to a subclass of environment
+// export const processLets = ( doc ) => {
+//   // Get all of the Let's whether or not they have bodies and make sure they are
+//   // the first child of their enclosing environment.  If not, wrap their scope
+//   // in an environment so that they are.
+//   doc.lets().forEach( decl => {
+//     const i = decl.indexInParent()
+//     const parent = decl.parent()
+//     if (i) parent.insertChild( new Environment(...parent.children().slice(i)) , i )
+//   })
+// }
 
 //////////////////////////////////////////////////////////////////////////////
 // Process Declaration Bodies
 //
 // Append the bodies of all ForSomes.
-export const processForSomeBodies = doc => {
-  // get the ForSomes with a body (hence the 'true') that don't contain 
-  // metavariables
-  const forSomes = doc.forSomes(true).filter( dec =>
-     Formula.domain(dec).size===0)
+// export const processForSomeBodies = doc => {
+//   // get the ForSomes with a body (hence the 'true') that don't contain 
+//   // metavariables
+//   const forSomes = doc.forSomes(true).filter( dec =>
+//      Formula.domain(dec).size===0)
 
-  // TODO: delete this if not needed.   
-  // get the lets with a body (hence the 'true') that don't contain 
-  // metavariables
-  const lets = doc.lets(true).filter( dec =>
-    Formula.domain(dec).size===0)
-  // push the lets onto the forSomes array
-  forSomes.push(...lets) 
+//   // TODO: delete this if not needed.   
+//   // get the lets with a body (hence the 'true') that don't contain 
+//   // metavariables
+//   const lets = doc.lets(true).filter( dec =>
+//     Formula.domain(dec).size===0)
+//   // push the lets onto the forSomes array
+//   forSomes.push(...lets) 
 
-  // insert a copy of the body after the declaration and mark where it came from
-  // with the js attribute .bodyof, unless it's already there
-  forSomes.forEach( decl => {
-    if (!(decl.nextSibling() && decl.nextSibling().bodyof &&
-          decl.nextSibling().bodyof === decl )) {      
-      let decbody = decl.body().copy()
-      if (decl.isA('given')) decbody.makeIntoA('given')
-      decbody.insertAfter(decl)
-      decbody.bodyof = decl
-      decbody.makeIntoA('Body')
-    }
-  })
-}  
+//   // insert a copy of the body after the declaration and mark where it came from
+//   // with the js attribute .bodyOf, unless it's already there
+//   forSomes.forEach( decl => {
+//     if (!(decl.nextSibling() && decl.nextSibling().bodyOf &&
+//           decl.nextSibling().bodyOf === decl )) {      
+//       let decbody = decl.body().copy()
+//       if (decl.isA('given')) decbody.makeIntoA('given')
+//       decbody.insertAfter(decl)
+//       decbody.bodyOf = decl
+//       decbody.makeIntoA('Body')
+//     }
+//   })
+// }  
 
 //////////////////////////////////////////////////////////////////////////////
 // Assign Proper Names
@@ -410,7 +410,7 @@ const loadLibs = (...libs) => {
   //   * Is this being called at the right time?  Don't we have to mark the
   //     the Rules and convert them to formulas first before running this?
   //     Check this.
-  processForSomeBodies(ans)
+  processDeclarationBodies(ans)
 
   // Check and mark the Rules and make them into formulas
   const Rules = ans.children().filter(kid => !(kid instanceof Declaration))
@@ -478,7 +478,7 @@ const loadDocs = (...docs) => {
   processLets(ans)
 
   // make copies of ForSome bodies after the ForSome
-  processForSomeBodies(ans)
+  processDeclarationBodies(ans)
 
   // make all bindings canonical by assigning ProperNames x₀, x₁, ...
   ans.statements().forEach( expr => renameBindings( expr ))

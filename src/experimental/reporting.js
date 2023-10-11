@@ -222,7 +222,7 @@ const formatter = ( options=defaultOptions ) => {
       ans += (L.isA('given') ? ':' : '') + label + 
               S.slice(0).replace(/\s*,\s*]$/,']') 
     // Declaration body copies
-    } else if (L.bodyof) {
+    } else if (L.bodyOf) {
       ans += (options.showBodies) ? instantiationPen(S) : ''
     // instantiations  
     } else if (L.hasAncestorSatisfying( x => x.isA(instantiation) )) {
@@ -356,7 +356,7 @@ LogicConcept.prototype.report = function ( options ) {
       if ( (!options.showRules && c.isA('Rule')) ||
            (!options.showPartials && c.isA('Part')) ||
            (!options.showInstantiations && c.isA('Inst')) ||
-           (!options.showBodies && c.isA('Body')) ||
+           (!options.showBodies && c.bodyOf) ||
            (!options.showDeclares && c.isA('Declare'))
          ) return
       linenum = `${c.indexInParent()}`

@@ -37,6 +37,7 @@ import { processShorthands } from './parsing.js'
 // Move Declares to the top of the document.
 export const moveDeclaresToTop = doc => {
   doc.Declares().reverse().forEach( dec => {
+    if (dec.body()) throw new Error('Global constant declarations cannot have a body.')
     dec.remove()
     doc.unshiftChild(dec)
   })
@@ -84,31 +85,41 @@ export const processTheorems = doc => {
 
 // Process Declaration Bodies
 //
-// Append the bodies of all ForSomes.
-// export const processDeclarationBodies = doc => {
-//   // get the declarations with a body (hence the 'true') that don't contain 
-//   // metavariables
-//   const decs = doc.declarations(true).filter( dec =>
-//      Formula.domain(dec).size===0)   
-//   // get the lets with a body (hence the 'true') that don't contain 
-//   // metavariables
-//   const lets = doc.lets(true).filter( dec =>
-//     Formula.domain(dec).size===0)
-//   // push the lets onto the forSomes array
-//   forSomes.push(...lets) 
-//   // insert a copy of the body after the declaration and mark where it came from
-//   // with the js attribute .bodyof, unless it's already there
-//   forSomes.forEach( decl => {
-//     if (!(decl.nextSibling() && decl.nextSibling().bodyof &&
-//           decl.nextSibling().bodyof === decl )) {      
-//       let decbody = decl.body().copy()
-//       if (decl.isA('given')) decbody.makeIntoA('given')
-//       decbody.insertAfter(decl)
-//       decbody.bodyof = decl
-//       decbody.makeIntoA('Body')
-//     }
-//   })
-// }  
+// Append the bodies of all declarations.
+export const processDeclarationBodies = doc => {
+  // get the declarations with a body (hence the 'true') that don't contain 
+  // metavariables (do this before converting a Rule to a formula)
+  const decs = doc.declarations(true).filter( dec => Formula.domain(dec).size===0)
+  // insert a copy of the body after the declaration and mark where it came from
+  // with the js attribute .bodyOf, unless it's already there
+  decs.forEach( dec => {
+    // if its already there, we're done
+    if ( dec.nextSibling()?.bodyOf === dec ) { return } 
+    let decbody = dec.body().copy()
+    if (dec.isA('given')) decbody.makeIntoA('given')
+    decbody.bodyOf = dec
+    decbody.insertAfter(dec)
+  })
+}  
+
+//////////////////////////////////////////////////////////////////////////////
+// Process Let Environments
+//
+// Get the Lets.  If they don't start an environment, wrap them to make a valid
+// Let-environment. We make this restriction, so that a Let-env is a type of LC
+// that can be used as a rule premise and can only be satisfied by another
+// Let-env.  We don't upgrade that to a subclass for now.
+// TODO: consider upgrading let-envs to a subclass of environment
+export const processLets = ( doc ) => {
+  // Get all of the Let's whether or not they have bodies and make sure they are
+  // the first child of their enclosing environment.  If not, wrap their scope
+  // in an environment so that they are.
+  doc.lets().forEach( dec => {
+    const i = dec.indexInParent()
+    const parent = dec.parent()
+    if (i) parent.insertChild( new Environment(...parent.children().slice(i)) , i )
+  })
+}
 
 // We keep a list of js attribute names that are used by validation.  Since
 // these are computed from the original content of the LC supplied by the user

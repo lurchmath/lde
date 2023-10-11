@@ -44,8 +44,8 @@ import CNF from '../validation/conjunctive-normal-form.js'
 import peggy from 'peggy'
 import { Tokenizer, Grammar } from 'earley-parser'
 // docify utilities
-import { moveDeclaresToTop, processTheorems, markDeclaredSymbols, 
-         computedAttributes, resetComputedAttributes } 
+import { moveDeclaresToTop, processTheorems, processDeclarationBodies,
+         processLets, markDeclaredSymbols, computedAttributes, resetComputedAttributes } 
        from './docify.js'
 // everything in the global validation lab. 
 import Compact from './global-validation-lab.js'
@@ -91,6 +91,8 @@ global.moveDeclaresToTop = moveDeclaresToTop
 global.computedAttributes = computedAttributes
 global.resetComputedAttributes = resetComputedAttributes
 global.processTheorems = processTheorems
+global.processDeclarationBodies = processDeclarationBodies
+global.processLets = processLets
 // External packages
 global.satSolve = satSolve
 global.Algebrite = Algebrite

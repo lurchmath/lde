@@ -165,7 +165,7 @@
 //    * 'creators'   - the user proposition(s) that caused this instantiation
 //
 //    JS attributes: declarations body copy and premature generalizations
-//    * 'bodyof'   - indicates an Expression is a copy of the body of a
+//    * 'bodyOf'   - indicates an Expression is a copy of the body of a
 //      declaration
 //    * 'preemie'  - a expression that is justified by a Let that it is in the
 //                   scope
@@ -194,11 +194,10 @@ import Scoping from '../scoping.js'
 import Validation from '../validation.js'
 
 // import experimental tools
-import {
-  Document, renameBindings, processLets, 
-  assignProperNames, processForSomeBodies
-} from '../experimental/document.js'
-import { markDeclaredSymbols } from './docify.js'
+import { Document, renameBindings, assignProperNames } 
+         from '../experimental/document.js'
+import { markDeclaredSymbols, processDeclarationBodies, processLets } 
+         from './docify.js'
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -883,7 +882,7 @@ const instantiate = (document, n = 1) => {
             // the formulas. 
             //
             // TODO: 
-            //  * we might want to upgrade .bodyof to an LC attribute since
+            //  * we might want to upgrade .bodyOf to an LC attribute since
             //    Formula.instantiate doesn't copy that attribute
             //
             // also rename the bindings to match what the user would have
