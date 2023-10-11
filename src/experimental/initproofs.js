@@ -110,19 +110,24 @@ let start = Date.now()
 
 // write(lc(parse(PeggyTests)))
 
-doc=$(`{ a=1
-         b=2 
-         { c=3
-           d=4 
-           :Let n be such that n>0
-           k>0 for some k 
-           e=5
-           f=6
-         }
-         g=7
-         h=8
-       }`)
-processDeclarationBodies(processTheorems(processShorthands(doc)))
+// doc=$(`{ a=1
+//          b=2 
+//          { c=3
+//            d=4 
+//            :Let n be such that n>0
+//            k>0 for some k 
+//            e=5
+//            f=6
+//          }
+//          g=7
+//          h=8
+//        }`)
+doc=catdocs('libs/PeanoPeg')
+processShorthands(doc)
+processTheorems(doc)
+processDeclarationBodies(doc)
+processRules(doc)
+markDeclaredSymbols(doc)
 doc.report(everything)
 
 ///////////////////////////////////////////////////////////
