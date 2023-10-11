@@ -3040,6 +3040,11 @@ describe( 'Smackdown notation and interpretation', () => {
             symbolMC( 'one_expression' ).attr(
                 [ [ 'label', 'that\'s an expression!' ] ] )
         ) ).to.equal( true )
+        expect( test1[0].interpret().equals(
+            LogicConcept.fromPutdown( `
+                one_expression +{"label":"that\'s an expression!"}
+            ` )[0]
+        ) ).to.equal( true )
 
         // ---------- one \label{...} applied to one environment
         const test2 = MathConcept.fromSmackdown( `
@@ -3054,6 +3059,11 @@ describe( 'Smackdown notation and interpretation', () => {
                     symbolMC( 'environment' ), symbolMC( 'of' ), symbolMC( 'things' )
                 )
             ).attr( [ [ 'label', 'that one is an env' ] ] )
+        ) ).to.equal( true )
+        expect( test2[0].interpret().equals(
+            LogicConcept.fromPutdown( `
+                { :one (environment of things) } +{"label":"that one is an env"}
+            ` )[0]
         ) ).to.equal( true )
 
         // ---------- several \label{...}s in a larger putdown text
@@ -3091,6 +3101,19 @@ describe( 'Smackdown notation and interpretation', () => {
                     [ [ 'label', 'this modifies "here"' ] ] ),
             ).attr( [ [ 'label', 'my favorite proof' ] ] )
         ) ).to.equal( true )
+        expect( test3[0].interpret().equals(
+            LogicConcept.fromPutdown( `
+                :{
+                    :(> x y) +{"label":"premise-1"}
+                    :(> y z) +{"label":"premise-2"}
+                    (> x z)
+                } +{"label":"transitivity of >"}
+                {
+                    maybe I would do some deduction here
+                    +{"label":"this modifies \\"here\\""}
+                } +{"label":"my favorite proof"}
+            ` )[0]
+        ) ).to.equal( true )
         
         // ---------- repeat test 1 using ref instead of label
         const test4 = MathConcept.fromSmackdown( `
@@ -3101,6 +3124,11 @@ describe( 'Smackdown notation and interpretation', () => {
         expect( test4[0].equals(
             symbolMC( 'one_expression' ).attr(
                 [ [ 'ref', 'that\'s an expression!' ] ] )
+        ) ).to.equal( true )
+        expect( test4[0].interpret().equals(
+            LogicConcept.fromPutdown( `
+                one_expression +{"ref":"that\'s an expression!"}
+            ` )[0]
         ) ).to.equal( true )
 
         // ---------- repeat test 2 using ref instead of label
@@ -3116,6 +3144,11 @@ describe( 'Smackdown notation and interpretation', () => {
                     symbolMC( 'environment' ), symbolMC( 'of' ), symbolMC( 'things' )
                 )
             ).attr( [ [ 'ref', 'that one is an env' ] ] )
+        ) ).to.equal( true )
+        expect( test5[0].interpret().equals(
+            LogicConcept.fromPutdown( `
+                { :one (environment of things) } +{"ref":"that one is an env"}
+            ` )[0]
         ) ).to.equal( true )
 
         // ---------- repeat test 3 using ref instead of label
@@ -3152,6 +3185,19 @@ describe( 'Smackdown notation and interpretation', () => {
                 symbolMC( 'here' ).attr(
                     [ [ 'ref', 'this modifies "here"' ] ] ),
             ).attr( [ [ 'ref', 'my favorite proof' ] ] )
+        ) ).to.equal( true )
+        expect( test6[0].interpret().equals(
+            LogicConcept.fromPutdown( `
+                :{
+                    :(> x y) +{"ref":"premise-1"}
+                    :(> y z) +{"ref":"premise-2"}
+                    (> x z)
+                } +{"ref":"transitivity of >"}
+                {
+                    maybe I would do some deduction here
+                    +{"ref":"this modifies \\"here\\""}
+                } +{"ref":"my favorite proof"}
+            ` )[0]
         ) ).to.equal( true )
         
         // ---------- mix of \label/ref{...}s in a large putdown text
@@ -3195,6 +3241,21 @@ describe( 'Smackdown notation and interpretation', () => {
                 [ 'label', 'between these' ]
             ] )
         ) ).to.equal( true )
+        expect( test7[0].interpret().equals(
+            LogicConcept.fromPutdown( `
+                :{
+                    :(> x y) +{"label":"premise-1"}
+                    :(> y z) +{"ref":"premise-2"}
+                    (> x z)
+                } +{"label":"transitivity of >"}
+                {
+                    maybe I would do some deduction here
+                    +{"label":"label for \\"here\\""}
+                    +{"ref":"ref for \\"here\\""}
+                } +{"ref":"try no space"}
+                  +{"label":"between these"}
+            ` )[0]
+        ) ).to.equal( true )
 
         // ---------- should handle escapes (\{, \\\}, \\, etc.) correctly
         const test8 = MathConcept.fromSmackdown( `
@@ -3217,6 +3278,45 @@ describe( 'Smackdown notation and interpretation', () => {
         expect( test8[3].equals(
             symbolMC( 'modify' ).attr(
                 [ [ 'ref', 'a {whole} mess of \\slashes\\ and {CURLIES}' ] ] )
+        ) ).to.equal( true )
+        expect( test8[0].interpret().equals(
+            LogicConcept.fromPutdown( `
+                simple +{"label":"plain"}
+            ` )[0]
+        ) ).to.equal( true )
+        expect( test8[1].interpret().equals(
+            LogicConcept.fromPutdown( `
+                things +{"label":"open curly: {"}
+            ` )[0]
+        ) ).to.equal( true )
+        expect( test8[2].interpret().equals(
+            LogicConcept.fromPutdown( `
+                to +{"ref":"close curly: }"}
+            ` )[0]
+        ) ).to.equal( true )
+        expect( test8[3].interpret().equals(
+            LogicConcept.fromPutdown( `
+                modify +{"ref":"a {whole} mess of \\\\slashes\\\\ and {CURLIES}"}
+            ` )[0]
+        ) ).to.equal( true )
+
+        // ---------- does interpretation preserve non-label/ref attributes?
+        const test9 = MathConcept.fromSmackdown( `
+            example \\label{my label} +{"other attr":"example val"}
+        ` )
+        expect( test9 ).to.be.instanceOf( Array )
+        expect( test9.length ).to.equal( 1 )
+        expect( test9[0].equals(
+            symbolMC( 'example' ).attr( [
+                [ 'label', 'my label' ],
+                [ 'other attr', 'example val' ]
+            ] )
+        ) ).to.equal( true )
+        expect( test9[0].interpret().equals(
+            LogicConcept.fromPutdown( `
+                example +{"label":"my label"}
+                        +{"other attr":"example val"}
+            ` )[0]
         ) ).to.equal( true )
     } )
 
@@ -3362,8 +3462,8 @@ describe( 'Smackdown notation and interpretation', () => {
         expect( test5[0].equals( commandMC(
             'noargcommand', ''
         ) ) ).to.equal( true )
-        const E1=test5[1].interpret()
-        const E2=test5[2].interpret()
+        const E1 = test5[1].interpret()
+        const E2 = test5[2].interpret()
         expect( E1 ).to.be.instanceOf( Environment )
         expect( E1.numChildren() ).to.equal( 1 )
         expect( E1.child(0) ).to.be.instanceOf( LurchSymbol )
