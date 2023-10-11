@@ -173,8 +173,8 @@ export class Solution {
     betaReduce () {
         this.domain().forEach( mv => {
             const sub = this._substitutions[mv]
-            const reduced = fullBetaReduce( sub.expression )
-            if ( !reduced.equals( sub.expression ) )
+            const reduced = fullBetaReduce( sub.expression, false )
+            if ( reduced != sub.expression )
                 this._substitutions[mv] = new Substitution(
                     new LurchSymbol( mv ).asA( metavariable ), reduced )
         } )

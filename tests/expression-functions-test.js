@@ -743,7 +743,7 @@ describe( 'Expression Functions', () => {
                 '(forall t , (= t ((sum 1 10) i , (^ i 2))))' )[0],
             LogicConcept.fromPutdown(
                 '(forall j , (= j ((sum 1 10) j , (^ j 2))))' )[0]
-        ) ).equals( false )
+        ) ).equals( true )
     } )
 
 } )

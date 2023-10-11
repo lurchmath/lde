@@ -320,8 +320,8 @@ export class Problem {
     // problem's constraints.
     betaReduce () {
         this.constraints.slice().forEach( con => {
-            const reduced = fullBetaReduce( con.pattern )
-            if ( !reduced.equals( con.pattern ) ) {
+            const reduced = fullBetaReduce( con.pattern, false )
+            if ( reduced != con.pattern ) {
                 this.remove( con )
                 this.add( new Constraint( reduced, con.expression ) )
             }

@@ -69,6 +69,7 @@
  * @module ExpressionFunctions
  */
 
+import { MathConcept } from '../math-concept.js'
 import { Symbol as LurchSymbol } from "../symbol.js"
 import { Application } from "../application.js"
 import { BindingExpression } from "../binding-expression.js"
@@ -132,14 +133,17 @@ export const isAnEF = expr => expr instanceof Application
  * function, 1 for a unary function, 2 for a binary function, etc.
  * 
  * @param {Expression} ef the expression function whose arity is to be computed
+ * @param {boolean=false} skipCheck whether to skip the check that `ef` is an
+ *   expression function, and just trust the caller that it is (and thus no
+ *   error will be thrown)
  * @returns {integer} the arity of `ef`
  * 
  * @see {@link module:ExpressionFunctions.isAnEF isAnEF()}
  * @see {@link module:ExpressionFunctions.applyEF applyEF()}
  * @see {@link module:ExpressionFunctions.parametersOfEF parametersOfEF()}
  */
-export const arityOfEF = ef => {
-    if ( !isAnEF( ef ) )
+export const arityOfEF = ( ef, skipCheck=false ) => {
+    if ( !skipCheck && !isAnEF( ef ) )
         throw new Error( 'arityOfEF requires an expression function as first argument' )
     return ef.lastChild().numChildren() - 1
 }
@@ -422,7 +426,7 @@ export const isAnEFA = expr =>
  */
 export const canBetaReduce = expr =>
     isAnEFA( expr ) && isAnEF( expr.child( 1 ) )
- && expr.numChildren() == arityOfEF( expr.child( 1 ) ) + 2
+ && expr.numChildren() == arityOfEF( expr.child( 1 ), true ) + 2
 
 /**
  * If {@link module:ExpressionFunctions.canBetaReduce canBetaReduce()} returns
@@ -471,23 +475,38 @@ export const betaReduce = expr => canBetaReduce( expr ) ?
  * 
  * @param {Expression} expr the {@link Expression Expression} in which to seek
  *   all opportunities for $\beta$-reduction and apply them
+ * @param {boolean=true} makeCopy whether to return a copy even if the
+ *   expression needs no beta reduction.  (If it does, a copy is always
+ *   returned, but if no beta reduction needs to be done, and you set this to
+ *   false, then the original expression will be returned, for efficiency.)
  * @returns {Expression} a copy of the original expression, but with all
  *   opportunities for $\beta$-reduction taken
  * 
  * @see {@link module:ExpressionFunctions.canBetaReduce canBetaReduce()}
  * @see {@link module:ExpressionFunctions.betaReduce betaReduce()}
  */
-export const fullBetaReduce = expr => {
-    const wrapper = new Application( expr.copy() )
-    let allDone = false
-    while ( !allDone ) {
-        allDone = true
-        wrapper.descendantsSatisfying( canBetaReduce ).forEach( efa => {
-            efa.replaceWith( betaReduce( efa ) )
-            allDone = false
-        } )
+export const fullBetaReduce = ( expr, makeCopy = true ) => {
+    // This function used to be written more elegantly, but slowly.
+    // This is a more efficient version that is not as clear or simple to read.
+    if ( canBetaReduce( expr ) )
+        return fullBetaReduce( betaReduce( expr ), false )
+    let oneChanged = false
+    const childReducts = expr._children.map( child => {
+        const result = fullBetaReduce( child, makeCopy )
+        oneChanged ||= result != child
+        return result
+    } )
+    if ( !makeCopy ) {
+        if ( !oneChanged ) return expr
+        for ( let i = 0 ; i < expr._children.length ; i++ )
+            if ( childReducts[i] == expr._children[i] )
+                childReducts[i] = childReducts[i].copy()
     }
-    return wrapper.popChild()
+    const className = expr.constructor.className
+    const classObject = MathConcept.subclasses.get( className )
+    const result = new classObject( ...childReducts )
+    result._attributes = expr._attributes.deepCopy()
+    return result
 }
 
 /**
@@ -511,13 +530,26 @@ export const fullBetaReduce = expr => {
  *   unchanged
  */
 export const alphaRenamed = ( binding, newBoundSyms ) => {
-    const result = binding.copy()
-    const body = result.lastChild()
-    result.boundSymbols().forEach( ( oldBoundVar, index ) => {
-        body.replaceFree( oldBoundVar, newBoundSyms[index], body )
-        oldBoundVar.replaceWith( newBoundSyms[index] )
-    } )
-    return result
+    // This function used to be written more elegantly, but slowly.
+    // This is a more efficient version that is not as clear or simple to read.
+    const origNames = binding.boundSymbols().map( symbol => symbol.text() )
+    const body = binding.lastChild()
+    const rebuild = ( node = body ) => {
+        if ( node instanceof LurchSymbol ) {
+            const index = origNames.indexOf( node.text() )
+            return (
+                index == -1         ? node :
+                node.isFree( body ) ? newBoundSyms[index] : node
+            ).copy()
+        }
+        const className = node.constructor.className
+        const classObject = MathConcept.subclasses.get( className )
+        const childCopies = node._children.map( rebuild )
+        const result = new classObject( ...childCopies )
+        result._attributes = node._attributes.deepCopy()
+        return result
+    }
+    return new BindingExpression( ...newBoundSyms, rebuild() )
 }
 
 /**
