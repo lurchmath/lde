@@ -45,17 +45,17 @@ import peggy from 'peggy'
 import { Tokenizer, Grammar } from 'earley-parser'
 // docify utilities
 import { moveDeclaresToTop, processTheorems, processDeclarationBodies,
-         processBindings, processLets, processRules, markDeclaredSymbols, computedAttributes, resetComputedAttributes } 
+         processBindings, processLetEnvironments, processRules, assignProperNames,
+         markDeclaredSymbols, computedAttributes, resetComputedAttributes } 
        from './docify.js'
 // everything in the global validation lab. 
 import Compact from './global-validation-lab.js'
 // load the custom formatter class
 import Reporting from './reporting.js' 
 // load the Document class
-import { Document, assignProperNames } 
-       from './document.js'
+import { Document } from './document.js'
 // load the lc command
-import { lc , mc , checkExtension, diff } from './extensions.js'
+import { lc , mc , checkExtension, diff , lineNum } from './extensions.js'
 // load the CNFProp tools for testing
 import { CNFProp } from './CNFProp.js'
 
@@ -93,7 +93,7 @@ global.resetComputedAttributes = resetComputedAttributes
 global.processTheorems = processTheorems
 global.processDeclarationBodies = processDeclarationBodies
 global.processBindings = processBindings
-global.processLets = processLets
+global.processLetEnvironments = processLetEnvironments
 global.processRules = processRules
 // External packages
 global.satSolve = satSolve
@@ -212,6 +212,7 @@ global.loadParser = (name) => {
 global.parsers = loadParser('asciimath')
 global.parse = parsers[0]
 global.trace = parsers[1]
+global.lineNum = lineNum
 global.lc = lc 
 global.mc = mc
 global.$ = s => {
@@ -386,4 +387,8 @@ rpl.defineCommand( "test", {
 // export the repl.writer to be available at the repl command line
 global.write = s => console.log(rpl.writer(s))
 
+// Just a global place to store benchmarking informtion.  Just assign properties
+// to it if you want to benchmark e.g. number of times a routine is called,
+// total time, number of instantiations created, etc.
+global.Accumulator = { }
 /////////////////////////////////////////////

@@ -103,13 +103,6 @@ export const processDeclarationBodies = doc => {
   return doc
 }  
 
-// Rename Bindings for Alpha Equivalence
-//
-// make all bindings canonical by assigning ProperNames x₀, x₁, ...
-export const processBindings = doc => {
-  doc.statements().forEach( expr => renameBindings( expr ))
-  return doc
-}
 
 //////////////////////////////////////////////////////////////////////////////
 // Process Let Environments
@@ -119,7 +112,7 @@ export const processBindings = doc => {
 // that can be used as a rule premise and can only be satisfied by another
 // Let-env.  We don't upgrade that to a subclass for now.
 // TODO: consider upgrading let-envs to a subclass of environment
-export const processLets = ( doc ) => {
+export const processLetEnvironments = ( doc ) => {
   // Get all of the Let's whether or not they have bodies and make sure they are
   // the first child of their enclosing environment.  If not, wrap their scope
   // in an environment so that they are.
@@ -128,6 +121,15 @@ export const processLets = ( doc ) => {
     const parent = dec.parent()
     if (i) parent.insertChild( new Environment(...parent.children().slice(i)) , i )
   })
+}
+
+//////////////////////////////////////////////////////////////
+// Rename Bindings for Alpha Equivalence
+//
+// make all bindings canonical by assigning ProperNames x₀, x₁, ...
+export const processBindings = doc => {
+  doc.statements().forEach( expr => renameBindings( expr ))
+  return doc
 }
 
 //////////////////////////////////////////////////////////////
@@ -151,9 +153,74 @@ export const processRules = doc => {
     // // ProperNames x₀, x₁, ... etc to make them canonical
     f.statements().forEach( expr => { 
       replaceBindings( expr , 'y' )
+      // TODO: this might be redundate if we run the previous routine first
       renameBindings( expr )
       } )
   } )
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Assign Proper Names
+//
+// Rename any symbol declared by a declartion with body by appending the putdown
+// form of their body. Rename any symbol in the scope of a Let-without body by
+// appending a tick mark.
+//
+// For bodies that have a binding we want to use the alpha-equivalent canonical
+// form.
+export const assignProperNames = doc => {
+  
+  const metavariable = "LDE MV"
+  
+  // get the declarations with a body (hence the 'true') which is an expression
+  // TODO: we don't support environments as bodies yet.  Decide or upgrade.
+  let declarations = doc.declarations(true).filter( x => 
+    x.body() instanceof Expression)
+  
+  // rename all of the declared symbols with body that aren't metavars
+  declarations.forEach( decl => {
+    decl.symbols().filter(s=>!s.isA(metavariable)).forEach( c => {
+      // Compute the new ProperName
+      c.setAttribute('ProperName',
+        c.text()+'#'+decl.body().toPutdown((L,S,A)=>S)) //.prop())
+      // apply it to all c's in it's scope
+      decl.scope().filter( x => x instanceof LurchSymbol && x.text()===c.text())
+        .forEach(s => s.setAttribute('ProperName',c.getAttribute('ProperName')))
+    })
+  })
+
+  // if it is an instantiation it is possible that some of the declarations
+  // without bodies have been instantiated with ProperNames already (from the
+  // user's expressions) that are not the correct ProperNames for the
+  // instantiation, so we fix them.  
+  // TODO: merge this with the code immediately above.
+  declarations = doc.declarations().filter( x => x.body()===undefined )
+  declarations.forEach( decl => {
+    decl.symbols().filter(s=>!s.isA(metavariable)).forEach( c => {
+      // Compute the new ProperName
+      c.setAttribute('ProperName', c.text())
+      // apply it to all c's in it's scope
+      decl.scope().filter( x => x instanceof LurchSymbol && x.text()===c.text())
+        .forEach(s => s.setAttribute('ProperName',c.getAttribute('ProperName')))
+    })
+  })
+
+  // Now add tick marks for all symbols declared with Let's.
+  doc.lets().forEach( decl => {
+    decl.symbols().filter(s=>!s.isA(metavariable)).forEach( c => {
+      // Compute the new ProperName
+      let cname = c.properName()
+      if (!cname.endsWith("'")) c.setAttribute( 'ProperName' , cname + "'" )
+      c.declaredBy = decl
+      // apply it to all c's in it's scope
+      decl.scope().filter( x => x instanceof LurchSymbol && x.text()===c.text())
+        .forEach( s => {
+          s.declaredBy = decl
+          s.setAttribute('ProperName',c.getAttribute('ProperName'))
+      })
+    })
+  })
+
 }
 
 //////////////////////////////////////////////////////////////////////////////

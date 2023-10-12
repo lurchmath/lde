@@ -122,13 +122,27 @@ let start = Date.now()
 //          g=7
 //          h=8
 //        }`)
-doc=catdocs('libs/PeanoPeg')
+
+system = lc(`:[ 'LDE EFA' '---' ]`).asA('Declare')
+A=loadLibStr('Acid Tests')
+B=loadProofStr('acid tests/acid 1 Example 4')
+doc=$(`{ Rules: «${A}» «${B}» }`)
+doc.unshiftChild(system)
+doc.child(2,0).makeIntoA('Declare')
+
 processShorthands(doc)
+moveDeclaresToTop(doc)
 processTheorems(doc)
 processDeclarationBodies(doc)
+processLetEnvironments(doc)
+processBindings(doc)
 processRules(doc)
+assignProperNames(doc)
 markDeclaredSymbols(doc)
+
 doc.report(everything)
+
+// Accumulator = { totaltime:0, numcalls:0, numsolns:0, numlines: 0}
 
 ///////////////////////////////////////////////////////////
 // closing

@@ -9,7 +9,7 @@ The main experiment currently in progress is an implementation of the $n$-_compa
 
 ## Attributes
 
-Any LC in a document can have two kinds of attributes - LC attributes and ordinary js attributes. This validation algorithm uses many different attributes of both kinds to carry out its work in addition to those already defined for all LCs. Attributes which must be supplied by the user are saved as LC attributes as part of the document content.  Attributes which can be computed from the user's content are stored in js attributes.  There may be exceptions to this for caching and such in the future, but for now here is the list of attributes used by the algorithm and what they mean.
+Any LC in a document can have two kinds of attributes - LC attributes and ordinary js attributes. This validation algorithm uses many different attributes of both kinds to carry out its work in addition to those already defined for all LCs. Attributes which must be supplied by the user are saved as LC attributes as part of the document content.  Attributes which can be computed from the user's content are stored in js attributes.  There are exceptions to this however, because the `LC.copy()` function only copies LC attributes, not js attributes, so sometimes we use an LC attribute when having that functionality makes the code simpler.
 
 ### LC Attributes
 
@@ -23,16 +23,22 @@ In addition, these LC attributes store a value.
 
 * `ExpectedResult` - Stores the expected result from validating this LC.  Intended primarily for testing, where the actual validation result can be compared to the expected one.  Typical results are 'valid', 'indeterminate', and 'invalid'.
 * `ID` - stores an ID number associated with this LC.  Can be used by a UI to map LC feedback results to entities in the user's original content that produced the document.
+* `ProperName` - the alternate name of a symbol used when computing propositional form. 
+   - Bound symbols have `ProperName` `x₀,x₁,x₂,...` so alpha equivalent expressions have the same propositional form.
+   - Free symbols, `c`, in the scope of a declaration of `c` with a body have `ProperName` formed by appending the putdown form of the body to the symbol name separated by a `#` character, e.g., `c#body`, so symbols with the same name that are defined differently have different propositional forms.
+* `Part` - a partial instantiation constructed during validation (still contains metavariables).  It is ignored for propositional form.
+* `Inst` - an instantiation.
 
 ### js Attributes
 
 The following js attributes store data that is computed from the user's content, and needed for validation and reporting feedback.
-* `.userRule` - true for the Rule copies of Theorems
+* `.userRule` - true for the Rule copies of Theorems.
 * `.bodyOf` - true for the copies of declaration bodies
 * `.ignore` - true for anything that should be ignored when computing the propositional form (e.g., expressions or rules containing metavariables)
-* `.properName` - the alternate name of a symbol used when computing propositional form. 
-   - bound symbols have properName x₀,x₁,x₂,... so alpha equivalent expressions have the same propositional form.
-   - free symbols, x, in the scope of a declaration (of x) with a body have properName formed by appending the putdown form of the body to the symbol name separated by a `#` character, e.g., `x#body`, so symbols with the same name that are defined differently have different propositional forms.  
+* `.domain` - stores the domain of a non-forbidden proposition or a formula (`Rule`s or `Part`s) containing at least one non-forbidden proposition whose domain is nonempty.
+* `.isWeeny` - true for a formula that contains one or more propositions containing all of the metavariables in the formula
+* `.weenies` - the set of all maximally weeny propositions in a formula (i.e., containing the largest number of metavariables), whether or not the formula itself is weeny.
+
 
 ### n-compact Documents
 
@@ -41,8 +47,13 @@ An LC is a *$n$-compact Document* (or simply a *doc*) if it is a claim environme
    - `moveDeclaresToTop()` - move all `Declare`'s to the top (i.e., make them be the first children of the document).
    - `processTheorems()` - put a copy of every `Theorem` after it as a next sibling and mark it as a `Rule` and a `.userRule` (unless such a copy would have no metavars).
    - `processDeclarationBodies()` - put a copy of the body of every declaration which has a body after it as a next sibling and store the declaration in the `.bodyOf` attribute of the copy.
-   - `processLets()` - check that every Let (i.e. given) declaration that is not the first child of its parent is wrapped in an environment containing its scope (a *Let-environment*).
-   - `processRules()` - convert every `Rule` to a formula and mark it `.ignore` if it contains metavariables.
+   - `processLetEnvironments()` - check that every Let (i.e. given) declaration that is not the first child of its parent is wrapped in an environment containing its scope (a *Let-environment*).
+   - `processBindings` - assign `ProperNames` `x₀,x₁,x₂,...` to all bound variables to allow alpha-equivalent expressions to have the same propositional form.
+   - `processRules()` - convert every `Rule` to a formula and mark it `.ignore` if it contains metavariables. Also rename any bound variables in it to something that cannot be entered by the user (currently, `y₀,y₁,y₂...`).
+   - `assignProperNames()` - assign `ProperNames` to any symbol, `c` in the scope of a declaration with body by appending `#` followed by the putdown form of the body, e.g., `c#body`.  This applies to both `Let` and `ForSome` declarations with body. 
+   - `markDeclaredSymbols` - mark every symbol declared by a global `Declare` declaration as a `.constant`.
+
+
 
 
 This is contained primarily in the following files.

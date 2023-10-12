@@ -78,8 +78,8 @@ import { Environment } from '../environment.js'
 import { Symbol as LurchSymbol } from '../symbol.js'
 import { lc , checkExtension, subscript } from './extensions.js'
 import { processShorthands } from './parsing.js'
-import { markDeclaredSymbols, processDeclarationBodies, renameBindings,
-         replaceBindings } from './docify.js'
+import { markDeclaredSymbols, processDeclarationBodies, processLetEnvironments,
+         renameBindings, replaceBindings } from './docify.js'
 
 
 // //////////////////////////////////////////////////////////////////////////////
@@ -264,69 +264,69 @@ import { markDeclaredSymbols, processDeclarationBodies, renameBindings,
 //   })
 // }  
 
-//////////////////////////////////////////////////////////////////////////////
-// Assign Proper Names
-//
-// Rename any symbol declared by a declartion with body by appending the putdown
-// form of their body. Rename any symbol in the scope of a Let-without body by
-// appending a tick mark.
-//
-// For bodies that have a binding we want to use the alpha-equivalent canonical
-// form.
-export const assignProperNames = doc => {
+// //////////////////////////////////////////////////////////////////////////////
+// // Assign Proper Names
+// //
+// // Rename any symbol declared by a declartion with body by appending the putdown
+// // form of their body. Rename any symbol in the scope of a Let-without body by
+// // appending a tick mark.
+// //
+// // For bodies that have a binding we want to use the alpha-equivalent canonical
+// // form.
+// export const assignProperNames = doc => {
   
-  const metavariable = "LDE MV"
+//   const metavariable = "LDE MV"
   
-  // get the declarations with a body (hence the 'true') which is an expression
-  // TODO: we don't support environments as bodies yet.  Decide or upgrade.
-  let declarations = doc.declarations(true).filter( x => 
-                         x.body() instanceof Expression)
+//   // get the declarations with a body (hence the 'true') which is an expression
+//   // TODO: we don't support environments as bodies yet.  Decide or upgrade.
+//   let declarations = doc.declarations(true).filter( x => 
+//                          x.body() instanceof Expression)
   
-  // rename all of the declared symbols with body that aren't metavars
-  declarations.forEach( decl => {
-    decl.symbols().filter(s=>!s.isA(metavariable)).forEach( c => {
-      // Compute the new ProperName
-      c.setAttribute('ProperName',
-        c.text()+'#'+decl.body().toPutdown((L,S,A)=>S)) //.prop())
-      // apply it to all c's in it's scope
-      decl.scope().filter( x => x instanceof LurchSymbol && x.text()===c.text())
-        .forEach(s => s.setAttribute('ProperName',c.getAttribute('ProperName')))
-    })
-  })
+//   // rename all of the declared symbols with body that aren't metavars
+//   declarations.forEach( decl => {
+//     decl.symbols().filter(s=>!s.isA(metavariable)).forEach( c => {
+//       // Compute the new ProperName
+//       c.setAttribute('ProperName',
+//         c.text()+'#'+decl.body().toPutdown((L,S,A)=>S)) //.prop())
+//       // apply it to all c's in it's scope
+//       decl.scope().filter( x => x instanceof LurchSymbol && x.text()===c.text())
+//         .forEach(s => s.setAttribute('ProperName',c.getAttribute('ProperName')))
+//     })
+//   })
 
-  // if it is an instantiation it is possible that some of the declarations
-  // without bodies have been instantiated with ProperNames already (from the
-  // user's expressions) that are not the correct ProperNames for the
-  // instantiation, so we fix them.  
-  // TODO: merge this with the code immediately above.
-  declarations = doc.declarations().filter( x => x.body()===undefined )
-  declarations.forEach( decl => {
-    decl.symbols().filter(s=>!s.isA(metavariable)).forEach( c => {
-      // Compute the new ProperName
-      c.setAttribute('ProperName', c.text())
-      // apply it to all c's in it's scope
-      decl.scope().filter( x => x instanceof LurchSymbol && x.text()===c.text())
-        .forEach(s => s.setAttribute('ProperName',c.getAttribute('ProperName')))
-    })
-  })
+//   // if it is an instantiation it is possible that some of the declarations
+//   // without bodies have been instantiated with ProperNames already (from the
+//   // user's expressions) that are not the correct ProperNames for the
+//   // instantiation, so we fix them.  
+//   // TODO: merge this with the code immediately above.
+//   declarations = doc.declarations().filter( x => x.body()===undefined )
+//   declarations.forEach( decl => {
+//     decl.symbols().filter(s=>!s.isA(metavariable)).forEach( c => {
+//       // Compute the new ProperName
+//       c.setAttribute('ProperName', c.text())
+//       // apply it to all c's in it's scope
+//       decl.scope().filter( x => x instanceof LurchSymbol && x.text()===c.text())
+//         .forEach(s => s.setAttribute('ProperName',c.getAttribute('ProperName')))
+//     })
+//   })
 
-  // Now add tick marks for all symbols declared with Let's.
-  doc.lets().forEach( decl => {
-    decl.symbols().filter(s=>!s.isA(metavariable)).forEach( c => {
-      // Compute the new ProperName
-      let cname = c.properName()
-      if (!cname.endsWith("'")) c.setAttribute( 'ProperName' , cname + "'" )
-      c.declaredBy = decl
-      // apply it to all c's in it's scope
-      decl.scope().filter( x => x instanceof LurchSymbol && x.text()===c.text())
-        .forEach( s => {
-          s.declaredBy = decl
-          s.setAttribute('ProperName',c.getAttribute('ProperName'))
-      })
-    })
-  })
+//   // Now add tick marks for all symbols declared with Let's.
+//   doc.lets().forEach( decl => {
+//     decl.symbols().filter(s=>!s.isA(metavariable)).forEach( c => {
+//       // Compute the new ProperName
+//       let cname = c.properName()
+//       if (!cname.endsWith("'")) c.setAttribute( 'ProperName' , cname + "'" )
+//       c.declaredBy = decl
+//       // apply it to all c's in it's scope
+//       decl.scope().filter( x => x instanceof LurchSymbol && x.text()===c.text())
+//         .forEach( s => {
+//           s.declaredBy = decl
+//           s.setAttribute('ProperName',c.getAttribute('ProperName'))
+//       })
+//     })
+//   })
 
-}
+// }
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -476,7 +476,7 @@ const loadDocs = (...docs) => {
   processShorthands(ans)
   
   // process Let's to ensure they are Let-environments
-  processLets(ans)
+  processLetEnvironments(ans)
 
   // make copies of ForSome bodies after the ForSome
   processDeclarationBodies(ans)

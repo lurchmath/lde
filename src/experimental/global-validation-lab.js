@@ -192,9 +192,9 @@ import Scoping from '../scoping.js'
 import Validation from '../validation.js'
 
 // import experimental tools
-import { Document, assignProperNames } from './document.js'
+import { Document } from './document.js'
 import { markDeclaredSymbols, processDeclarationBodies, renameBindings,
-         processLets } from './docify.js'
+         processLetEnvironments, assignProperNames } from './docify.js'
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -215,6 +215,80 @@ const timeEnd = (description) => { if (Debug) console.timeEnd(description) }
 // to implement the Global n-compact validation algorithm.  It is currently not
 // implemented as a validation tool.
 
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//                  Cache all Domains 
+//
+// For efficiency, mark all of the expressions in formulas with their domains
+// (the set of metavariable text names) for easy lookup.  This assumes that the
+// metavariables have been marked in Step #2 above.  We also mark the formula
+// with its maximally Weenie expressions, and its domain size while we are
+// caching stuff for easy access later.
+//
+// TODO: 
+// * maybe the above information should be saved with the Library itself so it
+//   only has to be computed once.  But that may not help much because partial
+//   instantiations still need to have it computed. Check how much of 
+//   the processing time is being used for this.
+
+// Forbid toxic Weenies
+//
+// Check if an expression is potentially Weenie.  
+// Currently we don't try to match user expressions to a pattern that is a
+// single metavariable or EFA because they match everything.  
+// This causes some rules, like or- or substitution, to require BIH's for now.
+//
+// for benchmarking use: const forbiddenWeeny = L => (L instanceof Environment)
+const forbiddenWeeny = L => (
+  (L instanceof Environment) || (L instanceof LurchSymbol) || isAnEFA(L))
+
+// Cache the domain information for a formula.  
+//
+// This should be done after processing the Declarations so it applies, e.g. to
+// declaration bodies.
+const cacheFormulaDomainInfo = f => {
+  let max = 0
+  f.propositions().forEach(p => {
+    if (!forbiddenWeeny(p)) {
+      p.domain = Formula.domain(p)
+      max = Math.max(max, p.domain.size)
+    } else {
+      p.domain = undefined
+    }
+  })
+  // the js Set of text names of the metavariables
+  f.domain = Formula.domain(f)
+  // if it has no metavariables, or the only remaining metavariables are
+  // forbidden, it can't be instantiated, so mark it finished.  
+  // Note that max===0 is not the same as f.domain.size===0 because of
+  // forbidden lone metavariables
+  if (max === 0) f.finished = true
+  // boolean that is true iff f is Weeny
+  f.isWeeny = (f.domain.size === max && max > 0)
+  // the array of maximally Weeny expressions in this formula (whether or not
+  // it is Weeny).  Don't add any when max===0 or you can match already
+  // partially instantiated expressions with the same expression when
+  // forbidden metavars are still present but max===0.
+  f.weenies = f.propositions().filter(p =>
+    max > 0 && p.domain && (p.domain.size === max))
+}
+
+// Apply that to the entire document
+const processDomains = doc => doc.formulas().forEach(f => {
+  cacheFormulaDomainInfo(f)
+  // If there are no metavariables in this formula, instantiate it so it is
+  // available for validation.
+  if (f.domain.size === 0) {
+    // let inst=f.copy()
+    // assignProperNames(inst)
+    f.unmakeIntoA('Rule')
+    f.makeIntoA('Inst')
+    f.makeIntoA(instantiation)
+    f.instantiation = true
+    // Formula.addCachedInstantiation( f , inst )
+  }
+})
 
 ////////////////////////////////////////////////////////////////////////////////
 // Validate
@@ -534,80 +608,6 @@ const load = (docs, libs = undefined, n = 4) => {
   return ans
 }
 
-
-////////////////////////////////////////////////////////////////////////////////
-//
-//                  Cache all Domains 
-//
-// For efficiency, mark all of the expressions in formulas with their domains
-// (the set of metavariable text names) for easy lookup.  This assumes that the
-// metavariables have been marked in Step #2 above.  We also mark the formula
-// with its maximally Weenie expressions, and its domain size while we are
-// caching stuff for easy access later.
-//
-// TODO: 
-// * maybe the above information should be saved with the Library itself so it
-//   only has to be computed once.  But that may not help much because partial
-//   instantiations still need to have it computed. Check how much of 
-//   the processing time is being used for this.
-
-// Forbid toxic Weenies
-//
-// Check if an expression is potentially Weenie.  
-// Currently we don't try to match user expressions to a pattern that is a
-// single metavariable or EFA because they match everything.  
-// This causes some rules, like or- or substitution, to require BIH's for now.
-//
-// for benchmarking use: const forbiddenWeeny = L => (L instanceof Environment)
-const forbiddenWeeny = L => (
-  (L instanceof Environment) || (L instanceof LurchSymbol) || isAnEFA(L))
-
-// Cache the domain information for a formula.  
-//
-// This should be done after processing the Declarations so it applies, e.g. to
-// declaration bodies.
-const cacheFormulaDomainInfo = f => {
-  let max = 0
-  f.propositions().forEach(p => {
-    if (!forbiddenWeeny(p)) {
-      p.domain = Formula.domain(p)
-      max = Math.max(max, p.domain.size)
-    } else {
-      p.domain = undefined
-    }
-  })
-  // the js Set of text names of the metavariables
-  f.domain = Formula.domain(f)
-  // if it has no metavariables, or the only remaining metavariables are
-  // forbidden, it can't be instantiated, so mark it finished.  
-  // Note that max===0 is not the same as f.domain.size===0 because of
-  // forbidden lone metavariables
-  if (max === 0) f.finished = true
-  // boolean that is true iff f is Weeny
-  f.isWeeny = (f.domain.size === max && max > 0)
-  // the array of maximally Weeny expressions in this formula (whether or not
-  // it is Weeny).  Don't add any when max===0 or you can match already
-  // partially instantiated expressions with the same expression when
-  // forbidden metavars are still present but max===0.
-  f.weenies = f.propositions().filter(p =>
-    max > 0 && p.domain && (p.domain.size === max))
-}
-
-// Apply that to the entire document
-const processDomains = doc => doc.formulas().forEach(f => {
-  cacheFormulaDomainInfo(f)
-  // If there are no metavariables in this formula, instantiate it so it is
-  // available for validation.
-  if (f.domain.size === 0) {
-    // let inst=f.copy()
-    // assignProperNames(inst)
-    f.unmakeIntoA('Rule')
-    f.makeIntoA('Inst')
-    f.makeIntoA(instantiation)
-    f.instantiation = true
-    // Formula.addCachedInstantiation( f , inst )
-  }
-})
 
 ////////////////////////////////////////////////////////////////////////////////
 //
