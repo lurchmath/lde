@@ -402,6 +402,13 @@ export const indent = (s,n) => {
   return t+s.replaceAll(/\n(.)/g,'\n'+t+'$1')
 }    
 
+// make a right justified line number consisting of a minimum width padded on
+// the right with a given suffix
+export const lineNum = (n,width=4,suffix=': ') => { 
+    const num = String(n)
+    return String(n).padStart(width-num.length-1, ' ')+suffix
+}
+
 // unicode numerical subscripts
 const subscriptDigits = '₀₁₂₃₄₅₆₇₈₉'
 export const subscript = n => [...n.toString()].map(d => subscriptDigits[d]).join('')

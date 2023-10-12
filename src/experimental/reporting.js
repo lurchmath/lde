@@ -20,7 +20,7 @@ import Compact from './global-validation-lab.js'
 // load chalk and stripAnsi
 import chalk from 'chalk'
 import erase from 'strip-ansi'
-import { tab,  indent } from './extensions.js'
+import { tab,  indent, lineNum } from './extensions.js'
 // load the commands from Lurch and Compact
 Object.assign( global, Lurch )
 Object.assign( global, Compact )
@@ -359,8 +359,9 @@ LogicConcept.prototype.report = function ( options ) {
            (!options.showBodies && c.bodyOf) ||
            (!options.showDeclares && c.isA('Declare'))
          ) return
-      linenum = `${c.indexInParent()}`
-      linenum += tab(4-linenum.length)
+      linenum =lineNum(c.indexInParent(),4,'  ')
+      // linenum = `${c.indexInParent()}`
+      // linenum += tab(4-linenum.length)
       linenum = (!c.isA(instantiation)) ? linenumPen(linenum) 
                                         : instantiationPen(linenum)
       ans += linenum+format(c,options).replace(/\n/g,'\n    ')+'\n'
@@ -382,8 +383,9 @@ const numberedIterable  = function (options=everything) {
     let ans = '  [\n'
     let linenum = ''
     this.forEach( (c,k) => {
-      linenum = `${k}`
-      linenum += tab(4-linenum.length)
+      linenum = lineNum(k)
+      // linenum = `${k}`
+      // linenum += tab(4-linenum.length)
       linenum = (c instanceof LogicConcept && !c.isA(instantiation))
                   ? linenumPen(linenum) 
                   : instantiationPen(linenum)
