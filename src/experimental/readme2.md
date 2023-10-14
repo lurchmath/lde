@@ -5,7 +5,19 @@ Welcome to the [experimental](.) folder of this branch of the Lurch LDE project.
 The main experiment currently in progress is an implementation of the $n$-_compact polynomial time global validation algorithm_. This is contained primarily in the following files.
    1. [lode.js](./lode.js) - All lurch documents, libraries, rules, theorems, and proofs begin essentially as a string (or more generally, text).  Each UI provides some way for the users and library authors to enter, save, store, load, and merge such text.  
    
-      𝕃𝕠𝕕𝕖 is a node.js command line UI intended for developers. Document text is created either directly at the command prompt for short strings, or in an external editor and saved as a file for larger documents.  This file defines the 𝕃𝕠𝕕𝕖 repl and contains utilities for listing, loading, and merging such strings.
+      𝕃𝕠𝕕𝕖 is a node.js command line UI intended for developers. Document text is created either directly at the command prompt as short test strings, or in an external editor and saved as a file for larger documents.  This file defines the 𝕃𝕠𝕕𝕖 repl and contains utilities for listing, loading, and merging such strings.
+
+   2. [parsing.js(parsing.js)] - If the UI produces a string from the user's content it must be parsed into an LC to hand to the LDE for validation.  In some cases it may be easier to obtain the desired LC by first parsing the string to an LC has been converted to an LC by post processing what we refer to as `Shorthands` - special LC content that indicate some way in which the LC needs further modification before proceeding. Currently available parsers are for `putdown` and an [asciimath](parsers/asciimath.peggy) extension of putdown that supports a small but useful subset of asciimath (http://asciimath.org/).
+
+   3. [docify.js](docify.js) - Any LC environment can be validated by $n$-_compact validation_, but will usually need to be modified in place to prepare it for validation by calling the main `docify()` routine, contained in this file.  In particular, it will move all global constant declarations to the top of the environment, create a rule associated with each user theorem, move declaration bodies after the declaration, wrap all `Let` declarations in an environment as needed to form _Let environments_, give all bound variables a canonical alpha-equivalent name, convert all rules into formulas and store information about their domains, assign unique names to symbols declared with a body, and mark all global constants throughout the document.
+
+   4. [global-validation.js](global-validation.js) - this is the main part of the validation routine.  It constructs all of the relevant instantiations, both for the n-compact global validation algorithm and for other validation tools for special entitied such as BIH and Transitive Chains and Scoping.  Each of these vlidation tools is run and it's validation results stored in the relevant locations in the document.  Additional information, such as which user espressions lead to a particular instantiation, is stored in the instantiations as well for future reporting.  Once that information is available, it is easy to validate a particular target or validate things in different ways (like whether the conclusion of a universal generalization appears within the scope of the required arbitrary declaration (preemie check).
+
+   5. [reporting.js](reporting.js) - once a document is fully instanted, we can generate reports about the results.  This can be as simple as putting a green checkmark or red x after a conclusion, or giving entire reports about how a particular instantiation is found or what rules had something to say about a particular conclusion.  The routines in this file can mine a validated document for various information, and report it in a way that is compatible with 𝕃𝕠𝕕𝕖 (terminal output).
+
+   6. [extensions.js](extensions.js) - contains miscellaneous extensions to the LC class and subclasses and utilties that are helpful for this code.
+
+
 
 ## Attributes
 
@@ -53,6 +65,8 @@ An LC is a *$n$-compact Document* (or simply a *doc*) if it is a claim environme
    - `assignProperNames()` - assign `ProperNames` to any symbol, `c` in the scope of a declaration with body by appending `#` followed by the putdown form of the body, e.g., `c#body`.  This applies to both `Let` and `ForSome` declarations with body. 
    - `markDeclaredSymbols` - mark every symbol declared by a global `Declare` declaration as a `.constant`.
 
+Additionally, the following processing of the document is more specific to the n-compact validation algorithm.   
+   - `processDomains()` - for each formula (`Rule` or `Part`) and each proposition they contain, store the domain (=set of metavariable names), whether or not the formula is a Weeny (contains a non-forbidden proposition containing all of the metavariables), and what it's weenies are, if any (propositions containing the maximal number of metavariables, even if the formula isn't iteself a weeny formula). The only part of this that is sort of specific to the n-compact validation algorithm is the definition of what is 'forbidden', so if we consider that to be a parameter this can be moved up with the previous collection of utilities that pre-process the document before validation. 
 
 
 
@@ -129,7 +143,7 @@ At this point the document has been loaded and constructed. It is ready to be va
 ### V. Process the Document <span style='font-family:monospace;font-size:9pt'>(see [processDoc()](global-validation-lab.js#L1))</span>
 1. Process Domains <span style='font-family:monospace;font-size:9pt'>(see [processDomains()](global-validation-lab.js#L1))</span>
    1. for each formula, cache the domain in `.domain`, the maximal weeny expressions in `.weenies`, avoiding forbidden weenies, and mark anything `.finished` that can no longer be instantiated (because it has only forbidden metavars or no metavars)
-   2. if the domain is empty mark the formula asA 'Inst' and unmark it as a 'Rule'
+   2. if the domain is empty mark the formula asA `Inst` and unmark it as a `Rule`
 
 2. Process Hints <span style='font-family:monospace;font-size:9pt'>(see [processHints()](global-validation-lab.js#L1))</span>
    1. process all Blatant Instantiation Hints (BIH's) $^4$

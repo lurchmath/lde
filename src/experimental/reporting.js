@@ -16,7 +16,7 @@
 // load everything from index.js
 import * as Lurch from '../index.js'
 // load the experimental code
-import Compact from './global-validation-lab.js'
+import Compact from './global-validation.js'
 // load chalk and stripAnsi
 import chalk from 'chalk'
 import erase from 'strip-ansi'

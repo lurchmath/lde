@@ -25,10 +25,27 @@ import { lc , checkExtension, subscript } from './extensions.js'
 import { processShorthands } from './parsing.js'
 
 //////////////////////////////////////////////////////////////////////////////
+//  docify
+//
+//  This takes a raw user's document as an LC environment and preprocesses it in
+//  preparation for validation using all of the routines in this document. 
+export const docify = (doc) => {
+  processShorthands(doc)
+  moveDeclaresToTop(doc)
+  processTheorems(doc)
+  processDeclarationBodies(doc)
+  processLetEnvironments(doc)
+  processBindings(doc)
+  processRules(doc)
+  assignProperNames(doc)
+  markDeclaredSymbols(doc)
+  return doc
+}
+
+//////////////////////////////////////////////////////////////////////////////
 //
 // Utilities
 //
-
 //////////////////////////////////////
 //
 // Structural Changing Utilities

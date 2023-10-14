@@ -232,6 +232,38 @@ const timeEnd = (description) => { if (Debug) console.timeEnd(description) }
 //   instantiations still need to have it computed. Check how much of 
 //   the processing time is being used for this.
 
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Load , Process, and Validate an entire document from scratch
+//
+// This is an all-in-one workhorse for making and testing documents. 
+// * docs are a single string, array of strings or a single LC environment. It
+//   is not optional.
+// * libs is the same thing for libraries, but defaults to LurchLib if omitted
+//
+// TODO: maybe go until a fixed point
+//       update this
+const load = (docs, libs = undefined, n = 4) => {
+  // make a new document
+  const doc = new Document(docs, libs)
+  // process the pre-instantiated document
+  let ans = processDoc(doc)
+  // instantiate everything
+  instantiate(ans, n)
+  // cache the let-scopes in the root
+  ans.letScopes = ans.scopes()
+  // cache the catalog in the root
+  ans.cat = ans.catalog()
+  // validate everything
+  ans.validateall()
+  ans.validateall(undefined,true)
+  // return the final validated document
+  return ans
+}
+
+
+
 // Forbid toxic Weenies
 //
 // Check if an expression is potentially Weenie.  
@@ -578,34 +610,6 @@ Environment.prototype.validateall = function (
       }
     })
   }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//
-//  Load , Process, and Validate an entire document from scratch
-//
-// This is an all-in-one workhorse for making and testing documents. 
-// * docs are a single string, array of strings or a single LC environment. It
-//   is not optional.
-// * libs is the same thing for libraries, but defaults to LurchLib if omitted
-//
-// TODO: maybe go until a fixed point
-const load = (docs, libs = undefined, n = 4) => {
-  // make a new document
-  const doc = new Document(docs, libs)
-  // process the pre-instantiated document
-  let ans = processDoc(doc)
-  // instantiate everything
-  instantiate(ans, n)
-  // cache the let-scopes in the root
-  ans.letScopes = ans.scopes()
-  // cache the catalog in the root
-  ans.cat = ans.catalog()
-  // validate everything
-  ans.validateall()
-  ans.validateall(undefined,true)
-  // return the final validated document
-  return ans
 }
 
 

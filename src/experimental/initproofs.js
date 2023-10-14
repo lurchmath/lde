@@ -123,6 +123,7 @@ let start = Date.now()
 //          h=8
 //        }`)
 
+// Load
 system = lc(`:[ 'LDE EFA' '---' ]`).asA('Declare')
 A=loadLibStr('Acid Tests')
 B=loadProofStr('acid tests/acid 1 Example 4')
@@ -130,15 +131,21 @@ doc=$(`{ Rules: «${A}» «${B}» }`)
 doc.unshiftChild(system)
 doc.child(2,0).makeIntoA('Declare')
 
-processShorthands(doc)
-moveDeclaresToTop(doc)
-processTheorems(doc)
-processDeclarationBodies(doc)
-processLetEnvironments(doc)
-processBindings(doc)
-processRules(doc)
-assignProperNames(doc)
-markDeclaredSymbols(doc)
+// Prep
+docify(doc)
+
+// processShorthands(doc)
+// moveDeclaresToTop(doc)
+// processTheorems(doc)
+// processDeclarationBodies(doc)
+// processLetEnvironments(doc)
+// processBindings(doc)
+// processRules(doc)
+// assignProperNames(doc)
+// markDeclaredSymbols(doc)
+
+// validate
+processDomains(doc)
 
 doc.report(everything)
 
