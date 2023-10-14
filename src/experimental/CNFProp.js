@@ -16,7 +16,8 @@ import { Environment } from '../environment.js'
 import { Symbol as LurchSymbol } from '../symbol.js'
 import { Expression } from '../expression.js'
 import { Declaration } from '../declaration.js'
-import { tab, indent, subscript } from './extensions.js'
+import Extensions from './extensions.js'
+const { tab, indent, subscript } = Extensions
 
 /////////////////////////////////////////////////////////////////////////////////
 //

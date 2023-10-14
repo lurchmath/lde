@@ -17,19 +17,18 @@
 //
 // Imports
 //
-import fs from 'fs'
-import { LogicConcept } from '../logic-concept.js'
 import { Environment } from '../environment.js'
 import { Symbol as LurchSymbol } from '../symbol.js'
-import { lc , checkExtension, subscript } from './extensions.js'
 import { processShorthands } from './parsing.js'
+import Extensions from './extensions.js'
+const { subscript } = Extensions
 
 //////////////////////////////////////////////////////////////////////////////
-//  docify
+//  interpret
 //
 //  This takes a raw user's document as an LC environment and preprocesses it in
 //  preparation for validation using all of the routines in this document. 
-export const docify = (doc) => {
+const interpret = (doc) => {
   processShorthands(doc)
   moveDeclaresToTop(doc)
   processTheorems(doc)
@@ -52,7 +51,7 @@ export const docify = (doc) => {
 //
 
 // Move Declares to the top of the document.
-export const moveDeclaresToTop = doc => {
+const moveDeclaresToTop = doc => {
   doc.Declares().reverse().forEach( dec => {
     if (dec.body()) throw new Error('Global constant declarations cannot have a body.')
     dec.remove()
@@ -80,7 +79,7 @@ export const moveDeclaresToTop = doc => {
 // This has to be done after processing Shorthands and moving Declares to the
 // top so the user's theorems are in the scope of declared constants in the
 // library, which then prevents them from being metavariables. 
-export const processTheorems = doc => {
+const processTheorems = doc => {
   [ ...doc.descendantsSatisfyingIterator( x => x.isA('Theorem') ) ].forEach( 
     thm => {
       // to make this idempotent, check if the copy is already there
@@ -103,7 +102,7 @@ export const processTheorems = doc => {
 // Process Declaration Bodies
 //
 // Append the bodies of all declarations.
-export const processDeclarationBodies = doc => {
+const processDeclarationBodies = doc => {
   // get the declarations with a body (hence the 'true') that don't contain 
   // metavariables (do this before converting a Rule to a formula)
   const decs = doc.declarations(true).filter( dec => Formula.domain(dec).size===0)
@@ -129,7 +128,7 @@ export const processDeclarationBodies = doc => {
 // that can be used as a rule premise and can only be satisfied by another
 // Let-env.  We don't upgrade that to a subclass for now.
 // TODO: consider upgrading let-envs to a subclass of environment
-export const processLetEnvironments = ( doc ) => {
+const processLetEnvironments = ( doc ) => {
   // Get all of the Let's whether or not they have bodies and make sure they are
   // the first child of their enclosing environment.  If not, wrap their scope
   // in an environment so that they are.
@@ -144,7 +143,7 @@ export const processLetEnvironments = ( doc ) => {
 // Rename Bindings for Alpha Equivalence
 //
 // make all bindings canonical by assigning ProperNames x₀, x₁, ...
-export const processBindings = doc => {
+const processBindings = doc => {
   doc.statements().forEach( expr => renameBindings( expr ))
   return doc
 }
@@ -154,7 +153,7 @@ export const processBindings = doc => {
 //
 // Check and mark the Rules, make them into formulas, and replace
 // and rename their bound variables
-export const processRules = doc => {
+const processRules = doc => {
   // get all of the Rules
   [...doc.descendantsSatisfyingIterator(x=>x.isA('Rule'))].forEach( f => {
     // check if f is not an Environment, or is a Let-environment, and throw
@@ -185,7 +184,7 @@ export const processRules = doc => {
 //
 // For bodies that have a binding we want to use the alpha-equivalent canonical
 // form.
-export const assignProperNames = doc => {
+const assignProperNames = doc => {
   
   const metavariable = "LDE MV"
   
@@ -256,7 +255,7 @@ export const assignProperNames = doc => {
 // * We might want to keep the user's original bound formula variable names
 //   somewhere for feedback purposes, but the canonical ones aren't that bad for
 //   now.
-export const replaceBindings = ( expr , symb='y' ) => {
+const replaceBindings = ( expr , symb='y' ) => {
   const stack = new Map()
   const push = () => stack.forEach( value => value.push( value.last() ) )
   const pop = () => stack.forEach( ( value, key ) => {
@@ -298,7 +297,7 @@ export const replaceBindings = ( expr , symb='y' ) => {
 // We also need alpha equivalent statements to have the same propositional form.
 // This assigns canonical names x₀ , x₁ , etc. as the ProperName attribute of
 // bound variables, and that is what .prop uses to make the propositional form.
-export const renameBindings = ( expr , symb='x' ) => {
+const renameBindings = ( expr , symb='x' ) => {
   const stack = new Map()
   const push = () => stack.forEach( value => value.push( value.last() ) )
   const pop = () => stack.forEach( ( value, key ) => {
@@ -340,15 +339,15 @@ export const renameBindings = ( expr , symb='x' ) => {
 // these are computed from the original content of the LC supplied by the user
 // having this list lets us reset the entire LC by removing these attributes and
 // recomputing them to revalidate it from scratch when we need to. 
-export const computedAttributes = [
+const computedAttributes = [
   'constant', 'properName'
 ] 
 
-// Reset all of the attributes computed by these docify utilities.  
+// Reset all of the attributes computed by these interpretation utilities.  
 //
 // NOTE: it might be faster to just rebuild and recompute the whole document
 // from source, but we put this here just in case it's needed. 
-export const resetComputedAttributes = doc => {
+const resetComputedAttributes = doc => {
   [...doc.descendantsIterator()].forEach( x => {
     computedAttributes.forEach( a => delete x[a])
   })
@@ -360,7 +359,7 @@ export const resetComputedAttributes = doc => {
 //
 // Mark explicitly declared symbols s, throughout an LC by setting
 // s.constant=true
-export const markDeclaredSymbols = doc => {
+const markDeclaredSymbols = doc => {
   // fetch all of the declarations
   let Declares = doc.Declares()
   // fetch all of the symbols
@@ -375,4 +374,10 @@ export const markDeclaredSymbols = doc => {
     }
   )
   return doc
+}
+
+export default { interpret, processShorthands, moveDeclaresToTop, processTheorems,
+  processDeclarationBodies, processLetEnvironments, processBindings,  
+  processRules, assignProperNames, markDeclaredSymbols, replaceBindings,
+  renameBindings
 }

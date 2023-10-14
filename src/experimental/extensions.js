@@ -344,7 +344,7 @@ LogicConcept.prototype.inspect = function(...args) { inspect(this,...args) }
 //
 // For example, in (x+1)+(x^2+x)=(x+1)+(x⋅x+x) we want to know that the LHS can
 // be obtained from the RHS by substituting x^2=x⋅x. 
-export const diff = (LHS,RHS) => {
+const diff = (LHS,RHS) => {
   let ans=[]
   // a Symbol doesn't match an Application.
   if ( 
@@ -378,37 +378,39 @@ export const diff = (LHS,RHS) => {
 }
 
 // useful abbreviations
-export const lc = s => { 
+const lc = s => { 
   const L = LogicConcept.fromPutdown(s)
   return (L.length===1) ? L[0] : L 
 }
-export const mc = s => { 
+const mc = s => { 
   const M = MathConcept.fromSmackdown(s)
   return (M.length===1) ? M[0] : M  
 }
 
 // check a filename to see if it has the right extension and add the extension
 // if it doesn't. The default extension is 'js'.
-export const checkExtension = ( name , ext = 'js' ) => 
+const checkExtension = ( name , ext = 'js' ) => 
     ( !(new RegExp(`\\.${ext}$`).test(name)) ) ? name +'.' + ext : name 
 
 // string formatting utilities used in more than one place
 // Return a string of spaces of length n
-export const tab = (n , char=' ') => { return Array.seq(()=>'',1,n+1).join(char) }
+const tab = (n , char=' ') => { return Array.seq(()=>'',1,n+1).join(char) }
 
 // indent string s with a tab of size n
-export const indent = (s,n) => {
+const indent = (s,n) => {
   const t = tab(n)
   return t+s.replaceAll(/\n(.)/g,'\n'+t+'$1')
 }    
 
 // make a right justified line number consisting of a minimum width padded on
 // the right with a given suffix
-export const lineNum = (n,width=4,suffix=': ') => { 
+const lineNum = (n,width=4,suffix=': ') => { 
     const num = String(n)
     return String(n).padStart(width-num.length-1, ' ')+suffix
 }
 
 // unicode numerical subscripts
 const subscriptDigits = '₀₁₂₃₄₅₆₇₈₉'
-export const subscript = n => [...n.toString()].map(d => subscriptDigits[d]).join('')
+const subscript = n => [...n.toString()].map(d => subscriptDigits[d]).join('')
+
+export default { lc, mc, diff, checkExtension, tab, indent, lineNum, subscript }

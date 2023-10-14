@@ -21,41 +21,38 @@ import repl from 'repl'
 import fs, { write } from 'fs'
 import { execSync } from 'child_process'
 import util from 'util'
+import peggy from 'peggy'
 
 // In LODE we have no need for EventTarget because we don't edit MCs in real
 // time and react to changes.  Importing this BEFORE importing math-concept.js
 // disables that.  This keeps the size and complexity of LCs simpler and avoids
 // spamming 'inspect' reports.
 //
-// NOTE: do not importan any lurch modules above this point (in class they load
+// NOTE: do not import any lurch modules above this point (in case they load
 // something that loads MathConcept first before we get a chance to import the
-// following)
+// following).
 import './disable-event-target.js'
-
 // with that disabled, now we can load everything from index.js and other LDE tools
 import * as Lurch from '../index.js'
 import { Problem } from '../matching/problem.js'
 import CNF from '../validation/conjunctive-normal-form.js'
 
-//
 // Experimental Code
 //
-// parsers
-import peggy from 'peggy'
+// parseing
 import { Tokenizer, Grammar } from 'earley-parser'
-// docify utilities
-import { docify, moveDeclaresToTop, processTheorems, processDeclarationBodies,
-         processBindings, processLetEnvironments, processRules, assignProperNames,
-         markDeclaredSymbols, computedAttributes, resetComputedAttributes } 
-       from './docify.js'
+// interpretation utilities
+import Interpret from './interpret.js'
 // everything in the global validation lab. 
 import Compact from './global-validation.js'
-// load the custom formatter class
+// load the custom formatters and reporting tools
 import Reporting from './reporting.js' 
+// load various helpful utilities
+import Extensions from './extensions.js'
 // load the Document class
 import { Document } from './document.js'
-// load the lc command
-import { lc , mc , checkExtension, diff , lineNum } from './extensions.js'
+// import the parsing utiltiies (processShorthands comes from Interpret)
+import { makeParser } from './parsing.js'
 // load the CNFProp tools for testing
 import { CNFProp } from './CNFProp.js'
 
@@ -64,7 +61,6 @@ import { CNFProp } from './CNFProp.js'
 import Algebrite from '../../dependencies/algebrite.js'
 // load SAT
 import { satSolve } from '../../dependencies/LSAT.js'
-import { makeParser , processShorthands } from './parsing.js'
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -76,27 +72,14 @@ import { makeParser , processShorthands } from './parsing.js'
 Object.assign( global, Lurch )
 
 // Experimental code
+Object.assign( global, Extensions )
+Object.assign( global, Interpret)
 Object.assign( global, Compact )
 Object.assign( global, Reporting )
 global.CNF = CNF
 global.Problem = Problem
 global.Document = Document
 global.CNFProp = CNFProp
-
-// exposing experimental commands for debugging
-global.docify = docify
-global.assignProperNames = assignProperNames
-global.assignProperNames = assignProperNames
-global.markDeclaredSymbols = markDeclaredSymbols
-global.processShorthands = processShorthands
-global.moveDeclaresToTop = moveDeclaresToTop
-global.computedAttributes = computedAttributes
-global.resetComputedAttributes = resetComputedAttributes
-global.processTheorems = processTheorems
-global.processDeclarationBodies = processDeclarationBodies
-global.processBindings = processBindings
-global.processLetEnvironments = processLetEnvironments
-global.processRules = processRules
 
 // External packages
 global.satSolve = satSolve
@@ -123,12 +106,6 @@ global.ls = (args='') => {
 
 // because it's easier to remember
 global.metavariable = 'LDE MV'
-
-// see if a filename has the correct extension and add it if it doesn't
-global.checkExtension = checkExtension
-
-// find the subtitution delta between two Application expressions if it exists
-global.diff = diff
 
 // for controlling the inspect-level for the default REPL echo
 global.Depth = Infinity
@@ -215,9 +192,6 @@ global.loadParser = (name) => {
 global.parsers = loadParser('asciimath')
 global.parse = parsers[0]
 global.trace = parsers[1]
-global.lineNum = lineNum
-global.lc = lc 
-global.mc = mc
 global.$ = s => {
   let parsed = parse(s)
   return (parsed) ? lc(parsed) : undefined

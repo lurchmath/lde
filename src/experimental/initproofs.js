@@ -132,7 +132,7 @@ doc.unshiftChild(system)
 doc.child(2,0).makeIntoA('Declare')
 
 // Prep
-docify(doc)
+interpret(doc)
 
 // processShorthands(doc)
 // moveDeclaresToTop(doc)
@@ -145,7 +145,7 @@ docify(doc)
 // markDeclaredSymbols(doc)
 
 // validate
-processDomains(doc)
+validate(doc)
 
 doc.report(everything)
 

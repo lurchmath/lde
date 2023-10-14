@@ -193,8 +193,8 @@ import Validation from '../validation.js'
 
 // import experimental tools
 import { Document } from './document.js'
-import { markDeclaredSymbols, processDeclarationBodies, renameBindings,
-         processLetEnvironments, assignProperNames } from './docify.js'
+import Interpret from './interpret.js'
+const { markDeclaredSymbols, renameBindings, assignProperNames } = Interpret
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -206,6 +206,65 @@ const instantiation = 'LDE CI'
 const time = (description) => { if (Debug) console.time(description) }
 const timeEnd = (description) => { if (Debug) console.timeEnd(description) }
 ////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+//
+//                        Validate!
+//
+// This is the main routine! It assumes that doc is an LC environment that has
+// already been interpreted. It then runs all available validation tools that
+// are compatible with n-compact global validation, then runs global validation
+// itself, and returns the modified document with feedback stored in the various
+// locations.
+//
+// The optional second argument specifies which inference in the document should
+// be validated, and defaults to checking the entire document.  The optional
+// third argument determines if it should additionally check for preemies and
+// defaults to true. To validate every inference in the document, call
+// validateall() instead.
+//
+// The current validation tools available are validateBIHs() and
+// Scoping.validate(). We hope to add validateTranstiveChains() next.  In
+// general, this routine provides the hook for installing new n-compact global
+// validation compatible tools in the future.  Validation tools can add
+// validation feedback and add additional complete instantiations to the document, but
+// should not add new Rules.
+//
+const validate = ( doc, target = doc, checkPreemies = true) => {
+  // process the domains if this is the first time it is being called.
+  if (!doc.domainsProcessed) processDomains(doc)
+  return doc   
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//
+//                     LDE Documents
+//
+// The Document class handles most of the file handling and computes properties
+// of Documents that are mostly independent of what validation tool will be used.
+// The remainder of the processing that has to be done here is more specific to
+// this validation tool.
+const processDoc = (doc) => {
+  // These have been moved to the Document class, but we keep the comments here
+  // for a quick reference.
+  // let doc=d.copy()
+  // processShorthands(doc)        
+  // processDeclarationBodies(doc) 
+  // replaceFormulaBindings(doc)   
+  // makeBindingsCanonical(doc)    
+  // markMetavars(doc)             
+  // assignProperNames(doc)        
+  processDomains(doc)
+  processHints(doc)
+  // instantiate(doc,n) // can be done afterwards
+  Scoping.validate(doc)
+  markDeclaredSymbols(doc)
+  // no longer needed, but it works and could be useful some day
+  // markDeclarationContexts(doc)
+  return doc
+}
+///////////////////////////////////////////////////////////////////////////////
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -320,6 +379,9 @@ const processDomains = doc => doc.formulas().forEach(f => {
     f.instantiation = true
     // Formula.addCachedInstantiation( f , inst )
   }
+  // and mark the document as having been processed so we don't call this more
+  // than once
+  doc.domainsProcessed = true 
 })
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -971,34 +1033,6 @@ const markDeclarationContexts = doc => {
     })
 }
 
-///////////////////////////////////////////////////////////////////////////////
-//
-//                     LDE Documents
-//
-// The Document class handles most of the file handling and computes properties
-// of Documents that are mostly independent of what validation tool will be used.
-// The remainder of the processing that has to be done here is more specific to
-// this validation tool.
-const processDoc = (doc) => {
-  // These have been moved to the Document class, but we keep the comments here
-  // for a quick reference.
-  // let doc=d.copy()
-  // processShorthands(doc)        
-  // processDeclarationBodies(doc) 
-  // replaceFormulaBindings(doc)   
-  // makeBindingsCanonical(doc)    
-  // markMetavars(doc)             
-  // assignProperNames(doc)        
-  processDomains(doc)
-  processHints(doc)
-  // instantiate(doc,n) // can be done afterwards
-  Scoping.validate(doc)
-  markDeclaredSymbols(doc)
-  // no longer needed, but it works and could be useful some day
-  // markDeclarationContexts(doc)
-  return doc
-}
-///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
 // Debottlenecker
@@ -1027,7 +1061,7 @@ const Benchmark = function (f, name) {
 }
 
 export default {
-  getUserPropositions, instantiate, markDeclarationContexts,
+  validate, getUserPropositions, instantiate, markDeclarationContexts,
   load, processHints, processDoc, processDomains,
   cacheFormulaDomainInfo, Benchmark, Report
 }

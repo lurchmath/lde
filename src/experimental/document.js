@@ -75,12 +75,12 @@
 import fs from 'fs'
 import { LogicConcept } from '../logic-concept.js'
 import { Environment } from '../environment.js'
-import { Symbol as LurchSymbol } from '../symbol.js'
-import { lc , checkExtension, subscript } from './extensions.js'
 import { processShorthands } from './parsing.js'
-import { markDeclaredSymbols, processDeclarationBodies, processLetEnvironments,
-         renameBindings, replaceBindings } from './docify.js'
-
+import Extensions from './extensions.js'
+const { lc , checkExtension } = Extensions
+import Interpret from './interpret.js'
+const { markDeclaredSymbols, processDeclarationBodies, processLetEnvironments,
+        renameBindings, replaceBindings } = Interpret
 
 // //////////////////////////////////////////////////////////////////////////////
 // //

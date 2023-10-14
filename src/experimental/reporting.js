@@ -20,8 +20,9 @@ import Compact from './global-validation.js'
 // load chalk and stripAnsi
 import chalk from 'chalk'
 import erase from 'strip-ansi'
-import { tab,  indent, lineNum } from './extensions.js'
+import Extensions from './extensions.js'
 // load the commands from Lurch and Compact
+Object.assign( global, Extensions )
 Object.assign( global, Lurch )
 Object.assign( global, Compact )
 
