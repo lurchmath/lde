@@ -233,6 +233,13 @@ const timeEnd = (description) => { if (Debug) console.timeEnd(description) }
 const validate = ( doc, target = doc, checkPreemies = true) => {
   // process the domains if this is the first time it is being called.
   if (!doc.domainsProcessed) processDomains(doc)
+  
+  // Here is the location to install new validation tools that are compatible
+  // with global validation in the future.
+
+  // BIHs
+  processBIHs(doc)
+
   return doc   
 }
 
@@ -255,7 +262,7 @@ const processDoc = (doc) => {
   // markMetavars(doc)             
   // assignProperNames(doc)        
   processDomains(doc)
-  processHints(doc)
+  processBIHs(doc)
   // instantiate(doc,n) // can be done afterwards
   Scoping.validate(doc)
   markDeclaredSymbols(doc)
@@ -376,7 +383,6 @@ const processDomains = doc => doc.formulas().forEach(f => {
     f.unmakeIntoA('Rule')
     f.makeIntoA('Inst')
     f.makeIntoA(instantiation)
-    f.instantiation = true
     // Formula.addCachedInstantiation( f , inst )
   }
   // and mark the document as having been processed so we don't call this more
@@ -687,7 +693,7 @@ Environment.prototype.validateall = function (
 // Since Matching won't match an environment to a formula that has a different
 // given status, check if LCs a and b are both givens or both claims and if
 // not, toggle the given status of a, and return true if it was toggled and
-// false it it wasn't.  This is just a utility used by processHints.
+// false it it wasn't.  This is just a utility used by processBIHs.
 //
 // TODO: when this is made permanent, just upgrade Matching to make this hoop
 //       jumping unneccesary.
@@ -715,9 +721,9 @@ const matchGivens = (a, b) => {
 // instatiation of the ⇒+ rule.
 //
 // TODO: Store the validation information in a more standard and sensible way.
-const processHints = L => {
-  const formulas = L.formulas()
-  const BIH = [...L.descendantsSatisfyingIterator(x => x.isA('BIH'))]
+const processBIHs = doc => {
+  const formulas = doc.formulas()
+  const BIH = [...doc.descendantsSatisfyingIterator(x => x.isA('BIH'))]
   BIH.forEach(b => {
     let found = false
     formulas.forEach(f => {
@@ -731,7 +737,6 @@ const processHints = L => {
           inst.unmakeIntoA('Rule')
           inst.unmakeIntoA('Part')
           inst.makeIntoA('Inst')
-          inst.instantiation = true
           inst.rule = f.rule || f
           if (!inst.creators) inst.creators = []
           inst.creators.push(b)
@@ -743,6 +748,7 @@ const processHints = L => {
     // if it's not a BIH, mark it as such with .badBIH
     if (!found) { b.badBIH = true }
   })
+  return doc
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -930,7 +936,6 @@ const instantiate = (document, n = 1) => {
               inst.unmakeIntoA('Rule')
               inst.unmakeIntoA('Part')
               inst.makeIntoA('Inst')
-              inst.instantiation = true
             } else {
               inst.unmakeIntoA('Rule')
               inst.makeIntoA('Part')
@@ -1062,7 +1067,7 @@ const Benchmark = function (f, name) {
 
 export default {
   validate, getUserPropositions, instantiate, markDeclarationContexts,
-  load, processHints, processDoc, processDomains,
+  load, processBIHs, processDoc, processDomains,
   cacheFormulaDomainInfo, Benchmark, Report
 }
 ///////////////////////////////////////////////////////////////////////////////

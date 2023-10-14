@@ -145,7 +145,7 @@ At this point the document has been loaded and constructed. It is ready to be va
    1. for each formula, cache the domain in `.domain`, the maximal weeny expressions in `.weenies`, avoiding forbidden weenies, and mark anything `.finished` that can no longer be instantiated (because it has only forbidden metavars or no metavars)
    2. if the domain is empty mark the formula asA `Inst` and unmark it as a `Rule`
 
-2. Process Hints <span style='font-family:monospace;font-size:9pt'>(see [processHints()](global-validation-lab.js#L1))</span>
+2. Process Hints <span style='font-family:monospace;font-size:9pt'>(see [processBIHs()](global-validation-lab.js#L1))</span>
    1. process all Blatant Instantiation Hints (BIH's) $^4$
    2. if a BIH is valid, create its instantiation, and mark it as an 'Inst' and set its `.rule` attribute to the 'Rule' it instantiates
    3. if a BIH is valid as a BIH, it has to be valid propositionally by definition, and will be marked with a gold star after validation, but if it is not a valid BIH, it might still be propositionally valid or invalid, so in that case it will receive both a propositional green check or redx in addition to a red star
