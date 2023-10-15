@@ -358,12 +358,13 @@ const resetComputedAttributes = doc => {
 // Mark Declared Symbols
 //
 // Mark explicitly declared symbols s, throughout an LC by setting
-// s.constant=true
-const markDeclaredSymbols = doc => {
+// s.constant=true.  The document containing the target must be specified to 
+// fetch the Declares.
+const markDeclaredSymbols = ( doc, target=doc ) => {
   // fetch all of the declarations
   let Declares = doc.Declares()
   // fetch all of the symbols
-  let symbols = doc.descendantsSatisfying( x => x instanceof LurchSymbol )
+  let symbols = target.descendantsSatisfying( x => x instanceof LurchSymbol )
   // for each one, see if it is in the scope of any Declare declaration of that symbol
   symbols.forEach( s => {
       if (Declares.some( d => 
@@ -373,7 +374,7 @@ const markDeclaredSymbols = doc => {
       s.constant = true
     }
   )
-  return doc
+  return target
 }
 
 export default { interpret, processShorthands, moveDeclaresToTop, processTheorems,
