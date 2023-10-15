@@ -221,9 +221,12 @@ LogicConcept.prototype.forSomes = function ( onlywithbodies ) {
          )]
 }
 
-// Compute the array of all formulas in this LC
-LogicConcept.prototype.formulas = function () {
-  return [...this.descendantsSatisfyingIterator( x => x.isA('Rule') || x.isA('Part'))]
+// Compute the array of all formulas that are not marked as .finished in this LC
+// the second optional argument, if true, tells it to return all formulas,
+// whether they are finished or not.
+LogicConcept.prototype.formulas = function ( includefinished=false ) {
+  return [...this.descendantsSatisfyingIterator( x => 
+          ((x.isA('Rule') || x.isA('Part')) && (includefinished || !x.finished )))]
 }
 
 // Compute the array of all propositions in this LC
