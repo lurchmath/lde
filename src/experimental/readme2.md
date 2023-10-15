@@ -54,7 +54,8 @@ The following js attributes store data that is computed from the user's content,
 * `.domainsProcessed` - true if this document has already had all of its domain information processed and stored.  Should only appear on an entire document, not on any target inside the document.
 * `.rule` - the rule that this `Part` or `Inst` is an instantiation of.
 * `.creators` - the list of user expressions that created this `Part` or `Inst`.
-
+* `.pass` - which instantiation pass created the `Part` or `Inst`.
+* `.numsolns` - the number of solutions found when matching the expression and formula proposition that created this `Part` or `Inst`
 
 ### n-compact Documents
 
