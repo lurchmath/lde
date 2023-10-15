@@ -38,8 +38,9 @@ In addition, these LC attributes store a value.
 * `ProperName` - the alternate name of a symbol used when computing propositional form. 
    - Bound symbols have `ProperName` `x₀,x₁,x₂,...` so alpha equivalent expressions have the same propositional form.
    - Free symbols, `c`, in the scope of a declaration of `c` with a body have `ProperName` formed by appending the putdown form of the body to the symbol name separated by a `#` character, e.g., `c#body`, so symbols with the same name that are defined differently have different propositional forms.
-* `Part` - a partial instantiation constructed during validation (still contains metavariables).  It is ignored for propositional form.
-* `Inst` - an instantiation.
+* `Part` - indicates this is a partial instantiation constructed during validation (still contains metavariables).  It is ignored for propositional form.
+* `Inst` - indicates this is an instantiation and should be used for propositional form.
+* `validation results` - a replacement for `validation result` set by the [validation engine](../validation/engine.js).
 
 ### js Attributes
 
@@ -51,6 +52,9 @@ The following js attributes store data that is computed from the user's content,
 * `.isWeeny` - true for a formula that contains one or more propositions containing all of the metavariables in the formula
 * `.weenies` - the set of all maximally weeny propositions in a formula (i.e., containing the largest number of metavariables), whether or not the formula itself is weeny.
 * `.domainsProcessed` - true if this document has already had all of its domain information processed and stored.  Should only appear on an entire document, not on any target inside the document.
+* `.rule` - the rule that this `Part` or `Inst` is an instantiation of.
+* `.creators` - the list of user expressions that created this `Part` or `Inst`.
+
 
 ### n-compact Documents
 

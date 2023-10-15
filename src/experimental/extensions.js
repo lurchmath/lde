@@ -293,6 +293,46 @@ LogicConcept.prototype.symbols = function () {
   return this.descendantsSatisfying( x => x instanceof LurchSymbol )
 }
 
+// Replacements for Validation.result(), Validation.setResult(), and
+// Validation.result().result that support more than one result (up to one for
+// each plugin-tool of global validation). For example, a BIH can be validated
+// separately by the BIH tool and the global propositional tool. Replacements
+// for Validation.result(), Validation.setResult(), and
+// Validation.result().result that support more than one result (up to one for
+// each plugin-tool of global validation). For example, a BIH can be validated
+// separately by the BIH tool and the global propositional tool.
+//
+// Get the results for this toolname.
+LogicConcept.prototype.results = function (toolname) {
+  const results = this.getAttribute( 'validation results' )
+  return (results) ? results[toolname] : undefined
+}
+// Set the results for this toolname (a string). Results should be objects
+// following the same requirements as those of Validation.result() if passed as
+// an object.  If passed as a string it is set to the .result key of the results
+// object.  If two strings are passed they are set to the keys .result and
+// .reason, respectively.
+LogicConcept.prototype.setResult = function (toolname, result, reason) {
+  // if there is no validation results object for any tool, make a blank one
+  const allResults = (this.getAttribute('validation results')) ? 
+                      this.getAttribute('validation results') :
+                      { }
+  // get the current result object for this tool, if any, or make a new one
+  const resultObj = (this.results(toolname)) ? this.results(toolname) : { }
+  // if the first arg is a string, set it
+  if (typeof result === 'string') { 
+    resultObj.result = result
+    // same for reason
+    if (typeof reason === 'string') { resultObj.reason = reason }
+  } else {
+    // the second arg must be an object, though we don't enforce that
+    resultObj = result
+  }
+  // update the attribute
+  allResults[toolname] = resultObj
+  this.setAttribute('validation results',allResults) 
+}
+
 // convenience syntax. 
 LogicConcept.prototype.inspect = function(x) { 
   console.log(util.inspect(x , depth = 1) , 

@@ -209,7 +209,7 @@ const timeEnd = (description) => { if (Debug) console.timeEnd(description) }
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-//                        Validate!
+//                                Validate!
 //
 // This is the main routine! It assumes that doc is an LC environment that has
 // already been interpreted. It then runs all available validation tools that
@@ -236,7 +236,7 @@ const validate = ( doc, target = doc, checkPreemies = true) => {
   
   // Here is the location to install new validation tools that are compatible
   // with global validation in the future.
-
+  
   // BIHs
   processBIHs(doc)
 
@@ -746,7 +746,10 @@ const processBIHs = doc => {
       if (toggle) { f.toggleGiven() }
     })
     // if it's not a BIH, mark it as such with .badBIH
+    // TODO: remove this eventually when we make the switch
     if (!found) { b.badBIH = true }
+    // TODO: switch over to this
+    b.setResult('BIH',(found)?'valid':'invalid')
   })
   return doc
 }
