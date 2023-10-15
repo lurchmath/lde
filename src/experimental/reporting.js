@@ -269,6 +269,10 @@ const formatter = ( options=defaultOptions ) => {
     }
     // show validation except for hidden ForSome bodies
     if (options.showValidation && ans.length>0 ) {
+      // TODO: adding the switchover to the new validation storage
+      if (L.results("BIH")) 
+        ans += (L.results("BIH").result==="valid")?goldstar:redstar
+      // TODO: remove old style validation
       if (Validation.result(L) && Validation.result(L).result==='valid') {
         // a valid BIH has to be propositionally valid, so a green check
         // isn't necessary when there's a gold star
