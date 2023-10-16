@@ -56,6 +56,9 @@ The following js attributes store data that is computed from the user's content,
 * `.creators` - the list of user expressions that created this `Part` or `Inst`.
 * `.pass` - which instantiation pass created the `Part` or `Inst`.
 * `.numsolns` - the number of solutions found when matching the expression and formula proposition that created this `Part` or `Inst`
+* `letScopes` - caches the Let scopes in the document (not targets)
+* `cat` - caches the docuement catalog in the document (not targets)
+* `.userPropositions` - caches the user's propositions (things that have a propositional form, do not contain metavariables, and are not inside a `Rule`).
 
 ### n-compact Documents
 

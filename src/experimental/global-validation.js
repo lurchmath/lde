@@ -234,6 +234,14 @@ const validate = ( doc, target = doc, checkPreemies = true) => {
   // process the domains (if they aren't already)
   processDomains(doc)
   
+  // cache the user propositions
+  //
+  // Since we no longer require that the last child of a document be an
+  // environment containing all of the user content, we want to fetch all of the
+  // propositions that do not contain metavariables and are not inside a Rule as
+  // the user propositions.
+  
+
   // instantiate with the user content (if it isn't already
   instantiate(doc)
   
@@ -248,10 +256,22 @@ const validate = ( doc, target = doc, checkPreemies = true) => {
   // Scoping
   Scoping.validate(doc)
   
+  ///////////////
+  // Instantiate 
+  instantiate(doc)
+  // cache the let-scopes in the root
+  doc.letScopes = doc.scopes()
+  // cache the catalog in the root
+  doc.cat = doc.catalog()
   // when its all complete mark the declared symbols again (this is fast, so no
-  // need to do it carefully)
+  // need to do it too carefully)
   markDeclaredSymbols(doc)
 
+  ///////////////
+  // Prop Check
+  // doc.validate( target )
+  // doc.validate( target , checkPreemies ) 
+  
   return doc   
 }
 
@@ -800,12 +820,18 @@ const processBIHs = doc => {
 //
 // Get all of the user proposition in the document, but don't include any
 // duplicates, i.e., no two expressions should have the same prop form. 
+// This should be run BEFORE instantiating so the expressions in instantiations
+// aren't counted as a user expression.
 const getUserPropositions = doc => {
   // We cache these for multiple pass n-compact validation
-  if (doc.lastChild().userPropositions)
-    return doc.lastChild().userPropositions
+  if (doc.userPropositions) return doc.userPropositions
   // if not cached, fetch them   
-  const allE = doc.lastChild().propositions()
+  const allE = [...doc.descendantsSatisfyingIterator(
+    // include these
+    x => x.isAProposition() , 
+    // exclude anything inside of these
+    x => x.isA('Rule') || x.isA('Part') || x.isA('Inst')  
+  )]
   // filter out duplicates so we don't make multiple copies of the same
   // instantiation
   const E = []
@@ -818,9 +844,35 @@ const getUserPropositions = doc => {
     }
   })
   // cache it
-  doc.lastChild().userPropositions = E
+  doc.userPropositions = E
   return E
 }
+
+// Get the e's
+//
+// Get all of the user proposition in the document, but don't include any
+// duplicates, i.e., no two expressions should have the same prop form. 
+// const getUserPropositions = doc => {
+//   // We cache these for multiple pass n-compact validation
+//   if (doc.lastChild().userPropositions)
+//     return doc.lastChild().userPropositions
+//   // if not cached, fetch them   
+//   const allE = doc.lastChild().propositions()
+//   // filter out duplicates so we don't make multiple copies of the same
+//   // instantiation
+//   const E = []
+//   const dups = new Set()
+//   allE.forEach(e => {
+//     const eprop = e.prop().replace(/^[:]/, '')
+//     if (!dups.has(eprop)) {
+//       dups.add(eprop)
+//       E.push(e)
+//     }
+//   })
+//   // cache it
+//   doc.lastChild().userPropositions = E
+//   return E
+// }
 
 // Matching Propositions 
 //
@@ -1000,133 +1052,6 @@ const instantiate = doc => {
   }
   doc.instantiated = true
 }
-
-// Instantiate!  The second argument is the n level for n-compact validation.
-// const instantiate = (document, n = 1) => {
-//   if (n == 0) return
-//   // time('Get the user propositions')
-//   // get the user's Propositions to match
-//   const E = getUserPropositions(document)
-//   // timeEnd('Get the user propositions') 
-
-//   // now loop through all of the formulas, check if they are finished and if
-//   // not, match all of their Weeny propositions to all of the elements of E to
-//   // find instantiations and partial instantiations
-//   document.formulas().forEach(f => {
-//     // skip finished formulas
-//     if (!f.finished &&
-//       // only try full Weeny formulas when n=1 since this is the last pass
-//       // and check that the formula has some non-forbidden patterns to
-//       // match
-//       ((n === 1 && f.isWeeny) || (n > 1 && f.weenies && f.weenies.length > 0))) {
-//       // get this formula's maximally weeny patterns (must be cached)   
-//       f.weenies.forEach(p => {
-//         // try to match this pattern p to every user proposition e
-//         E.forEach(e => {
-//           // get all valid solutions 
-//           // declarations with body are a special case
-
-//           let solns = []
-//           // console.log(`${p} ${e}`)
-//           // time('Solve one matching problem')
-//           try { solns = matchPropositions(p, e) } catch { }
-//           // timeEnd('Solve one matching problem')
-//           // for each solution, try to make a valid instantiation of f
-//           solns.forEach(s => {
-//             let inst
-//             // time('Instantiate a formula')
-//             try { inst = Formula.instantiate(f, s) } catch { return }
-//             // timeEnd('Instantiate a formula')
-//             // all instantiations are givens
-//             inst.makeIntoA('given')
-//             // if we made it here, we have a valid instantation
-//             //
-//             // inst.formula = true // replaced by 'Rule', 'Part', 'Inst', .finished
-//             //
-//             // it might contain a Let which was instantiated by some other
-//             // statment, so we might have to add the tickmarks.
-//             //
-//             // Note: we had to check that in a rule like :{:{:Let(x) (@ P
-//             //       x)} (@ P y)} that it doesn't instantiate (@ P y) first
-//             //       with a constant lambda expression like 𝜆y,Q(z) which
-//             //       has z free and then instantiate the metavar x with z,
-//             //       since then 'the free z becomes bound' in a sense.
-//             //       Otherwise you could conclude, e.g. ∀y,Q(z) from {
-//             //       :Let(z) Q(z) } instead of just ∀y,Q(y). 
-//             assignProperNames(inst)
-//             // TODO: when making a proper testing suite check if we need to
-//             //       do any of these to the instantiation (and anything
-//             //       else)
-//             //
-//             //     processLets( inst , false ) 
-//             //     processForSomes( inst )
-//             //
-//             // let's also remember which expression created this
-//             // instantiation, what original Rule it instantiates, and which
-//             // pass for debugging and feedback.
-//             //
-//             inst.creators = (f.creators) ? [...f.creators] : []
-//             inst.creators.push(e)
-//             // whether it's a Part or an Inst, save the rule it originates from
-//             inst.rule = f.rule || f
-//             //  Note that .pass is the number of passes remaining. 
-//             inst.pass = n
-//             inst.numsolns = solns.length
-//             inst.weenienum = f.weenies.length
-//             // if the instantiation left some metavariables, we will want to
-//             // cache it's domain info and mark it as a formula for use
-//             // possible use in the next round
-//             // time('Cache Formula Domain Info')
-//             cacheFormulaDomainInfo(inst)
-//             // timeEnd('Cache Formula Domain Info')
-//             // if there are no more metavars, flag it as a completed
-//             // instantiation
-//             if (inst.domain.size === 0) {
-//               inst.unmakeIntoA('Rule')
-//               inst.unmakeIntoA('Part')
-//               inst.makeIntoA('Inst')
-//             } else {
-//               inst.unmakeIntoA('Rule')
-//               inst.makeIntoA('Part')
-//               // since it still has metavariables, ignore it for
-//               // propositional form
-//               inst.ignore = true
-//             }
-
-//             // either way, rename ForSome constants that aren't metavars. We
-//             // should not have to insert a copy of the bodies of ForSomes
-//             // since they should be there automatically because they were in
-//             // the formulas. 
-//             //
-//             // TODO: 
-//             //  * we might want to upgrade .bodyOf to an LC attribute since
-//             //    Formula.instantiate doesn't copy that attribute
-//             //
-//             // also rename the bindings to match what the user would have
-//             // for the same expressions in his document
-//             // time('Rename bindings')
-//             inst.statements().forEach(x => renameBindings(x))
-//             // timeEnd('Rename bindings')
-//             // then insert this intantiation after its formula
-//             Formula.addCachedInstantiation(f, inst)
-//           })
-//         })
-//         // we've matched every user proposition to every weenie pattern in
-//         // this formula, and don't want to do it again on future passes, so
-//         // mark it as finished.
-//         f.finished = true
-//       })
-//     }
-//   })
-//   // mark the declared symbols in the instantiations we added on this pass
-//   //
-//   // TODO: 
-//   // * it would be more efficient to do this to just the instantiations as they
-//   //   are inserted, since this makes a pass through the entire document on each
-//   //   pass, which has a lot of redundancy (but perhaps not significant).
-//   markDeclaredSymbols(document)
-//   instantiate(document, n - 1)
-// }
 
 ////////////////////////////////////////////////////////////////////////////////
 //
