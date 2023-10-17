@@ -130,7 +130,7 @@ B=loadProofStr('acid tests/acid 1 Example 4')
 doc=$(
 `{ Rules: «${A}» 
    «${B}»
-   Notice { 2=3 }
+   Notice { :2=3 3=3 }
    Notice { 2=2 }
  }`
 )
