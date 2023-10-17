@@ -159,8 +159,7 @@ const allclean = { showInstantiations, showNumbers, showProperNames,
 const clean = { showInstantiations, showNumbers, showSimpleProperNames , showUserThms ,
                 showValidation } 
 // user report option
-const user = { showNumbers, showUserThms , showSimpleProperNames, showUserOnly , 
-               showValidation }
+const user = { showNumbers, showUserThms , showSimpleProperNames , showValidation }
 // user report option
 const defaultOptions = { showDeclares, showNumbers, showRules , showSimpleProperNames , 
   showUserThms , showValidation }
@@ -275,17 +274,12 @@ const formatter = ( options=defaultOptions ) => {
       // TODO: remove old style validation
       if (Validation.result(L) && Validation.result(L).result==='valid') {
         // a valid BIH has to be propositionally valid, so a green check
-        // isn't necessary when there's a gold star
-        if (L.isA(hint)) {  
-          ans += (L.badBIH)?greencheck+redstar:goldstar
-        } else {
-          ans += greencheck
-        }
+        // isn't necessary when there's a gold star, but we now treat them as
+        // independent since so the user sees both kinds of feedback.
+        ans += greencheck
         // Propositionally invalid ones. Add a red x even if it's a BIH  
       } else if ((Validation.result(L) && Validation.result(L).result!=='valid')) {
         ans += (Validation.result(L).reason==='preemie') ? preemiex : redx
-        // if it's a BIH append it's star
-        if (L.isA(hint)) ans += (L.badBIH)?redstar:redx
       }
     }
     // mark redeclared symbols
