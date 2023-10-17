@@ -230,21 +230,16 @@ const timeEnd = (description) => { if (Debug) console.timeEnd(description) }
 // validation feedback and add additional complete instantiations to the document, but
 // should not add new Rules.
 //
-const validate = ( doc, target = doc, checkPreemies = true) => {
+const validate = ( doc, target = doc, 
+                   options = { checkPreemies:true , validateall:true }) => {
   // process the domains (if they aren't already)
   processDomains(doc)
-  
-  // cache the user propositions
-  //
-  // Since we no longer require that the last child of a document be an
-  // environment containing all of the user content, we want to fetch all of the
-  // propositions that do not contain metavariables and are not inside a Rule as
-  // the user propositions.
-  
 
-  // instantiate with the user content (if it isn't already
+  // instantiate with the user content (if it isn't already) this also caches
+  // the list of user propositions and the document catalog
   instantiate(doc)
   
+  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
   // Here is the location to install new validation tools that are compatible
   // with global validation in the future.
   
@@ -256,22 +251,29 @@ const validate = ( doc, target = doc, checkPreemies = true) => {
   // Scoping
   Scoping.validate(doc)
   
+  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+
   ///////////////
-  // Instantiate 
-  instantiate(doc)
-  // cache the let-scopes in the root
-  doc.letScopes = doc.scopes()
+  // Cache
+  // cache the let-scopes in the root (if the aren't)
+  if (!doc.letScopes) doc.letScopes = doc.scopes()
   // cache the catalog in the root
-  doc.cat = doc.catalog()
+  if (!doc.cat) doc.cat = doc.catalog()
+  
   // when its all complete mark the declared symbols again (this is fast, so no
   // need to do it too carefully)
   markDeclaredSymbols(doc)
 
   ///////////////
   // Prop Check
-  // doc.validate( target )
-  // doc.validate( target , checkPreemies ) 
-  
+  if (options.validateall) {
+    doc.validateall( target )
+    if (options.checkPreemies) doc.validateall( target , true ) 
+  } else { 
+    doc.validate( target )
+    if (options.checkPreemies) doc.validate( target , true ) 
+  }
+
   return doc   
 }
 
@@ -625,9 +627,8 @@ LogicConcept.prototype.validate = function (target = this,
 // If checkPreemies is false it only
 // checks the target propositionally, otherwise it only checks the target for
 // preemies.
-Environment.prototype.validateall = function (
-  target = this, checkPreemies = false
-) {
+Environment.prototype.validateall = function ( target = this, 
+                                               checkPreemies = false  ) {
   const checkProps = !checkPreemies
 
   // Props
@@ -848,32 +849,6 @@ const getUserPropositions = doc => {
   return E
 }
 
-// Get the e's
-//
-// Get all of the user proposition in the document, but don't include any
-// duplicates, i.e., no two expressions should have the same prop form. 
-// const getUserPropositions = doc => {
-//   // We cache these for multiple pass n-compact validation
-//   if (doc.lastChild().userPropositions)
-//     return doc.lastChild().userPropositions
-//   // if not cached, fetch them   
-//   const allE = doc.lastChild().propositions()
-//   // filter out duplicates so we don't make multiple copies of the same
-//   // instantiation
-//   const E = []
-//   const dups = new Set()
-//   allE.forEach(e => {
-//     const eprop = e.prop().replace(/^[:]/, '')
-//     if (!dups.has(eprop)) {
-//       dups.add(eprop)
-//       E.push(e)
-//     }
-//   })
-//   // cache it
-//   doc.lastChild().userPropositions = E
-//   return E
-// }
-
 // Matching Propositions 
 //
 // Since we consider Lets and ForSomes to be proposition, we want to be able to
@@ -951,7 +926,6 @@ const instantiate = doc => {
       // we can only instantiate formulas that have a non-forbidden weeny.
       // get this formula's maximally weeny patterns (must be cached)   
       f.weenies.forEach(p => {
-        
         // try to match this pattern p to every user proposition e
         E.forEach(e => {
           // get all valid solutions 
