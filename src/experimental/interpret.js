@@ -22,6 +22,7 @@ import { Symbol as LurchSymbol } from '../symbol.js'
 import { processShorthands } from './parsing.js'
 import Extensions from './extensions.js'
 const { subscript } = Extensions
+const instantiation = 'LDE CI'
 
 //////////////////////////////////////////////////////////////////////////////
 //  interpret
@@ -164,7 +165,16 @@ const processRules = doc => {
     // the second arg specifies it should be done in place
     Formula.from(f,true)
     // if it has metavariables, ignore it as a proposition
-    if (Formula.domain(f).size>0) f.ignore = true
+    if (Formula.domain(f).size>0) { f.ignore = true 
+    // otherwise mark it as an Instantiation (sort of an identity instantiation)
+    } else {
+      f.unmakeIntoA('Rule')
+      f.makeIntoA('Inst')
+      f.makeIntoA(instantiation)
+      f.rule = f
+      f.creators = []
+      f.pass = 0
+    }
     // // replace all bound variables with y₀, y₁, ... etc and rename them to
     // // ProperNames x₀, x₁, ... etc to make them canonical
     f.statements().forEach( expr => { 
