@@ -57,6 +57,20 @@ LogicConcept.prototype.some = function ( predicate ) {
   return false  
 }
 
+// Give LCs a .slice() command analogous to what js has for arrays. This returns
+// a copy of the LC, not a 'shallow copy' since separate LCs can't share the
+// same children.  It also preserves the LC attributes of the original LC by
+// making a complete copy of it first (rather than e.g. reconstructing it from
+// copies of the children that are being kept)
+LogicConcept.prototype.slice = function ( start = 0, end = this.numChildren() ) {
+  const n = this.numChildren()
+  if (start < 0) start = n+start
+  if (end < 0) end = n+end
+  const result = this.copy()
+  result.children().forEach( (x,k) => { if (k<start || end<=k) x.remove() } )
+  return result 
+}
+
 // This utility is useful for what we need to do here. Insert this LC as the
 // next sibling of LC target. You might have to make a copy of 'this' if it is
 // already in the same tree as the target. We don't check that here.
