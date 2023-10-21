@@ -44,6 +44,20 @@ LogicConcept.prototype.descendantsSatisfyingIterator =
     }
   }
 
+ 
+// Find the first occurrence of a descendant of this LC that satisfies the
+// boolean function given by the argument, and return it.  Skip over any branch
+// that is excluded by the second argument.  
+LogicConcept.prototype.find = function ( include = x=>true , exclude = x=>false) {
+  if ( include(this) ) { return this
+  } else if (!exclude(this)) { 
+    for ( let child of this._children ) { 
+      if (include(child)) return child 
+    }
+  }
+  return undefined
+}
+
 // Efficiently check if an LC has a descendant satisfying some predicate it
 // aborts the search as soon as it finds one.  This is analogous to the same
 // method for js arrays.
@@ -113,12 +127,22 @@ LogicConcept.prototype.toggleGiven = LogicConcept.prototype.negate
 
 // A Statement is any outermost Expression that is not a declaration or a 
 // declared symbol inside a declaration. The body of a declaration can contain
-// statements. 
+// statements.
 LogicConcept.prototype.isAStatement = function () {
   return (this instanceof Expression) && this.isOutermost() &&
          !((this.parent() instanceof Declaration) &&
             this.parent().symbols().includes(this)
           )
+}
+
+// An equation is an outermost Application whose operation is the Symbol whose
+// .text() is '=' and has at least two arguments.
+LogicConcept.prototype.isAnEquation = function ( ) {
+  return (this instanceof Application) && 
+          this.isOutermost() && 
+          this.child(0) instanceof LurchSymbol && 
+          this.child(0).text()==='=' &&
+          this.numChildren()>2
 }
 
 // matching syntactic sugar
@@ -163,6 +187,14 @@ LogicConcept.prototype.isAComment = function () {
 // Compute the array of all Statements in this LC
 LogicConcept.prototype.statements = function () {
   return [...this.descendantsSatisfyingIterator( x => x.isAStatement() )]
+}
+
+// Compute the array of all equations in this LC.  If the first argument is
+// true, only return those that are inferences.
+LogicConcept.prototype.equations = function ( conclusionsOnly = false ) {
+  return [...this.descendantsSatisfyingIterator( 
+    x => x.isAnEquation() && (!conclusionsOnly || x.isAConclusionIn()) ,
+    x => x.isA('Declare') || x.isA('Rule') || x.isA('Part') || x.isA('Inst') )]
 }
 
 // Compute the array of all declarations in this LC If the optional argument
