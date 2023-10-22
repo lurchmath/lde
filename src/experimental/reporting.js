@@ -265,6 +265,11 @@ const formatter = ( options=defaultOptions ) => {
         })
         ans+=attributeKeyPen('❳')
       }
+      // add a faux-attribute for .consider's and .ignore's
+      ans += (L.ignore) ? 
+               (L.consider) ? attributeKeyPen(`❲consider❳`) 
+                            : attributeKeyPen(`❲ignore❳`) 
+               : ''
     }
     // show validation except for hidden ForSome bodies
     if (options.showValidation && ans.length>0 ) {

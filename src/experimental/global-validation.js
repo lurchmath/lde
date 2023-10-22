@@ -34,7 +34,7 @@
 //   * Allow an option to efficiently solve 'Weenie' matching problems. e.g., if
 //     (@ P c) where P is a metavar and c is a constant is matched to e, and e
 //     does not contain c, return the constant solution (or none if the previous
-//     option is enabled.  If e only has one instance of c, there's only one
+//     option is enabled).  If e only has one instance of c, there's only one
 //     solution, so return that without recursing.  If it has two instances
 //     there are four solutions, so return those.  Three have eight.  That
 //     should cover about 99% of the cases.
@@ -54,7 +54,7 @@
 //   does will be almost instantaneous.  So optimization would mainly only
 //   affect batch mode instantiation of a large document from scratch.
 //
-// * Sometimes and instantiation will instantiate the variable in a Let with a
+// * Sometimes an instantiation will instantiate the variable in a Let with a
 //   constant, either directly or indirectly, e.g. `Let 0'`. This doesn't seem
 //   to hurt anything but it makes for stupid instantiations, and might speed
 //   things up if we eliminate it.
@@ -247,6 +247,10 @@ const validate = ( doc, target = doc,
   // BIHs
   processBIHs(doc)
   
+  //////////////
+  // Equations
+  // processEquations(doc)
+
   ///////////////
   // Scoping
   Scoping.validate(doc)
@@ -757,7 +761,6 @@ const matchGivens = (a, b) => {
 // propositionally valid in a document that depends on Prop lib but not an 
 // instatiation of the ⇒+ rule.
 //
-// TODO: Store the validation information in a more standard and sensible way.
 const processBIHs = doc => {
   // since this is a separate tool, we don't care if a formula has been
   // .finished for prop instantiation, so we pass the argument true.
@@ -792,6 +795,143 @@ const processBIHs = doc => {
   })
   return doc
 }
+
+// Process Equations
+//
+// Check if the doc contains the Rule :{ Transitive Chain }.  If not, just split
+// the equation chains.  
+//
+// Otherwise after splitting get the diffs of all equations, and add the
+// instantiation :{ :x=y A=B } after the above Rule where B=A[x:=y].  Note that
+// this assumes = is reflexive, because the normal way to say this would be to
+// say that A=A by reflexive and then :{ :x=y :A=A A=B } by substitution. 
+//
+// For each equation a=b=c=d that is split, also include the instantiation :{
+// :a=b :b=c :c=d a=d } after the above rule.  This assumes transitivity of
+// equality.
+//
+// So including the Transitive Chain Rule is assuming reflexive, transitive, and
+// substitution for equality.
+//
+// TODO: 
+// * generalize this to other reflexive operators with a special kind of
+//   Declare, e.g. Reflexive = ≤ ⊆ ⇔
+// * generalize this to transitive chains of operators, e.g. a = b < c = d ≤ e
+//   implies that a<e
+// * think about if there is some way to generalize this to assume symmetry of
+//   equality, or if that is not relevant? 
+const processEquations = doc => {
+  // split equation chains
+  splitEquations(doc)
+  // check if the Transitive_Chain rule is around, if not, we're done
+  const rule=doc.find(
+    x=>x.isA('Rule') && x.numChildren()==1 && 
+       x.child(0) instanceof LurchSymbol && x.child(0).text()==='transitive_chain_rule',
+    x=>!(x.isA('Rule') || x===doc))
+  // if there is no transitive chain rule loaded we are done
+  if (!rule) return
+  // the transitive chain rule has been found, so get all of the .equations
+  const eqs=[...doc.descendantsSatisfyingIterator(
+    x => x.equation , 
+    x => x instanceof Application && !x.isOutermost())]
+  // for each equation, A=B,
+  eqs.forEach( eq => {
+    // get the LHS and RHS
+    const A = eq.child(1).copy(), B=eq.child(2).copy()
+    // get the diff
+    const delta = diff(A,B)
+    // for now we only allow a single substutition at a time, so check if there's only one diff, and that it is nontrivial (i.e., there is a nontrivial substitution that works)
+    // TODO: maybe generalize later
+    if (delta?.length===1 && delta[0].length>0) {
+      // get x,y such that replacing x with y in A produces B
+      let x = A.child(...delta[0]).copy(), y=B.child(...delta[0]).copy()
+      // construct the instantiation :{ :x=y A=B }
+      const inst = new Environment( 
+        new Application(new LurchSymbol('='),x,y).asA('given') , 
+        new Application(new LurchSymbol('='),A,B ) 
+      ).asA('given').asA('Inst')
+      // and finally insert the instantiation after the rule
+      inst.insertAfter(rule) 
+      // additionally add x=y to the list of things that should be considered
+      // as user propositions for further instantiation when prop validating.
+      let x_eq_y = inst.child(0).copy()
+      // tell it to no validate this equation, the user isn't necessarily asserting it
+      x_eq_y.ignore = true
+      // but tell it to consider it to be a user expression for creating prop instantiations
+      x_eq_y.consider = true
+      // and insert it after
+      x_eq_y.insertAfter(inst)
+    }
+  })
+  // Finally add the transitivity conclusion.  This assumes transitivity, of course.
+  instantiateTransitives(doc,rule)
+}
+
+// Transitivity Instantiations
+//
+// Go through and fetch all of the user's equations (i.e., only equations that
+// are conclusions) which have more than two arguments and create and insert
+// them after the transitive_chain_rule rule.  For example, a=b=c=d=e would produce
+// and insert the instantiation :{ :a=b :b=c :c=d :d=e a=e }
+//
+// This is a helper utility called by processEquations().
+const instantiateTransitives = (doc,rule) => {
+  // fetch the conclusion equations (argument = true)
+  doc.equations(true).forEach( eq => {
+    // let n be the number of arguments to =
+    let n = eq.numChildren()
+    // if there are more than two args, create the relevant instantiation
+    if (n>3) { 
+      const inst = new Environment().asA('given').asA('Inst')
+      for (let k=1;k<n-1;k++) {
+        // 
+        let newpair = eq.slice(k,k+2)
+        newpair.unshiftChild( eq.child(0).copy() )
+        inst.pushChild(newpair.asA('given'))
+      }
+      inst.pushChild(
+        new Application(
+          eq.child(0).copy(), 
+          eq.child(1).copy(),
+          eq.lastChild().copy()
+        )
+      )
+      inst.insertAfter(rule)
+    }
+  })
+}
+
+// Split Equations
+//
+// Go through and fetch all of the user's equations (i.e., only equations that
+// are conclusions).  If they have more than two arguments split them into
+// binary pairs and insert them in the document.
+const splitEquations = doc => {
+  // fetch the conclusion equations (argument = true)
+  doc.equations(true).forEach( eq => {
+    // let n be the number of arguments to =
+    let n = eq.numChildren()
+    // if there are two args, its an equation, so mark it as such
+    if (n===2) { eq.equation = true 
+    } else if (n>2) {
+    // if there are more than two args, split it
+      let last = eq
+      for (let k=1;k<n-1;k++) {
+        // instead of building a new equation from a pair of arguments, we copy
+        // the original equation and delete children that are not needed in order
+        // to preserve any LC attributes that might be stored on the original
+        // equation.  Note .slice for LCs makes an LC copy, not a 'shallow' copy.
+        let newpair = eq.slice(k,k+2)
+        newpair.unshiftChild(eq.child(0).copy())
+        newpair.equation = true 
+        newpair.insertAfter(last)
+        last=newpair
+      }
+      eq.ignore = true
+    }
+  })
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -1115,7 +1255,7 @@ const Benchmark = function (f, name) {
 
 export default {
   validate, getUserPropositions, instantiate, markDeclarationContexts,
-  load, processBIHs, processDoc, processDomains,
+  load, processBIHs, processEquations, splitEquations, processDoc, processDomains,
   cacheFormulaDomainInfo, Benchmark, Report
 }
 ///////////////////////////////////////////////////////////////////////////////

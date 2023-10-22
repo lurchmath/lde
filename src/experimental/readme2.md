@@ -48,6 +48,7 @@ The following js attributes store data that is computed from the user's content,
 * `.userRule` - true for the Rule copies of Theorems.
 * `.bodyOf` - true for the copies of declaration bodies
 * `.ignore` - true for anything that should be ignored when computing the propositional form (e.g., expressions or rules containing metavariables)
+* `.consider` - true if this proposition should be added to the list of user propositions for the purpose of creating instantiations.  Only necessary when `.consider` is true, to let it create instantations without being validated itself.
 * `.domain` - stores the domain of a non-forbidden proposition or a formula (`Rule`s or `Part`s) containing at least one non-forbidden proposition whose domain is nonempty.
 * `.isWeeny` - true for a formula that contains one or more propositions containing all of the metavariables in the formula
 * `.weenies` - the set of all maximally weeny propositions in a formula (i.e., containing the largest number of metavariables), whether or not the formula itself is weeny.
@@ -56,9 +57,10 @@ The following js attributes store data that is computed from the user's content,
 * `.creators` - the list of user expressions that created this `Part` or `Inst`.
 * `.pass` - which instantiation pass created the `Part` or `Inst`.
 * `.numsolns` - the number of solutions found when matching the expression and formula proposition that created this `Part` or `Inst`
-* `letScopes` - caches the Let scopes in the document (not targets)
-* `cat` - caches the docuement catalog in the document (not targets)
+* `.letScopes` - caches the Let scopes in the document (not targets)
+* `.cat` - caches the docuement catalog in the document (not targets)
 * `.userPropositions` - caches the user's propositions (things that have a propositional form, do not contain metavariables, and are not inside a `Rule`).
+* `.equations` - true if this is a binary equation (A=B) either from the user or created by the `splitEquations` command
 
 ### n-compact Documents
 
