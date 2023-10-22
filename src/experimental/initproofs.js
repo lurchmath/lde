@@ -124,26 +124,52 @@ let start = Date.now()
 //        }`)
 
 // Load
-system = lc(`:[ 'LDE EFA' '---' ]`).asA('Declare')
-A=loadLibStr('Acid Tests')
-B=loadProofStr('acid tests/acid 1 Example 4')
-doc=$(
-`{ Rules: «${A}» 
-   «${B}»
-   Notice { :2=3 3=3 }
-   Notice { 2=2 }
- }`
-)
-doc.unshiftChild(system)
-doc.child(2,0).makeIntoA('Declare')
+// system = lc(`:[ 'LDE EFA' '---' ]`).asA('Declare')
+// A=loadLibStr('Acid Tests')
+// B=loadProofStr('acid tests/acid 1 Example 4')
+// doc=$(
+// `{ Rules: «${A}» 
+//    «${B}»
+//    Recall { :2=3 3=3 }
+//    Recall { 2=2 }
+//  }`
+// )
+// doc.unshiftChild(system)
+// doc.child(2,0).makeIntoA('Declare')
 
-// Prep
-interpret(doc)
+// // Prep
+// interpret(doc)
 
-// validate
-validate(doc)
+// // validate
+// validate(doc)
 
-doc.report(everything)
+// doc.report(everything)
+
+x=$(
+`{
+  Declare + ⋅ - 0 1 = 
+  Rule :{ transitive_chain_rule } 
+  (x+1)⋅(x-1) = (x+1)⋅(x+(-1))
+              = (x+1)⋅x + (x+1)⋅(-1) 
+              = (x⋅x+1⋅x) + (x+1)⋅(-1)
+              = (x⋅x+x) + (x+1)⋅(-1) 
+}`)
+processShorthands(x)
+processEquations(x)
+markDeclaredSymbols(x)
+
+y=$(
+  `{
+    Declare + ⋅ 0 1 2 = 
+    Rule :{ transitive_chain_rule } 
+    a+a = 1⋅a+a
+        = 1⋅a+1⋅a
+        = (1+1)⋅a
+        = 2⋅a
+  }`)
+processShorthands(y)
+processEquations(y)
+markDeclaredSymbols(y)
 
 // Accumulator = { totaltime:0, numcalls:0, numsolns:0, numlines: 0}
 

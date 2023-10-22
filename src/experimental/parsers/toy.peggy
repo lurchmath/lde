@@ -132,7 +132,7 @@ Meta = Putdown / BIH / Comment / Thm
 Putdown = '«' @$([^»]*) '»'
 
 // flag the next environment as a BIH
-BIH = 'Notice'i { return '>>' }
+BIH = 'Recall'i { return '>>' }
 
 // synonyms for theorems
 ThmLabel = 'Theorem'i / 'Thm'i / 'Lemma'i / 'Corollary'i

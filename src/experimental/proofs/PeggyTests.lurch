@@ -189,7 +189,7 @@ P and (exists x.P(x)  implies  Q)  implies  P and (for all y.Q)
 Let x
 let x,y,z,wilma
 Declare f
-declare fred, wilma, barney, #, !
+declare fred wilma barney # !
 P(c) for some c
 P(c,w)  implies  Q(c,y) for some c
 // environments
@@ -264,7 +264,8 @@ P(c,w)  implies  Q(c,y) for some c
 
 {
   // Assignment #8 (b)
-  { Declare 0, lt ,7
+  { 
+    Declare 0 lt 7
     {  
       Assume 0 lt 7
       exists x.0 lt x
@@ -423,7 +424,7 @@ P(c,w)  implies  Q(c,y) for some c
 
 {
   // BIH
-  Notice { "This is a BIH" }
+  Recall { "This is a BIH" }
   Comment
   ➤ "This is a comment"
   // Theorems

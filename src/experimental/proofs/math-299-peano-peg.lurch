@@ -21,9 +21,9 @@
         //       =𝜎(k)
         
         0+𝜎(k)=𝜎(0+k)
-        Notice { :0+k=k :𝜎(0+k)=𝜎(0+k) 𝜎(0+k)=𝜎(k) }
+        Recall { :0+k=k :𝜎(0+k)=𝜎(0+k) 𝜎(0+k)=𝜎(k) }
         𝜎(0+k)=𝜎(k)
-        Notice { :0+𝜎(k)=𝜎(0+k) :𝜎(0+k)=𝜎(k) 0+𝜎(k)=𝜎(k) } 
+        Recall { :0+𝜎(k)=𝜎(0+k) :𝜎(0+k)=𝜎(k) 0+𝜎(k)=𝜎(k) } 
         0+𝜎(k)=𝜎(k)
         
       }
@@ -50,7 +50,7 @@
     ➤ "We will proceed by induction on n for arbitrary m."
     { :Let m 
       ➤ "Base case."
-      Notice { :0+m=m :m+0=m m+0=0+m }
+      Recall { :0+m=m :m+0=m m+0=0+m }
       m+0=0+m 
       ➤ "Inductive step."
       { :Let k be such that m+k=k+m
@@ -64,19 +64,19 @@
         //       =𝜎(k)+m
         
         m+𝜎(k)=𝜎(m+k)
-        Notice { :m+k=k+m :𝜎(m+k)=𝜎(m+k) 𝜎(m+k)=𝜎(k+m) }
+        Recall { :m+k=k+m :𝜎(m+k)=𝜎(m+k) 𝜎(m+k)=𝜎(k+m) }
         // 𝜎(m+k)=𝜎(k+m)
-        Notice { :𝜎(m+k)=𝜎(k+m) :m+𝜎(k)=𝜎(m+k)  m+𝜎(k)=𝜎(k+m) }
+        Recall { :𝜎(m+k)=𝜎(k+m) :m+𝜎(k)=𝜎(m+k)  m+𝜎(k)=𝜎(k+m) }
         // m+𝜎(k)=𝜎(k+m)
-        Notice { :k+𝜎(m)=𝜎(k+m) :m+𝜎(k)=𝜎(k+m) m+𝜎(k)=k+𝜎(m) }
+        Recall { :k+𝜎(m)=𝜎(k+m) :m+𝜎(k)=𝜎(k+m) m+𝜎(k)=k+𝜎(m) }
         // m+𝜎(k)=k+𝜎(m)
-        Notice { :𝜎(m)=m+1 :m+𝜎(k)=k+𝜎(m) m+𝜎(k)=k+(m+1) }
+        Recall { :𝜎(m)=m+1 :m+𝜎(k)=k+𝜎(m) m+𝜎(k)=k+(m+1) }
         // m+𝜎(k)=k+(m+1)
-        Notice { :1+m=m+1 :m+𝜎(k)=k+(m+1) m+𝜎(k)=k+(1+m) }
+        Recall { :1+m=m+1 :m+𝜎(k)=k+(m+1) m+𝜎(k)=k+(1+m) }
         // m+𝜎(k)=k+(1+m)
-        Notice { :k+(1+m)=(k+1)+m :m+𝜎(k)=k+(1+m) m+𝜎(k)=(k+1)+m }
+        Recall { :k+(1+m)=(k+1)+m :m+𝜎(k)=k+(1+m) m+𝜎(k)=(k+1)+m }
         // m+𝜎(k)=(k+1)+m
-        Notice { :𝜎(k)=k+1 :m+𝜎(k)=(k+1)+m m+𝜎(k)=𝜎(k)+m }
+        Recall { :𝜎(k)=k+1 :m+𝜎(k)=(k+1)+m m+𝜎(k)=𝜎(k)+m }
         m+𝜎(k)=𝜎(k)+m
       }
       ∀n.m+n=n+m
