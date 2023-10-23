@@ -1,0 +1,12 @@
+////////////////////////////////////////////////////////////////////////////
+//
+// Test 2 Lib
+//
+
+Declare and
+Rule: :{ :W :V   W and V }
+
+include content/Test1.lurch  
+
+:P 
+P or P

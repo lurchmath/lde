@@ -166,8 +166,37 @@ global.ParserFileExtension = 'peggy'
 // check a file name to see if it has the .lurch extension and if not, add it
 global.checkLurchExtension = name => checkExtension(name , LurchFileExtension )
 
-// Load just the string for a file and return that. You can omit the .lurch 
-// extension. The second argument is the folder.
+// Load a LDE document
+//
+// Load a document string, recursively replacing included files, and wrap the
+// result in environment brackets, { }. before returning.
+//
+global.loadDoc = ( name, folder='./', extension=LurchFileExtension ) => {
+  // load the specified file
+  return `{ ${loadDocStr( name, folder, extension )} }`
+}
+
+// Load a LDE document string
+//
+// This command works just like loadStr with one difference. If the string that
+// is loaded contains a line of the form 
+//
+//    include fname
+//
+// it will load the string in fname and replace that line with the contents of
+// that file recursively checking for more include statements.  No checking is
+// done to prevent circular dependencies.
+//
+global.loadDocStr = ( name, folder='./', extension=LurchFileExtension ) => {
+  // load the specified file
+  let ans = loadStr( name, folder, extension )
+  // recursively replace all of the includes
+  const regx = /(?:^|\n)[ \t]*[iI]nclude[ \t]+([^ \t].*)(?:\n|$)/g
+  return ans.replace(regx,(line,fname) => { return loadStr(fname.trim()) })
+}
+
+// Load just the string for a file and return that. You can omit the .lurch
+// extension. The second argument is the folder which default to the current folder. 
 global.loadStr = ( name, folder='./', extension=LurchFileExtension) => {
   const filename = folder + checkExtension(name,extension)
   if (!fs.existsSync(filename)) {
