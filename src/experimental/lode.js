@@ -173,7 +173,12 @@ global.checkLurchExtension = name => checkExtension(name , LurchFileExtension )
 //
 global.loadDoc = ( name, folder='./', extension=LurchFileExtension ) => {
   // load the specified file
-  return `{ ${loadDocStr( name, folder, extension )} }`
+  let doc = `{\n${loadDocStr( name, folder, extension )}\n}`
+  doc = parse(doc)
+  doc = lc(doc)
+  interpret(doc)
+  validate(doc)
+  return doc
 }
 
 // Load a LDE document string

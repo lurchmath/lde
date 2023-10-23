@@ -171,6 +171,16 @@ processShorthands(y)
 processEquations(y)
 markDeclaredSymbols(y)
 
+z=$(
+  `{
+    Declare + ⋅ 0 1 2 = 
+    Rule :{ transitive_chain_rule } 
+    a+a = 1⋅a+a
+  }`)
+processShorthands(z)
+processEquations(z)
+markDeclaredSymbols(z)
+
 // Accumulator = { totaltime:0, numcalls:0, numsolns:0, numlines: 0}
 
 ///////////////////////////////////////////////////////////

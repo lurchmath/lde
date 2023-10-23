@@ -1,0 +1,27 @@
+////////////////////////////////////////////////////////////////////
+// Acid Test Proofs
+// 
+// These are the example and counterexample proofs from the END document
+
+include content/libs/Acid Tests
+
+➤ "Example 1 from END"
+{
+  ➤ "Thm: If P⇒Q then ¬P∨Q."  
+  { :P ⇒ Q   not P or Q }
+  
+  // Proof:
+  { :P ⇒ Q
+    { :not (not P or Q)
+      { :P
+         Q
+         not P or Q
+         →←
+      }
+      not P
+      not P or Q
+      →←
+    }
+    not P or Q
+  }
+} ✔︎
