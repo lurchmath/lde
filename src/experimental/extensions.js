@@ -345,17 +345,14 @@ LogicConcept.prototype.symbols = function () {
 // Replacements for Validation.result(), Validation.setResult(), and
 // Validation.result().result that support more than one result (up to one for
 // each plugin-tool of global validation). For example, a BIH can be validated
-// separately by the BIH tool and the global propositional tool. Replacements
-// for Validation.result(), Validation.setResult(), and
-// Validation.result().result that support more than one result (up to one for
-// each plugin-tool of global validation). For example, a BIH can be validated
-// separately by the BIH tool and the global propositional tool.
-//
+// separately by the BIH tool and the global propositional tool. 
+
 // Get the results for this toolname.
 LogicConcept.prototype.results = function (toolname) {
   const results = this.getAttribute( 'validation results' )
   return (results) ? results[toolname] : undefined
 }
+
 // Set the results for this toolname (a string). Results should be objects
 // following the same requirements as those of Validation.result() if passed as
 // an object.  If passed as a string it is set to the .result key of the results
@@ -381,6 +378,12 @@ LogicConcept.prototype.setResult = function (toolname, result, reason) {
   allResults[toolname] = resultObj
   this.setAttribute('validation results',allResults) 
 }
+
+// Just show the LC Attributes
+LogicConcept.prototype.attributes = function ( ) {
+  return this.getAttributeKeys().map( key => [key,this.getAttribute(key)])
+}
+
 
 // convenience syntax. 
 LogicConcept.prototype.inspect = function(x) { 
