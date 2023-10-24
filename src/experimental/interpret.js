@@ -30,6 +30,7 @@ const instantiation = 'LDE CI'
 //  This takes a raw user's document as an LC environment and preprocesses it in
 //  preparation for validation using all of the routines in this document. 
 const interpret = (doc) => {
+  addSystemDeclarations(doc)
   processShorthands(doc)
   moveDeclaresToTop(doc)
   processTheorems(doc)
@@ -52,12 +53,22 @@ const interpret = (doc) => {
 //
 
 // Move Declares to the top of the document.
-const moveDeclaresToTop = doc => {
+const addSystemDeclarations = doc => {
   doc.Declares().reverse().forEach( dec => {
     if (dec.body()) throw new Error('Global constant declarations cannot have a body.')
     dec.remove()
     doc.unshiftChild(dec)
   })
+  return doc
+}
+
+// Move Declares to the top of the document.
+const moveDeclaresToTop = doc => {
+  doc.unshiftChild(
+    new Declaration(
+      new LurchSymbol('LDE EFA'),
+      new LurchSymbol('---')
+    ).asA('given').asA('Declare') )
   return doc
 }
 
