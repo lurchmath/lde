@@ -1,9 +1,9 @@
+include content/libs/Acid Tests
 ////////////////////////////////////////////////////////////////////
 // Acid Test Proofs
 // 
 // These are the example and counterexample proofs from the END document
 
-include content/libs/Acid Tests
 
 ➤ "Example 1 from END"
 {
