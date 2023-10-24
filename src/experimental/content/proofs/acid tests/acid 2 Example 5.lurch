@@ -13,7 +13,7 @@ include content/libs/Acid Tests
   ➤ "Proof:"
   { :x=y :y=z
      x=x 
-     y=x Recall { :x=y :x=x y=x } 
-     x=z Recall { :y=z :x=y x=z } 
+     y=x because { :x=y :x=x y=x } // BIH reasons! :)
+     x=z since { :y=z :x=y x=z } 
   }  
 } ✔︎
