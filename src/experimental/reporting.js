@@ -307,8 +307,8 @@ const isNestedLCs = A => {
          )
 }
 
-// Apply the custom formatter to nested arrays of LCs.
-// Indent and number lines as needed.  Note that for arrays we usually are
+// Apply the custom formatter to nested arrays and sets containing LCs. Indent
+// and number lines as needed.  Note that for Arrays or Sets we usually are
 // debugging something, so we show everything.
 const format = (x,options,indentlevel=0) => {
   if (x instanceof LogicConcept) {
@@ -322,11 +322,11 @@ const format = (x,options,indentlevel=0) => {
     return indent(itemPen(x),indentlevel)
   } else if (typeof x === 'number') { 
     return indent(constantPen(x),indentlevel)
-  } else if (isNestedLCs(x) && x instanceof Array) { 
+  } else if (x instanceof Array) { 
     return indent(`[\n${x.map(y=>format(y,everything,indentlevel+1))
                   .join(',\n')}\n]`,
                   indentlevel)
-  } else if (isNestedLCs(x) && x instanceof Set) { 
+  } else if (x instanceof Set) { 
     return indent(`[\n${[...x].map(y=>format(y,everything,indentlevel+1))
                   .join(',\n')}\n]`,
                   indentlevel)
