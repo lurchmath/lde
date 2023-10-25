@@ -299,6 +299,8 @@ const formatter = ( options=defaultOptions ) => {
 // Nested arrays of LCs come up often in Lode (e.g. X.children()) so we want to
 // be able to syntax highlight them. Sometimes they may be mixed in with Sets
 // and elementary values. This identifies them for formatting.
+//
+// TODO: this is no longer needed.  Consider deleting it.
 const isNestedLCs = A => {
   return ((A instanceof LogicConcept) || (typeof A === 'string') ||
           (typeof A === 'boolean') || (typeof A === 'number') ||
@@ -331,7 +333,13 @@ const format = (x,options,indentlevel=0) => {
                   .join(',\n')}\n]`,
                   indentlevel)
   } else {
-    return `${x}`
+    return util.inspect( x, 
+      {
+        customInspect: false,
+        showHidden: false,
+        depth: Depth,
+        colors: true
+      })
   }
 }
 

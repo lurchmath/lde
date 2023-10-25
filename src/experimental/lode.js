@@ -313,22 +313,7 @@ const rpl = repl.start( {
   prompt: defaultPen('▶︎')+' ',
   useGlobal: true,
   writer: ( expr ) => {
-    if (isNestedLCs(expr)) {
-      let ans=format(expr)
-      return (ans==='') ? format(expr,everything) : ans             
-    } else if ( expr instanceof MathConcept ) {
-      try { return defaultPen(expr.toSmackdown()) }
-      catch { return defaultPen(expr.toString()) }
-    } else { 
-      return util.inspect( expr, 
-        {
-          customInspect: false,
-          showHidden: false,
-          depth: Depth,
-          colors: true
-        } 
-      )
-    } 
+    return format(expr)
   }
 } )
 ////////////////////////////////////////////////////////////////////////////
