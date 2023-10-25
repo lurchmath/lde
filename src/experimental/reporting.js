@@ -299,7 +299,8 @@ const formatter = ( options=defaultOptions ) => {
 // Nested arrays of LCs come up often in Lode (e.g. X.children()) so we want to 
 // be able to syntax highlight them.  This identifies them.
 const isNestedArrayofLCs = A => {
-  return ((A instanceof LogicConcept) || 
+  return ((A instanceof LogicConcept) || (typeof A === 'string') ||
+          (typeof A === 'boolean') ||(typeof A === 'number') ||
           (A instanceof Array) && (A.every(isNestedArrayofLCs))
          )
 }
@@ -321,6 +322,12 @@ const format = (x,options,indentlevel=0) => {
            x.toPutdown(formatter(options), 
                        text => /\n/.test( text ) || erase(text).length > 50 ) , 
            indentlevel))
+  } else if (typeof x === 'string') { 
+    return indent(stringPen(x),indentlevel)
+  } else if (typeof x === 'boolean') { 
+    return indent(itemPen(x),indentlevel)
+  } else if (typeof x === 'number') { 
+    return indent(constantPen(x),indentlevel)
   } else if (isNestedArrayofLCs(x)) { 
     return indent(`[\n${x.map(y=>format(y,everything,indentlevel+1))
                   .join(',\n')}\n]`,
