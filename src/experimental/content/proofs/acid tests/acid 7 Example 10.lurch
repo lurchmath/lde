@@ -1,0 +1,14 @@
+include content/libs/Acid Tests
+////////////////////////////////////////////////////////////////////
+// Acid Test Proofs
+// 
+// These are the example and counterexample proofs from the END document
+
+➤ "Example 10 from END"
+{
+    ➤ "This should be incorrect, e.g. if B is '(∀y,P(y))⇒∃y,P(y)'"
+    :{ :Let x B } 
+    {
+      B  
+    }     
+} ✗

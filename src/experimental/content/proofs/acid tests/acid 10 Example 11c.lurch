@@ -1,0 +1,15 @@
+include content/libs/Acid Tests
+////////////////////////////////////////////////////////////////////
+// Acid Test Proofs
+// 
+// These are the example and counterexample proofs from the END document
+
+➤ "Example 11c from END"
+{
+   ➤ "Trying even harder to cheat the subset plus rule."
+   // Thm/Pf attempt 
+   { { :Let x  :x∈T } // TODO: decide how to handle this
+     ➤ "Expected to fail here."
+     S⊆T ✗
+   }
+}
