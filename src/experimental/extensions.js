@@ -381,8 +381,11 @@ LogicConcept.prototype.setResult = function (toolname, result, reason) {
 
 // Just show the LC Attributes
 LogicConcept.prototype.attributes = function ( ) {
-  return Object.keys(this).filter(x=> x[0]!=='_').map( 
-    key => [key,this[key]])
+  return [ 
+    ...Object.keys(this).filter(x=> x[0]!=='_')
+      .map( key => [key,this[key]]) ,
+    ...this.getAttributeKeys().map( key => [key,this.getAttribute(key)])  
+    ]
 }
 
 
