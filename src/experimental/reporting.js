@@ -296,20 +296,14 @@ const formatter = ( options=defaultOptions ) => {
   }  
 }
 
-// Nested arrays of LCs come up often in Lode (e.g. X.children()) so we want to 
-// be able to syntax highlight them.  This identifies them.
-const isNestedArrayofLCs = A => {
+// Nested arrays of LCs come up often in Lode (e.g. X.children()) so we want to
+// be able to syntax highlight them. Sometimes they may be mixed in with Sets
+// and elementary values. This identifies them for formatting.
+const isNestedLCs = A => {
   return ((A instanceof LogicConcept) || (typeof A === 'string') ||
-          (typeof A === 'boolean') ||(typeof A === 'number') ||
-          (A instanceof Array) && (A.every(isNestedArrayofLCs))
-         )
-}
-
-// Nested Sets of LCs may also come up in Lode (e.g. X.creators) so we want to 
-// be able to syntax highlight them.  This identifies them.
-const isNestedSetofLCs = A => {
-  return ((A instanceof LogicConcept) || 
-          (A instanceof Set) && ([...A].every(isNestedSetofLCs))
+          (typeof A === 'boolean') || (typeof A === 'number') ||
+          (A instanceof Array) && (A.every(isNestedLCs)) ||
+          (A instanceof Set) && ([...A].every(isNestedLCs))
          )
 }
 
@@ -328,11 +322,11 @@ const format = (x,options,indentlevel=0) => {
     return indent(itemPen(x),indentlevel)
   } else if (typeof x === 'number') { 
     return indent(constantPen(x),indentlevel)
-  } else if (isNestedArrayofLCs(x)) { 
+  } else if (isNestedLCs(x) && x instanceof Array) { 
     return indent(`[\n${x.map(y=>format(y,everything,indentlevel+1))
                   .join(',\n')}\n]`,
                   indentlevel)
-  } else if (isNestedSetofLCs(x)) { 
+  } else if (isNestedLCs(x) && x instanceof Set) { 
     return indent(`[\n${[...x].map(y=>format(y,everything,indentlevel+1))
                   .join(',\n')}\n]`,
                   indentlevel)
@@ -502,8 +496,7 @@ LogicConcept.prototype.investigate = function(option) {
 export default {
   
   // formatting utiltiies
-  formatter, format, isNestedArrayofLCs, isNestedSetofLCs, tab, indent, 
-  erase, timer, chalk,
+  formatter, format, isNestedLCs, tab, indent, erase, timer, chalk,
   
   // special symbols
   goldstar, greencheck, redx, idunno, stringPen,
