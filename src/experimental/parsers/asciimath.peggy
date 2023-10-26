@@ -178,7 +178,7 @@ Let = 'Let'i __ a:SymbolSeq __ ('be'i __)? 'such'i __ 'that'i __ b:Expression
       'Let'i __ a:SymbolSeq { return `[${spaced(a)}]` }
 
 // expressions
-Expression "Expression" = EFA / Binding / Prop  // get's Stuff from Not
+Expression "Expression" = Binding / Prop / EFA  // get's Stuff from Not
 
 // binding expressions
 Binding = a:BindingSymbol b:SymbolSeq period c:Expression
@@ -234,7 +234,7 @@ Negated   = a:'-'? b:Exp                              { return lispUnary(a,b) }
 Exp       = a:Atomic|1..,'^'|                         { return lisp('^',a)    } 
 
 // morally atomic (do not require parentheses)
-Atomic = Parenthesized / Prefix / Symbol / Number
+Atomic = Parenthesized / EFA / Prefix / Symbol / Number
 
 // For convenience we define 𝜆P(k) to be (λ P k) and replace λ with "LDE EFA"
 // as a shortcut

@@ -441,4 +441,6 @@ Rules: {
  
 Rule: { :A B⇒A }
 
+∀y.𝜆P(y) ⇒ y=x
+
 }
