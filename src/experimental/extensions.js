@@ -211,6 +211,16 @@ LogicConcept.prototype.Declares = function () {
   return [...this.descendantsSatisfyingIterator( x => x.isA('Declare') )]
 }
 
+// Compute the array of all Rule's in this LC
+LogicConcept.prototype.Rules = function () {
+  return [...this.descendantsSatisfyingIterator( x => x.isA('Rule') )]
+}
+
+// Compute the array of all Rule's in this LC
+LogicConcept.prototype.Insts = function () {
+  return [...this.descendantsSatisfyingIterator( x => x.isA('Inst') )]
+}
+
 // A Let is defined to be a given declaration that is not marked as a 'Declare'
 // whether or not it has a body
 LogicConcept.prototype.isALet = function ( ) {
