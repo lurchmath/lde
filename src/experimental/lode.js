@@ -196,8 +196,8 @@ global.loadDocStr = ( name, folder='./', extension=LurchFileExtension ) => {
   // load the specified file
   let ans = loadStr( name, folder, extension )
   // recursively replace all of the includes
-  const regx = /(?:^|\n)[ \t]*[iI]nclude[ \t]+([^ \t].*)(?:\n|$)/g
-  return ans.replace(regx,(line,fname) => { return loadStr(fname.trim()) })
+  const regx = /(?:^|\n)[ \t]*[iI]nclude[ \t]+([^ \t][^\n]*)(?:\n|$)/g
+  return ans.replace(regx,(line,fname) => { return loadDocStr(fname) })
 }
 
 // Load just the string for a file and return that. You can omit the .lurch

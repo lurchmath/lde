@@ -52,25 +52,29 @@ const interpret = (doc) => {
 // Structural Changing Utilities
 //
 
-// Move Declares to the top of the document.
+// Add system declarations to the top of the document.
 const addSystemDeclarations = doc => {
-  doc.Declares().reverse().forEach( dec => {
-    if (dec.body()) throw new Error('Global constant declarations cannot have a body.')
-    dec.remove()
-    doc.unshiftChild(dec)
-  })
+  doc.unshiftChild(
+    new Declaration(
+      [new LurchSymbol('LDE EFA'), new LurchSymbol('---')]
+    ).asA('given').asA('Declare') )
   return doc
 }
 
 // Move Declares to the top of the document.
 const moveDeclaresToTop = doc => {
-  doc.unshiftChild(
-    new Declaration(
-      new LurchSymbol('LDE EFA'),
-      new LurchSymbol('---')
-    ).asA('given').asA('Declare') )
-  return doc
+  doc.Declares().reverse().forEach( dec => {
+    if (dec.body()) { 
+      write(dec)
+      console.log(dec.body())
+      // throw new Error('Global constant declarations cannot have a body.')
+    }
+    dec.remove()
+  doc.unshiftChild(dec)
+})
+return doc
 }
+
 
 // Process the user's theorems 
 //
