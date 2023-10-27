@@ -1,0 +1,250 @@
+include content/libs/Prop
+/////////////////////////////////////////////
+➤ "Math 299 Proofs"
+➤ "Propositional Logic"
+➤ " "
+➤ "Group them all for efficient validation"
+{ 
+  
+➤ "Assignment #4 - Spring 2023"
+
+➤ "4.1 P⇒P"
+{ P ⇒ P }  ➤ "validates automatically!"
+
+➤ "(a) P and Q ⇒ Q and P"
+{ :(P and Q)  (Q and P) }
+
+➤ "(b) Q ⇒ Q or P"
+{ { :Q 
+    (Q or P) 
+  } 
+  Q ⇒ (Q or P) 
+} 
+
+➤ "(c) Q ⇒ (P ⇒ Q)"
+{ { :Q 
+    P ⇒ Q 
+  } 
+  Q ⇒ (P ⇒ Q) 
+}
+
+➤ "(d) P ⇔ ¬¬P"
+{ { :P 
+    { :¬P 
+      →← 
+    } 
+    ¬(¬P)
+  } 
+  { :¬(¬P) 
+    { :¬P 
+      →← 
+    } 
+    P 
+  }   
+  P ⇔ ¬(¬P)
+}
+
+➤ "(e) →← ⇒ P"
+➤ "note this can validate now because the relevant instantiations have already"
+➤ "been found because of the previous proofs"
+{  →← ⇒ P  }
+
+➤ "(f) ¬(P and ¬P)"
+{ { :(P and ¬P)  
+    →← 
+  } 
+  ¬(P and ¬P) 
+}
+
+➤ "Assignment #5 - Spring 2023"
+
+➤ "(a) R ⇒ (Q ⇒ P or Q)"
+{ { :Q 
+    (P or Q) 
+  } 
+  Q ⇒ (P or Q) 
+  R ⇒ (Q ⇒ (P or Q)) 
+}
+
+➤ "(b) ¬P or Q ⇒ (P ⇒ Q)"
+{ Recall { :(¬P or Q) :{ :¬P (P ⇒ Q) } :{ :Q (P ⇒ Q) }  P ⇒ Q }
+  { :(¬P or Q)
+    { :¬P 
+      { :P 
+        { :¬Q 
+          →← 
+        } 
+        Q 
+      } 
+      P ⇒ Q
+    }
+    { :Q
+      {:P Q}
+      P ⇒ Q
+    } 
+    P ⇒ Q
+  }
+  (¬P or Q) ⇒ (P ⇒ Q)
+}
+
+➤ "(c) (P or Q) or R ⇒ P or (Q or R)"
+{ ➤ "the or- rule (proof by cases) always need a BIH"
+  Recall { :(P or Q) or R  
+    :{ :(P or Q) (P or (Q or R)) }
+    :{ :R (P or (Q or R)) }
+    P or (Q or R)
+  } 
+  Recall { :(P or Q)
+    :{ :P (P or (Q or R)) }
+    :{ :Q (P or (Q or R)) } 
+    P or (Q or R)
+  }
+  { :(P or Q) or R
+    { :(P or Q)
+      { :P (P or (Q or R)) }
+      { :Q (Q or R) (P or (Q or R)) } 
+      P or (Q or R)
+    }
+    { :R 
+      Q or R
+      P or (Q or R)
+    }
+    P or (Q or R)
+  }
+  (P or Q) or R ⇒ P or (Q or R)
+}
+
+➤ "(d) ¬(P and Q) ⇒ ¬P or ¬Q"
+{
+  { :¬(P and Q) 
+    { :¬(¬P or ¬Q) 
+      { :¬P
+        ¬P or ¬Q
+        →←
+      }
+      P
+      { :¬Q
+        ¬P or ¬Q
+        →←
+      }
+      Q
+      P and Q
+      →←
+    }
+    ¬P or ¬Q 
+  }
+  ¬(P and Q) ⇒ ¬P or ¬Q
+}
+
+➤ "Assignment #6"
+➤ "(a)  P and Q ⇔ Q and P"
+{
+  { :(P and Q) P Q (Q and P) }
+  { :(Q and P) P Q (P and Q) }
+  (P and Q) ⇔ (Q and P) 
+}
+
+➤ "(b)  P and ¬Q ⇒ ¬(P⇒Q)"
+{
+  { :P and ¬Q 
+    { :P⇒Q P ¬Q Q →← }
+    ¬(P⇒Q)
+  }
+  P and ¬Q ⇒ ¬(P⇒Q)
+}
+
+➤ "(c) P or ¬P"
+{
+  { :¬(P or ¬P)
+    { :P
+      P or ¬P
+      →← 
+    }
+    ¬P
+    P or ¬P
+    →←
+  }
+  P or ¬P
+}
+
+➤ "(d) (P⇒Q)⇒¬P or Q"
+➤ "uh... I already got this for free somehow. Probably from the reverse direction"
+{
+  (P⇒Q) ⇒ (¬P or Q)  
+}
+
+➤ "(e) P or (Q and R) ⇔ (P or Q) and (P or R)"
+{ Recall { :P or (Q and R) 
+    :{ :P ((P or Q) and (P or R)) } 
+    :{ :(Q and R) ((P or Q) and (P or R))} 
+    (P or Q) and (P or R) 
+  } 
+  Recall { :(P or Q) 
+    :{ :P (P or (Q and R)) } 
+    :{ :Q (P or (Q and R)) } 
+    P or (Q and R)
+  }   
+  Recall { :(P or R) 
+    :{ :P (P or (Q and R)) } 
+    :{ :R (P or (Q and R)) } 
+    P or (Q and R)
+  } 
+    
+  { :(P or (Q and R))
+    { :P (P or Q) (P or R) ((P or Q) and (P or R)) }
+    { :(Q and R) Q R (P or Q) (P or R) ((P or Q) and (P or R)) } 
+    (P or Q) and (P or R)
+  }
+  { :((P or Q) and (P or R)) (P or Q) (P or R) 
+    { :P (P or (Q and R)) }
+    { :Q { :P (P or (Q and R)) } { :R (Q and R) (P or (Q and R)) }
+      P or (Q and R)
+    }
+    P or (Q and R)
+  }
+  P or (Q and R) ⇔ (P or Q) and (P or R)
+}
+
+➤ "(f) (P or Q) and ¬Q ⇒ P"
+{ Recall { :(P or Q) :{ :P P } :{ :Q P } P } 
+  { :((P or Q) and ¬Q) (P or Q) ¬Q 
+    { :Q { :¬P →← } P }
+    P
+  }
+  ((P or Q) and ¬Q) ⇒ P
+}  
+
+
+{
+  ➤ "Assignment #10.4"
+  ➤ " "
+  ➤ "Theorem: ¬(P⇒Q) or ¬P or Q"
+  { (¬(P⇒Q) or ¬P) or Q }
+  ➤ "Proof:"
+  { :¬((¬(P⇒Q) or ¬P) or Q)
+    { :¬(¬(P⇒Q) or ¬P)
+      { :Q
+        (¬(P⇒Q) or ¬P) or Q
+        →←
+      }
+      ¬Q
+      { :P 
+        { :P⇒Q
+          Q
+          →←
+        }
+        ¬(P⇒Q)
+        ¬(P⇒Q) or ¬P
+        →←
+      }
+      ¬P
+      ¬(P⇒Q) or ¬P
+      →←
+    }
+    ¬(P⇒Q) or ¬P
+    →←
+  }
+  (¬(P⇒Q) or ¬P) or Q
+} 
+➤ "end all"
+} ✔︎

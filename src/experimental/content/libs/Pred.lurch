@@ -1,0 +1,24 @@
+include content/libs/Prop
+////////////////////////////////////////////////////////////////////////////
+// Predicate Logic Lurch Lib
+//
+
+// Global Constants - we don't want any of these to be metavariables
+Declare ∀ ∃ ∃! =
+
+////////////////////////////////
+// ND Predicate Logic Axioms
+////////////////////////////////
+Rules:  
+{
+  
+  :{ :(∀x.𝜆P(x))  𝜆P(t) }               // ∀-
+  :{ :{ :Let x  𝜆P(x) }  ∀y.𝜆P(y) }     // ∀+
+  :{ :(∃x. 𝜆P(x)) 𝜆P(c) for some c }    // ∃-
+  :{ :𝜆P(t) ∃x.𝜆P(x) }                  // ∃+
+  :{ :x = y  :𝜆P(x) 𝜆P(y) }             // substitution
+  :{ W = W }                            // reflexive =
+  :{ (∃!x.𝜆P(x)) ≡                      // ∃!
+     (∃x.𝜆P(x) and (∀y.𝜆P(y) ⇒ y = x)) 
+   }                                    
+} 
