@@ -8,3 +8,4 @@ src/experimental/initmisc.js
 src/experimental/parsers/ascimathref.js
 src/experimental/initproofs.js
 for-reference-only/
+docs/
