@@ -1,37 +1,18 @@
 ///////////////////////////////////////////////////////////////////////////
-// AsciiMath Peggy Grammar and Parser
+// Tidy Peggy Grammar and Parser
 //
 // A peggy grammar definition file to generate a parser for converting
-// AsciiMath expression to an LC.
-
-
-///////////////////////////////////////////////////////////////////////////
-// Toy Peggy Grammar and Parser
-//
-// A peggy grammar definition file to generate a parser for converting more
-// natural math notation into putdown, which can then be converted to an LC. 
-//
-// Note: for now we encode negative numbers as compound expressions e.g. -3 is
-// encoded as (- 3). We also encode rational fractions as a product of the
-// numerator times the multiplicative inverse of the denominator where / is the
-// unary inverse operator, e.g. 2/3 parses as (⋅ 2 (/ 3)).  This is consistent
-// with the way negation is handled.  We do not allow expresions like '/2' to
-// represent one half. We do not have an Integer or Rational constant type for
-// this reason.
-//
-// Note: Declare's have to be on a line by themselves and its declared
-// constants separated by spaces (not commas)
-//
-// TODO: 
-//  * add x≠y but have it parse as (¬ (= x y)), & same for other negated ops
-//  * add f:A→B, ∘, injective, surjective, bijective, ^inv, etc.
-//  * Integrate Declare() with the parser creation.  For example, if we want to
-//    Declare reserved symbols like < or = at the top of the document we don't
-//    want the parser to try to parse them as infix operators at that point
-//    Idea: make it possible to Declare the constants both syntactically and
-//    semantically at the same time.
+// putdown expressions to a asciimath syntax.
 
 {{
+
+  // Convert // and (--- ) comments to ➤ comments
+  const tidy =  s => {
+    // convert all js comments to asciimath comments
+    let ans = s.replace(/\/\/\s*([^\n]+)(\n|$)/g,`➤ "$1"$2`)
+    ans = ans.replace(/\(---(.+)\)/g,`➤$1`)
+    return ans
+  }
 
   // remove empty arrays from a nested array
   const clean = A => { 
@@ -42,43 +23,6 @@
   
   // replace the commas in a sequence with spaces
   const spaced = s => s.replace(/,/g, ' ') 
-
-  // default: convert optional associative binary operator to lisp
-  const lisp = (op,args) => {
-    // if there's only one arg, return it, otherwise apply the op
-    return (args.length>1) ? `(${op} ${args.join(' ')})` : args[0]
-  }
-
-  // convert optional unary operator to lisp
-  const lispUnary = (op,arg) => {
-    return (op) ? `(${op} ${arg})` : arg
-  }
-
-  // convert mandatory binary operator to lisp
-  const lispBinary = (op,a,b) => {
-    return `(${op} ${a} ${b})`
-  }
-
-  // convert prefix function application to lisp
-  const lispPrefix = (op,args) => {
-    if (!Array.isArray(args)) { return `(${op} ${args})` }
-    else if (!args.every(Array.isArray)) { 
-      return `(${op} ${args.join(' ')})` 
-    } else {
-      return args.reduce( (ans,group) => { 
-        return (group.length) ? `(${ans} ${group.join(' ')})` : `(${ans})`  
-      } , op )
-    }
-  }
-
-  // convert signed sums to lisp
-  const lispSum = (first,rest) => {
-    let ans = `(+ ${first}`
-    rest.forEach( term => {
-      ans = ans + ( (term[0]==='-') ? ` (- ${term[1]})` : ` ${term[1]}` )
-    })
-    return ans + ')'
-  }
 
   // for debugging, shorthand for console.log
   const say = s => {
@@ -95,27 +39,7 @@
 // Preprocess the input string
 { 
   //   * replace toxic unicode chars with equivalents
-  input = input.replace(/𝜎/g, 'σ')
-  input = input.replace(/𝜆/g, 'λ')
-  //   * Declaring reserved constants is tricky since it tries to parse them as they are
-  //     intended to be used, so for now we convert any line of the form `Declare stuff`
-  //     to escaped putdown up front.
-  input = input.replace(/[Dd]eclare \s*([^\s].*)$/mg, 'declare> «:[$1]»\n')
-  //   * delete comments (but leave any \n's to keep the line counts right)
-  input = input.replace(/\/\/[^\n\r]*(\n|\r)/g, '\n')
-  //   * Replace tabs with a space
-  input = input.replace(/\t/g, ' ')
-  //   * shrink consecutive spaces to a single space
-  input = input.replace(/ ( +)/g,' ') 
-  //   * remove spaces around reserved infix unicode ops not inside literal putdown so
-  //     the parser doesn't have to find and avoid them
-  input = input.replace(/(?<!«[^«»]*)\s*([,.+⋅/^=<≤⇒⇔|∩∪×∈⊆∖])\s*(?![^«»]*»)/g,'$1')
-  //   * same for prefix ops
-  input = input.replace(/(?<!«[^«»]*)([-({∀∃])[ \t]*(?![^«»]*»)/g,'$1')
-  //   * same for postfix ops
-  input = input.replace(/(?<!«[^«»]*)[ \t]*([⁻)}])(?![^«»]*»)/g,'$1')
-  //   * replace all '/' with '⋅/'
-  input = input.replace(/(?<!«[^«»]*)\/(?![^«»]*»)/g,'⋅/')
+  input = tidy(input)
   
   // uncomment the following for debugging
   // say(input)
@@ -161,7 +85,7 @@ Shorthand = BIH / Ruleset / Rule / Thm
 
 BIHLabel = 'since'i / 'because'i / 'by'i / 'Recall'i
 BIH = BIHLabel { return '>>' }
-RulesetLabel = 'Rules'i / 'Axioms'i / 'Givens'i / 'Definitions'i
+RulesetLabel = 'Rules'i / 'Axioms'i / 'Givens'i
 Ruleset = RulesetLabel ':'? { return 'rules>' }
 RuleLabel = 'Rule'i / 'Axiom'i / 'Given'i / 'Definition'i
 Rule = RuleLabel ':'? { return 'rule>' }
@@ -178,7 +102,7 @@ Let = 'Let'i __ a:SymbolSeq __ ('be'i __)? 'such'i __ 'that'i __ b:Expression
       'Let'i __ a:SymbolSeq { return `[${spaced(a)}]` }
 
 // expressions
-Expression "Expression" = Binding / Prop / EFA  // get's Stuff from Not
+Expression "Expression" = EFA / Binding / Prop  // get's Stuff from Not
 
 // binding expressions
 Binding = a:BindingSymbol b:SymbolSeq period c:Expression
@@ -191,7 +115,7 @@ Iff        = a:Implies|1..,'⇔'/' iff '|    { return lisp('⇔',a) }
 Implies    = a:Or|1..,'⇒'/' implies '|     { return lisp('⇒',a) }
 Or         = a:And|1..,' or '/'∨'|         { return lisp('or',a) }
 And        = a:Not|1..,' and '/'∧'|        { return lisp('and',a) }
-Not        = a:('¬'/'not ')? _ b:Stuff     { return (a==='not ')
+Not        = a:('¬'/'not ')? b:Stuff       { return (a==='not ')
                                                      ?lispUnary('¬',b)
                                                      :lispUnary(a,b)
                                            }
@@ -234,7 +158,7 @@ Negated   = a:'-'? b:Exp                              { return lispUnary(a,b) }
 Exp       = a:Atomic|1..,'^'|                         { return lisp('^',a)    } 
 
 // morally atomic (do not require parentheses)
-Atomic = Parenthesized / EFA / Prefix / Symbol / Number
+Atomic = Parenthesized / Prefix / Symbol / Number
 
 // For convenience we define 𝜆P(k) to be (λ P k) and replace λ with "LDE EFA"
 // as a shortcut
@@ -253,7 +177,7 @@ Decimal = $( Natural '.' [0-9]+ )
 Natural = $( [1-9][0-9]* / '0' )
 
 // Symbols can't start with a digit, contain reserved constants, or keywords
-SymbolSeq = a:(Symbol/Number)|1..,comma| { return a.join(',') }
+SymbolSeq = a:(Symbol/Number)|1..,[\s]| { return a.join(' ') }
 Symbol "Symbol" =  $( !([0-9]/ReservedWords)
                       [^-\][() \t\n✦{},.:+⋅/^=<≤¬⇒⇔|∀∃∩∪×∈⊆∖⁻∧∨≡]+ )
 BindingSymbol = ('∃!'/'exists unique ') { return '∃!' } /

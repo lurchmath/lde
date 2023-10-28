@@ -8,20 +8,20 @@ process.stdout.write(defaultPen(`Loading the acid tests ...\n\n`))
 let start = Date.now()
 ////////////////////////////////////////////////////////////////////////////
 
+const biglib = ['Prop','PropThm','Pred','PredThm','Peano','Number Theory']
 // Load Acid Tests
 acid=[1,4,5,6,7,8,9,10,'11a','11b','11c','11d','11e','Induction'].map( (ex,k) => 
-     loadDoc(`proofs/acid tests/acid ${k} Example ${ex}.lurch`))
+     load(`acid tests/acid ${k} Example ${ex}.lurch`,`Acid Tests`))
 // Load Math 299 tests
-acid.push(loadDoc('proofs/math-299-prop'))
-acid.push(loadDoc('proofs/math-299-pred'))
-acid.push(loadDoc('proofs/math-299-peano'))
+acid.push(load('math-299-prop','Prop'))
+acid.push(load('math-299-pred',['Prop','Pred']))
+acid.push(load('math-299-peano',biglib))
 // Load user theorem tests
-acid.push(loadDoc('proofs/user-thms'))
+acid.push(load('thm',biglib))
+acid.push(load('thm2',biglib))
 
 let passed = 0
 let failed = 0
-let numchecks = 0
-let numreds = 0
 acid.forEach( (T,k) => {
   T.descendantsSatisfying( x => x.hasAttribute('ExpectedResult') ).forEach( (s,i) => {
     if (Validation.result(s) && 
@@ -33,17 +33,10 @@ acid.forEach( (T,k) => {
       failed++
     }
   })
-  T.descendantsSatisfying( x => {
-    result = x.getAttribute('validation result')?.result
-    if (result==='valid') ++numchecks  
-    if ( result==='indeterminate' || result==='invalid' ) ++numreds
-  })
 })
 
 const pen = (!failed) ? chalk.ansi256(40) : chalk.ansi256(9)
 console.log(pen(`\n${passed} tests passed - ${failed} tests failed\n`))
-console.log(
-  `${checkPen(numchecks)} green checks\n${xPen(numreds)} red marks`)
 console.log(`Test result stored in the array 'acid'\n`)
 
 // acid.forEach((x,k)=>{console.log('\nTest #'+k+'\n');x.report(user)})

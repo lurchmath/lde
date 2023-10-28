@@ -1,4 +1,3 @@
-include content/libs/Acid Tests
 ////////////////////////////////////////////////////////////////////
 // Induction vs Forall+ test
 //
@@ -24,19 +23,18 @@ include content/libs/Acid Tests
 //     like ForSome except for the Given status and preemie check, which is probably
 //     a step in the right direction anyway.
 {
-  ➤ "Theorem 7.8: Commutativity of Addition"
-
-  ➤ "Proof:"
+  (--- "Theorem 7.8: Commutativity of Addition")
+  (--- "Proof:")
   { 
-  ➤ "We will proceed by induction on n for arbitrary m."
-    {  :Let m 
-      ➤ "Base case."
-       m+0 = 0+m  
-      ➤ "Inductive step."
-      { :Let k such that m+k=k+m
-        m+𝜎(k) = 𝜎(k)+m ✗ // this equation should not validate
+    (--- "We will proceed by induction on n for arbitrary m.")
+    {  :[m] 
+      (--- "Base case.")
+      (= (+ m 0) (+ 0 m))  
+      (--- "Inductive step.")
+      { :[k, (= (+ m k) (+ k m))]
+        (= (+ m (𝜎 k)) (+ (𝜎 k) m)) ✗ // this equation should not validate
       }
-      ∀n.m+n=n+m
+      (∀ n , (= (+ m n) (+ n m))) ✔︎
     }
   }
 }

@@ -1,14 +1,13 @@
-include content/libs/Acid Tests
 ////////////////////////////////////////////////////////////////////
 // Acid Test Proofs
 // 
 // These are the example and counterexample proofs from the END document
 
-➤ "Example 11b from END"
+(--- "Example 11b from END")
 {
-   ➤ "Trying again to cheat the subset plus rule."
+   (--- "Trying again to cheat the subset plus rule.")
    // Thm/Pf attempt 
-   { :Let x  :x∈T 
-     S⊆T !✗ // preemie 
+   { :[ x ] :(∈ x T) 
+     (⊆ S T) !✗ // preemie 
    } !✗ // preemie 
 } !✗  

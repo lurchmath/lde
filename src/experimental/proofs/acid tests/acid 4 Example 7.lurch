@@ -1,18 +1,19 @@
+include libs/Acid Tests
 ////////////////////////////////////////////////////////////////////
 // Acid Test Proofs
 // 
 // These are the example and counterexample proofs from the END document
 
-(--- "Example 7 from END")
+➤ "Example 7 from END"
 {
-  (--- "Beginner's mistake")
-  { :(∀ x , (∃ y , (P x y)))
-    {:[ z ]
-      (∃ y , (P z y))
-      [ c , (P z c) ]
+  ➤ "Beginner's mistake"
+  { :∀x.∃y.P(x,y)
+    {:Let z 
+      ∃y. P(z,y)
+      P(z,c) for some c
     }
-    (--- "Expect incorrect:")
-    (∀ x , (P x c)) ✗         
-    (∃ y , (∀ x , (P z c))) ✗    
-  }  
+    ➤ "Expect incorrect:"
+    ∀x.P(x,c) ✗         
+    ∃y.∀x.P(z,c) ✗    
+  }
 }

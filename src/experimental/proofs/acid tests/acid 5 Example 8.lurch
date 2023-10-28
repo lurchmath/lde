@@ -1,17 +1,20 @@
+include libs/Acid Tests
 ////////////////////////////////////////////////////////////////////
 // Acid Test Proofs
 // 
 // These are the example and counterexample proofs from the END document
 
-(--- "Example 8 from END (generalizing a constant expression)")
+➤ "Example 8 from END (generalizing a constant expression)"
 {
-  (--- "Thm: 1<1")
+  ➤ "Thm: 1<1"
   { 
-    {:[ z ]
-     :(< 1 1) 
-      (< 1 1)                 
+    {:Let z 
+     :1<1 
+      1<1                 
     } ✔︎
-    (∀ x , (< 1 1)) ✗        // ∀+
-    (< 1 1) ✔︎                // ∀-
+    ➤ "Expect incorrect use of ∀+"
+    ∀x.1<1 ✗        // ∀+
+    ➤ "Expect correct conclusion of that, however"
+    1<1 ✔︎           // ∀-
   }     
 }

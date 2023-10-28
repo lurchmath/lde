@@ -192,7 +192,7 @@ import Scoping from '../scoping.js'
 import Validation from '../validation.js'
 
 // import experimental tools
-import { Document } from './document.js'
+// import { Document } from './document.js'
 import Interpret from './interpret.js'
 const { markDeclaredSymbols, renameBindings, assignProperNames } = Interpret
 

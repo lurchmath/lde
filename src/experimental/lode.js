@@ -49,8 +49,6 @@ import Compact from './global-validation.js'
 import Reporting from './reporting.js' 
 // load various helpful utilities
 import Extensions from './extensions.js'
-// load the Document class
-import { Document } from './document.js'
 // import the parsing utiltiies (processShorthands comes from Interpret)
 import { makeParser } from './parsing.js'
 // load the CNFProp tools for testing
@@ -78,7 +76,6 @@ Object.assign( global, Compact )
 Object.assign( global, Reporting )
 global.CNF = CNF
 global.Problem = Problem
-global.Document = Document
 global.CNFProp = CNFProp
 
 // External packages
