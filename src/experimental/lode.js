@@ -377,6 +377,26 @@ rpl.defineCommand( "test", {
   }
 })
 
+// define the Lode .makedocs command
+rpl.defineCommand( "makedocs", {
+  help: "Run jsdocs to make the documentation.",
+  action() { 
+    exec('rm -rf docs && jsdoc ./* -d docs -c jsdoc-conf.json')
+    console.log(defaultPen('done'))
+    this.displayPrompt()
+  }
+})
+
+// define the Lode .showdocs command
+rpl.defineCommand( "showdocs", {
+  help: "Open the jsdocs index.html page in the browser.",
+  action() { 
+    exec('open docs/index.html')
+    this.displayPrompt()
+  }
+})
+
+
 // export the repl.writer to be available at the repl command line
 global.write = s => console.log(rpl.writer(s))
 

@@ -1,0 +1,23 @@
+{
+    "plugins": ["plugins/markdown"],
+    "opts": {
+        "template": "../../node_modules/tidy-jsdoc",
+        "prism-theme": "prism-default"
+    },
+    "templates": {
+        "default": {
+            "includeDate": false
+        }
+    },
+    "metadata": {
+        "title": "Lurch Deductive Engine"
+    },
+    "styles": {
+        "nav-width": "335px"
+    },	
+    "source": {
+        "exclude": [
+            "./acidtests.js"
+        ]
+    }
+}
