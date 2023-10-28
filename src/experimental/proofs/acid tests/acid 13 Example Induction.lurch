@@ -34,7 +34,8 @@ include libs/Acid Tests
        m+0 = 0+m  
       ➤ "Inductive step."
       { :Let k such that m+k=k+m
-        m+𝜎(k) = 𝜎(k)+m ✗ // this equation should not validate
+        ➤ "this equation should not validate"
+        m+𝜎(k) = 𝜎(k)+m ✗ 
       }
       ∀n.m+n=n+m
     }

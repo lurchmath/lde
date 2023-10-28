@@ -249,7 +249,7 @@ const validate = ( doc, target = doc,
   
   //////////////
   // Equations
-  // processEquations(doc)
+  processEquations(doc)
 
   ///////////////
   // Scoping
@@ -912,9 +912,10 @@ const splitEquations = doc => {
     // let n be the number of arguments to =
     let n = eq.numChildren()
     // if there are two args, its an equation, so mark it as such
-    if (n===2) { eq.equation = true 
-    } else if (n>2) {
+    if (n===3) { eq.equation = true 
+    } else if (n>3) {
     // if there are more than two args, split it
+      console.log(`It found ${eq} with n=${n}`)
       let last = eq
       for (let k=1;k<n-1;k++) {
         // instead of building a new equation from a pair of arguments, we copy
@@ -931,7 +932,6 @@ const splitEquations = doc => {
     }
   })
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////
 //
