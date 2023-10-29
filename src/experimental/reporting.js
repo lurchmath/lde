@@ -507,6 +507,13 @@ LogicConcept.prototype.investigate = function(option) {
   console.log(_investigate(this,option))
 }
 
+// Because this is used so often
+Object.defineProperty(LogicConcept.prototype, 'all', {
+  get: function() {
+    this.report(all)
+  }
+})
+
 export default {
   
   // formatting utiltiies
