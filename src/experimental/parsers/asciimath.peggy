@@ -159,7 +159,7 @@ StringLiteral = $('"' [^"]* '"')
 // Shorthand symbols that will be post-processed
 Shorthand = BIH / Ruleset / Rule / Thm
 
-BIHLabel = 'since'i / 'because'i / 'by'i / 'Recall'i
+BIHLabel = 'since'i / 'because'i / 'Recall'i
 BIH = BIHLabel { return '>>' }
 RulesetLabel = 'Rules'i / 'Axioms'i / 'Givens'i / 'Definitions'i
 Ruleset = RulesetLabel ':'? { return 'rules>' }

@@ -107,23 +107,26 @@ export const processShorthands = L => {
     m.previousSibling().makeIntoA(type)
     m.remove()
   }
-  
+
   // declare the type of the next or previous sibling 
   processSymbol( 'BIH>'     , m => makeNext(m,'BIH') )
   processSymbol( 'declare>' , m => makeNext(m,'Declare') )
   processSymbol( 'rule>'    , m => makeNext(m,'Rule') )  
+  processSymbol( 'cases>'   , m => makeNext(m,'Cases') )  
   processSymbol( 'thm>'     , m => makeNext(m,'Theorem') )  
   processSymbol( '<thm'     , m => makePrevious(m,'Theorem') )  
+
   
-  // depricated but kept for backward compatibility
-  processSymbol( '<<' , m => { 
-    const target = m.previousSibling()
-    const type = (target instanceof Declaration) ? 'Declare' : 'BIH'
-    target.makeIntoA(type)
+  // attribute the previous sibling with .by attribute whose value is the text
+  // of the next sibling if it is a symbol (and does nothing if it isn't)
+  processSymbol( 'by' ,  m => { 
+    const LHS = m.previousSibling()
+    const RHS = m.nextSibling()
+    if (!RHS instanceof LurchSymbol) return
+    LHS.by = RHS.text()
     m.remove()
+    RHS.remove()
   } )
-  // depricated but kept for backward compatibility
-  processSymbol( '>>'     , m => makeNext(m,'BIH') )
   
   // rules> - Mark each of the children of the next sibling (which should be an
   // environment) as a Rule, and delete both the shorthand and the environment. 
@@ -151,23 +154,23 @@ export const processShorthands = L => {
     const LHS = m.previousSibling()
     const RHS = m.nextSibling()
     let A1=LHS.copy().asA('given'), A2=LHS.copy(),
-        B1=RHS.copy(), B2=RHS.copy().asA('given')
+    B1=RHS.copy(), B2=RHS.copy().asA('given')
     LHS.replaceWith(new Environment(A1,B1))
     RHS.replaceWith(new Environment(B2,A2))
     m.remove()
   } )
-
+  
   // For testing purposes, flag the expected result
   processSymbol( '✔︎' , m => { 
     m.previousSibling().setAttribute('ExpectedResult','valid')
     m.remove() 
   } )
-
+  
   processSymbol( '✗' , m => { 
     m.previousSibling().setAttribute('ExpectedResult','indeterminate') 
     m.remove()
   } )
-
+  
   processSymbol( '!✗' , m => { 
     m.previousSibling().setAttribute('ExpectedResult','invalid') 
     m.remove()
@@ -177,7 +180,31 @@ export const processShorthands = L => {
   processSymbol( '---' , m => { 
     if (m.parent().isAComment()) m.parent().ignore=true 
   })
+  
+  // Labels
+  //
+  // Just a quickie lable mechanism that will be upgraded later.
+  // Labels are currently a single symbol of the form name> which assigns
+  // 'name' to the .label attribute of the next sibling.  Previous siblings
+  // aren't supported yet, nor is whitespace. 
+  // L.descendantsSatisfying( s => (s instanceof LurchSymbol) && 
+  //   /[^"()\[\]\s]+>/.test(s.text()) )
+  //   .forEach( s => { 
+  //     s.nextSibling().label=s.text().slice(0,-2).toLowerCase() 
+  //     s.remove()
+  //   } ) 
 
+     // depricated but kept for backward compatibility
+  processSymbol( '<<' , m => { 
+    const target = m.previousSibling()
+    const type = (target instanceof Declaration) ? 'Declare' : 'BIH'
+    target.makeIntoA(type)
+    m.remove()
+  } )
+  // depricated but kept for backward compatibility
+  processSymbol( '>>' , m => makeNext(m,'BIH') )
+  
   return L
 }
+
 ///////////////////////////////////////////////////////////////////////////////
