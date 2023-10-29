@@ -227,36 +227,43 @@ const timeEnd = (description) => { if (Debug) console.timeEnd(description) }
 // Scoping.validate(). We hope to add validateTranstiveChains() next.  In
 // general, this routine provides the hook for installing new n-compact global
 // validation compatible tools in the future.  Validation tools can add
-// validation feedback and add additional complete instantiations to the document, but
-// should not add new Rules.
+// validation feedback and add additional complete instantiations to the
+// document, but should not add new Rules.
 //
 const validate = ( doc, target = doc, 
                    options = { checkPreemies:true , validateall:true }) => {
   // process the domains (if they aren't already)
   processDomains(doc)
 
-  // instantiate with the user content (if it isn't already) this also caches
-  // the list of user propositions and the document catalog
-  instantiate(doc)
-  
   //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
   // Here is the location to install new validation tools that are compatible
   // with global validation in the future.
   
-  ///////////////
+  ///////////////////////////////////
   // BIHs
   processBIHs(doc)
   
-  //////////////
-  // Equations
+  ///////////////////////////////////
+  // Equations and Transtivive Chains
   processEquations(doc)
-
+  
+  ///////////////////////////////////
+  // Proof by Case
+  processCases(doc)
+  
+  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+  
+  // instantiate with the user content (if it isn't already) this also caches
+  // the list of user propositions and the document catalog.  This must be done
+  // after the tools above in case they instantiate a 'Part' that then is used
+  // for further instantiation (e.g. as with the Cases tool)
+  instantiate(doc)
+  
   ///////////////
   // Scoping
   Scoping.validate(doc)
   
-  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-
+  
   ///////////////
   // Cache
   // cache the let-scopes in the root (if the aren't)
@@ -796,7 +803,9 @@ const processBIHs = doc => {
   return doc
 }
 
-// Process Equations
+////////////////////////////////////////////////////////////////////////////////
+//
+//                 Process Equations and Transitive Chains
 //
 // Check if the doc contains the Rule :{ Transitive Chain }.  If not, just split
 // the equation chains.  
@@ -931,6 +940,63 @@ const splitEquations = doc => {
       eq.ignore = true
     }
   })
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+//                        Process Proof by Cases
+//
+// Find the first Rule in the document flagged with .label='cases'. Do nothing
+// if there is no such rule. Otherwise instantiate its last child using each
+// user conclusion that has .by='cases', insert the (usually partial)
+// instantiations after the Rule, leaving the Rule available for further
+// instantation by the global Prop tool (i.e. don't mark it .finished).
+//
+const processCases = doc => {
+  // check if some rule is a 'Cases' if not, we're done
+  const rule=doc.find( x => x.isA('Cases') )
+  if (!rule) return
+  // The conclusion of a 'cases' rule must be what is matched.
+  const p = rule.lastChild()
+  // get all the things the user wants to checked as a conclusion by cases
+  const usercases = [...doc.descendantsSatisfyingIterator(x => x.by==='cases')]
+  // for each one construct the relevant partial instantiation
+  usercases.forEach( c => {
+    try {
+      ;[...Formula.allPossibleInstantiations(p, c)].forEach(s => {
+        const inst = Formula.instantiate(rule, s)
+        // do the usual prepping
+        // TODO: modularize some of this
+        assignProperNames(inst)
+        cacheFormulaDomainInfo(inst)
+        // the inst is no longer a Rule
+        inst.unmakeIntoA('Rule')
+        // decide whether it's a Part or an Inst
+        if (inst.domain.size===0) {
+          inst.unmakeIntoA('Part')
+          inst.makeIntoA('Inst')
+        } else {
+          inst.makeIntoA('Part')
+          inst.ignore = true
+        }
+        // store the rule it came from and add c to the list of creators
+        inst.rule = rule.rule || rule
+        if (!inst.creators) inst.creators = []
+        inst.creators.push(c)
+        // also rename the bindings to match what the user would have
+        // for the same expressions in his document
+        // time('Rename bindings')
+        inst.statements().forEach(x => renameBindings(x))
+        // then insert this instantiation after its formula
+        Formula.addCachedInstantiation(rule, inst)
+        // finally mark the declared symbols in the instantiation
+        markDeclaredSymbols(doc, inst)
+      })
+    } catch { }
+  })
+  rule.finished = true  
+  return doc
 }
 
 ////////////////////////////////////////////////////////////////////////////////
