@@ -451,8 +451,8 @@ Declaration.prototype.lookup = function ( catalog, ignores = []) {
 
 // convert to cnf in satSolve format
 Environment.prototype.cnf = function ( target=this , checkPreemies = false ) {
-  // get the catalog.. this assumes this environment is a document and it has
-  // been cached
+  // get the catalog.. this assumes this environment is a document and checks if
+  // it has been cached
   let cat = this.cat || this.catalog()
   // number the switch vars starting at one more than the catalog length
   let n = cat.length+2 
