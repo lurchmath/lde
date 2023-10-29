@@ -131,8 +131,8 @@ const showValidation = true
 
 // useful sets of options
 //
-// show everything report option
-const everything = { showDeclares, showAttributes , showBodies, showContexts,
+// show all report option
+const all = { showDeclares, showAttributes , showBodies, showContexts,
                      showRules , showUserThms , showPartials,
                      showInstantiations , showNumbers , showProperNames ,
                      showUserRules , showUserInstantiations , showValidation
@@ -325,13 +325,19 @@ const format = (x,options,indentlevel=0) => {
   } else if (typeof x === 'number') { 
     return indent(constantPen(x),indentlevel)
   } else if (x instanceof Array) { 
-    return indent(`[\n${x.map(y=>format(y,everything,indentlevel+1))
-                  .join(',\n')}\n]`,
-                  indentlevel)
+    if (x.length===2 && (typeof x[1] === 'boolean' || typeof x[1] === 'string')) {
+      return indent(`[${x.map(y=>format(y,all,1)).join(',')} ]`,1)
+    } else {
+      return indent(`[\n${x.map(y=>format(y,all,indentlevel+1))
+                    .join(',\n')}\n]`,indentlevel)
+    }
   } else if (x instanceof Set) { 
-    return indent(`[\n${[...x].map(y=>format(y,everything,indentlevel+1))
-                  .join(',\n')}\n]`,
-                  indentlevel)
+    if (x.length===2 && (typeof x[1] === 'boolean' || typeof x[1] === 'string')) {
+      return indent(`[${[...x].map(y=>format(y,all,1)).join(',')} ]`,1)
+    } else {
+      return indent(`[\n${[...x].map(y=>format(y,all,indentlevel+1))
+                    .join(',\n')}\n]`, indentlevel) 
+    }
   } else {
     return util.inspect( x, 
       {
@@ -389,7 +395,7 @@ LogicConcept.prototype.report = function ( options ) {
 }
 
 // Number arrays or sets of LCs
-const numberedIterable  = function (options=everything) {
+const numberedIterable  = function (options=all) {
     let ans = '  [\n'
     let linenum = ''
     this.forEach( (c,k) => {
@@ -515,7 +521,7 @@ export default {
   decPen , commentPen , headingPen , docPen , linenumPen , itemPen ,
   
   // report definitions
-  everything, show, detailed , moderate, allclean, clean , user ,
+  all, show, detailed , moderate, allclean, clean , user ,
   
   // report options
   showAttributes , showContexts , showRules , showInstantiations , 
