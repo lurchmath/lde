@@ -175,13 +175,13 @@ LogicConcept.prototype.isALetEnvironment = function () {
           this.child(0).isA('given'))
 }
 
-// We say an LC expression is a Comment if it has the form `(--- "Comment string
+// We say an LC expression is a Comment if it has the form `(➤ "Comment string
 // here.")`.  These are ignored when computing prop form, and are converted to
 // actual comments when printing the LC to the Lode terminal.
 LogicConcept.prototype.isAComment = function () { 
   return (this instanceof Expression && this.numChildren()===2 && 
           this.child(0) instanceof LurchSymbol && 
-          this.child(0).text()==='---')
+          this.child(0).text()==='➤')
 }
 
 // Compute the array of all Statements in this LC
@@ -216,9 +216,14 @@ LogicConcept.prototype.Rules = function () {
   return [...this.descendantsSatisfyingIterator( x => x.isA('Rule') )]
 }
 
-// Compute the array of all Rule's in this LC
+// Compute the array of all Insts's in this LC
 LogicConcept.prototype.Insts = function () {
   return [...this.descendantsSatisfyingIterator( x => x.isA('Inst') )]
+}
+
+// Compute the array of all Parts's in this LC
+LogicConcept.prototype.Parts = function () {
+  return [...this.descendantsSatisfyingIterator( x => x.isA('Part') )]
 }
 
 // A Let is defined to be a given declaration that is not marked as a 'Declare'
