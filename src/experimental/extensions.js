@@ -49,11 +49,11 @@ LogicConcept.prototype.descendantsSatisfyingIterator =
 // boolean function given by the argument, and return it.  Skip over any branch
 // that is excluded by the second argument.  
 LogicConcept.prototype.find = function ( include = x=>true , exclude = x=>false) {
-  if ( include(this) ) { return this
-  } else if (!exclude(this)) { 
-    for ( let child of this._children ) { 
-      if (include(child)) return child 
-    }
+  if (exclude(this)) return undefined
+  if (include(this)) return this
+  for ( let child of this._children ) {
+      let ans = child.find(include,exclude) 
+      if (ans) return ans 
   }
   return undefined
 }
