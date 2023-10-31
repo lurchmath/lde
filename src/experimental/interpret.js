@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 //
-//                                Docify
+//                                Interpret
 //                prepare an LC for Global n-compact Validation 
 //
 //  (KEEP OUT!  Work in progress.)
@@ -56,7 +56,7 @@ const interpret = (doc) => {
 const addSystemDeclarations = doc => {
   doc.unshiftChild(
     new Declaration(
-      [new LurchSymbol('LDE EFA'), new LurchSymbol('---')]
+      [new LurchSymbol('LDE EFA'), new LurchSymbol('➤')]
     ).asA('given').asA('Declare') )
   return doc
 }

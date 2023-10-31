@@ -109,12 +109,12 @@ export const processShorthands = L => {
   }
 
   // declare the type of the next or previous sibling 
-  processSymbol( 'BIH>'     , m => makeNext(m,'BIH') )
-  processSymbol( 'declare>' , m => makeNext(m,'Declare') )
-  processSymbol( 'rule>'    , m => makeNext(m,'Rule') )  
-  processSymbol( 'cases>'   , m => makeNext(m,'Cases') )  
-  processSymbol( 'thm>'     , m => makeNext(m,'Theorem') )  
-  processSymbol( '<thm'     , m => makePrevious(m,'Theorem') )  
+  processSymbol( 'BIH>'          , m => makeNext(m,'BIH') )
+  processSymbol( 'declare>'      , m => makeNext(m,'Declare') )
+  processSymbol( 'rule>'         , m => makeNext(m,'Rule') )  
+  processSymbol( 'cases>'        , m => makeNext(m,'Cases') )  
+  processSymbol( 'thm>'          , m => makeNext(m,'Theorem') )  
+  processSymbol( '<thm'          , m => makePrevious(m,'Theorem') )  
 
   
   // attribute the previous sibling with .by attribute whose value is the text
@@ -177,7 +177,7 @@ export const processShorthands = L => {
   } )
   
   // TODO: make this more consistent with the other shorthands
-  processSymbol( '---' , m => { 
+  processSymbol( '➤' , m => { 
     if (m.parent().isAComment()) m.parent().ignore=true 
   })
   

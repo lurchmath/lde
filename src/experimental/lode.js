@@ -248,7 +248,7 @@ global.catdocs = ( ...files ) => {
   // the reserved constants are declared at the top of every document
   // Note: we temporarily include '/' here until we can fix the bug in the 
   // ascii peggy parser that prevents it from being Declared. 
-  const system = lc(`:[ 'LDE EFA' '---' ]`).asA('Declare')
+  const system = lc(`:[ 'LDE EFA' '➤' ]`).asA('Declare')
   // create a temporary empty environment to hold the final answer
   let ans = new Environment()
   ans.pushChild(system)

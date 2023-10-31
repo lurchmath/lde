@@ -152,7 +152,7 @@ Meta = Putdown / Comment / Shorthand
 Putdown = '«' @$([^»]*) '»'  // todo: add a non-unicode way to do this
 
 // insert a comment that gets echoed
-Comment "Comment" = ('Comment'i / '➤') __ a:StringLiteral { return `(--- ${a})` }
+Comment "Comment" = ('Comment'i / '➤') __ a:StringLiteral { return `(➤ ${a})` }
 // String Literals for comments
 StringLiteral = $('"' [^"]* '"')
 

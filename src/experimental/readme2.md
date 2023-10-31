@@ -30,6 +30,8 @@ The following attributes set the type of the LC.
 * `Rule` - an LC that defines a rule. It must be a given environment.
 * `Theorem` - a claim environment that the user wants to prove, and then use as a new rule after that.
 * `BIH` - a blatant instantiation hint. Allows the user to provide an explicit instantiation of some rule in the document.
+* `Cases` - a special rule marked for use with the Cases tool.
+* `Consider` - this proposition should be added to the list of user propositions for the purpose of creating instantiations, but it has no propositional form itself, so it is neither claimed or assumed as part of the document's propositional meaning.
 
 In addition, these LC attributes store a value.
 
@@ -47,8 +49,6 @@ In addition, these LC attributes store a value.
 The following js attributes store data that is computed from the user's content, and needed for validation and reporting feedback.
 * `.userRule` - true for the Rule copies of Theorems.
 * `.bodyOf` - true for the copies of declaration bodies
-* `.ignore` - true for anything that should be ignored when computing the propositional form (e.g., expressions or rules containing metavariables)
-* `.consider` - true if this proposition should be added to the list of user propositions for the purpose of creating instantiations.  Only necessary when `.consider` is true, to let it create instantations without being validated itself.
 * `.domain` - stores the domain of a non-forbidden proposition or a formula (`Rule`s or `Part`s) containing at least one non-forbidden proposition whose domain is nonempty.
 * `.isWeeny` - true for a formula that contains one or more propositions containing all of the metavariables in the formula
 * `.weenies` - the set of all maximally weeny propositions in a formula (i.e., containing the largest number of metavariables), whether or not the formula itself is weeny.
@@ -57,6 +57,7 @@ The following js attributes store data that is computed from the user's content,
 * `.creators` - the list of user expressions that created this `Part` or `Inst`.
 * `.pass` - which instantiation pass created the `Part` or `Inst`.
 * `.finished` - true if the Rule or Part has been fully instantiated and is no longer available on the next pass.
+* `.ignore` - true for anything that should be ignored when computing the propositional form (e.g., expressions or rules containing metavariables)
 * `.numsolns` - the number of solutions found when matching the expression and formula proposition that created this `Part` or `Inst`
 * `.letScopes` - caches the Let scopes in the document (not targets)
 * `.cat` - caches the docuement catalog in the document (not targets)
@@ -121,7 +122,7 @@ To construct the document initially it does the following.
 1. load each library named in `libs`
 2. process its shorthands $^1$
 3. merge the libs - move all `Declare`'s to the beginning and all `Rules` after that.
-4. add the reserved _system constants_ on top (e.g. `LDE EFA` and `---`)
+4. add the reserved _system constants_ on top (e.g. `LDE EFA` and `➤`)
 5. mark the `Declare` declarations asA `Declare`
 6. insert copies of `ForSome` declaration bodies containing no metavariables (which will be all of them at this point) after the declaration, and mark asA `Body`.  These can be instantiated later $^2$
 7. mark all Rules asA 'Rule'

@@ -106,6 +106,8 @@ const showDeclares =  true
 const showContexts = true
 // show formulas
 const showRules = true
+// show formulas
+const showConsiders = true
 // show partial instantiations
 const showPartials = true
 // show instantiations of formulas in the library
@@ -133,20 +135,20 @@ const showValidation = true
 //
 // show all report option
 const all = { showDeclares, showAttributes , showBodies, showContexts,
-                     showRules , showUserThms , showPartials,
-                     showInstantiations , showNumbers , showProperNames ,
-                     showUserRules , showUserInstantiations , showValidation
-                   }                     
+              showRules , showUserThms , showPartials , showConsiders ,
+              showInstantiations , showNumbers , showProperNames ,
+              showUserRules , showUserInstantiations , showValidation
+            }                     
 // simple report option
 const show = { showDeclares, showAttributes , showBodies, showContexts,
                showRules , showUserThms , showPartials,
-               showInstantiations , showProperNames ,
+               showInstantiations , showProperNames , showConsiders ,
                showUserRules , showUserInstantiations , showValidation 
              }
 // detailed report option
 const detailed = {  showDeclares, showRules , showPartials, showInstantiations ,
                     showNumbers , showBodies, showProperNames , showUserRules ,
-                    showUserThms , showValidation 
+                    showUserThms , showValidation
                  }
 // moderate report option
 const moderate = { showInstantiations, showNumbers, showSimpleProperNames, showRules,
@@ -227,6 +229,9 @@ const formatter = ( options=defaultOptions ) => {
     // instantiations  
     } else if (L.hasAncestorSatisfying( x => x.isA(instantiation) )) {
       ans += (options.showInstantiations) ? instantiationPen(S) : ''
+    // Considers
+    } else if (L.hasAncestorSatisfying( x => x.isA('Consider') )) {
+      ans += (options.showConsiders) ? instantiationPen(S) : ''
     // everything else  
     } else {
       ans += defaultPen(S)
@@ -373,19 +378,24 @@ LogicConcept.prototype.report = function ( options ) {
            (!options.showPartials && c.isA('Part')) ||
            (!options.showInstantiations && c.isA('Inst')) ||
            (!options.showBodies && c.bodyOf) ||
-           (!options.showDeclares && c.isA('Declare'))
+           (!options.showDeclares && c.isA('Declare')) ||
+           (!options.showConsiders && c.isA('Consider')) 
          ) return
-      linenum =lineNum(c.indexInParent(),4,'  ')
+      linenum = lineNum(c.indexInParent(),4,'  ')
       // linenum = `${c.indexInParent()}`
       // linenum += tab(4-linenum.length)
-      linenum = (!c.isA(instantiation)) ? linenumPen(linenum) 
-                                        : instantiationPen(linenum)
+      linenum = (!c.isA(instantiation) &&!c.isA('Consider')) 
+                ? linenumPen(linenum) 
+                : instantiationPen(linenum)
       ans += linenum+format(c,options).replace(/\n/g,'\n    ')+'\n'
     })
 
     ans += defaultPen('  }')
-    ans +=  (!Validation.result(this)) ? '' :
-              (Validation.result(this).result==='valid') ? greencheck : redx
+    ans +=  (!Validation.result(this)) 
+            ? '' 
+            : (Validation.result(this).result==='valid') 
+              ? greencheck 
+              : redx
             
     console.log(ans)
   
