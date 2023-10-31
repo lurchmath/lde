@@ -1,0 +1,24 @@
+////////////////////////////////////////////////
+// Proof by Cases (or-) Tool
+//
+// A simple example of the proof by Cases tool.
+// Compare to BIH Cases.lurch
+
+Declare or
+Rules:
+{ 
+  cases> :{ :W or V  :{:W U}  :{:V U}  U }  
+  :{ :W   W or V   V or W } 
+}
+// this should pass   
+{ :P or Q
+  { :P  Q or P}
+  { :Q  Q or P}
+  Q or P by cases
+} ✔︎
+// but this should fail, even with the cases rule labeled above
+{ :A or B
+  { :A  B or A}
+  { :B  B or A}
+  B or A
+} ✗

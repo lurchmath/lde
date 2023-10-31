@@ -201,6 +201,7 @@ const { markDeclaredSymbols, renameBindings, assignProperNames } = Interpret
 // Convenience Utilities
 //
 const instantiation = 'LDE CI'
+const metavariable  = 'LDE MV'
 
 // Debug is a global boolean
 const time = (description) => { if (Debug) console.time(description) }
@@ -230,8 +231,13 @@ const timeEnd = (description) => { if (Debug) console.timeEnd(description) }
 // validation feedback and add additional complete instantiations to the
 // document, but should not add new Rules.
 //
-const validate = ( doc, target = doc, 
-                   options = { checkPreemies:true , validateall:true }) => {
+const validate = ( doc, target = doc, options) => {
+  
+  // put the default options here inside the routine so we can expand the number
+  // of options in the future without cluttering the signature.
+  if (!options) options = 
+    { checkPreemies:true , validateall:true , autoCases:false }
+
   // process the domains (if they aren't already)
   processDomains(doc)
 
@@ -249,7 +255,10 @@ const validate = ( doc, target = doc,
   
   ///////////////////////////////////
   // Proof by Case
-  processCases(doc)
+  processCases(doc, options)
+  // while this idea works, it's not efficent because there are way more ways to
+  // match something like f(x+1,y-2) to 𝜆P(y) than to a single metavar U
+  // processCases(doc,'Substitution')
   
   //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
   
@@ -811,16 +820,18 @@ const processBIHs = doc => {
 // the equation chains.  
 //
 // Otherwise after splitting get the diffs of all equations, and add the
-// instantiation :{ :x=y A=B } after the above Rule where B=A[x:=y].  Note that
-// this assumes = is reflexive, because the normal way to say this would be to
-// say that A=A by reflexive and then :{ :x=y :A=A A=B } by substitution. 
+// instantiation :{ :x=y f(x)=f(y) } after the above Rule. For an arbitrary
+// equation A=B the values of x,y are computed with diff(A,B). Note that this
+// assumes = is reflexive, because the normal way to say this would be to say
+// that A=A by reflexive and then :{ :x=y :A=A A=B } by substitution. 
 //
 // For each equation a=b=c=d that is split, also include the instantiation :{
 // :a=b :b=c :c=d a=d } after the above rule.  This assumes transitivity of
 // equality.
 //
-// So including the Transitive Chain Rule is assuming reflexive, transitive, and
-// substitution for equality.
+// Finally, to assume symmetry we allow both x=y and y=x versions of the above
+// rules. So including the Transitive Chain Rule is assuming reflexive,
+// symmetric, transitive, and substitution properties for equality.
 //
 // TODO: 
 // * generalize this to other reflexive operators with a special kind of
@@ -849,25 +860,32 @@ const processEquations = doc => {
     const A = eq.child(1).copy(), B=eq.child(2).copy()
     // get the diff
     const delta = diff(A,B)
-    // for now we only allow a single substutition at a time, so check if there's only one diff, and that it is nontrivial (i.e., there is a nontrivial substitution that works)
+    // for now we only allow a single substutition at a time, so check if
+    // there's only one diff, and that it is nontrivial (i.e., there is a
+    // nontrivial substitution that works) 
     // TODO: maybe generalize later
     if (delta?.length===1 && delta[0].length>0) {
       // get x,y such that replacing x with y in A produces B
       let x = A.child(...delta[0]).copy(), y=B.child(...delta[0]).copy()
       // construct the instantiation :{ :x=y A=B }
-      const inst = new Environment( 
+      let inst = new Environment( 
         new Application(new LurchSymbol('='),x,y).asA('given') , 
         new Application(new LurchSymbol('='),A,B ) 
-      ).asA('given').asA('Inst')
+      ).asA('given').asA('Inst').asA(instantiation)
+      // it's an instantiation and will be inserted before prop checking so we
+      // have to make it compatible with the others
+      inst.rule=rule
+      inst.finished=true
+      if (!inst.creators) inst.creators = []
+      inst.creators.push(eq)
       // and finally insert the instantiation after the rule
       inst.insertAfter(rule) 
       // additionally add x=y to the list of things that should be considered
       // as user propositions for further instantiation when prop validating.
-      let x_eq_y = inst.child(0).copy()
-      // tell it to no validate this equation, the user isn't necessarily asserting it
+      let x_eq_y = inst.child(0).copy().asA('Consider')
+      // tell it to not validate this equation, the user isn't necessarily
+      // asserting it or hypothesizing it
       x_eq_y.ignore = true
-      // but tell it to consider it to be a user expression for creating prop instantiations
-      x_eq_y.consider = true
       // and insert it after
       x_eq_y.insertAfter(inst)
     }
@@ -891,7 +909,7 @@ const instantiateTransitives = (doc,rule) => {
     let n = eq.numChildren()
     // if there are more than two args, create the relevant instantiation
     if (n>3) { 
-      const inst = new Environment().asA('given').asA('Inst')
+      const inst = new Environment().asA('given').asA('Inst').asA(instantiation)
       for (let k=1;k<n-1;k++) {
         // 
         let newpair = eq.slice(k,k+2)
@@ -905,6 +923,10 @@ const instantiateTransitives = (doc,rule) => {
           eq.lastChild().copy()
         )
       )
+      inst.rule=rule
+      inst.finished=true
+      if (!inst.creators) inst.creators = []
+      inst.creators.push(eq)
       inst.insertAfter(rule)
     }
   })
@@ -924,7 +946,6 @@ const splitEquations = doc => {
     if (n===3) { eq.equation = true 
     } else if (n>3) {
     // if there are more than two args, split it
-      console.log(`It found ${eq} with n=${n}`)
       let last = eq
       for (let k=1;k<n-1;k++) {
         // instead of building a new equation from a pair of arguments, we copy
@@ -947,56 +968,148 @@ const splitEquations = doc => {
 //
 //                        Process Proof by Cases
 //
-// Find the first Rule in the document flagged with .label='cases'. Do nothing
-// if there is no such rule. Otherwise instantiate its last child using each
-// user conclusion that has .by='cases', insert the (usually partial)
-// instantiations after the Rule, leaving the Rule available for further
-// instantation by the global Prop tool (i.e. don't mark it .finished).
+// Find the first Rule in the document flagged with .label='cases'. If found,
+// instantiate its last child using each user conclusion that has .by='cases',
+// insert the (usually partial) instantiations after the Rule, leaving the Rule
+// available for further instantation by the global Prop tool (i.e. don't mark
+// it .finished).
 //
-const processCases = doc => {
-  // check if some rule is a 'Cases' if not, we're done
+// Then check of options.autoCases is true.  If it is find every rule that has
+//
+//   a) its last conclusion is a metavariable 
+//
+//   b) every occurrence of that metavariable in the rule is an outermost
+//      expression. 
+//
+// Create the instantiation of every such rule by matching the metavariable
+// conclusion to every one of the user's conclusions.
+//
+// TODO: design this second idea much more carefully.  Here's why.  A typical
+// large document without using this latter feature has, on average, about 2-3
+// Insts for each conclusion in the user's document.  (Aside: that's kind of
+// amazing and illustrates how instantiating non-forbidden Weenies is a very
+// efficient way to find exactly those instantiations needed for a given user
+// statement.)
+//
+// But the number of Insts (or Parts) created with this feature is equal to the
+// number of conclusions, which is a substantial increase in both the number of
+// Ints and size of the document but also the time it takes to produce them all.
+// For example the time it takes for the current testing suite to complete
+// doubles with this feature enabled.  So for now we will make the default to
+// turn this off and still use the annoyng 'by cases' speedup.
+//
+// In the future, however, there are better more subtle ways to approach this.
+// One idea is the following.
+//
+// * Split this routine into two separate routines, and run the first have that
+//   processes cases> and 'by cases' BEFORE the main propositional instantiation
+//   is done.
+// * Then AFTER instantiating with the main loop, only instantiate the Parts (or
+//   Rules, but more likely Parts) which have no other metavariables in them
+//   besides the forbidden one. That will at least eliminate creating Parts up
+//   front that then never turn into Insts afterwards. In lucky documents
+//
+// This still doesn't eliminate
+const processCases = (doc , options) => {
+
+  // check if some rule is a 'Cases'
   const rule=doc.find( x => x.isA('Cases') )
-  if (!rule) return
-  // The conclusion of a 'cases' rule must be what is matched.
-  const p = rule.lastChild()
-  // get all the things the user wants to checked as a conclusion by cases
-  const usercases = [...doc.descendantsSatisfyingIterator(x => x.by==='cases')]
-  // for each one construct the relevant partial instantiation
-  usercases.forEach( c => {
-    try {
-      ;[...Formula.allPossibleInstantiations(p, c)].forEach(s => {
-        const inst = Formula.instantiate(rule, s)
-        // do the usual prepping
-        // TODO: modularize some of this
-        assignProperNames(inst)
-        cacheFormulaDomainInfo(inst)
-        // the inst is no longer a Rule
-        inst.unmakeIntoA('Rule')
-        // decide whether it's a Part or an Inst
-        if (inst.domain.size===0) {
-          inst.unmakeIntoA('Part')
-          inst.makeIntoA('Inst')
-        } else {
-          inst.makeIntoA('Part')
-          inst.ignore = true
-        }
-        // store the rule it came from and add c to the list of creators
-        inst.rule = rule.rule || rule
-        if (!inst.creators) inst.creators = []
-        inst.creators.push(c)
-        // also rename the bindings to match what the user would have
-        // for the same expressions in his document
-        // time('Rename bindings')
-        inst.statements().forEach(x => renameBindings(x))
-        // then insert this instantiation after its formula
-        Formula.addCachedInstantiation(rule, inst)
-        // finally mark the declared symbols in the instantiation
-        markDeclaredSymbols(doc, inst)
+  if (rule) {
+    // The conclusion of a 'cases' rule must be what is matched.
+    const p = rule.lastChild()
+    // get all the things the user wants to checked as a conclusion by cases
+    const usercases = [...doc.descendantsSatisfyingIterator(
+      x => x.by?.toLowerCase()==='cases')]
+    // for each one construct the relevant partial instantiation
+    usercases.forEach( c => {
+      try {
+        ;[...Formula.allPossibleInstantiations(p, c)].forEach(s => {
+          const inst = Formula.instantiate(rule, s)
+          // do the usual prepping
+          assignProperNames(inst)
+          cacheFormulaDomainInfo(inst)
+          // the inst is no longer a Rule
+          inst.unmakeIntoA('Rule')
+          // decide whether it's a Part or an Inst
+          if (inst.domain.size===0) {
+            inst.unmakeIntoA('Part')
+            inst.makeIntoA('Inst')
+          } else {
+            inst.makeIntoA('Part')
+            inst.ignore = true
+          }
+          // store the rule it came from and add c to the list of creators
+          inst.rule = rule.rule || rule
+          if (!inst.creators) inst.creators = []
+          inst.creators.push(c)
+          // also rename the bindings to match what the user would have
+          // for the same expressions in his document
+          // time('Rename bindings')
+          inst.statements().forEach(x => renameBindings(x))
+          // then insert this instantiation after its formula
+          Formula.addCachedInstantiation(rule, inst)
+          // finally mark the declared symbols in the instantiation
+          markDeclaredSymbols(doc, inst)
+        })
+      } catch { }
+    })
+    rule.finished = true
+  // also check if the autoCases option is true. If so, match every user conclusion
+  // to every caselike rule. 
+  } else if (options.autoCases) {
+    const rules = getCaselikeRules(doc)
+    getUserPropositions(doc)
+      .filter( e => e instanceof Expression && e.isAConclusionIn(doc))
+      .forEach( e =>{  
+      rules.forEach( r => {
+        try {
+          ;[...Formula.allPossibleInstantiations(r.lastChild(), e)].forEach(s => {
+            const inst = Formula.instantiate(r, s)
+            // do the usual prepping
+            assignProperNames(inst)
+            cacheFormulaDomainInfo(inst)
+            // the inst is no longer a Rule
+            inst.unmakeIntoA('Rule')
+            // decide whether it's a Part or an Inst
+            if (inst.domain.size===0) {
+              inst.unmakeIntoA('Part')
+              inst.makeIntoA('Inst')
+            } else {
+              inst.makeIntoA('Part')
+              inst.ignore = true
+            }
+            // store the rule it came from and add c to the list of creators
+            inst.rule = r
+            if (!inst.creators) inst.creators = []
+            inst.creators.push(e)
+            // also rename the bindings to match what the user would have
+            // for the same expressions in his document
+            // time('Rename bindings')
+            inst.statements().forEach(x => renameBindings(x))
+            // then insert this instantiation after its formula
+            Formula.addCachedInstantiation(r, inst)
+            // finally mark the declared symbols in the instantiation
+            markDeclaredSymbols(doc, inst)
+          })
+        } catch { }
       })
-    } catch { }
-  })
-  rule.finished = true  
+    })
+  } 
   return doc
+}
+
+// getCaselikeRules
+// Find all of the Rules that 
+const getCaselikeRules = doc => {
+  return doc.Rules().filter( rule => {
+    const U = rule.lastChild() 
+    if (!U.isA(metavariable)) return false
+    const others = rule.descendantsSatisfying( x => x.equals(U) )
+    // we return only rules that have more than one U to avoid
+    // matching rules like :{ transitive_chain_rule } propositionally.
+    // Note that a rule like :{ →← U } will match however.
+    return others.length>1 && others.every( u => u.isOutermost() ) 
+  })
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1035,7 +1148,7 @@ const getUserPropositions = doc => {
   // if not cached, fetch them   
   const allE = [...doc.descendantsSatisfyingIterator(
     // include these
-    x => x.isAProposition() , 
+    x => x.isAProposition() || x.isA('Consider'), 
     // exclude anything inside of these
     x => x.isA('Rule') || x.isA('Part') || x.isA('Inst')  
   )]
@@ -1322,6 +1435,6 @@ const Benchmark = function (f, name) {
 export default {
   validate, getUserPropositions, instantiate, markDeclarationContexts,
   load, processBIHs, processEquations, splitEquations, processDoc, processDomains,
-  cacheFormulaDomainInfo, Benchmark, Report
+  cacheFormulaDomainInfo, Benchmark, getCaselikeRules, Report
 }
 ///////////////////////////////////////////////////////////////////////////////

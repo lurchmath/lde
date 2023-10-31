@@ -8,50 +8,149 @@ process.stdout.write(defaultPen(`Loading proofs ...\n`))
 let start = Date.now()
 ////////////////////////////////////////////////////////////////////////////
 
-doc = $(
-`
-{
-  Declare or
-  Rules:
-  { 
-    cases> :{ :W or V  :{:W U}  :{:V U}  U }  
-    :{ :W   W or V   V or W } 
-  }   
-  { :P or Q
-    { :P  Q or P}
-    { :Q  Q or P}
-    Q or P by cases
-  } 
-}
-`)
-doc = interpret(doc)
-validate(doc)
+// casesdoc = $(
+// `
+// {
+//   Declare or ⇒
+//   Rules:
+//   { 
+//     cases>
+//     :{ :W or V  :{ :W U } :{ :V U }  U }  
+//     :{ :W   W or V   V or W } 
+//   }   
+//   { :P or Q
+//     { :P  Q or P}
+//     { :Q  Q or P}
+//     Q or P by cases
+//   } 
+// }
+// `)
+// interpret(casesdoc)
+// validate(casesdoc)
 
-bih = $(
-    `
-    {
-      Declare or
-      Rules:
-      { 
-        :{ :W or V  :{:W U}  :{:V U}  U }  
-        :{ :W   W or V   V or W } 
-      } 
-      Recall
-      { :P or Q
-        :{ :P  Q or P}
-        :{ :Q  Q or P}
-        Q or P 
-      } 
-      { :P or Q
-        { :P  Q or P}
-        { :Q  Q or P}
-        Q or P 
-      }
-    }
-    `)
-bih = interpret(bih)
-validate(bih)
+// nocasesdoc = $(
+//   `
+//   {
+//     Declare or ⇒
+//     Rules:
+//     { 
+//       :{ :W or V  :W⇒U  :V⇒U  U }  
+//       :{ :W   W or V   V or W } 
+//       :{ :{ :W V } W⇒V }
+//     }   
+//     { :P or Q
+//       { :P  Q or P}
+//       { :Q  Q or P}
+//       Q or P
+//     } 
+//   }
+//   `)
+//   interpret(nocasesdoc)
+//   validate(nocasesdoc)
+  
+// casesdoc = $(
+// `
+// {
+//   Declare or
+//   Rules:
+//   { 
+//     cases> :{ :W or V  :{:W U}  :{:V U}  U }  
+//     :{ :W   W or V   V or W } 
+//   }   
+//   { :P or Q
+//     { :P  Q or P}
+//     { :Q  Q or P}
+//     Q or P by cases
+//   } 
+// }
+// `)
+// interpret(casesdoc)
+// validate(casesdoc)
+
+// bih = $(
+//     `
+//     {
+//       Declare or
+//       Rules:
+//       { 
+//         :{ :W or V  :{:W U}  :{:V U}  U }  
+//         :{ :W   W or V   V or W } 
+//       } 
+//       Recall
+//       { :P or Q
+//         :{ :P  Q or P}
+//         :{ :Q  Q or P}
+//         Q or P 
+//       } 
+//       { :P or Q
+//         { :P  Q or P}
+//         { :Q  Q or P}
+//         Q or P 
+//       }
+//     }
+//     `)
+// interpret(bih)
+// validate(bih)
     
+// Disable forbiddenWeenies before using this.
+// nobih = $(
+//     `
+//     {
+//       Declare or
+//       Rules:
+//       { 
+//         :{ :W or V  :{:W U}  :{:V U}  U }  
+//         :{ :W   W or V   V or W } 
+//       } 
+//       { :P or Q
+//         { :P  Q or P}
+//         { :Q  Q or P}
+//         Q or P 
+//       }
+//     }
+//     `)
+// nobih = interpret(nobih)
+// validate(nobih)
+    
+// doc = $(
+//   `
+//   {
+//     Declare 1 = +
+//     Rules:
+//     { 
+//       :{ transitive_chain_rule }
+//     }   
+//     { 
+//       :a=b
+//       :f(a,a+1)=f(a,a+1)
+//       f(a,a+1)=f(a,b+1)
+//     } 
+//   }
+//   `)
+// doc = interpret(doc)
+// validate(doc)
+
+// doc2 = $(
+//   `
+//   {
+//     Declare 1 = +
+//     Rules:
+//     { 
+//       :{ transitive_chain_rule }
+//     }   
+//     { 
+//       :a=b
+//       f(a,a+1)=f(a,b+1)
+//     } 
+//   }
+//   `)
+// interpret(doc2)
+// validate(doc2)
+
+// trans = loadDoc('proofs/TransChain')
+
+doc = loadDoc('proofs/math-299-midterm')
+write(doc)
 
 // Accumulator = { totaltime:0, numcalls:0, numsolns:0, numlines: 0}
 ///////////////////////////////////////////////////////////

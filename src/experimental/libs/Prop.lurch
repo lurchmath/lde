@@ -15,7 +15,8 @@ Rules:
   :{ {W V}  ≡  W and V }                // and+
   :{ {:W V} ≡  W⇒V }                    // ⇒
   :{ { {:W V} {:V W} } ≡ W⇔V }          // ⇔
-  :{ :W  (W or V) (V or W) }            // or+ 
+  :{ :W  (W or V) (V or W) }            // or+
+  cases> 
   :{ :(W or V) :{:W U} :{:V U}  U }     // or-
   :{ :{:W →←}  ¬W }                     // ¬+
   :{ :{:¬W →←}  W }                     // ¬-

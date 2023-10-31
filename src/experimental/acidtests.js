@@ -10,14 +10,19 @@ let start = Date.now()
 
 // Load Acid Tests
 acid=[1,4,5,6,7,8,9,10,'11a','11b','11c','11d','11e','Induction'].map( (ex,k) => 
-     loadDoc(`proofs/acid tests/acid ${k} Example ${ex}.lurch`))
+     loadDoc(`proofs/acid tests/acid ${k} Example ${ex}`))
+// Load other tests in the acid tests folder
+acid.push(loadDoc('proofs/acid tests/Transitive Chains'))
+acid.push(loadDoc('proofs/acid tests/Cases'))
+acid.push(loadDoc('proofs/acid tests/BIH Cases'))
+acid.push(loadDoc('proofs/acid tests/user-thms'))
 // Load Math 299 tests
-acid.push(loadDoc('proofs/math-299-prop'))
-acid.push(loadDoc('proofs/math-299-pred'))
-acid.push(loadDoc('proofs/math-299-peano'))
-// Load user theorem tests
-acid.push(loadDoc('proofs/user-thms'))
+acid.push(loadDoc('proofs/math299/prop'))
+acid.push(loadDoc('proofs/math299/pred'))
+acid.push(loadDoc('proofs/math299/peano'))
+acid.push(loadDoc('proofs/math299/midterm'))
 
+// run the tests
 let passed = 0
 let failed = 0
 let numchecks = 0

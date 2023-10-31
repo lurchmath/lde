@@ -10,7 +10,7 @@ include libs/PredThm
 // :{ :𝜆P(0) :{ :Let k be such that 𝜆P(k)   𝜆P(𝜎(k)) } 𝜆P(n) }   // alt N4
 
 // Declare constants
-Declare 0 𝜎 + ⋅ ≤ =
+Declare 0 𝜎 + ⋅ ≤
 
 ////////////////////////////////
 // Peano Axioms
