@@ -4,7 +4,7 @@ include libs/Acid Tests
 // 
 // These are the example and counterexample proofs from the END document
 
-➤ "Example 5 from END"
+➤ "(END Example 5) Equality is symmetric and transitive."
 {
   
   ➤ "Thm: Equality is symmetric and transitive."

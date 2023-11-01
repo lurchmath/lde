@@ -6,6 +6,9 @@
 // Compare to Cases.lurch
 
 Declare or
+
+➤ "(cases example with BIHs) Thm: Commutativity of or"
+
 Rules:
 { 
   :{ :W or V  :{:W U}  :{:V U}  U }  

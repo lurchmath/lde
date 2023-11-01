@@ -4,6 +4,8 @@
 // A simple example of the proof by Cases tool.
 // Compare to BIH Cases.lurch
 
+➤ "(cases example with no BIHs) Thm: Commutativity of or."
+
 Declare or
 Rules:
 { 

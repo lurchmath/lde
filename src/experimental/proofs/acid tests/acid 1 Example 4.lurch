@@ -4,7 +4,7 @@ include libs/Acid Tests
 // 
 // These are the example and counterexample proofs from the END document
 
-➤ "Example 4 from END"
+➤ "(END Example 4) If ∃x,∀y,Q(x,y) then ∀y,∃x,Q(x,y)"
 {
   ➤ "Thm 4: If ∃x,∀y,Q(x,y) then ∀y,∃x,Q(x,y)"
   { :∃x.∀y.Q(x,y)  ∀y.∃x.Q(x,y) }

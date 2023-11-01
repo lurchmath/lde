@@ -4,7 +4,7 @@ include libs/Number Theory
 // 
 
 { 
-➤ "Testing User Theorems"
+➤ "(testing user theorems) Thm 7.5 Assoc of + & Thm 7.2 n≠0 ⇒ ∃m,n=𝜎(m)"
 
 {
   ➤ "Theorem 7.5: Associativity of Addition"

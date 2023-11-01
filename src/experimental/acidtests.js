@@ -28,13 +28,18 @@ let failed = 0
 let numchecks = 0
 let numreds = 0
 acid.forEach( (T,k) => {
+  // for each test, find the first comment if any and use that as the
+  // description of the test file
+  const desc = T.find(x=>x.isAComment())?.child(1)
+  console.log((itemPen(`Test ${k}: ${stringPen(desc)}`)))
+
   T.descendantsSatisfying( x => x.hasAttribute('ExpectedResult') ).forEach( (s,i) => {
     if (Validation.result(s) && 
         Validation.result(s).result==s.getAttribute('ExpectedResult')) {
-      console.log(`Test ${k}.${i} → ok`)
+      console.log(`  Test ${k}.${i} → ok`)
       passed++
     } else {
-      console.log(`\nTest ${k}.${i} → FAIL!!\n`)
+      console.log(`\n  Test ${k}.${i} → FAIL!!\n`)
       failed++
     }
   })

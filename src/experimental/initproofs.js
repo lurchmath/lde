@@ -149,8 +149,8 @@ let start = Date.now()
 
 // trans = loadDoc('proofs/TransChain')
 
-doc = loadDoc('proofs/math-299-midterm')
-write(doc)
+doc = loadDoc('proofs/math299/midterm')
+
 
 // Accumulator = { totaltime:0, numcalls:0, numsolns:0, numlines: 0}
 ///////////////////////////////////////////////////////////

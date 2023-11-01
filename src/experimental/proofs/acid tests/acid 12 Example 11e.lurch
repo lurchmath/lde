@@ -4,7 +4,8 @@ include libs/Acid Tests
 // 
 // These are the example and counterexample proofs from the END document
 
-➤ "Example 11e from END"
+➤ "(END Example 11e) Cheating the subset plus rule"
+
 {
    ➤ "Cheaty, cheatin, cheater."
    ➤ "This does validate... and it should!"

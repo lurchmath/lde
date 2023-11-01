@@ -4,7 +4,7 @@ include libs/Acid Tests
 // 
 // These are the example and counterexample proofs from the END document
 
-➤ "Example 7 from END"
+➤ "(END Example 7) Beginner's mistake."
 {
   ➤ "Beginner's mistake"
   { :∀x.∃y.P(x,y)

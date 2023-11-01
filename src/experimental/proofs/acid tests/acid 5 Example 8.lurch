@@ -4,7 +4,7 @@ include libs/Acid Tests
 // 
 // These are the example and counterexample proofs from the END document
 
-➤ "Example 8 from END (generalizing a constant expression)"
+➤ "(END Example 8) Generalizing a constant expression."
 {
   ➤ "Thm: 1<1"
   { 

@@ -5,7 +5,7 @@ include libs/Acid Tests
 // These are the example and counterexample proofs from the END document
 
 
-➤ "Example 1 from END"
+➤ "(END Example 1) If P⇒Q then ¬P∨Q."
 {
   ➤ "Thm: If P⇒Q then ¬P∨Q."  
   { :P ⇒ Q   not P or Q }

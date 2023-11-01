@@ -4,7 +4,7 @@ include libs/Acid Tests
 // 
 // These are the example and counterexample proofs from the END document
 
-➤ "Example 11b from END"
+➤ "(END Example 11b) Cheating the subset plus rule"
 {
    ➤ "Trying again to cheat the subset plus rule."
    // Thm/Pf attempt 

@@ -4,7 +4,7 @@ include libs/Acid Tests
 // 
 // These are the example and counterexample proofs from the END document
 
-➤ "Example 10 from END"
+➤ "(END Example 10) { :{ :Let x B } { B } } is invalid."
 {
     ➤ "This should be incorrect, e.g. if B is '(∀y,P(y))⇒∃y,P(y)'"
     :{ :Let x B } 
