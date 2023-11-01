@@ -24,11 +24,12 @@ acid.push(loadDoc('proofs/math299/midterm'))
 
 // run the tests
 
-// test the Peggy parser by itself
+// test the asciimath Peggy parser by itself
 try { 
-  const s=lc(parse(loadStr('proofs/PeggyTests')))
+  const s=lc(parse(loadStr('parsers/asciiParserTests')))
   console.log(`${itemPen('Parser Test:')} → ok`)
 } catch (e) { console.log(xPen(`ERROR: asciimath peggy parser test failed.`)) }
+
 // and the rest of the acid tests
 let passed = 0
 let failed = 0
