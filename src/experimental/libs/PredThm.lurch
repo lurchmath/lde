@@ -12,7 +12,7 @@ include libs/PropThm
 // * commutative of ∀ and ∃ rules are probably more efficiently handled with
 //   something like (∀ x y, (@ P x y)) vs (∀ y x, (@ P x y)) but it's not clear
 //   the best way to do that in practice yet
-// * update: we now have the transitive_chain_rule.  This may supercede
+// * update: we now have the Equations_Rule.  This may supercede
 //   substitution and reflexive of equality. 
 //   TODO: make more test examples to check this.
 

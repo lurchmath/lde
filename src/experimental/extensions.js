@@ -484,7 +484,9 @@ const diff = (LHS,RHS) => {
         ans.push(...nodeans)
       }
     }
-    return (ans.length)?ans:undefined
+    // it should only return undefined if you, e.g. diff an expression against a
+    // declaration or something
+    return (ans.length) ? ans : undefined
   }
 }
 

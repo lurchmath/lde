@@ -45,7 +45,7 @@ Rules:
     }                                    
   :{ W = W }                            // reflexive =
   // theorems
-  :{ transitive_chain_rule }            // for equations
+  :{ Equations_Rule }            // for equations
   :{ :x = y   y = x }                   // symmetry of =
 } 
     

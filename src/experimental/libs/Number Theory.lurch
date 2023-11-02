@@ -14,4 +14,9 @@ Definitions:
   :{ 3=𝜎(2) }
   :{ 4=𝜎(3) }
   :{ 5=𝜎(4) }  
+
+  // and at this point we want the helpful equations rule
+  // and symmetry of =
+  :{ Equations_Rule }
+  :{ :x=y y=x }
 } 

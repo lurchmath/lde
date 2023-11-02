@@ -118,7 +118,7 @@ let start = Date.now()
 //     Declare 1 = +
 //     Rules:
 //     { 
-//       :{ transitive_chain_rule }
+//       :{ Equations_Rule }
 //     }   
 //     { 
 //       :a=b
@@ -136,7 +136,7 @@ let start = Date.now()
 //     Declare 1 = +
 //     Rules:
 //     { 
-//       :{ transitive_chain_rule }
+//       :{ Equations_Rule }
 //     }   
 //     { 
 //       :a=b
@@ -149,7 +149,7 @@ let start = Date.now()
 
 // trans = loadDoc('proofs/TransChain')
 
-doc = loadDoc('proofs/math299/midterm')
+doc = loadDoc('proofs/math299/peanotranschain')
 
 
 // Accumulator = { totaltime:0, numcalls:0, numsolns:0, numlines: 0}

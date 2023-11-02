@@ -145,7 +145,7 @@ let start = Date.now()
 // x=$(
 // `{
 //   Declare + ⋅ - 0 1 = 
-//   Rule :{ transitive_chain_rule } 
+//   Rule :{ Equations_Rule } 
 //   (x+1)⋅(x-1) = (x+1)⋅(x+(-1))
 //               = (x+1)⋅x + (x+1)⋅(-1) 
 //               = (x⋅x+1⋅x) + (x+1)⋅(-1)
@@ -158,7 +158,7 @@ let start = Date.now()
 // y=$(
 //   `{
 //     Declare + ⋅ 0 1 2 = 
-//     Rule :{ transitive_chain_rule } 
+//     Rule :{ Equations_Rule } 
 //     a+a = 1⋅a+a
 //         = 1⋅a+1⋅a
 //         = (1+1)⋅a
@@ -171,7 +171,7 @@ let start = Date.now()
 // z=$(
 //   `{
 //     Declare + ⋅ 0 1 2 = 
-//     Rule :{ transitive_chain_rule } 
+//     Rule :{ Equations_Rule } 
 //     a+a = 1⋅a+a
 //   }`)
 // processShorthands(z)

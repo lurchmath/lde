@@ -250,7 +250,7 @@ const validate = ( doc, target = doc, options) => {
   processBIHs(doc)
   
   ///////////////////////////////////
-  // Equations and Transtivive Chains
+  // Equations 
   processEquations(doc)
   
   ///////////////////////////////////
@@ -843,14 +843,14 @@ const processBIHs = doc => {
 const processEquations = doc => {
   // split equation chains
   splitEquations(doc)
-  // check if the Transitive_Chain rule is around, if not, we're done
+  // check if the Equations_Rule is around, if not, we're done
   const rule=doc.find(
     x=>x.isA('Rule') && x.numChildren()==1 && 
-       x.child(0) instanceof LurchSymbol && x.child(0).text()==='transitive_chain_rule',
+       x.child(0) instanceof LurchSymbol && x.child(0).text()==='Equations_Rule',
     x=>!(x.isA('Rule') || x===doc))
-  // if there is no transitive chain rule loaded we are done
+  // if there is no Equations Rule loaded we are done
   if (!rule) return
-  // the transitive chain rule has been found, so get all of the .equations
+  // the Equations Rule has been found, so get all of the .equations
   const eqs=[...doc.descendantsSatisfyingIterator(
     x => x.equation , 
     x => x instanceof Application && !x.isOutermost())]
@@ -888,7 +888,25 @@ const processEquations = doc => {
       x_eq_y.ignore = true
       // and insert it after
       x_eq_y.insertAfter(inst)
-    }
+      // Also make the reverse diff equation as a Consider
+      let y_eq_x = new Application(new LurchSymbol('='),y.copy(),x.copy())
+      .asA('given').asA('Consider')
+      // ignore it for prop form
+      y_eq_x.ignore = true
+      // and insert it after
+      y_eq_x.insertAfter(rule)
+
+    // otherwise, we still want to put the reverse as a Consider to get symmetry
+    // for free.
+    } else {
+      // Make the reverse equation as a Consider
+      let y_eq_x = new Application(new LurchSymbol('='),B.copy(),A.copy())
+                   .asA('given').asA('Consider')
+      // ignore it for prop form
+      y_eq_x.ignore = true
+      // and insert it after
+      y_eq_x.insertAfter(rule)
+    } 
   })
   // Finally add the transitivity conclusion.  This assumes transitivity, of course.
   instantiateTransitives(doc,rule)
@@ -898,7 +916,7 @@ const processEquations = doc => {
 //
 // Go through and fetch all of the user's equations (i.e., only equations that
 // are conclusions) which have more than two arguments and create and insert
-// them after the transitive_chain_rule rule.  For example, a=b=c=d=e would produce
+// them after the Equations_Rule rule.  For example, a=b=c=d=e would produce
 // and insert the instantiation :{ :a=b :b=c :c=d :d=e a=e }
 //
 // This is a helper utility called by processEquations().
@@ -1106,7 +1124,7 @@ const getCaselikeRules = doc => {
     if (!U.isA(metavariable)) return false
     const others = rule.descendantsSatisfying( x => x.equals(U) )
     // we return only rules that have more than one U to avoid
-    // matching rules like :{ transitive_chain_rule } propositionally.
+    // matching rules like :{ Equations_Rule } propositionally.
     // Note that a rule like :{ →← U } will match however.
     return others.length>1 && others.every( u => u.isOutermost() ) 
   })
