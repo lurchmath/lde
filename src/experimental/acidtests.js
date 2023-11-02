@@ -61,7 +61,7 @@ acid.forEach( (T,k) => {
 const pen = (!failed) ? chalk.ansi256(40) : chalk.ansi256(9)
 console.log(pen(`\n${passed} tests passed - ${failed} tests failed\n`))
 console.log(
-  `${checkPen(numchecks)} green checks\n${xPen(numreds)} red marks`)
+  `${checkPen(numchecks)} green checks\n${checkPen(numreds)} red marks`)
 console.log(`Test result stored in the array 'acid'\n`)
 
 // acid.forEach((x,k)=>{console.log('\nTest #'+k+'\n');x.report(user)})

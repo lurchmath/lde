@@ -74,42 +74,41 @@ include libs/Number Theory
 //   }
 // }
 
-{
-  ➤ "Theorem 7.4: 𝜎(n)=n+1"
-  { 𝜎(n)=n+1 }
-
-  ➤ "Proof:"
-  { 
-    𝜎(n) = 𝜎(n+0)
-         = n+𝜎(0)
-         = n+1
-  }
-}
-
 // {
-//   ➤ "Theorem 7.5: Associativity of Addition"
-//   { (m+n)+p=m+(n+p) }
+//   ➤ "Theorem 7.4: 𝜎(n)=n+1"
+//   { 𝜎(n)=n+1 }
 
-//   ➤ "Proof: (by induction on p for arbitrary m,n"
+//   ➤ "Proof:"
 //   { 
-//     ➤ "Base case:"
-//     Recall { :n+0=n :(m+n)+0=m+n (m+n)+0=m+(n+0) }
-//     ➤ "Inductive step:"
-//     { :Let k be such that (m+n)+k=m+(n+k)
-//       Recall { :(m+n)+k = m+(n+k) 
-//                :(m+n)+𝜎(k) = 𝜎((m+n)+k) 
-//                (m+n)+𝜎(k) = 𝜎(m+(n+k)) } 
-//       Recall { :m+𝜎(n+k) = 𝜎(m+(n+k)) 
-//                :(m+n)+𝜎(k) = 𝜎(m+(n+k))
-//                (m+n)+𝜎(k) = m+𝜎(n+k) }
-//       Recall { :n+𝜎(k) = 𝜎(n+k)
-//                :(m+n)+𝜎(k) = m+𝜎(n+k)
-//                (m+n)+𝜎(k) = m+(n+𝜎(k)) }
-//     }
-//     ➤ "Therefore, by induction"
-//     ∀p.(m+n)+p=m+(n+p)
+//     𝜎(n) = 𝜎(n+0)
+//          = n+𝜎(0)
+//          = n+1
 //   }
 // }
+
+{
+  ➤ "Theorem 7.5: Associativity of Addition"
+  { (m+n)+p=m+(n+p) }
+
+  ➤ "Proof: (by induction on p for arbitrary m,n"
+  { 
+    ➤ "Base case:"
+    (m+n)+0 = m+n
+            = m+(n+0) 
+            
+    ➤ "Inductive step:"
+    { :Let k be such that (m+n)+k=m+(n+k)
+      
+      (m+n)+𝜎(k) = 𝜎((m+n)+k) 
+                 = 𝜎(m+(n+k)) 
+                 = m+𝜎(n+k) 
+                 = m+(n+𝜎(k)) 
+
+    }
+    ➤ "Therefore, by induction"
+    ∀p.(m+n)+p=m+(n+p)
+  }
+}
 
 // end of all
 } ✔︎

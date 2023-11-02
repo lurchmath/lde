@@ -868,44 +868,37 @@ const processEquations = doc => {
       // get x,y such that replacing x with y in A produces B
       let x = A.child(...delta[0]).copy(), y=B.child(...delta[0]).copy()
       // construct the instantiation :{ :x=y A=B }
+      
+      // build it
       let inst = new Environment( 
-        new Application(new LurchSymbol('='),x,y).asA('given') , 
-        new Application(new LurchSymbol('='),A,B ) 
-      ).asA('given').asA('Inst').asA(instantiation)
-      // it's an instantiation and will be inserted before prop checking so we
-      // have to make it compatible with the others
-      inst.rule=rule
-      inst.finished=true
-      if (!inst.creators) inst.creators = []
-      inst.creators.push(eq)
-      // and finally insert the instantiation after the rule
-      inst.insertAfter(rule) 
+        new Application( new LurchSymbol('=') , x , y).asA('given') , 
+        new Application( new LurchSymbol('=') , A , B ) 
+      )
+  
+      // and insert it
+      insertInstantiation( inst , rule , eq )
+
       // additionally add x=y to the list of things that should be considered
       // as user propositions for further instantiation when prop validating.
-      let x_eq_y = inst.child(0).copy().asA('Consider')
-      // tell it to not validate this equation, the user isn't necessarily
-      // asserting it or hypothesizing it
-      x_eq_y.ignore = true
-      // and insert it after
-      x_eq_y.insertAfter(inst)
-      // Also make the reverse diff equation as a Consider
-      let y_eq_x = new Application(new LurchSymbol('='),y.copy(),x.copy())
-      .asA('given').asA('Consider')
-      // ignore it for prop form
-      y_eq_x.ignore = true
-      // and insert it after
-      y_eq_x.insertAfter(rule)
+      const x_eq_y = inst.child(0).copy()
 
-    // otherwise, we still want to put the reverse as a Consider to get symmetry
-    // for free.
+      // and insert it
+      insertInstantiation( x_eq_y , rule , eq )
+      
+      // Also make the reverse diff equation as a Consider to impose symmetry
+      const y_eq_x = new Application(new LurchSymbol('='),y.copy(),x.copy())
+      
+      // and insert it
+      insertInstantiation( y_eq_x , rule , eq )
+
+    // and in the case where there's no substitution possible, also add the
+    // reverse of the equation to impose symmetry
     } else {
       // Make the reverse equation as a Consider
-      let y_eq_x = new Application(new LurchSymbol('='),B.copy(),A.copy())
-                   .asA('given').asA('Consider')
-      // ignore it for prop form
-      y_eq_x.ignore = true
-      // and insert it after
-      y_eq_x.insertAfter(rule)
+      let y_eq_x = new Application(new LurchSymbol('=') , B.copy() , A.copy())
+      
+      // and insert it
+      insertInstantiation( y_eq_x , rule , eq )
     } 
   })
   // Finally add the transitivity conclusion.  This assumes transitivity, of course.
@@ -923,11 +916,15 @@ const processEquations = doc => {
 const instantiateTransitives = (doc,rule) => {
   // fetch the conclusion equations (argument = true)
   doc.equations(true).forEach( eq => {
+    
     // let n be the number of arguments to =
     let n = eq.numChildren()
+
     // if there are more than two args, create the relevant instantiation
     if (n>3) { 
-      const inst = new Environment().asA('given').asA('Inst').asA(instantiation)
+
+      // build it
+      const inst = new Environment()
       for (let k=1;k<n-1;k++) {
         // 
         let newpair = eq.slice(k,k+2)
@@ -941,11 +938,10 @@ const instantiateTransitives = (doc,rule) => {
           eq.lastChild().copy()
         )
       )
-      inst.rule=rule
-      inst.finished=true
-      if (!inst.creators) inst.creators = []
-      inst.creators.push(eq)
-      inst.insertAfter(rule)
+      
+      // and insert it
+      insertInstantiation( inst, rule, eq )
+
     }
   })
 }
@@ -1027,7 +1023,6 @@ const splitEquations = doc => {
 //   besides the forbidden one. That will at least eliminate creating Parts up
 //   front that then never turn into Insts afterwards. In lucky documents
 //
-// This still doesn't eliminate
 const processCases = (doc , options) => {
 
   // check if some rule is a 'Cases'
@@ -1042,32 +1037,13 @@ const processCases = (doc , options) => {
     usercases.forEach( c => {
       try {
         ;[...Formula.allPossibleInstantiations(p, c)].forEach(s => {
+          
+          // for each solution (there should only be one) instantiate the rule
           const inst = Formula.instantiate(rule, s)
-          // do the usual prepping
-          assignProperNames(inst)
-          cacheFormulaDomainInfo(inst)
-          // the inst is no longer a Rule
-          inst.unmakeIntoA('Rule')
-          // decide whether it's a Part or an Inst
-          if (inst.domain.size===0) {
-            inst.unmakeIntoA('Part')
-            inst.makeIntoA('Inst')
-          } else {
-            inst.makeIntoA('Part')
-            inst.ignore = true
-          }
-          // store the rule it came from and add c to the list of creators
-          inst.rule = rule.rule || rule
-          if (!inst.creators) inst.creators = []
-          inst.creators.push(c)
-          // also rename the bindings to match what the user would have
-          // for the same expressions in his document
-          // time('Rename bindings')
-          inst.statements().forEach(x => renameBindings(x))
-          // then insert this instantiation after its formula
-          Formula.addCachedInstantiation(rule, inst)
-          // finally mark the declared symbols in the instantiation
-          markDeclaredSymbols(doc, inst)
+          
+          // process and insert it
+          insertInstantiation( inst, rule, c )
+
         })
       } catch { }
     })
@@ -1272,82 +1248,21 @@ const instantiate = doc => {
           // for each solution, try to make a valid instantiation of f
           solns.forEach(s => {
             let inst
-            // time('Instantiate a formula')
             try { inst = Formula.instantiate(f, s) } catch { return }
-            // timeEnd('Instantiate a formula')
-            // all instantiations are givens
-            inst.makeIntoA('given')
-            // if we made it here, we have a valid instantation
-            //
-            // inst.formula = true // replaced by 'Rule', 'Part', 'Inst', .finished
-            //
-            // it might contain a Let which was instantiated by some other
-            // statment, so we might have to add the tickmarks.
-            //
-            // Note: we had to check that in a rule like :{:{:Let(x) (@ P
-            //       x)} (@ P y)} that it doesn't instantiate (@ P y) first
-            //       with a constant lambda expression like 𝜆y,Q(z) which
-            //       has z free and then instantiate the metavar x with z,
-            //       since then 'the free z becomes bound' in a sense.
-            //       Otherwise you could conclude, e.g. ∀y,Q(z) from {
-            //       :Let(z) Q(z) } instead of just ∀y,Q(y). 
-            assignProperNames(inst)
-            // TODO: when making a proper testing suite check if we need to
-            //       do any of these to the instantiation (and anything
-            //       else)
-            //
-            //     processLets( inst , false ) 
-            //     processForSomes( inst )
-            //
-            // let's also remember which expression created this
-            // instantiation, what original Rule it instantiates, and which
-            // pass for debugging and feedback.
-            //
-            inst.creators = (f.creators) ? [...f.creators] : []
-            inst.creators.push(e)
-            // whether it's a Part or an Inst, save the rule it originates from
-            inst.rule = f.rule || f
-            //  Note that .pass is the current pass number. 
-            inst.pass = n
-            inst.numsolns = solns.length
-            // if the instantiation left some metavariables, we will want to
-            // cache it's domain info and mark it as a formula for use
-            // possible use in the next round
-            // time('Cache Formula Domain Info')
-            cacheFormulaDomainInfo(inst)
-            // timeEnd('Cache Formula Domain Info')
-            // if there are no more metavars, flag it as a completed
-            // instantiation
-            if (inst.domain.size === 0) {
-              inst.unmakeIntoA('Rule')
-              inst.unmakeIntoA('Part')
-              inst.makeIntoA('Inst')
-            } else {
-              inst.unmakeIntoA('Rule')
-              inst.makeIntoA('Part')
-              // since it still has metavariables, ignore it for
-              // propositional form
-              inst.ignore = true
-            }
-
-            // either way, rename ForSome constants that aren't metavars. We
-            // should not have to insert a copy of the bodies of ForSomes
-            // since they should be there automatically because they were in
-            // the formulas. 
+            
+            // if we made it here, we have a valid instantation. 
+            // Note that .pass is the current pass number. 
+            // Cache some reporting info.
             //
             // TODO: 
             //  * we might want to upgrade .bodyOf to an LC attribute since
             //    Formula.instantiate doesn't copy that attribute
-            //
-            // also rename the bindings to match what the user would have
-            // for the same expressions in his document
-            // time('Rename bindings')
-            inst.statements().forEach(x => renameBindings(x))
-            // timeEnd('Rename bindings')
-            // then insert this intantiation after its formula
-            Formula.addCachedInstantiation(f, inst)
-            // finally mark the declared symbols in the instantiation
-            markDeclaredSymbols(doc, inst)
+
+            inst.pass = n
+            inst.numsolns = solns.length
+            
+            // insert this instantiation
+            insertInstantiation( inst, f, e )
           })
         })
       })
@@ -1362,6 +1277,86 @@ const instantiate = doc => {
     formulas = doc.formulas()
   }
   doc.instantiated = true
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// insert instantiation
+//
+// Many of the tools that work with n-compact validation (including the
+// n-compact tool itself) require creating and inserting instantiations and
+// marking them in various ways.  This utility makes that process more coherent.
+//
+// inst - the instantiation to insert. If it is an environment it will be
+//        inserted either as a Part or an Inst. If it is an expression it will
+//        be inserted as a Consider.
+//
+// formula - the Rule or Part that this is an instantiation of. It is inserted
+//           after this formula.
+//
+// creators - an optional LC that caused this to be created and added to the
+//            creators list of the instantiation.
+//
+const insertInstantiation = ( inst, formula, creator ) => {
+
+    // it might contain a Let which was instantiated by some other
+    // statment, so we might have to add the tickmarks.
+    //
+    // Note: we had to check that in a rule like :{:{:Let(x) (@ P
+    //       x)} (@ P y)} that it doesn't instantiate (@ P y) first
+    //       with a constant lambda expression like 𝜆y,Q(z) which
+    //       has z free and then instantiate the metavar x with z,
+    //       since then 'the free z becomes bound' in a sense.
+    //       Otherwise you could conclude, e.g. ∀y,Q(z) from {
+    //       :Let(z) Q(z) } instead of just ∀y,Q(y). 
+    //
+    // TODO: does this have to be done before inserting it?
+    assignProperNames(inst)
+
+    // insert it after the formula, the order doesn't matter
+    inst.insertAfter(formula)
+    
+    // save the rule (whether formula is a Part or Rule)
+    inst.rule = formula.rule || formula
+    // if a creator is specified, push it onto the list
+    if (creator) {
+      // if the inst is for a Part it might already have creators, if so, keep them
+      if (!inst.creators) inst.creators = []
+      inst.creators.push(creator)
+    }
+    // mark it as a cached instantiation for the Formula package.
+    // TODO: is this really needed?
+    inst.makeIntoA(instantiation)
+    // all instantiations are givens, even Considers
+    inst.makeIntoA('given')
+    // also rename the bindings to match what the user would have
+    // for the same expressions in his document
+    inst.statements().forEach(x => renameBindings(x))
+    // and mark the declared constants in the instantiation
+    markDeclaredSymbols(inst.root(), inst)
+
+    // if it's an expression, it's a Consider
+    if (inst instanceof Expression) {
+      inst.makeIntoA('Consider')
+      inst.makeIntoA('Inst')
+      // Consider's don't have prop form
+      inst.ignore = true
+    }
+
+    // if it's an environment, check if the inst has metavars, and mark it appropriately
+    if ( inst instanceof Environment ) {
+      cacheFormulaDomainInfo(inst)
+      if (inst.domain.size === 0) {
+        inst.unmakeIntoA('Rule')
+        inst.unmakeIntoA('Part')
+        inst.makeIntoA('Inst')
+      } else {
+        inst.unmakeIntoA('Rule')
+        inst.makeIntoA('Part')
+        // since it still has metavariables, ignore it for prop form
+        inst.ignore = true
+      }
+    }
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -62,7 +62,7 @@ The following js attributes store data that is computed from the user's content,
 * `.letScopes` - caches the Let scopes in the document (not targets)
 * `.cat` - caches the docuement catalog in the document (not targets)
 * `.userPropositions` - caches the user's propositions (things that have a propositional form, do not contain metavariables, and are not inside a `Rule`).
-* `.equations` - true if this is a binary equation (A=B) either from the user or created by the `splitEquations` command
+* `.equation` - true if this is a binary equation (A=B) either from the user or created by the `splitEquations` command
 * `.by` - currently should have the value 'cases' to indicate that this conclusion is a conclusion of the proof by cases rule.
 *  `.label` - currently should only have the value 'cases' on a rule to indicate that that rule is the proof by cases rule in this document.
 
