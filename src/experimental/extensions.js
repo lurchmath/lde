@@ -455,7 +455,21 @@ LogicConcept.prototype.inspect = function(...args) { inspect(this,...args) }
 //
 // For example, in (x+1)+(x^2+x)=(x+1)+(x⋅x+x) we want to know that the LHS can
 // be obtained from the RHS by substituting x^2=x⋅x. 
-const diff = (LHS,RHS) => {
+//
+// If they differ at more than one location, return the array of all of the
+// addresses where they differ. If the optional argument 'intersect' is true
+// return the highest address containing all of the diffs.  For example, 
+//
+//   diff( f(g(a,b) , f(g(c,d)) ) returns [[1,1],[1,2]]
+//
+// but
+//
+//   diff( f(g(a,b) , f(g(c,d)) true ) returns [[1]]
+//
+// so in the latter case we know that the second expression can be obtained from
+// the first via the single substitution g(a,b)=g(c,d), whereas the former would
+// require two substitutions, a=c and b=d.
+const diff = (LHS , RHS , intersect=false ) => {
   let ans=[]
   // a Symbol doesn't match an Application.
   if ( 
@@ -484,10 +498,23 @@ const diff = (LHS,RHS) => {
         ans.push(...nodeans)
       }
     }
-    // it should only return undefined if you, e.g. diff an expression against a
-    // declaration or something
+    // check if we want to intersect them to find the smalled single substitution that will work
+    if ( intersect && ans.length ) {
+      ans = [commonInitialSlice(...ans)]
+    }
+
+    // it should only return undefined if they match
     return (ans.length) ? ans : undefined
   }
+  // or if you try to match a Declaration or Environment or something
+  return undefined
+}
+
+// Find the longest common initial slice of a set of arrays
+const commonInitialSlice = (...arg) => {
+  if (!arg.length) return
+  let k=0; while (arg.every( A => A[k] === arg[0][k] && k<arg[0].length )) k++
+  return arg[0].slice(0,k)
 }
 
 // useful abbreviations
@@ -526,4 +553,4 @@ const lineNum = (n,width=4,suffix=': ') => {
 const subscriptDigits = '₀₁₂₃₄₅₆₇₈₉'
 const subscript = n => [...n.toString()].map(d => subscriptDigits[d]).join('')
 
-export default { lc, mc, diff, checkExtension, tab, indent, lineNum, subscript }
+export default { lc, mc, diff, commonInitialSlice, checkExtension, tab, indent, lineNum, subscript }
