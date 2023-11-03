@@ -1,0 +1,12 @@
+include libs/Number Theory
+////////////////////////////////////////////////////////////////////////////
+// Equations Rule
+//
+// We just include the Equations rule here so that we can compare, e.g.
+// Peano proofs using BIHs to ones using the Equations rule.
+
+Rules:
+{
+  // and at this point we want the helpful Equations Rule
+  :{ Equations_Rule }
+} 

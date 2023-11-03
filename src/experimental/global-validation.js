@@ -294,7 +294,37 @@ const validate = ( doc, target = doc, options) => {
     if (options.checkPreemies) doc.validate( target , true ) 
   }
 
+  // For debugging purposes, before leaving, rename all of the ProperNames to
+  // something human-readable. 
+  // TODO: maybe improve or eliminate this in the future
+  tidyProperNames(doc)
+
   return doc   
+}
+
+// rename ProperNames from declarations with body to something easier to read by
+// changing, e.g. `c#(= (+ (+ m n) p) (+ m (+ n p))` to `c#13` by putting them
+// all in a list and using the list number instead of the body name.  This isn't
+// necessary for the algorithm to work, but it's easier to debug and read.
+// TODO: maybe improve or eliminate this in the future
+const tidyProperNames = doc => {
+  // make an lookup array
+  const lookup = []
+  // get all the ProperNames with # proper names
+  const allProps = doc.descendantsSatisfying( x => x instanceof LurchSymbol && 
+    x.getAttribute('ProperName')?.includes('#'))
+  // store a copy on the lookup table (no dups)  
+  allProps.forEach( s => { 
+    const pname = s.getAttribute('ProperName') 
+    if (!lookup.includes(pname)) lookup.push(pname) 
+  })
+  // rename them with their index in the lookup array
+  allProps.forEach( s => { 
+    const pname = s.getAttribute('ProperName')
+    const tick = (pname.endsWith("'")) ? "'" : ''
+    s.setAttribute('ProperName', 
+      pname.replace(/([^#]+)#(.+)/,`$1#${lookup.indexOf(pname)}`+tick))
+  })
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -382,8 +412,6 @@ const load = (docs, libs = undefined) => {
   return ans
 }
 
-
-
 // Forbid toxic Weenies
 //
 // Check if an expression is potentially Weenie.  
@@ -440,7 +468,6 @@ const processDomains = doc => {
       f.unmakeIntoA('Rule')
       f.makeIntoA('Inst')
       f.makeIntoA(instantiation)
-      // Formula.addCachedInstantiation( f , inst )
     }
     // and mark the document as having been processed so we don't call this more
     // than once
@@ -814,9 +841,9 @@ const processBIHs = doc => {
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-//                 Process Equations and Transitive Chains
+//                          Process Equations
 //
-// Check if the doc contains the Rule :{ Transitive Chain }.  If not, just split
+// Check if the doc contains the Rule :{ Equations_Rule }.  If not, just split
 // the equation chains.  
 //
 // Otherwise after splitting get the diffs of all equations, and add the
@@ -838,11 +865,16 @@ const processBIHs = doc => {
 //   Declare, e.g. Reflexive = ≤ ⊆ ⇔
 // * generalize this to transitive chains of operators, e.g. a = b < c = d ≤ e
 //   implies that a<e
-// * think about if there is some way to generalize this to assume symmetry of
-//   equality, or if that is not relevant? 
+// * make it more efficient.  For example, don't process reflexive equations,
+//   carefully check exactly when you need to insert symmetry or a Consider
+//   rather than brute force blanketing everything.  Do we need all of the
+//   symmetric equivalences?  Is there a cleaner more efficient way to
+//   accomplish the same thing?
 const processEquations = doc => {
+  
   // split equation chains
   splitEquations(doc)
+  
   // check if the Equations_Rule is around, if not, we're done
   const rule=doc.find(
     x=>x.isA('Rule') && x.numChildren()==1 && 
@@ -850,16 +882,22 @@ const processEquations = doc => {
     x=>!(x.isA('Rule') || x===doc))
   // if there is no Equations Rule loaded we are done
   if (!rule) return
+  
   // the Equations Rule has been found, so get all of the .equations
   const eqs=[...doc.descendantsSatisfyingIterator(
     x => x.equation , 
     x => x instanceof Application && !x.isOutermost())]
-  // for each equation, A=B,
+  
+    // for each equation, A=B,
   eqs.forEach( eq => {
+
     // get the LHS and RHS
     const A = eq.child(1).copy(), B=eq.child(2).copy()
-    // get the diff
-    const delta = diff(A,B)
+    // get the diff.  The optional third argument tells it to check for the
+    // smallest single substutition that will work.  Thus, for now, the user
+    // must only do one substitution at a time.
+    // TODO: consider generalizing or upgrading
+    const delta = diff(A,B,true)
     // for now we only allow a single substutition at a time, so check if
     // there's only one diff, and that it is nontrivial (i.e., there is a
     // nontrivial substitution that works) 
@@ -891,8 +929,12 @@ const processEquations = doc => {
       // and insert it
       insertInstantiation( y_eq_x , rule , eq )
 
+      // and insert the symmetric equivalences for them (only need to do it for
+      // one of them)
+      insertSymmetricEquivalences( x_eq_y , rule )
+
     // and in the case where there's no substitution possible, also add the
-    // reverse of the equation to impose symmetry
+    // reverse of the equation to impose symmetry (its symmetric equivalences are inserted above)
     } else {
       // Make the reverse equation as a Consider
       let y_eq_x = new Application(new LurchSymbol('=') , B.copy() , A.copy())
@@ -900,6 +942,11 @@ const processEquations = doc => {
       // and insert it
       insertInstantiation( y_eq_x , rule , eq )
     } 
+
+    // Finally add symmtric equivalences.  For these we don't restrict to just
+    // conclusion equations
+    doc.equations().forEach( eq => insertSymmetricEquivalences( eq , rule ))
+
   })
   // Finally add the transitivity conclusion.  This assumes transitivity, of course.
   instantiateTransitives(doc,rule)
@@ -945,6 +992,44 @@ const instantiateTransitives = (doc,rule) => {
     }
   })
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Insert Symmetric Equivalences 
+//
+// If we want to give users symmetry of = for free, it is more efficient to just
+// manually instantiate the symmetry rule for all equations than to insert the
+// rule and let matching do it. 
+//
+// eqn - must be a binary equation, and is the 'creator' of the equivalence. 
+//
+// rule - the name of the rule to insert these equivalences after and that is
+//        stored as their .rule 
+//
+const insertSymmetricEquivalences = ( eqn , rule ) => {
+  
+  // since we need copies, not originals, use an x-maker and y-maker
+  const x = () => eqn.child(1).copy() , 
+        y = () => eqn.child(2).copy() ,
+        equals = () => new LurchSymbol('=')
+  
+  // insert :{ :x=y y=x }      
+  let inst = 
+    new Environment(
+      new Application( equals() , x(), y() ).asA('given') ,
+      new Application( equals() , y(), x() )
+    )
+  insertInstantiation( inst , rule , eqn )
+  
+  // insert :{ :y=x x=y }      
+  inst = 
+  new Environment(
+    new Application( equals() , y(), x() ).asA('given') ,
+    new Application( equals() , x(), y() )
+  )
+  insertInstantiation( inst , rule , eqn )
+
+}
+
 
 // Split Equations
 //

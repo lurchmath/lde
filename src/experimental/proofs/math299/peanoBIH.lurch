@@ -1,4 +1,4 @@
-include libs/Equations
+include libs/Number Theory
 ////////////////////////////////////////////////////////////////////
 // Peano Test Proofs
 // 
@@ -13,10 +13,18 @@ include libs/Equations
   
   ➤ "Proof:"
   {  
+    ➤ "Necessary BIHs:"
+    Recall { :1=𝜎(0) :1+1=1+1 1+1=1+𝜎(0) } 
+    Recall { :1+𝜎(0)=𝜎(1+0) :1+1=1+𝜎(0) 1+1=𝜎(1+0) }
+    Recall { :1+0=1 :1+1=𝜎(1+0) 1+1=𝜎(1) }
+    Recall { :𝜎(1)=2 :1+1=𝜎(1) 1+1=2 } 
+    Recall { :2=𝜎(1) :2=2 𝜎(1)=2 }
+    ➤ "the actual proof:"
+    1+1=1+1
     1+1=1+𝜎(0)
-       =𝜎(1+0)
-       =𝜎(1)
-       =2
+    1+1=𝜎(1+0)
+    1+1=𝜎(1)
+    1+1=2
   }  
 }
 
@@ -80,9 +88,16 @@ include libs/Equations
 
   ➤ "Proof:"
   { 
-    𝜎(n) = 𝜎(n+0)
-         = n+𝜎(0)
-         = n+1
+    ➤ "Necessary BIHs"
+    Recall { :n+0=n :𝜎(n+0)=𝜎(n+0) 𝜎(n)=𝜎(n+0) } 
+    Recall { :n+𝜎(0)=𝜎(n+0) :n+𝜎(0)=n+𝜎(0) 𝜎(n+0)=n+𝜎(0) }
+    Recall { :𝜎(n+0)=n+𝜎(0) :𝜎(n)=𝜎(n+0) 𝜎(n)=n+𝜎(0) }
+    Recall { :1=𝜎(0) :1=1 𝜎(0)=1 }
+    Recall { :𝜎(0)=1 :𝜎(n)=n+𝜎(0) 𝜎(n)=n+1 }
+    ➤ "the actual proof below is not needed because the BIHs do all the work!"
+    ➤ "𝜎(n)=𝜎(n+0)"
+    ➤ "𝜎(n)=n+𝜎(0)"
+    ➤ "𝜎(n)=n+1    "
   }
 }
 
@@ -93,17 +108,18 @@ include libs/Equations
   ➤ "Proof: (by induction on p for arbitrary m,n"
   { 
     ➤ "Base case:"
-    (m+n)+0 = m+n
-            = m+(n+0) 
-            
+    Recall { :n+0=n :(m+n)+0=m+n (m+n)+0=m+(n+0) }
     ➤ "Inductive step:"
     { :Let k be such that (m+n)+k=m+(n+k)
-      
-      (m+n)+𝜎(k) = 𝜎((m+n)+k) 
-                 = 𝜎(m+(n+k)) 
-                 = m+𝜎(n+k) 
-                 = m+(n+𝜎(k)) 
-
+      Recall { :(m+n)+k = m+(n+k) 
+               :(m+n)+𝜎(k) = 𝜎((m+n)+k) 
+               (m+n)+𝜎(k) = 𝜎(m+(n+k)) } 
+      Recall { :m+𝜎(n+k) = 𝜎(m+(n+k)) 
+               :(m+n)+𝜎(k) = 𝜎(m+(n+k))
+               (m+n)+𝜎(k) = m+𝜎(n+k) }
+      Recall { :n+𝜎(k) = 𝜎(n+k)
+               :(m+n)+𝜎(k) = m+𝜎(n+k)
+               (m+n)+𝜎(k) = m+(n+𝜎(k)) }
     }
     ➤ "Therefore, by induction"
     ∀p.(m+n)+p=m+(n+p)

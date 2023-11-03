@@ -149,7 +149,7 @@ let start = Date.now()
 
 // trans = loadDoc('proofs/TransChain')
 
-doc = loadDoc('proofs/math299/peanotranschain')
+doc = loadDoc('proofs/math299/peano')
 
 
 // Accumulator = { totaltime:0, numcalls:0, numsolns:0, numlines: 0}
