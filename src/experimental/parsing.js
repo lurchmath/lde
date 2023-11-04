@@ -92,7 +92,7 @@ export const makeParser = parserstr => {
 //
 export const processShorthands = L => {
 
-  // for each symbol named symb, do f
+  // for each symbol named symb, do f, i.e. execute f(symb)
   const processSymbol = ( symb , f ) =>  {
     L.descendantsSatisfying( x => (x instanceof LurchSymbol) && x.text()===symb )
      .forEach( s => f(s) )

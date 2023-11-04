@@ -101,6 +101,9 @@
   //     intended to be used, so for now we convert any line of the form `Declare stuff`
   //     to escaped putdown up front.
   input = input.replace(/[Dd]eclare \s*([^\s].*)$/mg, 'declare> «:[$1]»\n')
+  //   * also look for lines containing only a ➤ and whitespace, and replace
+  //     them with (➤ " ") to act as a line break in the output
+  input = input.replace(/^([ \t]*)➤[ \t]*$/mg, `$1➤ " " \n`)
   //   * delete comments (but leave any \n's to keep the line counts right)
   input = input.replace(/\/\/[^\n\r]*(\n|\r)/g, '\n')
   //   * Replace tabs with a space

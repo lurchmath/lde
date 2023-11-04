@@ -320,9 +320,11 @@ const isNestedLCs = A => {
 const format = (x,options,indentlevel=0) => {
   if (x instanceof LogicConcept) {
     return defaultPen(indent(
-           x.toPutdown(formatter(options), 
-                       text => /\n/.test( text ) || erase(text).length > 50 ) , 
-           indentlevel))
+      x.toPutdown(formatter(options), 
+        text => /\n/.test( text )         || 
+                /^[ \t"]*$/.test( text )  ||
+                erase(text).length > 50  
+      ),indentlevel))
   } else if (typeof x === 'string') { 
     return indent(stringPen(x),indentlevel)
   } else if (typeof x === 'boolean') { 
