@@ -97,6 +97,7 @@
   //   * replace toxic unicode chars with equivalents
   input = input.replace(/𝜎/g, 'σ')
   input = input.replace(/𝜆/g, 'λ')
+  input = input.replace(/≠/g, ' neq ')  
   //   * Declaring reserved constants is tricky since it tries to parse them as they are
   //     intended to be used, so for now we convert any line of the form `Declare stuff`
   //     to escaped putdown up front.
@@ -203,13 +204,15 @@ Not        = a:('¬'/'not ')? _ b:Stuff     { return (a==='not ')
 Stuff = Relation / Thing
 
 // relations
-Relation = Subset / ElementOf / Divides / Leq / LessThan / Equation / Loves
+Relation = Subset / ElementOf / Divides / Leq / LessThan / Equation / NotEqual / Loves
 
 Subset     = a:Thing|2..,'⊆'/' subset '/' subseteq '| { return lisp('⊆',a) }
 ElementOf  = a:Thing ('∈'/' in ') b:Thing             { return lispBinary('∈',a,b) }
 Divides    = a:Thing '|' b:Thing                      { return lispBinary('|',a,b) }  
 Leq        = a:Thing|2..,'≤'/' leq '|                 { return lisp('≤',a) }
 LessThan   = a:Thing|2..,'<'/' lt '|                  { return lisp('<',a) }
+NotEqual   = a:Thing (' neq '/' ne ') b:Thing 
+             { return `(¬ ${lispBinary('=',a,b)})` }
 Equation   = a:Thing|2..,'='|                         { return lisp('=',a) }
 Loves      = a:Thing|2..2,' loves '|                  { return lisp('loves',a) }
 
