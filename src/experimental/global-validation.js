@@ -924,7 +924,8 @@ const processEquations = doc => {
       insertInstantiation( x_eq_y , rule , eq )
       
       // Also make the reverse diff equation as a Consider to impose symmetry
-      const y_eq_x = new Application(new LurchSymbol('='),y.copy(),x.copy())
+      // const y_eq_x = new Application(new LurchSymbol('='),y.copy(),x.copy())
+      const y_eq_x = reverseEquation(x_eq_y)
       
       // and insert it
       insertInstantiation( y_eq_x , rule , eq )
@@ -937,7 +938,8 @@ const processEquations = doc => {
     // reverse of the equation to impose symmetry (its symmetric equivalences are inserted above)
     } else {
       // Make the reverse equation as a Consider
-      let y_eq_x = new Application(new LurchSymbol('=') , B.copy() , A.copy())
+      // const y_eq_x = new Application(new LurchSymbol('=') , B.copy() , A.copy())
+      const y_eq_x = reverseEquation(eq)
       
       // and insert it
       insertInstantiation( y_eq_x , rule , eq )
@@ -973,7 +975,6 @@ const instantiateTransitives = (doc,rule) => {
       // build it
       const inst = new Environment()
       for (let k=1;k<n-1;k++) {
-        // 
         let newpair = eq.slice(k,k+2)
         newpair.unshiftChild( eq.child(0).copy() )
         inst.pushChild(newpair.asA('given'))
@@ -988,6 +989,18 @@ const instantiateTransitives = (doc,rule) => {
       
       // and insert it
       insertInstantiation( inst, rule, eq )
+
+      // We also want the conclusion of that instantiation to be a Consider so
+      // it can instantiate other rules as if the user had stated it explicitly
+      // (since they stated it implicitly by constructing this transitive chain
+      // in the first place).  Note that insertInstantiation() automatically
+      // marks it as a Consider because it's an equation, not an environment.
+      const conc = inst.lastChild().copy()
+      insertInstantiation( conc , rule , eq )
+      // and insert its symmetric equivalence
+      insertSymmetricEquivalences( conc , rule )
+      // and Consider its reverse
+      insertInstantiation( reverseEquation(conc) , rule)
 
     }
   })
@@ -1007,27 +1020,54 @@ const instantiateTransitives = (doc,rule) => {
 //
 const insertSymmetricEquivalences = ( eqn , rule ) => {
   
-  // since we need copies, not originals, use an x-maker and y-maker
-  const x = () => eqn.child(1).copy() , 
-        y = () => eqn.child(2).copy() ,
-        equals = () => new LurchSymbol('=')
-  
   // insert :{ :x=y y=x }      
   let inst = 
     new Environment(
-      new Application( equals() , x(), y() ).asA('given') ,
-      new Application( equals() , y(), x() )
+      eqn.copy().asA('given') ,
+      reverseEquation(eqn)
     )
   insertInstantiation( inst , rule , eqn )
   
   // insert :{ :y=x x=y }      
   inst = 
   new Environment(
-    new Application( equals() , y(), x() ).asA('given') ,
-    new Application( equals() , x(), y() )
+    reverseEquation(eqn).asA('given') ,
+    eqn.copy()
   )
   insertInstantiation( inst , rule , eqn )
+  // // since we need copies, not originals, use an x-maker and y-maker
+  // const x = () => eqn.child(1).copy() , 
+  //       y = () => eqn.child(2).copy() ,
+  //       equals = () => new LurchSymbol('=')
+  
+  // // insert :{ :x=y y=x }      
+  // let inst = 
+  //   new Environment(
+  //     new Application( equals() , x(), y() ).asA('given') ,
+  //     new Application( equals() , y(), x() )
+  //   )
+  // insertInstantiation( inst , rule , eqn )
+  
+  // // insert :{ :y=x x=y }      
+  // inst = 
+  // new Environment(
+  //   new Application( equals() , y(), x() ).asA('given') ,
+  //   new Application( equals() , x(), y() )
+  // )
+  // insertInstantiation( inst , rule , eqn )
 
+}
+
+// Reverse an Equation
+//
+// Given an equation x=y, return the equation y=x using copies of x and y. It
+// does not copy the LC attributes of the original equation. 
+const reverseEquation = eq => {
+  return new Application(
+             new LurchSymbol('='),
+             eq.child(2).copy(),
+             eq.child(1).copy()
+  )
 }
 
 
