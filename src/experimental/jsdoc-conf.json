@@ -1,8 +1,18 @@
 {
     "plugins": ["plugins/markdown"],
     "opts": {
-        "template": "../../node_modules/tidy-jsdoc",
-        "prism-theme": "prism-default"
+        "template": "../../node_modules/clean-jsdoc-theme",
+        "prism-theme": "prism-default",
+        "encoding": "utf8",
+        "recurse": true,
+        "verbose": false,
+        "theme_opts": {
+            "default_theme": "dark"
+        }
+    },
+    "markdown": {
+        "hardwrap": false,
+        "idInHeadings": true
     },
     "templates": {
         "default": {
