@@ -1,4 +1,7 @@
 include libs/Number Theory
+// Because we no long allow Number Theory to include PredThm we need this rule 
+// for the BIH proofs below.
+Rule: :{ :x=y :𝜆P(y) 𝜆P(x) }
 ////////////////////////////////////////////////////////////////////
 // Peano Test Proofs
 // 

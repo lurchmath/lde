@@ -872,7 +872,8 @@ const processBIHs = doc => {
 //   accomplish the same thing?
 const processEquations = doc => {
   
-  // split equation chains
+  // split equation chains. This also marks all conclusion equations, including
+  // those split from chains, with .equation=true
   splitEquations(doc)
   
   // check if the Equations_Rule is around, if not, we're done
@@ -883,7 +884,12 @@ const processEquations = doc => {
   // if there is no Equations Rule loaded we are done
   if (!rule) return
   
-  // the Equations Rule has been found, so get all of the .equations
+  // First, we add symmetric equivalences.  For these we don't restrict to just
+  // conclusion equations.  This way it knows every equation is 
+  doc.equations().forEach( eq => insertSymmetricEquivalences( eq , rule ))
+
+  // the Equations Rule has been found, so get all of the .equations that are
+  // conclusions or produced from a conclusion equation chain by splitEquations
   const eqs=[...doc.descendantsSatisfyingIterator(
     x => x.equation , 
     x => x instanceof Application && !x.isOutermost())]
@@ -896,13 +902,16 @@ const processEquations = doc => {
     // get the diff.  The optional third argument tells it to check for the
     // smallest single substutition that will work.  Thus, for now, the user
     // must only do one substitution at a time.
+    //
     // TODO: consider generalizing or upgrading
     const delta = diff(A,B,true)
     // for now we only allow a single substutition at a time, so check if
-    // there's only one diff, and that it is nontrivial (i.e., there is a
-    // nontrivial substitution that works) 
+    // there's a diff, and that it is vacuous (e.g., the equation isn't x=x).
+    // The argument 'true' to diff above guarantees there will only be one diff,
+    // if any. 
+    //
     // TODO: maybe generalize later
-    if (delta?.length===1 && delta[0].length>0) {
+    if (delta && delta[0].length>0) {
       // get x,y such that replacing x with y in A produces B
       let x = A.child(...delta[0]).copy(), y=B.child(...delta[0]).copy()
       // construct the instantiation :{ :x=y A=B }
@@ -944,10 +953,6 @@ const processEquations = doc => {
       // and insert it
       insertInstantiation( y_eq_x , rule , eq )
     } 
-
-    // Finally add symmtric equivalences.  For these we don't restrict to just
-    // conclusion equations
-    doc.equations().forEach( eq => insertSymmetricEquivalences( eq , rule ))
 
   })
   // Finally add the transitivity conclusion.  This assumes transitivity, of course.
@@ -1021,52 +1026,33 @@ const instantiateTransitives = (doc,rule) => {
 const insertSymmetricEquivalences = ( eqn , rule ) => {
   
   // insert :{ :x=y y=x }      
-  let inst = 
-    new Environment(
-      eqn.copy().asA('given') ,
-      reverseEquation(eqn)
-    )
+  let inst = new Environment( copyEquation(eqn).asA('given') , reverseEquation(eqn) )
   insertInstantiation( inst , rule , eqn )
   
   // insert :{ :y=x x=y }      
-  inst = 
-  new Environment(
-    reverseEquation(eqn).asA('given') ,
-    eqn.copy()
-  )
+  inst = new Environment( reverseEquation(eqn).asA('given') , copyEquation(eqn) )
   insertInstantiation( inst , rule , eqn )
-  // // since we need copies, not originals, use an x-maker and y-maker
-  // const x = () => eqn.child(1).copy() , 
-  //       y = () => eqn.child(2).copy() ,
-  //       equals = () => new LurchSymbol('=')
-  
-  // // insert :{ :x=y y=x }      
-  // let inst = 
-  //   new Environment(
-  //     new Application( equals() , x(), y() ).asA('given') ,
-  //     new Application( equals() , y(), x() )
-  //   )
-  // insertInstantiation( inst , rule , eqn )
-  
-  // // insert :{ :y=x x=y }      
-  // inst = 
-  // new Environment(
-  //   new Application( equals() , y(), x() ).asA('given') ,
-  //   new Application( equals() , x(), y() )
-  // )
-  // insertInstantiation( inst , rule , eqn )
-
+ 
 }
 
 // Reverse an Equation
 //
 // Given an equation x=y, return the equation y=x using copies of x and y. It
-// does not copy the LC attributes of the original equation. 
+// does not copy the LC attributes of the original equation.
 const reverseEquation = eq => {
   return new Application(
              new LurchSymbol('='),
              eq.child(2).copy(),
              eq.child(1).copy()
+  )
+}
+// the same routine as the previous one, but doesn't reverse the equation. This
+// differs from eq.copy() in that it doesn't copy atributes
+const copyEquation = eq => {
+  return new Application(
+             new LurchSymbol('='),
+             eq.child(1).copy(),
+             eq.child(2).copy()
   )
 }
 
@@ -1082,7 +1068,8 @@ const splitEquations = doc => {
     // let n be the number of arguments to =
     let n = eq.numChildren()
     // if there are two args, its an equation, so mark it as such
-    if (n===3) { eq.equation = true 
+    if (n===3) { 
+      eq.equation = true 
     } else if (n>3) {
     // if there are more than two args, split it
       let last = eq
