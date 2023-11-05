@@ -231,14 +231,12 @@ const timeEnd = (description) => { if (Debug) console.timeEnd(description) }
 // validation feedback and add additional complete instantiations to the
 // document, but should not add new Rules.
 //
-const validate = ( doc, target = doc, _options = {} ) => {
+const validate = ( doc, target = doc, options) => {
   
   // put the default options here inside the routine so we can expand the number
   // of options in the future without cluttering the signature.
-  const defaultoptions = 
+  if (!options) options = 
     { checkPreemies:true , validateall:true , autoCases:false }
-  // options supplied as an argument override defaults
-  const options = { ...defaultoptions , ..._options }
 
   // process the domains (if they aren't already)
   processDomains(doc)
@@ -289,11 +287,11 @@ const validate = ( doc, target = doc, _options = {} ) => {
   ///////////////
   // Prop Check
   if (options.validateall) {
-    doc._validateall( target )
-    if (options.checkPreemies) doc._validateall( target , true ) 
+    doc.validateall( target )
+    if (options.checkPreemies) doc.validateall( target , true ) 
   } else { 
-    doc._validate( target )
-    if (options.checkPreemies) doc._validate( target , true ) 
+    doc.validate( target )
+    if (options.checkPreemies) doc.validate( target , true ) 
   }
 
   // For debugging purposes, before leaving, rename all of the ProperNames to
@@ -384,6 +382,36 @@ const processDoc = doc => {
 //   instantiations still need to have it computed. Check how much of 
 //   the processing time is being used for this.
 
+
+// ////////////////////////////////////////////////////////////////////////////////
+// //
+// //  Load , Process, and Validate an entire document from scratch
+// //
+// // This is an all-in-one workhorse for making and testing documents. 
+// // * docs are a single string, array of strings or a single LC environment. It
+// //   is not optional.
+// // * libs is the same thing for libraries, but defaults to LurchLib if omitted
+// //
+// // TODO: maybe go until a fixed point
+// //       update this
+// const load = (docs, libs = undefined) => {
+//   // make a new document
+//   const doc = new Document(docs, libs)
+//   // process the pre-instantiated document
+//   let ans = processDoc(doc)
+//   // instantiate everything
+//   instantiate(ans)
+//   // cache the let-scopes in the root
+//   ans.letScopes = ans.scopes()
+//   // cache the catalog in the root
+//   ans.cat = ans.catalog()
+//   // validate everything
+//   ans.validateall()
+//   ans.validateall(undefined,true)
+//   // return the final validated document
+//   return ans
+// }
+
 // Forbid toxic Weenies
 //
 // Check if an expression is potentially Weenie.  
@@ -456,7 +484,7 @@ const processDomains = doc => {
 // propositional checker and the preemie checker.  The second and third optional
 // arguments are booleans which specify whether it should be prop checked and
 // preemie checked respectively.  This is useful for calling this efficiently
-// from ._validateall.  If both are false, it does nothing and returns undefined.)
+// from .validateall.  If both are false, it does nothing and returns undefined.)
 //
 // With both tools, in order for this to provide more localized information
 // about what is wrong with a proof, everything that is accessible to the target
@@ -493,16 +521,16 @@ const processDomains = doc => {
 // preemie by ignoring the Lets it is in the scope of and its own Let if it is
 // a Let-env. Thus, this routine assumes that all descendant Let-environments of
 // this environment have already been preemie-checked (which will be the case
-// when ._validateall has been called).  Thus, this routine will tell you if the
+// when .validateall has been called).  Thus, this routine will tell you if the
 // target is, itself, a preemie, but not if contains any preemies if you don't
 // check for those first.  So it could return 'valid' for an environment, which
-// is useful for ._validateall, but might be misleading if you don't interpret it
+// is useful for .validateall, but might be misleading if you don't interpret it
 // correctly.
 //
 // Moral: use only for targets that do not contain any descendant
-//        Let-environments, or just call ._validateall for environments that do.
+//        Let-environments, or just call .validateall for environments that do.
 //
-LogicConcept.prototype._validate = function (target = this,
+LogicConcept.prototype.validate = function (target = this,
   checkPreemies = false) {
 
   // store the answer and result here
@@ -566,7 +594,7 @@ LogicConcept.prototype._validate = function (target = this,
       if (!(Validation.result(target) &&
         Validation.result(target).reason === 'n-compact')) {
         // say(`Not already validated, so doing it`)
-        ans = this._validate(target)
+        ans = this.validate(target)
         result = (ans)
           ? { result: 'valid', reason: 'n-compact' }
           : { result: 'indeterminate', reason: 'n-compact' }
@@ -617,13 +645,13 @@ LogicConcept.prototype._validate = function (target = this,
 //
 // We do the preemie check efficiently as follows.
 // * If the target is not valid, we don't have to do anything.
-// * If the target is valid and not an environment, we just call ._validate on
+// * If the target is valid and not an environment, we just call .validate on
 //   the target with checkPreemies=true. Update the validation result of the
 //   target and its valid ancestors if it is a preemie. 
 // * If the target is a valid environment we do the following.  
 //   - Get all top level Let-env descendants of X (those not nested inside
 //     another Let-env descendant of X).  
-//   - If any exist, call ._validateall(-,true) on each of those recursively
+//   - If any exist, call .validateall(-,true) on each of those recursively
 //     until we reach one that has no Let-env descendants.
 //   - for the base case of the recursion, when a Let environment is reached
 //     that does not contain any Let-environment descendants, validate it with
@@ -646,7 +674,7 @@ LogicConcept.prototype._validate = function (target = this,
 // If checkPreemies is false it only
 // checks the target propositionally, otherwise it only checks the target for
 // preemies.
-Environment.prototype._validateall = function ( target = this, 
+Environment.prototype.validateall = function ( target = this, 
                                                checkPreemies = false  ) {
   const checkProps = !checkPreemies
 
@@ -654,7 +682,7 @@ Environment.prototype._validateall = function ( target = this,
   if (checkProps) {
 
     // validate this environment (which saves the result in the target)
-    const result = this._validate(target)
+    const result = this.validate(target)
 
     // if the target is an Environment, recurse
     if (target instanceof Environment) {
@@ -668,12 +696,12 @@ Environment.prototype._validateall = function ( target = this,
             Validation.setResult(C, { result: 'valid', reason: 'n-compact' })
           })
 
-          // otherwise ._validateall the inference children of this target
+          // otherwise .validateall the inference children of this target
         } else {
           target.children().forEach(kid => {
             // skip givens and things marked .ignore, e.g. Comments
             if (kid.isA('given') || kid.ignore) return
-            this._validateall(kid, false)
+            this.validateall(kid, false)
           })
         }
 
@@ -705,7 +733,7 @@ Environment.prototype._validateall = function ( target = this,
     lets.forEach(L => {
 
       // see if this Let environment is a preemie (it should delete it's own let)
-      let preemie = !this._validate(L.parent(), true)
+      let preemie = !this.validate(L.parent(), true)
 
       // if it is a preemie, mark it, and then narrow down which of it's
       // children is the offender
@@ -724,7 +752,7 @@ Environment.prototype._validateall = function ( target = this,
         // recursive descent like we do for the prop check above.
         L.parent().conclusions()
          .filter( x => !x.ignore && Validation.result(x).result==='valid')         .forEach( conc => {
-          let result = this._validate(conc,true)
+          let result = this.validate(conc,true)
           if (!result) {
             conc.ancestors().forEach( a => {
               Validation.setResult( a , { result:'invalid' , reason:'preemie'})
@@ -1448,11 +1476,11 @@ const insertInstantiation = ( inst, formula, creator ) => {
 //                  Validation!
 //
 // The final thing we might want to do is validate the LC.  This can be done for
-// the entire document with doc._validate() above.  But we would like to get more
+// the entire document with doc.validate() above.  But we would like to get more
 // refined feedback about individual claims in the document itself.
 //
 // Given that we have already cached all of the necessary information, the only
-// thing that remains is to allow L._validate() to take a target as an argument,
+// thing that remains is to allow L.validate() to take a target as an argument,
 // which we do now.
 
 // We say an LC in an environment L is irrelevant to the inference 'target' if

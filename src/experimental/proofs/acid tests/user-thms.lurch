@@ -1,13 +1,13 @@
 include libs/Number Theory
 // Because we no long allow Number Theory to include PredThm we need this rule 
-// for the BIH proofs below.
+// for the BIH proofs .below.
 Rule: :{ :x=y :𝜆P(y) 𝜆P(x) }
 ////////////////////////////////////////////////////////////////////
 // Peano Test Proofs
 // 
 
 { 
-➤ "(testing user theorems) Thm 7.5 Assoc of + & Thm 7.2 n≠0 ⇒ ∃m,n=𝜎(m)"
+➤ "(testing user theorems) Thm 7.5 Assoc of +  & Thm 7.2 n≠0 ⇒ ∃m,n=𝜎(m)"
 
 {
   ➤ "Theorem 7.5: Associativity of Addition"

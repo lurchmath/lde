@@ -19,7 +19,8 @@ acid.push(loadDoc('proofs/acid tests/user-thms'))
 // Load Math 299 tests
 acid.push(loadDoc('proofs/math299/prop'))
 acid.push(loadDoc('proofs/math299/pred'))
-// acid.push(loadDoc('proofs/math299/peanoBIH')) 
+acid.push(loadDoc('proofs/math299/peanoBIH')) 
+acid.push(loadDoc('proofs/math299/peano')) 
 acid.push(loadDoc('proofs/math299/midterm'))
 
 // run the tests

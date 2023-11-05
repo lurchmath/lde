@@ -1,11 +1,13 @@
 include libs/Number Theory
+// needed for a BIH because Number Theory no longer includes PredThm
+Rule: :{ :x=y :𝜆P(y) 𝜆P(x) }
 ////////////////////////////////////////////////////////////////////
 // Peano Test Proofs
 // 
 
 { // wrap them all
   
-  ➤ "Math 299 Peano Axiom Homework Proofs 2023"
+  ➤ "Math 299 Peano Axiom Homework Proofs 2023 (using BIHs)"
 
 {
   ➤ "Theorem: 1+1=2"
