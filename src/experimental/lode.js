@@ -339,6 +339,8 @@ rpl.defineCommand( "features", {
                       is omitted the default is 1
       ${itemPen('.list')}         : show the list of known libs and proofs
       ${itemPen('.test')}         : run the acidtests script
+      ${itemPen('.makedocs')}     : make the jsdoc docs
+      ${itemPen('.showdocs')}     : open the jsdoc docs in the browser
       ${itemPen('exec(command)')} : execute the given shell commmand and print the result
       ${itemPen('initialize()')}  : loads and executes 'initproof.js' from the scripts
                       folder. A different file can be executed by calling 
@@ -380,9 +382,10 @@ rpl.defineCommand( "test", {
 // define the Lode .makedocs command
 rpl.defineCommand( "makedocs", {
   help: "Run jsdocs to make the documentation.",
-  action() { 
-    exec('rm -rf docs && jsdoc ./* -d docs -c jsdoc-conf.json')
-    console.log(defaultPen('done'))
+  action() {
+    console.log(defaultPen('Building docs...')) 
+    exec('rm -rf docs && jsdoc ./* -d docs -c jsdoc-conf.json && node post-docs')
+    console.log(defaultPen('...done'))
     this.displayPrompt()
   }
 })
