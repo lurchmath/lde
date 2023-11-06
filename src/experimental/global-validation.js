@@ -1,6 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
-//  Global n-compact Validation
+//  Global polynomial time n-compact Validation
+//
 //
 //  (KEEP OUT!  Work in progress.)
 //
@@ -11,170 +12,174 @@
 //  when using Lode, the node LDE app, to keep it separate from the more
 //  thoroughly tested code in the LDE repo.  Use this code at your own risk.
 //
-// TODO Summary: 
-// * For each attribute we use below, decide whether it should be stored cached
-//   as a permanent LC attribute or a normal js object attribute before moving
-//   to the repo.
-// * Optimizations: for a rule like symmetry of equality, it will ALWAYS be
-//   instantiated twice for every equation in the user's doc.  Figure some way
-//   to improve that situation in general.
-// * Eliminate or replace BIHs. 
-//   * Add "Consider" options that are force-matched to lone metavariable and
-//     EFAs.
-//   * When an EFA has a parameter that is partially instantiated, leverage that
-//     by allowing it to match expressions that contain the partial
-//     instantiations.
-//   * Along these lines, one 'strategy' is to consider 'BIH-makers', namely
-//     what kinds of natural, minimal things can a user enter when doing, say,
-//     substitution, that would be a tiny enough hint that Lurch could construct
-//     an entire BIH from it?
-// * Consider speeding up matching in several ways.
-//   * Allow an option to eliminate the constant lambda expression as a
-//     solution.
-//   * Allow an option to efficiently solve 'Weenie' matching problems. e.g., if
-//     (@ P c) where P is a metavar and c is a constant is matched to e, and e
-//     does not contain c, return the constant solution (or none if the previous
-//     option is enabled).  If e only has one instance of c, there's only one
-//     solution, so return that without recursing.  If it has two instances
-//     there are four solutions, so return those.  Three have eight.  That
-//     should cover about 99% of the cases.
-// * Design a generic way to use multiple validation tools in the same document
-//   so they work well together.  For example, to have a CAS rule work with this
-//   501 validation tool we might insert a placeholder formula like `:{ CASRule
-//   }` and when an expression is supposed to be validated by the CAS rule it
-//   can put 'instantiations' after that formula to make a valid CAS expression
-//   validate propositionally.
-// * The following algorithm makes several passes through the entire document to
-//   process each step/phase separately for testing and experimenting. It might
-//   be more efficient to make one pass through the entire document, modifying
-//   everything as you go. Update: initial benchmarks seem to indicate that ALL
-//   of the computation time is coming from finding all of the instantiations,
-//   so this probably doesn't matter.  Furthermore, initial tests seem to
-//   indicate that that in an interactive UI almost everything this algorithm
-//   does will be almost instantaneous.  So optimization would mainly only
-//   affect batch mode instantiation of a large document from scratch.
+//  This module is intended to be the location of the utilities and code needed
+//  to implement the Global n-compact validation algorithm.  It is currently not
+//  implemented as a validation tool.
 //
-// * Sometimes an instantiation will instantiate the variable in a Let with a
-//   constant, either directly or indirectly, e.g. `Let 0'`. This doesn't seem
-//   to hurt anything but it makes for stupid instantiations, and might speed
-//   things up if we eliminate it.
-// * For rules like transitivity, e.g. :{ :x=y y=z x=z }, if used successfully
-//   they get instantiated six times, once for each pair of metavariables, but
-//   produce the same instantiation, plus a lot more.  However, these rules do
-//   not have a forbidden expression like the metavar W or (@ P x), so they
-//   don't automatically require a BIH.  But it is clearly nice to have such
-//   rules.  So add an attribute marking it as 'inefficient', and treat Rule or
-//   Part containing only a forbidden W or (@ P x) as a special case of
-//   'inefficient' so that in every case a BIH is required.
-// * Make a substitution tool that does the following. 
-//   - find any expressions of the form A~B (i.e., (~ A B)) where ~ is a
-//     reflexive relation like =. ≤ etc, and A and B are expressions.
-//   - compute the expression diff() between A and B, and see if there is a
-//     nontrivial possible substitution, e.g. X=Y, that when applied to A~A
-//     would produce A~B via substitution.
-//   - add the instantiations
-//
-//        :{ A~A }           (of the reflexive rule for ~)
-//
-//     and
-//
-//        :{ :X=Y :A~A A~B } (of the substitution rule for =)
-//
-//   - do this for all expressions of the form A~B in the document.  This gives
-//     us the main logic behind substitution by skipping the annoying
-//     substitution BIHs for propositional expressions of this form. 
-//
-//     TODO: make a similar tool for other common propositions to specify
-//     substitutions, e.g. 
-//
-//       `Substituting x=y in ∀z,f(x,y)<z yeilds ∀z,f(y,y)<z`
-//
-//   - we may want to then add a special way to declare reflexive operators
-//     rather than just inserting the various reflexive rules, e.g.,
-//     reflexive_operator(=.≤,⊆)
-// * Make a transitive chain tool that generalized the previous feature that
-//   does the following.
-//   - Allows a special kind of Declaration, e.g., trans_op_chain(=,≤,<) or
-//     trans_op_chain(=,⊆) or trans_op_chain(⇔,⇒).  Note that not all such
-//     operators are reflexive.
-//   - Allows expressions that chain the operators in a single such declaration
-//     of the form (E₀ op₁ E₁ op₂ ... opₙ Eₙ) where op₁,op₂,...,opₙ are all in a
-//     single trans_op_chain declaration. Alternatively, this can be entered as
-//     the sequence of expressions (E₀ op₁ E₁), (op₂ E₂), ...  (opₙ Eₙ), where
-//     using the binary operators in prefix form indicates they should be
-//     concatenated to the chain. 
-//   - For each k from 1..n add the expression (Eₖ₋₁ opₖ Eₖ) to the pool of user
-//     expressions to match, and apply the substitution tool for reflexive
-//     operators to each such expression.
-//   - After propositioall add validation after Eₖ if it eventually validates
-//   - Add the following 'instantiation' to the list 
-//
-//         :{ :(E₀ op₁ E₁) :(E₁ op₂ E₂) ... :(Eₙ₋₁ opₙ Eₙ) (E₀ op Eₙ) ) }
-//
-//     where op is the last operator in any trans_op_chain containing
-//     op₀,...,opₙ that appears among op₀,...,opₙ.  For efficiency we don't
-//     insert every possible relation between the E's that are deducible from
-//     this chain.  If the user wants to use more than one, they should make a
-//     transitive chain for each one.
-//
-// New attributes for LCs used here 
+//  TODO Summary: 
+//  * For each attribute we use below, decide whether it should be stored cached
+//    as a permanent LC attribute or a normal js object attribute before moving
+//    to the repo.
+//  * Optimizations: for a rule like symmetry of equality, it will ALWAYS be
+//    instantiated twice for every equation in the user's doc.  Figure some way
+//    to improve that situation in general.
+//  * Eliminate or replace BIHs. 
+//    * Add "Consider" options that are force-matched to lone metavariable and
+//      EFAs.
+//    * When an EFA has a parameter that is partially instantiated, leverage that
+//      by allowing it to match expressions that contain the partial
+//      instantiations.
+//    * Along these lines, one 'strategy' is to consider 'BIH-makers', namely
+//      what kinds of natural, minimal things can a user enter when doing, say,
+//      substitution, that would be a tiny enough hint that Lurch could construct
+//      an entire BIH from it?
+//  * Consider speeding up matching in several ways.
+//    * Allow an option to eliminate the constant lambda expression as a
+//      solution.
+//    * Allow an option to efficiently solve 'Weenie' matching problems. e.g., if
+//      (@ P c) where P is a metavar and c is a constant is matched to e, and e
+//      does not contain c, return the constant solution (or none if the previous
+//      option is enabled).  If e only has one instance of c, there's only one
+//      solution, so return that without recursing.  If it has two instances
+//      there are four solutions, so return those.  Three have eight.  That
+//      should cover about 99% of the cases.
+//  * Design a generic way to use multiple validation tools in the same document
+//    so they work well together.  For example, to have a CAS rule work with this
+//    501 validation tool we might insert a placeholder formula like `:{ CASRule
+//    }` and when an expression is supposed to be validated by the CAS rule it
+//    can put 'instantiations' after that formula to make a valid CAS expression
+//    validate propositionally.
+//  * The following algorithm makes several passes through the entire document to
+//    process each step/phase separately for testing and experimenting. It might
+//    be more efficient to make one pass through the entire document, modifying
+//    everything as you go. Update: initial benchmarks seem to indicate that ALL
+//    of the computation time is coming from finding all of the instantiations,
+//    so this probably doesn't matter.  Furthermore, initial tests seem to
+//    indicate that that in an interactive UI almost everything this algorithm
+//    does will be almost instantaneous.  So optimization would mainly only
+//    affect batch mode instantiation of a large document from scratch.
 // 
-// TODO: these are out of date... go through the code and update eventually
-//
-// One immediately question that arises when defining all of these new
-// attributes is whether they should be LC attributes or js attributes.  The
-// design principle we will use to make this decision in each case is roughly
-// the following. If the attribute is something that can always be computed from
-// the LC or its context we store it as a js attribute.  If it is some inherent
-// piece of information which sometimes cannot be computed on the fly, then we
-// store it as an LC attribute.  The exception might be any computed attribute
-// that we want to store with the user's document because it is expensive to
-// recompute.
-//
-// The advantage to this approach is that we can easily refresh all of the
-// computable attributes from scratch from the given user data e.g. after fixing
-// a bug or testing a coding change.
-//
-//    LC attributes: Environments
-//    * 'Rule' - (isA) this environment is a Formula which can be instantiated.
-//    * 'BIH'  - (isA) this environment is a blatant instantiation hint supplied
-//               by the user.
-//
-//    LC attributes: Declarations 
-//    * 'Declare' - (isA) this declaration declares global constants and has no
-//                  propositional form, whether a given or claim.
-//
-//    JS attributes: formula environments
-//    * 'domain'   - the js Set of metavariable names (strings) in this formula 
-//    * 'isWeeny'  - boolean that is true iff this formula is Weeny (has at
-//                   least one metavariable and at least one Weeny expression 
-//    * 'weenies'  - the array of Weeny expressions in this formula, if any 
-//    * 'finished' - boolean that is true if this formula is finished being
-//                   instantiated and should be ignored on future passes
-//
-//    JS attributes: user's document environment 
-//    * 'userPropositions' - cache of the user's propositions (the e expressions
-//      to match) stored in the last child of the document (the user's content)
-//
-//    JS attributes: instantiation environments & BIH's 
-//    * 'instantiation' - boolean indicating that this is an instantiation with
-//                        no metavars left
-//    * 'creators'   - the user proposition(s) that caused this instantiation
-//
-//    JS attributes: declarations body copy and premature generalizations
-//    * 'bodyOf'   - indicates an Expression is a copy of the body of a
-//      declaration
-//    * 'preemie'  - a expression that is justified by a Let that it is in the
-//                   scope
-//    * 'badBIH'   - an environment marked asA 'BIH' that isn't one
-//
-//    JS attributes - Symbols
-//    * 'constant' - boolean that indicates whether a free symbol is explicitly
-//      declared by a Let, Declare, or ForSome
-//    * 'properName' - its value is the proper name of this Lurch symbol
-
-/////////////////////////////////////////////////////////////////////////////
-//
+//  * Sometimes an instantiation will instantiate the variable in a Let with a
+//    constant, either directly or indirectly, e.g. `Let 0'`. This doesn't seem
+//    to hurt anything but it makes for stupid instantiations, and might speed
+//    things up if we eliminate it.
+//  * For rules like transitivity, e.g. :{ :x=y y=z x=z }, if used successfully
+//    they get instantiated six times, once for each pair of metavariables, but
+//    produce the same instantiation, plus a lot more.  However, these rules do
+//    not have a forbidden expression like the metavar W or (@ P x), so they
+//    don't automatically require a BIH.  But it is clearly nice to have such
+//    rules.  So add an attribute marking it as 'inefficient', and treat Rule or
+//    Part containing only a forbidden W or (@ P x) as a special case of
+//    'inefficient' so that in every case a BIH is required.
+//  * Make a substitution tool that does the following. 
+//    - find any expressions of the form A~B (i.e., (~ A B)) where ~ is a
+//      reflexive relation like =. ≤ etc, and A and B are expressions.
+//    - compute the expression diff() between A and B, and see if there is a
+//      nontrivial possible substitution, e.g. X=Y, that when applied to A~A
+//      would produce A~B via substitution.
+//    - add the instantiations
+// 
+//         :{ A~A }           (of the reflexive rule for ~)
+// 
+//      and
+// 
+//         :{ :X=Y :A~A A~B } (of the substitution rule for =)
+// 
+//    - do this for all expressions of the form A~B in the document.  This gives
+//      us the main logic behind substitution by skipping the annoying
+//      substitution BIHs for propositional expressions of this form. 
+// 
+//      TODO: make a similar tool for other common propositions to specify
+//      substitutions, e.g. 
+// 
+//        `Substituting x=y in ∀z,f(x,y)<z yeilds ∀z,f(y,y)<z`
+// 
+//    - we may want to then add a special way to declare reflexive operators
+//      rather than just inserting the various reflexive rules, e.g.,
+//      reflexive_operator(=.≤,⊆)
+//  * Make a transitive chain tool that generalized the previous feature that
+//    does the following.
+//    - Allows a special kind of Declaration, e.g., trans_op_chain(=,≤,<) or
+//      trans_op_chain(=,⊆) or trans_op_chain(⇔,⇒).  Note that not all such
+//      operators are reflexive.
+//    - Allows expressions that chain the operators in a single such declaration
+//      of the form (E₀ op₁ E₁ op₂ ... opₙ Eₙ) where op₁,op₂,...,opₙ are all in a
+//      single trans_op_chain declaration. Alternatively, this can be entered as
+//      the sequence of expressions (E₀ op₁ E₁), (op₂ E₂), ...  (opₙ Eₙ), where
+//      using the binary operators in prefix form indicates they should be
+//      concatenated to the chain. 
+//    - For each k from 1..n add the expression (Eₖ₋₁ opₖ Eₖ) to the pool of user
+//      expressions to match, and apply the substitution tool for reflexive
+//      operators to each such expression.
+//    - After propositioall add validation after Eₖ if it eventually validates
+//    - Add the following 'instantiation' to the list 
+// 
+//          :{ :(E₀ op₁ E₁) :(E₁ op₂ E₂) ... :(Eₙ₋₁ opₙ Eₙ) (E₀ op Eₙ) ) }
+// 
+//      where op is the last operator in any trans_op_chain containing
+//      op₀,...,opₙ that appears among op₀,...,opₙ.  For efficiency we don't
+//      insert every possible relation between the E's that are deducible from
+//      this chain.  If the user wants to use more than one, they should make a
+//      transitive chain for each one.
+// 
+//  New attributes for LCs used here 
+//  
+//  TODO: these are out of date... go through the code and update eventually
+// 
+//  One immediately question that arises when defining all of these new
+//  attributes is whether they should be LC attributes or js attributes.  The
+//  design principle we will use to make this decision in each case is roughly
+//  the following. If the attribute is something that can always be computed from
+//  the LC or its context we store it as a js attribute.  If it is some inherent
+//  piece of information which sometimes cannot be computed on the fly, then we
+//  store it as an LC attribute.  The exception might be any computed attribute
+//  that we want to store with the user's document because it is expensive to
+//  recompute.
+// 
+//  The advantage to this approach is that we can easily refresh all of the
+//  computable attributes from scratch from the given user data e.g. after fixing
+//  a bug or testing a coding change.
+// 
+//     LC attributes: Environments
+//     * 'Rule' - (isA) this environment is a Formula which can be instantiated.
+//     * 'BIH'  - (isA) this environment is a blatant instantiation hint supplied
+//                by the user.
+// 
+//     LC attributes: Declarations 
+//     * 'Declare' - (isA) this declaration declares global constants and has no
+//                   propositional form, whether a given or claim.
+// 
+//     JS attributes: formula environments
+//     * 'domain'   - the js Set of metavariable names (strings) in this formula 
+//     * 'isWeeny'  - boolean that is true iff this formula is Weeny (has at
+//                    least one metavariable and at least one Weeny expression 
+//     * 'weenies'  - the array of Weeny expressions in this formula, if any 
+//     * 'finished' - boolean that is true if this formula is finished being
+//                    instantiated and should be ignored on future passes
+// 
+//     JS attributes: user's document environment 
+//     * 'userPropositions' - cache of the user's propositions (the e expressions
+//       to match) stored in the last child of the document (the user's content)
+// 
+//     JS attributes: instantiation environments & BIH's 
+//     * 'instantiation' - boolean indicating that this is an instantiation with
+//                         no metavars left
+//     * 'creators'   - the user proposition(s) that caused this instantiation
+// 
+//     JS attributes: declarations body copy and premature generalizations
+//     * 'bodyOf'   - indicates an Expression is a copy of the body of a
+//       declaration
+//     * 'preemie'  - a expression that is justified by a Let that it is in the
+//                    scope
+//     * 'badBIH'   - an environment marked asA 'BIH' that isn't one
+// 
+//     JS attributes - Symbols
+//     * 'constant' - boolean that indicates whether a free symbol is explicitly
+//       declared by a Let, Declare, or ForSome
+//     * 'properName' - its value is the proper name of this Lurch symbol
+ 
+////////////////////////////////////////////////////////////////////////////
+// 
 // Imports
 //
 
@@ -231,14 +236,10 @@ const timeEnd = (description) => { if (Debug) console.timeEnd(description) }
 // validation feedback and add additional complete instantiations to the
 // document, but should not add new Rules.
 //
-const validate = ( doc, target = doc, _options = {} ) => {
+const validate = ( doc, target = doc ) => {
   
-  // put the default options here inside the routine so we can expand the number
-  // of options in the future without cluttering the signature.
-  const defaultoptions = 
-    { checkPreemies:true , validateall:true , autoCases:false }
-  // options supplied as an argument override defaults
-  const options = { ...defaultoptions , ..._options }
+  // interpret it if it hasn't been already (the routine checks)
+  interpret(doc)
 
   // process the domains (if they aren't already)
   processDomains(doc)
@@ -256,11 +257,14 @@ const validate = ( doc, target = doc, _options = {} ) => {
   processEquations(doc)
   
   ///////////////////////////////////
-  // Proof by Case
-  processCases(doc, options)
-  // while this idea works, it's not efficent because there are way more ways to
-  // match something like f(x+1,y-2) to 𝜆P(y) than to a single metavar U
-  // processCases(doc,'Substitution')
+  // Proof by Cases
+  processCases(doc)
+  
+  // while this idea works in general for any forbidden Weeny formula, it's not
+  // efficent because there are way more ways to match something like f(x+1,y-2)
+  // to 𝜆P(y) than to a single metavar U processCases(doc,'Substitution').  But
+  // it can work for single metavariable weeny, since that only creates one
+  // instantiation.
   
   //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
   
@@ -274,9 +278,9 @@ const validate = ( doc, target = doc, _options = {} ) => {
   // Scoping
   Scoping.validate(doc)
   
-  
   ///////////////
-  // Cache
+  // Caching
+  //
   // cache the let-scopes in the root (if the aren't)
   if (!doc.letScopes) doc.letScopes = doc.scopes()
   // cache the catalog in the root
@@ -288,12 +292,12 @@ const validate = ( doc, target = doc, _options = {} ) => {
 
   ///////////////
   // Prop Check
-  if (options.validateall) {
+  if (LurchOptions.validateall) {
     doc._validateall( target )
-    if (options.checkPreemies) doc._validateall( target , true ) 
+    if (LurchOptions.checkPreemies) doc._validateall( target , true ) 
   } else { 
     doc._validate( target )
-    if (options.checkPreemies) doc._validate( target , true ) 
+    if (LurchOptions.checkPreemies) doc._validate( target , true ) 
   }
 
   // For debugging purposes, before leaving, rename all of the ProperNames to
@@ -329,45 +333,6 @@ const tidyProperNames = doc => {
   })
 }
 
-///////////////////////////////////////////////////////////////////////////////
-//
-//                     LDE Documents
-//
-// The Document class handles most of the file handling and computes properties
-// of Documents that are mostly independent of what validation tool will be used.
-// The remainder of the processing that has to be done here is more specific to
-// this validation tool.
-const processDoc = doc => {
-  // These have been moved to the Document class, but we keep the comments here
-  // for a quick reference.
-  // let doc=d.copy()
-  // processShorthands(doc)        
-  // processDeclarationBodies(doc) 
-  // replaceFormulaBindings(doc)   
-  // makeBindingsCanonical(doc)    
-  // markMetavars(doc)             
-  // assignProperNames(doc)        
-  processDomains(doc)
-  processBIHs(doc)
-  // instantiate(doc,n) // can be done afterwards
-  Scoping.validate(doc)
-  markDeclaredSymbols(doc)
-  // no longer needed, but it works and could be useful some day
-  // markDeclarationContexts(doc)
-  return doc
-}
-///////////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////////////
-//
-//  Global 501 Algorithm (polynomial time n-compact)
-//
-// This module is intended to be the location of the utilities and code needed
-// to implement the Global n-compact validation algorithm.  It is currently not
-// implemented as a validation tool.
-
-
 ////////////////////////////////////////////////////////////////////////////////
 //
 //                  Cache all Domains 
@@ -392,8 +357,10 @@ const processDoc = doc => {
 // This causes some rules, like or- or substitution, to require BIH's for now.
 //
 // for benchmarking use: const forbiddenWeeny = L => (L instanceof Environment)
-const forbiddenWeeny = L => (
-  (L instanceof Environment) || (L instanceof LurchSymbol) || isAnEFA(L))
+const forbiddenWeeny = ( L ) => (
+  (L instanceof Environment) || 
+  ((L instanceof LurchSymbol) && LurchOptions.avoidLoneMetavars) || 
+  (isAnEFA(L) && LurchOptions.avoidLoneEFAs) )
 
 // Cache the domain information for a formula.  
 //
@@ -430,6 +397,7 @@ const cacheFormulaDomainInfo = f => {
 const processDomains = doc => {
   // make it idempotent
   if (doc.domainsProcessed) { return }
+
   doc.formulas().forEach(f => {
     cacheFormulaDomainInfo(f)
     // If there are no metavariables in this formula, instantiate it so it is
@@ -777,6 +745,9 @@ const matchGivens = (a, b) => {
 // instatiation of the ⇒+ rule.
 //
 const processBIHs = doc => {
+  // check LurchOptions
+  if (!LurchOptions.processBIHs) return
+
   // since this is a separate tool, we don't care if a formula has been
   // .finished for prop instantiation, so we pass the argument true.
   const formulas = doc.formulas(true)
@@ -843,7 +814,9 @@ const processBIHs = doc => {
 //   symmetric equivalences?  Is there a cleaner more efficient way to
 //   accomplish the same thing?
 const processEquations = doc => {
-  
+  // check options 
+  if (!LurchOptions.processEquations) return
+
   // split equation chains. This also marks all conclusion equations, including
   // those split from chains, with .equation=true
   splitEquations(doc)
@@ -1072,7 +1045,7 @@ const splitEquations = doc => {
 // available for further instantation by the global Prop tool (i.e. don't mark
 // it .finished).
 //
-// Then check of options.autoCases is true.  If it is find every rule that has
+// Then check of LurchOptions.autoCases is true.  If it is find every rule that has
 //
 //   a) its last conclusion is a metavariable 
 //
@@ -1107,7 +1080,9 @@ const splitEquations = doc => {
 //   besides the forbidden one. That will at least eliminate creating Parts up
 //   front that then never turn into Insts afterwards. In lucky documents
 //
-const processCases = (doc , options) => {
+const processCases = doc => {
+   // check options
+   if (!LurchOptions.processCases) return
 
   // check if some rule is a 'Cases'
   const rule=doc.find( x => x.isA('Cases') )
@@ -1134,7 +1109,7 @@ const processCases = (doc , options) => {
     rule.finished = true
   // also check if the autoCases option is true. If so, match every user conclusion
   // to every caselike rule. 
-  } else if (options.autoCases) {
+  } else if (LurchOptions.autoCases) {
     const rules = getCaselikeRules(doc)
     getUserPropositions(doc)
       .filter( e => e instanceof Expression && e.isAConclusionIn(doc))
@@ -1467,6 +1442,20 @@ LogicConcept.prototype.irrelevantTo = function (target) {
     !this.hasAncestorSatisfying(z => { return z.isAccessibleTo(target, true) })
 }
 
+// We just use a global for storing the current options. To set an option just do
+// e.g. LurchOptions.avoidLoneMetavars = false
+const LurchOptions = { 
+  validateall:true ,    
+  checkPreemies:true ,  
+  processBIHs:true ,
+  avoidLoneMetavars:true ,
+  avoidLoneEFAs:true ,    
+  processEquations:true ,    
+  processCases:true ,    
+  autoCases:false  
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 // Declaration contexts
 //
@@ -1531,7 +1520,7 @@ const Benchmark = function (f, name) {
 
 export default {
   validate, getUserPropositions, instantiate, markDeclarationContexts,
-  processBIHs, processEquations, splitEquations, processDoc, processDomains,
-  cacheFormulaDomainInfo, Benchmark, getCaselikeRules, Report
+  processBIHs, processEquations, splitEquations, processDomains,
+  cacheFormulaDomainInfo, Benchmark, getCaselikeRules, LurchOptions, Report
 }
 ///////////////////////////////////////////////////////////////////////////////

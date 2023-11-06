@@ -29,7 +29,11 @@ const instantiation = 'LDE CI'
 //
 //  This takes a raw user's document as an LC environment and preprocesses it in
 //  preparation for validation using all of the routines in this document. 
-const interpret = (doc) => {
+const interpret = doc => {
+  
+  // just return if it's already interpreted
+  if (doc.interpreted) return
+
   addSystemDeclarations(doc)
   processShorthands(doc)
   moveDeclaresToTop(doc)
@@ -40,6 +44,10 @@ const interpret = (doc) => {
   processRules(doc)
   assignProperNames(doc)
   markDeclaredSymbols(doc)
+  
+  // mark it as interpreted
+  doc.interpreted = true
+
   return doc
 }
 
