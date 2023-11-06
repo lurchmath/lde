@@ -194,6 +194,7 @@ global.loadDocStr = ( name, folder='./', extension=LurchFileExtension ) => {
   let ans = loadStr( name, folder, extension )
   // recursively replace all of the includes
   const regx = /(?:^|\n)[ \t]*[iI]nclude[ \t]+([^ \t][^\n]*)(?:\n|$)/g
+  const regx = /(?:^|\n)[ \t]*[iI]nclude[ \t]+([^ \t][^\n]*)(?:\n|$)/gm
   return ans.replace(regx,(line,fname) => { return loadDocStr(fname) })
 }
 
