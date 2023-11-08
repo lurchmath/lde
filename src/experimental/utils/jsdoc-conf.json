@@ -1,7 +1,8 @@
 {
     "plugins": ["plugins/markdown"],
     "opts": {
-        "template": "../../node_modules/clean-jsdoc-theme",
+        "_comment_": "../../node_modules/clean-jsdoc-theme",
+        "template": "../../node_modules/tidy-jsdoc", 
         "prism-theme": "prism-default",
         "encoding": "utf8",
         "recurse": true,
@@ -27,7 +28,8 @@
     },	
     "source": {
         "exclude": [
-            "./acidtests.js"
+            "./scripts/acidtests.js",
+            "./scripts/post-docs.js"
         ]
     }
 }

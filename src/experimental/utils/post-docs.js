@@ -20,7 +20,7 @@ const MathJaxCode = `
 
 // Read all files in the docs folder
 const docsFolder = path.join( path.dirname(
-    import.meta.url.substring( 7 ) ), '.', 'docs' )
+    import.meta.url.substring( 7 ) ), '..', 'docs' )
 fs.readdir( docsFolder, ( err, files ) => {
     if ( err )
         return console.error(
@@ -45,7 +45,7 @@ fs.readdir( docsFolder, ( err, files ) => {
                     console.error(
                         'Unable to write to this HTML file:', file )
                 else if ( ++counter == files.length )
-                    console.log( '  Added MathJax ...' )
+                    console.log( 'Adding MathJax ...' )
             } )
         } )
     } )
