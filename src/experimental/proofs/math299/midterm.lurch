@@ -14,15 +14,14 @@ include libs/Number Theory
   { P ⇒ (P ⇔ P or (¬P and P)) }
   
   ➤ "Proof:"
-  { 
-    { :P
-      { :P P or (¬P and P) }
-      { :P or (¬P and P) 
-        {:¬P and P  P}  
-      } 
-      (P ⇔ P or (¬P and P))
-    }
-  }  
+  Proof:
+  { :P
+    { :P P or (¬P and P) }
+    { :P or (¬P and P) 
+      {:¬P and P  P}  
+    } 
+    (P ⇔ P or (¬P and P))
+  }
 }
   
 ➤ "Math 299 Midterm 2023 #11"
@@ -32,17 +31,17 @@ include libs/Number Theory
   { ((P or Q) and (Q⇒R)) and ¬P ⇒ R }
 
   ➤ "Proof:"
-  { 
-    { :((P or Q) and (Q⇒R)) and ¬P
-      (P or Q) and (Q⇒R)
-      ¬P
-      Q⇒R
-      P or Q
-      { :P { :¬R →← } R }
-      { :Q R }
-      R by cases
-    }
+  Proof:
+  { :((P or Q) and (Q⇒R)) and ¬P
+    (P or Q) and (Q⇒R)
+    ¬P
+    Q⇒R
+    P or Q
+    { :P { :¬R →← } R }
+    { :Q R }
+    R by cases
   }
+  
 }
 
 ➤ "Math 299 Midterm 2023 #12"
@@ -52,6 +51,7 @@ include libs/Number Theory
   { x=y and ¬y=z ⇒ ¬x=z }
 
   ➤ "Proof:"
+  Proof:
   { 
     { :x=y and ¬y=z
       ¬y=z
@@ -72,6 +72,7 @@ include libs/Number Theory
   {  (∀x.(∃y.x loves y)⇒(∃z.z loves x)) ⇒ (∀x.(∀y.¬y loves x)⇒(∀y.¬x loves y)) }
 
   ➤ "Proof:"
+  Proof:
   { :∀x. (∃y.x loves y) ⇒ (∃z.z loves x)
     { :Let s
       { :∀y.¬y loves s

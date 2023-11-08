@@ -12,6 +12,7 @@ include libs/Equations
   { 1+1=2 }
   
   ➤ "Proof:"
+  Proof:
   {  
     1+1=1+𝜎(0)
        =𝜎(1+0)
@@ -26,6 +27,7 @@ Theorem: { :n≠0 ∃m.n=𝜎(m) }
 
 {
   ➤ "Proof:"
+  Proof:
   { :n≠0
     ➤ "P(n) is n≠0⇒∃m,n=𝜎(m)"
     ➤ "Base Case"
@@ -58,6 +60,7 @@ Theorem: { :n≠0 ∃m.n=𝜎(m) }
   { ¬n=𝜎(n) }
 
   ➤ "Proof:"
+  Proof:
   { 
     ➤ "Base Case:"
     ¬0=𝜎(0)
@@ -81,6 +84,7 @@ Theorem: { 𝜎(n)=n+1 }
 
 {
   ➤ "Proof:"
+  Proof:
   { 
     𝜎(n) = 𝜎(n+0)
          = n+𝜎(0)
@@ -93,6 +97,7 @@ Theorem: { 𝜎(n)=n+1 }
   { (m+n)+p=m+(n+p) }
 
   ➤ "Proof: (by induction on p for arbitrary m,n)"
+  Proof:
   { 
     ➤ "Base case:"
     (m+n)+0 = m+n
@@ -123,6 +128,7 @@ Rules:
 Theorem: { 𝜎(m+n)=𝜎(m)+n }
 
 {
+  Proof:
   {
     ➤ "Proof: (by induction on n)"
     ➤ 
@@ -145,6 +151,7 @@ Theorem:  { m+n = n+m }
 
 {
   ➤ "Proof: (by induction on n)"
+  Proof:
   { 
     ➤ "Base case"
     m+0 = m
@@ -166,6 +173,7 @@ Theorem:  { m+n = n+m }
 
 {
   ➤ "Proof: (by induction on p)"
+  Proof:
   { 
     ➤ "Base case"
     { :m+0 = n+0
@@ -199,6 +207,7 @@ Theorem: { n⋅1=n  1⋅n=n }
 
 {
   ➤ "Proof:"
+  Proof:
   { 
     ➤ "The first part is straightforward"
     n⋅1 = n⋅𝜎(0)
@@ -231,6 +240,7 @@ Theorem: { n⋅1=n  1⋅n=n }
   { n≤n }
 
   ➤ "Proof:"
+  Proof:
   { n+0 = n
     ∃k. n+k = n
   }
@@ -241,6 +251,7 @@ Theorem: { n⋅1=n  1⋅n=n }
   ➤ "Theorem 7.35: Every number divides itself."
   { 1 | n  n | n }
   ➤ "Proof:"
+  Proof:
   { 
     ➤ "These follow from Thm 7.12"
     1⋅n = n = n⋅1
@@ -256,6 +267,7 @@ Theorem: { n⋅1=n  1⋅n=n }
   { :n≠0 :m|n  m≤n }
   
   ➤ "Proof:"
+  Proof:
   { :n≠0 :m|n
     n=m⋅k for some k
 

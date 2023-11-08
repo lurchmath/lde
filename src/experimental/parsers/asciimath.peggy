@@ -161,7 +161,7 @@ Comment "Comment" = ('Comment'i / '➤') __ a:StringLiteral { return `(➤ ${a})
 StringLiteral = $('"' [^"]* '"')
 
 // Shorthand symbols that will be post-processed
-Shorthand = BIH / Ruleset / Rule / Thm
+Shorthand = BIH / Ruleset / Rule / Thm / Proof
 
 BIHLabel = 'since'i / 'because'i / 'Recall'i
 BIH = BIHLabel { return '>>' }
@@ -171,6 +171,8 @@ RuleLabel = 'Rule'i / 'Axiom'i / 'Given'i / 'Definition'i
 Rule = RuleLabel ':'? { return 'rule>' }
 ThmLabel = 'Theorem'i / 'Thm'i / 'Lemma'i / 'Corollary'i
 Thm = ThmLabel ':'? { return 'thm>' }
+ProofLabel = 'Proof'i 
+Proof = ProofLabel ':'? { return 'proof>' }
 
 // declarations
 Declaration "Declaration" = ForSome / Let

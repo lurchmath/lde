@@ -14,11 +14,13 @@ include libs/Pred
   // { :(∀x.P(x)) { :Let s  P(s)) } (∀y.P(y)) } 
   ➤ "Problem 5.1"
   ➤ "Amazingly requires no proof!"
+  Proof:
   { (∀x.P(x)) ⇒ (∀y.P(y)) }  
 }
 
 {
   ➤ "Second in-class example (similar to Problem 5.2)"
+  Proof:
   { :∃x.P(x) and Q(x) 
     P(c) and Q(c) for some c
     P(c)
@@ -28,6 +30,7 @@ include libs/Pred
 
 {
   ➤ "Assignment #7 (a)"
+  Proof:
   { { :∃x.Q(x)
       Q(c) for some c
       { :P(c)
@@ -42,6 +45,7 @@ include libs/Pred
 
 {
   ➤ "Assignment #7 (b)"
+  Proof:
   { { :∀x.¬P(x)
       { :∃y.P(y)
         P(n) for some n
@@ -56,6 +60,7 @@ include libs/Pred
 
 {
   ➤ "Problem 5.3 - Distributivity of ∀ over 'and'"
+  Proof:
   { { :(∀y.P(y)) and (∀z.Q(z))
       (∀y.P(y)) (∀z.Q(z))
       { :Let x
@@ -80,6 +85,7 @@ include libs/Pred
 
 {
   ➤ "Problem 5.3 - Distributivity of ∃ over 'or'"
+  Proof:
   { 
     { :(∃y.P(y)) or (∃z.Q(z))
       { :∃y.P(y)
@@ -128,6 +134,7 @@ include libs/Pred
 
 {
   ➤ "Assignment #8 (b)"
+  Proof:
   { 
     Declare < 0 7 
     { :0<7
@@ -141,6 +148,7 @@ include libs/Pred
 
 {
   ➤ "Assignment #8 (c)"
+  Proof:
   { 
     Declare Alice Bob loves
     { :∀x.(∀y.x loves y)
@@ -153,6 +161,7 @@ include libs/Pred
 
 {
   ➤ "Assignment #8 (d)"
+  Proof:
   { { :x=y and y=z
       x=y
       y=z
@@ -164,6 +173,7 @@ include libs/Pred
 
 {
   ➤ "Assignment #8 (e)"
+  Proof:
   { 
     { :(∀y.P(y)) ⇒ (∃z.Q(z))
       { :¬(∃x.P(x) ⇒ Q(x))
@@ -215,6 +225,7 @@ include libs/Pred
     (∀x.(∃!y. x loves y)) and ¬a=b ⇒ ¬(c loves a and c loves b)
   }
   ➤ "Proof:"
+  Proof:
   { 
     { ➤ "Assume the conjunction..."
       :(∀x.(∃!y. x loves y)) and ¬a=b
@@ -257,6 +268,7 @@ include libs/Pred
   ➤ "Theorem: Pierce's Law"
   { ((P ⇒ Q) ⇒ P) ⇒ P }
   ➤ "Proof:"
+  Proof:
   { 
     :(P⇒Q)⇒P
     { :¬P
@@ -280,6 +292,7 @@ include libs/Pred
   ➤ "Theorem: (P⇒R) or (Q⇒R) ⇒ ((P and Q)⇒R)"
   { (P⇒R) or (Q⇒R) ⇒ ((P and Q)⇒R) }
   ➤ "Proof:"
+  Proof:
   { :(P⇒R) or (Q⇒R)
     { :P and Q
       P 
@@ -305,6 +318,7 @@ include libs/Pred
   ➤ "Theorem: If everyone loves themselves then everyone loves someone."
   { :(∀x.x loves x) (∀x.(∃y.x loves y)) }
   ➤ "Proof:"
+  Proof:
   { :∀x.x loves x
     { :Let z
       z loves z
@@ -320,6 +334,7 @@ include libs/Pred
   ➤ "Theorem: Alternate definition of unique existence."
   { (∃!x.P(x)) ⇔ (∃x.P(x) and (∀y.¬y=x ⇒ ¬P(y))) }
   ➤ "Proof:"
+  Proof:
   { { :∃!x.P(x)
       ∃x.(P(x) and (∀y.P(y) ⇒ y=x))
       P(c) and (∀y.P(y) ⇒ y=c) for some c
@@ -370,6 +385,7 @@ include libs/Pred
   ➤ "Theorem:"
   { ¬(∀x.∃y.∀z.P(x,y,z)) ⇒ (∃x.∀y.∃z.¬P(x,y,z)) }
   ➤ "Proof:"
+  Proof:
   { :¬(∀x.∃y.∀z.P(x,y,z))
     { :¬(∃x.∀y.∃z.¬P(x,y,z))
       { :Let a

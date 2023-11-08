@@ -8,12 +8,15 @@ include libs/Prop
 ➤ "Assignment #4 - Spring 2023"
 
 ➤ "4.1 P⇒P"
+Proof:
 { P ⇒ P }  ➤ "validates automatically!"
 
 ➤ "(a) P and Q ⇒ Q and P"
+Proof: 
 { :(P and Q)  (Q and P) }
 
 ➤ "(b) Q ⇒ Q or P"
+Proof: 
 { { :Q 
     (Q or P) 
   } 
@@ -21,6 +24,7 @@ include libs/Prop
 } 
 
 ➤ "(c) Q ⇒ (P ⇒ Q)"
+Proof:
 { { :Q 
     P ⇒ Q 
   } 
@@ -28,6 +32,7 @@ include libs/Prop
 }
 
 ➤ "(d) P ⇔ ¬¬P"
+Proof:
 { { :P 
     { :¬P 
       →← 
@@ -46,9 +51,11 @@ include libs/Prop
 ➤ "(e) →← ⇒ P"
 ➤ "note this can validate now because the relevant instantiations have already"
 ➤ "been found because of the previous proofs"
+Proof:
 {  →← ⇒ P  }
 
 ➤ "(f) ¬(P and ¬P)"
+Proof:
 { { :(P and ¬P)  
     →← 
   } 
@@ -58,6 +65,7 @@ include libs/Prop
 ➤ "Assignment #5 - Spring 2023"
 
 ➤ "(a) R ⇒ (Q ⇒ P or Q)"
+Proof:
 { { :Q 
     (P or Q) 
   } 
@@ -66,6 +74,7 @@ include libs/Prop
 }
 
 ➤ "(b) ¬P or Q ⇒ (P ⇒ Q)"
+Proof:
 { Recall { :(¬P or Q) :{ :¬P (P ⇒ Q) } :{ :Q (P ⇒ Q) }  P ⇒ Q }
   { :(¬P or Q)
     { :¬P 
@@ -87,6 +96,7 @@ include libs/Prop
 }
 
 ➤ "(c) (P or Q) or R ⇒ P or (Q or R)"
+Proof:
 { ➤ "the or- rule (proof by cases) always need a BIH"
   Recall { :(P or Q) or R  
     :{ :(P or Q) (P or (Q or R)) }
@@ -114,6 +124,7 @@ include libs/Prop
 }
 
 ➤ "(d) ¬(P and Q) ⇒ ¬P or ¬Q"
+Proof:
 {
   { :¬(P and Q) 
     { :¬(¬P or ¬Q) 
@@ -137,6 +148,7 @@ include libs/Prop
 
 ➤ "Assignment #6"
 ➤ "(a)  P and Q ⇔ Q and P"
+Proof:
 {
   { :(P and Q) P Q (Q and P) }
   { :(Q and P) P Q (P and Q) }
@@ -144,6 +156,7 @@ include libs/Prop
 }
 
 ➤ "(b)  P and ¬Q ⇒ ¬(P⇒Q)"
+Proof:
 {
   { :P and ¬Q 
     { :P⇒Q P ¬Q Q →← }
@@ -153,6 +166,7 @@ include libs/Prop
 }
 
 ➤ "(c) P or ¬P"
+Proof:
 {
   { :¬(P or ¬P)
     { :P
@@ -168,11 +182,13 @@ include libs/Prop
 
 ➤ "(d) (P⇒Q)⇒¬P or Q"
 ➤ "uh... I already got this for free somehow. Probably from the reverse direction"
+Proof:
 {
   (P⇒Q) ⇒ (¬P or Q)  
 }
 
 ➤ "(e) P or (Q and R) ⇔ (P or Q) and (P or R)"
+Proof:
 { Recall { :P or (Q and R) 
     :{ :P ((P or Q) and (P or R)) } 
     :{ :(Q and R) ((P or Q) and (P or R))} 
@@ -205,6 +221,7 @@ include libs/Prop
 }
 
 ➤ "(f) (P or Q) and ¬Q ⇒ P"
+Proof:
 { Recall { :(P or Q) :{ :P P } :{ :Q P } P } 
   { :((P or Q) and ¬Q) (P or Q) ¬Q 
     { :Q { :¬P →← } P }
@@ -220,6 +237,7 @@ include libs/Prop
   ➤ "Theorem: ¬(P⇒Q) or ¬P or Q"
   { (¬(P⇒Q) or ¬P) or Q }
   ➤ "Proof:"
+  Proof:
   { :¬((¬(P⇒Q) or ¬P) or Q)
     { :¬(¬(P⇒Q) or ¬P)
       { :Q
