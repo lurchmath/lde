@@ -206,7 +206,8 @@ Not        = a:('¬'/'not ')? _ b:Stuff     { return (a==='not ')
 Stuff = Relation / Thing
 
 // relations
-Relation = Subset / ElementOf / Divides / Leq / LessThan / Equation / NotEqual / Loves
+Relation = Subset / ElementOf / Divides / Leq / 
+           LessThan / Equation / NotEqual / Loves / Is
 
 Subset     = a:Thing|2..,'⊆'/' subset '/' subseteq '| { return lisp('⊆',a) }
 ElementOf  = a:Thing ('∈'/' in ') b:Thing             { return lispBinary('∈',a,b) }
@@ -217,6 +218,7 @@ NotEqual   = a:Thing (' neq '/' ne ') b:Thing
              { return `(¬ ${lispBinary('=',a,b)})` }
 Equation   = a:Thing|2..,'='|                         { return lisp('=',a) }
 Loves      = a:Thing|2..2,' loves '|                  { return lisp('loves',a) }
+Is         = a:Thing|2..2,' is an '/' is a '/' is '|  { return lisp('is',a) }
 
 // things to relate
 Thing = Set / Algebraic

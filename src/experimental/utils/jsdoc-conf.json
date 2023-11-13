@@ -1,7 +1,7 @@
 {
     "plugins": ["plugins/markdown"],
     "opts": {
-        "_comment_": "../../node_modules/clean-jsdoc-theme",
+        "_template": "../../node_modules/clean-jsdoc-theme",
         "template": "../../node_modules/tidy-jsdoc", 
         "prism-theme": "prism-default",
         "encoding": "utf8",
@@ -21,7 +21,7 @@
         }
     },
     "metadata": {
-        "title": "Lurch Deductive Engine"
+        "title": "Global $n$-compact Validation Engine"
     },
     "styles": {
         "nav-width": "335px"

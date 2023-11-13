@@ -1,3 +1,9 @@
+/**
+ * Parse a string to convert it to an LC and process Shorthands that appear in
+ * an LC.
+ *
+ * @module Parsing
+ */
 //////////////////////////////////////////////////////////////////////////////
 //
 //                       Parsers and Parsing Utilties 
@@ -13,12 +19,15 @@
 //
 import { Environment } from '../environment.js'
 import { Symbol as LurchSymbol } from '../symbol.js'
+import './extensions.js'
 
-//////////////////////////////////////////////////////////////////////////////
-// Make Parser
-//
-// Make a normal and tracing peggy parser from the given string and customize
-// the error formatting, then return both parsers in an array.
+/**
+ * Make both a normal and tracing peggy parser from the given string and customize
+ * the error formatting, then return both parsers in an array.
+ * @function
+ * @param {string} parserstr - the peggy parser definition string  
+ * @returns {function[]} - the normal and tracing parsers
+ */
 export const makeParser = parserstr => {
   const opts = { cache:true }
   const traceopts = { ...opts , trace:true }
@@ -54,42 +63,76 @@ export const makeParser = parserstr => {
   return [parser,traceparser]
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// Process Shorthands 
-//
-// In order to make it convenient to enter large documents in putdown notation,
-// it is convenient to use fromPutdown to enter some reserved content in the
-// document that is preprocessed before evaluating the document.
-//
-// The following are what we have for Shorthands. More might be added later. 
-//
-//  * Scan a document looking for the symbol '<<', which we call a 'marker'. 
-//    For every marker, 
-//
-//    (i) if the preceding sibling is an environment, attribute it
-//    as a 'BIH'. 
-//
-//    (ii) if the preceding sibling is a declaration, attribute it
-//    as a 'Declare', 
-//
-//    (iii) in either case, finally, delete the marker.
-//
-//   * Scan for occurrences of the symbol 'λ' (or  '@' for backwards
-//     compatibility) and replace that with the symbol "LDE EFA" (which then
-//     will still print as '𝜆' but it's what is needed under the hood).
-//
-//   * Scan for occurrences of the symbol '<thm' and mark its previous sibling
-//     as a user theorem, or 'thm> and mark its next sibling as a Theorem.
-//
-//   * Scan for occurrences of the symbol `✔︎` and `✗` and mark its previous
-//     sibling with .expectedResult 'valid' or 'invalid', respectively.
-//
-// Naturally we have to run this FIRST before anything else.  These changes are
-// made in-place - they don't return a copy of the document.
-//
-// This does no error checking, so << has to be an outermost expression with a
-// previous sibling and λ has to appear in some sensible location.
-//
+/**
+ *  ## Process Shorthands 
+ *
+ * In order to make it convenient to enter large documents in putdown notation,
+ * it is convenient to use fromPutdown to enter some reserved content in the
+ * document that is preprocessed before evaluating the document.
+ *
+ * The following are what we have for Shorthands. More might be added later. 
+ *
+ *   * Scan a document looking for any of the following Shorthands and convert
+ *     the next (>) or previous (<) sibling to the corresponding type in the asA
+ *     column.
+ *
+ *       | Shorthand   |  mark asA |
+ *       | ------------|-----------|
+ *       | 'BIH>'      | 'BIH'     |
+ *       | 'declare>'  | 'Declare' |
+ *       | 'rule>'     | 'Rule'    |
+ *       | 'cases>'    | 'Cases'   |
+ *       | 'thm>'      | 'Theorem' |
+ *       | '<thm'      | 'Theorem' |
+ *       | 'proof>'    | 'Proof'   |
+ *
+ *   * Scan for occurrences of the symbol `rules>`. Its next sibling should be
+ *     an environment containing given Environments. Mark each child of the next
+ *     sibling as a `Rule` and delete both the `rules>` symbol and the outer
+ *     environment containing the newly marked `Rules.  This allows us to use an
+ *     Environment to mark a lot of consecutive `Rules` all at once and then
+ *     ignore the wrapper Environment. For libraries this is cleaner than trying
+ *     to mark every Rule with `rule>` individually.  
+ *
+ *   * Scan for occurrences of the symbol `λ` (or  `@` for backwards
+ *     compatibility) and replace that with the symbol "LDE EFA" (which then
+ *     will still print as '𝜆' but it's what is needed under the hood).
+ *
+ *   * Scan for occurrences of the symbol `≡`. If found let `A` and `B` be its
+ *     previous and next siblings. Replace all three with `{ {:A B} {:B A}}
+ *
+ *   * Scan for occurrences of the symbol `➤`. If found it should be the first
+ *     child of an Application whose second child is a symbol whose text is the
+ *     text of the comment.  Mark that Application with `.ignore=true` so it is
+ *     ignored propositionally.
+ *
+ *   * Scan for occurrences of the symbol `by` and mark its previous sibling's
+ *     `.by` attribute with the text of its next sibling, which must be a
+ *     LurchSymbol. Then delete both the `by` and it's next sibling.  Currently
+ *     used by the `Cases` tool
+ *
+ *   * Scan for occurrences of the symbol `✔︎`, `✗`, and `!✗ and mark its
+ *     previous sibling with .expectedResult 'valid', 'indeterminate', and
+ *     'invalid' respectively.
+ *
+ *   * Scan a document looking for the symbol `<<`, which we call a 'marker'.
+ *     For every marker, 
+ *     - if the preceding sibling is an environment, attribute it as a `BIH`. 
+ *
+ *     - if the preceding sibling is a declaration, attribute it as a `Declare`, 
+ *
+ *     - in either case, finally, delete the marker.
+ *
+ * Naturally we have to run this FIRST before anything else.  These changes are
+ * made in-place - they don't return a copy of the document.
+ *
+ * This does no error checking, so << has to be an outermost expression with a
+ * previous sibling and λ has to appear in some sensible location and so on.
+ *
+ * @function
+ * @param {Environment} L - the document
+ * @returns {LogicConcept} - the modified document
+ */
 export const processShorthands = L => {
 
   // for each symbol named symb, do f, i.e. execute f(symb)
@@ -115,7 +158,7 @@ export const processShorthands = L => {
   processSymbol( 'cases>'        , m => makeNext(m,'Cases') )  
   processSymbol( 'thm>'          , m => makeNext(m,'Theorem') )  
   processSymbol( '<thm'          , m => makePrevious(m,'Theorem') )  
-
+  processSymbol( 'proof>'        , m => makeNext(m,'Proof') )
   
   // attribute the previous sibling with .by attribute whose value is the text
   // of the next sibling if it is a symbol (and does nothing if it isn't)

@@ -1,17 +1,31 @@
+/**
+ * #### Prepare an LC for Global $n$-compact Validation 
+ *
+ *  In the current implementation of global n-compact validation we currently
+ *  make many simplifying assumptions about the nature of a document.  But they
+ *  are hard to keep track of when just defined, but not codified.  So we
+ *  include here routines for the phase of processing that moves things around
+ *  and computes js attributes that are required for validation.
+ *
+ *  Interpret an LC as a document. It does the following, in order.
+ *  - addSystemDeclarations(doc)
+ *  - processShorthands(doc)
+ *  - moveDeclaresToTop(doc)
+ *  - processTheorems(doc)
+ *  - processDeclarationBodies(doc)
+ *  - processLetEnvironments(doc)
+ *  - processBindings(doc)
+ *  - processRules(doc)
+ *  - assignProperNames(doc)
+ *  - markDeclaredSymbols(doc) 
+ * 
+ *  Note: Global $n$-compact validation assumes a document
+ *    has been interpreted before trying to validate and will interpret it first
+ *    if you try to validate it and it hasn't been already.
+ *
+ * @module Interpretation
+ */
 //////////////////////////////////////////////////////////////////////////////
-//
-//                                Interpret
-//                prepare an LC for Global n-compact Validation 
-//
-//  (KEEP OUT!  Work in progress.)
-//
-//  This file is still under construction and subject to frequent change.
-//
-//  In the current implementation of global n-compact validation we currently
-//  make many simplifying assumptions about the nature of a document.  But they
-//  are hard to keep track of when just defined, but not codified.  So we
-//  include here routines for the phase of processing that moves things around
-//  and computes js attributes that are required for validation.
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -20,15 +34,30 @@
 import { Environment } from '../environment.js'
 import { Symbol as LurchSymbol } from '../symbol.js'
 import { processShorthands } from './parsing.js'
-import Extensions from './extensions.js'
-const { subscript } = Extensions
+import Utilities from './utils.js'
+const { subscript } = Utilities
 const instantiation = 'LDE CI'
 
-//////////////////////////////////////////////////////////////////////////////
-//  interpret
-//
-//  This takes a raw user's document as an LC environment and preprocesses it in
-//  preparation for validation using all of the routines in this document. 
+
+/**
+ *  ### Interpret
+ * 
+ *  This takes a raw user's document as an LC environment and preprocesses it in
+ *  preparation for validation.  It does the following:
+ *  - addSystemDeclarations(doc)
+ *  - processShorthands(doc)
+ *  - moveDeclaresToTop(doc)
+ *  - processTheorems(doc)
+ *  - processDeclarationBodies(doc)
+ *  - processLetEnvironments(doc)
+ *  - processBindings(doc)
+ *  - processRules(doc)
+ *  - assignProperNames(doc)
+ *  - markDeclaredSymbols(doc)
+ * When it is finished it marks the document as interpreted.
+ * 
+ * @param {Environment} doc - the raw user's document as an LC environment 
+ */
 const interpret = doc => {
   
   // just return if it's already interpreted
@@ -51,16 +80,16 @@ const interpret = doc => {
   return doc
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//
-// Utilities
-//
 //////////////////////////////////////
 //
 // Structural Changing Utilities
 //
 
-// Add system declarations to the top of the document.
+/** 
+ * Add system declarations to the top of the document. These are reserved
+ * symbols that the user is not allowed to use. Currently they are
+ * 'LDE EFA' and '➤'.
+*/
 const addSystemDeclarations = doc => {
   doc.unshiftChild(
     new Declaration(
@@ -69,7 +98,7 @@ const addSystemDeclarations = doc => {
   return doc
 }
 
-// Move Declares to the top of the document.
+/** Move `Declare` declarations to the top of the document. */
 const moveDeclaresToTop = doc => {
   doc.Declares().reverse().forEach( dec => {
     if (dec.body()) { 
@@ -84,25 +113,29 @@ return doc
 }
 
 
-// Process the user's theorems 
-//
-// If a user specifies that a claim Environment is a Theorem, he is declaring
-// that he wants to use it as a Rule after that (if we enable the option to
-// allow users to enter Theorems... otherwise just let them enter them as
-// ordinary claim environments like proofs that aren't marked asA 'Theorem' but
-// can be formatted as such). But we want to mark his theorem as valid or
-// invalid just like any other proof in addition to using it as a Rule.  To
-// accomplish this, we make an invisible copy of the Theorem immediately
-// following the theorem, make that a formula, and label it as a Rule for future
-// use.  This does not have to be done if the Theorem has no metavariables as a
-// Rule because it would be redundant. When a Rule copy of the user's Theorem is
-// inserted it does not have to be marked as a given since it has no prop form,
-// but its instantiations do.  We flag the inserted Rule version of the Theorem as
-// .userThm to distinguish it from ordinary Rules.
-//
-// This has to be done after processing Shorthands and moving Declares to the
-// top so the user's theorems are in the scope of declared constants in the
-// library, which then prevents them from being metavariables. 
+/**
+ * ### Process the user's theorems 
+ *
+ * If a user specifies that a claim Environment is a `Theorem`, he is declaring
+ * that he wants to use it as a `Rule` after that (if we enable the option to
+ * allow users to enter `Theorems`... otherwise just let them enter them as
+ * ordinary claim environments like proofs that aren't marked asA `Theorem` but
+ * can be formatted as such). 
+ *
+ * But we want to mark his theorem as valid or invalid just like any other proof
+ * in addition to using it as a `Rule`.  To accomplish this, we make an invisible
+ * copy of the Theorem immediately following the theorem, make that a formula,
+ * and label it as a `Rule` for future use.  This does not have to be done if the
+ * Theorem has no metavariables as a `Rule` because it would be redundant. When a
+ * Rule copy of the user's Theorem is inserted it does not have to be marked as
+ * a given since it has no prop form, but its instantiations do.  We flag the
+ * inserted `Rule` version of the Theorem as `.userThm` to distinguish it from
+ * ordinary `Rules`.
+ *
+ * This has to be done after processing Shorthands and moving Declares to the
+ * top so the user's theorems are in the scope of declared constants in the
+ * library, which then prevents them from being metavariables. 
+ */
 const processTheorems = doc => {
   [ ...doc.descendantsSatisfyingIterator( x => x.isA('Theorem') ) ].forEach( 
     thm => {
@@ -123,9 +156,11 @@ const processTheorems = doc => {
   return doc
 }
 
-// Process Declaration Bodies
-//
-// Append the bodies of all declarations.
+/**
+ * Process Declaration Bodies
+ * 
+ * Append a copy of the bodies of all declarations immediately after its Declaration.
+ */
 const processDeclarationBodies = doc => {
   // get the declarations with a body (hence the 'true') that don't contain 
   // metavariables (do this before converting a Rule to a formula)
@@ -144,15 +179,17 @@ const processDeclarationBodies = doc => {
 }  
 
 
-//////////////////////////////////////////////////////////////////////////////
-// Process Let Environments
-//
-// Get the Lets.  If they don't start an environment, wrap them to make a valid
-// Let-environment. We make this restriction, so that a Let-env is a type of LC
-// that can be used as a rule premise and can only be satisfied by another
-// Let-env.  We don't upgrade that to a subclass for now.
-// TODO: consider upgrading let-envs to a subclass of environment
-const processLetEnvironments = ( doc ) => {
+/**
+ * Process Let Environments
+ * 
+ * Get the `Let`'s.  If they don't start an environment, wrap them to make a valid
+ * Let-environment. We make this restriction, so that a Let-env is a type of LC
+ * that can be used as a rule premise and can only be satisfied by another
+ * Let-env.  We don't upgrade that to a subclass for now.
+ * 
+ * TODO: consider upgrading let-envs to a subclass of environment
+ */
+const processLetEnvironments = doc => {
   // Get all of the Let's whether or not they have bodies and make sure they are
   // the first child of their enclosing environment.  If not, wrap their scope
   // in an environment so that they are.
@@ -163,20 +200,25 @@ const processLetEnvironments = ( doc ) => {
   })
 }
 
-//////////////////////////////////////////////////////////////
-// Rename Bindings for Alpha Equivalence
-//
-// make all bindings canonical by assigning ProperNames x₀, x₁, ...
+
+/**
+ * Rename Bindings for Alpha Equivalence
+ *
+ * Make all bindings canonical by assigning ProperNames `x₀, x₁, ...` to the
+ * bound variables in order.
+ */
 const processBindings = doc => {
   doc.statements().forEach( expr => renameBindings( expr ))
   return doc
 }
 
-//////////////////////////////////////////////////////////////
-// process Rules 
-//
-// Check and mark the Rules, make them into formulas, and replace
-// and rename their bound variables
+
+/**
+ * Process Rules 
+ *
+ * Check all of `Rules` to ensure they are the right type of LC. Convert them into
+ * formulas.  If they have metavariables, mark them `.ignore` so they have no prop form. If they don't mark them as an `Inst`. Replace and rename their bound variables to `y₀, y₁, ...` to avoid classes with user variables with the same name.
+ */
 const processRules = doc => {
   // get all of the Rules
   [...doc.descendantsSatisfyingIterator(x=>x.isA('Rule'))].forEach( f => {
@@ -198,8 +240,8 @@ const processRules = doc => {
       f.creators = []
       f.pass = 0
     }
-    // // replace all bound variables with y₀, y₁, ... etc and rename them to
-    // // ProperNames x₀, x₁, ... etc to make them canonical
+    // replace all bound variables with y₀, y₁, ... etc and rename them to
+    // ProperNames x₀, x₁, ... etc to make them canonical
     f.statements().forEach( expr => { 
       replaceBindings( expr , 'y' )
       // TODO: this might be redundate if we run the previous routine first
@@ -208,20 +250,23 @@ const processRules = doc => {
   } )
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// Assign Proper Names
-//
-// Rename any symbol declared by a declartion with body by appending the putdown
-// form of their body. Rename any symbol in the scope of a Let-without body by
-// appending a tick mark.
-//
-// For bodies that have a binding we want to use the alpha-equivalent canonical
-// form.
+
+/**
+ * Assign Proper Names
+ * 
+ * Rename any symbol declared by a declaration with body by appending the putdown
+ * form of their body. Rename any symbol in the scope of a Let-without body by
+ * appending a tick mark.
+ * 
+ * For bodies that have a binding we want to use the alpha-equivalent canonical
+ * form.
+ */
 const assignProperNames = doc => {
   
   const metavariable = "LDE MV"
   
   // get the declarations with a body (hence the 'true') which is an expression
+  //
   // TODO: we don't support environments as bodies yet.  Decide or upgrade.
   let declarations = doc.declarations(true).filter( x => 
     x.body() instanceof Expression)
@@ -242,6 +287,7 @@ const assignProperNames = doc => {
   // without bodies have been instantiated with ProperNames already (from the
   // user's expressions) that are not the correct ProperNames for the
   // instantiation, so we fix them.  
+  //
   // TODO: merge this with the code immediately above.
   declarations = doc.declarations().filter( x => x.body()===undefined )
   declarations.forEach( decl => {
@@ -272,22 +318,27 @@ const assignProperNames = doc => {
 
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// Replace bound variables in formulas
-//
-// Matching checks if a match would violate variable capture, but
-// Formula.instantiate does not.  So we need to turn all bound variables in
-// formulas to a canonical form e.g. y₀, y₁, ... that cannot be entered by the
-// user. Applying this to formulas before instantiating fixes that.  
-//
-// TODO: 
-// * When making this permanent, just upgrade Formula.instantiate to respect
-//   ProperNames so we can delete this routine and just use the previous one
-//   instead. 
-// * Also enforce the requirement that user's can't enter any of y₀, y₁, ... .
-// * We might want to keep the user's original bound formula variable names
-//   somewhere for feedback purposes, but the canonical ones aren't that bad for
-//   now.
+
+/**
+ * Replace bound variables in formulas
+ * 
+ * Matching checks if a match would violate variable capture, but
+ * `Formula.instantiate` does not.  So we need to turn all bound variables in
+ * formulas to a canonical form e.g. `y₀, y₁, ...` that cannot be entered by the
+ * user. Applying this to formulas before instantiating fixes that.  
+ * 
+ * TODO: 
+ * * When making this permanent, just upgrade Formula.instantiate to respect
+ *   ProperNames so we can delete this routine and just use the previous one
+ *   instead. 
+ * * Also enforce the requirement that user's can't enter any of `y₀, y₁, ...` .
+ * * We might want to keep the user's original bound formula variable names
+ *   somewhere for feedback purposes, but the canonical ones aren't that bad for
+ *   now.
+ * 
+ * @param {Expression} expr - The expression to process
+ * @param {string} [symb='y'] - The symbol to use for the replacement
+ */
 const replaceBindings = ( expr , symb='y' ) => {
   const stack = new Map()
   const push = () => stack.forEach( value => value.push( value.last() ) )
@@ -324,12 +375,16 @@ const replaceBindings = ( expr , symb='y' ) => {
   solve( expr )
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// Rename bound variables for alpha equivalence
-//
-// We also need alpha equivalent statements to have the same propositional form.
-// This assigns canonical names x₀ , x₁ , etc. as the ProperName attribute of
-// bound variables, and that is what .prop uses to make the propositional form.
+/**
+ * Rename bound variables for alpha equivalence
+ * 
+ * We also need alpha equivalent statements to have the same propositional form.
+ * This assigns canonical names x₀ , x₁ , etc. as the ProperName attribute of
+ * bound variables, and that is what .prop uses to make the propositional form.
+ * 
+ * @param {Expression} expr - The expression to process
+ * @param {string} [symb='x'] - The symbol to use for the replacement
+ */
 const renameBindings = ( expr , symb='x' ) => {
   const stack = new Map()
   const push = () => stack.forEach( value => value.push( value.last() ) )
@@ -368,14 +423,15 @@ const renameBindings = ( expr , symb='x' ) => {
   solve( expr )
 }
 
+// TODO: These next two are not complete.  Complete them or delete them.
+//
 // We keep a list of js attribute names that are used by validation.  Since
 // these are computed from the original content of the LC supplied by the user
 // having this list lets us reset the entire LC by removing these attributes and
 // recomputing them to revalidate it from scratch when we need to. 
 const computedAttributes = [
   'constant', 'properName'
-] 
-
+]
 // Reset all of the attributes computed by these interpretation utilities.  
 //
 // NOTE: it might be faster to just rebuild and recompute the whole document
@@ -387,12 +443,19 @@ const resetComputedAttributes = doc => {
   return doc
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// Mark Declared Symbols
-//
-// Mark explicitly declared symbols s, throughout an LC by setting
-// s.constant=true.  The document containing the target must be specified to 
-// fetch the Declares.
+
+/**
+ * Mark Declared Symbols
+ * 
+ * Mark explicitly declared symbols `s, throughout an LC by setting
+ * `s.constant=true`.  The document containing the target must be specified to 
+ * fetch the Declares.
+ * 
+ * TODO: Maybe upgrade to just compute doc from target.root()
+ * 
+ * @param {LurchDocument} doc - The document containing the expression
+ * @param {LurchDocument} [target=doc] - The target 
+ */
 const markDeclaredSymbols = ( doc, target=doc ) => {
   // fetch all of the declarations
   let Declares = doc.Declares()

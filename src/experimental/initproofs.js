@@ -130,7 +130,7 @@ let start = Date.now()
 // doc = interpret(doc)
 // validate(doc)
 
-// doc2 = $(
+// doc = $(
 //   `
 //   {
 //     Declare 1 = +
@@ -140,16 +140,82 @@ let start = Date.now()
 //     }   
 //     { 
 //       :a=b
-//       f(a,a+1)=f(a,b+1)
+//       f(a,b+1)=f(a,a+1)
 //     } 
 //   }
 //   `)
-// interpret(doc2)
-// validate(doc2)
+// interpret(doc)
+// validate(doc)
 
 // trans = loadDoc('proofs/TransChain')
 
-doc = loadDoc('proofs/math299/peano')
+// doc = loadDoc('proofs/math299/peano')
+// write(doc.lastChild())
+
+// doc = loadDoc('proofs/test')
+// validate(doc)
+
+doc1 = `
+{ 
+  Declare Socrates mortal man is ⇒
+
+  Assume forall x. x is a man ⇒ x is mortal
+  Assume Socrates is a man
+  Socrates is mortal
+}`
+
+doc2 = `
+{ 
+  Declare Socrates mortal man is ⇒
+
+  Rules:
+  {
+    :{ :W⇒V :W V }
+    :{ :(∀y.𝜆P(y)) 𝜆P(z) }
+  }
+  Assume forall x. x is a man ⇒ x is mortal
+  Assume Socrates is a man
+  Socrates is mortal
+}
+`
+
+doc3 = `
+{ 
+  Declare Socrates mortal man is ⇒
+
+  Rules:
+  {
+    :{ :W⇒V :W V }
+    :{ :(∀y.𝜆P(y)) 𝜆P(z) }
+  }
+  
+  ➤ 
+  ➤ "All men are mortal."
+  ➤ "Socrates is a man."
+  ➤ "Socrates is mortal."
+  ➤ 
+  
+  Assume forall x. x is a man ⇒ x is mortal
+  Assume Socrates is a man
+  
+  Socrates is a man ⇒ Socrates is mortal
+  
+  Socrates is mortal
+}
+`
+
+doc4 =
+`{ 
+  Declare Socrates mortal man is
+
+  Rule:  :{ :W is man W is a mortal }
+  
+  Assume Socrates is a man
+  
+  Socrates is mortal
+}
+`
+
 
 
 // Accumulator = { totaltime:0, numcalls:0, numsolns:0, numlines: 0}

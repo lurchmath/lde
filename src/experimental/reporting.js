@@ -1,12 +1,29 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// Reporting Utilties
-//
-// Description: This allows for custom formatting and customize reports
-//              for LCs and various output devices.  For now we only support
-//              the terminal in Lode.
-//
-///////////////////////////////////////////////////////////////////////////////
+/**
+ * Reporting Utilties
+ *
+ * This provides tools for custom formatting and customized reports for LCs and
+ * various output devices.  For now we only support the terminal output in Lode. 
+ *
+ * The main function is the LogicConcept extension `.report(options)`. It will
+ * format and output a LC document with syntax highlighting and various. The
+ * options object has the following fields:
+ * ```
+ *  showDeclares, showAttributes , showBodies, showContexts, showRules ,
+ *  showUserThms , showPartials , showConsiders , showInstantiations ,
+ *  showNumbers , showProperNames , showUserRules , showUserInstantiations ,
+ *  showValidation
+ * ```
+ * which, when true, will show the corresponding part aspect of the document.
+ *
+ * Some predefined reports are available by using a predefined options object:
+ * ```
+ *  all, show, detailed , moderate, allclean, clean , user
+ * ```
+ * These reporting routines also are used by the Lode writer for echoing LC
+ * documents and arrays of LCs and other objects.
+ *
+ * @module Reporting
+ */
 
 ///////////////////////////////////////////////////////////////////////////////
 // Imports
@@ -20,9 +37,9 @@ import Compact from './global-validation.js'
 // load chalk and stripAnsi
 import chalk from 'chalk'
 import erase from 'strip-ansi'
-import Extensions from './extensions.js'
+import Utilities from './utils.js'
 // load the commands from Lurch and Compact
-Object.assign( global, Extensions )
+Object.assign( global, Utilities )
 Object.assign( global, Lurch )
 Object.assign( global, Compact )
 
@@ -63,23 +80,8 @@ const preemiex   = xPen('!✗')
 // Utilities
 //
 
-// // Return a string of spaces of length n
-// const tab = (n , char=' ') => { return Array.seq(()=>'',1,n+1).join(char) }
 
-// // indent string s with a tab of size n
-// const indent = (s,n) => {
-//   const t = tab(n)
-//   return t+s.replaceAll(/\n(.)/g,'\n'+t+'$1')
-// }
-
-// report the time it took to execute function f
-const timer = f => {
-  let start = Date.now()
-  f()
-  console.log((Date.now()-start)+' ms')
-}
-
-// Just list the keys in an LC.  This would be more useful as an LC extension.
+// Just list the keys in an LC.  This is more useful as an LC extension.
 LogicConcept.prototype.showkeys = function() { 
   let keys = this.getAttributeKeys()
   keys.forEach( key => { 
@@ -332,8 +334,13 @@ const format = (x,options,indentlevel=0) => {
   } else if (typeof x === 'number') { 
     return indent(constantPen(x),indentlevel)
   } else if (x instanceof Array) { 
+    // arrays of pairs of booleans and strings  
     if (x.length===2 && (typeof x[1] === 'boolean' || typeof x[1] === 'string')) {
       return indent(`[${x.map(y=>format(y,all,1)).join(',')} ]`,1)
+    // arrays of integers
+    } else if (x.every(  t => Number.isInteger(t) )) {
+      return indent(`[${x.map(y=>format(y,all,1)).join(',')} ]`,1) 
+    // all other arrays   
     } else {
       return indent(`[\n${x.map(y=>format(y,all,indentlevel+1))
                     .join(',\n')}\n]`,indentlevel)
@@ -361,7 +368,7 @@ const format = (x,options,indentlevel=0) => {
 //  Reporting
 //
 
-// We assume 'this' is a document with all of the usual simplifying assumptions.
+// generate various reports
 LogicConcept.prototype.report = function ( options ) {
   // default report
   options = options || defaultOptions

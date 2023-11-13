@@ -1,3 +1,9 @@
+/**
+ * Lode is the Lurch Node app. It defines a node REPL which has all of the Lurch
+ * LDE brains loaded. For details see the [Lode tutorial](@tutorial Lurch Node REPL).
+ *
+ * @module Lode
+ */
 //////////////////////////////////////////////////////////////////////////////
 //
 // LurchNode (Lode)
@@ -6,7 +12,7 @@
 //              of the lurch LDE brains loaded.
 //
 // Syntax: at the bash prompt type "node lode" where lode.js is this file,
-//         assuming the current directory is the /scripts directory containing
+//         assuming the current directory is the directory containing
 //         the file.
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,16 +45,16 @@ import CNF from '../validation/conjunctive-normal-form.js'
 
 // Experimental Code
 //
-// parseing
+// parsing
 import { Tokenizer, Grammar } from 'earley-parser'
+// generic helper utilities
+import Utilities from './utils.js'
 // interpretation utilities
 import Interpret from './interpret.js'
 // everything in the global validation lab. 
 import Compact from './global-validation.js'
 // load the custom formatters and reporting tools
 import Reporting from './reporting.js' 
-// load various helpful utilities
-import Extensions from './extensions.js'
 // import the parsing utiltiies (processShorthands comes from Interpret)
 import { makeParser } from './parsing.js'
 // load the CNFProp tools for testing
@@ -70,13 +76,14 @@ import { satSolve } from '../../dependencies/LSAT.js'
 Object.assign( global, Lurch )
 
 // Experimental code
-Object.assign( global, Extensions )
+Object.assign( global, Utilities )
 Object.assign( global, Interpret)
 Object.assign( global, Compact )
 Object.assign( global, Reporting )
 global.CNF = CNF
 global.Problem = Problem
 global.CNFProp = CNFProp
+
 
 // External packages
 global.satSolve = satSolve
@@ -122,29 +129,41 @@ global.initialize = function(fname='initproofs') {
 global.catproof = function(fname) {
   console.log(defaultPen(execStr(
     `cat "${proofPath}${checkExtension(fname,'lurch')}"`)))
-  }
+}
 
-  // display a library file by filename
+// display a library file by filename
 global.catlib = function(fname) {
   console.log(defaultPen(execStr(
     `cat "${libPath}${checkExtension(fname,'lurch')}"`)))
-  } 
+} 
 
-  // List both libs and proofs
+// List both libs and proofs
+/** List libs and proofs */
 const list = () => { console.log(
   `\n${headingPen('Available Libraries:')}\n`+
   `${docPen(execStr('cd '+libPath+';ls -pRC '))}\n`+
   `${headingPen('Available Proofs:')}\n` +
   `${docPen(execStr('cd '+proofPath+';ls -pRC'))}`
-  )}
-  
+)}
+
+// two useful abbreviations
+global.lc = s => { 
+  const L = LogicConcept.fromPutdown(s)
+  return (L.length===1) ? L[0] : L 
+}
+global.mc = s => { 
+  const M = MathConcept.fromSmackdown(s)
+  return (M.length===1) ? M[0] : M  
+}  
 /////////////////////////////////////////////////////////////////////////////
 //
 //  File handling utilities
 //
 
-/** A library path */
 // the path to library definition files
+/** 
+ * A library path 
+ */
 global.libPath = './libs/'
 
 // the path to proof definition files
@@ -193,7 +212,6 @@ global.loadDocStr = ( name, folder='./', extension=LurchFileExtension ) => {
   // load the specified file
   let ans = loadStr( name, folder, extension )
   // recursively replace all of the includes
-  const regx = /(?:^|\n)[ \t]*[iI]nclude[ \t]+([^ \t][^\n]*)(?:\n|$)/g
   const regx = /(?:^|\n)[ \t]*[iI]nclude[ \t]+([^ \t][^\n]*)(?:\n|$)/gm
   return ans.replace(regx,(line,fname) => { return loadDocStr(fname) })
 }
@@ -334,8 +352,8 @@ rpl.defineCommand( "features", {
       ${itemPen('lc(s)')}         : constructs an LC from the putdown string s
       ${itemPen('mc(s)')}         : constructs an MC from the smackdown string s
       ${itemPen('X.report()')}    : prints a syntax highlighted, numbered view of LC X
-                      Optional args 'everything', 'show', 'detailed', 'allclean'
-                      'clean'  and 'user' (with no quotes) show variations
+                      Optional args 'all', 'show', 'detailed', 'allclean'
+                      and 'clean' (with no quotes) show variations
       ${itemPen('X.inspect(x,d)')}: prints the object structure of X to depth d. If d
                       is omitted the default is 1
       ${itemPen('.list')}         : show the list of known libs and proofs
@@ -375,7 +393,7 @@ rpl.defineCommand( "list", {
 rpl.defineCommand( "test", {
   help: "Run the default test script ('acidtests.js').",
   action() { 
-    initialize('acidtests')
+    initialize('utils/acidtests')
     this.displayPrompt()
   }
 })
@@ -385,8 +403,12 @@ rpl.defineCommand( "makedocs", {
   help: "Run jsdocs to make the documentation.",
   action() {
     console.log(defaultPen('Building docs...')) 
-    exec('rm -rf docs && jsdoc ./* -d docs -c jsdoc-conf.json && node post-docs')
+    try {
+    exec('rm -rf docs && jsdoc ./* -d docs -c utils/jsdoc-conf.json -u tutorials/ && node utils/post-docs')
     console.log(defaultPen('...done'))
+    } catch (err) {
+      console.log('Error building docs.')
+    }
     this.displayPrompt()
   }
 })

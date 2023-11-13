@@ -27,7 +27,8 @@ const depthPicture = LC =>  LC instanceof Environment ?
     '(' + LC.children().map(depthPicture).join('') + ')' :
     '' + LC.address().length 
 
-write(allproofs.map( proof => depthPicture( proof ) ))
+depths = allproofs.map( proof => depthPicture( proof ) )
+write(depths)
 
 ///////////////////////////////////////////////////////////
 // closing    
