@@ -34,9 +34,9 @@ let numreds = 0
 
 // test the asciimath Peggy parser by itself
 try { 
-  const s=lc(parse(loadStr('parsers/asciiParserTests')))
-  console.log(`${itemPen('Parser Test:')} → ok`)
+  const s=lc(parse(loadStr('aparsers/asciiParserTests')))
   passed++
+  console.log(`${itemPen('Parser Test:')} → ok`)
 } catch (e) { 
   failed++
   console.log(xPen(`ERROR: asciimath peggy parser test failed.`)) 
