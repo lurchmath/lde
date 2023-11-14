@@ -33,7 +33,7 @@ The first thing we might tell it is that `Mars`, `is`, and `=` are meant to be c
 // in file initproofs.js:
 doc = `
 { 
-  Declare constants Mars is =
+  Declare Mars is =
   x is Mars
   y is Mars
   x = y
