@@ -197,7 +197,7 @@ We might try to do something like this
 ```js
 ▶︎ doc
 `{ 
-  Declare Socrates mortal man is ⇒
+  Declare Socrates mortal man is ⇒ ∀
 
   Assume forall x. x is a man ⇒ x is mortal
   Assume Socrates is a man
@@ -207,7 +207,7 @@ We might try to do something like this
 ▶︎ validate($(doc))
 {
   :Declare[𝜆 ➤]
-  :Declare[Socrates mortal man is ⇒]
+  :Declare[Socrates mortal man is ⇒ ∀]
   :(∀ x , (⇒ (is x man) (is x mortal)))
   :(is Socrates man)
   (is Socrates mortal)✗
@@ -217,7 +217,7 @@ Lurch marks this as indeterminate because it doesn't know anything about `∀` o
 ```js
 ▶︎ doc
 `{ 
-  Declare Socrates mortal man is ⇒
+  Declare Socrates mortal man is ⇒ ∀
 
   Rules:
   {
@@ -232,7 +232,7 @@ Lurch marks this as indeterminate because it doesn't know anything about `∀` o
 ▶︎ doc=$(doc)
 {
   declare>
-  :Let[Socrates mortal man is ⇒]
+  :Let[Socrates mortal man is ⇒ ∀]
   rules>
   { :{ :(⇒ W V) :W V } :{ :(∀ y , (λ P y)) (λ P z) } }
   :(∀ x , (⇒ (is x man) (is x mortal)))
@@ -243,7 +243,7 @@ Lurch marks this as indeterminate because it doesn't know anything about `∀` o
 ▶︎ interpret(doc)
 {
   :Declare[𝜆 ➤]
-  :Declare[Socrates mortal man is ⇒]
+  :Declare[Socrates mortal man is ⇒ ∀]
   :{ :(⇒ W V) :W V }
   :{ :(∀ y₁ , (𝜆 P y₁)) (𝜆 P z) }
   :(∀ x , (⇒ (is x man) (is x mortal)))
@@ -254,7 +254,7 @@ Lurch marks this as indeterminate because it doesn't know anything about `∀` o
 ▶︎ validate(doc)
 {
   :Declare[𝜆 ➤]
-  :Declare[Socrates mortal man is ⇒]
+  :Declare[Socrates mortal man is ⇒ ∀]
   :{ :(⇒ W V) :W V }
   :{ :(∀ y₁ , (𝜆 P y₁)) (𝜆 P z) }
   :(∀ x , (⇒ (is x man) (is x mortal)))
@@ -265,7 +265,7 @@ Lurch marks this as indeterminate because it doesn't know anything about `∀` o
 ▶︎ validate(doc).report(all)
   {
  0  :Declare[𝜆 ➤]
- 1  :Declare[Socrates mortal man is ⇒]
+ 1  :Declare[Socrates mortal man is ⇒ ∀]
  2  :{ :(⇒ W V) :W V }❲Rule❳
  3  :{ :(∀ x₁ , (𝜆 P x₁)) (𝜆 P z) }❲Rule❳
  4  :{
@@ -283,7 +283,7 @@ We can expand our proof by explaining that `Socrates is a man ⇒ Socrates is mo
 ```js
 ▶︎ doc
 `{ 
-  Declare Socrates mortal man is ⇒
+  Declare Socrates mortal man is ⇒ ∀
 
   Rules:
   {
@@ -304,7 +304,7 @@ We can expand our proof by explaining that `Socrates is a man ⇒ Socrates is mo
 ▶︎ validate(doc)
 {
   :Declare[𝜆 ➤]
-  :Declare[Socrates mortal man is ⇒]
+  :Declare[Socrates mortal man is ⇒ ∀]
   :{ :(⇒ W V) :W V }
   :{ :(∀ y₁ , (𝜆 P y₁)) (𝜆 P z) }
    
@@ -317,7 +317,7 @@ We can expand our proof by explaining that `Socrates is a man ⇒ Socrates is mo
 ▶︎ doc.report(all)
   {
  0  :Declare[𝜆 ➤]
- 1  :Declare[Socrates mortal man is ⇒]
+ 1  :Declare[Socrates mortal man is ⇒ ∀]
  2  :{ :(⇒ W V) :W V }❲Rule❳
  3  :{
       :(⇒ (is Socrates man) (is Socrates mortal))
