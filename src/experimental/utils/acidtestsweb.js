@@ -4,7 +4,7 @@
 // This exports a function to run our acid tests.
 //
 
-export const test = async () => {
+export const test = async (exppath = 'src/experimental') => {
 
   const defaultCSS = 'color: #00CCFF; font-family: "Andale Mono 18", monospace;'
   const successCSS = 'color: #00CC00;'
@@ -19,18 +19,18 @@ export const test = async () => {
   
   // Load Acid Tests
   let acid = await Promise.all([1,4,5,6,7,8,9,10,'11a','11b','11c','11d','11e','Induction'].map( 
-      (ex,k) => loadDoc(`../proofs/acid tests/acid ${k} Example ${ex}`)))
+      (ex,k) => loadDoc(`proofs/acid tests/acid ${k} Example ${ex}`,exppath)))
   // Load other tests in the acid tests folder
-  acid.push(await loadDoc('../proofs/acid tests/Transitive Chains'))
-  acid.push(await loadDoc('../proofs/acid tests/Cases'))
-  acid.push(await loadDoc('../proofs/acid tests/BIH Cases'))
-  acid.push(await loadDoc('../proofs/acid tests/user-thms'))
+  acid.push(await loadDoc('proofs/acid tests/Transitive Chains',exppath))
+  acid.push(await loadDoc('proofs/acid tests/Cases',exppath))
+  acid.push(await loadDoc('proofs/acid tests/BIH Cases',exppath))
+  acid.push(await loadDoc('proofs/acid tests/user-thms',exppath))
   // Load Math 299 tests
-  acid.push(await loadDoc('../proofs/math299/prop'))
-  acid.push(await loadDoc('../proofs/math299/pred'))
-  acid.push(await loadDoc('../proofs/math299/peanoBIH')) 
-  acid.push(await loadDoc('../proofs/math299/peano')) 
-  acid.push(await loadDoc('../proofs/math299/midterm'))
+  acid.push(await loadDoc('proofs/math299/prop',exppath))
+  acid.push(await loadDoc('proofs/math299/pred',exppath))
+  acid.push(await loadDoc('proofs/math299/peanoBIH',exppath)) 
+  acid.push(await loadDoc('proofs/math299/peano',exppath)) 
+  acid.push(await loadDoc('proofs/math299/midterm',exppath))
   
   // run the tests
   let passed = 0
@@ -40,7 +40,7 @@ export const test = async () => {
   
   // test the asciimath Peggy parser by itself
   try { 
-    const str = await loadDocStr('./parsers/asciiParserTests')
+    const str = await loadDocStr('parsers/asciiParserTests',exppath)
     const s = lc(parse(str))
     passed++
     console.log(`%cParser Test:' → ok`,itemCSS)

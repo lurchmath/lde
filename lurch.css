@@ -1,0 +1,72 @@
+/***************************************************************************
+  Lurch css
+
+  The css file for styling the editor content and anything in its iframe.
+  Styling for the container html page that contains the editor and the Lurch
+  logo is stored in lurch-home.css.
+***************************************************************************/
+
+/* Expression atoms */
+[data-metadata_notation='"putdown"'] {
+    font-size : 12pt;
+    font-family : 'Courier New', Courier, monospace;
+}
+[data-metadata_notation='"smackdown"'] {
+    font-size : 12pt;
+    font-family : 'Courier New', Courier, monospace;
+}
+span.lurch-atom-empty::before {
+    content: 'empty expression';
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-style: italic;
+    color: #bbb;
+}
+span.checkmark {
+    font-family: 'Lucida Grande';
+    color: #4CAF50;
+    font-weight: bold;
+}
+span.redx {
+    font-family: 'Lucida Grande';
+    color: red;
+    font-weight: bold;
+}
+
+/* shells */
+div.lurch-shell {
+    position: relative;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    padding: 0 1em;
+    margin: 1ex 0;
+}
+div.lurch-shell.lurch-given {
+    border: 2px dashed #bbb;
+}
+
+/* Dependency URL atoms  */
+.lurch-dependency {
+    border: solid 1px gray;
+    padding: 0 1em;  
+}
+.lurch-dependency table {
+    table-layout: fixed;
+    width: 100%;  
+}
+.lurch-dependency .lurch-borderless-table {
+    border: none;
+}
+.lurch-dependency col:first-of-type {
+    width: 12%;  
+}
+.lurch-dependency td {
+    vertical-align: baseline;
+}
+.lurch-dependency tr:nth-of-type(2) td:first-of-type {
+    font-size: 11pt;
+}
+
+span.URL {
+    font-family : 'Courier New', Courier, monospace;
+    font-size: small;
+}

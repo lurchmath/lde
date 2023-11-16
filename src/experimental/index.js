@@ -289,17 +289,27 @@ const formatter = ( options=defaultOptions ) => {
     return ans
   }  
 }
+
 // check the extension of a filename and add it if it is missing
 const checkExtension = ( name , ext = 'js' ) => 
   ( name.endsWith(`.${ext}$`)) ? name : name + '.' + ext 
+
+// check the folder and filename for appropriate / between them and add it if
+// needed, then concatenate 
+const checkPath = ( name , folder  ) => 
+  ( folder.endsWith('/')) ? 
+    (name.startsWith('/')) ? 
+      folder+name.slice(1) : 
+      folder+name : 
+    folder+'/'+name 
 
 // default for Lurch document source files (plain text)
 const LurchFileExtension = 'lurch'
 
 // Load just the string for a file and return that. You can omit the .lurch
 // extension. The second argument is the folder which default to the current folder. 
-window.loadStr = async ( name, folder='./', extension=LurchFileExtension) => {
-  const filename = folder + checkExtension(name,extension)
+window.loadStr = async ( name, folder='.', extension=LurchFileExtension) => {
+  const filename = checkPath(checkExtension(name,extension),folder)
   try {
     const response = await fetch(filename);
     if (!response.ok) {
@@ -321,18 +331,7 @@ window.loadStr = async ( name, folder='./', extension=LurchFileExtension) => {
 // it will load the string in fname and replace that line with the contents of
 // that file recursively checking for more include statements.  No checking is
 // done to prevent circular dependencies.
-//
-// window.loadDocStr = async ( name, folder='/src/experimental/', extension=LurchFileExtension ) => {
-//   // load the specified file
-//   let ans = await loadStr( name, folder, extension )
-  
-//   // recursively replace all of the includes
-//   const regx = /(?:^|\n)[ \t]*[iI]nclude[ \t]+([^ \t][^\n]*)(?:\n|$)/gm
-
-//   return ans.replace(regx,(line,fname) => { return loadDocStr(fname) })
-// }
-
-window.loadDocStr = async (name, folder = '/src/experimental/', extension = LurchFileExtension) => {
+window.loadDocStr = async (name, folder = '.', extension = LurchFileExtension) => {
   try {
     // load the specified file
     let ans = await loadStr(name, folder, extension)
@@ -348,7 +347,7 @@ window.loadDocStr = async (name, folder = '/src/experimental/', extension = Lurc
       const replacements = await Promise.all(
         ans.match(regx).map(async (line) => {
           const fname = line.match(/(?:^|\n)[ \t]*[iI]nclude[ \t]+([^ \t][^\n]*)(?:\n|$)/m)[1]
-          const replacement = await loadDocStr(fname)
+          const replacement = await loadDocStr(fname , folder, extension)
           return { line, replacement }
         })
       )
@@ -370,7 +369,7 @@ window.loadDocStr = async (name, folder = '/src/experimental/', extension = Lurc
 // Load a document string, recursively replacing included files, and wrap the
 // result in environment brackets, { }. before returning.
 //
-window.loadDoc = async ( name, folder='./', extension=LurchFileExtension ) => {
+window.loadDoc = async ( name, folder='.', extension=LurchFileExtension ) => {
   // load the specified file
   let doc = `{\n${await loadDocStr( name, folder, extension )}\n}`
   doc = parse(doc)
