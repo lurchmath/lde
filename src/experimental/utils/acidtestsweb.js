@@ -31,7 +31,7 @@ export const test = async () => {
   acid.push(await loadDoc('../proofs/math299/peanoBIH')) 
   acid.push(await loadDoc('../proofs/math299/peano')) 
   acid.push(await loadDoc('../proofs/math299/midterm'))
-  console.log(acid)
+  
   // run the tests
   let passed = 0
   let failed = 0
