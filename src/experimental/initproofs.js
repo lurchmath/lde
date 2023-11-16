@@ -181,7 +181,7 @@ doc2 = `
 
 doc3 = `
 { 
-  Declare Socrates mortal man is ⇒
+  Declare Socrates mortal man is ⇒ ∀
 
   Rules:
   {
@@ -208,7 +208,7 @@ doc4 =
 `{ 
   Declare Socrates mortal man is
 
-  Rule:  :{ :W is man W is a mortal }
+  Rule:  :{ :W is man   W is a mortal }
   
   Assume Socrates is a man
   
