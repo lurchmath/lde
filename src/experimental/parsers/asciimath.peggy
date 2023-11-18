@@ -3,13 +3,6 @@
 //
 // A peggy grammar definition file to generate a parser for converting
 // AsciiMath expression to an LC.
-
-
-///////////////////////////////////////////////////////////////////////////
-// Toy Peggy Grammar and Parser
-//
-// A peggy grammar definition file to generate a parser for converting more
-// natural math notation into putdown, which can then be converted to an LC. 
 //
 // Note: for now we encode negative numbers as compound expressions e.g. -3 is
 // encoded as (- 3). We also encode rational fractions as a product of the
@@ -184,11 +177,15 @@ Let = 'Let'i __ a:SymbolSeq __ ('be'i __)? 'such'i __ 'that'i __ b:Expression
       'Let'i __ a:SymbolSeq { return `[${spaced(a)}]` }
 
 // expressions
-Expression "Expression" = Binding / Prop / EFA  // get's Stuff from Not
+Expression "Expression" = Quantified / Binding / Prop / EFA  // get's Stuff from Not
+
+// quantified binding expressions
+Quantified = a:BindingSymbol b:Binding
+          { return `(${a} ${b})` }
 
 // binding expressions
-Binding = a:BindingSymbol b:SymbolSeq period c:Expression
-          { return `(${a} ${b}, ${c})` }
+Binding = a:Symbol period b:(Expression / Binding) 
+          { return `${a}, ${b}` }
 
 // propositional expressions
 Prop = Iff / Implies / And / Or / Not
@@ -244,14 +241,15 @@ Negated   = a:'-'? b:Exp                              { return lispUnary(a,b) }
 Exp       = a:Atomic|1..,'^'|                         { return lisp('^',a)    } 
 
 // morally atomic (do not require parentheses)
-Atomic = Parenthesized / EFA / Prefix / Symbol / Number
+Atomic = Parenthesized / EFA / Prefix / Tuple / Symbol / Number
 
 // For convenience we define 𝜆P(k) to be (λ P k) and replace λ with "LDE EFA"
 // as a shortcut
 EFA = 'λ' a:Symbol '(' b:Expression ')' { return `(λ ${a} ${b})` }
 
+Tuple = '⟨' b:(  @Expression|1..,comma| )+ '⟩' { return lispPrefix('tuple',b) }
 Prefix = a:Symbol b:( '(' @Expression|..,comma| ')' )+ { return lispPrefix(a,b) }
-Parenthesized = '(' @Expression ')'
+Parenthesized = '(' @Expression ')' 
 
 // while we probably will never use a number or reserved symbol as a bound var, 
 // we might Declare one to be a constant, e.g. Peano or ops
@@ -265,11 +263,10 @@ Natural = $( [1-9][0-9]* / '0' )
 // Symbols can't start with a digit, contain reserved constants, or keywords
 SymbolSeq = a:(Symbol/Number)|1..,comma| { return a.join(',') }
 Symbol "Symbol" =  $( !([0-9]/ReservedWords)
-                      [^-\][() \t\n✦{},.:+⋅/^=<≤¬⇒⇔|∀∃∩∪×∈⊆∖⁻∧∨≡]+ )
+                      [^-\][()⟨⟩ \t\n✦{},.:+⋅/^=<≤¬⇒⇔|∀∃∩∪×∈⊆∖⁻∧∨≡]+ )
 BindingSymbol = ('∃!'/'exists unique ') { return '∃!' } /
                 ('∀'/'forall '/'for all ') { return '∀' } /
                 ('∃'/'exists ') { return '∃' } 
-
 
 // punctuation
 comma  =  ','

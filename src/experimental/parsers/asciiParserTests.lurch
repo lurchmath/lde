@@ -180,8 +180,8 @@ for all x.for all y.P(x)
 exists x.exists y.P(x)
 for all x.exists y.P(x)
 exists x.for all y.P(x)
-for all x,y.P(x)
-exists x,y.P(x)
+for all x.y.P(x)
+exists x.y.P(x)
 (exists x.for all y.P(x,y))  implies  (for all y.exists x.P(x,y))
 (exists x.for all y.x loves y)  implies  (for all y.exists x.x loves y)
 P and (exists x.P(x)  implies  Q)  implies  P and (for all y.Q)
@@ -442,5 +442,8 @@ Rules: {
 Rule: { :A B⇒A }
 
 ∀y.𝜆P(y) ⇒ y=x
+
+⟨x⟩
+⟨x,y,z⟩
 
 }
