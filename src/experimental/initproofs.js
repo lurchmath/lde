@@ -8,123 +8,217 @@ process.stdout.write(defaultPen(`Loading proofs ...\n`))
 let start = Date.now()
 ////////////////////////////////////////////////////////////////////////////
 
-// comm = load($(Document.loadPegStr('math-299-peano')),['Prop','PropThm','Pred','PredThm','Peano2','Number Theory'])
-// ken = load($(Document.loadPegStr('ken')),['Prop','PropThm','Pred','PredThm','Peano2','Number Theory'])
-// write(ken.lastChild())
-// const trix = fs.readFileSync('../src/experimental/trix.js', 'utf8');
-// eval(trix)
-
-// check = n => { acid[n].validateall(undefined,true); return acid[n] }
-// N = load('preddoc',['Prop','Pred'])
-
-// preemie = load('preemie','Preemie')
-// Q = preemie.lastChild().child(1,1,0,1)
-// badguy = preemie.lastChild().child(1,0,0,3)
-// // goodguy = preemie.lastChild().child(1,1,1,1)
-// ghost = preemie.lastChild().child(1,0,0,0)
-
-// peano = load('math-299-peano-thm',['Prop','Pred','Peano'])
-// badconc = peano.child(51,2,2,1,1,2)
-// // say(stringPen(CNFProp.fromLC(peano,undefined,badconc,true).toNice(peano.cat)))
-
-// T=$(`{ :{ :{ :A B } C } :{ :D :{ :A :B E } C } :{ :C F } :D { F } }`)
-// T.cat=T.catalog()
-// T.validate()
-// T
-
-// initialize('acidtests')
-// // TODO: upgrade this as a utility
-// A=acid[13]
-// kids=A.children().filter(x=>x.isA('Inst')).map(x=>x.address()).flat()
-// write(kids)
-// C=A.lastChild().child(0,2,1,4,2)
-// write(C)
-// newkids = [...kids]
-// kids.forEach( n => {
-//   Validation.setResult(C , { result:'valid' , reason: 'n-compact' })
-//   let kid=A.child(n)
-//   kid.ignore=true
-//   if (A.validate(C , true)) { 
-//     newkids.splice(newkids.indexOf(n),1)
-//   } else {
-//     kid.ignore = false
+// casesdoc = $(
+// `
+// {
+//   Declare or ⇒
+//   Rules:
+//   { 
+//     cases>
+//     :{ :W or V  :{ :W U } :{ :V U }  U }  
+//     :{ :W   W or V   V or W } 
+//   }   
+//   { :P or Q
+//     { :P  Q or P}
+//     { :Q  Q or P}
+//     Q or P by cases
 //   } 
-// })
-// A.toNice(C,true)
-// write(newkids)
+// }
+// `)
+// interpret(casesdoc)
+// validate(casesdoc)
 
-// bug = load('math-299-pred',['Prop','Pred'])
-// bug.validateall(bug,true)
-// tar = bug.child(545,0,4,1,0,3,3)
-
-// falseCNFProp = CNFProp.fromLC(bug,bug.cat,tar,false)
-// trueCNFProp = CNFProp.fromLC(bug,bug.cat,tar,true)
-
-// i = peano.getAll('Inst')[2]
-// console.log('\npeano loaded\n')
-// peano.report(user)
-// console.log('')
-// badguy.investigate()
-// doc = load('math-299-pred',['Prop','PropThm','Pred','PredThm','Number Theory'])
-
-// M=$(`
-// { { :Let x P(x) 
-//     { :Let y Q(x,y) 
-//       {  :Let z  R(x,y,z) } 
-//       S(x,y,z) 
-//       {  :Let w  U(x,y,z) }  
-//       T(x,y,z)
+// nocasesdoc = $(
+//   `
+//   {
+//     Declare or ⇒
+//     Rules:
+//     { 
+//       :{ :W or V  :W⇒U  :V⇒U  U }  
+//       :{ :W   W or V   V or W } 
+//       :{ :{ :W V } W⇒V }
+//     }   
+//     { :P or Q
+//       { :P  Q or P}
+//       { :Q  Q or P}
+//       Q or P
 //     } 
 //   }
-//   { :Let v
-//     V(x,y,z,w,v)
+//   `)
+//   interpret(nocasesdoc)
+//   validate(nocasesdoc)
+  
+// casesdoc = $(
+// `
+// {
+//   Declare or
+//   Rules:
+//   { 
+//     cases> :{ :W or V  :{:W U}  :{:V U}  U }  
+//     :{ :W   W or V   V or W } 
+//   }   
+//   { :P or Q
+//     { :P  Q or P}
+//     { :Q  Q or P}
+//     Q or P by cases
 //   } 
-//   W(x,y,z,v,w)
-// }`)
-// markDeclaredSymbols(M)
-// assignProperNames(M)
-// P=M.child(0,1)
-// Q=M.child(0,2,1)
-// R=M.child(0,2,2,1)
-// S=M.child(0,2,3)
-// T=M.child(0,3)
-// letx = M.child(0,0)
-// lety = M.child(0,2,0)
-// letz = M.child(0,2,2,0)
-// letw = M.child(0,2,4,0)
-// letv = M.child(1,0)
+// }
+// `)
+// interpret(casesdoc)
+// validate(casesdoc)
 
-// parsers = loadParser('toy')
-// $$ = parsers[0]
-// trace = parsers[1]
+// bih = $(
+//     `
+//     {
+//       Declare or
+//       Rules:
+//       { 
+//         :{ :W or V  :{:W U}  :{:V U}  U }  
+//         :{ :W   W or V   V or W } 
+//       } 
+//       Recall
+//       { :P or Q
+//         :{ :P  Q or P}
+//         :{ :Q  Q or P}
+//         Q or P 
+//       } 
+//       { :P or Q
+//         { :P  Q or P}
+//         { :Q  Q or P}
+//         Q or P 
+//       }
+//     }
+//     `)
+// interpret(bih)
+// validate(bih)
+    
+// Disable forbiddenWeenies before using this.
+// nobih = $(
+//     `
+//     {
+//       Declare or
+//       Rules:
+//       { 
+//         :{ :W or V  :{:W U}  :{:V U}  U }  
+//         :{ :W   W or V   V or W } 
+//       } 
+//       { :P or Q
+//         { :P  Q or P}
+//         { :Q  Q or P}
+//         Q or P 
+//       }
+//     }
+//     `)
+// nobih = interpret(nobih)
+// validate(nobih)
+    
+// doc = $(
+//   `
+//   {
+//     Declare 1 = +
+//     Rules:
+//     { 
+//       :{ Equations_Rule }
+//     }   
+//     { 
+//       :a=b
+//       :f(a,a+1)=f(a,a+1)
+//       f(a,a+1)=f(a,b+1)
+//     } 
+//   }
+//   `)
+// doc = interpret(doc)
+// validate(doc)
 
-// testparsers = loadParser('toy')
-// test = testparsers[0]
-// ttest = testparsers[1]
+// doc = $(
+//   `
+//   {
+//     Declare 1 = +
+//     Rules:
+//     { 
+//       :{ Equations_Rule }
+//     }   
+//     { 
+//       :a=b
+//       f(a,b+1)=f(a,a+1)
+//     } 
+//   }
+//   `)
+// interpret(doc)
+// validate(doc)
 
-// asciiparsers = loadParser('asciimath')
-// ascii = asciiparsers[0]
-// asciitrace = asciiparsers[1]
+// trans = loadDoc('proofs/TransChain')
 
-// PeggyTests = loadProofStr('PeggyTests')
+// doc = loadDoc('proofs/math299/peano')
+// write(doc.lastChild())
 
-// write(lc(parse(PeggyTests)))
+// doc = loadDoc('proofs/test')
+// validate(doc)
 
-doc=$(`{ a=1
-         b=2 
-         { c=3
-           d=4 
-           :Let n be such that n>0
-           k>0 for some k 
-           e=5
-           f=6
-         }
-         g=7
-         h=8
-       }`)
-processDeclarationBodies(processTheorems(processShorthands(doc)))
-doc.report(everything)
+doc1 = `
+{ 
+  Declare Socrates mortal man is ⇒
 
+  Assume forall x. x is a man ⇒ x is mortal
+  Assume Socrates is a man
+  Socrates is mortal
+}`
+
+doc2 = `
+{ 
+  Declare Socrates mortal man is ⇒
+
+  Rules:
+  {
+    :{ :W⇒V :W V }
+    :{ :(∀y.𝜆P(y)) 𝜆P(z) }
+  }
+  Assume forall x. x is a man ⇒ x is mortal
+  Assume Socrates is a man
+  Socrates is mortal
+}
+`
+
+doc3 = `
+{ 
+  Declare Socrates mortal man is ⇒ ∀
+
+  Rules:
+  {
+    :{ :W⇒V :W V }
+    :{ :(∀y.𝜆P(y)) 𝜆P(z) }
+  }
+  
+  ➤ 
+  ➤ "All men are mortal."
+  ➤ "Socrates is a man."
+  ➤ "Socrates is mortal."
+  ➤ 
+  
+  Assume forall x. x is a man ⇒ x is mortal
+  Assume Socrates is a man
+  
+  Socrates is a man ⇒ Socrates is mortal
+  
+  Socrates is mortal
+}
+`
+
+doc4 =
+`{ 
+  Declare Socrates mortal man is
+
+  Rule:  :{ :W is man   W is a mortal }
+  
+  Assume Socrates is a man
+  
+  Socrates is mortal
+}
+`
+
+
+
+// Accumulator = { totaltime:0, numcalls:0, numsolns:0, numlines: 0}
 ///////////////////////////////////////////////////////////
 // closing
 console.log(defaultPen(`done! (${(Date.now()-start)} ms)`))

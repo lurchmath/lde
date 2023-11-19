@@ -1,0 +1,422 @@
+include libs/Pred
+////////////////////////////////////////////////////////////////////
+// Math 299 Proofs
+// Predicate Logic
+//
+
+➤ "Math 299 Predicate Logic Homework Proofs 2023"
+
+{ // wrap all of them for efficient validation
+
+{
+  // Alpha Equivalence for ∀ (in-class example) Problem 5.1
+  // omitted proof:
+  // { :(∀x.P(x)) { :Let s  P(s)) } (∀y.P(y)) } 
+  ➤ "Problem 5.1"
+  ➤ "Amazingly requires no proof!"
+  Proof:
+  { (∀x.P(x)) ⇒ (∀y.P(y)) }  
+}
+
+{
+  ➤ "Second in-class example (similar to Problem 5.2)"
+  Proof:
+  { :∃x.P(x) and Q(x) 
+    P(c) and Q(c) for some c
+    P(c)
+    ∃y.P(y)
+  }
+}
+
+{
+  ➤ "Assignment #7 (a)"
+  Proof:
+  { { :∃x.Q(x)
+      Q(c) for some c
+      { :P(c)
+        Q(c)
+      }
+      P(c) ⇒ Q(c)
+      ∃x.P(x) ⇒ Q(x)
+    }
+    (∃x.Q(x)) ⇒ (∃x.P(x) ⇒ Q(x))
+  }
+}
+
+{
+  ➤ "Assignment #7 (b)"
+  Proof:
+  { { :∀x.¬P(x)
+      { :∃y.P(y)
+        P(n) for some n
+        ¬P(n)
+        →←
+      }
+      ¬(∃y.P(y))
+    }
+    (∀x.¬P(x)) ⇒ ¬(∃y.P(y)) 
+  }
+}
+
+{
+  ➤ "Problem 5.3 - Distributivity of ∀ over 'and'"
+  Proof:
+  { { :(∀y.P(y)) and (∀z.Q(z))
+      (∀y.P(y)) (∀z.Q(z))
+      { :Let x
+        P(x) 
+        Q(x)
+        P(x) and Q(x)
+      }
+      (∀x.P(x) and Q(x) )
+    }
+    { :(∀x.P(x) and Q(x))
+      { :Let x
+        P(x) and Q(x)
+        P(x) Q(x)
+      }
+      (∀y.P(y)) 
+      (∀z.Q(z))
+      (∀y.P(y)) and (∀z.Q(z))
+    }
+    (∀x.P(x) and Q(x)) ⇔ (∀y.P(y)) and (∀z.Q(z)) 
+  }
+}
+
+{
+  ➤ "Problem 5.3 - Distributivity of ∃ over 'or'"
+  Proof:
+  { 
+    { :(∃y.P(y)) or (∃z.Q(z))
+      { :∃y.P(y)
+        P(c) for some c
+        P(c) or Q(c)   
+        ∃x.P(x) or Q(x)
+      } 
+      { :∃z.Q(z)
+        Q(c) for some c
+        P(c) or Q(c)   
+        ∃x.P(x) or Q(x)  
+      }
+      (∃x.P(x) or Q(x))  
+                         because { :(∃y.P(y)) or (∃z.Q(z))
+                                    :{ :(∃y.P(y))   
+                                      (∃x.P(x) or Q(x))
+                                    } 
+                                    :{ :(∃z.Q(z))
+                                      (∃x.P(x) or Q(x))  
+                                    }
+                                    (∃x.P(x) or Q(x))
+                                  } 
+    }
+    { :(∃x.P(x) or Q(x))
+      P(c) or Q(c) for some c
+      { :P(c)
+        (∃y.P(y)) or (∃z.Q(z))  
+      }
+      { :Q(c)
+        (∃y.P(y)) or (∃z.Q(z))
+      }
+      (∃y.P(y)) or (∃z.Q(z))   
+                              because { :P(c) or Q(c)
+                                        :{ :P(c)
+                                          (∃y.P(y)) or (∃z.Q(z))  
+                                        }
+                                        :{ :Q(c)
+                                          (∃y.P(y)) or (∃z.Q(z))
+                                        }
+                                        (∃y.P(y)) or (∃z.Q(z))
+                                      }
+    }
+    (∃x.P(x) or Q(x)) ⇔ (∃y.P(y)) or (∃z.Q(z)) 
+  }
+}
+
+{
+  ➤ "Assignment #8 (b)"
+  Proof:
+  { 
+    Declare < 0 7 
+    { :0<7
+      ∃x.0<x
+      ∃x.x<7
+      (∃x.0<x) and (∃x.x<7)
+    }
+    0<7 ⇒ (∃x.0<x) and (∃x.x<7)
+  }
+}
+
+{
+  ➤ "Assignment #8 (c)"
+  Proof:
+  { 
+    Declare Alice Bob loves
+    { :∀x.(∀y.x loves y)
+      ∀y.Alice loves y
+      Alice loves Bob
+    }
+    (∀x.(∀y.loves(x,y))) ⇒ Alice loves Bob
+  }
+}
+
+{
+  ➤ "Assignment #8 (d)"
+  Proof:
+  { { :x=y and y=z
+      x=y
+      y=z
+      x=z  since { :y=z :x=y x=z }
+    }
+    x=y and y=z ⇒ x=z
+  }
+}
+
+{
+  ➤ "Assignment #8 (e)"
+  Proof:
+  { 
+    { :(∀y.P(y)) ⇒ (∃z.Q(z))
+      { :¬(∃x.P(x) ⇒ Q(x))
+        { :Let t
+          { :¬P(t)
+            { :P(t)
+              { :¬Q(t)
+                →←
+              }
+              Q(t)
+            }
+            P(t) ⇒ Q(t)
+            ∃x.P(x) ⇒ Q(x)
+            →←
+          }
+          P(t)
+        }
+        ∀y.P(y)
+        ∃z.Q(z)
+        Q(c) for some c
+        { :P(c)
+          Q(c)
+        }
+        P(c) ⇒ Q(c)
+        ∃x.P(x) ⇒ Q(x)
+      }
+      (∃x.P(x) ⇒ Q(x))
+    }
+    { :∃x.P(x) ⇒ Q(x)
+      P(c) ⇒ Q(c) for some c
+      { :∀y.P(y)
+        P(c)
+        Q(c)
+        ∃z.Q(z)
+      }
+      (∀y.P(y)) ⇒ (∃z.Q(z))
+    }
+    (∃x.P(x) ⇒ Q(x)) ⇔ (∀y.P(y)) ⇒ (∃z.Q(z)) 
+  }
+}
+
+{
+  ➤ "Assignment #8 (f)"
+  ➤ " "
+  ➤ "Theorem: If everyone loves exactly one person, and Alice and Bob"
+  ➤ "are not the same person, then Cathy does not love them both."
+  ➤ " "
+  {
+    (∀x.(∃!y. x loves y)) and ¬a=b ⇒ ¬(c loves a and c loves b)
+  }
+  ➤ "Proof:"
+  Proof:
+  { 
+    { ➤ "Assume the conjunction..."
+      :(∀x.(∃!y. x loves y)) and ¬a=b
+      ➤ "Use and- twice..."
+      ¬a=b
+      ∀x.(∃!y. x loves y)
+      ➤ "Use ∀- on that using the free 'c' in the theorem..."
+      ∃!y. c loves y
+      ➤ "Apply the definition of ∃! ..."
+      ∃y. c loves y and (∀z. c loves z ⇒ z=y)
+      ➤ "It exists, so let's name it w ..."
+      c loves w and (∀z.c loves z ⇒ z=w) for some w
+      ➤ "Use and- twice on the body of that declaration..."
+      c loves w
+      ∀z. c loves z ⇒ z=w
+      ➤ "Now it's just a short a proof by contradiction..."
+      { :c loves a and c loves b
+        c loves a 
+        c loves b
+        c loves a ⇒ a=w
+        c loves b ⇒ b=w
+        a=w 
+        b=w 
+        ➤ "Substitution still requires BIH's for now ..."
+        Recall { :b=w :b=b w=b } 
+        Recall { :w=b :a=w a=b } 
+        →←
+      }
+      ➤ "Thus since the assumption led to a contradiction ..."
+      ¬(c loves a and c loves b)
+    }
+    ➤ "And we have the theorem ..."
+    (∀x.(∃!y.x loves y)) and ¬a=b ⇒ (¬(c loves a and c loves b)) 
+  }
+}
+
+{
+  ➤ "Assignment #9.1"
+  ➤ " "
+  ➤ "Theorem: Pierce's Law"
+  { ((P ⇒ Q) ⇒ P) ⇒ P }
+  ➤ "Proof:"
+  Proof:
+  { 
+    :(P⇒Q)⇒P
+    { :¬P
+      { :P
+        { :¬Q 
+          →←
+        }
+        Q
+      }
+      P⇒Q
+      P
+      →←
+    }
+    P   
+  }
+}
+
+{
+  ➤ "Assignment #9.2"
+  ➤ "'A case of cases' "
+  ➤ "Theorem: (P⇒R) or (Q⇒R) ⇒ ((P and Q)⇒R)"
+  { (P⇒R) or (Q⇒R) ⇒ ((P and Q)⇒R) }
+  ➤ "Proof:"
+  Proof:
+  { :(P⇒R) or (Q⇒R)
+    { :P and Q
+      P 
+      Q
+      { :P ⇒ R 
+        R
+      }
+      { :Q ⇒ R 
+        R
+      }
+      R since { :(P⇒R) or (Q⇒R) :{ :P⇒R R} :{ :Q⇒R R} R }
+    }
+    P and Q ⇒ R
+  }
+  (P⇒R) or (Q⇒R) ⇒ ((P and Q)⇒R)
+}
+
+{
+  // Assignment #9.3
+  // Thm: If everyone loves themselves then everyone loves someone.
+  ➤ "Assignment #9.3"
+  ➤ " "
+  ➤ "Theorem: If everyone loves themselves then everyone loves someone."
+  { :(∀x.x loves x) (∀x.(∃y.x loves y)) }
+  ➤ "Proof:"
+  Proof:
+  { :∀x.x loves x
+    { :Let z
+      z loves z
+      (∃y.z loves y)
+    }
+    ∀x.(∃y.x loves y)
+  }
+}
+
+{
+  ➤ "Assignment #9.4"
+  ➤ " "
+  ➤ "Theorem: Alternate definition of unique existence."
+  { (∃!x.P(x)) ⇔ (∃x.P(x) and (∀y.¬y=x ⇒ ¬P(y))) }
+  ➤ "Proof:"
+  Proof:
+  { { :∃!x.P(x)
+      ∃x.(P(x) and (∀y.P(y) ⇒ y=x))
+      P(c) and (∀y.P(y) ⇒ y=c) for some c
+      P(c)
+      ∀y.P(y) ⇒ y=c
+      { :Let z 
+        { :¬z=c
+          { :P(z)
+            P(z) ⇒ z=c
+            z=c
+            →←
+          }
+          ¬P(z)
+        }
+        ¬z=c ⇒ ¬P(z)
+      }
+      ∀y. ¬y=c ⇒ ¬P(y)
+      P(c) and (∀y.¬y=c ⇒ ¬P(y))
+      ∃x. P(x) and (∀y.(¬y=x ⇒ ¬P(y)))
+    }
+    
+    { :∃x. P(x) and (∀y.(¬y=x ⇒ ¬P(y)))
+      P(c) and (∀y.(¬y=c ⇒ ¬P(y))) for some c
+      P(c) 
+      ∀y. ¬y=c ⇒ ¬P(y)
+      { :Let z 
+        { :P(z) 
+          ¬z=c ⇒ ¬P(z)
+          { :¬z=c
+            ¬P(z)
+            →←
+          }
+          z=c
+        }
+        P(z) ⇒ z=c
+      }
+      ∀y.P(y) ⇒ y=c
+      P(c) and (∀y.P(y) ⇒ y=c)
+      (∃x. P(x) and (∀y.P(y) ⇒ y=x))
+      ∃!x. P(x) 
+    }
+  }
+}
+
+{
+  ➤ "Assignment #10.2"
+  ➤ "DeMorgan extravaganze "
+  ➤ "Theorem:"
+  { ¬(∀x.∃y.∀z.P(x,y,z)) ⇒ (∃x.∀y.∃z.¬P(x,y,z)) }
+  ➤ "Proof:"
+  Proof:
+  { :¬(∀x.∃y.∀z.P(x,y,z))
+    { :¬(∃x.∀y.∃z.¬P(x,y,z))
+      { :Let a
+        { :¬(∃y.∀z.P(a,y,z))
+          { :Let b
+            { :¬(∃z.¬P(a,b,z))
+              { :Let c
+                { :¬P(a,b,c)
+                  ∃z.¬P(a,b,z)
+                  →←
+                }
+                P(a,b,c)
+              }
+              ∀z.P(a,b,z)
+              ∃y.∀z.P(a,y,z)
+              →←
+            }
+            ∃z.¬P(a,b,z)
+          }
+          ∀y.∃z.¬P(a,y,z)
+          ∃x.∀y.∃z.¬P(x,y,z)
+          →←
+        }
+        ∃y.∀z.P(a,y,z)
+      }
+      ∀x.∃y.∀z.P(x,y,z)
+      →←
+    }
+    ∃x.∀y.∃z.¬P(x,y,z)
+  }
+} 
+
+// end of all
+} ✔︎

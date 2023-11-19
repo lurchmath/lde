@@ -1,28 +1,29 @@
+include libs/Acid Tests
 ////////////////////////////////////////////////////////////////////
 // Acid Test Proofs
 // 
 // These are the example and counterexample proofs from the END document
 
-(--- "Example 6 from END")
+➤ "(END Example 6) Fine's test case."
 {
   // Thm: Fine's tests case
-  (--- "Thm: Fine's test case")
-  { :(∃ x , (∃ y , (∀ u , (∀ v , (F x y u v)))))  
-    (∃ y , (∀ v , (∃ u , (∃ x , (F x y u v)))))  
+  ➤ "Thm: Fine's test case"
+  { :∃x.∃y.∀u.∀v.F(x,y,u,v)
+     ∃y.∀v.∃u.∃x.F(x,y,u,v)
   }
 
-  (--- "Proof:")
+  ➤ "Proof:"
   {
-    :(∃ x , (∃ y , (∀ u , (∀ v , (F x y u v))))) 
-    [ c , (∃ y , (∀ u , (∀ v , (F c y u v)))) ] 
-    [ d , (∀ u , (∀ v , (F c d u v))) ] 
-    { :[ z ]
-       (∀ v , (F c d z v)) 
-       (F c d z z) 
-       (∃ x , (F x d z z)) 
-       (∃ u , (∃ x , (F x d u z))) 
+    :∃x.∃y.∀u.∀v.F(x,y,u,v)
+     ∃y.∀u.∀v.F(c,y,u,v) for some c 
+     ∀u.∀v.F(c,d,u,v) for some d
+    { :Let z 
+       ∀v.F(c,d,z,v) 
+       F(c,d,z,z) 
+       ∃x.F(x,d,z,z) 
+       ∃u.∃x.F(x,d,u,z) 
     }
-    (∀ v , (∃ u , (∃ x , (F x d u v)))) 
-    (∃ y , (∀ v , (∃ u , (∃ x , (F x y u v))))) 
+    ∀v.∃u.∃x.F(x,d,u,v)
+    ∃y.∀v.∃u.∃x.F(x,y,u,v)
   }    
 } ✔︎

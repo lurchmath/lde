@@ -3,13 +3,6 @@
 //
 // A peggy grammar definition file to generate a parser for converting
 // AsciiMath expression to an LC.
-
-
-///////////////////////////////////////////////////////////////////////////
-// Toy Peggy Grammar and Parser
-//
-// A peggy grammar definition file to generate a parser for converting more
-// natural math notation into putdown, which can then be converted to an LC. 
 //
 // Note: for now we encode negative numbers as compound expressions e.g. -3 is
 // encoded as (- 3). We also encode rational fractions as a product of the
@@ -97,10 +90,14 @@
   //   * replace toxic unicode chars with equivalents
   input = input.replace(/𝜎/g, 'σ')
   input = input.replace(/𝜆/g, 'λ')
+  input = input.replace(/≠/g, ' neq ')  
   //   * Declaring reserved constants is tricky since it tries to parse them as they are
   //     intended to be used, so for now we convert any line of the form `Declare stuff`
   //     to escaped putdown up front.
   input = input.replace(/[Dd]eclare \s*([^\s].*)$/mg, 'declare> «:[$1]»\n')
+  //   * also look for lines containing only a ➤ and whitespace, and replace
+  //     them with (➤ " ") to act as a line break in the output
+  input = input.replace(/^([ \t]*)➤[ \t]*$/mg, `$1➤ " " \n`)
   //   * delete comments (but leave any \n's to keep the line counts right)
   input = input.replace(/\/\/[^\n\r]*(\n|\r)/g, '\n')
   //   * Replace tabs with a space
@@ -152,20 +149,23 @@ Meta = Putdown / Comment / Shorthand
 Putdown = '«' @$([^»]*) '»'  // todo: add a non-unicode way to do this
 
 // insert a comment that gets echoed
-Comment "Comment" = ('Comment'i / '➤') __ a:StringLiteral { return `(--- ${a})` }
+Comment "Comment" = ('Comment'i / '➤') __ a:StringLiteral { return `(➤ ${a})` }
 // String Literals for comments
 StringLiteral = $('"' [^"]* '"')
 
 // Shorthand symbols that will be post-processed
-Shorthand = BIH / Ruleset / Rule / Thm
+Shorthand = BIH / Ruleset / Rule / Thm / Proof
 
-BIH = 'Notice'i { return '>>' }
-RulesetLabel = 'Rules'i / 'Axioms'i / 'Givens'i
+BIHLabel = 'since'i / 'because'i / 'Recall'i
+BIH = BIHLabel { return '>>' }
+RulesetLabel = 'Rules'i / 'Axioms'i / 'Givens'i / 'Definitions'i
 Ruleset = RulesetLabel ':'? { return 'rules>' }
 RuleLabel = 'Rule'i / 'Axiom'i / 'Given'i / 'Definition'i
 Rule = RuleLabel ':'? { return 'rule>' }
 ThmLabel = 'Theorem'i / 'Thm'i / 'Lemma'i / 'Corollary'i
 Thm = ThmLabel ':'? { return 'thm>' }
+ProofLabel = 'Proof'i 
+Proof = ProofLabel ':'? { return 'proof>' }
 
 // declarations
 Declaration "Declaration" = ForSome / Let
@@ -177,11 +177,15 @@ Let = 'Let'i __ a:SymbolSeq __ ('be'i __)? 'such'i __ 'that'i __ b:Expression
       'Let'i __ a:SymbolSeq { return `[${spaced(a)}]` }
 
 // expressions
-Expression "Expression" = EFA / Binding / Prop  // get's Stuff from Not
+Expression "Expression" = Quantified / Binding / Prop / EFA  // get's Stuff from Not
+
+// quantified binding expressions
+Quantified = a:BindingSymbol b:Binding
+          { return `(${a} ${b})` }
 
 // binding expressions
-Binding = a:BindingSymbol b:SymbolSeq period c:Expression
-          { return `(${a} ${b}, ${c})` }
+Binding = a:Symbol period b:(Expression / Binding) 
+          { return `${a}, ${b}` }
 
 // propositional expressions
 Prop = Iff / Implies / And / Or / Not
@@ -190,7 +194,7 @@ Iff        = a:Implies|1..,'⇔'/' iff '|    { return lisp('⇔',a) }
 Implies    = a:Or|1..,'⇒'/' implies '|     { return lisp('⇒',a) }
 Or         = a:And|1..,' or '/'∨'|         { return lisp('or',a) }
 And        = a:Not|1..,' and '/'∧'|        { return lisp('and',a) }
-Not        = a:('¬'/'not ')? b:Stuff       { return (a==='not ')
+Not        = a:('¬'/'not ')? _ b:Stuff     { return (a==='not ')
                                                      ?lispUnary('¬',b)
                                                      :lispUnary(a,b)
                                            }
@@ -199,15 +203,19 @@ Not        = a:('¬'/'not ')? b:Stuff       { return (a==='not ')
 Stuff = Relation / Thing
 
 // relations
-Relation = Subset / ElementOf / Divides / Leq / LessThan / Equation / Loves
+Relation = Subset / ElementOf / Divides / Leq / 
+           LessThan / Equation / NotEqual / Loves / Is
 
 Subset     = a:Thing|2..,'⊆'/' subset '/' subseteq '| { return lisp('⊆',a) }
 ElementOf  = a:Thing ('∈'/' in ') b:Thing             { return lispBinary('∈',a,b) }
 Divides    = a:Thing '|' b:Thing                      { return lispBinary('|',a,b) }  
 Leq        = a:Thing|2..,'≤'/' leq '|                 { return lisp('≤',a) }
 LessThan   = a:Thing|2..,'<'/' lt '|                  { return lisp('<',a) }
+NotEqual   = a:Thing (' neq '/' ne ') b:Thing 
+             { return `(¬ ${lispBinary('=',a,b)})` }
 Equation   = a:Thing|2..,'='|                         { return lisp('=',a) }
 Loves      = a:Thing|2..2,' loves '|                  { return lisp('loves',a) }
+Is         = a:Thing|2..2,' is an '/' is a '/' is '|  { return lisp('is',a) }
 
 // things to relate
 Thing = Set / Algebraic
@@ -233,14 +241,15 @@ Negated   = a:'-'? b:Exp                              { return lispUnary(a,b) }
 Exp       = a:Atomic|1..,'^'|                         { return lisp('^',a)    } 
 
 // morally atomic (do not require parentheses)
-Atomic = Parenthesized / Prefix / Symbol / Number
+Atomic = Parenthesized / EFA / Prefix / Tuple / Symbol / Number
 
 // For convenience we define 𝜆P(k) to be (λ P k) and replace λ with "LDE EFA"
 // as a shortcut
 EFA = 'λ' a:Symbol '(' b:Expression ')' { return `(λ ${a} ${b})` }
 
+Tuple = '⟨' b:(  @Expression|1..,comma| )+ '⟩' { return lispPrefix('tuple',b) }
 Prefix = a:Symbol b:( '(' @Expression|..,comma| ')' )+ { return lispPrefix(a,b) }
-Parenthesized = '(' @Expression ')'
+Parenthesized = '(' @Expression ')' 
 
 // while we probably will never use a number or reserved symbol as a bound var, 
 // we might Declare one to be a constant, e.g. Peano or ops
@@ -254,11 +263,10 @@ Natural = $( [1-9][0-9]* / '0' )
 // Symbols can't start with a digit, contain reserved constants, or keywords
 SymbolSeq = a:(Symbol/Number)|1..,comma| { return a.join(',') }
 Symbol "Symbol" =  $( !([0-9]/ReservedWords)
-                      [^-\][() \t\n✦{},.:+⋅/^=<≤¬⇒⇔|∀∃∩∪×∈⊆∖⁻∧∨≡]+ )
+                      [^-\][()⟨⟩ \t\n✦{},.:+⋅/^=<≤¬⇒⇔|∀∃∩∪×∈⊆∖⁻∧∨≡]+ )
 BindingSymbol = ('∃!'/'exists unique ') { return '∃!' } /
                 ('∀'/'forall '/'for all ') { return '∀' } /
                 ('∃'/'exists ') { return '∃' } 
-
 
 // punctuation
 comma  =  ','

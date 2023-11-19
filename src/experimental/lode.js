@@ -1,3 +1,9 @@
+/**
+ * Lode is the Lurch Node app. It defines a node REPL which has all of the Lurch
+ * LDE brains loaded. For details see the [Lode tutorial](@tutorial Lurch Node REPL).
+ *
+ * @module Lode
+ */
 //////////////////////////////////////////////////////////////////////////////
 //
 // LurchNode (Lode)
@@ -6,7 +12,7 @@
 //              of the lurch LDE brains loaded.
 //
 // Syntax: at the bash prompt type "node lode" where lode.js is this file,
-//         assuming the current directory is the /scripts directory containing
+//         assuming the current directory is the directory containing
 //         the file.
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -21,41 +27,36 @@ import repl from 'repl'
 import fs, { write } from 'fs'
 import { execSync } from 'child_process'
 import util from 'util'
+import peggy from 'peggy'
 
 // In LODE we have no need for EventTarget because we don't edit MCs in real
 // time and react to changes.  Importing this BEFORE importing math-concept.js
 // disables that.  This keeps the size and complexity of LCs simpler and avoids
 // spamming 'inspect' reports.
 //
-// NOTE: do not importan any lurch modules above this point (in class they load
+// NOTE: do not import any lurch modules above this point (in case they load
 // something that loads MathConcept first before we get a chance to import the
-// following)
+// following).
 import './disable-event-target.js'
-
 // with that disabled, now we can load everything from index.js and other LDE tools
 import * as Lurch from '../index.js'
 import { Problem } from '../matching/problem.js'
 import CNF from '../validation/conjunctive-normal-form.js'
 
-//
 // Experimental Code
 //
-// parsers
-import peggy from 'peggy'
+// parsing
 import { Tokenizer, Grammar } from 'earley-parser'
-// docify utilities
-import { moveDeclaresToTop, processTheorems, processDeclarationBodies,
-         processLets, markDeclaredSymbols, computedAttributes, resetComputedAttributes } 
-       from './docify.js'
+// generic helper utilities
+import Utilities from './utils.js'
+// interpretation utilities
+import Interpret from './interpret.js'
 // everything in the global validation lab. 
-import Compact from './global-validation-lab.js'
-// load the custom formatter class
+import Compact from './global-validation.js'
+// load the custom formatters and reporting tools
 import Reporting from './reporting.js' 
-// load the Document class
-import { Document , assignProperNames } 
-       from './document.js'
-// load the lc command
-import { lc , mc , checkExtension, diff } from './extensions.js'
+// import the parsing utiltiies (processShorthands comes from Interpret)
+import { makeParser } from './parsing.js'
 // load the CNFProp tools for testing
 import { CNFProp } from './CNFProp.js'
 
@@ -64,7 +65,6 @@ import { CNFProp } from './CNFProp.js'
 import Algebrite from '../../dependencies/algebrite.js'
 // load SAT
 import { satSolve } from '../../dependencies/LSAT.js'
-import { makeParser , processShorthands } from './parsing.js'
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -76,23 +76,15 @@ import { makeParser , processShorthands } from './parsing.js'
 Object.assign( global, Lurch )
 
 // Experimental code
+Object.assign( global, Utilities )
+Object.assign( global, Interpret)
 Object.assign( global, Compact )
 Object.assign( global, Reporting )
 global.CNF = CNF
 global.Problem = Problem
-global.Document = Document
 global.CNFProp = CNFProp
 
-// exposing commands for debugging
-global.assignProperNames = assignProperNames
-global.markDeclaredSymbols = markDeclaredSymbols
-global.processShorthands = processShorthands
-global.moveDeclaresToTop = moveDeclaresToTop
-global.computedAttributes = computedAttributes
-global.resetComputedAttributes = resetComputedAttributes
-global.processTheorems = processTheorems
-global.processDeclarationBodies = processDeclarationBodies
-global.processLets = processLets
+
 // External packages
 global.satSolve = satSolve
 global.Algebrite = Algebrite
@@ -119,12 +111,6 @@ global.ls = (args='') => {
 // because it's easier to remember
 global.metavariable = 'LDE MV'
 
-// see if a filename has the correct extension and add it if it doesn't
-global.checkExtension = checkExtension
-
-// find the subtitution delta between two Application expressions if it exists
-global.diff = diff
-
 // for controlling the inspect-level for the default REPL echo
 global.Depth = Infinity
 
@@ -143,29 +129,61 @@ global.initialize = function(fname='initproofs') {
 global.catproof = function(fname) {
   console.log(defaultPen(execStr(
     `cat "${proofPath}${checkExtension(fname,'lurch')}"`)))
-  }
+}
 
-  // display a library file by filename
+// display a library file by filename
 global.catlib = function(fname) {
   console.log(defaultPen(execStr(
     `cat "${libPath}${checkExtension(fname,'lurch')}"`)))
-  } 
+} 
 
-  // List both libs and proofs
+// List both libs and proofs
+/** List libs and proofs */
 const list = () => { console.log(
   `\n${headingPen('Available Libraries:')}\n`+
   `${docPen(execStr('cd '+libPath+';ls -pRC '))}\n`+
   `${headingPen('Available Proofs:')}\n` +
   `${docPen(execStr('cd '+proofPath+';ls -pRC'))}`
-  )}
-  
+)}
+
+// two useful abbreviations
+global.lc = s => { 
+  const L = LogicConcept.fromPutdown(s)
+  return (L.length===1) ? L[0] : L 
+}
+global.mc = s => { 
+  const M = MathConcept.fromSmackdown(s)
+  return (M.length===1) ? M[0] : M  
+}  
+
+// a useful utility for exploring matching
+global.matchMaker = (decl,pstr,estr) => {
+  let doc = $(`{
+    Declare ${decl}
+    Rule: :{ ${pstr} }
+    ${estr}
+  }`)
+  interpret(doc)
+  doc.report(all)
+  const p = doc.child(2,0)
+  const e = doc.child(3)
+  const ans = matchPropositions(p,e)
+  return ans.toString().split(/(?<=}),(?={)/)
+            .map( s=>s.slice(1,-1) )
+            .map( s=>s.split(/(?<=\)),(?=\()/) )
+            .map( s=>s.map( x=>x.replace(/__/g,'') ) )
+            .map( s=>s.map( x=>x.replace(/\(([^,]+),(.+)\)$/g,'$1=$2') ) )
+}
+
 /////////////////////////////////////////////////////////////////////////////
 //
 //  File handling utilities
 //
 
-/** A library path */
 // the path to library definition files
+/** 
+ * A library path 
+ */
 global.libPath = './libs/'
 
 // the path to proof definition files
@@ -184,8 +202,42 @@ global.ParserFileExtension = 'peggy'
 // check a file name to see if it has the .lurch extension and if not, add it
 global.checkLurchExtension = name => checkExtension(name , LurchFileExtension )
 
-// Load just the string for a file and return that. You can omit the .lurch 
-// extension. The second argument is the folder.
+// Load a LDE document
+//
+// Load a document string, recursively replacing included files, and wrap the
+// result in environment brackets, { }. before returning.
+//
+global.loadDoc = ( name, folder='./', extension=LurchFileExtension ) => {
+  // load the specified file
+  let doc = `{\n${loadDocStr( name, folder, extension )}\n}`
+  doc = parse(doc)
+  doc = lc(doc)
+  interpret(doc)
+  validate(doc)
+  return doc
+}
+
+// Load a LDE document string
+//
+// This command works just like loadStr with one difference. If the string that
+// is loaded contains a line of the form 
+//
+//    include fname
+//
+// it will load the string in fname and replace that line with the contents of
+// that file recursively checking for more include statements.  No checking is
+// done to prevent circular dependencies.
+//
+global.loadDocStr = ( name, folder='./', extension=LurchFileExtension ) => {
+  // load the specified file
+  let ans = loadStr( name, folder, extension )
+  // recursively replace all of the includes
+  const regx = /(?:^|\n)[ \t]*[iI]nclude[ \t]+([^ \t][^\n]*)(?:\n|$)/gm
+  return ans.replace(regx,(line,fname) => { return loadDocStr(fname) })
+}
+
+// Load just the string for a file and return that. You can omit the .lurch
+// extension. The second argument is the folder which default to the current folder. 
 global.loadStr = ( name, folder='./', extension=LurchFileExtension) => {
   const filename = folder + checkExtension(name,extension)
   if (!fs.existsSync(filename)) {
@@ -210,8 +262,6 @@ global.loadParser = (name) => {
 global.parsers = loadParser('asciimath')
 global.parse = parsers[0]
 global.trace = parsers[1]
-global.lc = lc 
-global.mc = mc
 global.$ = s => {
   let parsed = parse(s)
   return (parsed) ? lc(parsed) : undefined
@@ -237,7 +287,7 @@ global.catdocs = ( ...files ) => {
   // the reserved constants are declared at the top of every document
   // Note: we temporarily include '/' here until we can fix the bug in the 
   // ascii peggy parser that prevents it from being Declared. 
-  const system = lc(`:[ 'LDE EFA' '---' ]`).asA('Declare')
+  const system = lc(`:[ 'LDE EFA' '➤' ]`).asA('Declare')
   // create a temporary empty environment to hold the final answer
   let ans = new Environment()
   ans.pushChild(system)
@@ -299,22 +349,7 @@ const rpl = repl.start( {
   prompt: defaultPen('▶︎')+' ',
   useGlobal: true,
   writer: ( expr ) => {
-    if (isNestedArrayofLCs(expr) || isNestedSetofLCs(expr)) {
-      let ans=format(expr)
-      return (ans==='') ? format(expr,everything) : ans             
-    } else if ( expr instanceof MathConcept ) {
-      try { return defaultPen(expr.toSmackdown()) }
-      catch { return defaultPen(expr.toString()) }
-    } else { 
-      return util.inspect( expr, 
-        {
-          customInspect: false,
-          showHidden: false,
-          depth: Depth,
-          colors: true
-        } 
-      )
-    } 
+    return format(expr)
   }
 } )
 ////////////////////////////////////////////////////////////////////////////
@@ -337,12 +372,14 @@ rpl.defineCommand( "features", {
       ${itemPen('lc(s)')}         : constructs an LC from the putdown string s
       ${itemPen('mc(s)')}         : constructs an MC from the smackdown string s
       ${itemPen('X.report()')}    : prints a syntax highlighted, numbered view of LC X
-                      Optional args 'everything', 'show', 'detailed', 'allclean'
-                      'clean'  and 'user' (with no quotes) show variations
+                      Optional args 'all', 'show', 'detailed', 'allclean'
+                      and 'clean' (with no quotes) show variations
       ${itemPen('X.inspect(x,d)')}: prints the object structure of X to depth d. If d
                       is omitted the default is 1
       ${itemPen('.list')}         : show the list of known libs and proofs
       ${itemPen('.test')}         : run the acidtests script
+      ${itemPen('.makedocs')}     : make the jsdoc docs
+      ${itemPen('.showdocs')}     : open the jsdoc docs in the browser
       ${itemPen('exec(command)')} : execute the given shell commmand and print the result
       ${itemPen('initialize()')}  : loads and executes 'initproof.js' from the scripts
                       folder. A different file can be executed by calling 
@@ -376,12 +413,41 @@ rpl.defineCommand( "list", {
 rpl.defineCommand( "test", {
   help: "Run the default test script ('acidtests.js').",
   action() { 
-    initialize('acidtests')
+    initialize('utils/acidtests')
     this.displayPrompt()
   }
 })
 
+// define the Lode .makedocs command
+rpl.defineCommand( "makedocs", {
+  help: "Run jsdocs to make the documentation.",
+  action() {
+    console.log(defaultPen('Building docs...')) 
+    try {
+    exec('rm -rf docs && jsdoc ./* -d docs -c utils/jsdoc-conf.json -u tutorials/ && node utils/post-docs')
+    console.log(defaultPen('...done'))
+    } catch (err) {
+      console.log('Error building docs.')
+    }
+    this.displayPrompt()
+  }
+})
+
+// define the Lode .showdocs command
+rpl.defineCommand( "showdocs", {
+  help: "Open the jsdocs index.html page in the browser.",
+  action() { 
+    exec('open docs/index.html')
+    this.displayPrompt()
+  }
+})
+
+
 // export the repl.writer to be available at the repl command line
 global.write = s => console.log(rpl.writer(s))
 
+// Just a global place to store benchmarking informtion.  Just assign properties
+// to it if you want to benchmark e.g. number of times a routine is called,
+// total time, number of instantiations created, etc.
+global.Accumulator = { }
 /////////////////////////////////////////////

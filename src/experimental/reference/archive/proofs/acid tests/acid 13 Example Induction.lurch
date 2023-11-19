@@ -1,0 +1,40 @@
+////////////////////////////////////////////////////////////////////
+// Induction vs Forall+ test
+//
+// This should not validates the inductive step (but currently does).  
+// The reason it does is that the forall statement instantiates the ∀- rule to
+// give the equation, and the forall+ and induction rules are of the form :{ :{
+// :A B } C } and :{ :D :{ :A :B E } C }, but these together classically imply C
+// when treated only propositionally. (The proof can be done using proof by
+// cases on (B or ¬B)). So to handle this we have two options. 
+//
+// (a) use FIC instead of SAT, since 
+//
+//            { :{ :{:A B } C }  :{ :D :{ :A :B E } C } C }
+//
+//     is a classical tautology but not an intuitionistic one.  It's not clear if
+//     this will only handle this particular case or if other similar
+//     counterexamples are possible when A is a declaration using FIC.  It's also
+//     slower than SAT.
+//
+// (b) upgrade the tick marks to use forSome style renamings for consecutive
+//     Let-Assumes. In that case the above tautology will fail classically because
+//     the B's will no longer match each other.  This makes Let behave almost exactly
+//     like ForSome except for the Given status and preemie check, which is probably
+//     a step in the right direction anyway.
+{
+  (--- "Theorem 7.8: Commutativity of Addition")
+  (--- "Proof:")
+  { 
+    (--- "We will proceed by induction on n for arbitrary m.")
+    {  :[m] 
+      (--- "Base case.")
+      (= (+ m 0) (+ 0 m))  
+      (--- "Inductive step.")
+      { :[k, (= (+ m k) (+ k m))]
+        (= (+ m (𝜎 k)) (+ (𝜎 k) m)) ✗ // this equation should not validate
+      }
+      (∀ n , (= (+ m n) (+ n m))) ✔︎
+    }
+  }
+}

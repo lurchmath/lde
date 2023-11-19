@@ -1,0 +1,35 @@
+{
+    "plugins": ["plugins/markdown"],
+    "opts": {
+        "_template": "../../node_modules/clean-jsdoc-theme",
+        "template": "../../node_modules/tidy-jsdoc", 
+        "prism-theme": "prism-default",
+        "encoding": "utf8",
+        "recurse": true,
+        "verbose": false,
+        "theme_opts": {
+            "default_theme": "dark"
+        }
+    },
+    "markdown": {
+        "hardwrap": false,
+        "idInHeadings": true
+    },
+    "templates": {
+        "default": {
+            "includeDate": false
+        }
+    },
+    "metadata": {
+        "title": "Global $n$-compact Validation Engine"
+    },
+    "styles": {
+        "nav-width": "335px"
+    },	
+    "source": {
+        "exclude": [
+            "./scripts/acidtests.js",
+            "./scripts/post-docs.js"
+        ]
+    }
+}

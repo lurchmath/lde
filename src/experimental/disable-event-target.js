@@ -12,4 +12,5 @@
 //         to import this module in a browser.
 //
 ///////////////////////////////////////////////////////////////////////////////
-global.disableEventTarget = true
+if (typeof global !== 'undefined') global.disableEventTarget = true
+if (typeof window !== 'undefined') window.disableEventTarget = true

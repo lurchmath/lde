@@ -1,12 +1,29 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// Reporting Utilties
-//
-// Description: This allows for custom formatting and customize reports
-//              for LCs and various output devices.  For now we only support
-//              the terminal in Lode.
-//
-///////////////////////////////////////////////////////////////////////////////
+/**
+ * Reporting Utilties
+ *
+ * This provides tools for custom formatting and customized reports for LCs and
+ * various output devices.  For now we only support the terminal output in Lode. 
+ *
+ * The main function is the LogicConcept extension `.report(options)`. It will
+ * format and output a LC document with syntax highlighting and various. The
+ * options object has the following fields:
+ * ```
+ *  showDeclares, showAttributes , showBodies, showContexts, showRules ,
+ *  showUserThms , showPartials , showConsiders , showInstantiations ,
+ *  showNumbers , showProperNames , showUserRules , showUserInstantiations ,
+ *  showValidation
+ * ```
+ * which, when true, will show the corresponding part aspect of the document.
+ *
+ * Some predefined reports are available by using a predefined options object:
+ * ```
+ *  all, show, detailed , moderate, allclean, clean , user
+ * ```
+ * These reporting routines also are used by the Lode writer for echoing LC
+ * documents and arrays of LCs and other objects.
+ *
+ * @module Reporting
+ */
 
 ///////////////////////////////////////////////////////////////////////////////
 // Imports
@@ -16,12 +33,13 @@
 // load everything from index.js
 import * as Lurch from '../index.js'
 // load the experimental code
-import Compact from './global-validation-lab.js'
+import Compact from './global-validation.js'
 // load chalk and stripAnsi
 import chalk from 'chalk'
 import erase from 'strip-ansi'
-import { tab,  indent } from './extensions.js'
+import Utilities from './utils.js'
 // load the commands from Lurch and Compact
+Object.assign( global, Utilities )
 Object.assign( global, Lurch )
 Object.assign( global, Compact )
 
@@ -62,23 +80,8 @@ const preemiex   = xPen('!✗')
 // Utilities
 //
 
-// // Return a string of spaces of length n
-// const tab = (n , char=' ') => { return Array.seq(()=>'',1,n+1).join(char) }
 
-// // indent string s with a tab of size n
-// const indent = (s,n) => {
-//   const t = tab(n)
-//   return t+s.replaceAll(/\n(.)/g,'\n'+t+'$1')
-// }
-
-// report the time it took to execute function f
-const timer = f => {
-  let start = Date.now()
-  f()
-  console.log((Date.now()-start)+' ms')
-}
-
-// Just list the keys in an LC.  This would be more useful as an LC extension.
+// Just list the keys in an LC.  This is more useful as an LC extension.
 LogicConcept.prototype.showkeys = function() { 
   let keys = this.getAttributeKeys()
   keys.forEach( key => { 
@@ -105,6 +108,8 @@ const showDeclares =  true
 const showContexts = true
 // show formulas
 const showRules = true
+// show formulas
+const showConsiders = true
 // show partial instantiations
 const showPartials = true
 // show instantiations of formulas in the library
@@ -130,22 +135,22 @@ const showValidation = true
 
 // useful sets of options
 //
-// show everything report option
-const everything = { showDeclares, showAttributes , showBodies, showContexts,
-                     showRules , showUserThms , showPartials,
-                     showInstantiations , showNumbers , showProperNames ,
-                     showUserRules , showUserInstantiations , showValidation
-                   }                     
+// show all report option
+const all = { showDeclares, showAttributes , showBodies, showContexts,
+              showRules , showUserThms , showPartials , showConsiders ,
+              showInstantiations , showNumbers , showProperNames ,
+              showUserRules , showUserInstantiations , showValidation
+            }                     
 // simple report option
 const show = { showDeclares, showAttributes , showBodies, showContexts,
                showRules , showUserThms , showPartials,
-               showInstantiations , showProperNames ,
+               showInstantiations , showProperNames , showConsiders ,
                showUserRules , showUserInstantiations , showValidation 
              }
 // detailed report option
 const detailed = {  showDeclares, showRules , showPartials, showInstantiations ,
                     showNumbers , showBodies, showProperNames , showUserRules ,
-                    showUserThms , showValidation 
+                    showUserThms , showValidation
                  }
 // moderate report option
 const moderate = { showInstantiations, showNumbers, showSimpleProperNames, showRules,
@@ -158,8 +163,7 @@ const allclean = { showInstantiations, showNumbers, showProperNames,
 const clean = { showInstantiations, showNumbers, showSimpleProperNames , showUserThms ,
                 showValidation } 
 // user report option
-const user = { showNumbers, showUserThms , showSimpleProperNames, showUserOnly , 
-               showValidation }
+const user = { showNumbers, showUserThms , showSimpleProperNames , showValidation }
 // user report option
 const defaultOptions = { showDeclares, showNumbers, showRules , showSimpleProperNames , 
   showUserThms , showValidation }
@@ -196,7 +200,7 @@ const formatter = ( options=defaultOptions ) => {
       ans += metavariablePen(S)        
     // the LDE EFA constant symbols
     } else if (L instanceof LurchSymbol && L.text()===EFA) {
-      ans += (L.constant) ? constantPen('@') : defaultPen('@')
+      ans += (L.constant) ? constantPen('𝜆') : defaultPen('𝜆')
     // comments just display their string (second arg) with the comment pen 
     } else if (L.isAComment()) {
       ans += commentPen(L.child(1))
@@ -227,6 +231,9 @@ const formatter = ( options=defaultOptions ) => {
     // instantiations  
     } else if (L.hasAncestorSatisfying( x => x.isA(instantiation) )) {
       ans += (options.showInstantiations) ? instantiationPen(S) : ''
+    // Considers
+    } else if (L.hasAncestorSatisfying( x => x.isA('Consider') )) {
+      ans += (options.showConsiders) ? instantiationPen(S) : ''
     // everything else  
     } else {
       ans += defaultPen(S)
@@ -265,22 +272,23 @@ const formatter = ( options=defaultOptions ) => {
         })
         ans+=attributeKeyPen('❳')
       }
+      // add a faux-attribute for .consider's
+      ans += (L.consider) ? attributeKeyPen(`❲consider❳`) : ''
     }
     // show validation except for hidden ForSome bodies
     if (options.showValidation && ans.length>0 ) {
+      // TODO: adding the switchover to the new validation storage
+      if (L.results("BIH")) 
+        ans += (L.results("BIH").result==="valid")?goldstar:redstar
+      // TODO: remove old style validation
       if (Validation.result(L) && Validation.result(L).result==='valid') {
         // a valid BIH has to be propositionally valid, so a green check
-        // isn't necessary when there's a gold star
-        if (L.isA(hint)) {  
-          ans += (L.badBIH)?greencheck+redstar:goldstar
-        } else {
-          ans += greencheck
-        }
+        // isn't necessary when there's a gold star, but we now treat them as
+        // independent since so the user sees both kinds of feedback.
+        ans += greencheck
         // Propositionally invalid ones. Add a red x even if it's a BIH  
       } else if ((Validation.result(L) && Validation.result(L).result!=='valid')) {
         ans += (Validation.result(L).reason==='preemie') ? preemiex : redx
-        // if it's a BIH append it's star
-        if (L.isA(hint)) ans += (L.badBIH)?redstar:redx
       }
     }
     // mark redeclared symbols
@@ -295,41 +303,63 @@ const formatter = ( options=defaultOptions ) => {
   }  
 }
 
-// Nested arrays of LCs come up often in Lode (e.g. X.children()) so we want to 
-// be able to syntax highlight them.  This identifies them.
-const isNestedArrayofLCs = A => {
-  return ((A instanceof LogicConcept) || 
-          (A instanceof Array) && (A.every(isNestedArrayofLCs))
+// Nested arrays of LCs come up often in Lode (e.g. X.children()) so we want to
+// be able to syntax highlight them. Sometimes they may be mixed in with Sets
+// and elementary values. This identifies them for formatting.
+//
+// TODO: this is no longer needed.  Consider deleting it.
+const isNestedLCs = A => {
+  return ((A instanceof LogicConcept) || (typeof A === 'string') ||
+          (typeof A === 'boolean') || (typeof A === 'number') ||
+          (A instanceof Array) && (A.every(isNestedLCs)) ||
+          (A instanceof Set) && ([...A].every(isNestedLCs))
          )
 }
 
-// Nested Sets of LCs may also come up in Lode (e.g. X.creators) so we want to 
-// be able to syntax highlight them.  This identifies them.
-const isNestedSetofLCs = A => {
-  return ((A instanceof LogicConcept) || 
-          (A instanceof Set) && ([...A].every(isNestedSetofLCs))
-         )
-}
-
-// Apply the custom formatter to nested arrays of LCs.
-// Indent and number lines as needed.  Note that for arrays we usually are
+// Apply the custom formatter to nested arrays and sets containing LCs. Indent
+// and number lines as needed.  Note that for Arrays or Sets we usually are
 // debugging something, so we show everything.
 const format = (x,options,indentlevel=0) => {
   if (x instanceof LogicConcept) {
     return defaultPen(indent(
-           x.toPutdown(formatter(options), 
-                       text => /\n/.test( text ) || erase(text).length > 50 ) , 
-           indentlevel))
-  } else if (isNestedArrayofLCs(x)) { 
-    return indent(`[\n${x.map(y=>format(y,everything,indentlevel+1))
-                  .join(',\n')}\n]`,
-                  indentlevel)
-  } else if (isNestedSetofLCs(x)) { 
-    return indent(`[\n${[...x].map(y=>format(y,everything,indentlevel+1))
-                  .join(',\n')}\n]`,
-                  indentlevel)
+      x.toPutdown(formatter(options), 
+        text => /\n/.test( text )         || 
+                /^[ \t"]*$/.test( text )  ||
+                erase(text).length > 50  
+      ),indentlevel))
+  } else if (typeof x === 'string') { 
+    return indent(stringPen(x),indentlevel)
+  } else if (typeof x === 'boolean') { 
+    return indent(itemPen(x),indentlevel)
+  } else if (typeof x === 'number') { 
+    return indent(constantPen(x),indentlevel)
+  } else if (x instanceof Array) { 
+    // arrays of pairs of booleans and strings  
+    if (x.length===2 && (typeof x[1] === 'boolean' || typeof x[1] === 'string')) {
+      return indent(`[${x.map(y=>format(y,all,1)).join(',')} ]`,1)
+    // arrays of integers
+    } else if (x.every(  t => Number.isInteger(t) )) {
+      return indent(`[${x.map(y=>format(y,all,1)).join(',')} ]`,1) 
+    // all other arrays   
+    } else {
+      return indent(`[\n${x.map(y=>format(y,all,indentlevel+1))
+                    .join(',\n')}\n]`,indentlevel)
+    }
+  } else if (x instanceof Set) { 
+    if (x.length===2 && (typeof x[1] === 'boolean' || typeof x[1] === 'string')) {
+      return indent(`[${[...x].map(y=>format(y,all,1)).join(',')} ]`,1)
+    } else {
+      return indent(`[\n${[...x].map(y=>format(y,all,indentlevel+1))
+                    .join(',\n')}\n]`, indentlevel) 
+    }
   } else {
-    return `${x}`
+    return util.inspect( x, 
+      {
+        customInspect: false,
+        showHidden: false,
+        depth: Depth,
+        colors: true
+      })
   }
 }
 
@@ -338,7 +368,7 @@ const format = (x,options,indentlevel=0) => {
 //  Reporting
 //
 
-// We assume 'this' is a document with all of the usual simplifying assumptions.
+// generate various reports
 LogicConcept.prototype.report = function ( options ) {
   // default report
   options = options || defaultOptions
@@ -357,18 +387,24 @@ LogicConcept.prototype.report = function ( options ) {
            (!options.showPartials && c.isA('Part')) ||
            (!options.showInstantiations && c.isA('Inst')) ||
            (!options.showBodies && c.bodyOf) ||
-           (!options.showDeclares && c.isA('Declare'))
+           (!options.showDeclares && c.isA('Declare')) ||
+           (!options.showConsiders && c.isA('Consider')) 
          ) return
-      linenum = `${c.indexInParent()}`
-      linenum += tab(4-linenum.length)
-      linenum = (!c.isA(instantiation)) ? linenumPen(linenum) 
-                                        : instantiationPen(linenum)
+      linenum = lineNum(c.indexInParent(),4,'  ')
+      // linenum = `${c.indexInParent()}`
+      // linenum += tab(4-linenum.length)
+      linenum = (!c.isA(instantiation) &&!c.isA('Consider')) 
+                ? linenumPen(linenum) 
+                : instantiationPen(linenum)
       ans += linenum+format(c,options).replace(/\n/g,'\n    ')+'\n'
     })
 
     ans += defaultPen('  }')
-    ans +=  (!Validation.result(this)) ? '' :
-              (Validation.result(this).result==='valid') ? greencheck : redx
+    ans +=  (!Validation.result(this)) 
+            ? '' 
+            : (Validation.result(this).result==='valid') 
+              ? greencheck 
+              : redx
             
     console.log(ans)
   
@@ -378,12 +414,13 @@ LogicConcept.prototype.report = function ( options ) {
 }
 
 // Number arrays or sets of LCs
-const numberedIterable  = function (options=everything) {
+const numberedIterable  = function (options=all) {
     let ans = '  [\n'
     let linenum = ''
     this.forEach( (c,k) => {
-      linenum = `${k}`
-      linenum += tab(4-linenum.length)
+      linenum = lineNum(k)
+      // linenum = `${k}`
+      // linenum += tab(4-linenum.length)
       linenum = (c instanceof LogicConcept && !c.isA(instantiation))
                   ? linenumPen(linenum) 
                   : instantiationPen(linenum)
@@ -489,11 +526,17 @@ LogicConcept.prototype.investigate = function(option) {
   console.log(_investigate(this,option))
 }
 
+// Because this is used so often
+Object.defineProperty(LogicConcept.prototype, 'all', {
+  get: function() {
+    this.report(all)
+  }
+})
+
 export default {
   
   // formatting utiltiies
-  formatter, format, isNestedArrayofLCs, isNestedSetofLCs, tab, indent, 
-  erase, timer, chalk,
+  formatter, format, isNestedLCs, tab, indent, erase, timer, chalk,
   
   // special symbols
   goldstar, greencheck, redx, idunno, stringPen,
@@ -504,7 +547,7 @@ export default {
   decPen , commentPen , headingPen , docPen , linenumPen , itemPen ,
   
   // report definitions
-  everything, show, detailed , moderate, allclean, clean , user ,
+  all, show, detailed , moderate, allclean, clean , user ,
   
   // report options
   showAttributes , showContexts , showRules , showInstantiations , 
