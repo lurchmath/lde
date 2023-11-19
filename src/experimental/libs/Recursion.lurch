@@ -1,0 +1,36 @@
+include libs/Equations
+include libs/PeanoThm
+////////////////////////////////////////////////////////////////////////////
+// Recursion Lurch Lib
+//
+
+//////////////////////////////////
+// Recursive Sequence Definitions
+//////////////////////////////////
+Definitions:  
+{
+  Declare ∑ F multinom
+	Rules:
+	{
+		// summation
+    :{ ∑(0,k.𝜆P(k)) = 𝜆P(0) }
+    :{ ∑(𝜎(n),k.𝜆P(k)) = 𝜆P(𝜎(n)) + ∑(n,k.𝜆P(k)) }
+
+		// natural number exponents
+		:{ z^0=1 }
+		:{ z^𝜎(n)=z⋅z^n }
+
+    // factorial (TODO: make the peggy parser work for factorials)
+
+		// Fibonacci
+    :{ F(0)=1 F(1)=1 }
+		:{ F(n+2)=F(n+1)+F(n) }
+
+		// multinomial coefficient
+		:{ multinom(m,0)=1 multinom(0,n)=1 }
+		:{ multinom(m+1,n+1)=multinom(m+1,n)+multinom(m,n+1) }
+		// choose
+		:{ choose(n+m,m)=multi(n,m)}
+		
+	}
+} 

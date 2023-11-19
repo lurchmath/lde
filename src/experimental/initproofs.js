@@ -155,68 +155,86 @@ let start = Date.now()
 // doc = loadDoc('proofs/test')
 // validate(doc)
 
-doc1 = `
-{ 
-  Declare Socrates mortal man is ⇒
+// doc1 = `
+// { 
+//   Declare Socrates mortal man is ⇒
 
-  Assume forall x. x is a man ⇒ x is mortal
-  Assume Socrates is a man
-  Socrates is mortal
-}`
+//   Assume forall x. x is a man ⇒ x is mortal
+//   Assume Socrates is a man
+//   Socrates is mortal
+// }`
 
-doc2 = `
-{ 
-  Declare Socrates mortal man is ⇒
+// doc2 = `
+// { 
+//   Declare Socrates mortal man is ⇒
 
-  Rules:
-  {
-    :{ :W⇒V :W V }
-    :{ :(∀y.𝜆P(y)) 𝜆P(z) }
-  }
-  Assume forall x. x is a man ⇒ x is mortal
-  Assume Socrates is a man
-  Socrates is mortal
-}
-`
+//   Rules:
+//   {
+//     :{ :W⇒V :W V }
+//     :{ :(∀y.𝜆P(y)) 𝜆P(z) }
+//   }
+//   Assume forall x. x is a man ⇒ x is mortal
+//   Assume Socrates is a man
+//   Socrates is mortal
+// }
+// `
 
-doc3 = `
-{ 
-  Declare Socrates mortal man is ⇒ ∀
+// doc3 = `
+// { 
+//   Declare Socrates mortal man is ⇒ ∀
 
-  Rules:
-  {
-    :{ :W⇒V :W V }
-    :{ :(∀y.𝜆P(y)) 𝜆P(z) }
-  }
+//   Rules:
+//   {
+//     :{ :W⇒V :W V }
+//     :{ :(∀y.𝜆P(y)) 𝜆P(z) }
+//   }
   
-  ➤ 
-  ➤ "All men are mortal."
-  ➤ "Socrates is a man."
-  ➤ "Socrates is mortal."
-  ➤ 
+//   ➤ 
+//   ➤ "All men are mortal."
+//   ➤ "Socrates is a man."
+//   ➤ "Socrates is mortal."
+//   ➤ 
   
-  Assume forall x. x is a man ⇒ x is mortal
-  Assume Socrates is a man
+//   Assume forall x. x is a man ⇒ x is mortal
+//   Assume Socrates is a man
   
-  Socrates is a man ⇒ Socrates is mortal
+//   Socrates is a man ⇒ Socrates is mortal
   
-  Socrates is mortal
-}
-`
+//   Socrates is mortal
+// }
+// `
 
-doc4 =
-`{ 
-  Declare Socrates mortal man is
+// doc4 =
+// `{ 
+//   Declare Socrates mortal man is
 
-  Rule:  :{ :W is man   W is a mortal }
+//   Rule:  :{ :W is man   W is a mortal }
   
-  Assume Socrates is a man
+//   Assume Socrates is a man
   
-  Socrates is mortal
-}
-`
+//   Socrates is mortal
+// }
+// `
 
+// matchMaker = (decl,pstr,estr) => {
+//   let doc = $(`{
+//     Declare ${decl}
+//     Rule: :{ ${pstr} }
+//     ${estr}
+//   }`)
+//   interpret(doc)
+//   doc.report(all)
+//   const p = doc.child(2,0)
+//   const e = doc.child(3)
+//   const ans = matchPropositions(p,e)
+//   return ans.toString().split(/(?<=}),(?={)/)
+//             .map( s=>s.slice(1,-1) )
+//             .map( s=>s.split(/(?<=\)),(?=\()/) )
+//             .map( s=>s.map( x=>x.replace(/__/g,'') ) )
+//             .map( s=>s.map( x=>x.replace(/\(([^,]+),(.+)\)$/g,'$1=$2') ) )
+// }
 
+doc=loadDoc('proofs/math299/recursion')
 
 // Accumulator = { totaltime:0, numcalls:0, numsolns:0, numlines: 0}
 ///////////////////////////////////////////////////////////

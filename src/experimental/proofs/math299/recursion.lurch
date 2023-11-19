@@ -1,0 +1,115 @@
+include libs/Recursion
+////////////////////////////////////////////////////////////////////
+// Peano Test Proofs
+// 
+
+➤ "Math 299 Recursive Sequences Homework Proofs 2023"
+
+{ // wrap them all
+  
+➤ "Just a warm up example (not assigned)"
+
+{
+  ➤ "Theorem: ∑(2,i.i^2) = 2^2+(1^2+0^2)"
+	{ ∑(2,i.i^2) = 2^2+(1^2+0^2) }
+	➤ "Proof:"
+	{
+		∑(2,i.i^2) = ∑(𝜎(1),i.i^2)
+							 = 𝜎(1)^2+∑(1,i.i^2)
+							 = 2^2+∑(1,i.i^2)
+							 = 2^2+∑(𝜎(0),i.i^2)
+							 = 2^2+(𝜎(0)^2+∑(0,i.i^2))
+							 = 2^2+(1^2+∑(0,i.i^2))
+							 = 2^2+(1^2+0^2)
+	}
+}
+
+➤ "Thm 8.2(c) - Assignment #15"
+➤
+➤ "We are allowed to use 8.2(b), proved in class"
+➤
+Rule: :{ z^m⋅z^n = z^(m+n) }
+
+{
+
+  ➤ "Theorem: (z^m)^n=z^(m⋅n)"
+	{ (z^m)^n=z^(m⋅n) }
+	➤ "Proof: (by induction on n for arbitrary m)"
+	{
+		➤ "Base case:"
+		(z^m)^0 = 1
+		        = z^0
+						= z^(m⋅0)
+		➤ "Inductive step:"
+		{ :Let k be such that (z^m)^k = z^(m⋅k)
+
+			(z^m)^𝜎(k) = z^m⋅(z^m)^k
+			           = z^m⋅z^(m⋅k)
+								 = z^(m+m⋅k)
+								 = z^(m⋅𝜎(k))
+
+		}				
+		➤ "Therefore, by induction"
+		∀n.(z^m)^n=z^(m⋅n)
+		➤ "and the theorem follows."
+	}
+}
+
+➤ "Thm 8.5(a) - Assignment #15"
+
+{
+	➤ "Theorem: ∑(n,i.a(i)+b(i)) = ∑(n,i.a(i))+∑(n,i.b(i))"
+	{ ∑(n,i.a(i)+b(i)) = ∑(n,i.a(i))+∑(n,i.b(i)) }
+	➤ "Proof: (by induction on n)"
+	{
+    ➤ "Base Case"
+		  ∑(0,i.a(i)+b(i)) = a(0)+b(0)
+			                 = ∑(0,i.a(i))+b(0)
+											 = ∑(0,i.a(i))+∑(0,i.b(i))
+     
+		➤ "Inductive step:"
+		{ :Let k be such that ∑(k,i.a(i)+b(i)) = ∑(k,i.a(i))+∑(k,i.b(i))
+			
+			∑(𝜎(k),i.a(i)+b(i)) = ( a(𝜎(k))+b(𝜎(k)) ) + ∑(k,i.a(i)+b(i)) 
+			                    = ( a(𝜎(k))+b(𝜎(k)) ) + ( ∑(k,i.a(i))+∑(k,i.b(i)) )
+			                    = a(𝜎(k)) + (b(𝜎(k))+( ∑(k,i.a(i))+∑(k,i.b(i)) ))
+			                    = a(𝜎(k)) + (( b(𝜎(k))+∑(k,i.a(i)) )+∑(k,i.b(i)))
+			                    = a(𝜎(k)) + (( ∑(k,i.a(i))+b(𝜎(k)) )+∑(k,i.b(i)))
+			                    = a(𝜎(k)) + (∑(k,i.a(i))+( b(𝜎(k))+∑(k,i.b(i)) ))
+			                    = ( a(𝜎(k))+∑(k,i.a(i)) ) + ( b(𝜎(k))+∑(k,i.b(i)) )
+			                    = ∑(𝜎(k),i.a(i)) + ( b(𝜎(k))+∑(k,i.b(i)) )
+													= ∑(𝜎(k),i.a(i)) + ∑(𝜎(k),i.b(i))
+		}
+		➤ "Therefore, by induction"
+		∀n.∑(n,i.a(i)+b(i)) = ∑(n,i.a(i))+∑(n,i.b(i))		
+		➤ "and the theorem follows."
+	}
+}
+
+➤ "Thm 8.7 - Assignment #15 - Fibonacci numbers"
+
+{
+  ➤ "Theorem: F(n+3)+F(n)=2⋅F(n+2)"
+	{ F(n+3)+F(n)=2⋅F(n+2) }
+	➤ "Proof:"
+	{
+		F(n+3)+F(n) = F(n+𝜎(2))+F(n)
+		            = F(n+(2+1))+F(n)
+		            = F(n+(1+2))+F(n)
+		            = F((n+1)+2)+F(n)
+								= (F((n+1)+1)+F(n+1))+F(n)
+								= (F(n+(1+1))+F(n+1))+F(n)
+								= (F(n+𝜎(1))+F(n+1))+F(n)
+								= (F(n+2)+F(n+1))+F(n)
+								= F(n+2)+(F(n+1)+F(n))
+								= F(n+2)+F(n+2)
+								= 1⋅F(n+2)+F(n+2)
+								= 1⋅F(n+2)+1⋅F(n+2)
+								= (1+1)⋅F(n+2)
+								= 𝜎(1)⋅F(n+2)
+		            = 2⋅F(n+2)
+	}
+}
+
+// end of all
+} 

@@ -22,6 +22,7 @@ acid.push(loadDoc('proofs/math299/pred'))
 acid.push(loadDoc('proofs/math299/peanoBIH')) 
 acid.push(loadDoc('proofs/math299/peano')) 
 acid.push(loadDoc('proofs/math299/midterm'))
+acid.push(loadDoc('proofs/math299/recursion'))
 
 // run the tests
 
