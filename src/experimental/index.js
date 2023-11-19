@@ -32,13 +32,13 @@ Object.assign( window, Compact )
 import Utils from './utils.js'
 Object.assign( window, Utils )
 
-import * as TEST from './utils/acidtestsweb.js'
-Object.assign( window, TEST )
 //////////////////////////////////////////////////////////////
 //
 //  Everything below here is for debugging in the console.
 //  It will probably be deleted for production.
 //
+import * as TEST from './utils/acidtestsweb.js'
+Object.assign( window, TEST )
 
 // Useful Lode and Reporting utilities
 window.lc = s => { 
