@@ -7,11 +7,10 @@ include libs/PeanoThm
 //////////////////////////////////
 // Recursive Sequence Definitions
 //////////////////////////////////
+Declare ∑ F multinom
+
 Definitions:  
 {
-  Declare ∑ F multinom
-	Rules:
-	{
 		// summation
     :{ ∑(0,k.𝜆P(k)) = 𝜆P(0) }
     :{ ∑(𝜎(n),k.𝜆P(k)) = 𝜆P(𝜎(n)) + ∑(n,k.𝜆P(k)) }
@@ -30,7 +29,5 @@ Definitions:
 		:{ multinom(m,0)=1 multinom(0,n)=1 }
 		:{ multinom(m+1,n+1)=multinom(m+1,n)+multinom(m,n+1) }
 		// choose
-		:{ choose(n+m,m)=multi(n,m)}
-		
-	}
+		:{ choose(n+m,m)=multi(n,m)}		
 } 

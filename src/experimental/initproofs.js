@@ -234,7 +234,7 @@ let start = Date.now()
 //             .map( s=>s.map( x=>x.replace(/\(([^,]+),(.+)\)$/g,'$1=$2') ) )
 // }
 
-doc=loadDoc('proofs/math299/recursion')
+doc=loadDoc('proofs/math299/reals')
 
 // Accumulator = { totaltime:0, numcalls:0, numsolns:0, numlines: 0}
 ///////////////////////////////////////////////////////////

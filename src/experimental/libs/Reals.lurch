@@ -1,0 +1,31 @@
+include libs/Recursion
+////////////////////////////////////////////////////////////////////////////
+// Real Numbers Lurch Lib
+//
+
+//////////////////////////////////
+// Axioms for the Reals
+//////////////////////////////////
+Declare ⁻
+Axioms:  
+{
+		// Axioms of addition
+		:{ x+0=x  0+x=x }                         // identity + 
+		:{ x+(-x)=0   -x+x=0 }                    // inverse + 
+		:{ x+y=y+x }                              // commutativity +
+		:{ (x+y)+z=x+(y+z) }                      //associativity of +
+		// Axioms of Multiplication
+		:{ 1≠0 1⋅x=x x⋅1=x }                      // identity ⋅ 
+		:{ :x≠0  (x⁻)⋅x = 1  x⋅(x⁻)= 1 }          // inverse ⋅ 
+		:{ x⋅y=y⋅x }                              // commutativity of ⋅
+		:{ (x⋅y)⋅z = x⋅(y⋅z) }                    // associativity of ⋅
+		// Axioms of Order
+		:{ ¬(x<x) }                               // irreflexive
+		:{ :x<y  :y<z   x<z }                     // transitive 
+		:{  x=y or (x<y or y<x) }                 // trichotomy 
+		➤ "Every bounded above sequence of real numbers has a least upper bound"   // complete
+		// Axioms Relating +, ⋅, and <
+		:{ x⋅(y+z) = x⋅y + x⋅z   (y+z)⋅x = y⋅x + z⋅x }  // distributivity +,⋅
+		:{ :x<y  x+z<y+z }                              // translation +,<
+		:{ :0<x  :0<y   0<x⋅y }                         // product of positives ⋅,<		
+} 
