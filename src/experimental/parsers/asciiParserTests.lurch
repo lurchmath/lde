@@ -149,6 +149,11 @@ Fred loves wilma
 // set relations
 x in A
 2 in Set(0,2,4,6)
+x ∈ A
+2 ∈ Set(0,2,4,6)
+x ∉ A
+2 ∉ Set(0,2,4,6)
+
 A subset B
 Set(1,2) in PowerSet(Set(0,1,2,3))
 A cap B  subset  A cup B
