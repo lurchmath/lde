@@ -203,6 +203,26 @@ global.mc = s => {
   const M = MathConcept.fromSmackdown(s)
   return (M.length===1) ? M[0] : M  
 }  
+
+// a useful utility for exploring matching
+global.matchMaker = (decl,pstr,estr) => {
+  let doc = $(`{
+    Declare ${decl}
+    Rule: :{ ${pstr} }
+    ${estr}
+  }`)
+  interpret(doc)
+  doc.report(all)
+  const p = doc.child(2,0)
+  const e = doc.child(3)
+  const ans = matchPropositions(p,e)
+  return ans.toString().split(/(?&lt;=}),(?={)/)
+            .map( s=>s.slice(1,-1) )
+            .map( s=>s.split(/(?&lt;=\)),(?=\()/) )
+            .map( s=>s.map( x=>x.replace(/__/g,'') ) )
+            .map( s=>s.map( x=>x.replace(/\(([^,]+),(.+)\)$/g,'$1=$2') ) )
+}
+
 /////////////////////////////////////////////////////////////////////////////
 //
 //  File handling utilities

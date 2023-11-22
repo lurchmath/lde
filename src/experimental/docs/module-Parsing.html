@@ -366,8 +366,12 @@ compatibility) and replace that with the symbol &quot;LDE EFA&quot; (which then
 will still print as '𝜆' but it's what is needed under the hood).</p>
 </li>
 <li>
-<p>Scan for occurrences of the symbol <code>≡</code>. If found let <code>A</code> and <code>B</code> be its
-previous and next siblings. Replace all three with `{ {:A B} {:B A}}</p>
+<p>Scan for occurrences of the symbol <code>≡</code>. They are intended to be a
+shorthand way to enter IFF rules (equivalences).  The '≡' should be a
+child of a Rule environment, and should not be the first or last child.
+The Rule will then be replaced by the expanded version and the <code>≡</code>
+symbols removed.  For example, if the Rule has the form <code>:{ a ≡ b c ≡ d }</code> then it will be replaced by
+<code>:{ {:a {b c} d} {:{b c} a d } {:d a {b c}} }</code>.</p>
 </li>
 <li>
 <p>Scan for occurrences of the symbol <code>➤</code>. If found it should be the first
@@ -521,7 +525,7 @@ previous sibling and λ has to appear in some sensible location and so on.</p>
     <h4 class="method-heading">Source</h4>
     <ul>
         <li class="method-source">
-            <a href="parsing.js.html">parsing.js</a><a href="parsing.js.html#source.136">, line 136</a>
+            <a href="parsing.js.html">parsing.js</a><a href="parsing.js.html#source.141">, line 141</a>
         </li>
     </ul>
 

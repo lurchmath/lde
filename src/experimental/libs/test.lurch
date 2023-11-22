@@ -1,7 +1,0 @@
-////////////////////////////////////////////////////////////////////////////
-//
-// Propositional Logic Lib
-//
-
-// Global Constants - we don't want any of these to be metavariables
-Declare hello world

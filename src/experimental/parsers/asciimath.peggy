@@ -91,6 +91,7 @@
   input = input.replace(/𝜎/g, 'σ')
   input = input.replace(/𝜆/g, 'λ')
   input = input.replace(/≠/g, ' neq ')  
+  input = input.replace(/∉/g, ' notin ')  
   //   * Declaring reserved constants is tricky since it tries to parse them as they are
   //     intended to be used, so for now we convert any line of the form `Declare stuff`
   //     to escaped putdown up front.
@@ -121,21 +122,15 @@
 // The start rule for a Peggy grammar is the first rule.  For us, it's a
 // sequence of LCs.
 LCs = 
-_ a:(Meta / Given / Declaration / Equivalence / Environment / Expression)|..,__| _ 
+_ a:(Meta / Given / Declaration / Environment / Expression)|..,__| _ 
   { return a.join(' ') }
 
 // A single LC
-LC "LC" = _ @( Meta / Given / Declaration / Equivalence / Environment / Expression) _
+LC "LC" = _ @( Meta / Given / Declaration / Environment / Expression) _
 
 // givens
 Given "Given" = (':' / 'Assume'i __ ) 
-  a:(Declaration / Equivalence / Environment / Expression)
-  { return ':'+a }
-
-// equivalence
-Equivalence "Equivalence" = '{' _ a:( Declaration / Environment / Expression ) _ '≡' _
-                    b:( Declaration / Environment / Expression ) _  '}'
-  { return `{ { :${a} ${b} } { :${b} ${a} } }` }
+  a:(Declaration / Environment / Expression) { return ':'+a }
 
 // environments
 Environment "Environment" = 
@@ -203,10 +198,12 @@ Not        = a:('¬'/'not ')? _ b:Stuff     { return (a==='not ')
 Stuff = Relation / Thing
 
 // relations
-Relation = Subset / ElementOf / Divides / Leq / 
+Relation = Subset / ElementOf / NotEltOf / Divides / Leq / 
            LessThan / Equation / NotEqual / Loves / Is
 
 Subset     = a:Thing|2..,'⊆'/' subset '/' subseteq '| { return lisp('⊆',a) }
+NotEltOf   = a:Thing (' notin '/' !in ') b:Thing 
+             { return `(¬ ${lispBinary('∈',a,b)})` }
 ElementOf  = a:Thing ('∈'/' in ') b:Thing             { return lispBinary('∈',a,b) }
 Divides    = a:Thing '|' b:Thing                      { return lispBinary('|',a,b) }  
 Leq        = a:Thing|2..,'≤'/' leq '|                 { return lisp('≤',a) }
@@ -262,8 +259,9 @@ Natural = $( [1-9][0-9]* / '0' )
 
 // Symbols can't start with a digit, contain reserved constants, or keywords
 SymbolSeq = a:(Symbol/Number)|1..,comma| { return a.join(',') }
-Symbol "Symbol" =  $( !([0-9]/ReservedWords)
-                      [^-\][()⟨⟩ \t\n✦{},.:+⋅/^=<≤¬⇒⇔|∀∃∩∪×∈⊆∖⁻∧∨≡]+ )
+Symbol "Symbol" = $( '≡' / 
+                     !([0-9]/ReservedWords)
+                     [^-\][()⟨⟩ \t\n✦{},.:+⋅/^=<≤¬⇒⇔|∀∃∩∪×∈⊆∖⁻∧∨≡]+ )
 BindingSymbol = ('∃!'/'exists unique ') { return '∃!' } /
                 ('∀'/'forall '/'for all ') { return '∀' } /
                 ('∃'/'exists ') { return '∃' } 

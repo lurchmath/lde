@@ -98,8 +98,13 @@ export const makeParser = parserstr => {
  *     compatibility) and replace that with the symbol "LDE EFA" (which then
  *     will still print as '𝜆' but it's what is needed under the hood).
  *
- *   * Scan for occurrences of the symbol `≡`. If found let `A` and `B` be its
- *     previous and next siblings. Replace all three with `{ {:A B} {:B A}}
+ *   * Scan for occurrences of the symbol `≡`. They are intended to be a
+ *     shorthand way to enter IFF rules (equivalences).  The '≡' should be a
+ *     child of a Rule environment, and should not be the first or last child.
+ *     The Rule will then be replaced by the expanded version and the `≡`
+ *     symbols removed.  For example, if the Rule has the form `:{ a ≡ b c ≡ d
+ *     }` then it will be replaced by 
+ *     `:{ {:a {b c} d} {:{b c} a d } {:d a {b c}} }`.
  *
  *   * Scan for occurrences of the symbol `➤`. If found it should be the first
  *     child of an Application whose second child is a symbol whose text is the
@@ -192,17 +197,59 @@ export const processShorthands = L => {
     m.replaceWith(new LurchSymbol('LDE EFA'))
   } )
   
-  // expand equivalences
+  // Expand equivalences
   processSymbol( '≡' ,  m => { 
-    const LHS = m.previousSibling()
-    const RHS = m.nextSibling()
-    let A1=LHS.copy().asA('given'), A2=LHS.copy(),
-    B1=RHS.copy(), B2=RHS.copy().asA('given')
-    LHS.replaceWith(new Environment(A1,B1))
-    RHS.replaceWith(new Environment(B2,A2))
-    m.remove()
-  } )
+    // find the parent environment, if there is none, then do nothing
+    const parent = m.parent()
+    if (!parent) return
+
+    // a utility to identify equivalence separators
+    const isSeparator = x => x instanceof LurchSymbol && x.text() === '≡'
+
+    // get the children of the parent
+    let inputArray = parent.children()
+    // an array to hold the groups
+    let groups = []
+    
+    // while there are separators, split the input array into groups
+    let k = inputArray.findIndex( isSeparator )
+    while ( k !== -1) {
+      if (k==1) groups.push(inputArray[0])
+      else groups.push(inputArray.slice(0,k))
+      inputArray = inputArray.slice(k+1)
+      k = inputArray.findIndex( isSeparator )      
+    }
+    // if there are no more separators, then push what's left
+    if (inputArray.length === 1) groups.push(inputArray[0])
+    else groups.push(inputArray)
   
+    // for each group, if it is an array, create a new Environment containing the group elements, otherwise just use the element itself.  Collect them all into a results array.
+    const results = []
+    groups.forEach( group => {
+      if (Array.isArray(group) ) {
+        const newEnv = new Environment( ...group )
+        results.push(newEnv)
+      } else {
+        results.push(group)
+      }
+    })
+
+    // finally, replace the parent with a new environment containing all of the 
+    // permuted results.
+    const ans = new Environment()
+    ans.copyAttributesFrom(parent)
+
+    results.forEach( ( result, i ) => { 
+      let myEnv = new Environment( 
+        result.copy().asA('given') , 
+        ...results.map(x=>x.copy()).slice(0,i))
+      results.slice(i+1).forEach( x => myEnv.pushChild(x.copy()) )
+      ans.pushChild(myEnv)
+    } )
+
+    parent.replaceWith(ans)
+  } )
+
   // For testing purposes, flag the expected result
   processSymbol( '✔︎' , m => { 
     m.previousSibling().setAttribute('ExpectedResult','valid')

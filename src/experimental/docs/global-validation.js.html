@@ -142,6 +142,13 @@
 //      rather than just inserting the various reflexive rules, e.g.,
 //      reflexive_operator(=.≤,⊆)
 //
+//  * When the user enters a rule, it might be the case that they have used a
+//    metavariable as both the function name in an EFA (like the P in 𝜆P(x))
+//    and also as a non-EFA metavar (as in just P(z) instead of 𝜆P(z)).  We
+//    probably should check that it doesn't do that.
+//  * Along similar lines, we should check that instantiations don't create, e.g. 
+//    Insts that have a bound constant or other idiosyncracies.
+//
 
 // import LDE tools
 import CNF from '../validation/conjunctive-normal-form.js'
@@ -1564,7 +1571,8 @@ const Benchmark = function (f, name) {
 export default {
   validate, getUserPropositions, instantiate, markDeclarationContexts,
   processBIHs, processEquations, splitEquations, processDomains, diff,
-  cacheFormulaDomainInfo, Benchmark, getCaselikeRules, LurchOptions, Report
+  cacheFormulaDomainInfo, Benchmark, getCaselikeRules, LurchOptions, Report,
+  matchPropositions
 }
 ///////////////////////////////////////////////////////////////////////////////</code></pre>
     </article>

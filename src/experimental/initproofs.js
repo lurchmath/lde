@@ -234,7 +234,57 @@ let start = Date.now()
 //             .map( s=>s.map( x=>x.replace(/\(([^,]+),(.+)\)$/g,'$1=$2') ) )
 // }
 
-doc=loadDoc('proofs/math299/reals')
+// doc=loadDoc('proofs/math299/reals')
+
+test = `
+{
+  Declare or 
+  
+  Rule: :{ :W or V :W⇒U :V⇒U U }
+  Rule: :{ :{ :W V } W⇒V }  
+  
+  Theorem: { :{ :P Q } :P or Q  Q }
+  
+  ➤ "Proof:"
+  { :{ :P Q }
+    :P or Q
+    P⇒Q
+    Q⇒Q
+    Q
+  }
+}
+`
+t=$(test)
+validate(t)
+
+f = (parent) => { 
+  // find the parent environment, if there is none, then do nothing
+  // const parent = m.parent()
+  // if (!parent) return
+
+  // a utility to identify equivalence separators
+  // const isSeparator = x => x instanceof LurchSymbol && x.text() === '≡'
+  const isSeparator = x => x === '≡'
+
+  // get the children of the parent
+  let inputArray = parent
+  // an array to hold the groups
+  let groups = []
+  
+  // while there are separators, split the input array into groups
+  let k = inputArray.findIndex( isSeparator )
+  while ( k !== -1) {
+    if (k==1) groups.push(inputArray[0])
+    else groups.push(inputArray.slice(0,k))
+    inputArray = inputArray.slice(k+1)
+    k = inputArray.findIndex( isSeparator )      
+  }
+  // if there are no more separators, then push what's left
+  if (inputArray.length === 1) groups.push(inputArray[0])
+  else groups.push(inputArray)
+
+  return groups
+} 
 
 // Accumulator = { totaltime:0, numcalls:0, numsolns:0, numlines: 0}
 ///////////////////////////////////////////////////////////
