@@ -1,0 +1,19 @@
+<html>
+	<head>
+    <link rel="shortcut icon" href="#">
+		<script type='module' language='javascript'>
+			console.log( 'Going to create a web worker now...' )
+			try {
+				const ww = new Worker( 'src/experimental/index-worker.js' , { type: 'module' } )
+				console.log( 'Worker has been created successfully!' )
+			} catch ( e ) {
+				console.log( 'Failed to create the worker.  Error is:' )
+				console.log( e )
+			}
+		</script>
+	</head>
+	<body>
+		<p>All the action in this baby example happens in the JS console.
+		Check there for output.</p>
+	</body>
+</html>
