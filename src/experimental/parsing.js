@@ -102,9 +102,9 @@ export const makeParser = parserstr => {
  *     shorthand way to enter IFF rules (equivalences).  The '≡' should be a
  *     child of a Rule environment, and should not be the first or last child.
  *     The Rule will then be replaced by the expanded version and the `≡`
- *     symbols removed.  For example, if the Rule has the form `:{ a ≡ b c ≡ d
- *     }` then it will be replaced by 
- *     `:{ {:a {b c} d} {:{b c} a d } {:d a {b c}} }`.
+ *     symbols removed, following the cyclic TFAE style of implications.  For
+ *     example, if the Rule has the form `:{ a ≡ b c ≡ d }` then it will be
+ *     replaced by `:{ {:a {b c}} {:{b c} d } {:d a} }`.
  *
  *   * Scan for occurrences of the symbol `➤`. If found it should be the first
  *     child of an Application whose second child is a symbol whose text is the
@@ -235,18 +235,20 @@ export const processShorthands = L => {
     })
 
     // finally, replace the parent with a new environment containing all of the 
-    // permuted results.
+    // cyclic implications.
     const ans = new Environment()
     ans.copyAttributesFrom(parent)
 
-    results.forEach( ( result, i ) => { 
-      let myEnv = new Environment( 
-        result.copy().asA('given') , 
-        ...results.map(x=>x.copy()).slice(0,i))
-      results.slice(i+1).forEach( x => myEnv.pushChild(x.copy()) )
+    // put all of the pairs into the new environment except the last one
+    results.slice(0,-1).forEach( ( result, i ) => { 
+      let myEnv = new Environment( result.copy().asA('given') , results[i+1].copy() ) 
       ans.pushChild(myEnv)
     } )
-
+    // and complete the cycle with the last one
+    ans.pushChild(new Environment( 
+      results[results.length-1].copy().asA('given'), results[0].copy() ) )
+    
+    // replace the parent with the new environment  
     parent.replaceWith(ans)
   } )
 
