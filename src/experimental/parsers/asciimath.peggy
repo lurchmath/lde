@@ -15,6 +15,10 @@
 // Note: Declare's have to be on a line by themselves and its declared
 // constants separated by spaces (not commas)
 //
+// To save the resulting parser to a standalone .js file use:
+//   peggy --cache --format es -o asciimath.js asciimath.peggy
+//
+//
 // TODO: 
 //  * add x≠y but have it parse as (¬ (= x y)), & same for other negated ops
 //  * add f:A→B, ∘, injective, surjective, bijective, ^inv, etc.
