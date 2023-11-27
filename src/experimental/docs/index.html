@@ -70,7 +70,7 @@
 
     <section class="readme">
         <article><h1 id="global-%24n%24-compact-validation">Global $n$-compact Validation</h1>
-<p>Welcome to the <a href="../">experimental</a> folder of this branch of the Lurch LDE project.  Here we gather code and content for rapidly testing, benchmarking, and prototyping design ideas for the LDE.</p>
+<p>Welcome to the <a href="../">experimental</a> folder of this branch of the Lurch LDE project.  Here we gather code and content for rapidly testing, benchmarking, and prototyping design ideas for the LDE.  For details about the rest of the LDE, and in particular the LogicConcept class and Matching package that this algorithm is built on, see <a href="https://lurchmath.github.io/lde">the LDE documentation</a>.</p>
 <p>The main experiment currently in progress is an implementation of the $n$-<em>compact polynomial time global validation algorithm</em>. This is accessible via the function <code>validate()</code> and its supporting tools and options.</p>
 <p>A <em>document</em> is any LC environment. It may (and usually will) additionally contain declarations of type <code>Declare</code> and environments of type <code>Rule</code>, <code>Theorem</code>, <code>BIH</code>, and <code>Cases</code>, all of which are specified by the user as part of the document. An <em>inference</em> is a descendant of a document that is either an environment, outermost expression, or declaration all of whose ancestors (including itself) are claims.  The <code>validate()</code> routine can validate any specified inference in any document.</p>
 <p>This routine and supporting infrastructure is contained primarily in the following files.</p>

@@ -370,8 +370,9 @@ will still print as '𝜆' but it's what is needed under the hood).</p>
 shorthand way to enter IFF rules (equivalences).  The '≡' should be a
 child of a Rule environment, and should not be the first or last child.
 The Rule will then be replaced by the expanded version and the <code>≡</code>
-symbols removed.  For example, if the Rule has the form <code>:{ a ≡ b c ≡ d }</code> then it will be replaced by
-<code>:{ {:a {b c} d} {:{b c} a d } {:d a {b c}} }</code>.</p>
+symbols removed, following the cyclic TFAE style of implications.  For
+example, if the Rule has the form <code>:{ a ≡ b c ≡ d }</code> then it will be
+replaced by <code>:{ {:a {b c}} {:{b c} d } {:d a} }</code>.</p>
 </li>
 <li>
 <p>Scan for occurrences of the symbol <code>➤</code>. If found it should be the first

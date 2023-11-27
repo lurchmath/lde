@@ -151,21 +151,28 @@
 //
 
 // import LDE tools
+// import { LogicConcept } from '../logic-concept.js'
+// import { Expression } from '../expression.js'
+// import { Symbol as LurchSymbol } from '../symbol.js'
+// import { isAnEFA } from '../matching/expression-functions.js'
+// import { Declaration } from '../declaration.js'
+// import { Environment } from '../environment.js'
+// import { Problem } from "../matching/problem.js"
 import CNF from '../validation/conjunctive-normal-form.js'
-import { LogicConcept } from '../logic-concept.js'
-import { Expression } from '../expression.js'
-import { isAnEFA } from '../matching/expression-functions.js'
-import { Declaration } from '../declaration.js'
-import { Environment } from '../environment.js'
-import { Symbol as LurchSymbol } from '../symbol.js'
-import { Problem } from "../matching/problem.js"
-import Formula from '../formula.js'
-import Scoping from '../scoping.js'
-import Validation from '../validation.js'
+// import Formula from '../formula.js'
+// import Scoping from '../scoping.js'
+// import Validation from '../validation.js'
+import {
+  LogicConcept, Expression, Declaration, Environment, LurchSymbol,
+  Matching, Formula, Scoping, Validation
+} from '../index.js'
+
+const Problem = Matching.Problem
+const isAnEFA = Matching.isAnEFA
 
 // import experimental tools
 import Interpret from './interpret.js'
-const { markDeclaredSymbols, renameBindings, assignProperNames } = Interpret
+const { markDeclaredSymbols, renameBindings, assignProperNames, interpret } = Interpret
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -209,7 +216,9 @@ const LurchOptions = {
   avoidLoneEFAs:true ,    
   processEquations:true ,    
   processCases:true ,    
-  autoCases:false  
+  autoCases:false ,
+  updateProgress: async () => { }  ,
+  updateFreq: 100 
 }
 
 /**
@@ -932,7 +941,9 @@ const getCaselikeRules = doc => {
   })
 }
 
-
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 /**
  * This is the meat of the algorithm for $n$-compact validation. It takes a
@@ -963,6 +974,19 @@ const instantiate = doc => {
   let n = 1
   // loop until there's nothing left to instantiate
   while ( formulas.length>0 ) {
+
+    //////////////////////////////////////////////////////////////////////////
+    // when calling from a UI we might want a progress meter to show how far 
+    // along validation is.  Since the major time is spent in this routine we 
+    // provide a hook for that.
+    let totalnum = E.length*formulas.reduce((tot, f) => {
+      return tot + f.weenies.length; }, 0)
+    let counter = 0
+    const freq = LurchOptions.updateFreq 
+    let update = Math.max(Math.floor(totalnum/freq),1)
+    // console.log(`Starting pass ${n}. Matching ${totalnum} expressions.`)
+    /////////////////////////////////////////////////////////////////////////
+
     // now loop through all of the formulas, check if they are finished and if
     // not, match all of their maximally Weeny propositions to all of the
     // elements of E to find instantiations and partial instantiations
@@ -995,6 +1019,17 @@ const instantiate = doc => {
             // insert this instantiation
             insertInstantiation( inst, f, e )
           })
+
+          ////////////////////////////////////////////////////////////////
+          // increment the progress bar
+          counter++
+          // number of times it reports during one computation
+          if (counter % update === 0) {
+            // console.log(`${Math.ceil(counter/totalnum*100)}% complete`)
+            LurchOptions.updateProgress(n,totalnum,Math.ceil(counter/totalnum*100))
+          }
+          ////////////////////////////////////////////////////////////////
+
         })
       })
       // we've matched every user proposition to every weenie pattern in
@@ -1572,7 +1607,7 @@ export default {
   validate, getUserPropositions, instantiate, markDeclarationContexts,
   processBIHs, processEquations, splitEquations, processDomains, diff,
   cacheFormulaDomainInfo, Benchmark, getCaselikeRules, LurchOptions, Report,
-  matchPropositions
+  matchPropositions, LogicConcept
 }
 ///////////////////////////////////////////////////////////////////////////////</code></pre>
     </article>

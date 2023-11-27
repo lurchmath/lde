@@ -472,7 +472,7 @@ rpl.defineCommand( "makedocs", {
   action() {
     console.log(defaultPen('Building docs...')) 
     try {
-    exec('rm -rf docs &amp;&amp; jsdoc ./* -d docs -c utils/jsdoc-conf.json -u tutorials/ &amp;&amp; node utils/post-docs')
+    exec('rm -rf docs &amp;&amp; jsdoc ./* -d docs -c utils/jsdoc-conf.json -u tutorials/ &amp;&amp; node utils/post-docs &amp;&amp; syncdocs > null')
     console.log(defaultPen('...done'))
     } catch (err) {
       console.log('Error building docs.')
