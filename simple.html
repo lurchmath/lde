@@ -1,11 +1,40 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <title>Lurch</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script type='module' src="src/experimental/lde-debug.js"></script>
+  <script>
+    window.onload = function() {
+      LurchOptions.updateProgress = async (pass, total, percent) => {
+          const msg = `Pass: ${pass} - Matches: ${total} - (${percent}%)`
+          document.getElementById('progdiv').innerHTML = msg
+          // console.log(msg) 
+      }
+    }
+  </script>
+  <style>
+    #logo #check { 
+      font-family: Lato; 
+      color:#4CAF50; }
+  </style>
   <link rel="shortcut icon" href="#">
 </head>
 <body>
-  <script type='module' src="src/experimental/index.js"></script>
-  <h1>Welcome to Lurch!</h1>
+  <div class="container mt-5">      
+    <h1>Welcome to <span id="logo">Lurch<span id="check">&#x2713</span></span></h1>
+    <p class="mt-4">Click to validate a big document.</p>
+    <p><button type="button" class="btn btn-primary" 
+        onclick="test()">
+        <!-- "document.getElementById('progdiv').innerHTML = 'Validating';
+          asyncvalidate();
+          document.getElementById('progdiv').innerHTML = 'Done!'"> -->
+        Validate</button>
+    </p>
+    <div class="active" id="progdiv"></div>
+  </div>
 </body>
-</html> 
+</html>
