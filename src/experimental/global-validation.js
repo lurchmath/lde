@@ -1559,6 +1559,6 @@ export default {
   validate, getUserPropositions, instantiate, markDeclarationContexts,
   processBIHs, processEquations, splitEquations, processDomains, diff,
   cacheFormulaDomainInfo, Benchmark, getCaselikeRules, LurchOptions, Report,
-  matchPropositions, LogicConcept, Scoping, Validation
+  matchPropositions, LogicConcept, Formula, Scoping, Validation
 }
 ///////////////////////////////////////////////////////////////////////////////
