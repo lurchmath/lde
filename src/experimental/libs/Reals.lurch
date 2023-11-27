@@ -23,7 +23,7 @@ Axioms:
 		:{ ¬(x<x) }                               // irreflexive
 		:{ :x<y  :y<z   x<z }                     // transitive 
 		:{  x=y or (x<y or y<x) }                 // trichotomy 
-		➤ "Every bounded above sequence of real numbers has a least upper bound"   // complete
+		// "Every bounded above sequence of real numbers has a least upper bound"   // complete
 		// Axioms Relating +, ⋅, and <
 		:{ x⋅(y+z) = x⋅y + x⋅z   (y+z)⋅x = y⋅x + z⋅x }  // distributivity +,⋅
 		:{ :x<y  x+z<y+z }                              // translation +,<

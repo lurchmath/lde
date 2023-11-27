@@ -31,6 +31,7 @@ export const test = async (exppath = 'src/experimental') => {
   acid.push(await loadDoc('proofs/math299/peanoBIH',exppath)) 
   acid.push(await loadDoc('proofs/math299/peano',exppath)) 
   acid.push(await loadDoc('proofs/math299/midterm',exppath))
+  acid.push(await loadDoc('proofs/math299/reals',exppath))
   
   // run the tests
   let passed = 0
