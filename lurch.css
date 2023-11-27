@@ -43,6 +43,19 @@ div.lurch-shell {
 div.lurch-shell.lurch-given {
     border: 2px dashed #bbb;
 }
+/* div.lurch-shell.lurch-theorem {
+  border: 4px solid #64B5F6
+}
+div.lurch-shell.lurch-theorem::before {
+  content: "Theorem";
+  color:#61b2f5;
+  background-color: white;
+  font-weight: bold;
+  position: absolute;
+  top: -10pt;
+  left: 4pt;
+  padding: 0 6pt;
+} */
 
 /* Dependency URL atoms  */
 .lurch-dependency {
