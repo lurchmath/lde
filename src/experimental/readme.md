@@ -1,6 +1,6 @@
 # Global $n$-compact Validation
 
-Welcome to the [experimental](../) folder of this branch of the Lurch LDE project.  Here we gather code and content for rapidly testing, benchmarking, and prototyping design ideas for the LDE.
+Welcome to the [experimental](../) folder of this branch of the Lurch LDE project.  Here we gather code and content for rapidly testing, benchmarking, and prototyping design ideas for the LDE.  For details about the rest of the LDE, and in particular the LogicConcept class and Matching package that this algorithm is built on, see [the LDE documentation](https://lurchmath.github.io/lde).
 
 The main experiment currently in progress is an implementation of the $n$-_compact polynomial time global validation algorithm_. This is accessible via the function `validate()` and its supporting tools and options. 
 
