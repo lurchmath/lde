@@ -418,13 +418,27 @@ rpl.defineCommand( "test", {
   }
 })
 
+// define the Lode .list command
+rpl.defineCommand( "compileparser", {
+  help: "Compile the Math 299 parser.",
+  action() { 
+    try {
+    exec('cd parsers && peggy --cache --format es -o asciimath.js asciimath.peggy')
+    } catch (err) {
+      console.log('Error compiling the parser.')
+    }
+    this.displayPrompt()
+  }
+})
+
+
 // define the Lode .makedocs command
 rpl.defineCommand( "makedocs", {
   help: "Run jsdocs to make the documentation.",
   action() {
     console.log(defaultPen('Building docs...')) 
     try {
-    exec('rm -rf docs && jsdoc ./* -d docs -c utils/jsdoc-conf.json -u tutorials/ && node utils/post-docs')
+    exec('rm -rf docs && jsdoc ./* -d docs -c utils/jsdoc-conf.json -u tutorials/ && node utils/post-docs && syncdocs > null')
     console.log(defaultPen('...done'))
     } catch (err) {
       console.log('Error building docs.')
