@@ -78,6 +78,11 @@ x/y
 2 cdot (x^3/(y cdot z^4))
 (2/(x^3/y) cdot z)^4
 2 cdot (x^3 cdot y)/z^4
+// multiplicative inverses
+x⁻
+x⋅x⁻
+(x+1)⁻
+(2⋅x⁻+1⁻)⁻
 // sums
 x+y
 2+x
