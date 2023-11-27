@@ -115,7 +115,7 @@
   //   * same for prefix ops
   input = input.replace(/(?<!«[^«»]*)([-({∀∃])[ \t]*(?![^«»]*»)/g,'$1')
   //   * same for postfix ops
-  input = input.replace(/(?<!«[^«»]*)[ \t]*([⁻)}])(?![^«»]*»)/g,'$1')
+  input = input.replace(/(?<!«[^«»]*)[ \t]*([⁻°)}])(?![^«»]*»)/g,'$1')
   //   * replace all '/' with '⋅/'
   input = input.replace(/(?<!«[^«»]*)\/(?![^«»]*»)/g,'⋅/')
   
@@ -228,18 +228,19 @@ CartProd      = a:CompAtomic|2..,'×'/' times '|  { return lisp('×',a) }
 Union         = a:CompAtomic|2..,'∪'/' cup '/' union '|  { return lisp('∪',a) }
 Intersection  = a:CompAtomic|2..,'∩'/' cap '/' intersect '|  { return lisp('∩',a) }
 RelativeComp  = a:CompAtomic|2..,'∖'/' setminus '|  { return lisp('∖',a) }
-// we don't want to have to do e.g. A∩(B⁻) instead of just A∩B⁻
+// we don't want to have to do e.g. A∩(B°) instead of just A∩B°
 CompAtomic    = Complement / Atomic
-Complement    = a:Atomic ('⁻'/' complement') { return lispUnary('⁻',a) }
+Complement    = a:Atomic ('°'/' complement') { return lispUnary('°',a) }
 
 // algebraic expressions
 Algebraic = Sum / Product
 
-Sum       = a:Product b:([-+] Product)+               { return lispSum(a,b)   }
-Product   = a:(Inversed/Negated)|1..,'⋅'/' cdot '|    { return lisp('⋅',a)    }
-Inversed  = a:'/'? b:Exp                              { return lispUnary(a,b) }    
-Negated   = a:'-'? b:Exp                              { return lispUnary(a,b) }
-Exp       = a:Atomic|1..,'^'|                         { return lisp('^',a)    } 
+Sum       = a:Product b:([-+] Product)+                   { return lispSum(a,b)     }
+Product   = a:(Recip/Inversed/Negated)|1..,'⋅'/' cdot '|  { return lisp('⋅',a)      }
+Recip     = a:Atomic ('⁻'/' recip')                       { return lispUnary('⁻',a) }
+Inversed  = a:'/'? b:Exp                                  { return lispUnary(a,b)   }    
+Negated   = a:'-'? b:Exp                                  { return lispUnary(a,b)   }
+Exp       = a:Atomic|1..,'^'|                             { return lisp('^',a)      } 
 
 // morally atomic (do not require parentheses)
 Atomic = Parenthesized / EFA / Prefix / Tuple / Symbol / Number
@@ -265,7 +266,7 @@ Natural = $( [1-9][0-9]* / '0' )
 SymbolSeq = a:(Symbol/Number)|1..,comma| { return a.join(',') }
 Symbol "Symbol" = $( '≡' / 
                      !([0-9]/ReservedWords)
-                     [^-\][()⟨⟩ \t\n✦{},.:+⋅/^=<≤¬⇒⇔|∀∃∩∪×∈⊆∖⁻∧∨≡]+ )
+                     [^-\][()⟨⟩ \t\n✦{},.:+⋅/^=<≤¬⇒⇔|∀∃∩∪×∈⊆∖⁻°∧∨≡]+ )
 BindingSymbol = ('∃!'/'exists unique ') { return '∃!' } /
                 ('∀'/'forall '/'for all ') { return '∀' } /
                 ('∃'/'exists ') { return '∃' } 
@@ -276,7 +277,7 @@ period =  '.'
 __  = [ \t\n\r]+
 _   = [ \t\n\r]*
 
-ReservedChars = $([+⋅/^=<≤¬⇒⇔|∀∃∩∪×∈⊆∖⁻∧∨≡σλ])
+ReservedChars = $([+⋅/^=<≤¬⇒⇔|∀∃∩∪×∈⊆∖⁻°∧∨≡σλ])
 ReservedWords = ' or '/' and '/' loves '/' cdot '/' complement'/
                 ' setminus '/' cap '/' cup '/' times '/' lt '/' leq '/
                 ' in '/' subset '/' implies '/' iff '

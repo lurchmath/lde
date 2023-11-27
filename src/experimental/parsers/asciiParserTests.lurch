@@ -114,7 +114,7 @@ x+y
 A cap B
 A cup B
 A setminus B
-A⁻
+A°
 A cap B cap C
 A cap (B cap C)
 (A cap B) cap C
@@ -127,14 +127,14 @@ A cap (B cup C)
 (A cup (B cap C)) cap D
 A cup B cup C
 A cup (B cup C)
-(A⁻ cap B⁻)⁻ cap C⁻
-(((A setminus B)⁻ cap C⁻) cap D)⁻
-(A⁻ cap (B setminus C)) setminus D⁻
-A cap (B⁻ setminus C⁻)⁻
+(A° cap B°)° cap C°
+(((A setminus B)° cap C°) cap D)°
+(A° cap (B setminus C)) setminus D°
+A cap (B° setminus C°)°
 (A cap B) setminus C
 ((A setminus B) cap C) cup D
 A setminus B setminus C setminus D
-(A⁻ cup (B setminus C⁻)) cap D
+(A° cup (B setminus C°)) cap D
 A times B  subset  B times A
 // arithmetic relations
 x=0
@@ -157,7 +157,7 @@ x ∉ A
 A subset B
 Set(1,2) in PowerSet(Set(0,1,2,3))
 A cap B  subset  A cup B
-A cap B⁻  subset  (A cup B)⁻ setminus A
+A cap B°  subset  (A cup B)° setminus A
 // propositions
 not P
 not P or Q
@@ -176,7 +176,7 @@ not (P  iff   Q)
 (((P implies Q) implies P) implies P)
 not P and Q  implies  not R or S  iff   not T  implies  U
 // mixed
-x in (A cap B)⁻  iff   x in A⁻ or x in B⁻
+x in (A cap B)°  iff   x in A° or x in B°
 1/(x^2-2 cdot x+1)=1/(x-1)^2  iff   x in R and not x=1
 //bindings
 for all x.P(x)
