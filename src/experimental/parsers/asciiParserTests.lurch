@@ -24,6 +24,8 @@ f(x)(y)
 f()(x,y)
 f()()(x)
 f(x,y)(a,b)(c,d,e)()
+f⁻(x)
+f⁻(f(x))
 // parentheticals
 (x)
 (0)
@@ -284,6 +286,7 @@ f: A → B
 f : A → B
 f(0):A∩B → A∪B°
 f:ℕ → ℕ
+f⁻:A→B
 
 // misc
 ∀y.𝜆P(y) ⇒ y=x

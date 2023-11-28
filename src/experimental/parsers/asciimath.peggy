@@ -219,7 +219,7 @@ Leq        = a:Thing|2..,'≤'/' leq '|                 { return lisp('≤',a) }
 LessThan   = a:Thing|2..,'<'/' lt '|                  { return lisp('<',a) }
 NotEqual   = a:Thing (' neq '/' ne ') b:Thing 
              { return `(¬ ${lispBinary('=',a,b)})` }
-Equation   = a:Thing|2..,'='|                         { return lisp('=',a) }
+Equation   = a:(Binding/Thing)|2..,'='|               { return lisp('=',a) }
 Loves      = a:Thing|2..2,' loves '|                  { return lisp('loves',a) }
 Is         = a:Thing|2..2,' is an '/' is a '/' is '|  { return lisp('is',a) }
 
@@ -255,7 +255,10 @@ Atomic = Parenthesized / EFA / Prefix / Tuple / Symbol / Number
 EFA = 'λ' a:Symbol '(' b:Expression ')' { return `(λ ${a} ${b})` }
 
 Tuple = '⟨' b:(  @Expression|1..,comma| )+ '⟩' { return lispPrefix('tuple',b) }
-Prefix = a:Symbol b:( '(' @Expression|..,comma| ')' )+ { return lispPrefix(a,b) }
+// TODO: fix this hack for inverse functions
+Prefix = a:(Symbol ('⁻'/' recip')/Symbol) b:( '(' @Expression|..,comma| ')' )+ 
+  { if (Array.isArray(a)) return lispPrefix(`(⁻ ${a[0]})`,b)
+    return lispPrefix(a,b) }
 Parenthesized = '(' @Expression ')' 
 
 // while we probably will never use a number or reserved symbol as a bound var, 
