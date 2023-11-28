@@ -89,14 +89,19 @@
   input = input.replace(/𝜎/g, 'σ')
   input = input.replace(/𝜆/g, 'λ')
   input = input.replace(/≠/g, ' neq ')  
-  input = input.replace(/∉/g, ' notin ')  
+  input = input.replace(/∉/g, ' notin ') 
+
+  input = input.replace(/→←/g, ' contr ')
+  //   * Let's used to require a colon ':Let' but we no longer require it, so 
+  //     for backwards compatibility, remove it if its there.
+  input = input.replace(/:([Ll]et )/g, '$1') 
   //   * Declaring reserved constants is tricky since it tries to parse them as they are
   //     intended to be used, so for now we convert any line of the form `Declare stuff`
   //     to escaped putdown up front.
   input = input.replace(/[Dd]eclare \s*([^\s].*)$/mg, 'declare> «:[$1]»\n')
   //   * also look for lines containing only a ➤ and whitespace, and replace
   //     them with (➤ " ") to act as a line break in the output
-  input = input.replace(/^([ \t]*)➤[ \t]*$/mg, `$1➤ " " \n`)
+  input = input.replace(/^([ \t]*)➤[ \t]*$/mg, '$1➤ " " \n')
   //   * delete comments (but leave any \n's to keep the line counts right)
   input = input.replace(/\/\/[^\n\r]*(\n|\r)/g, '\n')
   //   * Replace tabs with a space
@@ -120,15 +125,15 @@
 // The start rule for a Peggy grammar is the first rule.  For us, it's a
 // sequence of LCs.
 LCs = 
-_ a:(Meta / Given / Declaration / Environment / Expression)|..,__| _ 
+_ a:(Meta / Contradiction / Given / Declaration / Environment / Expression)|..,__| _ 
   { return a.join(' ') }
 
 // A single LC
-LC "LC" = _ @( Meta / Given / Declaration / Environment / Expression) _
+LC "LC" = _ @( Meta / Contradiction / Given / Declaration / Environment / Expression) _
 
 // givens
 Given "Given" = (':' / 'Assume'i __ ) 
-  a:(Declaration / Environment / Expression) { return ':'+a }
+  a:(Environment / Expression) { return ':'+a }
 
 // environments
 Environment "Environment" = 
@@ -165,9 +170,10 @@ Declaration "Declaration" = ForSome / Let
 
 ForSome = body:Expression __ 'for'i __ 'some'i __ a:SymbolSeq 
           { return `[${spaced(a)}, ${body}]` }
-Let = 'Let'i __ a:SymbolSeq __ ('be'i __)? 'such'i __ 'that'i __ b:Expression 
-       { return `[${spaced(a)}, ${b}]` } /
-      'Let'i __ a:SymbolSeq { return `[${spaced(a)}]` }
+// the 'given' colon is optional since these are always 'given'.          
+Let =  'Let'i __ a:SymbolSeq __ ('be'i __)? 'such'i __ 'that'i __ b:Expression 
+       { return `:[${spaced(a)}, ${b}]` } /
+       'Let'i __ a:SymbolSeq { return `:[${spaced(a)}]` }
 
 // expressions
 Expression "Expression" = Quantified / Binding / Prop / EFA  // get's Stuff from Not
@@ -183,14 +189,15 @@ Binding = a:Symbol period b:(Expression / Binding)
 // propositional expressions
 Prop = Iff / Implies / And / Or / Not
 
-Iff        = a:Implies|1..,'⇔'/' iff '|    { return lisp('⇔',a) }
-Implies    = a:Or|1..,'⇒'/' implies '|     { return lisp('⇒',a) }
-Or         = a:And|1..,' or '/'∨'|         { return lisp('or',a) }
-And        = a:Not|1..,' and '/'∧'|        { return lisp('and',a) }
-Not        = a:('¬'/'not ')? _ b:Stuff     { return (a==='not ')
-                                                     ?lispUnary('¬',b)
-                                                     :lispUnary(a,b)
-                                           }
+Contradiction = ' contradiction '             { return '→←' }
+Iff           = a:Implies|1..,'⇔'/' iff '|    { return lisp('⇔',a) }
+Implies       = a:Or|1..,'⇒'/' implies '|     { return lisp('⇒',a) }
+Or            = a:And|1..,' or '/'∨'|         { return lisp('or',a) }
+And           = a:Not|1..,' and '/'∧'|        { return lisp('and',a) }
+Not           = a:('¬'/'not ')? _ b:Stuff     { return (a==='not ')
+                                                        ?lispUnary('¬',b)
+                                                        :lispUnary(a,b)
+                                              }
 
 // stuff that might be a prop
 Stuff = Relation / Thing
@@ -200,7 +207,7 @@ Relation = Maps / Subset / ElementOf / NotEltOf / Divides / Leq /
            LessThan / Equation / NotEqual / Loves / Is
 
 
-Maps       = a:Thing _ ':' _ b:Thing '→' c:Thing    { return lisp('maps',[a,b,c]) }
+Maps       = a:Thing _ ':' _ b:Thing '→' c:Thing      { return lisp('maps',[a,b,c]) }
 
 Subset     = a:Thing|2..,'⊆'/' subset '/' subseteq '| { return lisp('⊆',a) }
 NotEltOf   = a:Thing (' notin '/' !in ') b:Thing 
@@ -261,9 +268,9 @@ Natural = $( [1-9][0-9]* / '0' )
 
 // Symbols can't start with a digit, contain reserved constants, or keywords
 SymbolSeq = a:(Symbol/Number)|1..,comma| { return a.join(',') }
-Symbol "Symbol" = $( '≡' / 
+Symbol "Symbol" = $( '≡' / '→←' /
                      !([0-9]/ReservedWords)
-                     [^-\][()⟨⟩ \t\n✦{},.:+⋅/^=<≤¬→⇒⇔|∀∃∩∪×∈⊆∖⁻°∧∨≡]+ )
+                     [^-\][()⟨⟩ \t\n✦{},.:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∧∨≡]+ )
 BindingSymbol = ('∃!'/'exists unique ') { return '∃!' } /
                 ('∀'/'forall '/'for all ') { return '∀' } /
                 ('∃'/'exists ') { return '∃' } 
@@ -274,7 +281,7 @@ period =  '.'
 __  = [ \t\n\r]+
 _   = [ \t\n\r]*
 
-ReservedChars = $([:+⋅/^=<≤¬→⇒⇔|∀∃∩∪×∈⊆∖⁻°∧∨≡σλ])
+ReservedChars = $([:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∧∨≡σλ])
 ReservedWords = ' or '/' and '/' loves '/' cdot '/' complement'/
                 ' setminus '/' cap '/' cup '/' times '/' lt '/' leq '/
-                ' in '/' subset '/' implies '/' iff ' / 'maps'
+                ' in '/' subset '/' implies '/' iff ' / 'maps '
