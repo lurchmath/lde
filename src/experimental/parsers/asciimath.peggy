@@ -91,7 +91,7 @@
   input = input.replace(/≠/g, ' neq ')  
   input = input.replace(/∉/g, ' notin ') 
 
-  input = input.replace(/→←/g, ' contr ')
+  input = input.replace(/→←/g, ' contradiction ')
   //   * Let's used to require a colon ':Let' but we no longer require it, so 
   //     for backwards compatibility, remove it if its there.
   input = input.replace(/:([Ll]et )/g, '$1') 
@@ -189,7 +189,8 @@ Binding = a:Symbol period b:(Expression / Binding)
 // propositional expressions
 Prop = Iff / Implies / And / Or / Not
 
-Contradiction = ' contradiction '             { return '→←' }
+Contradiction = a:' contradiction '           { return '→←' }
+
 Iff           = a:Implies|1..,'⇔'/' iff '|    { return lisp('⇔',a) }
 Implies       = a:Or|1..,'⇒'/' implies '|     { return lisp('⇒',a) }
 Or            = a:And|1..,' or '/'∨'|         { return lisp('or',a) }
@@ -284,4 +285,5 @@ _   = [ \t\n\r]*
 ReservedChars = $([:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∧∨≡σλ])
 ReservedWords = ' or '/' and '/' loves '/' cdot '/' complement'/
                 ' setminus '/' cap '/' cup '/' times '/' lt '/' leq '/
-                ' in '/' subset '/' implies '/' iff ' / 'maps '
+                ' in '/' subset '/' implies '/' iff ' / 'maps ' /
+                ' contradiction '

@@ -201,6 +201,9 @@ const formatter = ( options=defaultOptions ) => {
     // the LDE EFA constant symbols
     } else if (L instanceof LurchSymbol && L.text()===EFA) {
       ans += (L.constant) ? constantPen('𝜆') : defaultPen('𝜆')
+    // the contradiction symbol (to avoid parser conflict with f:A→B)
+  } else if (L instanceof LurchSymbol && L.text()==='contradiction') {
+    ans += (L.constant) ? constantPen('→←') : defaultPen('→←')  
     // comments just display their string (second arg) with the comment pen 
     } else if (L.isAComment()) {
       ans += commentPen(L.child(1))
