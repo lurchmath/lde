@@ -213,6 +213,8 @@ P(c,w)  implies  Q(c,y) for some c
 { :{:{:P Q} P} P }
 { Assume { Assume { Assume P Q} P} P }
 :{ :(x+1) cdot (x-1) leq 0 x leq 1 -1 leq x }
+// attributed environments
+Rule: { :A B⇒A }
   
 ////////////////////////////////
 // ND Propositional Logic Axioms
@@ -271,6 +273,20 @@ P(c,w)  implies  Q(c,y) for some c
 :{ n cdot 0 = 0 }                                                   // M0
 :{ n cdot sigma(m) = m+m cdot n }                                   // M1       
 :{ m leq n ≡ (exists k.m+k=n) }                                     // I
+///////////////////////////////
+// tuples
+⟨x⟩
+⟨x,y,z⟩
+// maps
+f:A→B
+f:A → B
+f: A → B
+f : A → B
+f(0):A∩B → A∪B°
+f:ℕ → ℕ
+
+// misc
+∀y.𝜆P(y) ⇒ y=x
 
 {
   // Assignment #8 (b)
@@ -449,11 +465,5 @@ Rules: {
   { :Q Q }
 }
  
-Rule: { :A B⇒A }
-
-∀y.𝜆P(y) ⇒ y=x
-
-⟨x⟩
-⟨x,y,z⟩
 
 }

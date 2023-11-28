@@ -20,13 +20,7 @@
 //
 //
 // TODO: 
-//  * add x≠y but have it parse as (¬ (= x y)), & same for other negated ops
 //  * add f:A→B, ∘, injective, surjective, bijective, ^inv, etc.
-//  * Integrate Declare() with the parser creation.  For example, if we want to
-//    Declare reserved symbols like < or = at the top of the document we don't
-//    want the parser to try to parse them as infix operators at that point
-//    Idea: make it possible to Declare the constants both syntactically and
-//    semantically at the same time.
 
 {{
 
@@ -111,7 +105,7 @@
   input = input.replace(/ ( +)/g,' ') 
   //   * remove spaces around reserved infix unicode ops not inside literal putdown so
   //     the parser doesn't have to find and avoid them
-  input = input.replace(/(?<!«[^«»]*)\s*([,.+⋅/^=<≤⇒⇔|∩∪×∈⊆∖])\s*(?![^«»]*»)/g,'$1')
+  input = input.replace(/(?<!«[^«»]*)\s*([,.+⋅/^=<≤→⇒⇔|∩∪×∈⊆∖])\s*(?![^«»]*»)/g,'$1')
   //   * same for prefix ops
   input = input.replace(/(?<!«[^«»]*)([-({∀∃])[ \t]*(?![^«»]*»)/g,'$1')
   //   * same for postfix ops
@@ -202,8 +196,11 @@ Not        = a:('¬'/'not ')? _ b:Stuff     { return (a==='not ')
 Stuff = Relation / Thing
 
 // relations
-Relation = Subset / ElementOf / NotEltOf / Divides / Leq / 
+Relation = Maps / Subset / ElementOf / NotEltOf / Divides / Leq / 
            LessThan / Equation / NotEqual / Loves / Is
+
+
+Maps       = a:Thing _ ':' _ b:Thing '→' c:Thing    { return lisp('maps',[a,b,c]) }
 
 Subset     = a:Thing|2..,'⊆'/' subset '/' subseteq '| { return lisp('⊆',a) }
 NotEltOf   = a:Thing (' notin '/' !in ') b:Thing 
@@ -266,7 +263,7 @@ Natural = $( [1-9][0-9]* / '0' )
 SymbolSeq = a:(Symbol/Number)|1..,comma| { return a.join(',') }
 Symbol "Symbol" = $( '≡' / 
                      !([0-9]/ReservedWords)
-                     [^-\][()⟨⟩ \t\n✦{},.:+⋅/^=<≤¬⇒⇔|∀∃∩∪×∈⊆∖⁻°∧∨≡]+ )
+                     [^-\][()⟨⟩ \t\n✦{},.:+⋅/^=<≤¬→⇒⇔|∀∃∩∪×∈⊆∖⁻°∧∨≡]+ )
 BindingSymbol = ('∃!'/'exists unique ') { return '∃!' } /
                 ('∀'/'forall '/'for all ') { return '∀' } /
                 ('∃'/'exists ') { return '∃' } 
@@ -277,7 +274,7 @@ period =  '.'
 __  = [ \t\n\r]+
 _   = [ \t\n\r]*
 
-ReservedChars = $([+⋅/^=<≤¬⇒⇔|∀∃∩∪×∈⊆∖⁻°∧∨≡σλ])
+ReservedChars = $([:+⋅/^=<≤¬→⇒⇔|∀∃∩∪×∈⊆∖⁻°∧∨≡σλ])
 ReservedWords = ' or '/' and '/' loves '/' cdot '/' complement'/
                 ' setminus '/' cap '/' cup '/' times '/' lt '/' leq '/
-                ' in '/' subset '/' implies '/' iff '
+                ' in '/' subset '/' implies '/' iff ' / 'maps'
