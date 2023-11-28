@@ -9,8 +9,7 @@ let start = Date.now()
 ////////////////////////////////////////////////////////////////////////////
 
 // Load Acid Tests
-acid=[1,4,5,6,7,8,9,10,'11a','11b','11c','11d','11e','Induction'].map( (ex,k) => 
-     loadDoc(`proofs/acid tests/acid ${k} Example ${ex}`))
+acid=Array.seq(k=>k,0,13).map( k => loadDoc(`proofs/acid tests/acid ${k}`))
 // Load other tests in the acid tests folder
 acid.push(loadDoc('proofs/acid tests/Transitive Chains'))
 acid.push(loadDoc('proofs/acid tests/Cases'))
