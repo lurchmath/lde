@@ -9,3 +9,4 @@ src/experimental/parsers/ascimathref.js
 src/experimental/initproofs.js
 for-reference-only/
 dependencies/lurchmath
+*.code-workspace
