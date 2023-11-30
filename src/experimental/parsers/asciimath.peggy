@@ -175,8 +175,8 @@ Let =  'Let'i __ a:SymbolSeq __ ('be'i __)? 'such'i __ 'that'i __ b:Expression
        { return `:[${spaced(a)}, ${b}]` } /
        'Let'i __ a:SymbolSeq { return `:[${spaced(a)}]` }
 
-// expressions
-Expression "Expression" = Quantified / Binding / Prop / EFA  // get's Stuff from Not
+// expressions - get's Stuff from Not
+Expression "Expression" = Quantified / Binding / Prop / EFA  
 
 // quantified binding expressions
 Quantified = a:BindingSymbol b:Binding
@@ -208,7 +208,7 @@ Relation = Maps / Subset / ElementOf / NotEltOf / Divides / Leq /
            LessThan / Equation / NotEqual / Loves / Is
 
 
-Maps       = a:Thing _ ':' _ b:Thing '→' c:Thing      { return lisp('maps',[a,b,c]) }
+Maps        = a:Thing _ ':' _ b:Thing '→' c:Thing      { return lisp('maps',[a,b,c]) }
 
 Subset     = a:Thing|2..,'⊆'/' subset '/' subseteq '| { return lisp('⊆',a) }
 NotEltOf   = a:Thing (' notin '/' !in ') b:Thing 
@@ -223,12 +223,14 @@ Equation   = a:(Binding/Thing)|2..,'='|               { return lisp('=',a) }
 Loves      = a:Thing|2..2,' loves '|                  { return lisp('loves',a) }
 Is         = a:Thing|2..2,' is an '/' is a '/' is '|  { return lisp('is',a) }
 
+
 // things to relate
 Thing = Set / Algebraic
 
 // sets
-Set = CartProd / Union / Intersection / RelativeComp / Complement
+Set = Composition / CartProd / Union / Intersection / RelativeComp / Complement
 
+Composition   = a:Atomic|2..,'∘'/' circ '|            { return lisp('∘',a) }
 CartProd      = a:CompAtomic|2..,'×'/' times '|  { return lisp('×',a) }
 Union         = a:CompAtomic|2..,'∪'/' cup '/' union '|  { return lisp('∪',a) }
 Intersection  = a:CompAtomic|2..,'∩'/' cap '/' intersect '|  { return lisp('∩',a) }
@@ -248,18 +250,21 @@ Negated   = a:'-'? b:Exp                                  { return lispUnary(a,b
 Exp       = a:Atomic|1..,'^'|                             { return lisp('^',a)      } 
 
 // morally atomic (do not require parentheses)
-Atomic = Parenthesized / EFA / Prefix / Tuple / Symbol / Number
+Atomic =   EFA / Prefix / Parenthesized / Tuple / Symbol / Number
+
+// TODO: fix this hack for inverse functions
+Prefix = a:(Symbol ('⁻'/' recip') / Symbol / Parenthesized ) 
+         b:( '(' @Expression|..,comma| ')' )+ 
+  { if (Array.isArray(a)) return lispPrefix(`(⁻ ${a[0]})`,b)
+    return lispPrefix(a,b) }
 
 // For convenience we define 𝜆P(k) to be (λ P k) and replace λ with "LDE EFA"
 // as a shortcut
 EFA = 'λ' a:Symbol '(' b:Expression ')' { return `(λ ${a} ${b})` }
 
 Tuple = '⟨' b:(  @Expression|1..,comma| )+ '⟩' { return lispPrefix('tuple',b) }
-// TODO: fix this hack for inverse functions
-Prefix = a:(Symbol ('⁻'/' recip')/Symbol) b:( '(' @Expression|..,comma| ')' )+ 
-  { if (Array.isArray(a)) return lispPrefix(`(⁻ ${a[0]})`,b)
-    return lispPrefix(a,b) }
-Parenthesized = '(' @Expression ')' 
+Parenthesized = '(' @Expression ')'
+ 
 
 // while we probably will never use a number or reserved symbol as a bound var, 
 // we might Declare one to be a constant, e.g. Peano or ops
@@ -274,7 +279,7 @@ Natural = $( [1-9][0-9]* / '0' )
 SymbolSeq = a:(Symbol/Number)|1..,comma| { return a.join(',') }
 Symbol "Symbol" = $( '≡' / '→←' /
                      !([0-9]/ReservedWords)
-                     [^-\][()⟨⟩ \t\n✦{},.:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∧∨≡]+ )
+                     [^-\][()⟨⟩ \t\n✦{},.:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∘∧∨≡]+ )
 BindingSymbol = ('∃!'/'exists unique ') { return '∃!' } /
                 ('∀'/'forall '/'for all ') { return '∀' } /
                 ('∃'/'exists ') { return '∃' } 
@@ -285,7 +290,7 @@ period =  '.'
 __  = [ \t\n\r]+
 _   = [ \t\n\r]*
 
-ReservedChars = $([:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∧∨≡σλ])
+ReservedChars = $([:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∘∧∨≡σλ])
 ReservedWords = ' or '/' and '/' loves '/' cdot '/' complement'/
                 ' setminus '/' cap '/' cup '/' times '/' lt '/' leq '/
                 ' in '/' subset '/' implies '/' iff ' / 'maps ' /
