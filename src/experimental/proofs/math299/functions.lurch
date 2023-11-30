@@ -28,8 +28,8 @@ include libs/Functions
       
 		  f(x)=f(y)
 			x = y
-			g∘f is injective
 		}
+		g∘f is injective
 	}
 }
 
