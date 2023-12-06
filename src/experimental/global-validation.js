@@ -169,6 +169,7 @@ const LurchOptions = {
   processEquations:true ,    
   processCases:true ,    
   autoCases:false ,
+  processCAS:true ,
   updateProgress: async () => { }  ,
   updateFreq: 100 
 }
@@ -235,6 +236,13 @@ const validate = ( doc, target = doc ) => {
   // to 𝜆P(y) than to a single metavar U processCases(doc,'Substitution').  But
   // it can work for single metavariable weeny, since that only creates one
   // instantiation.
+
+  ///////////////////////////////////
+  // CAS
+  //
+  // we currently are using Algebrite for the CAS but this tool will work with
+  // any CAS.
+  // processCAS(doc)
   
   //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
   
@@ -895,6 +903,33 @@ const getCaselikeRules = doc => {
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+const processCAS = doc => {
+  // check options 
+  if (!LurchOptions.processCAS) return
+  
+  // check if the CAS_Rule is around, if not, we're done
+  // For now we only allow one. TODO: allow multiple
+  const rule=doc.find(
+    x=>x.isA('Rule') && 
+       x.child(0) instanceof LurchSymbol && x.child(0).text()==='CAS_Rule',
+    x=>!(x.isA('Rule') || x===doc))
+  // if there is no Equations Rule loaded we are done
+  if (!rule) return
+
+  // get all the things the user wants to checked as a conclusion by CAS
+  const userCASs = [...doc.descendantsSatisfyingIterator(
+    x => x.by?.toLowerCase()==='cas')]
+  // for each one construct the relevant partial instantiation
+  userCASs.forEach( c => {
+    try {
+
+    } catch {
+
+    }
+  })
+
 }
 
 /**

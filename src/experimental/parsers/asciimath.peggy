@@ -20,7 +20,7 @@
 //
 //
 // TODO: 
-//  * add f:A→B, ∘, injective, surjective, bijective, ^inv, etc.
+//  * add equiv classes, infix relation symbols family
 
 {{
 
@@ -110,11 +110,11 @@
   input = input.replace(/ ( +)/g,' ') 
   //   * remove spaces around reserved infix unicode ops not inside literal putdown so
   //     the parser doesn't have to find and avoid them
-  input = input.replace(/(?<!«[^«»]*)\s*([,.+⋅/^=<≤→⇒⇔|∩∪×∈⊆∖])\s*(?![^«»]*»)/g,'$1')
+  input = input.replace(/(?<!«[^«»]*)\s*([,.↦+⋅/^=<≤→⇒⇔|∩∪×∈⊆∖~≈])\s*(?![^«»]*»)/g,'$1')
   //   * same for prefix ops
   input = input.replace(/(?<!«[^«»]*)([-({∀∃])[ \t]*(?![^«»]*»)/g,'$1')
   //   * same for postfix ops
-  input = input.replace(/(?<!«[^«»]*)[ \t]*([⁻°)}])(?![^«»]*»)/g,'$1')
+  input = input.replace(/(?<!«[^«»]*)[ \t]*([⁻°！)}])(?![^«»]*»)/g,'$1')
   //   * replace all '/' with '⋅/'
   input = input.replace(/(?<!«[^«»]*)\/(?![^«»]*»)/g,'⋅/')
   
@@ -183,7 +183,7 @@ Quantified = a:BindingSymbol b:Binding
           { return `(${a} ${b})` }
 
 // binding expressions
-Binding = a:Symbol period b:(Expression / Binding) 
+Binding = a:Symbol (period / '↦') b:(Expression / Binding) 
           { return `${a}, ${b}` }
 
 // propositional expressions
@@ -201,17 +201,16 @@ Not           = a:('¬'/'not ')? _ b:Stuff     { return (a==='not ')
                                               }
 
 // stuff that might be a prop
-Stuff = Relation / Thing
+Stuff = Relations / Thing
 
 // relations
-Relation = Maps / Subset / ElementOf / NotEltOf / Divides / Leq / 
-           LessThan / Equation / NotEqual / Loves / Is
+Relations = Maps / Subset / ElementOf / NotEltOf / Divides / Leq / LessThan / 
+             Similar / Relation / Equation / NotEqual / Loves / Is
 
-
-Maps        = a:Thing _ ':' _ b:Thing '→' c:Thing      { return lisp('maps',[a,b,c]) }
+Maps       = a:Thing _ ':' _ b:Thing '→' c:Thing      { return lisp('maps',[a,b,c]) }
 
 Subset     = a:Thing|2..,'⊆'/' subset '/' subseteq '| { return lisp('⊆',a) }
-NotEltOf   = a:Thing (' notin '/' !in ') b:Thing 
+NotEltOf   = a:Thing (' notin ') b:Thing 
              { return `(¬ ${lispBinary('∈',a,b)})` }
 ElementOf  = a:Thing ('∈'/' in ') b:Thing             { return lispBinary('∈',a,b) }
 Divides    = a:Thing '|' b:Thing                      { return lispBinary('|',a,b) }  
@@ -219,6 +218,8 @@ Leq        = a:Thing|2..,'≤'/' leq '|                 { return lisp('≤',a) }
 LessThan   = a:Thing|2..,'<'/' lt '|                  { return lisp('<',a) }
 NotEqual   = a:Thing (' neq '/' ne ') b:Thing 
              { return `(¬ ${lispBinary('=',a,b)})` }
+Similar    = a:(Binding/Thing)|2..,'≈'|               { return lisp('≈',a) }             
+Relation   = a:(Binding/Thing)|2..,'~'|               { return lisp('~',a) }             
 Equation   = a:(Binding/Thing)|2..,'='|               { return lisp('=',a) }
 Loves      = a:Thing|2..2,' loves '|                  { return lisp('loves',a) }
 Is         = a:Thing|2..2,' is an '/' is a '/' is '|  { return lisp('is',a) }
@@ -243,14 +244,16 @@ Complement    = a:Atomic ('°'/' complement') { return lispUnary('°',a) }
 Algebraic = Sum / Product
 
 Sum       = a:Product b:([-+] Product)+                   { return lispSum(a,b)     }
-Product   = a:(Recip/Inversed/Negated)|1..,'⋅'/' cdot '|  { return lisp('⋅',a)      }
+Product   = a:(Recip/Factorial/Inversed/Negated)|1..,'⋅'/' cdot '| 
+                                                          { return lisp('⋅',a)      }
 Recip     = a:Atomic ('⁻'/' recip')                       { return lispUnary('⁻',a) }
+Factorial = a:Atomic ('！'/' factorial')                   { return lispUnary('!',a) }
 Inversed  = a:'/'? b:Exp                                  { return lispUnary(a,b)   }    
 Negated   = a:'-'? b:Exp                                  { return lispUnary(a,b)   }
 Exp       = a:Atomic|1..,'^'|                             { return lisp('^',a)      } 
 
 // morally atomic (do not require parentheses)
-Atomic =   EFA / Prefix / Parenthesized / Tuple / Symbol / Number
+Atomic =   EFA / Prefix / Parenthesized / EquivalenceClass / Tuple / Symbol / Number
 
 // TODO: fix this hack for inverse functions
 Prefix = a:(Symbol ('⁻'/' recip') / Symbol / Parenthesized ) 
@@ -262,6 +265,7 @@ Prefix = a:(Symbol ('⁻'/' recip') / Symbol / Parenthesized )
 // as a shortcut
 EFA = 'λ' a:Symbol '(' b:Expression ')' { return `(λ ${a} ${b})` }
 
+EquivalenceClass = '[' b:(  @Expression|1..2,comma| )+ ']' { return lispPrefix('class',b) }
 Tuple = '⟨' b:(  @Expression|1..,comma| )+ '⟩' { return lispPrefix('tuple',b) }
 Parenthesized = '(' @Expression ')'
  
@@ -277,9 +281,9 @@ Natural = $( [1-9][0-9]* / '0' )
 
 // Symbols can't start with a digit, contain reserved constants, or keywords
 SymbolSeq = a:(Symbol/Number)|1..,comma| { return a.join(',') }
-Symbol "Symbol" = $( '≡' / '→←' /
+Symbol "Symbol" = $( '≡' / '→←' / '~' /
                      !([0-9]/ReservedWords)
-                     [^-\][()⟨⟩ \t\n✦{},.:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∘∧∨≡]+ )
+                     [^-\][()⟨⟩ \t\n✦{},.:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∘∧∨≡↦~≈！]+ )
 BindingSymbol = ('∃!'/'exists unique ') { return '∃!' } /
                 ('∀'/'forall '/'for all ') { return '∀' } /
                 ('∃'/'exists ') { return '∃' } 
@@ -290,8 +294,8 @@ period =  '.'
 __  = [ \t\n\r]+
 _   = [ \t\n\r]*
 
-ReservedChars = $([:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∘∧∨≡σλ])
-ReservedWords = ' or '/' and '/' loves '/' cdot '/' complement'/
+ReservedChars = $([:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∘∧∨≡σλ↦~≈！])
+ReservedWords = ' or '/' and '/' loves '/' cdot '/' complement' / 
                 ' setminus '/' cap '/' cup '/' times '/' lt '/' leq '/
                 ' in '/' subset '/' implies '/' iff ' / 'maps ' /
                 ' contradiction '

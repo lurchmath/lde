@@ -85,6 +85,7 @@ export const makeParser = parserstr => {
  *       | 'thm>'      | 'Theorem' |
  *       | '<thm'      | 'Theorem' |
  *       | 'proof>'    | 'Proof'   |
+ *       | 'proof>'    | 'Proof'   |
  *
  *   * Scan for occurrences of the symbol `rules>`. Its next sibling should be
  *     an environment containing given Environments. Mark each child of the next
@@ -114,7 +115,7 @@ export const makeParser = parserstr => {
  *   * Scan for occurrences of the symbol `by` and mark its previous sibling's
  *     `.by` attribute with the text of its next sibling, which must be a
  *     LurchSymbol. Then delete both the `by` and it's next sibling.  Currently
- *     used by the `Cases` tool
+ *     used by the `Cases` tool and the CAS tool.
  *
  *   * Scan for occurrences of the symbol `✔︎`, `✗`, and `!✗` and mark its
  *     previous sibling with .expectedResult 'valid', 'indeterminate', and
@@ -171,6 +172,13 @@ export const processShorthands = L => {
     const LHS = m.previousSibling()
     const RHS = m.nextSibling()
     if (!RHS instanceof LurchSymbol) return
+    // check for CAS calls
+    
+    // if (RHS.text()==='CAS') { 
+    //   const CASarg = RHS.nextSibling() 
+    //   if (!CASArg instanceof LurchSymbol) return
+    // }
+    
     LHS.by = RHS.text()
     m.remove()
     RHS.remove()

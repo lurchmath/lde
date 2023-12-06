@@ -117,6 +117,10 @@ x+y
 -2-(x-3/(yz^4))
 (2/(x-3/y) cdot z)^(-4)
 -2 cdot (x^3+y)/(-z)-4
+// factorials
+n！
+(n+1)！+2
+2+n！
 // sets
 A cap B
 A cup B
@@ -287,6 +291,15 @@ f : A → B
 f(0):A∩B → A∪B°
 f:ℕ → ℕ
 f⁻:A→B
+
+// relations
+x~y
+x ~ y
+a~(b+1)~c~d^2
+ABC≈DEF
+ABC ≈ DEF
+ABC≈DEF≈X
+ABC ≈ DEF ≈ X
 
 // misc
 ∀y.𝜆P(y) ⇒ y=x
@@ -467,6 +480,5 @@ Rules: {
   { :P P }
   { :Q Q }
 }
- 
 
 }
