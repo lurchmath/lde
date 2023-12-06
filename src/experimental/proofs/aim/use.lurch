@@ -1,0 +1,17 @@
+
+Declare "minimal divisor of"
+{
+ 
+	Theorem: { ∀n.∃p. n < p and p is prime }
+
+	➤ "Proof:"
+	
+	{ { 
+		  Let n
+	    p is minimal_divisor_of(n！+1) for some p 
+      
+	  }
+
+	}
+
+}

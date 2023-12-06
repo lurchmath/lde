@@ -1,0 +1,16 @@
+include libs/Reals
+{
+	Definition: :{ x^2=x⋅x }
+	{
+    Assume a|b 
+		Assume b|c
+    b = a⋅k for some k
+    c = b⋅j for some j
+    
+		c = b⋅j
+		  = (a⋅k)⋅j
+			= a⋅(k⋅j)
+    
+		a|c
+  }
+}

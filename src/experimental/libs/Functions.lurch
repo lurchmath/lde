@@ -12,7 +12,7 @@ Definitions:
 {
 	:{ :f:A→B :x∈A  f(x)∈B }                     // function
 	:{ :f:A→B Domain(f)=A Codomain(f)=B }        // domain & codomain
-  :{ :f = x.𝜆P(x) f(z) = 𝜆P(z) }               // lambda expression
+  :{ :f = (x ↦ 𝜆P(x))  f(z) = 𝜆P(z) }            // lambda expression
   :{ :f:A→B :g:A→B 
 	   :{ Let x such that x∈A  f(x)=g(x) }
      f=g
@@ -33,7 +33,7 @@ Definitions:
 	}                                            // surjective
 	:{ :f:A→B 
 		 :{ Let b such that b∈B
-			  a∈A and b=f(a) for some a
+			  ∃a.b=f(a)
 		 }  
 		 f is surjective }                         // surjective
   :{ f is bijective ≡ 

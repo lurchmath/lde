@@ -1,0 +1,14 @@
+include libs/Functions
+////////////////////////////////////////////////////////////////////////////
+// Relations Lurch Lib
+//
+
+//////////////////////////////////
+// Definitions for Relations
+//////////////////////////////////
+Declare ~ ≈ reflexive symmetric transitive irreflexive antisymmetric total class
+Declare "partial order" "strict partial order" "total order" "equivalence relation"
+Definitions:  
+{
+ :{ :(~) is reflexive ≡ (~)⊆A×A } // reflexive
+} 
