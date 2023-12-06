@@ -213,7 +213,7 @@ Subset     = a:Thing|2..,'⊆'/' subset '/' subseteq '| { return lisp('⊆',a) }
 NotEltOf   = a:Thing (' notin ') b:Thing 
              { return `(¬ ${lispBinary('∈',a,b)})` }
 ElementOf  = a:Thing ('∈'/' in ') b:Thing             { return lispBinary('∈',a,b) }
-Divides    = a:Thing '|' b:Thing                      { return lispBinary('|',a,b) }  
+Divides    = a:Thing ('|'/' divides ') b:Thing        { return lispBinary('|',a,b) }  
 Leq        = a:Thing|2..,'≤'/' leq '|                 { return lisp('≤',a) }
 LessThan   = a:Thing|2..,'<'/' lt '|                  { return lisp('<',a) }
 NotEqual   = a:Thing (' neq '/' ne ') b:Thing 
@@ -298,4 +298,4 @@ ReservedChars = $([:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∘∧
 ReservedWords = ' or '/' and '/' loves '/' cdot '/' complement' / 
                 ' setminus '/' cap '/' cup '/' times '/' lt '/' leq '/
                 ' in '/' subset '/' implies '/' iff ' / 'maps ' /
-                ' contradiction '
+                ' contradiction ' / ' divides '

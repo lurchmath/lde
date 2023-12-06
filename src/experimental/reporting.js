@@ -164,9 +164,10 @@ const clean = { showInstantiations, showNumbers, showSimpleProperNames , showUse
                 showValidation } 
 // user report option
 const user = { showNumbers, showUserThms , showSimpleProperNames , showValidation }
-// user report option
-const defaultOptions = { showDeclares, showNumbers, showRules , showSimpleProperNames , 
+// old default report option
+const nice = { showDeclares, showNumbers, showRules , showSimpleProperNames , 
   showUserThms , showValidation }
+const defaultOptions = {  showDeclares, showSimpleProperNames , showUserThms , showValidation }
 
 
 // Syntactic sugar for the formatter
@@ -192,7 +193,9 @@ const formatter = ( options=defaultOptions ) => {
     // optionally hide user Theorems or userRules
     if ((L.isA('Theorem') && !options.showUserThms) ||
         (L.userRule && !options.showUserRules))  { // do nothing
-    // hint markers
+    } else if ((L.isA('Rule') && !options.showRules) ||
+        (L.userRule && !options.showUserRules))  { // do nothing
+      // hint markers
     } else if (L.isA(hint) || (L instanceof LurchSymbol && L.text()==='<<')) {  
       ans += hintPen(S)
     // metavariables        
@@ -226,8 +229,8 @@ const formatter = ( options=defaultOptions ) => {
     } else if (L instanceof Declaration) {
       const label = L.isA('Declare') ? decPen('Declare') : 
                     L.isA('given')   ? decPen('Let')     : decPen('ForSome')
-      ans += (L.isA('given') ? ':' : '') + label + 
-              S.slice(0).replace(/\s*,\s*]$/,']') 
+      ans += (options.showDeclares) ? (L.isA('given') ? ':' : '') + label + 
+              S.slice(0).replace(/\s*,\s*]$/,']') : ''
     // Declaration body copies
     } else if (L.bodyOf) {
       ans += (options.showBodies) ? instantiationPen(S) : ''
@@ -550,7 +553,7 @@ export default {
   decPen , commentPen , headingPen , docPen , linenumPen , itemPen ,
   
   // report definitions
-  all, show, detailed , moderate, allclean, clean , user ,
+  all, show, detailed , moderate, allclean, clean , user , nice ,
   
   // report options
   showAttributes , showContexts , showRules , showInstantiations , 

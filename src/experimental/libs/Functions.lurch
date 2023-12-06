@@ -6,13 +6,13 @@ include libs/Sets
 //////////////////////////////////
 // Definitions for Functions
 //////////////////////////////////
-Declare maps is ℕ ℤ ℚ ℝ ℂ inv ∘ 
+Declare maps ℕ ℤ ℚ ℝ ℂ inv ∘ 
 Declare Domain Codomain Range injective surjective bijective
 Definitions:  
 {
 	:{ :f:A→B :x∈A  f(x)∈B }                     // function
 	:{ :f:A→B Domain(f)=A Codomain(f)=B }        // domain & codomain
-  :{ :f = (x ↦ 𝜆P(x))  f(z) = 𝜆P(z) }            // lambda expression
+  :{ :f = (x ↦ 𝜆P(x))  f(z) = 𝜆P(z) }          // lambda expression
   :{ :f:A→B :g:A→B 
 	   :{ Let x such that x∈A  f(x)=g(x) }
      f=g
@@ -42,7 +42,7 @@ Definitions:
 		 :g∘f=id(A) :f∘g=id(B)
 	   f⁻=g }                                    // inverse function
 	// :{ :f:A→B  :f is bijective 
-	//     f⁻:B→A  f⁻(f(x))=x  f(f⁻(y))=y }         // inverse function
+	//     f⁻:B→A  f⁻(f(x))=x  f(f⁻(y))=y }      // inverse function
 
 	:{ :a∈f^inv(S) ≡ f(a)∈S }		                 // inverse image
 } 

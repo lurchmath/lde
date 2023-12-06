@@ -154,8 +154,12 @@ global.lc = s => {
 global.mc = s => { 
   const M = MathConcept.fromSmackdown(s)
   return (M.length===1) ? M[0] : M  
-}  
-
+}
+global.check = s => { 
+  const doc = $(s)
+  validate(doc)  
+  return doc
+}
 // a useful utility for exploring matching
 global.matchMaker = (decl,pstr,estr) => {
   let doc = $(`{
