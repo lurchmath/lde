@@ -7,6 +7,7 @@ src/experimental/initmisc.js
 .vscode/extensions.json
 src/experimental/parsers/ascimathref.js
 src/experimental/initproofs.js
+src/experimental/reference/
 for-reference-only/
 dependencies/lurchmath
 *.code-workspace
