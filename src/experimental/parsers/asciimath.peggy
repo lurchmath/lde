@@ -141,7 +141,7 @@ Environment "Environment" =
   { return `{ ${a.join(' ')} }` }
 
 // things it searches for and replaces up front
-Meta = Putdown / Comment / Shorthand
+Meta = Putdown / Comment / Shorthand / StringLiteral
 
 // unprocessed putdown notation (cannot include // comments)
 Putdown = '«' @$([^»]*) '»'  // todo: add a non-unicode way to do this
@@ -281,7 +281,7 @@ Natural = $( [1-9][0-9]* / '0' )
 
 // Symbols can't start with a digit, contain reserved constants, or keywords
 SymbolSeq = a:(Symbol/Number)|1..,comma| { return a.join(',') }
-Symbol "Symbol" = $( '≡' / '→←' / '~' /
+Symbol "Symbol" = $( '≡' / '→←' / '~' / '"' [^"]* '"' /
                      !([0-9]/ReservedWords)
                      [^-\][()⟨⟩ \t\n✦{},.:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∘∧∨≡↦~≈！]+ )
 BindingSymbol = ('∃!'/'exists unique ') { return '∃!' } /
