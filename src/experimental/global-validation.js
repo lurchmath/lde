@@ -171,7 +171,8 @@ const LurchOptions = {
   autoCases:false ,
   processCAS:true ,
   updateProgress: async () => { }  ,
-  updateFreq: 100 
+  updateFreq: 100 ,
+  badResultMsg: 'indeterminate' 
 }
 
 /**
@@ -1300,7 +1301,7 @@ LogicConcept.prototype._validate = function (target = this,
       // determine the appropriate feedback
       result = (ans)
         ? { result: 'valid', reason: 'n-compact' }
-        : { result: 'indeterminate', reason: 'n-compact' }
+        : { result: LurchOptions.badResultMsg, reason: 'n-compact' }
       Validation.setResult(target, result)
     }
   }
@@ -1322,7 +1323,7 @@ LogicConcept.prototype._validate = function (target = this,
         ans = this._validate(target)
         result = (ans)
           ? { result: 'valid', reason: 'n-compact' }
-          : { result: 'indeterminate', reason: 'n-compact' }
+          : { result: LurchOptions.badResultMsg, reason: 'n-compact' }
         Validation.setResult(target, result)
       }
       // if it is propositionally valid, check it for preemies           
