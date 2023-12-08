@@ -157,6 +157,7 @@ const timeEnd = (description) => { if (Debug) console.timeEnd(description) }
  *   * `autoCases` - similar to avoidLoneMetavars=false. If true, then identify
  *      all Cases-like rules and try to instantiate their univar conclusion with
  *      every user's conclusion in the document.
+ *   * `processCAS` - process CAS tool iff this is true
  *
  * @see {@link validate validate()}
  */
@@ -243,7 +244,7 @@ const validate = ( doc, target = doc ) => {
   //
   // we currently are using Algebrite for the CAS but this tool will work with
   // any CAS.
-  // processCAS(doc)
+  processCAS(doc)
   
   //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
   
@@ -910,25 +911,15 @@ const processCAS = doc => {
   // check options 
   if (!LurchOptions.processCAS) return
   
-  // check if the CAS_Rule is around, if not, we're done
-  // For now we only allow one. TODO: allow multiple
-  const rule=doc.find(
-    x=>x.isA('Rule') && 
-       x.child(0) instanceof LurchSymbol && x.child(0).text()==='CAS_Rule',
-    x=>!(x.isA('Rule') || x===doc))
-  // if there is no Equations Rule loaded we are done
-  if (!rule) return
-
   // get all the things the user wants to checked as a conclusion by CAS
-  const userCASs = [...doc.descendantsSatisfyingIterator(
-    x => x.by?.toLowerCase()==='cas')]
-  // for each one construct the relevant partial instantiation
-  userCASs.forEach( c => {
-    try {
-
-    } catch {
-
-    }
+  const userCASs = [...doc.descendantsSatisfyingIterator( x => typeof x.by?.CAS ==='string')]
+  
+  userCASs.forEach( c => { 
+    // get the command
+    const command = c.by.CAS
+    // if the CAS evaluates to truthy, mark the proposition as valid
+    const ans = (compute(command)==='1') ? 'valid' : 'invalid'
+    c.setResult('CAS', ans , 'CAS')
   })
 
 }

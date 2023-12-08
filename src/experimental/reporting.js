@@ -165,8 +165,8 @@ const clean = { showInstantiations, showNumbers, showSimpleProperNames , showUse
 // user report option
 const user = { showNumbers, showUserThms , showSimpleProperNames , showValidation }
 // old default report option
-const nice = { showDeclares, showNumbers, showRules , showSimpleProperNames , 
-  showUserThms , showValidation }
+const nice = { showDeclares, showRules , showSimpleProperNames , showUserThms ,
+   showValidation }
 const defaultOptions = { showSimpleProperNames , showUserThms , showValidation }
 
 
@@ -286,6 +286,9 @@ const formatter = ( options=defaultOptions ) => {
       // TODO: adding the switchover to the new validation storage
       if (L.results("BIH")) 
         ans += (L.results("BIH").result==="valid")?goldstar:redstar
+      // CAS validation marker
+      if (L.results("CAS")) 
+        ans += (L.results("CAS").result==="valid")?checkPen('#'):xPen('#')
       // TODO: remove old style validation
       if (Validation.result(L) && Validation.result(L).result==='valid') {
         // a valid BIH has to be propositionally valid, so a green check

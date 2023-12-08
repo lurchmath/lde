@@ -171,17 +171,20 @@ export const processShorthands = L => {
   processSymbol( 'by' ,  m => { 
     const LHS = m.previousSibling()
     const RHS = m.nextSibling()
-    if (!RHS instanceof LurchSymbol) return
-    // check for CAS calls
-    
-    // if (RHS.text()==='CAS') { 
-    //   const CASarg = RHS.nextSibling() 
-    //   if (!CASArg instanceof LurchSymbol) return
-    // }
-    
-    LHS.by = RHS.text()
-    m.remove()
-    RHS.remove()
+    // it should be a LurchSymbol or an Application
+    if (RHS instanceof LurchSymbol) {
+      LHS.by = RHS.text()
+      m.remove()
+      RHS.remove()
+    } else if (RHS instanceof Application ) {
+      if (RHS.child(0) instanceof LurchSymbol && RHS.child(0).text()==='CAS') { 
+        // TODO: handle the case where no arg is passed or it's not a symbol
+        LHS.by = { CAS: RHS.child(1).text() }
+        m.remove()
+        RHS.remove()
+      }
+    }
+    return 
   } )
   
   // rules> - Mark each of the children of the next sibling (which should be an
