@@ -63,6 +63,24 @@ export const makeParser = parserstr => {
   return [parser,traceparser]
 }
 
+export const lc2algebrite = e => {
+  if (e instanceof Application && 
+      e.numChildren()==3 &&
+      e.child(0) instanceof LurchSymbol &&
+      e.child(0).text()==='is' && 
+      e.child(2) instanceof LurchSymbol &&
+      e.child(2).text()==='prime' &&
+      e.child(1) instanceof LurchSymbol &&
+      e.child(1).text().length > 0 &&
+      Number.isInteger(Number(e.child(1).text())) ) {
+    const n = Number(e.child(1).text())  
+    return `isprime(${n})`
+  } else {  
+    return '0'
+  }
+}
+
+
 /**
  *  ## Process Shorthands 
  *
@@ -173,9 +191,15 @@ export const processShorthands = L => {
     const RHS = m.nextSibling()
     // it should be a LurchSymbol or an Application
     if (RHS instanceof LurchSymbol) {
-      LHS.by = RHS.text()
-      m.remove()
-      RHS.remove()
+      if (RHS.text()==='CAS') {
+        LHS.by = { CAS: lc2algebrite(LHS) }
+        m.remove()
+        RHS.remove()
+      } else {
+        LHS.by = RHS.text()
+        m.remove()
+        RHS.remove()
+      }
     } else if (RHS instanceof Application ) {
       if (RHS.child(0) instanceof LurchSymbol && RHS.child(0).text()==='CAS') { 
         // TODO: handle the case where no arg is passed or it's not a symbol
