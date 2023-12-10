@@ -2,7 +2,7 @@ include libs/Reals
 
 Declare minimal_divisor_of !
 
-Rules:  // mini-MathLib
+Rules:  // mini-Mathlib
 { 
 	:{ :¬a≤b  b<a }
 	:{ :a+c=b+c a=b }
