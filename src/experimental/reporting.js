@@ -184,6 +184,7 @@ const context = 'context'
 const declare = 'Declare'
 const ProperName = 'ProperName'
 const validation = 'validation result'
+const validations = 'validation results'
 
 // custom formatter
 const formatter = ( options=defaultOptions ) => {
@@ -260,7 +261,7 @@ const formatter = ( options=defaultOptions ) => {
       const highlighted=[ metavariable, constant, instantiation, hint, valid, 
             invalid, declare, formula ].map( s => '_type_'+s )
       // then non-types
-      highlighted.push(scoping,context,ProperName,validation)
+      highlighted.push(scoping,context,ProperName,validation,validations)
       let keys=attr.filter( a => !highlighted.includes(a) )
       // format what's left
       if (keys.length>0) {
@@ -541,6 +542,14 @@ Object.defineProperty(LogicConcept.prototype, 'all', {
     this.report(all)
   }
 })
+
+// Because this is used so often
+Object.defineProperty(LogicConcept.prototype, 'nice', {
+  get: function() {
+    this.report(nice)
+  }
+})
+
 
 export default {
   
