@@ -284,6 +284,8 @@ const validate = ( doc, target = doc ) => {
   // something human-readable. 
   // TODO: maybe improve or eliminate this in the future
   tidyProperNames(doc)
+  // re-cache the catalog, since these are new prop names
+  doc.cat = doc.catalog()
 
   return doc   
 }
