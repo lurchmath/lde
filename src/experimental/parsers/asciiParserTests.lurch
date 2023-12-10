@@ -296,10 +296,8 @@ f⁻:A→B
 x~y
 x ~ y
 a~(b+1)~c~d^2
-ABC≈DEF
-ABC ≈ DEF
-ABC≈DEF≈X
-ABC ≈ DEF ≈ X
+a ≈ b mod m
+a+k ≈ b-3 mod m
 
 // misc
 ∀y.𝜆P(y) ⇒ y=x
