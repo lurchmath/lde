@@ -90,8 +90,18 @@
   input = input.replace(/𝜆/g, 'λ')
   input = input.replace(/≠/g, ' neq ')  
   input = input.replace(/∉/g, ' notin ') 
-
+  
+  //   * since we want to use → for maps, we replace the contradiction symbol pair up front
   input = input.replace(/→←/g, ' contradiction ')
+  //   * we also prefer to write 'equivalence relation', etc. than equivalence_relation
+  input = input.replace(/equivalence relation/g, ' equivalence_relation ')
+  input = input.replace(/strict partial order/g, ' strict_partial_order ')
+  input = input.replace(/partial order/g, ' partial_order ')
+  input = input.replace(/total order/g, ' total_order ')
+  //   * in order to use ~ and ≈ as both infix operations AND sets (and talk about their
+  //     properties) we replace '~' and '≈' up front with (~) and (≈) respectively.
+  input = input.replace(/'~'/g, '(~)')
+  input = input.replace(/'≈'/g, '(≈)')
   //   * Let's used to require a colon ':Let' but we no longer require it, so 
   //     for backwards compatibility, remove it if its there.
   input = input.replace(/:([Ll]et )/g, '$1') 
@@ -204,11 +214,15 @@ Not           = a:('¬'/'not ')? _ b:Stuff     { return (a==='not ')
 Stuff = Relations / Thing
 
 // relations
-Relations = Maps / Subset / ElementOf / NotEltOf / Divides / Leq / LessThan / 
-             Similar / Relation / Equation / NotEqual / Loves / Is
+Relations = Maps / Partition / Congruent / Subset / ElementOf / NotEltOf / Divides / 
+            Leq / LessThan / Relation / Equation / NotEqual / Loves / Is
 
 Maps       = a:Thing _ ':' _ b:Thing '→' c:Thing      { return lisp('maps',[a,b,c]) }
 
+Partition  = a:(Binding/Thing) ' is a partition of 'i b:(Binding/Thing)
+             { return lisp('partition',[a,b]) }             
+Congruent  = a:(Binding/Thing) '≈' b:(Binding/Thing) ' mod 'i c:(Binding/Thing)
+             { return lisp('≈',[a,b,c]) }             
 Subset     = a:Thing|2..,'⊆'/' subset '/' subseteq '| { return lisp('⊆',a) }
 NotEltOf   = a:Thing (' notin ') b:Thing 
              { return `(¬ ${lispBinary('∈',a,b)})` }
@@ -218,7 +232,6 @@ Leq        = a:Thing|2..,'≤'/' leq '|                 { return lisp('≤',a) }
 LessThan   = a:Thing|2..,'<'/' lt '|                  { return lisp('<',a) }
 NotEqual   = a:Thing (' neq '/' ne ') b:Thing 
              { return `(¬ ${lispBinary('=',a,b)})` }
-Similar    = a:(Binding/Thing)|2..,'≈'|               { return lisp('≈',a) }             
 Relation   = a:(Binding/Thing)|2..,'~'|               { return lisp('~',a) }             
 Equation   = a:(Binding/Thing)|2..,'='|               { return lisp('=',a) }
 Loves      = a:Thing|2..2,' loves '|                  { return lisp('loves',a) }
@@ -247,7 +260,7 @@ Sum       = a:Product b:([-+] Product)+                   { return lispSum(a,b) 
 Product   = a:(Recip/Factorial/Inversed/Negated)|1..,'⋅'/' cdot '| 
                                                           { return lisp('⋅',a)      }
 Recip     = a:Atomic ('⁻'/' recip')                       { return lispUnary('⁻',a) }
-Factorial = a:Atomic ('！'/' factorial')                   { return lispUnary('!',a) }
+Factorial = a:Atomic ('！'/' factorial')                  { return lispUnary('!',a) }
 Inversed  = a:'/'? b:Exp                                  { return lispUnary(a,b)   }    
 Negated   = a:'-'? b:Exp                                  { return lispUnary(a,b)   }
 Exp       = a:Atomic|1..,'^'|                             { return lisp('^',a)      } 
@@ -265,7 +278,10 @@ Prefix = a:(Symbol ('⁻'/' recip') / Symbol / Parenthesized )
 // as a shortcut
 EFA = 'λ' a:Symbol '(' b:Expression ')' { return `(λ ${a} ${b})` }
 
-EquivalenceClass = '[' b:(  @Expression|1..2,comma| )+ ']' { return lispPrefix('class',b) }
+EquivalenceClass = '[' b:(  @Expression|1..2,comma| )+ ']' { 
+  // if the optional relation is missing from an equivalence class, use '~'
+  if (b.length===1 && b[0].length===1) b=[[b[0][0],'~']]
+  return lispPrefix('class',b) }
 Tuple = '⟨' b:(  @Expression|1..,comma| )+ '⟩' { return lispPrefix('tuple',b) }
 Parenthesized = '(' @Expression ')'
  

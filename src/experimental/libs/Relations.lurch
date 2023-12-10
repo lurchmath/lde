@@ -1,4 +1,4 @@
-include libs/Functions
+// include libs/Functions
 ////////////////////////////////////////////////////////////////////////////
 // Relations Lurch Lib
 //
@@ -7,8 +7,50 @@ include libs/Functions
 // Definitions for Relations
 //////////////////////////////////
 Declare ~ ≈ reflexive symmetric transitive irreflexive antisymmetric total class
-Declare "partial order" "strict partial order" "total order" "equivalence relation"
+Declare partial order  strict partial order  total order  equivalence relation
+Declare partition
 Definitions:  
 {
- :{ :(~) is reflexive ≡ (~)⊆A×A } // reflexive
+	:{ x~y ≡ ⟨x,y⟩∈'~' }                          // infix vs set of tuples
+	// The following rule is not necessary because the parser translates both x~y
+	// and '~'(x,y) to the exact same thing.
+	// :{ x~y ≡ '~'(x,y)  }                       // infix vs prefix
+	:{ :'~' is reflexive  x~x          } // reflexive
+	:{ :{ Let x   x~x }   '~' is reflexive      } // reflexive
+	:{ :'~' is symmetric  :x~y   y~x            } // symmetric
+	:{ :{ Let x,y such that x~y  y~x }   '~' is symmetric  } // symmetric
+	:{ :'~' is transitive  :x~y  :y~z x~z       } // transitive
+	:{ :{ Let x,y,z such that x~y and y~z   x~z }   '~' is transitive  } // transitive
+
+  // equivalence relation
+	:{ '~' is an equivalence relation ≡ '~' is reflexive '~' is symmetric  '~' is transitive  }
+	:{ x∈[a] ≡ x~a } // equivalence class
+
+  // congruence mod m
+  :{ a ≈ b mod m  ≡  m | a-b } 
+  
+	// partition TODO: after doing indexed union
+  // :{ :P is a partition of A  P⊆𝒫(A) ∪P=A {:s∈A :t∈A s∩t=Set() or s=t } }
+
+	// order
+	:{ :'~' is irreflexive   ¬ x~x              } // irreflexive
+	:{ :{ Let x   ¬ x~x }   '~' is irreflexive  } // irreflexive
+	:{ :'~' is antisymmetric :x~y :y~x   x=y    } // antisymmetric
+	:{ :{ Let x,y such that x~y and y~x  x=y }  '~' is antisymmetric  } // antisymmetric
+	:{ :'~' is total     x~y or y~x             } // total
+	:{ :{ Let x,y   x~y or y~x }  '~' is total  } // total
+	
+	:{ '~' is a partial order ≡                   // partial order
+	   '~' is reflexive  
+		 '~' is antisymmetric  
+		 '~' is transitive  } 
+	:{ '~' is a strict partial order ≡            // strict partial order
+	   '~' is irreflexive  
+		 '~' is antisymmetric  
+		 '~' is transitive  }
+	:{ '~' is a total order ≡                     // total order
+	   '~' is antisymmetric  
+		 '~' is transitive  
+	   '~' is total }
+
 } 
