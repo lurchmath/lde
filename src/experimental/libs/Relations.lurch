@@ -1,4 +1,4 @@
-// include libs/Functions
+include libs/Functions
 ////////////////////////////////////////////////////////////////////////////
 // Relations Lurch Lib
 //
@@ -23,7 +23,8 @@ Definitions:
 	:{ :{ Let x,y,z such that x~y and y~z   x~z }   '~' is transitive  } // transitive
 
   // equivalence relation
-	:{ '~' is an equivalence relation ≡ '~' is reflexive '~' is symmetric  '~' is transitive  }
+	:{ '~' is an equivalence relation ≡ 
+	   '~' is reflexive '~' is symmetric  '~' is transitive  }
 	:{ x∈[a] ≡ x~a } // equivalence class
 
   // congruence mod m
