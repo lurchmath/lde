@@ -1116,6 +1116,10 @@ const matchPropositions = (p, e) => {
  * Many of the tools that work with $n$-compact validation (including the
  * $n$-compact tool itself) require creating and inserting instantiations and
  * marking them in various ways.  This utility makes that process more coherent.
+ * It also allows us to check for 'bad' instantiations that e.g. instantiate a
+ * metavariable that is inside (declared by) a declaration with a constant, or
+ * instantiate both $x$ and $y$ with the same thing in an declaration like 
+ * `[ x y ]`.
  *
  * @param {LogicConcept} inst - the instantiation to insert. If it is an
  *        environment it will be inserted either as a `Part` or an `Inst`. If it
@@ -1145,7 +1149,19 @@ const insertInstantiation = ( inst, formula, creator ) => {
 
     // insert it after the formula, the order doesn't matter
     inst.insertAfter(formula)
-    
+
+    // and mark the declared constants in the instantiation
+    markDeclaredSymbols(inst.root(), inst)
+
+    // check if this instantiation should be rejected because it contains a
+    // declaration that is declaring a constant or a declaration declaring more than
+    // one symbol that are instantiated with the same thing.
+    if (isBadInstantiation(inst)) { 
+      // if so, remove it
+      inst.remove()
+      return 
+    }
+
     // save the rule (whether formula is a Part or Rule)
     inst.rule = formula.rule || formula
     // if a creator is specified, push it onto the list
@@ -1162,9 +1178,7 @@ const insertInstantiation = ( inst, formula, creator ) => {
     // also rename the bindings to match what the user would have
     // for the same expressions in his document
     inst.statements().forEach(x => renameBindings(x))
-    // and mark the declared constants in the instantiation
-    markDeclaredSymbols(inst.root(), inst)
-
+    
     // if it's an expression, it's a Consider
     if (inst instanceof Expression) {
       inst.makeIntoA('Consider')
@@ -1190,6 +1204,40 @@ const insertInstantiation = ( inst, formula, creator ) => {
 
 }
 
+/**
+ * Check a proposed instantiation for bad declarations.
+ *
+ *  * If it declares a constant, it's bad.
+ *  * If it declares more than one symbol that are instantiated with the same
+ *    thing, it's bad.
+ *
+ * @param {*} target 
+ * @param {*} checkPreemies 
+ * @returns 
+ */
+const isBadInstantiation = ( inst ) => {
+  // get the declarations in this instantiation
+  const decs=inst.declarations()
+  // check each one to see if it declares a constant
+  for (let k = 0; k < decs.length; k++) {
+    // get the array of symbols in this declaration
+    const symbols = decs[k].symbols()
+    // check each one to see if it declares a constant
+    if (symbols.findIndex(s=>{return s.constant})!==-1) {
+      // return true if it does
+      return true
+    }
+    // check each one to see if it declares more than one symbol the same way
+    const names = new Set(symbols.map(s=>s.text())) 
+    if (names.size < symbols.length) {
+      // return true if it does
+      return true 
+    }
+  }
+
+  // return false if it doesn't have anything bad
+  return false
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Validate helper utility.  This is the way the original validation tool worked
