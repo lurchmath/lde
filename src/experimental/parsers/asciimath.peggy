@@ -113,7 +113,7 @@
   //     them with (➤ " ") to act as a line break in the output
   input = input.replace(/^([ \t]*)➤[ \t]*$/mg, '$1➤ " " \n')
   //   * delete comments (but leave any \n's to keep the line counts right)
-  input = input.replace(/\/\/[^\n\r]*(\n|\r)/g, '\n')
+  input = input.replace(/\/\/[^\n\r]*(\n|\r|$)/g, '\n')
   //   * Replace tabs with a space
   input = input.replace(/\t/g, ' ')
   //   * shrink consecutive spaces to a single space
