@@ -80,6 +80,15 @@ export const lc2algebrite = e => {
   }
 }
 
+export const parselines = (parser,name='asciiParserTests') => {
+  const lines = 
+    loadStr(name,'./parsers/','lurch').split('\n')
+       .map(line => line.trim())
+       .filter(line => line.length > 0 && line.slice(0,2)!=='//')
+  console.log(`File contains ${lines.length} parseable lines`)
+  let pass = 0, fail = 0
+  return lines.map( l => { return parser(l) })
+}
 
 /**
  *  ## Process Shorthands 
