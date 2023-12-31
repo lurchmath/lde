@@ -28,6 +28,12 @@ import fs, { write } from 'fs'
 import { execSync } from 'child_process'
 import util from 'util'
 import peggy from 'peggy'
+import asciimath2latex from './parsers/asciimath-to-latex.js'
+// import * as MathLive from 'mathlive'
+// import { getConverter } from './utils/math-live.js'
+// import katex from 'katex'
+// import mathjax from 'mathjax-node'
+// import React from 'react'
 
 // In LODE we have no need for EventTarget because we don't edit MCs in real
 // time and react to changes.  Importing this BEFORE importing math-concept.js
@@ -46,7 +52,7 @@ import CNF from '../validation/conjunctive-normal-form.js'
 // Experimental Code
 //
 // parsing
-import { Tokenizer, Grammar } from 'earley-parser'
+// import { Tokenizer, Grammar } from 'earley-parser'
 // generic helper utilities
 import Utilities from './utils.js'
 // interpretation utilities
@@ -56,7 +62,7 @@ import Compact from './global-validation.js'
 // load the custom formatters and reporting tools
 import Reporting from './reporting.js' 
 // import the parsing utiltiies (processShorthands comes from Interpret)
-import { makeParser } from './parsing.js'
+import { makeParser, parselines } from './parsing.js'
 // load the CNFProp tools for testing
 import { CNFProp } from './CNFProp.js'
 
@@ -89,8 +95,14 @@ global.CNFProp = CNFProp
 global.satSolve = satSolve
 global.Algebrite = Algebrite
 global.peggy = peggy
-global.Tokenizer = Tokenizer
-global.Grammar = Grammar
+// global.Tokenizer = Tokenizer
+// global.Grammar = Grammar
+// global.MathLive = MathLive
+global.asciimath2latex = asciimath2latex
+// global.getConverter = getConverter
+// global.katex = katex
+// global.mathjax = mathjax
+// global.React = React
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -263,13 +275,21 @@ global.loadParser = (name) => {
 }
 
 // a convenient way to make an lc or mc at the Lode prompt or in scripts
-global.parsers = loadParser('asciimath')
+let parsers = loadParser('asciimath')
 global.parse = parsers[0]
 global.trace = parsers[1]
 global.$ = s => {
   let parsed = parse(s)
   return (parsed) ? lc(parsed) : undefined
 }
+
+// a parser from my asciimath to LaTeX
+parsers = loadParser('asciitex')
+global.tex = parsers[0]
+global.textrace = parsers[1]
+global.parselines = parselines
+// global.mathlive = MathLive.convertLatexToMarkup
+// global.html = katex.renderToString
 
 // print a string to the console with line numbers
 global.say = s => {
@@ -384,6 +404,7 @@ rpl.defineCommand( "features", {
       ${itemPen('.test')}         : run the acidtests script
       ${itemPen('.makedocs')}     : make the jsdoc docs
       ${itemPen('.showdocs')}     : open the jsdoc docs in the browser
+      ${itemPen('.compileparser')}: compile the parser to js
       ${itemPen('exec(command)')} : execute the given shell commmand and print the result
       ${itemPen('initialize()')}  : loads and executes 'initproof.js' from the scripts
                       folder. A different file can be executed by calling 
@@ -427,8 +448,12 @@ rpl.defineCommand( "compileparser", {
   help: "Compile the Math 299 parser.",
   action() { 
     try {
-      console.log(`${defaultPen('Compiling parser to asciimath.js...')}`)
-      exec('cd parsers && peggy --cache --format es -o asciimath.js asciimath.peggy')
+      console.log(`${defaultPen('Compiling Lurch parser to asciimath.js...')}`)
+      execStr('cd parsers && peggy --cache --format es -o asciimath.js asciimath.peggy')
+      execStr('cd parsers && cp asciimath.js ../../../../lurchmath/')
+      console.log(`${defaultPen('Compiling Lurch parser to asciitex.js...')}`)
+      execStr('cd parsers && peggy --cache --format es -o asciitex.js asciitex.peggy')
+      execStr('cd parsers && cp asciitex.js ../../../../lurchmath/')
       console.log(`${defaultPen('Done.')}`)
     } catch (err) {
       console.log(xPen('Error compiling the parser.'))
@@ -439,7 +464,7 @@ rpl.defineCommand( "compileparser", {
 
 // define the Lode .list command
 rpl.defineCommand( "parsertest", {
-  help: "Run the Math 299 parser test.",
+  help: "Run the Lurch parser test.",
   action() { 
     try { 
       const s=lc(parse(loadStr('parsers/asciiParserTests')))
