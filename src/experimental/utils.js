@@ -86,10 +86,10 @@ const subscript = n => [...n.toString()].map(d => subscriptDigits[d]).join('')
 /** 
  * Report the time it took to execute function `f`, passed as an argument. 
  */
-const timer = f => {
+const timer = (f,msg='') => {
   let start = Date.now()
   f()
-  console.log((Date.now()-start)+' ms')
+  console.log(`${msg} ${(Date.now()-start)} ms`)
 }
 
 export default {
