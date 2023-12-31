@@ -14,6 +14,30 @@
   // replace the commas in a sequence with spaces
   const spaced = s => s.replace(/,/g, ' ') 
 
+  // tex utilities
+  const texUnary = (op,arg) => {
+    return (op) ? `${op} ${arg}` : arg
+  }
+
+  const texJoin = (op,args) => {
+    if (args.length===1) return args.join(op)
+    return args.map(x=>` ${x}`).join(op)
+  }
+
+  const texRightAssoc = (op,args) => {
+    return args.reverse().slice(1).reduce(
+      (ans,x)=>{ return `${x}${op}{${ans}}`},args[0])
+  }
+
+// convert signed sums to lisp
+  const texSum = (first,rest) => {
+    let ans = `${first}`
+    rest.forEach( term => {
+      ans = ans + ( (term[0]==='-') ? `-${term[1]}` : `+${term[1]}` )
+    })
+    return ans
+  }
+
   // default: convert optional associative binary operator to lisp
   const lisp = (op,args) => {
     // if there's only one arg, return it, otherwise apply the op
@@ -266,7 +290,7 @@ function peg$parse(input, options) {
   var peg$c29 = "such";
   var peg$c30 = "that";
   var peg$c31 = "\u21A6";
-  var peg$c32 = " contradiction ";
+  var peg$c32 = "contradiction";
   var peg$c33 = "\u21D4";
   var peg$c34 = " iff ";
   var peg$c35 = "\u21D2";
@@ -344,6 +368,7 @@ function peg$parse(input, options) {
   var peg$c107 = "exists ";
   var peg$c108 = ",";
   var peg$c109 = "maps ";
+  var peg$c110 = " contradiction ";
 
   var peg$r0 = /^[^\xBB]/;
   var peg$r1 = /^[^"]/;
@@ -394,7 +419,7 @@ function peg$parse(input, options) {
   var peg$e37 = peg$literalExpectation("that", true);
   var peg$e38 = peg$otherExpectation("Expression");
   var peg$e39 = peg$literalExpectation("\u21A6", false);
-  var peg$e40 = peg$literalExpectation(" contradiction ", false);
+  var peg$e40 = peg$literalExpectation("contradiction", false);
   var peg$e41 = peg$literalExpectation("\u21D4", false);
   var peg$e42 = peg$literalExpectation(" iff ", false);
   var peg$e43 = peg$literalExpectation("\u21D2", false);
@@ -479,70 +504,77 @@ function peg$parse(input, options) {
   var peg$e122 = peg$classExpectation([" ", "\t", "\n", "\r"], false, false);
   var peg$e123 = peg$classExpectation([":", "+", "\u22C5", "/", "^", "=", "<", "\u2264", "\xAC", "\u2192", "\u2190", "\u21D2", "\u21D4", "|", "\u2200", "\u2203", "\u2229", "\u222A", "\xD7", "\u2208", "\u2286", "\u2216", "\u207B", "\xB0", "\u2218", "\u2227", "\u2228", "\u2261", "\u03C3", "\u03BB", "\u21A6", "~", "\u2248", "\uFF01"], false, false);
   var peg$e124 = peg$literalExpectation("maps ", false);
+  var peg$e125 = peg$literalExpectation(" contradiction ", false);
 
   var peg$f0 = function(a) { return a.join(' ') };
-  var peg$f1 = function(a) { return ':'+a };
-  var peg$f2 = function(a) { return `{ ${a.join(' ')} }` };
+  var peg$f1 = function(a) { return ':\\text{:}'+a };
+  var peg$f2 = function(a) { return `\\{ ${a.join(' ')} \\}` };
   var peg$f3 = function(a) { return `(➤ ${a})` };
-  var peg$f4 = function() { return '>>' };
-  var peg$f5 = function() { return 'rules>' };
-  var peg$f6 = function() { return 'rule>' };
-  var peg$f7 = function() { return 'thm>' };
-  var peg$f8 = function() { return 'proof>' };
-  var peg$f9 = function(body, a) { return `[${spaced(a)}, ${body}]` };
-  var peg$f10 = function(a, b) { return `:[${spaced(a)}, ${b}]` };
-  var peg$f11 = function(a) { return `:[${spaced(a)}]` };
-  var peg$f12 = function(a, b) { return `(${a} ${b})` };
+  var peg$f4 = function() { return '\\text{Recall }' };
+  var peg$f5 = function() { return '\\text{Rules:}' };
+  var peg$f6 = function() { return '\\text{Rule}' };
+  var peg$f7 = function() { return '\\text{Theorem}' };
+  var peg$f8 = function() { return '\\text{Proof:}' };
+  var peg$f9 = function(body, a) { return `${body}\\text{ for some }${a}` };
+  var peg$f10 = function(a, b) { return `\\text{Let }${a}\\text{ be such that }${b}` };
+  var peg$f11 = function(a) { return `\\text{Let }${a}` };
+  var peg$f12 = function(a, b) { return `\\left(${a} ${b}\\right)` };
   var peg$f13 = function(a, b) { return `${a}, ${b}` };
-  var peg$f14 = function(a) { return '→←' };
-  var peg$f15 = function(a) { return lisp('⇔',a) };
-  var peg$f16 = function(a) { return lisp('⇒',a) };
-  var peg$f17 = function(a) { return lisp('or',a) };
-  var peg$f18 = function(a) { return lisp('and',a) };
-  var peg$f19 = function(a, b) { return (a==='not ')
-                                                        ?lispUnary('¬',b)
-                                                        :lispUnary(a,b)
+  var peg$f14 = function(a) { return '\\Leftarrow\\Rightarrow' };
+  var peg$f15 = function(a) { return texJoin('\\Leftrightarrow',a) };
+  var peg$f16 = function(a) { return texJoin('\\Rightarrow',a) };
+  var peg$f17 = function(a) { return texJoin('\\text{ or }',a) };
+  var peg$f18 = function(a) { return texJoin('\\text{ and }',a) };
+  var peg$f19 = function(a, b) { return (a==='not ' || a==='¬')
+                                                        ?texUnary('\\neg',b)
+                                                        :b
                                               };
-  var peg$f20 = function(a, b, c) { return lisp('maps',[a,b,c]) };
-  var peg$f21 = function(a, b) { return lisp('partition',[a,b]) };
-  var peg$f22 = function(a, b, c) { return lisp('≈',[a,b,c]) };
-  var peg$f23 = function(a) { return lisp('⊆',a) };
-  var peg$f24 = function(a, b) { return `(¬ ${lispBinary('∈',a,b)})` };
-  var peg$f25 = function(a, b) { return lispBinary('∈',a,b) };
-  var peg$f26 = function(a, b) { return lispBinary('|',a,b) };
-  var peg$f27 = function(a) { return lisp('≤',a) };
-  var peg$f28 = function(a) { return lisp('<',a) };
-  var peg$f29 = function(a, b) { return `(¬ ${lispBinary('=',a,b)})` };
-  var peg$f30 = function(a) { return lisp('~',a) };
-  var peg$f31 = function(a) { return lisp('=',a) };
-  var peg$f32 = function(a) { return lisp('loves',a) };
-  var peg$f33 = function(a) { return lisp('is',a) };
-  var peg$f34 = function(a) { return lisp('∘',a) };
-  var peg$f35 = function(a) { return lisp('×',a) };
-  var peg$f36 = function(a) { return lisp('∪',a) };
-  var peg$f37 = function(a) { return lisp('∩',a) };
-  var peg$f38 = function(a) { return lisp('∖',a) };
-  var peg$f39 = function(a) { return lispUnary('°',a) };
-  var peg$f40 = function(a, b) { return lispSum(a,b)     };
-  var peg$f41 = function(a) { return lisp('⋅',a)      };
-  var peg$f42 = function(a) { return lispUnary('⁻',a) };
-  var peg$f43 = function(a) { return lispUnary('!',a) };
-  var peg$f44 = function(a, b) { return lispUnary(a,b)   };
-  var peg$f45 = function(a, b) { return lispUnary(a,b)   };
-  var peg$f46 = function(a) { return lisp('^',a)      };
-  var peg$f47 = function(a, b) { if (Array.isArray(a)) return lispPrefix(`(⁻ ${a[0]})`,b)
-    return lispPrefix(a,b) };
-  var peg$f48 = function(a, b) { return `(λ ${a} ${b})` };
+  var peg$f20 = function(a, b, c) { return `a\\colon ${b}\\to ${c}` };
+  var peg$f21 = function(a, b) { return texJoin('\\text{ is a partition of }',[a,b]) };
+  var peg$f22 = function(a, b, c) { return `${a}\\underset{${c}}{\\equiv}${b}` };
+  var peg$f23 = function(a) { return texJoin('\\subseteq',a) };
+  var peg$f24 = function(a, b) { return texJoin('\\in',[a,b])        };
+  var peg$f25 = function(a, b) { return texJoin('\\in',[a,b]) };
+  var peg$f26 = function(a, b) { return texJoin('\\mid',[a,b]) };
+  var peg$f27 = function(a) { return texJoin('\\leq',a) };
+  var peg$f28 = function(a) { return texJoin('<',a) };
+  var peg$f29 = function(a, b) { return texJoin('\\neq',[a,b]) };
+  var peg$f30 = function(a) { return texJoin('\\sim',a) };
+  var peg$f31 = function(a) { return texJoin('=',a) };
+  var peg$f32 = function(a) { return texJoin('\\text{ loves }',a) };
+  var peg$f33 = function(a) { return texJoin('\\text{ is }',a) };
+  var peg$f34 = function(a) { return texJoin('\\circ',a) };
+  var peg$f35 = function(a) { return texJoin('×',a) };
+  var peg$f36 = function(a) { return texJoin('\\cup',a) };
+  var peg$f37 = function(a) { return texJoin('\\cap',a) };
+  var peg$f38 = function(a) { return texJoin('\\setminus',a) };
+  var peg$f39 = function(a) { return `${a}^\\circ` };
+  var peg$f40 = function(a, b) { return texSum(a,b)   };
+  var peg$f41 = function(a) { return texJoin('',a) };
+  var peg$f42 = function(a) { return `${a}^-`      };
+  var peg$f43 = function(a) { return `${a}!`       };
+  var peg$f44 = function(a, b) { return texUnary(a,b) };
+  var peg$f45 = function(a, b) { return texUnary(a,b) };
+  var peg$f46 = function(a) { return texRightAssoc('^',a) };
+  var peg$f47 = function(a, b) { if (Array.isArray(a)) return `${a[0]}^-\\left(${b}\\right)` 
+    return `${a}\\left(${b}\\right)` 
+  };
+  var peg$f48 = function(a, b) { return `\\lambda{${a}}(${b})` };
   var peg$f49 = function(b) { 
-  // if the optional relation is missing from an equivalence class, use '~'
-  if (b.length===1 && b[0].length===1) b=[[b[0][0],'~']]
-  return lispPrefix('class',b) };
-  var peg$f50 = function(b) { return lispPrefix('tuple',b) };
-  var peg$f51 = function(a) { return a.join(' ') };
-  var peg$f52 = function(a) { return a.join(',') };
-  var peg$f53 = function() { return '∃!' };
-  var peg$f54 = function() { return '∀' };
-  var peg$f55 = function() { return '∃' };
+  // if the optional relation is missing from an equivalence class, don't print it
+  if (b.length===1 && b[0].length===1) {
+    return `\\left[${b[0]}\\right]` 
+  } else {
+    return `\\left[${b[0]}\\right]_{${b[1]}}` 
+  }
+};
+  var peg$f50 = function(b) { return `\\langle{${b}}\\rangle` };
+  var peg$f51 = function(a) { return `\\left(${a}\\right)` };
+  var peg$f52 = function(a) { return a.join(' ') };
+  var peg$f53 = function(a) { return a.join(',') };
+  var peg$f54 = function() { return '\\exists!' };
+  var peg$f55 = function() { return '\\forall' };
+  var peg$f56 = function() { return '\\exists' };
   var peg$currPos = 0;
   var peg$savedPos = 0;
   var peg$posDetailsCache = [{ line: 1, column: 1 }];
@@ -720,43 +752,13 @@ function peg$parse(input, options) {
     s0 = peg$currPos;
     s1 = peg$parse_();
     s2 = [];
-    s3 = peg$parseMeta();
-    if (s3 === peg$FAILED) {
-      s3 = peg$parseContradiction();
-      if (s3 === peg$FAILED) {
-        s3 = peg$parseGiven();
-        if (s3 === peg$FAILED) {
-          s3 = peg$parseDeclaration();
-          if (s3 === peg$FAILED) {
-            s3 = peg$parseEnvironment();
-            if (s3 === peg$FAILED) {
-              s3 = peg$parseExpression();
-            }
-          }
-        }
-      }
-    }
+    s3 = peg$parseLC();
     while (s3 !== peg$FAILED) {
       s2.push(s3);
       s3 = peg$currPos;
       s4 = peg$parse__();
       if (s4 !== peg$FAILED) {
-        s4 = peg$parseMeta();
-        if (s4 === peg$FAILED) {
-          s4 = peg$parseContradiction();
-          if (s4 === peg$FAILED) {
-            s4 = peg$parseGiven();
-            if (s4 === peg$FAILED) {
-              s4 = peg$parseDeclaration();
-              if (s4 === peg$FAILED) {
-                s4 = peg$parseEnvironment();
-                if (s4 === peg$FAILED) {
-                  s4 = peg$parseExpression();
-                }
-              }
-            }
-          }
-        }
+        s4 = peg$parseLC();
         if (s4 === peg$FAILED) {
           peg$currPos = s3;
           s3 = peg$FAILED;
@@ -777,7 +779,7 @@ function peg$parse(input, options) {
   }
 
   function peg$parseLC() {
-    var s0, s1, s2, s3;
+    var s0, s1;
 
     var key = peg$currPos * 84 + 1;
     var cached = peg$resultsCache[key];
@@ -790,26 +792,24 @@ function peg$parse(input, options) {
 
     peg$silentFails++;
     s0 = peg$currPos;
-    s1 = peg$parse_();
-    s2 = peg$parseMeta();
-    if (s2 === peg$FAILED) {
-      s2 = peg$parseContradiction();
-      if (s2 === peg$FAILED) {
-        s2 = peg$parseGiven();
-        if (s2 === peg$FAILED) {
-          s2 = peg$parseDeclaration();
-          if (s2 === peg$FAILED) {
-            s2 = peg$parseEnvironment();
-            if (s2 === peg$FAILED) {
-              s2 = peg$parseExpression();
+    s1 = peg$parseMeta();
+    if (s1 === peg$FAILED) {
+      s1 = peg$parseContradiction();
+      if (s1 === peg$FAILED) {
+        s1 = peg$parseGiven();
+        if (s1 === peg$FAILED) {
+          s1 = peg$parseDeclaration();
+          if (s1 === peg$FAILED) {
+            s1 = peg$parseEnvironment();
+            if (s1 === peg$FAILED) {
+              s1 = peg$parseExpression();
             }
           }
         }
       }
     }
-    if (s2 !== peg$FAILED) {
-      s3 = peg$parse_();
-      s0 = s2;
+    if (s1 !== peg$FAILED) {
+      s0 = s1;
     } else {
       peg$currPos = s0;
       s0 = peg$FAILED;
@@ -2051,9 +2051,9 @@ function peg$parse(input, options) {
     }
 
     s0 = peg$currPos;
-    if (input.substr(peg$currPos, 15) === peg$c32) {
+    if (input.substr(peg$currPos, 13) === peg$c32) {
       s1 = peg$c32;
-      peg$currPos += 15;
+      peg$currPos += 13;
     } else {
       s1 = peg$FAILED;
       if (peg$silentFails === 0) { peg$fail(peg$e40); }
@@ -4733,7 +4733,8 @@ function peg$parse(input, options) {
           if (peg$silentFails === 0) { peg$fail(peg$e100); }
         }
         if (s3 !== peg$FAILED) {
-          s0 = s2;
+          peg$savedPos = s0;
+          s0 = peg$f51(s2);
         } else {
           peg$currPos = s0;
           s0 = peg$FAILED;
@@ -4804,7 +4805,7 @@ function peg$parse(input, options) {
     }
     if (s1 !== peg$FAILED) {
       peg$savedPos = s0;
-      s1 = peg$f51(s1);
+      s1 = peg$f52(s1);
     }
     s0 = s1;
 
@@ -5019,7 +5020,7 @@ function peg$parse(input, options) {
     }
     if (s1 !== peg$FAILED) {
       peg$savedPos = s0;
-      s1 = peg$f52(s1);
+      s1 = peg$f53(s1);
     }
     s0 = s1;
 
@@ -5123,7 +5124,7 @@ function peg$parse(input, options) {
               if (peg$silentFails === 0) { peg$fail(peg$e107); }
             }
             if (s3 === peg$FAILED) {
-              s3 = peg$parseReservedWords();
+              s3 = peg$parseReservedWord();
             }
             peg$silentFails--;
             if (s3 === peg$FAILED) {
@@ -5217,7 +5218,7 @@ function peg$parse(input, options) {
     }
     if (s1 !== peg$FAILED) {
       peg$savedPos = s0;
-      s1 = peg$f53();
+      s1 = peg$f54();
     }
     s0 = s1;
     if (s0 === peg$FAILED) {
@@ -5249,7 +5250,7 @@ function peg$parse(input, options) {
       }
       if (s1 !== peg$FAILED) {
         peg$savedPos = s0;
-        s1 = peg$f54();
+        s1 = peg$f55();
       }
       s0 = s1;
       if (s0 === peg$FAILED) {
@@ -5272,7 +5273,7 @@ function peg$parse(input, options) {
         }
         if (s1 !== peg$FAILED) {
           peg$savedPos = s0;
-          s1 = peg$f55();
+          s1 = peg$f56();
         }
         s0 = s1;
       }
@@ -5440,7 +5441,7 @@ function peg$parse(input, options) {
     return s0;
   }
 
-  function peg$parseReservedWords() {
+  function peg$parseReservedWord() {
     var s0;
 
     var key = peg$currPos * 84 + 83;
@@ -5580,12 +5581,12 @@ function peg$parse(input, options) {
                                     if (peg$silentFails === 0) { peg$fail(peg$e124); }
                                   }
                                   if (s0 === peg$FAILED) {
-                                    if (input.substr(peg$currPos, 15) === peg$c32) {
-                                      s0 = peg$c32;
+                                    if (input.substr(peg$currPos, 15) === peg$c110) {
+                                      s0 = peg$c110;
                                       peg$currPos += 15;
                                     } else {
                                       s0 = peg$FAILED;
-                                      if (peg$silentFails === 0) { peg$fail(peg$e40); }
+                                      if (peg$silentFails === 0) { peg$fail(peg$e125); }
                                     }
                                     if (s0 === peg$FAILED) {
                                       if (input.substr(peg$currPos, 9) === peg$c54) {
