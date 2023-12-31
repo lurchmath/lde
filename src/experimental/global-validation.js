@@ -252,6 +252,7 @@ const validate = ( doc, target = doc ) => {
   // the list of user propositions and the document catalog.  This must be done
   // after the tools above in case they instantiate a 'Part' that then is used
   // for further instantiation (e.g. as with the Cases tool)
+  
   instantiate(doc)
   
   ///////////////
@@ -830,7 +831,7 @@ const processCases = doc => {
     const p = rule.lastChild()
     // get all the things the user wants to checked as a conclusion by cases
     const usercases = [...doc.descendantsSatisfyingIterator(
-      x => x.by?.toLowerCase()==='cases')]
+      x => typeof x.by === 'string' && x.by.toLowerCase()==='cases')]
     // for each one construct the relevant partial instantiation
     usercases.forEach( c => {
       try {
@@ -914,7 +915,7 @@ const processCAS = doc => {
   if (!LurchOptions.processCAS) return
   
   // get all the things the user wants to checked as a conclusion by CAS
-  const userCASs = [...doc.descendantsSatisfyingIterator( x => typeof x.by?.CAS ==='string')]
+  const userCASs = [...doc.descendantsSatisfyingIterator( x => typeof x.by === 'object' && typeof x.by?.CAS ==='string')]
   
   userCASs.forEach( c => { 
     // get the command
@@ -1009,7 +1010,7 @@ const instantiate = doc => {
             // console.log(`${Math.ceil(counter/totalnum*100)}% complete`)
             LurchOptions.updateProgress(n,totalnum,Math.ceil(counter/totalnum*100))
           }
-          ////////////////////////////////////////////////////////////////
+          //////////////////////////////////////////////////////////////////
 
         })
       })
@@ -1211,9 +1212,6 @@ const insertInstantiation = ( inst, formula, creator ) => {
  *  * If it declares more than one symbol that are instantiated with the same
  *    thing, it's bad.
  *
- * @param {*} target 
- * @param {*} checkPreemies 
- * @returns 
  */
 const isBadInstantiation = ( inst ) => {
   // get the declarations in this instantiation
