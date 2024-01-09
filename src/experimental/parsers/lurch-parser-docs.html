@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang=en-US>
+<head>
+	<meta charset=UTF-8>
+	<title>LurchMath</title>
+
+  <script type="module">
+    import { parse as lurch2putdown } from './lurch-to-putdown.js'
+    import { parse as lurch2tex } from './lurch-to-tex.js'
+    window.onload = function() {
+      const textarea = document.getElementById('source')
+      const update = () => {
+        const text = textarea.value
+        let tex,putdown
+        try { 
+          const isBlank = /^\s*$/.test(text)
+          console.log(`The text input is blank: ${isBlank}`)
+          tex = (!isBlank) ? `$${lurch2tex(text)}$` : ''
+          putdown = (!isBlank) ? lurch2putdown(text) : ''
+          console.log(
+            `changing render from ${text} to ${tex} with meaning ${putdown}` )
+          const meaningDiv = document.getElementById('meaning')
+          meaningDiv.innerHTML = putdown
+          const renderDiv = document.getElementById('rendered')
+          renderDiv.innerHTML = tex
+          try { MathJax.typeset([renderDiv]) } catch (e) { }
+        } catch (e) {  } 
+      }
+      update()
+      textarea.addEventListener('input', update)
+    }
+  </script>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+        processEscapes: true
+      }
+    };
+  </script>
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+  </script>
+  <link rel="shortcut icon" href="favicon.ico">
+	<link href=http://fonts.googleapis.com/css?family=Quicksand
+			rel=stylesheet type=text/css>
+	<link rel=stylesheet href=lurch-parser-docs.css>
+	<meta name=viewport
+			content="width=device-width, initial-scale=0.8,
+			minimum-scale=0.8, maximum-scale=10">
+	</head>
+<body>
+
+<div id="wrapper">
+
+<nav>
+	<h1>LurchMath</h1>
+
+	<div id="links">
+		<a href="#about">about</a>
+		<a href="#features">features</a>
+		<a href="#examples">examples</a>
+	</div>
+</nav>
+
+<article>
+<section id="about">
+	<h2>About</h2>
+
+	<p>LurchMath is an easy-to-write markup language for mathematics.<br/> 
+    It extends a proper subset of <a href="https://asciimath.org" target="_blank">AsciiMath</a>, $\LaTeX$, and CAS software in natural ways.<br/>
+    It is currently under development, and more features will be added in the future.
+  </p>
+
+	<div class="leftColumn">
+		<label for="source">Input:</label>
+		<br/>
+
+		<textarea class="ioArea" id="source" onchange="()=>{ console.log('changed!');updateRender(this.value) }">Let x be such that x leq 10</textarea>
+	</div>
+
+	<div class="rightColumn">
+		<label for="rendered">Rendering:</label>
+		<br/>
+
+		<div class="ioArea" id="rendered">
+		</div>
+	</div>
+
+  <div class="fullColumn">
+    <label for="meaning">Meaning:</label>
+    <br/>
+  
+    <div class="ioArea" id="meaning">
+    </div>
+  </div>
+</section>
+
+<section id="features">
+<h2>Features</h2>
+
+  <p>LurchMath currently supports a small subset of AsciiMath, $\LaTeX$, and notation found in CAS software. Many symbols can be displayed using a TeX command but a preceeding backslash is not required.</p>
+
+  <p>Symbols can be more than one character long and can contain anything except reserved symbols and terms. Multiplication must be explicitly entered with <tt>cdot</tt> or ⋅ as a result, but is rendered as concatenation.</p>
+</section>
+
+
+<section id="examples"></section>
+<h2>Examples</h2>
+
+<table>
+    <thead>
+    <tr>
+    	<th>If you type any of these</th>
+      <th>it renders as this</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td colspan="2" class="subheader">Logic</td></tr>
+    <tr><td>P and Q<br/>P∧Q</td><td>$P\text{ and }Q$</td></tr>
+    <tr><td>P or Q<br/>P∨Q</td><td>$P\text{ or }Q$</td></tr>
+    <tr><td>not P<br/>¬P</td><td>$\neg P$</td></tr>
+    <tr><td>P implies Q<br/>P⇒Q</td><td>$P\Rightarrow Q$</td></tr>
+    <tr><td>P iff Q<br/>P⇔Q</td><td>$P\Leftrightarrow Q$</td></tr>
+    <tr><td>contradiction<br/>→←</td><td>$\rightarrow\leftarrow$</td></tr>
+    <tr><td colspan="2" class="subheader">Quantifiers and bindings</td></tr>
+    <tr><td>forall <br/>for all <br/>∀</td><td>$\forall$</td></tr>
+    <tr><td>exists <br/>∃</td><td>$\exists$</td></tr>
+    <tr><td>exists unique <br/>∃!</td><td>$\exists!$</td></tr>
+    <tr><td>forall x.x&lt;x+1<br/>for all x.x&lt;x+1<br/>∀x.x&lt;x+1</td><td>$\forall x, x&lt;x+1$</td></tr>
+    <tr><td>exists x.x=2 cdot x<br/>∃x.x=2⋅x</td><td>$\exists x, x=2x$</td></tr>
+    <tr><td>x.x+2<br/>x↦x+2</td><td>$x, x+1$</td></tr>
+    <tr><td colspan="2" class="subheader">Algebraic expressions</td></tr>
+    <tr><td>(x)</td><td>$\left(x\right)$</td></tr>
+    <tr><td>x+y</td><td>$x+y$</td></tr>
+    <tr><td>2+x+y</td><td>$2+x+y$</td></tr>
+    <tr><td>-x</td><td>$-x$</td></tr>
+    <tr><td>1-x</td><td>$1-x$</td></tr>
+    <tr><td>x cdot y<br/>x⋅y</td><td>$x\cdot y$</td></tr>
+    <tr><td>2 cdot x cdot y<br/>2⋅x⋅y</td><td>$2\cdot x\cdot y$</td></tr>
+    <tr><td>1/x</td><td>$1/x$</td></tr>
+    <tr><td>x^2</td><td>$x^2$</td></tr>
+    <tr><td>x factorial</td><td>$x!$</td></tr>
+    <tr><td colspan="2" class="subheader">Set Theory</td></tr>
+    <tr><td>x in A<br/>x∈A</td><td>$x\in A$</td></tr>
+    <tr><td>x notin A<br/>x∉A</td><td>$x\notin A$</td></tr>
+    <tr><td>A subset B<br/>A subseteq B<br/>A⊆B</td><td>$A\subseteq B$</td></tr>
+    <tr><td>A cup B<br/>A union B<br/>A∪B</td><td>$A\cup B$</td></tr>
+    <tr><td>A cap B<br/>A intersect B<br/>A∩B</td><td>$A\cap B$</td></tr>
+    <tr><td>A setminus B<br/>A∖B</td><td>$A\setminus B$</td></tr>
+    <tr><td>A complement<br/>A°</td><td>$A^\circ$</td></tr>
+    <tr><td>f:A→B</td><td>$f\colon A\to B$</td></tr>
+    <tr><td>f(x)</td><td>$f\left(x\right)$</td></tr>
+    <tr><td>g circ f<br/>g∘f</td><td>$g\circ f$</td></tr>
+    <tr><td>A times B<br/>A×B</td><td>$A\times B$</td></tr>
+    <tr><td>⟨x,y⟩</td><td>$\langle x,y \rangle$</td></tr>
+    <tr><td colspan="2" class="subheader">Relations</td></tr>
+    <tr><td>x &lt; 0<br/>x lt 0</td><td>$x&lt;0$</td></tr>
+    <tr><td>x leq 0<br/>x ≤ 0</td><td>$x\leq 0$</td></tr>
+    <tr><td>x neq 0<br/>x ne 0<br/>x≠0</td><td>$x\neq 0$</td></tr>
+    <tr><td>m | n<br/>m divides n</td><td>$m\mid n$</td></tr>
+    <tr><td>a≈b mod m</td><td>$a\underset{m}{\equiv}b$</td></tr>
+    <tr><td>x~y</td><td>$x\sim y$</td></tr>
+    <tr><td>x~y~z</td><td>$x\sim y\sim z$</td></tr>
+    <tr><td>x=y</td><td>$x=y$</td></tr>
+    <tr><td>x=y=z</td><td>$x=y=z$</td></tr>
+    <tr><td>X loves Y</td><td>$X\text{ loves }Y$</td></tr>
+    <tr><td>X is Y<br/>X is an Y<br/>X is a Y</td><td>$X\text{ is }Y$</td></tr>
+    <tr><td>P is a partition of A</td><td>$P\text{ is a partition of }A$</td></tr>
+    <tr><td>'~' is an equivalence relation</td><td>$\sim\text{ is equivalence relation}$</td></tr>
+    <tr><td>[a]</td><td>$\left[a\right]$</td></tr>
+    <tr><td>[a,~]</td><td>$\left[a\right]_{\sim}$</td></tr>
+    <tr><td>'~' is a strict partial order</td><td>$\sim\text{ is strict partial order}$</td></tr>
+    <tr><td>'~' is a partial order</td><td>$\sim\text{ is partial order}$</td></tr>
+    <tr><td>'~' is a total order</td><td>$\sim\text{ is total order}$</td></tr>
+    <tr><td colspan="2" class="subheader">Assumptions and Declarations</td></tr>
+    <tr><td>Assume P<br/>:P</td><td>$\text{Assume }P$</td></tr>
+    <tr><td>Let x</td><td>$\text{Let }x$</td></tr>
+    <tr><td>Let x be such that x in ℝ<br/>Let x such that x in ℝ</td><td>$\text{Let }x\text{ be such that }x\in\mathbb{R}$</td></tr>
+    <tr><td>f(c)=0 for some c</td><td>$f(c)=0\text{ for some }c$</td></tr>
+    <tr><td colspan="2" class="subheader">Miscellaneous</td></tr>
+    <tr><td>f⁻(x)<br/>f recip(x)<br/>f inv(x)</td><td>$f^-\left(x\right)$</td></tr>
+    <tr><td>x recip<br/>x inv<br/>x⁻</td><td>$x^-$</td></tr>
+    <tr><td>λP(k)</td><td>$\lambda{P}(k)$</td></tr>
+  </tbody>
+</table>
+</section>
+
+</article>
+</div>
+
+</body>
+</html>

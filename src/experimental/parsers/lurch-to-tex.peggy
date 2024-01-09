@@ -1,14 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////
-// AsciiMath Peggy Grammar and Parser
+// LurchMath Peggy Grammar and Parser
 //
 // A peggy grammar definition file to generate a parser for converting
-// AsciiMath expression to an LC.
+// LurchMath expressions to an LC.
 //
 // Note: for now we encode negative numbers as compound expressions e.g. -3 is
 // encoded as (- 3). We also encode rational fractions as a product of the
 // numerator times the multiplicative inverse of the denominator where / is the
 // unary inverse operator, e.g. 2/3 parses as (⋅ 2 (/ 3)).  This is consistent
-// with the way negation is handled.  We do not allow expresions like '/2' to
+// with the way negation is handled.  We do not allow expressions like '/2' to
 // represent one half. We do not have an Integer or Rational constant type for
 // this reason.
 //
@@ -16,11 +16,8 @@
 // constants separated by spaces (not commas)
 //
 // To save the resulting parser to a standalone .js file use:
-//   peggy --cache --format es -o asciimath.js asciimath.peggy
+//   peggy --cache --format es -o lurch-to-tex.js lurch-to-tex.peggy
 //
-//
-// TODO: 
-//  * add equiv classes, infix relation symbols family
 
 {{
 
@@ -165,7 +162,7 @@ LC "LC" = @( Meta / Contradiction / Given / Declaration / Environment / Expressi
 
 // givens
 Given "Given" = (':' / 'Assume'i __ ) 
-  a:(Environment / Expression) { return ':\\text{:}'+a }
+  a:(Environment / Expression) { return '\\text{Assume }'+a }
 
 // environments
 Environment "Environment" = 
@@ -221,15 +218,15 @@ Binding = a:Symbol (period / '↦') b:(Expression / Binding)
 // propositional expressions
 Prop = Iff / Implies / And / Or / Not
 
-Contradiction = a:'contradiction'           { return '\\Leftarrow\\Rightarrow' }
+Contradiction = a:'contradiction'             { return '\\rightarrow\\leftarrow' }
 
 Iff           = a:Implies|1..,'⇔'/' iff '|    { return texJoin('\\Leftrightarrow',a) }
 Implies       = a:Or|1..,'⇒'/' implies '|     { return texJoin('\\Rightarrow',a) }
 Or            = a:And|1..,' or '/'∨'|         { return texJoin('\\text{ or }',a) }
 And           = a:Not|1..,' and '/'∧'|        { return texJoin('\\text{ and }',a) }
 Not           = a:('¬'/'not ')? _ b:Stuff     { return (a==='not ' || a==='¬')
-                                                        ?texUnary('\\neg',b)
-                                                        :b
+                                                        ? texUnary('\\neg',b)
+                                                        : b
                                               }
 
 // stuff that might be a prop
@@ -239,14 +236,15 @@ Stuff = Relations / Thing
 Relations = Maps / Partition / Congruent / Subset / ElementOf / NotEltOf / Divides / 
             Leq / LessThan / Relation / Equation / NotEqual / Loves / Is
 
-Maps       = a:Thing _ ':' _ b:Thing '→' c:Thing      { return `a\\colon ${b}\\to ${c}` }
+Maps       = a:Thing _ ':' _ b:Thing '→' c:Thing      { return `${a}\\colon ${b}\\to ${c}` }
 
 Partition  = a:(Binding/Thing) ' is a partition of 'i b:(Binding/Thing)
              { return texJoin('\\text{ is a partition of }',[a,b]) }
 Congruent  = a:(Binding/Thing) '≈' b:(Binding/Thing) ' mod 'i c:(Binding/Thing)
              { return `${a}\\underset{${c}}{\\equiv}${b}` }
 Subset     = a:Thing|2..,'⊆'/' subset '/' subseteq '| { return texJoin('\\subseteq',a) }
-NotEltOf   = a:Thing (' notin ') b:Thing              { return texJoin('\\in',[a,b])        } 
+NotEltOf   = a:Thing (' notin ') b:Thing              { return texJoin('\\notin',
+                                                                       [a,b])        } 
 ElementOf  = a:Thing ('∈'/' in ') b:Thing             { return texJoin('\\in',[a,b]) }
 Divides    = a:Thing ('|'/' divides ') b:Thing        { return texJoin('\\mid',[a,b]) }
 Leq        = a:Thing|2..,'≤'/' leq '|                 { return texJoin('\\leq',a) }
@@ -264,11 +262,11 @@ Thing = Set / Algebraic
 // sets
 Set = Composition / CartProd / Union / Intersection / RelativeComp / Complement
 
-Composition   = a:Atomic|2..,'∘'/' circ '|            { return texJoin('\\circ',a) }
-CartProd      = a:CompAtomic|2..,'×'/' times '|  { return texJoin('×',a) }
-Union         = a:CompAtomic|2..,'∪'/' cup '/' union '|  { return texJoin('\\cup',a) }
+Composition   = a:Atomic|2..,'∘'/' circ '|                   { return texJoin('\\circ',a) }
+CartProd      = a:CompAtomic|2..,'×'/' times '|              { return texJoin('\\times',a) }
+Union         = a:CompAtomic|2..,'∪'/' cup '/' union '|      { return texJoin('\\cup',a) }
 Intersection  = a:CompAtomic|2..,'∩'/' cap '/' intersect '|  { return texJoin('\\cap',a) }
-RelativeComp  = a:CompAtomic|2..,'∖'/' setminus '|  { return texJoin('\\setminus',a) }
+RelativeComp  = a:CompAtomic|2..,'∖'/' setminus '|           { return texJoin('\\setminus',a) }
 // we don't want to have to do e.g. A∩(B°) instead of just A∩B°
 CompAtomic    = Complement / Atomic
 Complement    = a:Atomic ('°'/' complement') { return `${a}^\\circ` }
@@ -279,7 +277,7 @@ Algebraic = Sum / Product
 Sum       = a:Product b:([-+] Product)+             { return texSum(a,b)   }
 Product   = a:(Recip/Factorial/Inversed/Negated)|1..,'⋅'/' cdot '| 
                                                     { return texJoin('',a) }
-Recip     = a:Atomic ('⁻'/' recip')                 { return `${a}^-`      }
+Recip     = a:Atomic ('⁻'/' recip'/' inv')          { return `${a}^-`      }
 Factorial = a:Atomic ('！'/' factorial')            { return `${a}!`       }
 Inversed  = a:'/'? b:Exp                            { return texUnary(a,b) }
 Negated   = a:'-'? b:Exp                            { return texUnary(a,b) }
@@ -289,7 +287,7 @@ Exp       = a:Atomic|1..,'^'|                       { return texRightAssoc('^',a
 Atomic =   EFA / Prefix / Parenthesized / EquivalenceClass / Tuple / Symbol / Number
 
 // TODO: fix this hack for inverse functions
-Prefix = a:(Symbol ('⁻'/' recip') / Symbol / Parenthesized ) 
+Prefix = a:(Symbol ('⁻'/' recip'/'. inv') / Symbol / Parenthesized ) 
          b:( '(' @Expression|..,comma| ')' )+ 
   { if (Array.isArray(a)) return `${a[0]}^-\\left(${b}\\right)` 
     return `${a}\\left(${b}\\right)` 
@@ -323,9 +321,11 @@ Natural = $( [1-9][0-9]* / '0' )
 
 // Symbols can't start with a digit, contain reserved constants, or keywords
 SymbolSeq = a:(Symbol/Number)|1..,comma| { return a.join(',') }
-Symbol "Symbol" = $( '≡' / '→←' / '~' / '"' [^"]* '"' /
+Symbol "Symbol" = a:( '≡' / '→←' / '~' / '"' [^"]* '"' /
                      !([0-9]/ReservedWord)
                      [^-\][()⟨⟩ \t\n✦{},.:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∘∧∨≡↦~≈！]+ )
+  { let b = a[1].join('')
+    return (b.length>1) ? `\\mathrm{${b}}` : b }
 BindingSymbol = ('∃!'/'exists unique ') { return '\\exists!' } /
                 ('∀'/'forall '/'for all ') { return '\\forall' } /
                 ('∃'/'exists ') { return '\\exists' } 

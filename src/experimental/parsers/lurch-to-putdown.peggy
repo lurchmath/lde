@@ -259,7 +259,7 @@ Algebraic = Sum / Product
 Sum       = a:Product b:([-+] Product)+                   { return lispSum(a,b)     }
 Product   = a:(Recip/Factorial/Inversed/Negated)|1..,'⋅'/' cdot '| 
                                                           { return lisp('⋅',a)      }
-Recip     = a:Atomic ('⁻'/' recip')                       { return lispUnary('⁻',a) }
+Recip     = a:Atomic ('⁻'/' recip'/' inv')                { return lispUnary('⁻',a) }
 Factorial = a:Atomic ('！'/' factorial')                  { return lispUnary('!',a) }
 Inversed  = a:'/'? b:Exp                                  { return lispUnary(a,b)   }    
 Negated   = a:'-'? b:Exp                                  { return lispUnary(a,b)   }
@@ -269,7 +269,7 @@ Exp       = a:Atomic|1..,'^'|                             { return lisp('^',a)  
 Atomic =   EFA / Prefix / Parenthesized / EquivalenceClass / Tuple / Symbol / Number
 
 // TODO: fix this hack for inverse functions
-Prefix = a:(Symbol ('⁻'/' recip') / Symbol / Parenthesized ) 
+Prefix = a:(Symbol ('⁻'/' recip'/' inv') / Symbol / Parenthesized ) 
          b:( '(' @Expression|..,comma| ')' )+ 
   { if (Array.isArray(a)) return lispPrefix(`(⁻ ${a[0]})`,b)
     return lispPrefix(a,b) }
