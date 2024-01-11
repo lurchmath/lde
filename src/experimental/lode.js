@@ -28,7 +28,7 @@ import fs, { write } from 'fs'
 import { execSync } from 'child_process'
 import util from 'util'
 import peggy from 'peggy'
-import asciimath2latex from './parsers/asciimath-to-latex.js'
+// import asciimath2latex from './parsers/asciimath-to-latex.js'
 import { latexToLurch } from './parsers/tex-to-lurch.js'
 // import * as MathLive from 'mathlive'
 // import { getConverter } from './utils/math-live.js'
@@ -98,7 +98,7 @@ global.peggy = peggy
 // global.Tokenizer = Tokenizer
 // global.Grammar = Grammar
 // global.MathLive = MathLive
-global.asciimath2latex = asciimath2latex
+// global.asciimath2latex = asciimath2latex
 global.untex = latexToLurch
 // global.getConverter = getConverter
 // global.katex = katex
