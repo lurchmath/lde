@@ -12,7 +12,7 @@ Rules:
   ////////////////////////////////
   // ND Propositional Logic Axioms
   ////////////////////////////////
-  :{ {W V}  ≡  W and V }                // and+
+  :{ {W V}  ≡  W and V }                // and
   :{ {:W V} ≡  W⇒V }                    // ⇒
   :{ { {:W V} {:V W} } ≡ W⇔V }          // ⇔
   :{ :W  (W or V) (V or W) }            // or+
