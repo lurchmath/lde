@@ -129,7 +129,7 @@
   //   * Declaring reserved constants is tricky since it tries to parse them as they are
   //     intended to be used, so for now we convert any line of the form `Declare stuff`
   //     to escaped putdown up front.
-  input = input.replace(/[Dd]eclare \s*([^\s].*)$/mg, 'declare> «:[$1]»\n')
+  // input = input.replace(/[Dd]eclare \s*([^\s].*)$/mg, 'declare> «:[$1]»\n')
   //   * also look for lines containing only a ➤ and whitespace, and replace
   //     them with (➤ " ") to act as a line break in the output
   input = input.replace(/^([ \t]*)➤[ \t]*$/mg, '$1➤ " " \n')
@@ -324,7 +324,7 @@ SymbolSeq = a:(Symbol/Number)|1..,comma| { return a.join(',') }
 Symbol "Symbol" = a:( '≡' / '→←' / '~' / '"' [^"]* '"' /
                      !([0-9]/ReservedWord)
                      [^-\][()⟨⟩ \t\n✦{},.:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∘∧∨≡↦~≈！]+ )
-  { let b = a[1].join('')
+  { let b =  Array.isArray(a) ? a[1].join('') : a
     return (b.length>1) ? `\\mathrm{${b}}` : b }
 BindingSymbol = ('∃!'/'exists unique ') { return '\\exists!' } /
                 ('∀'/'forall '/'for all ') { return '\\forall' } /

@@ -31,7 +31,7 @@ self.Problem = Problem
 import CNF from '../validation/conjunctive-normal-form.js'
 self.CNF = CNF
 
-import { parse } from './parsers/asciimath.js'
+import { parse } from './parsers/lurch-to-putdown.js'
 self.parse = parse
 
 import Interpret from './interpret.js'
@@ -42,6 +42,9 @@ Object.assign( self, Compact )
 
 import Utils from './utils.js'
 Object.assign( self, Utils )
+
+import { Message } from '../../dependencies/lurchmath/validation-messages.js'
+self.Message = Message
 
 //////////////////////////////////////////////////////////////
 //

@@ -29,6 +29,7 @@ import { execSync } from 'child_process'
 import util from 'util'
 import peggy from 'peggy'
 import asciimath2latex from './parsers/asciimath-to-latex.js'
+import { latexToLurch } from './parsers/tex-to-lurch.js'
 // import * as MathLive from 'mathlive'
 // import { getConverter } from './utils/math-live.js'
 // import katex from 'katex'
@@ -90,7 +91,6 @@ global.CNF = CNF
 global.Problem = Problem
 global.CNFProp = CNFProp
 
-
 // External packages
 global.satSolve = satSolve
 global.Algebrite = Algebrite
@@ -99,6 +99,7 @@ global.peggy = peggy
 // global.Grammar = Grammar
 // global.MathLive = MathLive
 global.asciimath2latex = asciimath2latex
+global.untex = latexToLurch
 // global.getConverter = getConverter
 // global.katex = katex
 // global.mathjax = mathjax
@@ -275,7 +276,7 @@ global.loadParser = (name) => {
 }
 
 // a convenient way to make an lc or mc at the Lode prompt or in scripts
-let parsers = loadParser('asciimath')
+let parsers = loadParser('lurch-to-putdown')
 global.parse = parsers[0]
 global.trace = parsers[1]
 global.$ = s => {
@@ -284,7 +285,7 @@ global.$ = s => {
 }
 
 // a parser from my asciimath to LaTeX
-parsers = loadParser('asciitex')
+parsers = loadParser('lurch-to-tex')
 global.tex = parsers[0]
 global.textrace = parsers[1]
 global.parselines = parselines
@@ -392,7 +393,7 @@ rpl.defineCommand( "features", {
       the following.
       
       ${headingPen('Useful Syntactic sugar')}
-      ${itemPen('$(s)')}          : constructs an LC from the ascii-putdown string s
+      ${itemPen('$(s)')}          : constructs an LC from the lurchmath string s
       ${itemPen('lc(s)')}         : constructs an LC from the putdown string s
       ${itemPen('mc(s)')}         : constructs an MC from the smackdown string s
       ${itemPen('X.report()')}    : prints a syntax highlighted, numbered view of LC X
@@ -434,7 +435,7 @@ rpl.defineCommand( "list", {
   }
 })
 
-// define the Lode .list command
+// define the Lode .test command
 rpl.defineCommand( "test", {
   help: "Run the default test script ('acidtests.js').",
   action() { 
@@ -443,17 +444,17 @@ rpl.defineCommand( "test", {
   }
 })
 
-// define the Lode .list command
+// define the Lode .compileparser command
 rpl.defineCommand( "compileparser", {
-  help: "Compile the Math 299 parser.",
+  help: "Compile the Lurch parser.",
   action() { 
     try {
-      console.log(`${defaultPen('Compiling Lurch parser to asciimath.js...')}`)
-      execStr('cd parsers && peggy --cache --format es -o asciimath.js asciimath.peggy')
-      execStr('cd parsers && cp asciimath.js ../../../../lurchmath/')
-      console.log(`${defaultPen('Compiling Lurch parser to asciitex.js...')}`)
-      execStr('cd parsers && peggy --cache --format es -o asciitex.js asciitex.peggy')
-      execStr('cd parsers && cp asciitex.js ../../../../lurchmath/')
+      console.log(`${defaultPen('Compiling Lurch parser to lurch-to-putdown.js...')}`)
+      execStr('cd parsers && peggy --cache --format es -o lurch-to-putdown.js lurch-to-putdown.peggy')
+      execStr('cd parsers && cp lurch-to-putdown.js ../../../../lurchmath/parsers/')
+      console.log(`${defaultPen('Compiling Lurch parser to lurch-to-tex.js...')}`)
+      execStr('cd parsers && peggy --cache --format es -o lurch-to-tex.js lurch-to-tex.peggy')
+      execStr('cd parsers && cp lurch-to-tex.js ../../../../lurchmath/parsers/')
       console.log(`${defaultPen('Done.')}`)
     } catch (err) {
       console.log(xPen('Error compiling the parser.'))
@@ -467,7 +468,8 @@ rpl.defineCommand( "parsertest", {
   help: "Run the Lurch parser test.",
   action() { 
     try { 
-      const s=lc(parse(loadStr('parsers/asciiParserTests')))
+      const s=lc(parse(loadStr('parsers/LurchParserTest')))
+      parselines(parse)
       console.log(`${itemPen('Parser Test:')} → ok`)
     } catch (e) { 
       console.log(xPen(`ERROR: Parser test failed.`)) 

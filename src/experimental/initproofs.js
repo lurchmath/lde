@@ -236,57 +236,115 @@ let start = Date.now()
 
 // doc=loadDoc('proofs/math299/reals')
 
-test = `
-{
-  Declare or 
+// test = `
+// {
+//   Declare or 
   
-  Rule: :{ :W or V :W⇒U :V⇒U U }
-  Rule: :{ :{ :W V } W⇒V }  
+//   Rule: :{ :W or V :W⇒U :V⇒U U }
+//   Rule: :{ :{ :W V } W⇒V }  
   
-  Theorem: { :{ :P Q } :P or Q  Q }
+//   Theorem: { :{ :P Q } :P or Q  Q }
   
-  ➤ "Proof:"
-  { :{ :P Q }
-    :P or Q
-    P⇒Q
-    Q⇒Q
-    Q
-  }
-}
-`
-t=$(test)
-validate(t)
+//   ➤ "Proof:"
+//   { :{ :P Q }
+//     :P or Q
+//     P⇒Q
+//     Q⇒Q
+//     Q
+//   }
+// }
+// `
+// t=$(test)
+// validate(t)
+// docstr=`{ :{ a ≡ b c ≡ d ≡ e f }  :{ h i ≡ j } :{ {k l} ≡ m } p q}`
+// console.log(docstr)
+// doc=$(docstr)
+// interpret(doc)
+// write(doc)
 
-f = (parent) => { 
-  // find the parent environment, if there is none, then do nothing
-  // const parent = m.parent()
-  // if (!parent) return
+// nice=loadDoc('proofs/aim/nicepeano')
+// write(nice)
 
-  // a utility to identify equivalence separators
-  // const isSeparator = x => x instanceof LurchSymbol && x.text() === '≡'
-  const isSeparator = x => x === '≡'
+// hello=loadDoc('proofs/aim/hello')
+// write(hello)
+// one=loadDoc('proofs/aim/oneplusone')
+// write(one)
+// oscar=loadDoc('proofs/oscar/dm')
+// write(oscar)
+// injective=loadDoc('proofs/aim/injective')
+// write(injective)
+// induction=loadDoc('proofs/aim/induction')
+// write(induction)
+// use=loadDoc('proofs/aim/use')
+// write(use)
+propex=loadDoc('proofs/math299/propEx')
+write(propex)
 
-  // get the children of the parent
-  let inputArray = parent
-  // an array to hold the groups
-  let groups = []
-  
-  // while there are separators, split the input array into groups
-  let k = inputArray.findIndex( isSeparator )
-  while ( k !== -1) {
-    if (k==1) groups.push(inputArray[0])
-    else groups.push(inputArray.slice(0,k))
-    inputArray = inputArray.slice(k+1)
-    k = inputArray.findIndex( isSeparator )      
-  }
-  // if there are no more separators, then push what's left
-  if (inputArray.length === 1) groups.push(inputArray[0])
-  else groups.push(inputArray)
+// doc = $(
+//   `{   
+//     Declare prime or is 
+//     23 is prime by CAS("isprime(23)")
+//     91 is prime by CAS("isprime(91)")
+//     23 is prime by CAS
+//     91 is prime by CAS
+//   }`)
+// validate(doc)
+// doc.report(nice)
 
-  return groups
-} 
+// doc = loadDoc('proofs/math299/functions')
+// validate(doc)
+// write(doc)
+// const mj = require('mathjax-node')
 
+// // Initialize MathJax
+// mj.start()
+
+// // Your LaTeX string
+// const latexString = 'P\\Rightarrow Q\\text{ and }\\left(R\\text{ or }Q\\right)\\Leftrightarrow \\neg R'
+
+// // Options for MathJax
+// const options = {
+//   format: 'TeX',
+//   math: latexString,
+//   html: true,
+//   css: true,
+//   fontURL: 'node_modules/mathjax/fonts/HTML-CSS'
+// }
+
+// // Typeset the LaTeX string
+// mj.typeset(options, (data) => {
+//   if (!data.errors) {
+//     // Access the resulting SVG
+//     const out = data.html
+//     console.log(out)
+//   } else {
+//     console.error(data.errors)
+//   }
+// })
+
+// LurchOpti91spdateFreq = 1
+// LurchOptions.updateProgress =(pass, tot, percent ) => g(`Pass ${pass} has ${tot}`)
+// }
 // Accumulator = { totaltime:0, numcalls:0, numsolns:0, numlines: 0}
+
+// S= ()=>{
+//   console.log("hello")
+//   let S = setTimeout(() => {
+//     console.log( 'five seconds passed')
+//   }, 5000)
+//   console.log("bye")  
+// }
+
+// async function parallel(arr, fn, threads = 2) {
+//   const result = [];
+//   while (arr.length) {
+//     const res = await Promise.all(arr.splice(0, threads).map(x => fn(x)));
+//     result.push(res);
+//   }
+//   return result.flat();
+// }
+
+
 ///////////////////////////////////////////////////////////
 // closing
 console.log(defaultPen(`done! (${(Date.now()-start)} ms)`))

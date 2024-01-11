@@ -8,40 +8,45 @@ process.stdout.write(defaultPen(`Loading the acid tests ...\n\n`))
 let start = Date.now()
 ////////////////////////////////////////////////////////////////////////////
 
+const DEBUG = false
+acid=[]
+const loadtest = (name, folder='acid tests') => { 
+  if (DEBUG) console.log(`loading acid test ${folder}/${name}`)
+  acid.push(loadDoc(`proofs/${folder}/${name}`)) }
+
 // Load Acid Tests
-acid=Array.seq(k=>k,0,13).map( k => loadDoc(`proofs/acid tests/acid ${k}`))
+Array.seq(k=>k,0,13).forEach( k => loadtest(`acid ${k}`) )
 // Load other tests in the acid tests folder
-acid.push(loadDoc('proofs/acid tests/Transitive Chains'))
-acid.push(loadDoc('proofs/acid tests/Cases'))
-acid.push(loadDoc('proofs/acid tests/BIH Cases'))
-acid.push(loadDoc('proofs/acid tests/user-thms'))
+loadtest('Transitive Chains')
+loadtest('Cases')
+loadtest('BIH Cases')
+loadtest('user-thms')
 // Load Math 299 tests
-acid.push(loadDoc('proofs/math299/prop'))
-acid.push(loadDoc('proofs/math299/pred'))
-acid.push(loadDoc('proofs/math299/peanoBIH')) 
-acid.push(loadDoc('proofs/math299/peano')) 
-acid.push(loadDoc('proofs/math299/midterm'))
-acid.push(loadDoc('proofs/math299/recursion'))
-acid.push(loadDoc('proofs/math299/reals'))
+loadtest('prop','math299')
+loadtest('pred','math299')
+loadtest('peanoBIH','math299')
+loadtest('peano','math299')
+loadtest('midterm','math299')
+loadtest('recursion','math299')
+loadtest('reals','math299')
 
 // run the tests
-
-
-// and the rest of the acid tests
 let passed = 0
 let failed = 0
-let numchecks = 0
-let numreds = 0
 
 // test the asciimath Peggy parser by itself
 try { 
-  const s=lc(parse(loadStr('parsers/asciiParserTests')))
+  const s=lc(parse(loadStr('parsers/LurchParserTests')))
   passed++
   console.log(`${itemPen('Parser Test:')} → ok`)
 } catch (e) { 
   failed++
   console.log(xPen(`ERROR: asciimath peggy parser test failed.`)) 
 }
+
+// and the rest of the acid tests
+let numchecks = 0
+let numreds = 0
 
 acid.forEach( (T,k) => {
   // for each test, find the first comment if any and use that as the

@@ -70,15 +70,16 @@ include libs/Relations
         y ≈ z mod m
 				m | x-y
 				m | y-z
-				x-y = m⋅i for some i
+				// TODO: why does changing i to k on the next line and below cause a problem?
+				x-y = m⋅k for some k
 				y-z = m⋅j for some j
 
 				x-z = (x+0)-z
 				    = (x+(-y+y))-z
 				    = ((x-y)+y)-z
 				    = (x-y)+(y-z)
-						= m⋅i+m⋅j
-						= m⋅(i+j)
+						= m⋅k+m⋅j
+						= m⋅(k+j)
 
 				∃d.x-z=m⋅d
 				m | x-z

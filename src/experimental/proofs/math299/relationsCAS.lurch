@@ -1,6 +1,6 @@
 include libs/Relations
 ////////////////////////////////////////////////////////////////////
-// Relation Test Proofs
+// Relation Test Proofs (with CAS)
 // 
 
 ➤ "Math 299 Relations Homework Proofs 2023"
@@ -39,23 +39,7 @@ include libs/Relations
 			  m | x-y
         x-y = m⋅k for some k
         
-				y-x = 0+(y-x)
-				    = (-(x-y) + (x-y))+(y-x)
-				    = -(x-y) + ((x-y)+(y-x))
-				    = -(x-y) + (x+(-y+(y-x)))
-				    = -(x-y) + (x+((-y+y)-x))
-				    = -(x-y) + (x+(0-x))
-				    = -(x-y) + (x-x)
-				    = -(x-y) + 0
-				    = -(x-y)
-				    = -(m⋅k)
-				    = -(m⋅k)  + 0
-				    = -(m⋅k)  + m⋅0
-				    = -(m⋅k)  + m⋅(k-k)
-				    = -(m⋅k)  + (m⋅k + m⋅(-k))
-				    = (-(m⋅k) + m⋅k) + m⋅(-k)
-						= 0 + m⋅(-k)
-						= m⋅(-k)
+				y-x = m⋅(-k) by CAS("test(y-x-m*(-k) = -(x-y-m*k),1,0)")
 				
 				∃d.y-x=m⋅d
 				m | y-x
@@ -70,15 +54,11 @@ include libs/Relations
         y ≈ z mod m
 				m | x-y
 				m | y-z
+				// TODO: why does changing i to k on the next line and below cause a problem?
 				x-y = m⋅i for some i
 				y-z = m⋅j for some j
 
-				x-z = (x+0)-z
-				    = (x+(-y+y))-z
-				    = ((x-y)+y)-z
-				    = (x-y)+(y-z)
-						= m⋅i+m⋅j
-						= m⋅(i+j)
+				x-z = m⋅(i+j) by CAS("test(x-z-m*(i+j) = x-y-m*i + y-z-m*j,1,0)")
 
 				∃d.x-z=m⋅d
 				m | x-z

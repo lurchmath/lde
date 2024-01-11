@@ -80,13 +80,22 @@ export const lc2algebrite = e => {
   }
 }
 
-export const parselines = (parser,name='asciiParserTests') => {
+export const parselines = (parser,name='LurchParserTests') => {
   const lines = 
     loadStr(name,'./parsers/','lurch').split('\n')
        .map(line => line.trim())
        .filter(line => line.length > 0 && line.slice(0,2)!=='//')
-  console.log(`File contains ${lines.length} parseable lines`)
+  // console.log(`File contains ${lines.length} parseable lines`)
   let pass = 0, fail = 0
+  lines.forEach( l => {
+    if (parser(l)) {
+      pass++
+    } else {
+      console.log(`Could not parse ${l}`)
+      fail++
+    }
+  })
+  console.log(`Parsed ${pass} lines successfully, ${fail} failed`)
   return lines.map( l => { return parser(l) })
 }
 

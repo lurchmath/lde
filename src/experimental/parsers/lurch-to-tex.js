@@ -577,7 +577,7 @@ function peg$parse(input, options) {
   var peg$f51 = function(a) { return `\\left(${a}\\right)` };
   var peg$f52 = function(a) { return a.join(' ') };
   var peg$f53 = function(a) { return a.join(',') };
-  var peg$f54 = function(a) { let b = a[1].join('')
+  var peg$f54 = function(a) { let b =  Array.isArray(a) ? a[1].join('') : a
     return (b.length>1) ? `\\mathrm{${b}}` : b };
   var peg$f55 = function() { return '\\exists!' };
   var peg$f56 = function() { return '\\forall' };
@@ -5668,7 +5668,7 @@ function peg$parse(input, options) {
   //   * Declaring reserved constants is tricky since it tries to parse them as they are
   //     intended to be used, so for now we convert any line of the form `Declare stuff`
   //     to escaped putdown up front.
-  input = input.replace(/[Dd]eclare \s*([^\s].*)$/mg, 'declare> «:[$1]»\n')
+  // input = input.replace(/[Dd]eclare \s*([^\s].*)$/mg, 'declare> «:[$1]»\n')
   //   * also look for lines containing only a ➤ and whitespace, and replace
   //     them with (➤ " ") to act as a line break in the output
   input = input.replace(/^([ \t]*)➤[ \t]*$/mg, '$1➤ " " \n')

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Updating Notification Example</title>
+  <style>
+    #notification {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<button onclick="runFoo()">Run foo()</button>
+<div id="notification"></div>
+
+<script>
+function showNotification(message) {
+  const notification = document.getElementById('notification');
+  notification.innerHTML = message;
+  notification.style.display = 'block';
+}
+
+function hideNotification() {
+  const notification = document.getElementById('notification');
+  notification.style.display = 'none';
+}
+
+function updateNotification(message) {
+  const notification = document.getElementById('notification');
+  notification.innerHTML = message;
+}
+
+function foo() {
+  return new Promise(resolve => {
+    showNotification('Starting foo...');
+
+    // Simulate a time-consuming task
+    const duration = 5000;
+    const interval = 1000;
+    let elapsedTime = 0;
+
+    const updateInterval = setInterval(() => {
+      elapsedTime += interval;
+      const progress = Math.floor((elapsedTime / duration) * 100);
+      updateNotification(`Foo in progress: ${progress}%`);
+
+      if (elapsedTime >= duration) {
+        clearInterval(updateInterval);
+        hideNotification();
+        resolve();
+      }
+    }, interval);
+  });
+}
+
+async function runFoo() {
+  await foo();
+  console.log('Foo done.');
+}
+</script>
+
+</body>
+</html>

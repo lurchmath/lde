@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Global $n$-compact Validation Engine: parsing.js</title>
+    <title>Global $n$-compact Validation Engine: MathItem</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
@@ -18,6 +18,13 @@
       }
     </style>
     
+
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+    </script>
 </head>
 <body>
 
@@ -34,365 +41,659 @@
 </header>
 
 
-<main class="layout-main  layout-content--source">
+<main class="layout-main ">
   <div class="container">
-    <p class="page-kind">source</p>
-    <h1 class="page-title">parsing.js</h1>
+    <p class="page-kind">Class</p>
+    <h1 class="page-title">MathItem</h1>
     
 
 
 
-    
 
 <section>
-    <article>
-        <pre id="source" class="source-page line-numbers"><code class="language-js">/**
- * Parse a string to convert it to an LC and process Shorthands that appear in
- * an LC.
- *
- * @module Parsing
- */
-//////////////////////////////////////////////////////////////////////////////
-//
-//                       Parsers and Parsing Utilties 
-//                       for converting strings to LCs
-//
-//  (KEEP OUT!  Work in progress.)
-//
-//  This file is still under construction and subject to frequent change.
 
-//////////////////////////////////////////////////////////////////////////////
-//
-// Imports
-//
-import { Environment } from '../environment.js'
-import { Symbol as LurchSymbol } from '../symbol.js'
-import './extensions.js'
 
-/**
- * Make both a normal and tracing peggy parser from the given string and customize
- * the error formatting, then return both parsers in an array.
- * @function
- * @param {string} parserstr - the peggy parser definition string  
- * @returns {function[]} - the normal and tracing parsers
- */
-export const makeParser = parserstr => {
-  const opts = { cache:true }
-  const traceopts = { ...opts , trace:true }
-  const rawparser = peggy.generate(parserstr,opts)
-  const rawtraceparser = peggy.generate(parserstr,traceopts)
-  const parser = s => {
-    try { 
-      return rawparser.parse(s)
-    } catch(e) {
-      if (typeof e.format === 'function') {
-        console.log(e.format([{
-          grammarSource:parserstr,
-          text:s
-        }]))
-      } else {    
-        console.log(e.toString())
-      }
-      return undefined
-    }
-  }
-  const traceparser = s => {
-    try { 
-      return rawtraceparser.parse(s)
-    } catch(e) {
-      if (typeof e.format === 'function') {
-        console.log(e.format({ }))
-      } else {    
-        console.log(e.toString())
-      }
-      return undefined
-    }
-  }
-  return [parser,traceparser]
-}
+<header class="class">
 
-export const lc2algebrite = e => {
-  if (e instanceof Application &amp;&amp; 
-      e.numChildren()==3 &amp;&amp;
-      e.child(0) instanceof LurchSymbol &amp;&amp;
-      e.child(0).text()==='is' &amp;&amp; 
-      e.child(2) instanceof LurchSymbol &amp;&amp;
-      e.child(2).text()==='prime' &amp;&amp;
-      e.child(1) instanceof LurchSymbol &amp;&amp;
-      e.child(1).text().length > 0 &amp;&amp;
-      Number.isInteger(Number(e.child(1).text())) ) {
-    const n = Number(e.child(1).text())  
-    return `isprime(${n})`
-  } else {  
-    return '0'
-  }
-}
 
-export const parselines = (parser,name='asciiParserTests') => {
-  const lines = 
-    loadStr(name,'./parsers/','lurch').split('\n')
-       .map(line => line.trim())
-       .filter(line => line.length > 0 &amp;&amp; line.slice(0,2)!=='//')
-  console.log(`File contains ${lines.length} parseable lines`)
-  let pass = 0, fail = 0
-  return lines.map( l => { return parser(l) })
-}
-
-/**
- *  ## Process Shorthands 
- *
- * In order to make it convenient to enter large documents in putdown notation,
- * it is convenient to use fromPutdown to enter some reserved content in the
- * document that is preprocessed before evaluating the document.
- *
- * The following are what we have for Shorthands. More might be added later. 
- *
- *   * Scan a document looking for any of the following Shorthands and convert
- *     the next (>) or previous (&lt;) sibling to the corresponding type in the asA
- *     column.
- *
- *       | Shorthand   |  mark asA |
- *       | ------------|-----------|
- *       | 'BIH>'      | 'BIH'     |
- *       | 'declare>'  | 'Declare' |
- *       | 'rule>'     | 'Rule'    |
- *       | 'cases>'    | 'Cases'   |
- *       | 'thm>'      | 'Theorem' |
- *       | '&lt;thm'      | 'Theorem' |
- *       | 'proof>'    | 'Proof'   |
- *       | 'proof>'    | 'Proof'   |
- *
- *   * Scan for occurrences of the symbol `rules>`. Its next sibling should be
- *     an environment containing given Environments. Mark each child of the next
- *     sibling as a `Rule` and delete both the `rules>` symbol and the outer
- *     environment containing the newly marked `Rules.  This allows us to use an
- *     Environment to mark a lot of consecutive `Rules` all at once and then
- *     ignore the wrapper Environment. For libraries this is cleaner than trying
- *     to mark every Rule with `rule>` individually.  
- *
- *   * Scan for occurrences of the symbol `λ` (or  `@` for backwards
- *     compatibility) and replace that with the symbol "LDE EFA" (which then
- *     will still print as '𝜆' but it's what is needed under the hood).
- *
- *   * Scan for occurrences of the symbol `≡`. They are intended to be a
- *     shorthand way to enter IFF rules (equivalences).  The '≡' should be a
- *     child of a Rule environment, and should not be the first or last child.
- *     The Rule will then be replaced by the expanded version and the `≡`
- *     symbols removed, following the cyclic TFAE style of implications.  For
- *     example, if the Rule has the form `:{ a ≡ b c ≡ d }` then it will be
- *     replaced by `:{ {:a {b c}} {:{b c} d } {:d a} }`.
- *
- *   * Scan for occurrences of the symbol `➤`. If found it should be the first
- *     child of an Application whose second child is a symbol whose text is the
- *     text of the comment.  Mark that Application with `.ignore=true` so it is
- *     ignored propositionally.
- *
- *   * Scan for occurrences of the symbol `by` and mark its previous sibling's
- *     `.by` attribute with the text of its next sibling, which must be a
- *     LurchSymbol. Then delete both the `by` and it's next sibling.  Currently
- *     used by the `Cases` tool and the CAS tool.
- *
- *   * Scan for occurrences of the symbol `✔︎`, `✗`, and `!✗` and mark its
- *     previous sibling with .expectedResult 'valid', 'indeterminate', and
- *     'invalid' respectively.
- *
- *   * Scan a document looking for the symbol `&lt;&lt;`, which we call a 'marker'.
- *     For every marker, 
- *     - if the preceding sibling is an environment, attribute it as a `BIH`. 
- *
- *     - if the preceding sibling is a declaration, attribute it as a `Declare`, 
- *
- *     - in either case, finally, delete the marker.
- *
- * Naturally we have to run this FIRST before anything else.  These changes are
- * made in-place - they don't return a copy of the document.
- *
- * This does no error checking, so &lt;&lt; has to be an outermost expression with a
- * previous sibling and λ has to appear in some sensible location and so on.
- *
- * @function
- * @param {Environment} L - the document
- * @returns {LogicConcept} - the modified document
- */
-export const processShorthands = L => {
-
-  // for each symbol named symb, do f, i.e. execute f(symb)
-  const processSymbol = ( symb , f ) =>  {
-    L.descendantsSatisfying( x => (x instanceof LurchSymbol) &amp;&amp; x.text()===symb )
-     .forEach( s => f(s) )
-  }
-  // make next sibling have a given type
-  const makeNext =  (m,type) => {
-    m.nextSibling().makeIntoA(type)
-    m.remove()
-  }
-  // make previous sibling have a given type
-  const makePrevious =  (m,type) => {
-    m.previousSibling().makeIntoA(type)
-    m.remove()
-  }
-
-  // declare the type of the next or previous sibling 
-  processSymbol( 'BIH>'          , m => makeNext(m,'BIH') )
-  processSymbol( 'declare>'      , m => makeNext(m,'Declare') )
-  processSymbol( 'rule>'         , m => makeNext(m,'Rule') )  
-  processSymbol( 'cases>'        , m => makeNext(m,'Cases') )  
-  processSymbol( 'thm>'          , m => makeNext(m,'Theorem') )  
-  processSymbol( '&lt;thm'          , m => makePrevious(m,'Theorem') )  
-  processSymbol( 'proof>'        , m => makeNext(m,'Proof') )
-  
-  // attribute the previous sibling with .by attribute whose value is the text
-  // of the next sibling if it is a symbol (and does nothing if it isn't)
-  processSymbol( 'by' ,  m => { 
-    const LHS = m.previousSibling()
-    const RHS = m.nextSibling()
-    // it should be a LurchSymbol or an Application
-    if (RHS instanceof LurchSymbol) {
-      if (RHS.text()==='CAS') {
-        LHS.by = { CAS: lc2algebrite(LHS) }
-        m.remove()
-        RHS.remove()
-      } else {
-        LHS.by = RHS.text()
-        m.remove()
-        RHS.remove()
-      }
-    } else if (RHS instanceof Application ) {
-      if (RHS.child(0) instanceof LurchSymbol &amp;&amp; RHS.child(0).text()==='CAS') { 
-        // TODO: handle the case where no arg is passed or it's not a symbol
-        LHS.by = { CAS: RHS.child(1).text() }
-        m.remove()
-        RHS.remove()
-      }
-    }
-    return 
-  } )
-  
-  // rules> - Mark each of the children of the next sibling (which should be an
-  // environment) as a Rule, and delete both the shorthand and the environment. 
-  processSymbol( 'rules>' , m => {
-    const wrapper = m.nextSibling()
-    wrapper.children().forEach( kid => {
-      if (kid instanceof Environment) { kid.makeIntoA('Rule') }
-      wrapper.shiftChild()
-      kid.insertBefore(wrapper) 
-    } )
-    wrapper.remove()
-    m.remove()
-  } )
-  
-  // simple replacements
-  processSymbol( 'λ' , m => { 
-    m.replaceWith(new LurchSymbol('LDE EFA'))
-  } )  
-  processSymbol( '@' , m => { 
-    m.replaceWith(new LurchSymbol('LDE EFA'))
-  } )
-  
-  // Expand equivalences
-  processSymbol( '≡' ,  m => { 
-    // find the parent environment, if there is none, then do nothing
-    const parent = m.parent()
-    if (!parent) return
-
-    // a utility to identify equivalence separators
-    const isSeparator = x => x instanceof LurchSymbol &amp;&amp; x.text() === '≡'
-
-    // get the children of the parent
-    let inputArray = parent.children()
-    // an array to hold the groups
-    let groups = []
     
-    // while there are separators, split the input array into groups
-    let k = inputArray.findIndex( isSeparator )
-    while ( k !== -1) {
-      if (k==1) groups.push(inputArray[0])
-      else groups.push(inputArray.slice(0,k))
-      inputArray = inputArray.slice(k+1)
-      k = inputArray.findIndex( isSeparator )      
-    }
-    // if there are no more separators, then push what's left
-    if (inputArray.length === 1) groups.push(inputArray[0])
-    else groups.push(inputArray)
-  
-    // for each group, if it is an array, create a new Environment containing the group elements, otherwise just use the element itself.  Collect them all into a results array.
-    const results = []
-    groups.forEach( group => {
-      if (Array.isArray(group) ) {
-        const newEnv = new Environment( ...group )
-        results.push(newEnv)
-      } else {
-        results.push(group)
-      }
-    })
+        
+        <!-- <h2>
+            <span class="ancestors"><a href="module-MathLive.html">MathLive</a>.</span>MathItem</h2> -->
 
-    // finally, replace the parent with a new environment containing all of the 
-    // cyclic implications.
-    const ans = new Environment()
-    ans.copyAttributesFrom(parent)
+        
 
-    // put all of the pairs into the new environment except the last one
-    results.slice(0,-1).forEach( ( result, i ) => { 
-      let myEnv = new Environment( result.copy().asA('given') , results[i+1].copy() ) 
-      ans.pushChild(myEnv)
-    } )
-    // and complete the cycle with the last one
-    ans.pushChild(new Environment( 
-      results[results.length-1].copy().asA('given'), results[0].copy() ) )
+        
+
+        
+            
+            <div class="class-description"><p>An item that can be used in a Dialog and shows up as an equation
+editor powered by a MathLive math editing component.</p></div>
+        
     
-    // replace the parent with the new environment  
-    parent.replaceWith(ans)
-  } )
+</header>
 
-  // For testing purposes, flag the expected result
-  processSymbol( '✔︎' , m => { 
-    m.previousSibling().setAttribute('ExpectedResult','valid')
-    m.remove() 
-  } )
-  
-  processSymbol( '✗' , m => { 
-    m.previousSibling().setAttribute('ExpectedResult','indeterminate') 
-    m.remove()
-  } )
-  
-  processSymbol( '!✗' , m => { 
-    m.previousSibling().setAttribute('ExpectedResult','invalid') 
-    m.remove()
-  } )
-  
-  // TODO: make this more consistent with the other shorthands
-  processSymbol( '➤' , m => { 
-    if (m.parent().isAComment()) m.parent().ignore=true 
-  })
-  
-  // Labels
-  //
-  // Just a quickie lable mechanism that will be upgraded later.
-  // Labels are currently a single symbol of the form name> which assigns
-  // 'name' to the .label attribute of the next sibling.  Previous siblings
-  // aren't supported yet, nor is whitespace. 
-  // L.descendantsSatisfying( s => (s instanceof LurchSymbol) &amp;&amp; 
-  //   /[^"()\[\]\s]+>/.test(s.text()) )
-  //   .forEach( s => { 
-  //     s.nextSibling().label=s.text().slice(0,-2).toLowerCase() 
-  //     s.remove()
-  //   } ) 
+<article>
+    <div class="container-overview">
 
-     // depricated but kept for backward compatibility
-  processSymbol( '&lt;&lt;' , m => { 
-    const target = m.previousSibling()
-    const type = (target instanceof Declaration) ? 'Declare' : 'BIH'
-    target.makeIntoA(type)
-    m.remove()
-  } )
-  // depricated but kept for backward compatibility
-  processSymbol( '>>' , m => makeNext(m,'BIH') )
-  
-  return L
-}
 
-///////////////////////////////////////////////////////////////////////////////</code></pre>
+
+    
+        
+
+
+
+
+
+    
+
+
+    
+    <h3 class="subtitle">Constructor</h3>
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="MathItem">new MathItem<span class="signature">(name, label)</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Construct a MathLive editing component.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">name</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>string</code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the name of the control in the dialog, used for
+querying its value when the dialog closes, or providing an initial
+value when the dialog opens</p></div>
+            
+        </li>
+
+    
+
+        <li>
+            
+                <span class="param-name">label</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>string</code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the label to show next to the math ediitor in the
+user interface</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="utils_math-live.js.html">utils/math-live.js</a><a href="utils_math-live.js.html#source.42">, line 42</a>
+        </li>
+    </ul>
+
+
+
+    
+    </div>
+
+    
+
+    
+
+     
+
+    
+
+    
+
+
+    
+
+    
+        <h3 class="subtitle">Methods</h3>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="get">get<span class="signature">(key)</span><span class="return-type-signature"> &rarr; nullable{string}</span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Get the saved value of the equation editor, as a LaTeX string.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">key</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>string</code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>the key whose value should be looked up</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+    <h4 class="method-heading">Returns</h4>
+    <ul>
+    
+        <li class="method-returns">
+            
+                <code>string</code>
+            
+            
+                <p>the value associated with the given key, if the key
+is the one that this item is in charge of editing, or undefined
+otherwise</p>
+            
+        </li>
+    
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="utils_math-live.js.html">utils/math-live.js</a><a href="utils_math-live.js.html#source.148">, line 148</a>
+        </li>
+    </ul>
+
+
+
     </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="setFocusWhenShown">setFocusWhenShown<span class="signature">(value)</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Whether to focus this item once it has loaded.  Defaults to <code>false</code>, so
+as to not interfere with the usual focus mechanics of the Dialog
+class.  However, because this component is a unique one, the normal focus
+mechanics will not work for it, so you should call this function to
+override them if you want this item to receive focus once it has been
+installed into the dialog.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">value</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>boolean</code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>whether to focus this item once it appears</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="utils_math-live.js.html">utils/math-live.js</a><a href="utils_math-live.js.html#source.72">, line 72</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+            
+
+
+    <article class="method">
+
+
+
+
+    
+
+
+    
+
+    <div class="method-type">
+    
+    </div>
+
+    <h4 class="method-name" id="setValue">setValue<span class="signature">(value)</span><span class="return-type-signature"></span>
+    </h4>
+
+
+
+
+
+<div class="method-description">
+    
+    <p>Set the current contents of the editor to the expression represented in
+the given LaTeX content.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Parameters</h4>
+    
+
+<ul class="method-params">
+    
+
+        <li>
+            
+                <span class="param-name">value</span>
+            
+
+            
+                
+
+
+    <span class="param-type">
+        <code>string</code>
+    </span>
+    
+
+            
+
+            
+
+            
+
+            <div class="param-description"><p>LaTeX content to be put into the MathLive editor</p></div>
+            
+        </li>
+
+    
+</ul>
+
+
+
+
+
+<div class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h4 class="method-heading">Source</h4>
+    <ul>
+        <li class="method-source">
+            <a href="utils_math-live.js.html">utils/math-live.js</a><a href="utils_math-live.js.html#source.108">, line 108</a>
+        </li>
+    </ul>
+
+
+
+    </article>
+
+        
+    
+
+    
+
+    
+</article>
+
 </section>
 
 

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Global $n$-compact Validation Engine: parsing.js</title>
+    <title>Global $n$-compact Validation Engine: utils/utilities.js</title>
     
       <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
     
@@ -37,7 +37,7 @@
 <main class="layout-main  layout-content--source">
   <div class="container">
     <p class="page-kind">source</p>
-    <h1 class="page-title">parsing.js</h1>
+    <h1 class="page-title">utils/utilities.js</h1>
     
 
 
@@ -46,352 +46,262 @@
 
 <section>
     <article>
-        <pre id="source" class="source-page line-numbers"><code class="language-js">/**
- * Parse a string to convert it to an LC and process Shorthands that appear in
- * an LC.
- *
- * @module Parsing
+        <pre id="source" class="source-page line-numbers"><code class="language-js">
+/**
+ * A set of generic utility functions used in this project.
+ * 
+ * @module Utilities
  */
-//////////////////////////////////////////////////////////////////////////////
-//
-//                       Parsers and Parsing Utilties 
-//                       for converting strings to LCs
-//
-//  (KEEP OUT!  Work in progress.)
-//
-//  This file is still under construction and subject to frequent change.
-
-//////////////////////////////////////////////////////////////////////////////
-//
-// Imports
-//
-import { Environment } from '../environment.js'
-import { Symbol as LurchSymbol } from '../symbol.js'
-import './extensions.js'
 
 /**
- * Make both a normal and tracing peggy parser from the given string and customize
- * the error formatting, then return both parsers in an array.
+ * Create a script element to load a script from the given URL, append that
+ * script element to the page's head, and notify us (via a returned `Promise`)
+ * when the script completes loading successfully or fails with an error.
+ * 
+ * Example use:
+ * ```
+ * loadScript( 'https://some.cdn.org/script.js' ).then( () => {
+ *     // Run code that depends on the script having loaded.
+ * } )
+ * ```
+ * 
+ * Note that if this function has already been called on this URL, so that there
+ * already is a script tag with this source, then the promise resolves
+ * immediately without doing anything first.
+ * 
+ * @param {String} url - URL of the script to load
+ * @returns {Promise} a promise that is resolved if the script finishes loading
+ *   or rejected if the script encounters an error
  * @function
- * @param {string} parserstr - the peggy parser definition string  
- * @returns {function[]} - the normal and tracing parsers
  */
-export const makeParser = parserstr => {
-  const opts = { cache:true }
-  const traceopts = { ...opts , trace:true }
-  const rawparser = peggy.generate(parserstr,opts)
-  const rawtraceparser = peggy.generate(parserstr,traceopts)
-  const parser = s => {
-    try { 
-      return rawparser.parse(s)
-    } catch(e) {
-      if (typeof e.format === 'function') {
-        console.log(e.format([{
-          grammarSource:parserstr,
-          text:s
-        }]))
-      } else {    
-        console.log(e.toString())
-      }
-      return undefined
-    }
-  }
-  const traceparser = s => {
-    try { 
-      return rawtraceparser.parse(s)
-    } catch(e) {
-      if (typeof e.format === 'function') {
-        console.log(e.format({ }))
-      } else {    
-        console.log(e.toString())
-      }
-      return undefined
-    }
-  }
-  return [parser,traceparser]
-}
+export const loadScript = url =>
+    Array.from( document.head.querySelectorAll( 'script' ) ).some(
+        script => script.getAttribute( 'src' ) == url ) ?
+    Promise.resolve() :
+    new Promise( ( resolve, reject ) => {
+        const scriptTag = document.createElement( 'script' )
+        document.head.append( scriptTag )
+        scriptTag.setAttribute( 'defer', true )
+        scriptTag.setAttribute( 'referrerpolicy', 'origin' )
+        scriptTag.addEventListener( 'load', resolve )
+        scriptTag.addEventListener( 'error', reject )
+        scriptTag.setAttribute( 'src', url )
+    } )
 
-export const lc2algebrite = e => {
-  if (e instanceof Application &amp;&amp; 
-      e.numChildren()==3 &amp;&amp;
-      e.child(0) instanceof LurchSymbol &amp;&amp;
-      e.child(0).text()==='is' &amp;&amp; 
-      e.child(2) instanceof LurchSymbol &amp;&amp;
-      e.child(2).text()==='prime' &amp;&amp;
-      e.child(1) instanceof LurchSymbol &amp;&amp;
-      e.child(1).text().length > 0 &amp;&amp;
-      Number.isInteger(Number(e.child(1).text())) ) {
-    const n = Number(e.child(1).text())  
-    return `isprime(${n})`
-  } else {  
-    return '0'
-  }
-}
-
-export const parselines = (parser,name='asciiParserTests') => {
-  const lines = 
-    loadStr(name,'./parsers/','lurch').split('\n')
-       .map(line => line.trim())
-       .filter(line => line.length > 0 &amp;&amp; line.slice(0,2)!=='//')
-  console.log(`File contains ${lines.length} parseable lines`)
-  let pass = 0, fail = 0
-  return lines.map( l => { return parser(l) })
+/**
+ * From any JavaScript object, we can create another object by first
+ * constructing a new instance of the Object prototype, then copying over all of
+ * the "own" properties from the original object (by reference).  This is like
+ * the original object, but without its prototype or any other inherited data or
+ * methods.  This function does that.
+ * 
+ * @param {Object} object - any JavaScript object
+ * @returns {Object} a shallow copy of the original object, but without copying
+ *   its prototype information
+ * @function
+ */
+export const copyWithoutPrototype = object => {
+    const result = new Object()
+    for ( let key in object )
+        if ( object.hasOwnProperty( key ) )
+            result[key] = object[key]
+    return result
 }
 
 /**
- *  ## Process Shorthands 
- *
- * In order to make it convenient to enter large documents in putdown notation,
- * it is convenient to use fromPutdown to enter some reserved content in the
- * document that is preprocessed before evaluating the document.
- *
- * The following are what we have for Shorthands. More might be added later. 
- *
- *   * Scan a document looking for any of the following Shorthands and convert
- *     the next (>) or previous (&lt;) sibling to the corresponding type in the asA
- *     column.
- *
- *       | Shorthand   |  mark asA |
- *       | ------------|-----------|
- *       | 'BIH>'      | 'BIH'     |
- *       | 'declare>'  | 'Declare' |
- *       | 'rule>'     | 'Rule'    |
- *       | 'cases>'    | 'Cases'   |
- *       | 'thm>'      | 'Theorem' |
- *       | '&lt;thm'      | 'Theorem' |
- *       | 'proof>'    | 'Proof'   |
- *       | 'proof>'    | 'Proof'   |
- *
- *   * Scan for occurrences of the symbol `rules>`. Its next sibling should be
- *     an environment containing given Environments. Mark each child of the next
- *     sibling as a `Rule` and delete both the `rules>` symbol and the outer
- *     environment containing the newly marked `Rules.  This allows us to use an
- *     Environment to mark a lot of consecutive `Rules` all at once and then
- *     ignore the wrapper Environment. For libraries this is cleaner than trying
- *     to mark every Rule with `rule>` individually.  
- *
- *   * Scan for occurrences of the symbol `λ` (or  `@` for backwards
- *     compatibility) and replace that with the symbol "LDE EFA" (which then
- *     will still print as '𝜆' but it's what is needed under the hood).
- *
- *   * Scan for occurrences of the symbol `≡`. They are intended to be a
- *     shorthand way to enter IFF rules (equivalences).  The '≡' should be a
- *     child of a Rule environment, and should not be the first or last child.
- *     The Rule will then be replaced by the expanded version and the `≡`
- *     symbols removed, following the cyclic TFAE style of implications.  For
- *     example, if the Rule has the form `:{ a ≡ b c ≡ d }` then it will be
- *     replaced by `:{ {:a {b c}} {:{b c} d } {:d a} }`.
- *
- *   * Scan for occurrences of the symbol `➤`. If found it should be the first
- *     child of an Application whose second child is a symbol whose text is the
- *     text of the comment.  Mark that Application with `.ignore=true` so it is
- *     ignored propositionally.
- *
- *   * Scan for occurrences of the symbol `by` and mark its previous sibling's
- *     `.by` attribute with the text of its next sibling, which must be a
- *     LurchSymbol. Then delete both the `by` and it's next sibling.  Currently
- *     used by the `Cases` tool and the CAS tool.
- *
- *   * Scan for occurrences of the symbol `✔︎`, `✗`, and `!✗` and mark its
- *     previous sibling with .expectedResult 'valid', 'indeterminate', and
- *     'invalid' respectively.
- *
- *   * Scan a document looking for the symbol `&lt;&lt;`, which we call a 'marker'.
- *     For every marker, 
- *     - if the preceding sibling is an environment, attribute it as a `BIH`. 
- *
- *     - if the preceding sibling is a declaration, attribute it as a `Declare`, 
- *
- *     - in either case, finally, delete the marker.
- *
- * Naturally we have to run this FIRST before anything else.  These changes are
- * made in-place - they don't return a copy of the document.
- *
- * This does no error checking, so &lt;&lt; has to be an outermost expression with a
- * previous sibling and λ has to appear in some sensible location and so on.
+ * Return the URL for this app.  It is taken directly from the browser's
+ * navigation bar, but it excludes any query string that may be present.
+ * It will be of the form `protocol://domain.name/path/to/file.html`.
  *
  * @function
- * @param {Environment} L - the document
- * @returns {LogicConcept} - the modified document
+ * @see {@link module:ImportFromURL.autoOpenLink autoOpenLink()}
  */
-export const processShorthands = L => {
-
-  // for each symbol named symb, do f, i.e. execute f(symb)
-  const processSymbol = ( symb , f ) =>  {
-    L.descendantsSatisfying( x => (x instanceof LurchSymbol) &amp;&amp; x.text()===symb )
-     .forEach( s => f(s) )
-  }
-  // make next sibling have a given type
-  const makeNext =  (m,type) => {
-    m.nextSibling().makeIntoA(type)
-    m.remove()
-  }
-  // make previous sibling have a given type
-  const makePrevious =  (m,type) => {
-    m.previousSibling().makeIntoA(type)
-    m.remove()
-  }
-
-  // declare the type of the next or previous sibling 
-  processSymbol( 'BIH>'          , m => makeNext(m,'BIH') )
-  processSymbol( 'declare>'      , m => makeNext(m,'Declare') )
-  processSymbol( 'rule>'         , m => makeNext(m,'Rule') )  
-  processSymbol( 'cases>'        , m => makeNext(m,'Cases') )  
-  processSymbol( 'thm>'          , m => makeNext(m,'Theorem') )  
-  processSymbol( '&lt;thm'          , m => makePrevious(m,'Theorem') )  
-  processSymbol( 'proof>'        , m => makeNext(m,'Proof') )
-  
-  // attribute the previous sibling with .by attribute whose value is the text
-  // of the next sibling if it is a symbol (and does nothing if it isn't)
-  processSymbol( 'by' ,  m => { 
-    const LHS = m.previousSibling()
-    const RHS = m.nextSibling()
-    // it should be a LurchSymbol or an Application
-    if (RHS instanceof LurchSymbol) {
-      if (RHS.text()==='CAS') {
-        LHS.by = { CAS: lc2algebrite(LHS) }
-        m.remove()
-        RHS.remove()
-      } else {
-        LHS.by = RHS.text()
-        m.remove()
-        RHS.remove()
-      }
-    } else if (RHS instanceof Application ) {
-      if (RHS.child(0) instanceof LurchSymbol &amp;&amp; RHS.child(0).text()==='CAS') { 
-        // TODO: handle the case where no arg is passed or it's not a symbol
-        LHS.by = { CAS: RHS.child(1).text() }
-        m.remove()
-        RHS.remove()
-      }
-    }
-    return 
-  } )
-  
-  // rules> - Mark each of the children of the next sibling (which should be an
-  // environment) as a Rule, and delete both the shorthand and the environment. 
-  processSymbol( 'rules>' , m => {
-    const wrapper = m.nextSibling()
-    wrapper.children().forEach( kid => {
-      if (kid instanceof Environment) { kid.makeIntoA('Rule') }
-      wrapper.shiftChild()
-      kid.insertBefore(wrapper) 
-    } )
-    wrapper.remove()
-    m.remove()
-  } )
-  
-  // simple replacements
-  processSymbol( 'λ' , m => { 
-    m.replaceWith(new LurchSymbol('LDE EFA'))
-  } )  
-  processSymbol( '@' , m => { 
-    m.replaceWith(new LurchSymbol('LDE EFA'))
-  } )
-  
-  // Expand equivalences
-  processSymbol( '≡' ,  m => { 
-    // find the parent environment, if there is none, then do nothing
-    const parent = m.parent()
-    if (!parent) return
-
-    // a utility to identify equivalence separators
-    const isSeparator = x => x instanceof LurchSymbol &amp;&amp; x.text() === '≡'
-
-    // get the children of the parent
-    let inputArray = parent.children()
-    // an array to hold the groups
-    let groups = []
-    
-    // while there are separators, split the input array into groups
-    let k = inputArray.findIndex( isSeparator )
-    while ( k !== -1) {
-      if (k==1) groups.push(inputArray[0])
-      else groups.push(inputArray.slice(0,k))
-      inputArray = inputArray.slice(k+1)
-      k = inputArray.findIndex( isSeparator )      
-    }
-    // if there are no more separators, then push what's left
-    if (inputArray.length === 1) groups.push(inputArray[0])
-    else groups.push(inputArray)
-  
-    // for each group, if it is an array, create a new Environment containing the group elements, otherwise just use the element itself.  Collect them all into a results array.
-    const results = []
-    groups.forEach( group => {
-      if (Array.isArray(group) ) {
-        const newEnv = new Environment( ...group )
-        results.push(newEnv)
-      } else {
-        results.push(group)
-      }
-    })
-
-    // finally, replace the parent with a new environment containing all of the 
-    // cyclic implications.
-    const ans = new Environment()
-    ans.copyAttributesFrom(parent)
-
-    // put all of the pairs into the new environment except the last one
-    results.slice(0,-1).forEach( ( result, i ) => { 
-      let myEnv = new Environment( result.copy().asA('given') , results[i+1].copy() ) 
-      ans.pushChild(myEnv)
-    } )
-    // and complete the cycle with the last one
-    ans.pushChild(new Environment( 
-      results[results.length-1].copy().asA('given'), results[0].copy() ) )
-    
-    // replace the parent with the new environment  
-    parent.replaceWith(ans)
-  } )
-
-  // For testing purposes, flag the expected result
-  processSymbol( '✔︎' , m => { 
-    m.previousSibling().setAttribute('ExpectedResult','valid')
-    m.remove() 
-  } )
-  
-  processSymbol( '✗' , m => { 
-    m.previousSibling().setAttribute('ExpectedResult','indeterminate') 
-    m.remove()
-  } )
-  
-  processSymbol( '!✗' , m => { 
-    m.previousSibling().setAttribute('ExpectedResult','invalid') 
-    m.remove()
-  } )
-  
-  // TODO: make this more consistent with the other shorthands
-  processSymbol( '➤' , m => { 
-    if (m.parent().isAComment()) m.parent().ignore=true 
-  })
-  
-  // Labels
-  //
-  // Just a quickie lable mechanism that will be upgraded later.
-  // Labels are currently a single symbol of the form name> which assigns
-  // 'name' to the .label attribute of the next sibling.  Previous siblings
-  // aren't supported yet, nor is whitespace. 
-  // L.descendantsSatisfying( s => (s instanceof LurchSymbol) &amp;&amp; 
-  //   /[^"()\[\]\s]+>/.test(s.text()) )
-  //   .forEach( s => { 
-  //     s.nextSibling().label=s.text().slice(0,-2).toLowerCase() 
-  //     s.remove()
-  //   } ) 
-
-     // depricated but kept for backward compatibility
-  processSymbol( '&lt;&lt;' , m => { 
-    const target = m.previousSibling()
-    const type = (target instanceof Declaration) ? 'Declare' : 'BIH'
-    target.makeIntoA(type)
-    m.remove()
-  } )
-  // depricated but kept for backward compatibility
-  processSymbol( '>>' , m => makeNext(m,'BIH') )
-  
-  return L
+export const appURL = () => {
+    const result = window.location.protocol + '//'
+                 + window.location.host + window.location.pathname
+    return result.endsWith( '/' ) ? result : result + '/'
 }
 
-///////////////////////////////////////////////////////////////////////////////</code></pre>
+/**
+ * Escape a string so that it can be safely inserted into an HTML document and
+ * still represent the plain text within the given string (not interpreting the
+ * string as HTML itself).  For example, the string `"x &lt; a and a > b"` should
+ * appear exactly that way in the rendered HTML, meaning that the `&lt;` and `>`
+ * will need to be escaped so that `"&lt;a and a>"` does not appear to be a tag.
+ * 
+ * @param {string} text - text to escape for insertion into HTML
+ * @returns {string} the same text, but with the characters `"&amp;"`, `"&lt;"`, `">"`,
+ *   `"'"`, and `'"'` replaced with character references instead
+ * @function
+ */
+export const escapeHTML = ( text = '' ) =>
+    text.replaceAll( '&amp;', '&amp;amp;' )
+        .replaceAll( '&lt;', '&amp;lt;' )
+        .replaceAll( '>', '&amp;gt;' )
+        .replaceAll( '"', '&amp;quot;' )
+        .replaceAll( "'", '&amp;#039;' )
+
+/**
+ * The following function takes as input an string containing HTML code and
+ * removes from it all script tags, so that the code can be used safely within
+ * the app itself, knowing that no malicious code will be executed.
+ * 
+ * @param {string} html - the HTML code from which to remove script tags
+ * @returns {string} the same HTML code, but with all script tags removed
+ * @function
+ */
+export const removeScriptTags = html => {
+    const regex = /&lt;script\b[^&lt;]*(?:(?!&lt;\/script>)&lt;[^&lt;]*)*&lt;\/script>/gi
+    return html.replace( regex, '' )
+}
+
+/**
+ * This function makes it easy to construct two-column tables of HTML content,
+ * which is something that several types of {@link module:Atoms.Atom Atoms} will
+ * want to do.  The arguments to the function are the rows of the table, and
+ * they are treated as follows.
+ * 
+ *  * Any string is treated as the content for a row of the table spanning both
+ *    columns (using `colspan`) and in bold font.
+ *  * An array of strings containing just one entry is treated the same as a
+ *    single string.
+ *  * An array of two strings is treated as the contents of the two cells in
+ *    the row.
+ *  * An array of three strings is treated as two rows, first a two-cell row,
+ *    and then an optional error row (only if the third entry is not falsy) that
+ *    places the error message in red font in the second cell.
+ * 
+ * Example use:
+ * 
+ * ```js
+ * simpleHTMLTable(
+ *     'Here is the information you entered:',
+ *     [ 'Your name:', 'Frederick the Great' ],
+ *     [ 'Your age:', '42' ],
+ *     [ 'Your favorite color:', color,
+ *       !isColor(color) &amp;&amp; 'That is not a valid color.' ]
+ * )
+ * ```
+ * 
+ * @param  {...any} rows - the data representing the rows of the table to construct
+ * @returns {string} the HTML code for the table
+ * @function
+ */
+export const simpleHTMLTable = ( ...rows ) => {
+    let result = '&lt;table>&lt;colgroup>&lt;col>&lt;col>&lt;/colgroup>'
+    const row = inside => `&lt;tr>${removeScriptTags( inside )}&lt;/tr>`
+    const cell = inside => `&lt;td>${removeScriptTags( inside )}&lt;/td>`
+    const bigCell = inside =>
+        `&lt;td colspan='2'>&lt;b>${removeScriptTags( inside )}&lt;/b>&lt;/td>`
+    const error = inside =>
+        `&lt;td>&lt;font color=red>${removeScriptTags( inside )}&lt;/font>&lt;/td>`
+    rows.forEach( rowData => {
+        if ( typeof( rowData ) == 'string' ) {
+            result += row( bigCell( rowData ) )
+        } else if ( rowData.length == 1 ) {
+            result += row( bigCell( rowData[0] ) )
+        } else if ( rowData.length == 2 ) {
+            result += row( cell( rowData[0] ) + cell( rowData[1] ) )
+        } else if ( rowData.length == 3 ) {
+            result += row( cell( rowData[0] ) + cell( rowData[1] ) )
+            if ( rowData[2] ) result += row( cell( '' ) + error( rowData[2] ) )
+        }
+    } )
+    result += '&lt;/table>'
+    return result
+}
+
+/**
+ * Given an ordered set of HTML Nodes in an array, and a node in the same
+ * document, return just the subset of `nodes` that appear before `point`.
+ * Because the given set of nodes are in order, this subset will always be an
+ * initial segment of the given array.  It can be empty (if none precede `point`)
+ * and it can be the whole array (if all preceded `point`).
+ * 
+ * While this could be done with a simple array filter, that could be slow on
+ * larger arrays; this uses a binary search.  Furthermore, node comparisons are
+ * a tedious process that uses an enum, so this function is simpler.
+ * 
+ * @param {Node[]} nodes - ordered array of Nodes to filter
+ * @param {Node} point - the node that will determine which subset of `nodes`
+ *   gets rerturned
+ * @returns {Node[]} some initial segment of `nodes`, including precisely those
+ *   that appear before `point`
+ * @function
+ */
+export const onlyBefore = ( nodes, point ) => {
+    const lt = ( a, b ) => {
+        const comparison = a.compareDocumentPosition( b )
+        if ( ( comparison &amp; Node.DOCUMENT_POSITION_FOLLOWING ) // b follows a
+          || ( comparison &amp; Node.DOCUMENT_POSITION_CONTAINED_BY ) ) // a contains b
+            return true
+        if ( ( comparison &amp; Node.DOCUMENT_POSITION_PRECEDING ) // b precedes a
+          || ( comparison &amp; Node.DOCUMENT_POSITION_CONTAINS ) // b contains a
+          || ( comparison == 0 ) ) // a is the same node as b
+            return false
+        throw new Error( 'Cannot compare document positions' )
+    }
+    try {
+        if ( nodes.length == 0 || !lt( nodes[0], point ) ) return [ ]
+        if ( lt( nodes[nodes.length-1], point ) ) return nodes
+        let indexLT = 0
+        let indexGE = nodes.length - 1
+        while ( indexLT &lt; indexGE - 1 ) {
+            const midIndex = Math.floor( ( indexLT + indexGE ) / 2 )
+            if ( lt( nodes[midIndex], point ) ) indexLT = midIndex
+            else indexGE = midIndex
+        }
+        return Array.from( nodes ).slice( 0, indexGE )
+    } catch ( e ) {
+        console.log( 'DEBUG:', e )
+        return nodes
+    }
+}
+
+/**
+ * Given a DOM Node, find the TinyMCE editor containing it.
+ * 
+ * @param {Node} node - HTML node for which to find the editor
+ * @returns {tinymce.Editor} the editor whose document contains the given node
+ * @function
+ */
+export const editorForNode = node => {
+    const allEditors = tinymce.get()
+    for ( let i = 0 ; i &lt; allEditors.length ; i++ )
+        if ( allEditors[i].getDoc() == node.ownerDocument )
+            return allEditors[i]
+    return null
+}
+
+/**
+ * Call a function on each element in an array, just like `array.forEach()`
+ * would do, except use a zero-second timeout between each call.
+ * 
+ * @param {Function} func - the function to call for each element
+ * @param {any[]} array - the array to iterate over
+ * @param {number} [timeout=0] - the number of milliseconds to wait between calls
+ * @function
+ */
+Array.prototype.forEachWithTimeout = function( func, timeout = 0 ) {
+    if ( this.length == 0 ) return
+    func( this[0] )
+    setTimeout( () =>
+        this.slice(1).forEachWithTimeout( func, timeout ), timeout )
+}
+
+/**
+ * TinyMCE sometimes stores elements off screen, but still part of the document,
+ * so if we search for elements by selector, we will find them, even though they
+ * are invisible and should not be taken into account as part of the user's
+ * document content.  This function checks to see if a given DOM nodes is really
+ * a visible, relevant part of the document or not.
+ * 
+ * @param {Node} node - the node to test
+ * @returns {boolean} true if the node is on screen (and "real")
+ */
+export const isOnScreen = node => node.parentNode &amp;&amp;
+    !node.parentNode.classList.contains( 'mce-offscreen-selection' )
+</code></pre>
     </article>
 </section>
 
