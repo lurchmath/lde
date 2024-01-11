@@ -294,12 +294,14 @@ export const processShorthands = L => {
 
     // put all of the pairs into the new environment except the last one
     results.slice(0,-1).forEach( ( result, i ) => { 
-      let myEnv = new Environment( result.copy().asA('given') , results[i+1].copy() ) 
+      let myEnv = new Environment( result.asA('given') , 
+                                   results[i+1].copy().unmakeIntoA('given') ) 
       ans.pushChild(myEnv)
     } )
     // and complete the cycle with the last one
     ans.pushChild(new Environment( 
-      results[results.length-1].copy().asA('given'), results[0].copy() ) )
+      results[results.length-1].asA('given'), 
+              results[0].copy().unmakeIntoA('given') ) )
     
     // replace the parent with the new environment  
     parent.replaceWith(ans)
