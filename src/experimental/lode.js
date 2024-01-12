@@ -28,6 +28,13 @@ import fs, { write } from 'fs'
 import { execSync } from 'child_process'
 import util from 'util'
 import peggy from 'peggy'
+// import asciimath2latex from './parsers/asciimath-to-latex.js'
+import { latexToLurch } from './parsers/tex-to-lurch.js'
+// import * as MathLive from 'mathlive'
+// import { getConverter } from './utils/math-live.js'
+// import katex from 'katex'
+// import mathjax from 'mathjax-node'
+// import React from 'react'
 
 // In LODE we have no need for EventTarget because we don't edit MCs in real
 // time and react to changes.  Importing this BEFORE importing math-concept.js
@@ -46,7 +53,7 @@ import CNF from '../validation/conjunctive-normal-form.js'
 // Experimental Code
 //
 // parsing
-import { Tokenizer, Grammar } from 'earley-parser'
+// import { Tokenizer, Grammar } from 'earley-parser'
 // generic helper utilities
 import Utilities from './utils.js'
 // interpretation utilities
@@ -56,7 +63,7 @@ import Compact from './global-validation.js'
 // load the custom formatters and reporting tools
 import Reporting from './reporting.js' 
 // import the parsing utiltiies (processShorthands comes from Interpret)
-import { makeParser } from './parsing.js'
+import { makeParser, parselines } from './parsing.js'
 // load the CNFProp tools for testing
 import { CNFProp } from './CNFProp.js'
 
@@ -84,13 +91,19 @@ global.CNF = CNF
 global.Problem = Problem
 global.CNFProp = CNFProp
 
-
 // External packages
 global.satSolve = satSolve
 global.Algebrite = Algebrite
 global.peggy = peggy
-global.Tokenizer = Tokenizer
-global.Grammar = Grammar
+// global.Tokenizer = Tokenizer
+// global.Grammar = Grammar
+// global.MathLive = MathLive
+// global.asciimath2latex = asciimath2latex
+global.untex = latexToLurch
+// global.getConverter = getConverter
+// global.katex = katex
+// global.mathjax = mathjax
+// global.React = React
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -154,8 +167,12 @@ global.lc = s => {
 global.mc = s => { 
   const M = MathConcept.fromSmackdown(s)
   return (M.length===1) ? M[0] : M  
-}  
-
+}
+global.check = s => { 
+  const doc = $(s)
+  validate(doc)  
+  return doc
+}
 // a useful utility for exploring matching
 global.matchMaker = (decl,pstr,estr) => {
   let doc = $(`{
@@ -259,13 +276,21 @@ global.loadParser = (name) => {
 }
 
 // a convenient way to make an lc or mc at the Lode prompt or in scripts
-global.parsers = loadParser('asciimath')
+let parsers = loadParser('lurch-to-putdown')
 global.parse = parsers[0]
 global.trace = parsers[1]
 global.$ = s => {
   let parsed = parse(s)
   return (parsed) ? lc(parsed) : undefined
 }
+
+// a parser from my asciimath to LaTeX
+parsers = loadParser('lurch-to-tex')
+global.tex = parsers[0]
+global.textrace = parsers[1]
+global.parselines = parselines
+// global.mathlive = MathLive.convertLatexToMarkup
+// global.html = katex.renderToString
 
 // print a string to the console with line numbers
 global.say = s => {
@@ -368,7 +393,7 @@ rpl.defineCommand( "features", {
       the following.
       
       ${headingPen('Useful Syntactic sugar')}
-      ${itemPen('$(s)')}          : constructs an LC from the ascii-putdown string s
+      ${itemPen('$(s)')}          : constructs an LC from the lurchmath string s
       ${itemPen('lc(s)')}         : constructs an LC from the putdown string s
       ${itemPen('mc(s)')}         : constructs an MC from the smackdown string s
       ${itemPen('X.report()')}    : prints a syntax highlighted, numbered view of LC X
@@ -380,6 +405,7 @@ rpl.defineCommand( "features", {
       ${itemPen('.test')}         : run the acidtests script
       ${itemPen('.makedocs')}     : make the jsdoc docs
       ${itemPen('.showdocs')}     : open the jsdoc docs in the browser
+      ${itemPen('.compileparser')}: compile the parser to js
       ${itemPen('exec(command)')} : execute the given shell commmand and print the result
       ${itemPen('initialize()')}  : loads and executes 'initproof.js' from the scripts
                       folder. A different file can be executed by calling 
@@ -409,11 +435,45 @@ rpl.defineCommand( "list", {
   }
 })
 
-// define the Lode .list command
+// define the Lode .test command
 rpl.defineCommand( "test", {
   help: "Run the default test script ('acidtests.js').",
   action() { 
     initialize('utils/acidtests')
+    this.displayPrompt()
+  }
+})
+
+// define the Lode .compileparser command
+rpl.defineCommand( "compileparser", {
+  help: "Compile the Lurch parser.",
+  action() { 
+    try {
+      console.log(`${defaultPen('Compiling Lurch parser to lurch-to-putdown.js...')}`)
+      execStr('cd parsers && peggy --cache --format es -o lurch-to-putdown.js lurch-to-putdown.peggy')
+      execStr('cd parsers && cp lurch-to-putdown.js ../../../../lurchmath/parsers/')
+      console.log(`${defaultPen('Compiling Lurch parser to lurch-to-tex.js...')}`)
+      execStr('cd parsers && peggy --cache --format es -o lurch-to-tex.js lurch-to-tex.peggy')
+      execStr('cd parsers && cp lurch-to-tex.js ../../../../lurchmath/parsers/')
+      console.log(`${defaultPen('Done.')}`)
+    } catch (err) {
+      console.log(xPen('Error compiling the parser.'))
+    }
+    this.displayPrompt()
+  }
+})
+
+// define the Lode .list command
+rpl.defineCommand( "parsertest", {
+  help: "Run the Lurch parser test.",
+  action() { 
+    try { 
+      const s=lc(parse(loadStr('parsers/LurchParserTest')))
+      parselines(parse)
+      console.log(`${itemPen('Parser Test:')} → ok`)
+    } catch (e) { 
+      console.log(xPen(`ERROR: Parser test failed.`)) 
+    }
     this.displayPrompt()
   }
 })
@@ -424,8 +484,8 @@ rpl.defineCommand( "makedocs", {
   action() {
     console.log(defaultPen('Building docs...')) 
     try {
-    exec('rm -rf docs && jsdoc ./* -d docs -c utils/jsdoc-conf.json -u tutorials/ && node utils/post-docs')
-    console.log(defaultPen('...done'))
+      execStr('rm -rf docs && jsdoc ./* -d docs -c utils/jsdoc-conf.json -u tutorials/ && node utils/post-docs && syncdocs')
+      console.log(defaultPen('...done'))
     } catch (err) {
       console.log('Error building docs.')
     }

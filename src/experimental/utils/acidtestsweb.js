@@ -18,8 +18,9 @@ export const test = async (exppath = 'src/experimental') => {
   ////////////////////////////////////////////////////////////////////////////
   
   // Load Acid Tests
-  let acid = await Promise.all([1,4,5,6,7,8,9,10,'11a','11b','11c','11d','11e','Induction'].map( 
-      (ex,k) => loadDoc(`proofs/acid tests/acid ${k} Example ${ex}`,exppath)))
+  // Array.seq(k=>k,0,13).map( k => loadDoc(`proofs/acid tests/acid ${k}`))
+  let acid = await Promise.all(Array.seq(k=>k,0,13).map( 
+      (k) => loadDoc(`proofs/acid tests/acid ${k}`,exppath)))
   // Load other tests in the acid tests folder
   acid.push(await loadDoc('proofs/acid tests/Transitive Chains',exppath))
   acid.push(await loadDoc('proofs/acid tests/Cases',exppath))
@@ -31,6 +32,8 @@ export const test = async (exppath = 'src/experimental') => {
   acid.push(await loadDoc('proofs/math299/peanoBIH',exppath)) 
   acid.push(await loadDoc('proofs/math299/peano',exppath)) 
   acid.push(await loadDoc('proofs/math299/midterm',exppath))
+  acid.push(await loadDoc('proofs/math299/recursion',exppath))
+  acid.push(await loadDoc('proofs/math299/reals',exppath))
   
   // run the tests
   let passed = 0
@@ -40,13 +43,13 @@ export const test = async (exppath = 'src/experimental') => {
   
   // test the asciimath Peggy parser by itself
   try { 
-    const str = await loadDocStr('parsers/asciiParserTests',exppath)
+    const str = await loadDocStr('parsers/LurchParserTests',exppath)
     const s = lc(parse(str))
     passed++
     console.log(`%cParser Test:' → ok`,itemCSS)
   } catch (e) { 
     failed++
-    console.log(`%cERROR: asciimath peggy parser test failed.`,failCSS) 
+    console.log(`%cERROR: LurchMath peggy parser test failed.`,failCSS) 
   }
   
   acid.forEach( (T,k) => {

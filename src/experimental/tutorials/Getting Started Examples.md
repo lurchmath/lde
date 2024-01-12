@@ -24,7 +24,7 @@ Let's start by making a simple document. We will call it `doc`. The simplest kin
 ▶︎ validate(doc)
 { :Declare[𝜆 ➤] (is x Mars)✗ (is y Mars)✗ (= x y)✗ }✗
 ```
-The command `$()` parses a string using the asciimath parser and creates the corresponding LC, which is echoed back in putdown notation. The parser recognizes `=` and `is` as infix operators so in this case it creates an environment with three children, each of which is an expression. 
+The command `$()` parses a string using the Lurch math parser and creates the corresponding LC, which is echoed back in putdown notation. The parser recognizes `=` and `is` as infix operators so in this case it creates an environment with three children, each of which is an expression. 
 
 Every document has to be interpreted before validating, which in this case only adds the system declarations of `𝜆` and `➤`, which are reserved symbols.  Validation does not know or assume anything at all about `Mars` or `=` or `is`, so it shrugs and marks this with ✗ to indicate that the claims are `indeterminate` - Lurch cannot determine that the given reasoning is correct from the information given.  So we need to tell it more.
 

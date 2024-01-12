@@ -31,8 +31,17 @@
 //
 // Imports
 //
-import { Environment } from '../environment.js'
-import { Symbol as LurchSymbol } from '../symbol.js'
+// import { Application } from '../application.js'
+// import { Environment } from '../environment.js'
+// import { Declaration } from '../declaration.js'
+// import { Symbol as LurchSymbol } from '../symbol.js'
+// import { Formula } from '../formula.js'
+// import { BindingExpression } from '../binding-expression.js'
+import {
+  Application, Environment, Declaration, LurchSymbol,
+  BindingExpression, Formula
+} from '../index.js'
+
 import { processShorthands } from './parsing.js'
 import Utilities from './utils.js'
 const { subscript } = Utilities

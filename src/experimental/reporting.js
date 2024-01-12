@@ -164,9 +164,10 @@ const clean = { showInstantiations, showNumbers, showSimpleProperNames , showUse
                 showValidation } 
 // user report option
 const user = { showNumbers, showUserThms , showSimpleProperNames , showValidation }
-// user report option
-const defaultOptions = { showDeclares, showNumbers, showRules , showSimpleProperNames , 
-  showUserThms , showValidation }
+// old default report option
+const nice = { showDeclares, showRules , showSimpleProperNames , showUserThms ,
+   showValidation }
+const defaultOptions = { showSimpleProperNames , showUserThms , showValidation }
 
 
 // Syntactic sugar for the formatter
@@ -183,6 +184,7 @@ const context = 'context'
 const declare = 'Declare'
 const ProperName = 'ProperName'
 const validation = 'validation result'
+const validations = 'validation results'
 
 // custom formatter
 const formatter = ( options=defaultOptions ) => {
@@ -192,7 +194,9 @@ const formatter = ( options=defaultOptions ) => {
     // optionally hide user Theorems or userRules
     if ((L.isA('Theorem') && !options.showUserThms) ||
         (L.userRule && !options.showUserRules))  { // do nothing
-    // hint markers
+    } else if ((L.isA('Rule') && !options.showRules) ||
+        (L.userRule && !options.showUserRules))  { // do nothing
+      // hint markers
     } else if (L.isA(hint) || (L instanceof LurchSymbol && L.text()==='<<')) {  
       ans += hintPen(S)
     // metavariables        
@@ -201,6 +205,9 @@ const formatter = ( options=defaultOptions ) => {
     // the LDE EFA constant symbols
     } else if (L instanceof LurchSymbol && L.text()===EFA) {
       ans += (L.constant) ? constantPen('𝜆') : defaultPen('𝜆')
+    // the contradiction symbol (to avoid parser conflict with f:A→B)
+  } else if (L instanceof LurchSymbol && L.text()==='contradiction') {
+    ans += (L.constant) ? constantPen('→←') : defaultPen('→←')  
     // comments just display their string (second arg) with the comment pen 
     } else if (L.isAComment()) {
       ans += commentPen(L.child(1))
@@ -223,8 +230,8 @@ const formatter = ( options=defaultOptions ) => {
     } else if (L instanceof Declaration) {
       const label = L.isA('Declare') ? decPen('Declare') : 
                     L.isA('given')   ? decPen('Let')     : decPen('ForSome')
-      ans += (L.isA('given') ? ':' : '') + label + 
-              S.slice(0).replace(/\s*,\s*]$/,']') 
+      ans += (options.showDeclares || !L.isA('Declare')) ? (L.isA('given') ? ':' : '') + label + 
+              S.slice(0).replace(/\s*,\s*]$/,']') : ''
     // Declaration body copies
     } else if (L.bodyOf) {
       ans += (options.showBodies) ? instantiationPen(S) : ''
@@ -254,7 +261,7 @@ const formatter = ( options=defaultOptions ) => {
       const highlighted=[ metavariable, constant, instantiation, hint, valid, 
             invalid, declare, formula ].map( s => '_type_'+s )
       // then non-types
-      highlighted.push(scoping,context,ProperName,validation)
+      highlighted.push(scoping,context,ProperName,validation,validations)
       let keys=attr.filter( a => !highlighted.includes(a) )
       // format what's left
       if (keys.length>0) {
@@ -280,6 +287,9 @@ const formatter = ( options=defaultOptions ) => {
       // TODO: adding the switchover to the new validation storage
       if (L.results("BIH")) 
         ans += (L.results("BIH").result==="valid")?goldstar:redstar
+      // CAS validation marker
+      if (L.results("CAS")) 
+        ans += (L.results("CAS").result==="valid")?checkPen('#'):xPen('#')
       // TODO: remove old style validation
       if (Validation.result(L) && Validation.result(L).result==='valid') {
         // a valid BIH has to be propositionally valid, so a green check
@@ -533,6 +543,14 @@ Object.defineProperty(LogicConcept.prototype, 'all', {
   }
 })
 
+// Because this is used so often
+Object.defineProperty(LogicConcept.prototype, 'nice', {
+  get: function() {
+    this.report(nice)
+  }
+})
+
+
 export default {
   
   // formatting utiltiies
@@ -547,7 +565,7 @@ export default {
   decPen , commentPen , headingPen , docPen , linenumPen , itemPen ,
   
   // report definitions
-  all, show, detailed , moderate, allclean, clean , user ,
+  all, show, detailed , moderate, allclean, clean , user , nice ,
   
   // report options
   showAttributes , showContexts , showRules , showInstantiations , 

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Global $n$-compact Validation Engine: utils/utilities.js</title>
+    
+      <link type="text/css" rel="stylesheet" href="styles/vendor/prism-default.css">
+    
+    <link type="text/css" rel="stylesheet" href="styles/styles.css">
+    
+    
+    <style>
+      :root {
+      
+      
+        --nav-width: 335px;
+      
+      }
+    </style>
+    
+</head>
+<body>
+
+<header class="layout-header">
+  
+  <h1>
+    <a href="./index.html">
+      Global $n$-compact Validation Engine
+    </a>
+  </h1>
+  <nav class="layout-nav">
+    <ul><li class="nav-heading">Tutorials</li><li class="nav-item"><a href="tutorial-Getting Started_ Examples.html">Getting Started: Examples</a></li><li class="nav-item"><a href="tutorial-Lurch Node REPL.html">Lurch Node REPL</a></li><li class="nav-item"><a href="tutorial-Propositional Form.html">Global Propositional Form</a></li></ul><ul><li class="nav-heading">Classes</li><li class="nav-heading"><span class="nav-item-type type-class" title="class">C</span><span class="nav-item-name is-class"><a href="CNFProp.html">CNFProp</a></span></li><li class="nav-item"><span class="nav-item-type type-member" title="member">M</span><span class="nav-item-name is-member"><a href="CNFProp.html#.switchVarSymbol">switchVarSymbol</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="CNFProp.html#hasCNFform">hasCNFform</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="CNFProp.html#simplify">simplify</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="CNFProp.html#toAlgebraic">toAlgebraic</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="CNFProp.html#toArray">toArray</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="CNFProp.html#toEnglish">toEnglish</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="CNFProp.html#.fromLC">fromLC</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="CNFProp.html#.toCNF">toCNF</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="CNFProp.html#.toVar">toVar</a></span></li><li class="nav-heading"><span class="nav-item-type type-class" title="class">C</span><span class="nav-item-name is-class"><a href="module-MathLive.MathItem.html">MathItem</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-MathLive.MathItem.html#get">get</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-MathLive.MathItem.html#setFocusWhenShown">setFocusWhenShown</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-MathLive.MathItem.html#setValue">setValue</a></span></li></ul><ul><li class="nav-heading">Modules</li><li class="nav-heading"><span class="nav-item-type type-module" title="module">M</span><span class="nav-item-name is-module"><a href="module-GlobalValidation.html">GlobalValidation</a></span></li><li class="nav-item"><span class="nav-item-type type-member" title="member">M</span><span class="nav-item-name is-member"><a href="module-GlobalValidation.html#~LurchOptions">LurchOptions</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-GlobalValidation.html#~cacheFormulaDomainInfo">cacheFormulaDomainInfo</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-GlobalValidation.html#~copyEquation">copyEquation</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-GlobalValidation.html#~diff">diff</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-GlobalValidation.html#~forbiddenWeeny">forbiddenWeeny</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-GlobalValidation.html#~getCaselikeRules">getCaselikeRules</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-GlobalValidation.html#~getUserPropositions">getUserPropositions</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-GlobalValidation.html#~insertInstantiation">insertInstantiation</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-GlobalValidation.html#~insertSymmetricEquivalences">insertSymmetricEquivalences</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-GlobalValidation.html#~instantiate">instantiate</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-GlobalValidation.html#~instantiateTransitives">instantiateTransitives</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-GlobalValidation.html#~isBadInstantiation">isBadInstantiation</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-GlobalValidation.html#~matchGivens">matchGivens</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-GlobalValidation.html#~matchPropositions">matchPropositions</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-GlobalValidation.html#~processBIHs">processBIHs</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-GlobalValidation.html#~processCases">processCases</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-GlobalValidation.html#~processDomains">processDomains</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-GlobalValidation.html#~processEquations">processEquations</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-GlobalValidation.html#~reverseEquation">reverseEquation</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-GlobalValidation.html#~splitEquations">splitEquations</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-GlobalValidation.html#~tidyProperNames">tidyProperNames</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-GlobalValidation.html#~validate">validate</a></span></li><li class="nav-heading"><span class="nav-item-type type-module" title="module">M</span><span class="nav-item-name is-module"><a href="module-Interpretation.html">Interpretation</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Interpretation.html#~addSystemDeclarations">addSystemDeclarations</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Interpretation.html#~assignProperNames">assignProperNames</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Interpretation.html#~interpret">interpret</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Interpretation.html#~markDeclaredSymbols">markDeclaredSymbols</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Interpretation.html#~moveDeclaresToTop">moveDeclaresToTop</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Interpretation.html#~processBindings">processBindings</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Interpretation.html#~processDeclarationBodies">processDeclarationBodies</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Interpretation.html#~processLetEnvironments">processLetEnvironments</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Interpretation.html#~processRules">processRules</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Interpretation.html#~processTheorems">processTheorems</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Interpretation.html#~renameBindings">renameBindings</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Interpretation.html#~replaceBindings">replaceBindings</a></span></li><li class="nav-heading"><span class="nav-item-type type-module" title="module">M</span><span class="nav-item-name is-module"><a href="module-Lode.html">Lode</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Lode.html#~list">list</a></span></li><li class="nav-heading"><span class="nav-item-type type-module" title="module">M</span><span class="nav-item-name is-module"><a href="module-MathLive.html">MathLive</a></span></li><li class="nav-item"><span class="nav-item-type type-member" title="member">M</span><span class="nav-item-name is-member"><a href="module-MathLive.html#.inputFormats">inputFormats</a></span></li><li class="nav-item"><span class="nav-item-type type-member" title="member">M</span><span class="nav-item-name is-member"><a href="module-MathLive.html#.outputFormats">outputFormats</a></span></li><li class="nav-item"><span class="nav-item-type type-member" title="member">M</span><span class="nav-item-name is-member"><a href="module-MathLive.html#.stylesheet">stylesheet</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-MathLive.html#.getConverter">getConverter</a></span></li><li class="nav-heading"><span class="nav-item-type type-module" title="module">M</span><span class="nav-item-name is-module"><a href="module-Parsing.html">Parsing</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Parsing.html#.makeParser">makeParser</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Parsing.html#.processShorthands">processShorthands</a></span></li><li class="nav-heading"><span class="nav-item-type type-module" title="module">M</span><span class="nav-item-name is-module"><a href="module-Reporting.html">Reporting</a></span></li><li class="nav-heading"><span class="nav-item-type type-module" title="module">M</span><span class="nav-item-name is-module"><a href="module-Utilities.html">Utilities</a></span></li><li class="nav-item"><span class="nav-item-type type-member" title="member">M</span><span class="nav-item-name is-member"><a href="module-Utilities.html#.isOnScreen">isOnScreen</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Utilities.html#.appURL">appURL</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Utilities.html#.copyWithoutPrototype">copyWithoutPrototype</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Utilities.html#.editorForNode">editorForNode</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Utilities.html#.escapeHTML">escapeHTML</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Utilities.html#.loadScript">loadScript</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Utilities.html#.onlyBefore">onlyBefore</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Utilities.html#.removeScriptTags">removeScriptTags</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Utilities.html#.simpleHTMLTable">simpleHTMLTable</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Utilities.html#~checkExtension">checkExtension</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Utilities.html#~commonInitialSlice">commonInitialSlice</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Utilities.html#~indent">indent</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Utilities.html#~lineNum">lineNum</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Utilities.html#~subscript">subscript</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Utilities.html#~tab">tab</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="module-Utilities.html#~timer">timer</a></span></li></ul><ul><li class="nav-heading">Namespaces</li><li class="nav-heading"><span class="nav-item-type type-namespace" title="namespace">N</span><span class="nav-item-name is-namespace"><a href="Extensions.html">Extensions</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.Declaration#allProps">Declaration#allProps</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.Declaration#letsInScope">Declaration#letsInScope</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.Declaration#lookup">Declaration#lookup</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.Declaration#prop">Declaration#prop</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.Environment#catalog">Environment#catalog</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.Environment#cnf">Environment#cnf</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.Environment#letInferences">Environment#letInferences</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.Environment#scopes">Environment#scopes</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.Expression#allProps">Expression#allProps</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.Expression#lookup">Expression#lookup</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.Expression#prop">Expression#prop</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#Declares">LogicConcept#Declares</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#Insts">LogicConcept#Insts</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#Parts">LogicConcept#Parts</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#Rules">LogicConcept#Rules</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#attributes">LogicConcept#attributes</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#bindings">LogicConcept#bindings</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#declarations">LogicConcept#declarations</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#descendantsSatisfyingIterator">LogicConcept#descendantsSatisfyingIterator</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#environments">LogicConcept#environments</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#equations">LogicConcept#equations</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#find">LogicConcept#find</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#forSomes">LogicConcept#forSomes</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#formulas">LogicConcept#formulas</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#insertAfter">LogicConcept#insertAfter</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#insertBefore">LogicConcept#insertBefore</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#isAComment">LogicConcept#isAComment</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#isADeclaration">LogicConcept#isADeclaration</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#isALet">LogicConcept#isALet</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#isALetEnvironment">LogicConcept#isALetEnvironment</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#isAProposition">LogicConcept#isAProposition</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#isAStatement">LogicConcept#isAStatement</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#isAnEquation">LogicConcept#isAnEquation</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#letAncestors">LogicConcept#letAncestors</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#lets">LogicConcept#lets</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#mentions">LogicConcept#mentions</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#negate">LogicConcept#negate</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#propositions">LogicConcept#propositions</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#results">LogicConcept#results</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#root">LogicConcept#root</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#setResult">LogicConcept#setResult</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#slice">LogicConcept#slice</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#some">LogicConcept#some</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#statements">LogicConcept#statements</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#symbols">LogicConcept#symbols</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#toAlgebraic">LogicConcept#toAlgebraic</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#toEnglish">LogicConcept#toEnglish</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#toNice">LogicConcept#toNice</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LogicConcept#toggleGiven">LogicConcept#toggleGiven</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LurchSymbol#properName">LurchSymbol#properName</a></span></li><li class="nav-item"><span class="nav-item-type type-function" title="function">F</span><span class="nav-item-name is-function"><a href="Extensions.html#.LurchSymbol#rename">LurchSymbol#rename</a></span></li></ul>
+  </nav>
+</header>
+
+
+<main class="layout-main  layout-content--source">
+  <div class="container">
+    <p class="page-kind">source</p>
+    <h1 class="page-title">utils/utilities.js</h1>
+    
+
+
+
+    
+
+<section>
+    <article>
+        <pre id="source" class="source-page line-numbers"><code class="language-js">
+/**
+ * A set of generic utility functions used in this project.
+ * 
+ * @module Utilities
+ */
+
+/**
+ * Create a script element to load a script from the given URL, append that
+ * script element to the page's head, and notify us (via a returned `Promise`)
+ * when the script completes loading successfully or fails with an error.
+ * 
+ * Example use:
+ * ```
+ * loadScript( 'https://some.cdn.org/script.js' ).then( () => {
+ *     // Run code that depends on the script having loaded.
+ * } )
+ * ```
+ * 
+ * Note that if this function has already been called on this URL, so that there
+ * already is a script tag with this source, then the promise resolves
+ * immediately without doing anything first.
+ * 
+ * @param {String} url - URL of the script to load
+ * @returns {Promise} a promise that is resolved if the script finishes loading
+ *   or rejected if the script encounters an error
+ * @function
+ */
+export const loadScript = url =>
+    Array.from( document.head.querySelectorAll( 'script' ) ).some(
+        script => script.getAttribute( 'src' ) == url ) ?
+    Promise.resolve() :
+    new Promise( ( resolve, reject ) => {
+        const scriptTag = document.createElement( 'script' )
+        document.head.append( scriptTag )
+        scriptTag.setAttribute( 'defer', true )
+        scriptTag.setAttribute( 'referrerpolicy', 'origin' )
+        scriptTag.addEventListener( 'load', resolve )
+        scriptTag.addEventListener( 'error', reject )
+        scriptTag.setAttribute( 'src', url )
+    } )
+
+/**
+ * From any JavaScript object, we can create another object by first
+ * constructing a new instance of the Object prototype, then copying over all of
+ * the "own" properties from the original object (by reference).  This is like
+ * the original object, but without its prototype or any other inherited data or
+ * methods.  This function does that.
+ * 
+ * @param {Object} object - any JavaScript object
+ * @returns {Object} a shallow copy of the original object, but without copying
+ *   its prototype information
+ * @function
+ */
+export const copyWithoutPrototype = object => {
+    const result = new Object()
+    for ( let key in object )
+        if ( object.hasOwnProperty( key ) )
+            result[key] = object[key]
+    return result
+}
+
+/**
+ * Return the URL for this app.  It is taken directly from the browser's
+ * navigation bar, but it excludes any query string that may be present.
+ * It will be of the form `protocol://domain.name/path/to/file.html`.
+ *
+ * @function
+ * @see {@link module:ImportFromURL.autoOpenLink autoOpenLink()}
+ */
+export const appURL = () => {
+    const result = window.location.protocol + '//'
+                 + window.location.host + window.location.pathname
+    return result.endsWith( '/' ) ? result : result + '/'
+}
+
+/**
+ * Escape a string so that it can be safely inserted into an HTML document and
+ * still represent the plain text within the given string (not interpreting the
+ * string as HTML itself).  For example, the string `"x &lt; a and a > b"` should
+ * appear exactly that way in the rendered HTML, meaning that the `&lt;` and `>`
+ * will need to be escaped so that `"&lt;a and a>"` does not appear to be a tag.
+ * 
+ * @param {string} text - text to escape for insertion into HTML
+ * @returns {string} the same text, but with the characters `"&amp;"`, `"&lt;"`, `">"`,
+ *   `"'"`, and `'"'` replaced with character references instead
+ * @function
+ */
+export const escapeHTML = ( text = '' ) =>
+    text.replaceAll( '&amp;', '&amp;amp;' )
+        .replaceAll( '&lt;', '&amp;lt;' )
+        .replaceAll( '>', '&amp;gt;' )
+        .replaceAll( '"', '&amp;quot;' )
+        .replaceAll( "'", '&amp;#039;' )
+
+/**
+ * The following function takes as input an string containing HTML code and
+ * removes from it all script tags, so that the code can be used safely within
+ * the app itself, knowing that no malicious code will be executed.
+ * 
+ * @param {string} html - the HTML code from which to remove script tags
+ * @returns {string} the same HTML code, but with all script tags removed
+ * @function
+ */
+export const removeScriptTags = html => {
+    const regex = /&lt;script\b[^&lt;]*(?:(?!&lt;\/script>)&lt;[^&lt;]*)*&lt;\/script>/gi
+    return html.replace( regex, '' )
+}
+
+/**
+ * This function makes it easy to construct two-column tables of HTML content,
+ * which is something that several types of {@link module:Atoms.Atom Atoms} will
+ * want to do.  The arguments to the function are the rows of the table, and
+ * they are treated as follows.
+ * 
+ *  * Any string is treated as the content for a row of the table spanning both
+ *    columns (using `colspan`) and in bold font.
+ *  * An array of strings containing just one entry is treated the same as a
+ *    single string.
+ *  * An array of two strings is treated as the contents of the two cells in
+ *    the row.
+ *  * An array of three strings is treated as two rows, first a two-cell row,
+ *    and then an optional error row (only if the third entry is not falsy) that
+ *    places the error message in red font in the second cell.
+ * 
+ * Example use:
+ * 
+ * ```js
+ * simpleHTMLTable(
+ *     'Here is the information you entered:',
+ *     [ 'Your name:', 'Frederick the Great' ],
+ *     [ 'Your age:', '42' ],
+ *     [ 'Your favorite color:', color,
+ *       !isColor(color) &amp;&amp; 'That is not a valid color.' ]
+ * )
+ * ```
+ * 
+ * @param  {...any} rows - the data representing the rows of the table to construct
+ * @returns {string} the HTML code for the table
+ * @function
+ */
+export const simpleHTMLTable = ( ...rows ) => {
+    let result = '&lt;table>&lt;colgroup>&lt;col>&lt;col>&lt;/colgroup>'
+    const row = inside => `&lt;tr>${removeScriptTags( inside )}&lt;/tr>`
+    const cell = inside => `&lt;td>${removeScriptTags( inside )}&lt;/td>`
+    const bigCell = inside =>
+        `&lt;td colspan='2'>&lt;b>${removeScriptTags( inside )}&lt;/b>&lt;/td>`
+    const error = inside =>
+        `&lt;td>&lt;font color=red>${removeScriptTags( inside )}&lt;/font>&lt;/td>`
+    rows.forEach( rowData => {
+        if ( typeof( rowData ) == 'string' ) {
+            result += row( bigCell( rowData ) )
+        } else if ( rowData.length == 1 ) {
+            result += row( bigCell( rowData[0] ) )
+        } else if ( rowData.length == 2 ) {
+            result += row( cell( rowData[0] ) + cell( rowData[1] ) )
+        } else if ( rowData.length == 3 ) {
+            result += row( cell( rowData[0] ) + cell( rowData[1] ) )
+            if ( rowData[2] ) result += row( cell( '' ) + error( rowData[2] ) )
+        }
+    } )
+    result += '&lt;/table>'
+    return result
+}
+
+/**
+ * Given an ordered set of HTML Nodes in an array, and a node in the same
+ * document, return just the subset of `nodes` that appear before `point`.
+ * Because the given set of nodes are in order, this subset will always be an
+ * initial segment of the given array.  It can be empty (if none precede `point`)
+ * and it can be the whole array (if all preceded `point`).
+ * 
+ * While this could be done with a simple array filter, that could be slow on
+ * larger arrays; this uses a binary search.  Furthermore, node comparisons are
+ * a tedious process that uses an enum, so this function is simpler.
+ * 
+ * @param {Node[]} nodes - ordered array of Nodes to filter
+ * @param {Node} point - the node that will determine which subset of `nodes`
+ *   gets rerturned
+ * @returns {Node[]} some initial segment of `nodes`, including precisely those
+ *   that appear before `point`
+ * @function
+ */
+export const onlyBefore = ( nodes, point ) => {
+    const lt = ( a, b ) => {
+        const comparison = a.compareDocumentPosition( b )
+        if ( ( comparison &amp; Node.DOCUMENT_POSITION_FOLLOWING ) // b follows a
+          || ( comparison &amp; Node.DOCUMENT_POSITION_CONTAINED_BY ) ) // a contains b
+            return true
+        if ( ( comparison &amp; Node.DOCUMENT_POSITION_PRECEDING ) // b precedes a
+          || ( comparison &amp; Node.DOCUMENT_POSITION_CONTAINS ) // b contains a
+          || ( comparison == 0 ) ) // a is the same node as b
+            return false
+        throw new Error( 'Cannot compare document positions' )
+    }
+    try {
+        if ( nodes.length == 0 || !lt( nodes[0], point ) ) return [ ]
+        if ( lt( nodes[nodes.length-1], point ) ) return nodes
+        let indexLT = 0
+        let indexGE = nodes.length - 1
+        while ( indexLT &lt; indexGE - 1 ) {
+            const midIndex = Math.floor( ( indexLT + indexGE ) / 2 )
+            if ( lt( nodes[midIndex], point ) ) indexLT = midIndex
+            else indexGE = midIndex
+        }
+        return Array.from( nodes ).slice( 0, indexGE )
+    } catch ( e ) {
+        console.log( 'DEBUG:', e )
+        return nodes
+    }
+}
+
+/**
+ * Given a DOM Node, find the TinyMCE editor containing it.
+ * 
+ * @param {Node} node - HTML node for which to find the editor
+ * @returns {tinymce.Editor} the editor whose document contains the given node
+ * @function
+ */
+export const editorForNode = node => {
+    const allEditors = tinymce.get()
+    for ( let i = 0 ; i &lt; allEditors.length ; i++ )
+        if ( allEditors[i].getDoc() == node.ownerDocument )
+            return allEditors[i]
+    return null
+}
+
+/**
+ * Call a function on each element in an array, just like `array.forEach()`
+ * would do, except use a zero-second timeout between each call.
+ * 
+ * @param {Function} func - the function to call for each element
+ * @param {any[]} array - the array to iterate over
+ * @param {number} [timeout=0] - the number of milliseconds to wait between calls
+ * @function
+ */
+Array.prototype.forEachWithTimeout = function( func, timeout = 0 ) {
+    if ( this.length == 0 ) return
+    func( this[0] )
+    setTimeout( () =>
+        this.slice(1).forEachWithTimeout( func, timeout ), timeout )
+}
+
+/**
+ * TinyMCE sometimes stores elements off screen, but still part of the document,
+ * so if we search for elements by selector, we will find them, even though they
+ * are invisible and should not be taken into account as part of the user's
+ * document content.  This function checks to see if a given DOM nodes is really
+ * a visible, relevant part of the document or not.
+ * 
+ * @param {Node} node - the node to test
+ * @returns {boolean} true if the node is on screen (and "real")
+ */
+export const isOnScreen = node => node.parentNode &amp;&amp;
+    !node.parentNode.classList.contains( 'mce-offscreen-selection' )
+</code></pre>
+    </article>
+</section>
+
+
+
+
+  </div>
+</main>
+
+<footer class="layout-footer">
+  <div class="container">
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a>
+  </div>
+</footer>
+
+
+
+<script src="scripts/prism.dev.js"></script>
+</body>
+</html>

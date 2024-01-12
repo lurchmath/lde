@@ -1,0 +1,41 @@
+include libs/Reals
+////////////////////////////////////////////////////////////////////////////
+// Elementary Naive Set Theory Lurch Lib
+//
+
+//////////////////////////////////
+// Definitions for Sets
+//////////////////////////////////
+Declare Set ∈ ⊆ ∩ ∪ ∖ ° 𝒫
+Axioms:  
+{
+	:{ x ∉ Set() }                                // empty set
+	:{ x ∈ Set(a) ≡ x=a }                         // Finite Set Notation
+	:{ x ∈ Set(a,b) ≡ x=a or x=b }                // Finite Set Notation
+	:{ x ∈ Set(a,b,c) ≡ (x=a or x=b) or x=c }     // Finite Set Notation
+	:{ x ∈ Set( z.𝜆P(z) ) ≡ 𝜆P(x)  }              // Set builder notation 
+	:{ :{:Let x be such that x∈A  x∈B } A⊆B }     // Subset+
+	:{ :A⊆B :x∈A  x∈B }                           // Subset-
+	:{ :{:Let a be such that a∈A  a∈B}
+		 :{:Let b be such that b∈B  b∈A} 
+		 A=B
+	}                                            // Set equality                         
+	:{ A ∈ 𝒫(B) ≡ A⊆B }                          // Power set
+	:{ x ∈ A∩B ≡ { x∈A x∈B } }                   // Intersection
+	:{ x ∈ A∪B ≡  x∈A or x∈B }                   // Union
+	:{ x ∈ A∖B ≡ { x∈A  x∉B } }                  // Relative Complement 
+	:{ x ∈ A° ≡ x∉A }                            // Complement
+	
+	:{ ⟨x,y⟩ = ⟨u,v⟩ ≡ { x=u y=v } }                      // Ordered Pairs
+	:{ ⟨x,y,z⟩ = ⟨u,v,w⟩ ≡ { x=u y=v z=w } }              // Ordered Triple
+		
+	:{ z∈A×B ≡ { a∈A b∈B z=⟨a,b⟩ for some a,b} }          // Cartesian Product
+	:{ z∈A×B×C ≡ { a∈A b∈B c∈C z=⟨a,b,c⟩ for some a,b } } // Cartesian Product
+
+	// :{ x ∈ T i∈I Ai ≡ ∀i.i∈I⇒x∈Ai }               // Indexed Intersection
+	// :{ x ∈S i∈I Ai ⇔ ∃i, i ∈ I and x ∈ Ai }       // Indexed Union
+	// Two convenient abbreviations
+	// (∀x ∈ A, P (x))⇔ ∀x, x ∈ A ⇒ P(x)
+	// (∃x ∈ A, P (x))⇔ ∃x, x ∈ A and P(x)
+
+} 

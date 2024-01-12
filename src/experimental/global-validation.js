@@ -103,21 +103,28 @@
 //
 
 // import LDE tools
+// import { LogicConcept } from '../logic-concept.js'
+// import { Expression } from '../expression.js'
+// import { Symbol as LurchSymbol } from '../symbol.js'
+// import { isAnEFA } from '../matching/expression-functions.js'
+// import { Declaration } from '../declaration.js'
+// import { Environment } from '../environment.js'
+// import { Problem } from "../matching/problem.js"
 import CNF from '../validation/conjunctive-normal-form.js'
-import { LogicConcept } from '../logic-concept.js'
-import { Expression } from '../expression.js'
-import { isAnEFA } from '../matching/expression-functions.js'
-import { Declaration } from '../declaration.js'
-import { Environment } from '../environment.js'
-import { Symbol as LurchSymbol } from '../symbol.js'
-import { Problem } from "../matching/problem.js"
-import Formula from '../formula.js'
-import Scoping from '../scoping.js'
-import Validation from '../validation.js'
+// import Formula from '../formula.js'
+// import Scoping from '../scoping.js'
+// import Validation from '../validation.js'
+import {
+  LogicConcept, Expression, Declaration, Environment, LurchSymbol,
+  Matching, Formula, Scoping, Validation
+} from '../index.js'
+
+const Problem = Matching.Problem
+const isAnEFA = Matching.isAnEFA
 
 // import experimental tools
 import Interpret from './interpret.js'
-const { markDeclaredSymbols, renameBindings, assignProperNames } = Interpret
+const { markDeclaredSymbols, renameBindings, assignProperNames, interpret } = Interpret
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -150,6 +157,7 @@ const timeEnd = (description) => { if (Debug) console.timeEnd(description) }
  *   * `autoCases` - similar to avoidLoneMetavars=false. If true, then identify
  *      all Cases-like rules and try to instantiate their univar conclusion with
  *      every user's conclusion in the document.
+ *   * `processCAS` - process CAS tool iff this is true
  *
  * @see {@link validate validate()}
  */
@@ -161,7 +169,11 @@ const LurchOptions = {
   avoidLoneEFAs:true ,    
   processEquations:true ,    
   processCases:true ,    
-  autoCases:false  
+  autoCases:false ,
+  processCAS:true ,
+  updateProgress: async () => { }  ,
+  updateFreq: 100 ,
+  badResultMsg: 'indeterminate' 
 }
 
 /**
@@ -226,6 +238,13 @@ const validate = ( doc, target = doc ) => {
   // to 𝜆P(y) than to a single metavar U processCases(doc,'Substitution').  But
   // it can work for single metavariable weeny, since that only creates one
   // instantiation.
+
+  ///////////////////////////////////
+  // CAS
+  //
+  // we currently are using Algebrite for the CAS but this tool will work with
+  // any CAS.
+  processCAS(doc)
   
   //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
   
@@ -233,6 +252,7 @@ const validate = ( doc, target = doc ) => {
   // the list of user propositions and the document catalog.  This must be done
   // after the tools above in case they instantiate a 'Part' that then is used
   // for further instantiation (e.g. as with the Cases tool)
+  
   instantiate(doc)
   
   ///////////////
@@ -265,6 +285,8 @@ const validate = ( doc, target = doc ) => {
   // something human-readable. 
   // TODO: maybe improve or eliminate this in the future
   tidyProperNames(doc)
+  // re-cache the catalog, since these are new prop names
+  doc.cat = doc.catalog()
 
   return doc   
 }
@@ -809,7 +831,7 @@ const processCases = doc => {
     const p = rule.lastChild()
     // get all the things the user wants to checked as a conclusion by cases
     const usercases = [...doc.descendantsSatisfyingIterator(
-      x => x.by?.toLowerCase()==='cases')]
+      x => typeof x.by === 'string' && x.by.toLowerCase()==='cases')]
     // for each one construct the relevant partial instantiation
     usercases.forEach( c => {
       try {
@@ -884,7 +906,26 @@ const getCaselikeRules = doc => {
   })
 }
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
+const processCAS = doc => {
+  // check options 
+  if (!LurchOptions.processCAS) return
+  
+  // get all the things the user wants to checked as a conclusion by CAS
+  const userCASs = [...doc.descendantsSatisfyingIterator( x => typeof x.by === 'object' && typeof x.by?.CAS ==='string')]
+  
+  userCASs.forEach( c => { 
+    // get the command
+    const command = c.by.CAS
+    // if the CAS evaluates to truthy, mark the proposition as valid
+    const ans = (compute(command)==='1') ? 'valid' : 'invalid'
+    c.setResult('CAS', ans , 'CAS')
+  })
+
+}
 
 /**
  * This is the meat of the algorithm for $n$-compact validation. It takes a
@@ -915,6 +956,19 @@ const instantiate = doc => {
   let n = 1
   // loop until there's nothing left to instantiate
   while ( formulas.length>0 ) {
+
+    //////////////////////////////////////////////////////////////////////////
+    // when calling from a UI we might want a progress meter to show how far 
+    // along validation is.  Since the major time is spent in this routine we 
+    // provide a hook for that.
+    let totalnum = E.length*formulas.reduce((tot, f) => {
+      return tot + f.weenies.length; }, 0)
+    let counter = 0
+    const freq = LurchOptions.updateFreq 
+    let update = Math.max(Math.floor(totalnum/freq),1)
+    // console.log(`Starting pass ${n}. Matching ${totalnum} expressions.`)
+    /////////////////////////////////////////////////////////////////////////
+
     // now loop through all of the formulas, check if they are finished and if
     // not, match all of their maximally Weeny propositions to all of the
     // elements of E to find instantiations and partial instantiations
@@ -947,6 +1001,17 @@ const instantiate = doc => {
             // insert this instantiation
             insertInstantiation( inst, f, e )
           })
+
+          ////////////////////////////////////////////////////////////////
+          // increment the progress bar
+          counter++
+          // number of times it reports during one computation
+          if (counter % update === 0) {
+            // console.log(`${Math.ceil(counter/totalnum*100)}% complete`)
+            LurchOptions.updateProgress(n,totalnum,Math.ceil(counter/totalnum*100))
+          }
+          //////////////////////////////////////////////////////////////////
+
         })
       })
       // we've matched every user proposition to every weenie pattern in
@@ -1052,6 +1117,10 @@ const matchPropositions = (p, e) => {
  * Many of the tools that work with $n$-compact validation (including the
  * $n$-compact tool itself) require creating and inserting instantiations and
  * marking them in various ways.  This utility makes that process more coherent.
+ * It also allows us to check for 'bad' instantiations that e.g. instantiate a
+ * metavariable that is inside (declared by) a declaration with a constant, or
+ * instantiate both $x$ and $y$ with the same thing in an declaration like 
+ * `[ x y ]`.
  *
  * @param {LogicConcept} inst - the instantiation to insert. If it is an
  *        environment it will be inserted either as a `Part` or an `Inst`. If it
@@ -1081,7 +1150,19 @@ const insertInstantiation = ( inst, formula, creator ) => {
 
     // insert it after the formula, the order doesn't matter
     inst.insertAfter(formula)
-    
+
+    // and mark the declared constants in the instantiation
+    markDeclaredSymbols(inst.root(), inst)
+
+    // check if this instantiation should be rejected because it contains a
+    // declaration that is declaring a constant or a declaration declaring more than
+    // one symbol that are instantiated with the same thing.
+    if (isBadInstantiation(inst)) { 
+      // if so, remove it
+      inst.remove()
+      return 
+    }
+
     // save the rule (whether formula is a Part or Rule)
     inst.rule = formula.rule || formula
     // if a creator is specified, push it onto the list
@@ -1098,9 +1179,7 @@ const insertInstantiation = ( inst, formula, creator ) => {
     // also rename the bindings to match what the user would have
     // for the same expressions in his document
     inst.statements().forEach(x => renameBindings(x))
-    // and mark the declared constants in the instantiation
-    markDeclaredSymbols(inst.root(), inst)
-
+    
     // if it's an expression, it's a Consider
     if (inst instanceof Expression) {
       inst.makeIntoA('Consider')
@@ -1126,6 +1205,37 @@ const insertInstantiation = ( inst, formula, creator ) => {
 
 }
 
+/**
+ * Check a proposed instantiation for bad declarations.
+ *
+ *  * If it declares a constant, it's bad.
+ *  * If it declares more than one symbol that are instantiated with the same
+ *    thing, it's bad.
+ *
+ */
+const isBadInstantiation = ( inst ) => {
+  // get the declarations in this instantiation
+  const decs=inst.declarations()
+  // check each one to see if it declares a constant
+  for (let k = 0; k < decs.length; k++) {
+    // get the array of symbols in this declaration
+    const symbols = decs[k].symbols()
+    // check each one to see if it declares a constant
+    if (symbols.findIndex(s=>{return s.constant})!==-1) {
+      // return true if it does
+      return true
+    }
+    // check each one to see if it declares more than one symbol the same way
+    const names = new Set(symbols.map(s=>s.text())) 
+    if (names.size < symbols.length) {
+      // return true if it does
+      return true 
+    }
+  }
+
+  // return false if it doesn't have anything bad
+  return false
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Validate helper utility.  This is the way the original validation tool worked
@@ -1230,7 +1340,7 @@ LogicConcept.prototype._validate = function (target = this,
       // determine the appropriate feedback
       result = (ans)
         ? { result: 'valid', reason: 'n-compact' }
-        : { result: 'indeterminate', reason: 'n-compact' }
+        : { result: LurchOptions.badResultMsg, reason: 'n-compact' }
       Validation.setResult(target, result)
     }
   }
@@ -1252,7 +1362,7 @@ LogicConcept.prototype._validate = function (target = this,
         ans = this._validate(target)
         result = (ans)
           ? { result: 'valid', reason: 'n-compact' }
-          : { result: 'indeterminate', reason: 'n-compact' }
+          : { result: LurchOptions.badResultMsg, reason: 'n-compact' }
         Validation.setResult(target, result)
       }
       // if it is propositionally valid, check it for preemies           
@@ -1524,6 +1634,6 @@ export default {
   validate, getUserPropositions, instantiate, markDeclarationContexts,
   processBIHs, processEquations, splitEquations, processDomains, diff,
   cacheFormulaDomainInfo, Benchmark, getCaselikeRules, LurchOptions, Report,
-  matchPropositions
+  matchPropositions, LogicConcept, Formula, Scoping, Validation
 }
 ///////////////////////////////////////////////////////////////////////////////

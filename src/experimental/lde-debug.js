@@ -1,5 +1,5 @@
 /*
- *        Global n-compact validation in the Browser
+ *        Global n-compact validation in the Browser or Node
  *
  * To import n-compact validation in a web page, just load this file.
  * e.g. 
@@ -10,43 +10,58 @@
  */
     
 import './disable-event-target.js'
-    
+
+let testarg
+if (typeof window === 'object') {
+  console.log(`In a browser window.`)
+} else if (typeof self === 'object') {
+  testarg = '.'
+  console.log(`In a web worker.`)
+} else if (typeof global === 'object') {
+  self = global 
+  console.log(`In node.`)
+}
+ 
 import * as Lurch from '../index.js'
-Object.assign( window, Lurch )
+Object.assign( self, Lurch )
 
 import { Problem } from '../matching/problem.js'
-window.Problem = Problem
+self.Problem = Problem
 
 import CNF from '../validation/conjunctive-normal-form.js'
-window.CNF = CNF
+self.CNF = CNF
 
-import { parse } from './parsers/asciimath.js'
-window.parse = parse
+import { parse } from './parsers/lurch-to-putdown.js'
+self.parse = parse
 
 import Interpret from './interpret.js'
-Object.assign( window, Interpret )
+Object.assign( self, Interpret )
 
 import Compact from './global-validation.js'
-Object.assign( window, Compact )
+Object.assign( self, Compact )
 
 import Utils from './utils.js'
-Object.assign( window, Utils )
+Object.assign( self, Utils )
 
-import * as TEST from './utils/acidtestsweb.js'
-Object.assign( window, TEST )
+import { Message } from '../../../lurchmath/validation-messages.js'
+self.Message = Message
+
 //////////////////////////////////////////////////////////////
 //
 //  Everything below here is for debugging in the console.
 //  It will probably be deleted for production.
 //
 
+import * as TEST from './utils/acidtestsweb.js'
+self.test = () => TEST.test(testarg)
+
 // Useful Lode and Reporting utilities
-window.lc = s => { 
+self.lc = s => { 
   const L = LogicConcept.fromPutdown(s)
   return (L.length===1) ? L[0] : L 
 }
 
-window.$ = s => {
+self.$ = s => {
   let parsed = parse(s)
   return (parsed) ? lc(parsed) : undefined
 }
@@ -308,7 +323,7 @@ const LurchFileExtension = 'lurch'
 
 // Load just the string for a file and return that. You can omit the .lurch
 // extension. The second argument is the folder which default to the current folder. 
-window.loadStr = async ( name, folder='.', extension=LurchFileExtension) => {
+self.loadStr = async ( name, folder='.', extension=LurchFileExtension) => {
   const filename = checkPath(checkExtension(name,extension),folder)
   try {
     const response = await fetch(filename);
@@ -331,7 +346,7 @@ window.loadStr = async ( name, folder='.', extension=LurchFileExtension) => {
 // it will load the string in fname and replace that line with the contents of
 // that file recursively checking for more include statements.  No checking is
 // done to prevent circular dependencies.
-window.loadDocStr = async (name, folder = '.', extension = LurchFileExtension) => {
+self.loadDocStr = async (name, folder = '.', extension = LurchFileExtension) => {
   try {
     // load the specified file
     let ans = await loadStr(name, folder, extension)
@@ -369,7 +384,7 @@ window.loadDocStr = async (name, folder = '.', extension = LurchFileExtension) =
 // Load a document string, recursively replacing included files, and wrap the
 // result in environment brackets, { }. before returning.
 //
-window.loadDoc = async ( name, folder='.', extension=LurchFileExtension ) => {
+self.loadDoc = async ( name, folder='.', extension=LurchFileExtension ) => {
   // load the specified file
   let doc = `{\n${await loadDocStr( name, folder, extension )}\n}`
   doc = parse(doc)
@@ -380,6 +395,6 @@ window.loadDoc = async ( name, folder='.', extension=LurchFileExtension ) => {
 }
 
 // show an LC using the above formatter
-window.show = doc => {
+self.show = doc => {
   console.log(doc.toPutdown(formatter()))
 }

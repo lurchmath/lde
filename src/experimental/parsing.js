@@ -63,6 +63,42 @@ export const makeParser = parserstr => {
   return [parser,traceparser]
 }
 
+export const lc2algebrite = e => {
+  if (e instanceof Application && 
+      e.numChildren()==3 &&
+      e.child(0) instanceof LurchSymbol &&
+      e.child(0).text()==='is' && 
+      e.child(2) instanceof LurchSymbol &&
+      e.child(2).text()==='prime' &&
+      e.child(1) instanceof LurchSymbol &&
+      e.child(1).text().length > 0 &&
+      Number.isInteger(Number(e.child(1).text())) ) {
+    const n = Number(e.child(1).text())  
+    return `isprime(${n})`
+  } else {  
+    return '0'
+  }
+}
+
+export const parselines = (parser,name='LurchParserTests') => {
+  const lines = 
+    loadStr(name,'./parsers/','lurch').split('\n')
+       .map(line => line.trim())
+       .filter(line => line.length > 0 && line.slice(0,2)!=='//')
+  // console.log(`File contains ${lines.length} parseable lines`)
+  let pass = 0, fail = 0
+  lines.forEach( l => {
+    if (parser(l)) {
+      pass++
+    } else {
+      console.log(`Could not parse ${l}`)
+      fail++
+    }
+  })
+  console.log(`Parsed ${pass} lines successfully, ${fail} failed`)
+  return lines.map( l => { return parser(l) })
+}
+
 /**
  *  ## Process Shorthands 
  *
@@ -85,6 +121,7 @@ export const makeParser = parserstr => {
  *       | 'thm>'      | 'Theorem' |
  *       | '<thm'      | 'Theorem' |
  *       | 'proof>'    | 'Proof'   |
+ *       | 'proof>'    | 'Proof'   |
  *
  *   * Scan for occurrences of the symbol `rules>`. Its next sibling should be
  *     an environment containing given Environments. Mark each child of the next
@@ -98,8 +135,13 @@ export const makeParser = parserstr => {
  *     compatibility) and replace that with the symbol "LDE EFA" (which then
  *     will still print as '𝜆' but it's what is needed under the hood).
  *
- *   * Scan for occurrences of the symbol `≡`. If found let `A` and `B` be its
- *     previous and next siblings. Replace all three with `{ {:A B} {:B A}}
+ *   * Scan for occurrences of the symbol `≡`. They are intended to be a
+ *     shorthand way to enter IFF rules (equivalences).  The '≡' should be a
+ *     child of a Rule environment, and should not be the first or last child.
+ *     The Rule will then be replaced by the expanded version and the `≡`
+ *     symbols removed, following the cyclic TFAE style of implications.  For
+ *     example, if the Rule has the form `:{ a ≡ b c ≡ d }` then it will be
+ *     replaced by `:{ {:a {b c}} {:{b c} d } {:d a} }`.
  *
  *   * Scan for occurrences of the symbol `➤`. If found it should be the first
  *     child of an Application whose second child is a symbol whose text is the
@@ -109,9 +151,9 @@ export const makeParser = parserstr => {
  *   * Scan for occurrences of the symbol `by` and mark its previous sibling's
  *     `.by` attribute with the text of its next sibling, which must be a
  *     LurchSymbol. Then delete both the `by` and it's next sibling.  Currently
- *     used by the `Cases` tool
+ *     used by the `Cases` tool and the CAS tool.
  *
- *   * Scan for occurrences of the symbol `✔︎`, `✗`, and `!✗ and mark its
+ *   * Scan for occurrences of the symbol `✔︎`, `✗`, and `!✗` and mark its
  *     previous sibling with .expectedResult 'valid', 'indeterminate', and
  *     'invalid' respectively.
  *
@@ -165,10 +207,26 @@ export const processShorthands = L => {
   processSymbol( 'by' ,  m => { 
     const LHS = m.previousSibling()
     const RHS = m.nextSibling()
-    if (!RHS instanceof LurchSymbol) return
-    LHS.by = RHS.text()
-    m.remove()
-    RHS.remove()
+    // it should be a LurchSymbol or an Application
+    if (RHS instanceof LurchSymbol) {
+      if (RHS.text()==='CAS') {
+        LHS.by = { CAS: lc2algebrite(LHS) }
+        m.remove()
+        RHS.remove()
+      } else {
+        LHS.by = RHS.text()
+        m.remove()
+        RHS.remove()
+      }
+    } else if (RHS instanceof Application ) {
+      if (RHS.child(0) instanceof LurchSymbol && RHS.child(0).text()==='CAS') { 
+        // TODO: handle the case where no arg is passed or it's not a symbol
+        LHS.by = { CAS: RHS.child(1).text() }
+        m.remove()
+        RHS.remove()
+      }
+    }
+    return 
   } )
   
   // rules> - Mark each of the children of the next sibling (which should be an
@@ -192,17 +250,63 @@ export const processShorthands = L => {
     m.replaceWith(new LurchSymbol('LDE EFA'))
   } )
   
-  // expand equivalences
+  // Expand equivalences
   processSymbol( '≡' ,  m => { 
-    const LHS = m.previousSibling()
-    const RHS = m.nextSibling()
-    let A1=LHS.copy().asA('given'), A2=LHS.copy(),
-    B1=RHS.copy(), B2=RHS.copy().asA('given')
-    LHS.replaceWith(new Environment(A1,B1))
-    RHS.replaceWith(new Environment(B2,A2))
-    m.remove()
-  } )
+    // find the parent environment, if there is none, then do nothing
+    const parent = m.parent()
+    if (!parent) return
+
+    // a utility to identify equivalence separators
+    const isSeparator = x => x instanceof LurchSymbol && x.text() === '≡'
+
+    // get the children of the parent
+    let inputArray = parent.children()
+    // an array to hold the groups
+    let groups = []
+    
+    // while there are separators, split the input array into groups
+    let k = inputArray.findIndex( isSeparator )
+    while ( k !== -1) {
+      if (k==1) groups.push(inputArray[0])
+      else groups.push(inputArray.slice(0,k))
+      inputArray = inputArray.slice(k+1)
+      k = inputArray.findIndex( isSeparator )      
+    }
+    // if there are no more separators, then push what's left
+    if (inputArray.length === 1) groups.push(inputArray[0])
+    else groups.push(inputArray)
   
+    // for each group, if it is an array, create a new Environment containing the group elements, otherwise just use the element itself.  Collect them all into a results array.
+    const results = []
+    groups.forEach( group => {
+      if (Array.isArray(group) ) {
+        const newEnv = new Environment( ...group )
+        results.push(newEnv)
+      } else {
+        results.push(group)
+      }
+    })
+
+    // finally, replace the parent with a new environment containing all of the 
+    // cyclic implications.
+    const ans = new Environment()
+    ans.copyAttributesFrom(parent)
+
+    // put all of the pairs into the new environment except the last one
+    results.slice(0,-1).forEach( ( result, i ) => { 
+      let myEnv = new Environment( result.asA('given') , 
+                                   results[i+1].copy().unmakeIntoA('given') ) 
+      ans.pushChild(myEnv)
+    } )
+    // and complete the cycle with the last one
+    ans.pushChild(new Environment( 
+      results[results.length-1].asA('given'), 
+              results[0].copy().unmakeIntoA('given') ) )
+    
+    // replace the parent with the new environment  
+    parent.replaceWith(ans)
+  } )
+
   // For testing purposes, flag the expected result
   processSymbol( '✔︎' , m => { 
     m.previousSibling().setAttribute('ExpectedResult','valid')

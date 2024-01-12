@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {
+        width: 800px;
+        margin: 3rem auto;
+        background-color: black;
+        color: beige;
+      }
+    </style>
+    <link rel="stylesheet" href="mathlive-fonts.css">
+    <link rel="stylesheet" href="mathlive-static.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+
+  </head>
+  <body>
+    <p>
+      MathLive renders this 
+
+      <span class="ML__latex"><span class="ML__strut" style="height:0.75em"></span><span class="ML__strut--bottom" style="height:1em;vertical-align:-0.25em"></span><span class="ML__base"><span class="ML__mathit" style="margin-right:0.14em">P</span><span style="display:inline-block;width:0.28em"></span><span class="ML__cmr">⇒</span><span style="display:inline-block;width:0.28em"></span><span class="ML__mathit">Q</span><span class="ML__text"> and </span><span style="display:inline-block;width:0.17em"></span><span class="left-right" style="margin-top:-0.19444em;height:0.8777699999999999em"><span class="ML__small-delim ML__open">(</span><span class="ML__mathit" style="margin-right:0.01em">R</span><span class="ML__text"> or </span><span class="ML__mathit">Q</span><span class="ML__small-delim ML__close">)</span></span><span style="display:inline-block;width:0.28em"></span><span class="ML__cmr">⇔</span><span class="ML__ams">¬</span><span style="display:inline-block;width:0.28em"></span><span class="ML__mathit" style="margin-right:0.01em">R</span></span></span>
+
+      as shown with this surrounding text.
+    </p>
+    <p>
+      KaTeX renders the same thing 
+
+      <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo>⇒</mo><mi>Q</mi><mtext> and </mtext><mrow><mo fence="true">(</mo><mi>R</mi><mtext> or </mtext><mi>Q</mi><mo fence="true">)</mo></mrow><mo>⇔</mo><mi mathvariant="normal">¬</mi><mi>R</mi></mrow><annotation encoding="application/x-tex">  P\Rightarrow  Q\text{ and } \left( R\text{ or } Q\right)\Leftrightarrow \neg R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">⇒</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">Q</span><span class="mord text"><span class="mord"> and </span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;">(</span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mord text"><span class="mord"> or </span></span><span class="mord mathnormal">Q</span><span class="mclose delimcenter" style="top:0em;">)</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">⇔</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">¬</span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span></span></span></span>
+
+      like this with surrounding text.  
+    </p>
+    <p>
+      Or MathJax can render the same thing
+
+      <svg xmlns:xlink="http://www.w3.org/1999/xlink" width="28.069ex" height="2.843ex" style="vertical-align: -0.838ex;" viewBox="0 -863.1 12085.3 1223.9" role="img" focusable="false" xmlns="http://www.w3.org/2000/svg" aria-labelledby="MathJax-SVG-1-Title">
+        <title id="MathJax-SVG-1-Title">P\Rightarrow Q\text{ and }\left(R\text{ or }Q\right)\Leftrightarrow \neg R</title>
+        <defs aria-hidden="true">
+        <path stroke-width="1" id="E1-MJMATHI-50" d="M287 628Q287 635 230 637Q206 637 199 638T192 648Q192 649 194 659Q200 679 203 681T397 683Q587 682 600 680Q664 669 707 631T751 530Q751 453 685 389Q616 321 507 303Q500 302 402 301H307L277 182Q247 66 247 59Q247 55 248 54T255 50T272 48T305 46H336Q342 37 342 35Q342 19 335 5Q330 0 319 0Q316 0 282 1T182 2Q120 2 87 2T51 1Q33 1 33 11Q33 13 36 25Q40 41 44 43T67 46Q94 46 127 49Q141 52 146 61Q149 65 218 339T287 628ZM645 554Q645 567 643 575T634 597T609 619T560 635Q553 636 480 637Q463 637 445 637T416 636T404 636Q391 635 386 627Q384 621 367 550T332 412T314 344Q314 342 395 342H407H430Q542 342 590 392Q617 419 631 471T645 554Z"></path>
+        <path stroke-width="1" id="E1-MJMAIN-21D2" d="M580 514Q580 525 596 525Q601 525 604 525T609 525T613 524T615 523T617 520T619 517T622 512Q659 438 720 381T831 300T927 263Q944 258 944 250T935 239T898 228T840 204Q696 134 622 -12Q618 -21 615 -22T600 -24Q580 -24 580 -17Q580 -13 585 0Q620 69 671 123L681 133H70Q56 140 56 153Q56 168 72 173H725L735 181Q774 211 852 250Q851 251 834 259T789 283T735 319L725 327H72Q56 332 56 347Q56 360 70 367H681L671 377Q638 412 609 458T580 514Z"></path>
+        <path stroke-width="1" id="E1-MJMATHI-51" d="M399 -80Q399 -47 400 -30T402 -11V-7L387 -11Q341 -22 303 -22Q208 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435Q740 255 592 107Q529 47 461 16L444 8V3Q444 2 449 -24T470 -66T516 -82Q551 -82 583 -60T625 -3Q631 11 638 11Q647 11 649 2Q649 -6 639 -34T611 -100T557 -165T481 -194Q399 -194 399 -87V-80ZM636 468Q636 523 621 564T580 625T530 655T477 665Q429 665 379 640Q277 591 215 464T153 216Q153 110 207 59Q231 38 236 38V46Q236 86 269 120T347 155Q372 155 390 144T417 114T429 82T435 55L448 64Q512 108 557 185T619 334T636 468ZM314 18Q362 18 404 39L403 49Q399 104 366 115Q354 117 347 117Q344 117 341 117T337 118Q317 118 296 98T274 52Q274 18 314 18Z"></path>
+        <path stroke-width="1" id="E1-MJMAIN-61" d="M137 305T115 305T78 320T63 359Q63 394 97 421T218 448Q291 448 336 416T396 340Q401 326 401 309T402 194V124Q402 76 407 58T428 40Q443 40 448 56T453 109V145H493V106Q492 66 490 59Q481 29 455 12T400 -6T353 12T329 54V58L327 55Q325 52 322 49T314 40T302 29T287 17T269 6T247 -2T221 -8T190 -11Q130 -11 82 20T34 107Q34 128 41 147T68 188T116 225T194 253T304 268H318V290Q318 324 312 340Q290 411 215 411Q197 411 181 410T156 406T148 403Q170 388 170 359Q170 334 154 320ZM126 106Q126 75 150 51T209 26Q247 26 276 49T315 109Q317 116 318 175Q318 233 317 233Q309 233 296 232T251 223T193 203T147 166T126 106Z"></path>
+        <path stroke-width="1" id="E1-MJMAIN-6E" d="M41 46H55Q94 46 102 60V68Q102 77 102 91T102 122T103 161T103 203Q103 234 103 269T102 328V351Q99 370 88 376T43 385H25V408Q25 431 27 431L37 432Q47 433 65 434T102 436Q119 437 138 438T167 441T178 442H181V402Q181 364 182 364T187 369T199 384T218 402T247 421T285 437Q305 442 336 442Q450 438 463 329Q464 322 464 190V104Q464 66 466 59T477 49Q498 46 526 46H542V0H534L510 1Q487 2 460 2T422 3Q319 3 310 0H302V46H318Q379 46 379 62Q380 64 380 200Q379 335 378 343Q372 371 358 385T334 402T308 404Q263 404 229 370Q202 343 195 315T187 232V168V108Q187 78 188 68T191 55T200 49Q221 46 249 46H265V0H257L234 1Q210 2 183 2T145 3Q42 3 33 0H25V46H41Z"></path>
+        <path stroke-width="1" id="E1-MJMAIN-64" d="M376 495Q376 511 376 535T377 568Q377 613 367 624T316 637H298V660Q298 683 300 683L310 684Q320 685 339 686T376 688Q393 689 413 690T443 693T454 694H457V390Q457 84 458 81Q461 61 472 55T517 46H535V0Q533 0 459 -5T380 -11H373V44L365 37Q307 -11 235 -11Q158 -11 96 50T34 215Q34 315 97 378T244 442Q319 442 376 393V495ZM373 342Q328 405 260 405Q211 405 173 369Q146 341 139 305T131 211Q131 155 138 120T173 59Q203 26 251 26Q322 26 373 103V342Z"></path>
+        <path stroke-width="1" id="E1-MJMAIN-28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path>
+        <path stroke-width="1" id="E1-MJMATHI-52" d="M230 637Q203 637 198 638T193 649Q193 676 204 682Q206 683 378 683Q550 682 564 680Q620 672 658 652T712 606T733 563T739 529Q739 484 710 445T643 385T576 351T538 338L545 333Q612 295 612 223Q612 212 607 162T602 80V71Q602 53 603 43T614 25T640 16Q668 16 686 38T712 85Q717 99 720 102T735 105Q755 105 755 93Q755 75 731 36Q693 -21 641 -21H632Q571 -21 531 4T487 82Q487 109 502 166T517 239Q517 290 474 313Q459 320 449 321T378 323H309L277 193Q244 61 244 59Q244 55 245 54T252 50T269 48T302 46H333Q339 38 339 37T336 19Q332 6 326 0H311Q275 2 180 2Q146 2 117 2T71 2T50 1Q33 1 33 10Q33 12 36 24Q41 43 46 45Q50 46 61 46H67Q94 46 127 49Q141 52 146 61Q149 65 218 339T287 628Q287 635 230 637ZM630 554Q630 586 609 608T523 636Q521 636 500 636T462 637H440Q393 637 386 627Q385 624 352 494T319 361Q319 360 388 360Q466 361 492 367Q556 377 592 426Q608 449 619 486T630 554Z"></path>
+        <path stroke-width="1" id="E1-MJMAIN-6F" d="M28 214Q28 309 93 378T250 448Q340 448 405 380T471 215Q471 120 407 55T250 -10Q153 -10 91 57T28 214ZM250 30Q372 30 372 193V225V250Q372 272 371 288T364 326T348 362T317 390T268 410Q263 411 252 411Q222 411 195 399Q152 377 139 338T126 246V226Q126 130 145 91Q177 30 250 30Z"></path>
+        <path stroke-width="1" id="E1-MJMAIN-72" d="M36 46H50Q89 46 97 60V68Q97 77 97 91T98 122T98 161T98 203Q98 234 98 269T98 328L97 351Q94 370 83 376T38 385H20V408Q20 431 22 431L32 432Q42 433 60 434T96 436Q112 437 131 438T160 441T171 442H174V373Q213 441 271 441H277Q322 441 343 419T364 373Q364 352 351 337T313 322Q288 322 276 338T263 372Q263 381 265 388T270 400T273 405Q271 407 250 401Q234 393 226 386Q179 341 179 207V154Q179 141 179 127T179 101T180 81T180 66V61Q181 59 183 57T188 54T193 51T200 49T207 48T216 47T225 47T235 46T245 46H276V0H267Q249 3 140 3Q37 3 28 0H20V46H36Z"></path>
+        <path stroke-width="1" id="E1-MJMAIN-29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path>
+        <path stroke-width="1" id="E1-MJMAIN-21D4" d="M308 524Q318 526 323 526Q340 526 340 514Q340 507 336 499Q326 476 314 454T292 417T274 391T260 374L255 368Q255 367 500 367Q744 367 744 368L739 374Q734 379 726 390T707 416T685 453T663 499Q658 511 658 515Q658 525 680 525Q687 524 690 523T695 519T701 507Q766 359 902 287Q921 276 939 269T961 259T966 250Q966 246 965 244T960 240T949 236T930 228T902 213Q763 137 701 -7Q697 -16 695 -19T690 -23T680 -25Q658 -25 658 -15Q658 -11 663 1Q673 24 685 46T707 83T725 109T739 126L744 132Q744 133 500 133Q255 133 255 132L260 126Q265 121 273 110T292 84T314 47T336 1Q341 -11 341 -15Q341 -25 319 -25Q312 -24 309 -23T304 -19T298 -7Q233 141 97 213Q83 221 70 227T51 235T41 239T35 243T34 250T35 256T40 261T51 265T70 273T97 287Q235 363 299 509Q305 522 308 524ZM792 319L783 327H216Q183 294 120 256L110 250L120 244Q173 212 207 181L216 173H783L792 181Q826 212 879 244L889 250L879 256Q826 288 792 319Z"></path>
+        <path stroke-width="1" id="E1-MJMAIN-AC" d="M56 323T56 336T70 356H596Q603 353 611 343V102Q598 89 591 89Q587 89 584 90T579 94T575 98T572 102L571 209V316H70Q56 323 56 336Z"></path>
+        </defs>
+        <g stroke="currentColor" fill="currentColor" stroke-width="0" transform="matrix(1 0 0 -1 0 0)" aria-hidden="true">
+         <use xlink:href="#E1-MJMATHI-50" x="0" y="0"></use>
+         <use xlink:href="#E1-MJMAIN-21D2" x="1029" y="0"></use>
+         <use xlink:href="#E1-MJMATHI-51" x="2307" y="0"></use>
+        <g transform="translate(3099,0)">
+         <use xlink:href="#E1-MJMAIN-61" x="250" y="0"></use>
+         <use xlink:href="#E1-MJMAIN-6E" x="750" y="0"></use>
+         <use xlink:href="#E1-MJMAIN-64" x="1307" y="0"></use>
+        </g>
+        <g transform="translate(5379,0)">
+         <use xlink:href="#E1-MJMAIN-28" x="0" y="0"></use>
+         <use xlink:href="#E1-MJMATHI-52" x="389" y="0"></use>
+        <g transform="translate(1149,0)">
+         <use xlink:href="#E1-MJMAIN-6F" x="250" y="0"></use>
+         <use xlink:href="#E1-MJMAIN-72" x="750" y="0"></use>
+        </g>
+         <use xlink:href="#E1-MJMATHI-51" x="2542" y="0"></use>
+         <use xlink:href="#E1-MJMAIN-29" x="3333" y="0"></use>
+        </g>
+         <use xlink:href="#E1-MJMAIN-21D4" x="9380" y="0"></use>
+         <use xlink:href="#E1-MJMAIN-AC" x="10658" y="0"></use>
+         <use xlink:href="#E1-MJMATHI-52" x="11325" y="0"></use>
+        </g>
+        </svg>
+
+        for svg with surrounding text.
+      </p>
+      <p>
+        Or MathJax with chtml output renders 
+        <span class="mjx-chtml MJXc-display" style="text-align: center;"><span class="mjx-math" aria-label="P\Rightarrow Q\text{ and }\left(R\text{ or }Q\right)\Leftrightarrow \neg R"><span class="mjx-mrow" aria-hidden="true"><span class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I" style="padding-top: 0.446em; padding-bottom: 0.298em; padding-right: 0.109em;">P</span></span><span class="mjx-mo MJXc-space3"><span class="mjx-char MJXc-TeX-main-R" style="padding-top: 0.225em; padding-bottom: 0.372em;">⇒</span></span><span class="mjx-mi MJXc-space3"><span class="mjx-char MJXc-TeX-math-I" style="padding-top: 0.519em; padding-bottom: 0.446em;">Q</span></span><span class="mjx-mtext"><span class="mjx-char MJXc-TeX-main-R" style="padding-top: 0.372em; padding-bottom: 0.372em;">&nbsp;and&nbsp;</span></span><span class="mjx-mrow MJXc-space1"><span class="mjx-mo"><span class="mjx-char MJXc-TeX-main-R" style="padding-top: 0.446em; padding-bottom: 0.593em;">(</span></span><span class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I" style="padding-top: 0.446em; padding-bottom: 0.298em;">R</span></span><span class="mjx-mtext"><span class="mjx-char MJXc-TeX-main-R" style="padding-top: 0.151em; padding-bottom: 0.372em;">&nbsp;or&nbsp;</span></span><span class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I" style="padding-top: 0.519em; padding-bottom: 0.446em;">Q</span></span><span class="mjx-mo"><span class="mjx-char MJXc-TeX-main-R" style="padding-top: 0.446em; padding-bottom: 0.593em;">)</span></span></span><span class="mjx-mo MJXc-space3"><span class="mjx-char MJXc-TeX-main-R" style="padding-top: 0.225em; padding-bottom: 0.372em;">⇔</span></span><span class="mjx-mi MJXc-space3"><span class="mjx-char MJXc-TeX-main-R" style="padding-top: 0.077em; padding-bottom: 0.298em;">¬</span></span><span class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I" style="padding-top: 0.446em; padding-bottom: 0.298em;">R</span></span></span></span></span>
+
+        like this.
+      </p>
+<!-- 
+        or
+
+      <svg xmlns:xlink="http://www.w3.org/1999/xlink" width="7.223ex" height="5.843ex" style="vertical-align: -2.005ex;" viewBox="0 -1652.5 3109.9 2515.6" role="img" focusable="false" xmlns="http://www.w3.org/2000/svg" aria-labelledby="MathJax-SVG-1-Title">
+        <title id="MathJax-SVG-1-Title">\frac{x^2+1}{x-1}</title>
+        <defs aria-hidden="true">
+        <path stroke-width="1" id="E1-MJMATHI-78" d="M52 289Q59 331 106 386T222 442Q257 442 286 424T329 379Q371 442 430 442Q467 442 494 420T522 361Q522 332 508 314T481 292T458 288Q439 288 427 299T415 328Q415 374 465 391Q454 404 425 404Q412 404 406 402Q368 386 350 336Q290 115 290 78Q290 50 306 38T341 26Q378 26 414 59T463 140Q466 150 469 151T485 153H489Q504 153 504 145Q504 144 502 134Q486 77 440 33T333 -11Q263 -11 227 52Q186 -10 133 -10H127Q78 -10 57 16T35 71Q35 103 54 123T99 143Q142 143 142 101Q142 81 130 66T107 46T94 41L91 40Q91 39 97 36T113 29T132 26Q168 26 194 71Q203 87 217 139T245 247T261 313Q266 340 266 352Q266 380 251 392T217 404Q177 404 142 372T93 290Q91 281 88 280T72 278H58Q52 284 52 289Z"></path>
+        <path stroke-width="1" id="E1-MJMAIN-32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path>
+        <path stroke-width="1" id="E1-MJMAIN-2B" d="M56 237T56 250T70 270H369V420L370 570Q380 583 389 583Q402 583 409 568V270H707Q722 262 722 250T707 230H409V-68Q401 -82 391 -82H389H387Q375 -82 369 -68V230H70Q56 237 56 250Z"></path>
+        <path stroke-width="1" id="E1-MJMAIN-31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path>
+        <path stroke-width="1" id="E1-MJMAIN-2212" d="M84 237T84 250T98 270H679Q694 262 694 250T679 230H98Q84 237 84 250Z"></path>
+        </defs>
+        <g stroke="currentColor" fill="currentColor" stroke-width="0" transform="matrix(1 0 0 -1 0 0)" aria-hidden="true">
+        <g transform="translate(120,0)">
+        <rect stroke="none" width="2869" height="60" x="0" y="220"></rect>
+        <g transform="translate(60,676)">
+         <use xlink:href="#E1-MJMATHI-78" x="0" y="0"></use>
+         <use transform="scale(0.707)" xlink:href="#E1-MJMAIN-32" x="809" y="513"></use>
+         <use xlink:href="#E1-MJMAIN-2B" x="1248" y="0"></use>
+         <use xlink:href="#E1-MJMAIN-31" x="2249" y="0"></use>
+        </g>
+        <g transform="translate(286,-687)">
+         <use xlink:href="#E1-MJMATHI-78" x="0" y="0"></use>
+         <use xlink:href="#E1-MJMAIN-2212" x="794" y="0"></use>
+         <use xlink:href="#E1-MJMAIN-31" x="1795" y="0"></use>
+        </g>
+        </g>
+        </g>
+        </svg> -->
+
+    </p>
+  </body>
+</html>

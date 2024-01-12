@@ -1,0 +1,50 @@
+include libs/Reals
+{
+	Declare is even
+	Rule: :{ :n is even   n=2⋅m for some m }
+	Rule: :{ :n=2⋅m       n is even }
+
+	➤ "Example 0.2.4"
+	Theorem: { :a is even  :b is even  a+b is even }
+	{
+    Assume a is even 
+    Assume b is even
+    a = 2⋅k for some k
+    b = 2⋅j for some j
+
+    a + b = 2⋅k + b
+          = 2⋅k + 2⋅j
+          = 2⋅(k + j)
+
+    a+b is even
+  }
+  ➤ "Example 3.2.2"
+	{
+		Definition: :{ x^2=x⋅x }
+		{
+			Let n be such that n is even
+			n = 2⋅k for some k
+			
+			n^2 = n⋅n
+					= (2⋅k)⋅n
+					= (2⋅k)⋅(2⋅k)
+					= 2⋅(k⋅(2⋅k))
+			
+			n^2 is even
+		}
+	}
+	➤ "Example 3.2.3"
+	{
+    Assume a|b 
+		Assume b|c
+    b = a⋅k for some k
+    c = b⋅j for some j
+    
+		c = b⋅j
+		  = (a⋅k)⋅j
+			= a⋅(k⋅j)
+    
+		a|c
+  }
+}
+	
