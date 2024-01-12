@@ -43,7 +43,7 @@ Object.assign( self, Compact )
 import Utils from './utils.js'
 Object.assign( self, Utils )
 
-import { Message } from '../../dependencies/lurchmath/validation-messages.js'
+import { Message } from '../../../lurchmath/validation-messages.js'
 self.Message = Message
 
 //////////////////////////////////////////////////////////////
