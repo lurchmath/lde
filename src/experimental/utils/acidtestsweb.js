@@ -4,7 +4,7 @@
 // This exports a function to run our acid tests.
 //
 
-export const test = async (exppath = 'src/experimental') => {
+export const test = async (exppath = 'lde/src/experimental') => {
 
   const defaultCSS = 'color: #00CCFF; font-family: "Andale Mono 18", monospace;'
   const successCSS = 'color: #00CC00;'

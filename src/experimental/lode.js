@@ -452,9 +452,11 @@ rpl.defineCommand( "compileparser", {
       console.log(`${defaultPen('Compiling Lurch parser to lurch-to-putdown.js...')}`)
       execStr('cd parsers && peggy --cache --format es -o lurch-to-putdown.js lurch-to-putdown.peggy')
       execStr('cd parsers && cp lurch-to-putdown.js ../../../../lurchmath/parsers/')
+      execStr('cd parsers && cp lurch-to-putdown.peggy ../../../../lurchmath/parsers/')
       console.log(`${defaultPen('Compiling Lurch parser to lurch-to-tex.js...')}`)
       execStr('cd parsers && peggy --cache --format es -o lurch-to-tex.js lurch-to-tex.peggy')
       execStr('cd parsers && cp lurch-to-tex.js ../../../../lurchmath/parsers/')
+      execStr('cd parsers && cp lurch-to-tex.peggy ../../../../lurchmath/parsers/')
       console.log(`${defaultPen('Done.')}`)
     } catch (err) {
       console.log(xPen('Error compiling the parser.'))

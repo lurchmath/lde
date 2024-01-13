@@ -52,6 +52,13 @@ self.Message = Message
 //  It will probably be deleted for production.
 //
 
+import { latexToLurch } from './parsers/tex-to-lurch.js'
+import { parse as lurchToPutdown } from './parsers/lurch-to-putdown.js'
+import { parse as lurchToLatex } from './parsers/lurch-to-tex.js'
+self.lurchToLatex = lurchToLatex
+self.latexToLurch = latexToLurch
+self.lurchToPutdown = lurchToPutdown
+
 import * as TEST from './utils/acidtestsweb.js'
 self.test = () => TEST.test(testarg)
 
