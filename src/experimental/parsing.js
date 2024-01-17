@@ -80,7 +80,7 @@ export const lc2algebrite = e => {
   }
 }
 
-export const parselines = (parser,name='LurchParserTests') => {
+export const parselines = (parser,name='LurchParserTests',verbose=false) => {
   const lines = 
     loadStr(name,'./parsers/','lurch').split('\n')
        .map(line => line.trim())
@@ -90,6 +90,7 @@ export const parselines = (parser,name='LurchParserTests') => {
   lines.forEach( l => {
     if (parser(l)) {
       pass++
+      if (verbose) console.log(`${l}\n → ${parser(l)}\n`)
     } else {
       console.log(`Could not parse ${l}`)
       fail++
@@ -182,9 +183,12 @@ export const processShorthands = L => {
     L.descendantsSatisfying( x => (x instanceof LurchSymbol) && x.text()===symb )
      .forEach( s => f(s) )
   }
-  // make next sibling have a given type
-  const makeNext =  (m,type) => {
-    m.nextSibling().makeIntoA(type)
+  // make next sibling have a given type.  If the optional third argument is missing, do nothing further.  If flag is 'given' make the target a given.  If the flag is 'claim' make the target a claim.
+  const makeNext =  (m,type,flag) => {
+    const next = m.nextSibling()
+    next.makeIntoA(type)
+    if (flag === 'given') next.makeIntoA('given')
+    if (flag === 'claim') next.unmakeIntoA('given')
     m.remove()
   }
   // make previous sibling have a given type
@@ -194,13 +198,13 @@ export const processShorthands = L => {
   }
 
   // declare the type of the next or previous sibling 
-  processSymbol( 'BIH>'          , m => makeNext(m,'BIH') )
-  processSymbol( 'declare>'      , m => makeNext(m,'Declare') )
-  processSymbol( 'rule>'         , m => makeNext(m,'Rule') )  
-  processSymbol( 'cases>'        , m => makeNext(m,'Cases') )  
-  processSymbol( 'thm>'          , m => makeNext(m,'Theorem') )  
-  processSymbol( '<thm'          , m => makePrevious(m,'Theorem') )  
-  processSymbol( 'proof>'        , m => makeNext(m,'Proof') )
+  processSymbol( 'BIH>'          , m => makeNext(m,'BIH','claim') )
+  processSymbol( 'declare>'      , m => makeNext(m,'Declare','given') )
+  processSymbol( 'rule>'         , m => makeNext(m,'Rule','given') )  
+  processSymbol( 'cases>'        , m => makeNext(m,'Cases','given') )  
+  processSymbol( 'thm>'          , m => makeNext(m,'Theorem','claim') )  
+  processSymbol( '<thm'          , m => makePrevious(m,'Theorem','claim') )  
+  processSymbol( 'proof>'        , m => makeNext(m,'Proof','claim') )
   
   // attribute the previous sibling with .by attribute whose value is the text
   // of the next sibling if it is a symbol (and does nothing if it isn't)
@@ -234,7 +238,17 @@ export const processShorthands = L => {
   processSymbol( 'rules>' , m => {
     const wrapper = m.nextSibling()
     wrapper.children().forEach( kid => {
-      if (kid instanceof Environment) { kid.makeIntoA('Rule') }
+      if (kid instanceof Environment) { 
+        kid.makeIntoA('Rule') 
+        kid.makeIntoA('given')
+        // TODO: the following would be useful for web UI but not for 
+        // Lode, since I've used claim environments in rules.
+        // kid.children().forEach( premise => {
+        //   if (premise instanceof Environment) {
+        //     premise.makeIntoA('given') 
+        //   }
+        // }) 
+      }
       wrapper.shiftChild()
       kid.insertBefore(wrapper) 
     } )

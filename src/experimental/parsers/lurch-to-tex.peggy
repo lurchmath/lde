@@ -129,7 +129,7 @@
   //   * Declaring reserved constants is tricky since it tries to parse them as they are
   //     intended to be used, so for now we convert any line of the form `Declare stuff`
   //     to escaped putdown up front.
-  // input = input.replace(/[Dd]eclare \s*([^\s].*)$/mg, 'declare> «:[$1]»\n')
+  input = input.replace(/[Dd]eclare *(.*)$/mg, '«\\text{Declare $1}»')
   //   * also look for lines containing only a ➤ and whitespace, and replace
   //     them with (➤ " ") to act as a line break in the output
   input = input.replace(/^([ \t]*)➤[ \t]*$/mg, '$1➤ " " \n')
@@ -173,7 +173,7 @@ Environment "Environment" =
 Meta = Putdown / Comment / Shorthand / StringLiteral
 
 // unprocessed putdown notation (cannot include // comments)
-Putdown = '«' @$([^»]*) '»'  // todo: add a non-unicode way to do this
+Putdown = '«' @$([^»]*) '»'
 
 // insert a comment that gets echoed
 Comment "Comment" = ('Comment'i / '➤') __ a:StringLiteral { return `(➤ ${a})` }
@@ -195,7 +195,12 @@ ProofLabel = 'Proof'i
 Proof = ProofLabel ':'? { return '\\text{Proof:}' }
 
 // declarations
-Declaration "Declaration" = ForSome / Let
+Declaration "Declaration" = ForSome / Let / DeclareSeq
+// while we probably will never use a number or reserved symbol as a bound var, 
+// we might Declare one to be a constant, e.g. Peano or ops
+DeclareSeq = 'Declare 'i a:([^\n]|1..,__|) { 
+  console.log(`Found Declare ${a}`)
+  return `\\text{Declare ${a.join(' ')}}` }
 
 ForSome = body:Expression __ 'for'i __ 'some'i __ a:SymbolSeq 
           { return `${body}\\text{ for some }${a}` }
@@ -309,11 +314,6 @@ EquivalenceClass = '[' b:(  @Expression|1..2,comma| )+ ']' {
 Tuple = '⟨' b:(  @Expression|1..,comma| )+ '⟩' { return `\\langle{${b}}\\rangle` }
 Parenthesized = '(' a:Expression ')' { return `\\left(${a}\\right)` }
  
-
-// while we probably will never use a number or reserved symbol as a bound var, 
-// we might Declare one to be a constant, e.g. Peano or ops
-// TODO: try to unify the lists of reserved symbols in one place
-DeclareSeq = a:(Symbol/Number/ReservedChars)|1..,comma| { return a.join(' ') }
 // numbers
 Number  = Decimal / Natural
 Decimal = $( Natural '.' [0-9]+ )
