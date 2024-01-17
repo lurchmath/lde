@@ -73,6 +73,8 @@ self.$ = s => {
   return (parsed) ? lc(parsed) : undefined
 }
 
+self.doc = () => { return Message.document(tinymce.activeEditor,'putdown').content.code }
+
 ////////////////////////////////////////////////////////
 // Custom LC formatter (for a browser console)
 //
