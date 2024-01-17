@@ -38,7 +38,7 @@
 // import { Formula } from '../formula.js'
 // import { BindingExpression } from '../binding-expression.js'
 import {
-  Application, Environment, Declaration, LurchSymbol,
+  Application, Environment, Expression, Declaration, LurchSymbol,
   BindingExpression, Formula
 } from '../index.js'
 
