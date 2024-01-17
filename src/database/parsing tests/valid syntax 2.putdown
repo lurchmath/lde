@@ -9,7 +9,7 @@ testing:
 
 {
     // Let x be arbitrary.
-    [x]
+    :[x]
     // Assume x is a real number.
     :(in x R)
     // Claim that x is a complex number, by Theorem 21

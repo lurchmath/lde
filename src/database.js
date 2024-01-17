@@ -895,7 +895,7 @@ const testingDatabase = [
         "length": 1
       }
     },
-    "content": "\n// This file contains some nested Environments, Expressions, and Declarations,\n// all using valid putdown syntax.\n\n{\n    // Let x be arbitrary.\n    [x]\n    // Assume x is a real number.\n    :(in x R)\n    // Claim that x is a complex number, by Theorem 21\n    (in x C) +{\"reason\":\"Theorem 21\"}\n}\n"
+    "content": "\n// This file contains some nested Environments, Expressions, and Declarations,\n// all using valid putdown syntax.\n\n{\n    // Let x be arbitrary.\n    :[x]\n    // Assume x is a real number.\n    :(in x R)\n    // Claim that x is a complex number, by Theorem 21\n    (in x C) +{\"reason\":\"Theorem 21\"}\n}\n"
   },
   {
     "filename": "/parsing tests/syntax error 1.smackdown",
@@ -952,7 +952,7 @@ const testingDatabase = [
         "biconditional elimination.putdown"
       ]
     },
-    "content": "\n// Declare the logical connectives as constants:\n\n[and or not implies iff const]\n\n\n{\n    :A\n    :B\n    (and A B)\n}\n\n\n{\n    :(and A B)\n    A\n    B\n}\n\n\n{\n    :A\n    (or A B)\n}\n\n{\n    :B\n    (or A B)\n}\n\n\n{\n    :(or A B)\n    :(implies A C)\n    :(implies B C)\n    C\n}\n\n\n{\n    :{\n        :A\n        B\n    }\n    (implies A B)\n}\n\n\n{\n    :(implies A B)\n    :A\n    B\n}\n\n\n{\n    :{\n        :A\n        B\n        (not B)\n    }\n    (not A)\n}\n\n\n{\n    :{\n        :(not A)\n        B\n        (not B)\n    }\n    A\n}\n\n\n{\n    :{\n        :A\n        B\n    }\n    :{\n        :B\n        A\n    }\n    (iff A B)\n}\n\n\n{\n    :(iff A B)\n    :A\n    B\n}\n\n{\n    :(iff A B)\n    :B\n    A\n}\n\n",
+    "content": "\n// Declare the logical connectives as constants:\n\n:[and or not implies iff const]\n\n\n{\n    :A\n    :B\n    (and A B)\n}\n\n\n{\n    :(and A B)\n    A\n    B\n}\n\n\n{\n    :A\n    (or A B)\n}\n\n{\n    :B\n    (or A B)\n}\n\n\n{\n    :(or A B)\n    :(implies A C)\n    :(implies B C)\n    C\n}\n\n\n{\n    :{\n        :A\n        B\n    }\n    (implies A B)\n}\n\n\n{\n    :(implies A B)\n    :A\n    B\n}\n\n\n{\n    :{\n        :A\n        B\n        (not B)\n    }\n    (not A)\n}\n\n\n{\n    :{\n        :(not A)\n        B\n        (not B)\n    }\n    A\n}\n\n\n{\n    :{\n        :A\n        B\n    }\n    :{\n        :B\n        A\n    }\n    (iff A B)\n}\n\n\n{\n    :(iff A B)\n    :A\n    B\n}\n\n{\n    :(iff A B)\n    :B\n    A\n}\n\n",
     "original": ""
   },
   {
@@ -1024,7 +1024,7 @@ const testingDatabase = [
   {
     "filename": "/propositional logic/declare connectives.putdown",
     "metadata": {},
-    "content": "\n// Declare the logical connectives as constants:\n\n[and or not implies iff const]\n"
+    "content": "\n// Declare the logical connectives as constants:\n\n:[and or not implies iff const]\n"
   },
   {
     "filename": "/propositional logic/disjunction elimination.putdown",

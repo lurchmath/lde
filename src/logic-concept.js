@@ -456,29 +456,24 @@ export class LogicConcept extends MathConcept {
                     problem( 'Cannot end an environment with a colon' )
                 // handle meaning of a declaration, or errors it might contain:
                 if ( group.type == '[ ]' ) {
-                    // 1. cannot mark a declaration as given
-                    // KM Temporarily commenting this out
-                    // if ( isLast( givenRE ) )
-                    //     problem( 'Cannot mark a declaration as given' )
-                    // END KM
-                    // 2. not enough children
+                    // 1. not enough children
                     if ( group.contents.length == 0 )
                         problem( 'Empty declarations are not permitted' )
-                    // 3. More than one comma is invalid syntax
+                    // 2. More than one comma is invalid syntax
                     const numCommas = group.contents.filter( x =>
                         exactMatch( bindingRE, x ) ).length
                     if ( numCommas > 1 )
                         problem( 'A declaration can have at most one comma' )
-                    // 4. If 2nd-to-last item (but not item #0) is a comma,
+                    // 3. If 2nd-to-last item (but not item #0) is a comma,
                     //    declaration has a body
                     if ( n >= 3
                       && exactMatch( bindingRE, group.contents[n-2] ) ) {
                         group.hasBody = true
                         group.contents = group.contents.without( n-2 )
-                    // 5. If some other item is a comma, it's misplaced.
+                    // 4. If some other item is a comma, it's misplaced.
                     } else if ( numCommas > 0 ) {
                         problem( 'Misplaced comma inside declaration' )
-                    // 6. No item is a comma, so it's a no-body binding.
+                    // 5. No item is a comma, so it's a no-body binding.
                     } else {
                         group.hasBody = false
                     }
@@ -679,9 +674,10 @@ export class LogicConcept extends MathConcept {
         // up above the switch statement, as you can see below.
         const indent = text => `  ${text.replace( /\n/g, '\n  ' )}`
         const Environment = MathConcept.subclasses.get( 'Environment' )
-        const Declaration = MathConcept.subclasses.get( 'Declaration' )
-        const given = ( !( this instanceof Declaration )
-                     && ( !this.parent()
+        const given = ( ( !this.parent()
+        // const Declaration = MathConcept. subclasses.get( 'Declaration' )
+        // const given = ( !( this instanceof Declaration )
+        //              && ( !this.parent()
                        || this.parent() instanceof Environment )
                      && this.isA( 'given' ) ) ? ':' : ''
         if ( !formatter ) formatter = ( lc, putdown, keys ) => {
