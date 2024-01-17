@@ -185,6 +185,7 @@ const declare = 'Declare'
 const ProperName = 'ProperName'
 const validation = 'validation result'
 const validations = 'validation results'
+const id = '_id'
 
 // custom formatter
 const formatter = ( options=defaultOptions ) => {
@@ -261,7 +262,7 @@ const formatter = ( options=defaultOptions ) => {
       const highlighted=[ metavariable, constant, instantiation, hint, valid, 
             invalid, declare, formula ].map( s => '_type_'+s )
       // then non-types
-      highlighted.push(scoping,context,ProperName,validation,validations)
+      highlighted.push(scoping,context,ProperName,validation,validations,id)
       let keys=attr.filter( a => !highlighted.includes(a) )
       // format what's left
       if (keys.length>0) {
