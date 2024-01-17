@@ -23,6 +23,7 @@
 // NOTE: all imports must be at the top of the file
 
 // REPL and file system utilities (non-Lurch modules)
+
 import repl from 'repl'
 import fs, { write } from 'fs'
 import { execSync } from 'child_process'
@@ -33,7 +34,7 @@ import { latexToLurch } from './parsers/tex-to-lurch.js'
 // import * as MathLive from 'mathlive'
 // import { getConverter } from './utils/math-live.js'
 // import katex from 'katex'
-// import mathjax from 'mathjax-node'
+// import mathjax from 'mathjax'
 // import React from 'react'
 
 // In LODE we have no need for EventTarget because we don't edit MCs in real
@@ -66,6 +67,14 @@ import Reporting from './reporting.js'
 import { makeParser, parselines } from './parsing.js'
 // load the CNFProp tools for testing
 import { CNFProp } from './CNFProp.js'
+// load the Lurch to putdown parser precompiled for efficiency
+import { parse as lurchToPutdown } from './parsers/lurch-to-putdown.js'
+// load the Lurch to LaTeX parser precompiled for efficiency
+import { parse as lurchToTex } from './parsers/lurch-to-tex.js'
+// load the Lurch to putdown parser precompiled for efficiency
+import { parse as lurchToPutdownTrace } from './parsers/lurch-to-putdown-trace.js'
+// load the Lurch to LaTeX parser precompiled for efficiency
+import { parse as lurchToTexTrace } from './parsers/lurch-to-tex-trace.js'
 
 // External packages
 // load Algebrite
@@ -269,26 +278,28 @@ global.loadLibStr = (name) => loadStr(name,libPath)
 global.loadProofStr = (name) => loadStr(name,proofPath)
 global.loadParserStr = (name) => loadStr(name,parserPath,ParserFileExtension)
 
-// load a parser by specifying it's filename
+// load a parser by specifying it's filename, optionally compiling it first
 global.loadParser = (name) => {
-  const parserstr = loadParserStr(name)
-  return makeParser(parserstr)
+    const parserstr = loadParserStr(name)
+    return makeParser(parserstr) 
 }
 
 // a convenient way to make an lc or mc at the Lode prompt or in scripts
-let parsers = loadParser('lurch-to-putdown')
-global.parse = parsers[0]
-global.trace = parsers[1]
+global.parse = lurchToPutdown
+global.trace = lurchToPutdownTrace
 global.$ = s => {
   let parsed = parse(s)
   return (parsed) ? lc(parsed) : undefined
 }
 
 // a parser from my asciimath to LaTeX
-parsers = loadParser('lurch-to-tex')
-global.tex = parsers[0]
-global.textrace = parsers[1]
+global.tex = lurchToTex
+global.textrace = lurchToTexTrace
+
+// function to parse a test file one line at a time with the parser given as the
+// first argument and file to parse as the second (optional)
 global.parselines = parselines
+
 // global.mathlive = MathLive.convertLatexToMarkup
 // global.html = katex.renderToString
 
@@ -447,16 +458,25 @@ rpl.defineCommand( "test", {
 // define the Lode .compileparser command
 rpl.defineCommand( "compileparser", {
   help: "Compile the Lurch parser.",
-  action() { 
+  action() {
+    const compile = (name,trace=false) => {
+      // the trace parser is only for Lode
+      if (trace) {
+        console.log(defaultPen(`Compiling Lurch parser to lurch-to-${name}-trace.js...`))
+        execStr(`cd parsers && peggy --cache --trace --format es -o lurch-to-${name}-trace.js lurch-to-${name}.peggy`)
+      // the non-tracing parser is for both       
+      } else {
+        console.log(defaultPen(`Compiling Lurch parser to lurch-to-${name}.js...`))
+        execStr(`cd parsers && peggy --cache --format es -o lurch-to-${name}.js lurch-to-${name}.peggy`)
+        execStr(`cd parsers && cp lurch-to-${name}.js ../../../../lurchmath/parsers/`)
+        execStr(`cd parsers && cp lurch-to-${name}.peggy ../../../../lurchmath/parsers/`)
+      }
+    }
     try {
-      console.log(`${defaultPen('Compiling Lurch parser to lurch-to-putdown.js...')}`)
-      execStr('cd parsers && peggy --cache --format es -o lurch-to-putdown.js lurch-to-putdown.peggy')
-      execStr('cd parsers && cp lurch-to-putdown.js ../../../../lurchmath/parsers/')
-      execStr('cd parsers && cp lurch-to-putdown.peggy ../../../../lurchmath/parsers/')
-      console.log(`${defaultPen('Compiling Lurch parser to lurch-to-tex.js...')}`)
-      execStr('cd parsers && peggy --cache --format es -o lurch-to-tex.js lurch-to-tex.peggy')
-      execStr('cd parsers && cp lurch-to-tex.js ../../../../lurchmath/parsers/')
-      execStr('cd parsers && cp lurch-to-tex.peggy ../../../../lurchmath/parsers/')
+      compile('putdown')
+      compile('tex')
+      compile('putdown',true)
+      compile('tex',true)
       console.log(`${defaultPen('Done.')}`)
     } catch (err) {
       console.log(xPen('Error compiling the parser.'))
@@ -467,7 +487,7 @@ rpl.defineCommand( "compileparser", {
 
 // define the Lode .list command
 rpl.defineCommand( "parsertest", {
-  help: "Run the Lurch parser test.",
+  help: "Run the Lurch parser tests.",
   action() { 
     try { 
       const s=lc(parse(loadStr('parsers/LurchParserTest')))
@@ -475,6 +495,13 @@ rpl.defineCommand( "parsertest", {
       console.log(`${itemPen('Parser Test:')} → ok`)
     } catch (e) { 
       console.log(xPen(`ERROR: Parser test failed.`)) 
+    }
+    try { 
+      // const s=lc(tex(loadStr('parsers/LurchParserTest')))
+      parselines(tex)
+      console.log(`${itemPen('Tex Parser Test:')} → ok`)
+    } catch (e) { 
+      console.log(xPen(`ERROR: Tex Parser test failed.`)) 
     }
     this.displayPrompt()
   }
@@ -508,7 +535,7 @@ rpl.defineCommand( "showdocs", {
 // export the repl.writer to be available at the repl command line
 global.write = s => console.log(rpl.writer(s))
 
-// Just a global place to store benchmarking informtion.  Just assign properties
+// Just a global place to store benchmarking information.  Just assign properties
 // to it if you want to benchmark e.g. number of times a routine is called,
 // total time, number of instantiations created, etc.
 global.Accumulator = { }
