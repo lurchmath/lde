@@ -365,9 +365,7 @@ const problemFromExpressionsWithin = ( formula, candidate, result = null ) => {
 }
 
 // Helper function:  Beta reduce an Expression only if necessary.
-const betaIfNeeded = expr =>
-    expr.hasDescendantSatisfying( Matching.isAnEFA ) ?
-    Matching.fullBetaReduce( expr ) : expr
+const betaIfNeeded = expr => Matching.fullBetaReduce( expr, false )
 
 /**
  * To facilitate marking some {@link LogicConcept LogicConcepts} as cached

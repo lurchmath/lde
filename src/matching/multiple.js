@@ -12,7 +12,7 @@ const applyWithBeta = ( solution, pattern ) => {
         const subst = solution._substitutions[symbol]
         pattern = subst.appliedTo( pattern )
     }
-    return fullBetaReduce( pattern )
+    return fullBetaReduce( pattern, false )
 }
 
 // Utility function used by allInstantiations(), below.
