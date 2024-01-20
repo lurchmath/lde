@@ -33,6 +33,14 @@ self.CNF = CNF
 
 import { parse } from './parsers/lurch-to-putdown.js'
 self.parse = parse
+self.lurchToPutdown = parse
+
+import { parse as lurchToLatex } from './parsers/lurch-to-tex.js'
+self.lurchToLatex = lurchToLatex
+self.tex = lurchToLatex
+
+import { latexToLurch } from './parsers/tex-to-lurch.js'
+self.latexToLurch = latexToLurch
 
 import Interpret from './interpret.js'
 Object.assign( self, Interpret )
@@ -51,13 +59,6 @@ self.Message = Message
 //  Everything below here is for debugging in the console.
 //  It will probably be deleted for production.
 //
-
-import { latexToLurch } from './parsers/tex-to-lurch.js'
-import { parse as lurchToPutdown } from './parsers/lurch-to-putdown.js'
-import { parse as lurchToLatex } from './parsers/lurch-to-tex.js'
-self.lurchToLatex = lurchToLatex
-self.latexToLurch = latexToLurch
-self.lurchToPutdown = lurchToPutdown
 
 import * as TEST from './utils/acidtestsweb.js'
 self.test = () => TEST.test(testarg)
