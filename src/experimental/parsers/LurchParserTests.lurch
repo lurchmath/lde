@@ -222,7 +222,25 @@ P(c,w)  implies  Q(c,y) for some c
 :{ :(x+1) cdot (x-1) leq 0 x leq 1 -1 leq x }
 // attributed environments
 Rule: { :A B⇒A }
-  
+// givens
+Assume P
+assume P
+Suppose P
+suppose P
+Given P
+given P
+If P
+if P
+:P
+// Comments (not this kind!)
+Comment "Fred often ponders reality."
+comment "Fred often ponders reality."
+➤ "Fred often ponders reality."
+% "Fred often ponders reality."
+Comment x^2
+➤ x^2
+% x^2
+
 ////////////////////////////////
 // ND Propositional Logic Axioms
 ////////////////////////////////

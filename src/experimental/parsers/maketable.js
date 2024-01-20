@@ -69,7 +69,8 @@ syntax =
 [[`'~' is a total order`             ],`\\sim\\text{ is total order}`],
 
 'Assumptions and Declarations',
-[['Assume P', ':P'                   ],`\\text{Assume }P` ],
+[['Assume P', 'Given P', 
+  'Suppose P', 'If P', ':P'          ],`\\text{Assume }P` ],
 [['Let x'                            ],`\\text{Let }x` ],
 [['Let x be such that x in ℝ',
   'Let x such that x in ℝ'           ],

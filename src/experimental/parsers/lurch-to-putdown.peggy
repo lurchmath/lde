@@ -142,7 +142,7 @@ _ a:(Meta / Contradiction / Given / Declaration / Environment / Expression)|..,_
 LC "LC" = _ @( Meta / Contradiction / Given / Declaration / Environment / Expression) _
 
 // givens
-Given "Given" = (':' / 'Assume'i __ ) 
+Given "Given" = (':' / 'Assume'i __ / 'Given'i __ / 'Suppose'i __ / 'If'i __ ) 
   a:(Environment / Expression) { return ':'+a }
 
 // environments
@@ -157,7 +157,7 @@ Meta = Putdown / Comment / Shorthand / StringLiteral
 Putdown = '«' @$([^»]*) '»'  // todo: add a non-unicode way to do this
 
 // insert a comment that gets echoed
-Comment "Comment" = ('Comment'i / '➤') __ a:StringLiteral { return `(➤ ${a})` }
+Comment "Comment" = ('%' / 'Comment'i / '➤') __ a:(StringLiteral / Expression) { return `(➤ ${a})` }
 // String Literals for comments
 StringLiteral = $('"' [^"]* '"')
 
@@ -166,9 +166,9 @@ Shorthand = BIH / Ruleset / Rule / Thm / Proof
 
 BIHLabel = 'since'i / 'because'i / 'Recall'i
 BIH = BIHLabel { return '>>' }
-RulesetLabel = 'Rules'i / 'Axioms'i / 'Givens'i / 'Definitions'i
+RulesetLabel = 'Rules'i / 'Axioms'i / 'Definitions'i
 Ruleset = RulesetLabel ':'? { return 'rules>' }
-RuleLabel = 'Rule'i / 'Axiom'i / 'Given'i / 'Definition'i
+RuleLabel = 'Rule'i / 'Axiom'i / 'Definition'i
 Rule = RuleLabel ':'? { return 'rule>' }
 ThmLabel = 'Theorem'i / 'Thm'i / 'Lemma'i / 'Corollary'i
 Thm = ThmLabel ':'? { return 'thm>' }

@@ -101,7 +101,9 @@
 
   <p>LurchMath currently supports a small subset of AsciiMath, $\LaTeX$, and notation found in CAS software. Many symbols can be displayed using a TeX command but a preceeding backslash is not required.</p>
 
-  <p>Symbols can be more than one character long and can contain anything except reserved symbols and terms. Multiplication must be explicitly entered with <tt>cdot</tt> or ⋅ as a result, but is rendered as concatenation.</p>
+  <p>Symbols can be more than one character long and can contain anything except reserved symbols and terms. Multiplication must be explicitly entered with <code>cdot</code> or ⋅ as a result, but is rendered as concatenation.</p>
+
+  <p>English phrases such as <code>Given</code> or <code> is a </code> are case sensitive and will produce LaTeX with the same phrase.  For example, <code>Suppose P</code>, <code>Given P</code>, <code>If P</code>, <code>Assume P</code>, <code>assume P</code> are synonyms and all have the same mathematical meaning, but will format as $\text{Suppose P}$, $\text{Given P}$, $\text{If P}$, $\text{Assume P}$ and $\text{assume P}$, respectively.
 </section>
 
 
@@ -140,7 +142,7 @@
     <tr><td>2 cdot x cdot y<br/>2⋅x⋅y</td><td>$2\cdot x\cdot y$</td></tr>
     <tr><td>1/x</td><td>$1/x$</td></tr>
     <tr><td>x^2</td><td>$x^2$</td></tr>
-    <tr><td>x factorial</td><td>$x!$</td></tr>
+    <tr><td>x factorial<br/>x！</td><td>$x!$</td></tr>
     <tr><td colspan="2" class="subheader">Set Theory</td></tr>
     <tr><td>x in A<br/>x∈A</td><td>$x\in A$</td></tr>
     <tr><td>x notin A<br/>x∉A</td><td>$x\notin A$</td></tr>
@@ -174,7 +176,7 @@
     <tr><td>'~' is a partial order</td><td>$\sim\text{ is partial order}$</td></tr>
     <tr><td>'~' is a total order</td><td>$\sim\text{ is total order}$</td></tr>
     <tr><td colspan="2" class="subheader">Assumptions and Declarations</td></tr>
-    <tr><td>Assume P<br/>:P</td><td>$\text{Assume }P$</td></tr>
+    <tr><td>Assume P<br/>Given P<br/>Suppose P<br/>If P<br/>:P</td><td>$\text{Assume }P$</td></tr>
     <tr><td>Let x</td><td>$\text{Let }x$</td></tr>
     <tr><td>Let x be such that x in ℝ<br/>Let x such that x in ℝ</td><td>$\text{Let }x\text{ be such that }x\in\mathbb{R}$</td></tr>
     <tr><td>f(c)=0 for some c</td><td>$f(c)=0\text{ for some }c$</td></tr>

@@ -129,7 +129,7 @@
   //   * Declaring reserved constants is tricky since it tries to parse them as they are
   //     intended to be used, so for now we convert any line of the form `Declare stuff`
   //     to escaped putdown up front.
-  input = input.replace(/[Dd]eclare *(.*)$/mg, '«\\text{Declare $1}»')
+  input = input.replace(/([Dd]eclare) *(.*)$/mg, '«\\text{$1 $2}»')
   //   * also look for lines containing only a ➤ and whitespace, and replace
   //     them with (➤ " ") to act as a line break in the output
   input = input.replace(/^([ \t]*)➤[ \t]*$/mg, '$1➤ " " \n')
@@ -161,8 +161,9 @@ LCs =  _ a:LC|..,__| _  { return a.join(' ') }
 LC "LC" = @( Meta / Contradiction / Given / Declaration / Environment / Expression)
 
 // givens
-Given "Given" = (':' / 'Assume'i __ ) 
-  a:(Environment / Expression) { return '\\text{Assume }'+a }
+Given "Given" = a:(':' / 'Assume'i __ / 'Given'i __ / 'Suppose'i __ / 'If'i __ ) 
+  b:(Environment / Expression) { 
+    return (a===':') ? `\\text{:}${b}` : `\\text{${a[0]} }${b}` }
 
 // environments
 Environment "Environment" = 
@@ -176,7 +177,7 @@ Meta = Putdown / Comment / Shorthand / StringLiteral
 Putdown = '«' @$([^»]*) '»'
 
 // insert a comment that gets echoed
-Comment "Comment" = ('Comment'i / '➤') __ a:StringLiteral { return `(➤ ${a})` }
+Comment "Comment" = ('%' / 'Comment'i / '➤') __ a:(StringLiteral / Expression) { return a }
 // String Literals for comments
 StringLiteral = $('"' [^"]* '"')
 
@@ -185,9 +186,9 @@ Shorthand = BIH / Ruleset / Rule / Thm / Proof
 
 BIHLabel = 'since'i / 'because'i / 'Recall'i
 BIH = BIHLabel { return '\\text{Recall }' }
-RulesetLabel = 'Rules'i / 'Axioms'i / 'Givens'i / 'Definitions'i
+RulesetLabel = 'Rules'i / 'Axioms'i / 'Definitions'i
 Ruleset = RulesetLabel ':'? { return '\\text{Rules:}' }
-RuleLabel = 'Rule'i / 'Axiom'i / 'Given'i / 'Definition'i
+RuleLabel = 'Rule'i / 'Axiom'i / 'Definition'i
 Rule = RuleLabel ':'? { return '\\text{Rule}' }
 ThmLabel = 'Theorem'i / 'Thm'i / 'Lemma'i / 'Corollary'i
 Thm = ThmLabel ':'? { return '\\text{Theorem}' }
@@ -258,8 +259,8 @@ NotEqual   = a:Thing (' neq '/' ne ') b:Thing         { return texJoin('\\neq',[
 Relation   = a:(Binding/Thing)|2..,'~'|               { return texJoin('\\sim',a) }        
 Equation   = a:(Binding/Thing)|2..,'='|               { return texJoin('=',a) }
 Loves      = a:Thing|2..2,' loves '|                  { return texJoin('\\text{ loves }',a) }
-Is         = a:Thing|2..2,' is an '/' is a '/' is '|  { return texJoin('\\text{ is }',a) }
-
+Is         = a:Thing b:(' is an '/' is a '/' is ') c:Thing  
+             { return `${a}\\text{${b}}${c}` }
 
 // things to relate
 Thing = Set / Algebraic
@@ -325,7 +326,7 @@ Symbol "Symbol" = a:( '≡' / '→←' / '~' / '"' [^"]* '"' /
                      !([0-9]/ReservedWord)
                      [^-\][()⟨⟩ \t\n✦{},.:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∘∧∨≡↦~≈！]+ )
   { let b =  Array.isArray(a) ? a[1].join('') : a
-    return (b.length>1) ? `\\mathrm{${b}}` : b }
+    return (b.length>1) ? `\\text{${b}}` : b }
 BindingSymbol = ('∃!'/'exists unique ') { return '\\exists!' } /
                 ('∀'/'forall '/'for all ') { return '\\forall' } /
                 ('∃'/'exists ') { return '\\exists' } 
