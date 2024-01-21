@@ -215,7 +215,7 @@ Expression "Expression" = Quantified / Binding / Prop / EFA
 
 // quantified binding expressions
 Quantified = a:BindingSymbol b:Binding
-          { return `\\left(${a} ${b}\\right)` }
+          { return `${a} ${b}` }
 
 // binding expressions
 Binding = a:Symbol (period / '↦') b:(Expression / Binding) 
@@ -281,7 +281,7 @@ Complement    = a:Atomic ('°'/' complement') { return `${a}^\\circ` }
 Algebraic = Sum / Product
 
 Sum       = a:Product b:([-+] Product)+             { return texSum(a,b)   }
-Product   = a:(Recip/Factorial/Inversed/Negated)|1..,'⋅'/' cdot '| 
+Product   = a:(Recip/Factorial/Inversed/Negated)|1..,'⋅'/' cdot '/'*'| 
                                                     { return texJoin('',a) }
 Recip     = a:Atomic ('⁻'/' recip'/' inv')          { return `${a}^-`      }
 Factorial = a:Atomic ('！'/' factorial')            { return `${a}!`       }
@@ -302,7 +302,7 @@ Prefix = a:(Symbol ('⁻'/' recip'/'. inv') / Symbol / Parenthesized )
 
 // For convenience we define 𝜆P(k) to be (λ P k) and replace λ with "LDE EFA"
 // as a shortcut
-EFA = 'λ' a:Symbol '(' b:Expression ')' { return `\\lambda{${a}}(${b})` }
+EFA = ('λ'/'lambda ') a:Symbol '(' b:Expression ')' { return `\\lambda{${a}}(${b})` }
 
 EquivalenceClass = '[' b:(  @Expression|1..2,comma| )+ ']' { 
   // if the optional relation is missing from an equivalence class, don't print it
@@ -321,15 +321,15 @@ Decimal = $( Natural '.' [0-9]+ )
 Natural = $( [1-9][0-9]* / '0' )
 
 // Symbols can't start with a digit, contain reserved constants, or keywords
-SymbolSeq = a:(Symbol/Number)|1..,comma| { return a.join(',') }
-Symbol "Symbol" = a:( '≡' / '→←' / '~' / '"' [^"]* '"' /
-                     !([0-9]/ReservedWord)
-                     [^-\][()⟨⟩ \t\n✦{},.:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∘∧∨≡↦~≈！]+ )
-  { let b =  Array.isArray(a) ? a[1].join('') : a
-    return (b.length>1) ? `\\text{${b}}` : b }
+SymbolSeq = a:(BindingSymbol/Symbol/Number)|1..,comma| { return a.join(',') }
 BindingSymbol = ('∃!'/'exists unique ') { return '\\exists!' } /
                 ('∀'/'forall '/'for all ') { return '\\forall' } /
                 ('∃'/'exists ') { return '\\exists' } 
+Symbol "Symbol" = a:( '≡' / '→←' / '~' / '"' [^"]* '"' /
+                     !([0-9]/ReservedWord)
+                     [^-\][()⟨⟩ \t\n✦{},.:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∘∧∨≡↦~≈！*]+ )
+  { let b =  Array.isArray(a) ? a[1].join('') : a
+    return (b.length>1) ? `\\text{${b}}` : b }
 
 // punctuation
 comma  =  ','
@@ -337,8 +337,8 @@ period =  '.'
 __  = [ \t\n\r]+
 _   = [ \t\n\r]*
 
-ReservedChars = $([:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∘∧∨≡σλ↦~≈！])
-ReservedWord = ' or '/' and '/' loves '/' cdot '/' complement' / 
+ReservedChars = $([:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∘∧∨≡σλ↦~≈！*])
+ReservedWord  = ' or '/' and '/' loves '/' cdot '/' complement' / 
                 ' setminus '/' cap '/' cup '/' times '/' lt '/' leq '/
                 ' in '/' subset '/' implies '/' iff ' / 'maps ' /
-                ' contradiction ' / ' divides '
+                ' contradiction ' / ' divides ' / 'forall' / 'exists' / 'lambda'

@@ -58,6 +58,13 @@ x cdot y
 2 cdot (x^3 cdot (y cdot z^4))
 (2 cdot (x^3 cdot y) cdot z)^4
 2 cdot (x^3 cdot y) cdot z^4
+x*y
+2*x
+2*0
+0*2
+3*x^2
+3^2 cdot 5^3*7^4
+2⋅x cdot y*z
 // quotients
 x/y
 2/x

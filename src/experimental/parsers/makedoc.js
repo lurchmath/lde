@@ -12,14 +12,13 @@ const syntax =
 [['contradiction', '→←'              ],`\\rightarrow\\leftarrow`],
 
 'Quantifiers and bindings',
-[['forall ', 'for all ', '∀'         ],'\\forall' ],
-[['exists ', '∃'                     ],'\\exists' ],
-[['exists unique ', '∃!'             ],'\\exists!' ],
 [['forall x.x&lt;x+1',
   'for all x.x&lt;x+1', 
   '∀x.x&lt;x+1'                      ],`\\forall x, x&lt;x+1` ],
 [['exists x.x=2 cdot x', 
   '∃x.x=2⋅x'                         ],`\\exists x, x=2x` ],
+[['exists unique x.x=2 cdot x', 
+  '∃!x.x=2⋅x'                        ],`\\exists ! x, x=2x` ],
 [['x.x+2', 'x↦x+2'                   ],`x, x+1`],
 
 'Algebraic expressions',

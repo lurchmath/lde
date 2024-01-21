@@ -293,6 +293,7 @@ global.$ = s => {
   let parsed = parse(s)
   return (parsed) ? lc(parsed) : undefined
 }
+global.makedoc = makedoc
 
 // a parser from my asciimath to LaTeX
 global.tex = lurchToTex
@@ -479,11 +480,15 @@ rpl.defineCommand( "compileparser", {
       compile('tex')
       compile('putdown',true)
       compile('tex',true)
+    } catch (err) {
+      console.log(xPen('Error compiling the parser.'))
+    }
+    try {
       console.log(`${defaultPen('Rebuilding the parser doc page...')}`)
       makedoc()
       console.log(`${defaultPen('Done.')}`)
     } catch (err) {
-      console.log(xPen('Error compiling the parser.'))
+      console.log(xPen('Error rebuilding the parser doc page.'))
     }
     this.displayPrompt()
   }

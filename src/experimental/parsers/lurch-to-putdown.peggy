@@ -257,7 +257,7 @@ Complement    = a:Atomic ('°'/' complement') { return lispUnary('°',a) }
 Algebraic = Sum / Product
 
 Sum       = a:Product b:([-+] Product)+                   { return lispSum(a,b)     }
-Product   = a:(Recip/Factorial/Inversed/Negated)|1..,'⋅'/' cdot '| 
+Product   = a:(Recip/Factorial/Inversed/Negated)|1..,'⋅'/' cdot '/'*'| 
                                                           { return lisp('⋅',a)      }
 Recip     = a:Atomic ('⁻'/' recip'/' inv')                { return lispUnary('⁻',a) }
 Factorial = a:Atomic ('！'/' factorial')                  { return lispUnary('!',a) }
@@ -299,7 +299,7 @@ Natural = $( [1-9][0-9]* / '0' )
 SymbolSeq = a:(Symbol/Number)|1..,comma| { return a.join(',') }
 Symbol "Symbol" = $( '≡' / '→←' / '~' / '"' [^"]* '"' /
                      !([0-9]/ReservedWords)
-                     [^-\][()⟨⟩ \t\n✦{},.:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∘∧∨≡↦~≈！]+ )
+                     [^-\][()⟨⟩ \t\n✦{},.:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∘∧∨≡↦~≈！*]+ )
 BindingSymbol = ('∃!'/'exists unique ') { return '∃!' } /
                 ('∀'/'forall '/'for all ') { return '∀' } /
                 ('∃'/'exists ') { return '∃' } 
@@ -310,8 +310,8 @@ period =  '.'
 __  = [ \t\n\r]+
 _   = [ \t\n\r]*
 
-ReservedChars = $([:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∘∧∨≡σλ↦~≈！])
+ReservedChars = $([:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∘∧∨≡σλ↦~≈！*])
 ReservedWords = ' or '/' and '/' loves '/' cdot '/' complement' / 
                 ' setminus '/' cap '/' cup '/' times '/' lt '/' leq '/
                 ' in '/' subset '/' implies '/' iff ' / 'maps ' /
-                ' contradiction ' / ' divides '
+                ' contradiction ' / ' divides ' / 'forall' / 'exists' / 'lambda'
