@@ -1,6 +1,6 @@
 // Raw Example Data for the LurchMath Parser
 
-syntax = 
+const syntax = 
 [
 
 'Logic',
@@ -83,7 +83,7 @@ syntax =
 [['λP(k)'                            ],`\\lambda{P}(k)` ],
 
 ] 
-maketable = () => {
+export const makedoc = () => {
   let ans = ''
   syntax.forEach( row => {
     if (typeof row === 'string') {
@@ -94,5 +94,7 @@ maketable = () => {
         `<tr><td>${row[0].join('<br/>')}</td><td>$${row[1]}$</td></tr>\n`
     }
   })
-  return ans
+  let doc = loadStr('lurch-parser-docs-template','./parsers/','html')
+              .replace(/## MAKEDOC OUTPUT GOES HERE ##/g,ans)
+  fs.writeFileSync('./parsers/lurch-parser-docs.html', doc)
 }

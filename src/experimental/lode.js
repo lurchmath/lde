@@ -69,12 +69,14 @@ import { makeParser, parselines } from './parsing.js'
 import { CNFProp } from './CNFProp.js'
 // load the Lurch to putdown parser precompiled for efficiency
 import { parse as lurchToPutdown } from './parsers/lurch-to-putdown.js'
-// load the Lurch to LaTeX parser precompiled for efficiency
+// load the Lurch to TeX parser precompiled for efficiency
 import { parse as lurchToTex } from './parsers/lurch-to-tex.js'
 // load the Lurch to putdown parser precompiled for efficiency
 import { parse as lurchToPutdownTrace } from './parsers/lurch-to-putdown-trace.js'
-// load the Lurch to LaTeX parser precompiled for efficiency
+// load the Lurch to TeX parser precompiled for efficiency
 import { parse as lurchToTexTrace } from './parsers/lurch-to-tex-trace.js'
+// load the Lurch to LaTeX parser precompiled for efficiency
+import { makedoc } from './parsers/makedoc.js'
 
 // External packages
 // load Algebrite
@@ -457,7 +459,7 @@ rpl.defineCommand( "test", {
 
 // define the Lode .compileparser command
 rpl.defineCommand( "compileparser", {
-  help: "Compile the Lurch parser.",
+  help: "Compile the Lurch parser and rebuild the parser docs.",
   action() {
     const compile = (name,trace=false) => {
       // the trace parser is only for Lode
@@ -477,6 +479,8 @@ rpl.defineCommand( "compileparser", {
       compile('tex')
       compile('putdown',true)
       compile('tex',true)
+      console.log(`${defaultPen('Rebuilding the parser doc page...')}`)
+      makedoc()
       console.log(`${defaultPen('Done.')}`)
     } catch (err) {
       console.log(xPen('Error compiling the parser.'))
