@@ -69,12 +69,16 @@ import { makeParser, parselines } from './parsing.js'
 import { CNFProp } from './CNFProp.js'
 // load the Lurch to putdown parser precompiled for efficiency
 import { parse as lurchToPutdown } from './parsers/lurch-to-putdown.js'
+global.parse = lurchToPutdown
 // load the Lurch to TeX parser precompiled for efficiency
 import { parse as lurchToTex } from './parsers/lurch-to-tex.js'
+global.tex = lurchToTex
 // load the Lurch to putdown parser precompiled for efficiency
 import { parse as lurchToPutdownTrace } from './parsers/lurch-to-putdown-trace.js'
+global.trace = lurchToPutdownTrace
 // load the Lurch to TeX parser precompiled for efficiency
 import { parse as lurchToTexTrace } from './parsers/lurch-to-tex-trace.js'
+global.textrace = lurchToTexTrace
 // load the Lurch to LaTeX parser precompiled for efficiency
 import { makedoc } from './parsers/makedoc.js'
 
@@ -162,12 +166,14 @@ global.catlib = function(fname) {
 } 
 
 // List both libs and proofs
-/** List libs and proofs */
+/** List libs, proofs, and parsers */
 const list = () => { console.log(
   `\n${headingPen('Available Libraries:')}\n`+
   `${docPen(execStr('cd '+libPath+';ls -pRC '))}\n`+
   `${headingPen('Available Proofs:')}\n` +
   `${docPen(execStr('cd '+proofPath+';ls -pRC'))}`
+  `${headingPen('Available Parsers:')}\n` +
+  `${docPen(execStr('cd '+parserPath+';ls -pRC'))}`
 )}
 
 // two useful abbreviations
@@ -287,17 +293,11 @@ global.loadParser = (name) => {
 }
 
 // a convenient way to make an lc or mc at the Lode prompt or in scripts
-global.parse = lurchToPutdown
-global.trace = lurchToPutdownTrace
 global.$ = s => {
   let parsed = parse(s)
   return (parsed) ? lc(parsed) : undefined
 }
 global.makedoc = makedoc
-
-// a parser from my asciimath to LaTeX
-global.tex = lurchToTex
-global.textrace = lurchToTexTrace
 
 // function to parse a test file one line at a time with the parser given as the
 // first argument and file to parse as the second (optional)
@@ -506,7 +506,6 @@ rpl.defineCommand( "parsertest", {
       console.log(xPen(`ERROR: Parser test failed.`)) 
     }
     try { 
-      // const s=lc(tex(loadStr('parsers/LurchParserTest')))
       parselines(tex)
       console.log(`${itemPen('Tex Parser Test:')} → ok`)
     } catch (e) { 

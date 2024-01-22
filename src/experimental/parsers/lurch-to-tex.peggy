@@ -33,7 +33,7 @@
 
   // tex utilities
   const texUnary = (op,arg) => {
-    return (op) ? `${op} ${arg}` : arg
+    return (op) ? `${op}${arg}` : arg
   }
 
   const texJoin = (op,args) => {
@@ -46,12 +46,41 @@
       (ans,x)=>{ return `${x}${op}{${ans}}`},args[0])
   }
 
-// convert signed sums to lisp
+  // convert signed sums to tex
   const texSum = (first,rest) => {
     let ans = `${first}`
     rest.forEach( term => {
       ans = ans + ( (term[0]==='-') ? `-${term[1]}` : `+${term[1]}` )
     })
+    return ans
+  }
+
+  // convert products (which include / operators) to tex
+  const texProduct = term => {
+    // latest is the most recent processed factor in the product
+    // it will either be concatenated to ans, or put in the numerator
+    // of a \frac, depending on whether the next factor is a reciprocal
+    let latest = term.shift()
+    let ans = ''
+    while (term.length>0) {
+      // get the next factor
+      let next = term.shift()
+      // if it starts with / put the latest in the numerator
+      // and next in the denominaator
+      if (next.startsWith('/')) { 
+        latest = `\\frac{${latest}}{${next.substring(1)}}`
+      // otherwise the next term is not a reciprocal, so append and update latest  
+      } else {
+        ans += (ans.length>0 && /\d$/.test(ans) && /^\d/.test(latest)) 
+               ? `\\cdot{}${latest}` 
+               : latest
+        latest = next
+      }
+    }
+    // no more factors, so just cat the latest
+    ans += (ans.length>0 && /\d$/.test(ans) && /^\d/.test(latest)) 
+           ? `\\cdot{}${latest}` 
+           : latest
     return ans
   }
 
@@ -129,7 +158,18 @@
   //   * Declaring reserved constants is tricky since it tries to parse them as they are
   //     intended to be used, so for now we convert any line of the form `Declare stuff`
   //     to escaped putdown up front.
-  input = input.replace(/([Dd]eclare) *(.*)$/mg, '«\\text{$1 $2}»')
+  input = input.replace(/([Dd]eclare) *(.*)$/mg, (match, group1, group2) => {
+            let ans = ''
+            let syms = group2.replace(/  /g,' ').split(' ')
+            if (syms.length>2) {
+              ans = syms.slice(0,-1).join(', ')+', and '+syms[syms.length-1]
+            } else if (syms.length === 2) {
+              ans = `${syms[0]} and ${syms[1]}`
+            } else {
+              ans = syms[0]
+            }
+            return `«\\text{${group1} ${ans}}»`
+          })
   //   * also look for lines containing only a ➤ and whitespace, and replace
   //     them with (➤ " ") to act as a line break in the output
   input = input.replace(/^([ \t]*)➤[ \t]*$/mg, '$1➤ " " \n')
@@ -200,8 +240,8 @@ Declaration "Declaration" = ForSome / Let / DeclareSeq
 // while we probably will never use a number or reserved symbol as a bound var, 
 // we might Declare one to be a constant, e.g. Peano or ops
 DeclareSeq = 'Declare 'i a:([^\n]|1..,__|) { 
-  console.log(`Found Declare ${a}`)
-  return `\\text{Declare ${a.join(' ')}}` }
+  // console.log(`Found Declare ${a}`)
+  return `\\text{Declare ${a.join(',')}}` }
 
 ForSome = body:Expression __ 'for'i __ 'some'i __ a:SymbolSeq 
           { return `${body}\\text{ for some }${a}` }
@@ -215,11 +255,11 @@ Expression "Expression" = Quantified / Binding / Prop / EFA
 
 // quantified binding expressions
 Quantified = a:BindingSymbol b:Binding
-          { return `${a} ${b}` }
+          { return `${a}${b}` }
 
 // binding expressions
 Binding = a:Symbol (period / '↦') b:(Expression / Binding) 
-          { return `${a}, ${b}` }
+          { return `${a},${b}` }
 
 // propositional expressions
 Prop = Iff / Implies / And / Or / Not
@@ -231,7 +271,7 @@ Implies       = a:Or|1..,'⇒'/' implies '|     { return texJoin('\\Rightarrow',
 Or            = a:And|1..,' or '/'∨'|         { return texJoin('\\text{ or }',a) }
 And           = a:Not|1..,' and '/'∧'|        { return texJoin('\\text{ and }',a) }
 Not           = a:('¬'/'not ')? _ b:Stuff     { return (a==='not ' || a==='¬')
-                                                        ? texUnary('\\neg',b)
+                                                        ? texUnary('\\neg{}',b)
                                                         : b
                                               }
 
@@ -282,7 +322,7 @@ Algebraic = Sum / Product
 
 Sum       = a:Product b:([-+] Product)+             { return texSum(a,b)   }
 Product   = a:(Recip/Factorial/Inversed/Negated)|1..,'⋅'/' cdot '/'*'| 
-                                                    { return texJoin('',a) }
+                                                    { return texProduct(a) }
 Recip     = a:Atomic ('⁻'/' recip'/' inv')          { return `${a}^-`      }
 Factorial = a:Atomic ('！'/' factorial')            { return `${a}!`       }
 Inversed  = a:'/'? b:Exp                            { return texUnary(a,b) }

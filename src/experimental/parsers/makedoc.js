@@ -67,27 +67,28 @@ const syntax =
 [[`'~' is a partial order`           ],`\\sim\\text{ is partial order}`],
 [[`'~' is a total order`             ],`\\sim\\text{ is total order}`],
 
-'Assumptions and Declarations',
+'Assumptions and Declarations (case insensitive, phrase is echoed)',
 [['Assume P', 'Given P', 
-  'Suppose P', 'If P', ':P'          ],`\\text{Assume }P` ],
+  'Suppose P', 'If P', ':P'          ],`\\text{Assume }P\\text{  (etc.)}` ],
 [['Let x'                            ],`\\text{Let }x` ],
 [['Let x be such that x in ℝ',
   'Let x such that x in ℝ'           ],
   `\\text{Let }x\\text{ be such that }x\\in\\mathbb{R}` ],
 [['f(c)=0 for some c'                ],`f(c)=0\\text{ for some }c` ],
+[['Declare is 0 + cos'               ],`\\text{Declare is, 0, +, and cos}` ],
 
 'Miscellaneous',
 [['f⁻(x)', 'f recip(x)', 'f inv(x)'  ],`f^-\\left(x\\right)`],
 [['x recip', 'x inv', 'x⁻'           ],`x^-`],
 [['λP(k)'                            ],`\\lambda{P}(k)` ],
 
-] 
+]
 export const makedoc = () => {
   let ans = ''
   syntax.forEach( row => {
     if (typeof row === 'string') {
       ans = ans + 
-        `<tr><td colspan="2" class="subheader">${row}</td></tr>\n`
+        `\n<tr><td colspan="2" class="subheader">${row}</td></tr>\n`
     } else {
       ans = ans + 
         `<tr><td>${row[0].join('<br/>')}</td><td>$${row[1]}$</td></tr>\n`
