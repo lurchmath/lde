@@ -54,11 +54,8 @@ Object.assign( self, Utils )
 import { Message } from '../../../lurchmath/validation-messages.js'
 self.Message = Message
 
-//////////////////////////////////////////////////////////////
-//
-//  Everything below here is for debugging in the console.
-//  It will probably be deleted for production.
-//
+import { downloadFile } from '../../../lurchmath/upload-download.js'
+self.downloadFile = downloadFile
 
 import * as TEST from './utils/acidtestsweb.js'
 self.test = () => TEST.test(testarg)
