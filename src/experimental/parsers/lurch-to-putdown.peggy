@@ -254,7 +254,11 @@ CompAtomic    = Complement / Atomic
 Complement    = a:Atomic ('°'/' complement') { return lispUnary('°',a) }
 
 // algebraic expressions
-Algebraic = Sum / Product
+Algebraic = Choose / Sum / Product
+
+// binomial coefficients
+Choose  = a:(Sum / Product) ' choose ' b:(Sum / Product) 
+          { return lispBinary('choose',a,b) }
 
 Sum       = a:Product b:([-+] Product)+                   { return lispSum(a,b)     }
 Product   = a:(Recip/Factorial/Inversed/Negated)|1..,'⋅'/' cdot '/'*'| 
@@ -297,7 +301,7 @@ Natural = $( [1-9][0-9]* / '0' )
 
 // Symbols can't start with a digit, contain reserved constants, or keywords
 SymbolSeq = a:(Symbol/Number)|1..,comma| { return a.join(',') }
-Symbol "Symbol" = $( '≡' / '→←' / '~' / '"' [^"]* '"' /
+Symbol "Symbol" = $( '≡' / '→←' / '~' / '"' [^"]* '"' / 'sigma' /
                      !([0-9]/ReservedWords)
                      [^-\][()⟨⟩ \t\n✦{},.:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∘∧∨≡↦~≈！*]+ )
 BindingSymbol = ('∃!'/'exists unique ') { return '∃!' } /
@@ -314,4 +318,5 @@ ReservedChars = $([:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∘∧
 ReservedWords = ' or '/' and '/' loves '/' cdot '/' complement' / 
                 ' setminus '/' cap '/' cup '/' times '/' lt '/' leq '/
                 ' in '/' subset '/' implies '/' iff ' / 'maps ' /
-                ' contradiction ' / ' divides ' / 'forall' / 'exists' / 'lambda'
+                ' contradiction ' / ' divides ' / 'forall' / 'exists' / 
+                'lambda' / 'sigma' / ' choose '

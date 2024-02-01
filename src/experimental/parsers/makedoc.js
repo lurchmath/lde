@@ -27,9 +27,12 @@ const syntax =
 [['2+x+y'                            ],`2+x+y`],
 [['-x'                               ],`-x` ],
 [['1-x'                              ],`1-x`],
-[['x cdot y', 'x⋅y'                  ],`x\\cdot y`],
-[['2 cdot x cdot y', '2⋅x⋅y'         ],`2\\cdot x\\cdot y`],
-[['1/x'                              ],`1/x`],
+[['x*y','x cdot y', 'x⋅y'            ],`x y`],
+[['2*x*y','2 cdot x cdot y', '2⋅x⋅y' ],`2 x y`],
+[['2*3*x','2 cdot 3 cdot x', '2⋅3⋅x' ],`2\\cdot 3 x`],
+[['1/x'                              ],`\\frac{1}{x}`],
+[['2*1/x*y'                          ],`2\\frac{1}{x}y`],
+[['(2*1)/(x*y)'                      ],`\\frac{(2\\cdot 1)}{(xy)}`],
 [['x^2'                              ],`x^2`],
 [['x factorial', 'x！'               ],`x!`],
 
@@ -95,6 +98,6 @@ export const makedoc = () => {
     }
   })
   let doc = loadStr('lurch-parser-docs-template','./parsers/','html')
-              .replace(/## MAKEDOC OUTPUT GOES HERE ##/g,ans)
+              .replace(/## MAKEDOC OUTPUT GOES HERE ##/g,ans)           
   fs.writeFileSync('./parsers/lurch-parser-docs.html', doc)
 }

@@ -38,7 +38,7 @@
 
   const texJoin = (op,args) => {
     if (args.length===1) return args.join(op)
-    return args.map(x=>` ${x}`).join(op)
+    return args.map(x=>`${x}`).join(op)
   }
 
   const texRightAssoc = (op,args) => {
@@ -71,17 +71,37 @@
         latest = `\\frac{${latest}}{${next.substring(1)}}`
       // otherwise the next term is not a reciprocal, so append and update latest  
       } else {
-        ans += (ans.length>0 && /\d$/.test(ans) && /^\d/.test(latest)) 
-               ? `\\cdot{}${latest}` 
-               : latest
+        // in more elementary courses we might want to use the following to 
+        // have concatenation for produce, e.g. in polynomials, but for 
+        // Math 299 it is not useful for things like n⋅0 in the Peano Axioms 
+        //
+        // ans += (ans.length>0 && /\d$/.test(ans) && /^\d/.test(latest)) 
+        //        ? `\\cdot ${latest}` 
+        //        : latest
+        ans += (ans.length>0) ? `\\cdot ${latest}` : latest
         latest = next
       }
     }
     // no more factors, so just cat the latest
-    ans += (ans.length>0 && /\d$/.test(ans) && /^\d/.test(latest)) 
-           ? `\\cdot{}${latest}` 
-           : latest
+    ans += (ans.length>0) ? `\\cdot ${latest}` : latest
     return ans
+  }
+  // instead of making a separate paring class for each symbol we want 
+  // to convert to tex, we just remap them here
+  const texsymbol = s => {
+    const tex = {
+       'sigma': '\\sigma', 
+       'σ': '\\sigma' 
+    } 
+    return (tex[s]) ? tex[s] : s
+  }
+  // convert equations with more than two arguments to a transitive chain
+  const texEquation = a => {
+    if (a.length === 2) return texJoin(' = ',a)
+    let ans = `\\begin{align}\n  ${a[0]} &= ${a[1]}`
+    a.slice(2).forEach( eq => ans += ` \\\\\n    &= ${eq}`)
+    ans += '\n\\end{align}'
+    return ans 
   }
 
   // default: convert optional associative binary operator to lisp
@@ -246,32 +266,32 @@ DeclareSeq = 'Declare 'i a:([^\n]|1..,__|) {
 ForSome = body:Expression __ 'for'i __ 'some'i __ a:SymbolSeq 
           { return `${body}\\text{ for some }${a}` }
 // the 'given' colon is optional since these are always 'given'.          
-Let =  'Let'i __ a:SymbolSeq __ ('be'i __)? 'such'i __ 'that'i __ b:Expression 
-       { return `\\text{Let }${a}\\text{ be such that }${b}` } /
-       'Let'i __ a:SymbolSeq { return `\\text{Let }${a}` }
+Let =  a:('Let'i) __ b:SymbolSeq __ c:('be'i __)? 'such'i __ 'that'i __ d:Expression 
+       { return `\\text{${a} }${b}\\text{${(c)?' '+c[0]:''} such that }${d}` } /
+       a:('Let'i) __ b:SymbolSeq { return `\\text{${a} }${b}` }
 
 // expressions - get's Stuff from Not
 Expression "Expression" = Quantified / Binding / Prop / EFA  
 
 // quantified binding expressions
 Quantified = a:BindingSymbol b:Binding
-          { return `${a}${b}` }
+          { return `${a} ${b}` }
 
 // binding expressions
 Binding = a:Symbol (period / '↦') b:(Expression / Binding) 
-          { return `${a},${b}` }
+          { return `${a}.${b}` }
 
 // propositional expressions
 Prop = Iff / Implies / And / Or / Not
 
 Contradiction = a:'contradiction'             { return '\\rightarrow\\leftarrow' }
 
-Iff           = a:Implies|1..,'⇔'/' iff '|    { return texJoin('\\Leftrightarrow',a) }
-Implies       = a:Or|1..,'⇒'/' implies '|     { return texJoin('\\Rightarrow',a) }
+Iff           = a:Implies|1..,'⇔'/' iff '|    { return texJoin('\\Leftrightarrow ',a) }
+Implies       = a:Or|1..,'⇒'/' implies '|     { return texJoin('\\Rightarrow ',a) }
 Or            = a:And|1..,' or '/'∨'|         { return texJoin('\\text{ or }',a) }
 And           = a:Not|1..,' and '/'∧'|        { return texJoin('\\text{ and }',a) }
 Not           = a:('¬'/'not ')? _ b:Stuff     { return (a==='not ' || a==='¬')
-                                                        ? texUnary('\\neg{}',b)
+                                                        ? texUnary('\\neg ',b)
                                                         : b
                                               }
 
@@ -288,16 +308,16 @@ Partition  = a:(Binding/Thing) ' is a partition of 'i b:(Binding/Thing)
              { return texJoin('\\text{ is a partition of }',[a,b]) }
 Congruent  = a:(Binding/Thing) '≈' b:(Binding/Thing) ' mod 'i c:(Binding/Thing)
              { return `${a}\\underset{${c}}{\\equiv}${b}` }
-Subset     = a:Thing|2..,'⊆'/' subset '/' subseteq '| { return texJoin('\\subseteq',a) }
-NotEltOf   = a:Thing (' notin ') b:Thing              { return texJoin('\\notin',
+Subset     = a:Thing|2..,'⊆'/' subset '/' subseteq '| { return texJoin('\\subseteq ',a) }
+NotEltOf   = a:Thing (' notin ') b:Thing              { return texJoin('\\notin ',
                                                                        [a,b])        } 
-ElementOf  = a:Thing ('∈'/' in ') b:Thing             { return texJoin('\\in',[a,b]) }
-Divides    = a:Thing ('|'/' divides ') b:Thing        { return texJoin('\\mid',[a,b]) }
-Leq        = a:Thing|2..,'≤'/' leq '|                 { return texJoin('\\leq',a) }
+ElementOf  = a:Thing ('∈'/' in ') b:Thing             { return texJoin('\\in ',[a,b]) }
+Divides    = a:Thing ('|'/' divides ') b:Thing        { return texJoin('\\mid ',[a,b]) }
+Leq        = a:Thing|2..,'≤'/' leq '|                 { return texJoin('\\leq ',a) }
 LessThan   = a:Thing|2..,'<'/' lt '|                  { return texJoin('<',a) }
-NotEqual   = a:Thing (' neq '/' ne ') b:Thing         { return texJoin('\\neq',[a,b]) }
-Relation   = a:(Binding/Thing)|2..,'~'|               { return texJoin('\\sim',a) }        
-Equation   = a:(Binding/Thing)|2..,'='|               { return texJoin('=',a) }
+NotEqual   = a:Thing (' neq '/' ne ') b:Thing         { return texJoin('\\neq ',[a,b]) }
+Relation   = a:(Binding/Thing)|2..,'~'|               { return texJoin('\\sim ',a) }        
+Equation   = a:(Binding/Thing)|2..,'='|               { return texEquation(a) }
 Loves      = a:Thing|2..2,' loves '|                  { return texJoin('\\text{ loves }',a) }
 Is         = a:Thing b:(' is an '/' is a '/' is ') c:Thing  
              { return `${a}\\text{${b}}${c}` }
@@ -308,17 +328,21 @@ Thing = Set / Algebraic
 // sets
 Set = Composition / CartProd / Union / Intersection / RelativeComp / Complement
 
-Composition   = a:Atomic|2..,'∘'/' circ '|                   { return texJoin('\\circ',a) }
-CartProd      = a:CompAtomic|2..,'×'/' times '|              { return texJoin('\\times',a) }
-Union         = a:CompAtomic|2..,'∪'/' cup '/' union '|      { return texJoin('\\cup',a) }
-Intersection  = a:CompAtomic|2..,'∩'/' cap '/' intersect '|  { return texJoin('\\cap',a) }
-RelativeComp  = a:CompAtomic|2..,'∖'/' setminus '|           { return texJoin('\\setminus',a) }
+Composition   = a:Atomic|2..,'∘'/' circ '|                   { return texJoin('\\circ ',a) }
+CartProd      = a:CompAtomic|2..,'×'/' times '|              { return texJoin('\\times ',a) }
+Union         = a:CompAtomic|2..,'∪'/' cup '/' union '|      { return texJoin('\\cup ',a) }
+Intersection  = a:CompAtomic|2..,'∩'/' cap '/' intersect '|  { return texJoin('\\cap ',a) }
+RelativeComp  = a:CompAtomic|2..,'∖'/' setminus '|           { return texJoin('\\setminus ',a) }
 // we don't want to have to do e.g. A∩(B°) instead of just A∩B°
 CompAtomic    = Complement / Atomic
 Complement    = a:Atomic ('°'/' complement') { return `${a}^\\circ` }
 
 // algebraic expressions
-Algebraic = Sum / Product
+Algebraic = Choose / Sum / Product
+
+// binomial coefficients
+Choose = a:(Sum / Product ) ' choose ' b:(Sum / Product ) 
+         { return `\\binom{${a}}{${b}}` }
 
 Sum       = a:Product b:([-+] Product)+             { return texSum(a,b)   }
 Product   = a:(Recip/Factorial/Inversed/Negated)|1..,'⋅'/' cdot '/'*'| 
@@ -362,14 +386,14 @@ Natural = $( [1-9][0-9]* / '0' )
 
 // Symbols can't start with a digit, contain reserved constants, or keywords
 SymbolSeq = a:(BindingSymbol/Symbol/Number)|1..,comma| { return a.join(',') }
-BindingSymbol = ('∃!'/'exists unique ') { return '\\exists!' } /
-                ('∀'/'forall '/'for all ') { return '\\forall' } /
-                ('∃'/'exists ') { return '\\exists' } 
-Symbol "Symbol" = a:( '≡' / '→←' / '~' / '"' [^"]* '"' /
+BindingSymbol = ('∃!'/'exists unique ') { return '\\exists! ' } /
+                ('∀'/'forall '/'for all ') { return '\\forall ' } /
+                ('∃'/'exists ') { return '\\exists ' } 
+Symbol "Symbol" = a:( '≡' / '→←' / '~' / '"' [^"]* '"' / 'sigma' / 'σ' /
                      !([0-9]/ReservedWord)
                      [^-\][()⟨⟩ \t\n✦{},.:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∘∧∨≡↦~≈！*]+ )
-  { let b =  Array.isArray(a) ? a[1].join('') : a
-    return (b.length>1) ? `\\text{${b}}` : b }
+  { let b = texsymbol(Array.isArray(a) ? a[1].join('') : a)
+    return (b.length>1 && !b.startsWith('\\')) ? `\\text{${b}}` : b }
 
 // punctuation
 comma  =  ','
@@ -381,4 +405,5 @@ ReservedChars = $([:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∘∧
 ReservedWord  = ' or '/' and '/' loves '/' cdot '/' complement' / 
                 ' setminus '/' cap '/' cup '/' times '/' lt '/' leq '/
                 ' in '/' subset '/' implies '/' iff ' / 'maps ' /
-                ' contradiction ' / ' divides ' / 'forall' / 'exists' / 'lambda'
+                ' contradiction ' / ' divides ' / 'forall' / 'exists' / 
+                'lambda' / 'sigma' / ' choose ' 
