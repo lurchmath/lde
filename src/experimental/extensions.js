@@ -455,6 +455,7 @@ LogicConcept.prototype.propositions = function () {
  * @memberof Extensions
  */
 LogicConcept.prototype.mentions = function (e) {
+  write(e)
   const eprop = e.prop()
   return [...this.descendantsSatisfyingIterator( x => {
     return (x.isA('Inst')) && x.propositions().some( p => p.prop() === eprop )
