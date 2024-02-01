@@ -231,8 +231,11 @@ const formatter = ( options=defaultOptions ) => {
     } else if (L instanceof Declaration) {
       const label = L.isA('Declare') ? decPen('Declare') : 
                     L.isA('given')   ? decPen('Let')     : decPen('ForSome')
-      ans += (options.showDeclares || !L.isA('Declare')) ? (L.isA('given') ? ':' : '') + label + 
-              S.slice(0).replace(/\s*,\s*]$/,']') : ''
+      ans += (options.showDeclares || !L.isA('Declare')) 
+             ? (L.isA('given')) 
+                 ? `:${label}${S.substring(1).replace(/\s*,\s*]$/,']')}` 
+                 : `${label}${S.replace(/\s*,\s*]$/,']')}` 
+             : ''
     // Declaration body copies
     } else if (L.bodyOf) {
       ans += (options.showBodies) ? instantiationPen(S) : ''
