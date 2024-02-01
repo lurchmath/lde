@@ -13,7 +13,8 @@ Rule: :{ :x=y :𝜆P(y) 𝜆P(x) }
   ➤ "Theorem 7.5: Associativity of Addition"
   Theorem: { (m+n)+p=m+(n+p) }
 
-  ➤ "Proof: (by induction on p for arbitrary m,n"
+  // ➤ "Proof: (by induction on p for arbitrary m,n"
+	Proof:
   { 
     ➤ "Base case:"
     Recall { :n+0=n :(m+n)+0=m+n (m+n)+0=m+(n+0) }
@@ -45,7 +46,8 @@ Rule: :{ :x=y :𝜆P(y) 𝜆P(x) }
   ➤ "Theorem 7.2: n≠0 ⇒ ∃m,n=𝜎(m)"
   Theorem: { :¬n=0 ∃m.n=𝜎(m) }
 
-  ➤ "Proof:"
+  // ➤ "Proof:"
+	Proof:
   { :¬n=0
     ➤ "P(n) is n≠0⇒∃m,n=𝜎(m)"
     ➤ "Base Case"

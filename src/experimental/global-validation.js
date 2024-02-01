@@ -116,7 +116,7 @@ import CNF from '../validation/conjunctive-normal-form.js'
 // import Validation from '../validation.js'
 import {
   LogicConcept, Expression, Declaration, Environment, LurchSymbol,
-  Matching, Formula, Scoping, Validation
+  Matching, Formula, Scoping, Validation, Application
 } from '../index.js'
 
 const Problem = Matching.Problem
@@ -125,6 +125,11 @@ const isAnEFA = Matching.isAnEFA
 // import experimental tools
 import Interpret from './interpret.js'
 const { markDeclaredSymbols, renameBindings, assignProperNames, interpret } = Interpret
+// import experimental utilities
+import Utils from './utils.js'
+const commonInitialSlice = Utils.commonInitialSlice
+// import the LDE options
+import { LurchOptions } from './lurch-options.js'
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -137,6 +142,7 @@ const metavariable  = 'LDE MV'
 const time = (description) => { if (Debug) console.time(description) }
 const timeEnd = (description) => { if (Debug) console.timeEnd(description) }
 ////////////////////////////////////////////////////////////////////////////////
+
 
 /**
  * We just use a global for storing the current options. This avoids having to
@@ -161,20 +167,21 @@ const timeEnd = (description) => { if (Debug) console.timeEnd(description) }
  *
  * @see {@link validate validate()}
  */
-const LurchOptions = { 
-  validateall:true ,    
-  checkPreemies:true ,  
-  processBIHs:true ,
-  avoidLoneMetavars:true ,
-  avoidLoneEFAs:true ,    
-  processEquations:true ,    
-  processCases:true ,    
-  autoCases:false ,
-  processCAS:true ,
-  updateProgress: async () => { }  ,
-  updateFreq: 100 ,
-  badResultMsg: 'indeterminate' 
-}
+// const LurchOptions = { 
+//   validateall:true ,    
+//   checkPreemies:true ,  
+//   processBIHs:true ,
+//   avoidLoneMetavars:true ,
+//   avoidLoneEFAs:true ,    
+//   processEquations:true ,    
+//   processCases:true ,    
+//   autoCases:false ,
+//   processCAS:true ,
+//   swapTheoremProofPairs: true ,
+//   updateProgress: async () => { }  ,
+//   updateFreq: 100 ,
+//   badResultMsg: 'indeterminate' 
+// }
 
 /**
  *
@@ -212,7 +219,7 @@ const LurchOptions = {
 const validate = ( doc, target = doc ) => {
   
   // interpret it if it hasn't been already (the interpret routine checks)
-  interpret(doc)
+  interpret( doc )
 
   // process the domains (if they aren't already)
   processDomains(doc)
@@ -910,6 +917,7 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// This is a prototype of the CAS Tool designed and built at the AIM Workshop
 const processCAS = doc => {
   // check options 
   if (!LurchOptions.processCAS) return
@@ -924,7 +932,6 @@ const processCAS = doc => {
     const ans = (compute(command)==='1') ? 'valid' : 'invalid'
     c.setResult('CAS', ans , 'CAS')
   })
-
 }
 
 /**

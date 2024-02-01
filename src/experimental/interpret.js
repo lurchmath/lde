@@ -47,6 +47,8 @@ import Utilities from './utils.js'
 const { subscript } = Utilities
 const instantiation = 'LDE CI'
 
+// import the LDE options
+import { LurchOptions } from './lurch-options.js'
 
 /**
  *  ### Interpret
@@ -132,24 +134,42 @@ return doc
  * can be formatted as such). 
  *
  * But we want to mark his theorem as valid or invalid just like any other proof
- * in addition to using it as a `Rule`.  To accomplish this, we make an invisible
- * copy of the Theorem immediately following the theorem, make that a formula,
- * and label it as a `Rule` for future use.  This does not have to be done if the
- * Theorem has no metavariables as a `Rule` because it would be redundant. When a
- * Rule copy of the user's Theorem is inserted it does not have to be marked as
- * a given since it has no prop form, but its instantiations do.  We flag the
- * inserted `Rule` version of the Theorem as `.userThm` to distinguish it from
- * ordinary `Rules`.
+ * in addition to using it as a `Rule`.  To accomplish this, we make an
+ * invisible copy of the Theorem immediately following the theorem, make that a
+ * formula, and label it as a `Rule` for future use.  This does not have to be
+ * done if the Theorem has no metavariables as a `Rule` because it would be
+ * redundant. When a Rule copy of the user's Theorem is inserted it does not
+ * have to be marked as a given since it has no prop form, but its
+ * instantiations do.  We flag the inserted `Rule` version of the Theorem as
+ * `.userThm` to distinguish it from ordinary `Rules`.
  *
  * This has to be done after processing Shorthands and moving Declares to the
  * top so the user's theorems are in the scope of declared constants in the
  * library, which then prevents them from being metavariables. 
+ *
+ * If `LurchOptions.swapTheoremProofPairs` is true, and a Proof is the next
+ * sibling of the Theorem, swap the two of them first before inserting the
+ * `.userThm` Rule.  This prevents the Theorem from being used in its own proof,
+ * which is done correctly if you don't swap them but is counterintuitive
+ * because mathematicians don't usually expect it to follow the rules of
+ * accessibilty in that situation.
  */
 const processTheorems = doc => {
   [ ...doc.descendantsSatisfyingIterator( x => x.isA('Theorem') ) ].forEach( 
     thm => {
-      // to make this idempotent, check if the copy is already there
+      // to make this idempotent, check if the rule copy is already there
       if ( thm.nextSibling()?.userRule ) { return }
+      // now check if you have to swap it with the next sibling if the next
+      // sibling is a Proof
+      if ( LurchOptions.swapTheoremProofPairs &&
+           thm.nextSibling()?.isA('Proof') ) { 
+        // theorem environments should always have a parent, at minimum, the
+        // document itself
+        const parent = thm.parent()
+        const i = thm.indexInParent() 
+        // just move the proof where the theorem is
+        parent.insertChild(thm.nextSibling(),i)
+      }
       // make a formula copy of the thm
       let thmrule = Formula.from(thm)
       // if it doesn't have any metavars there's no need for it
