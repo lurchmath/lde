@@ -167,14 +167,15 @@ global.catlib = function(fname) {
 
 // List both libs and proofs
 /** List libs, proofs, and parsers */
-const list = () => { console.log(
+const list = () => { 
+  console.log(
   `\n${headingPen('Available Libraries:')}\n`+
   `${docPen(execStr('cd '+libPath+';ls -pRC '))}\n`+
   `${headingPen('Available Proofs:')}\n` +
-  `${docPen(execStr('cd '+proofPath+';ls -pRC'))}`
+  `${docPen(execStr('cd '+proofPath+';ls -pRC'))}\n` +
   `${headingPen('Available Parsers:')}\n` +
   `${docPen(execStr('cd '+parserPath+';ls -pRC'))}`
-)}
+) }
 
 // two useful abbreviations
 global.lc = s => { 
