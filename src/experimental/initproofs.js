@@ -118,7 +118,7 @@ let start = Date.now()
 //     Declare 1 = +
 //     Rules:
 //     { 
-//       :{ Equations_Rule }
+//       :{ EquationsRule }
 //     }   
 //     { 
 //       :a=b
@@ -136,7 +136,7 @@ let start = Date.now()
 //     Declare 1 = +
 //     Rules:
 //     { 
-//       :{ Equations_Rule }
+//       :{ EquationsRule }
 //     }   
 //     { 
 //       :a=b
@@ -277,8 +277,8 @@ let start = Date.now()
 // write(induction)
 // use=loadDoc('proofs/aim/use')
 // write(use)
-propex=loadDoc('proofs/math299/propEx')
-write(propex)
+// propex=loadDoc('proofs/math299/propEx')
+// write(propex)
 
 // doc = $(
 //   `{   
@@ -344,8 +344,19 @@ write(propex)
 //   return result.flat();
 // }
 
+// test=loadDoc('proofs/test')
+// write(test)
+// console.log(`tex('Declare ∀ ∃ ∃! ='`)
+// write(tex('Declare ∀ ∃ ∃! ='))
 
-///////////////////////////////////////////////////////////
+// fname='lurch-parser-docs-template'
+
+parsers = loadParser('lurch-to-putdown')
+p = parsers[0]
+t = parsers[1]
+r = parsers[2]
+
+//////////////////////////////////////////////////////////
 // closing
 console.log(defaultPen(`done! (${(Date.now()-start)} ms)`))
 // don't echo anything
