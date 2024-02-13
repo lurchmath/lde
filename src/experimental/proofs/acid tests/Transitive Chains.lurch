@@ -3,11 +3,11 @@
 
 ➤ "(transitive chain test) Thm: 1+1=2"
 
-Declare ∀ ∃ ∃! = 0 1 2 𝜎 + ⋅ ≤
+Declare ∀, ∃, ∃!, =, 0, 1, 2, 𝜎, +, ⋅, ≤
 
 Rules:  
 {
-  :{ Equations_Rule }  
+  :{ EquationsRule }  
   :{ :x=y y=x }              
   :{ :𝜎(m)=𝜎(n) m=n }              
   :{ n+0=n }                       

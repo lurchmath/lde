@@ -126,9 +126,9 @@ x+y
 (2/(x-3/y) cdot z)^(-4)
 -2 cdot (x^3+y)/(-z)-4
 // factorials
-n！
-(n+1)！+2
-2+n！
+n!
+(n+1)!+2
+2+n!
 // sets
 A cap B
 A cup B
@@ -159,7 +159,7 @@ A times B  subset  B times A
 x=0
 fred lt wilma
 x+1 leq 0
--(-x^2+2 cdot x-7)/((x-1) cdot (x+1))=(3 cdot x+1)/2
+(-(-x^2+2 cdot x-7)/((x-1) cdot (x+1))=(3 cdot x+1)/2)
 2|6
 12|24
 n|6
@@ -173,7 +173,7 @@ x ∈ A
 x ∉ A
 2 ∉ Set(0,2,4,6)
 
-A subset B
+// A subset B
 Set(1,2) in PowerSet(Set(0,1,2,3))
 A cap B  subset  A cup B
 A cap B°  subset  (A cup B)° setminus A
@@ -210,10 +210,11 @@ exists x.y.P(x)
 (exists x.for all y.x loves y)  implies  (for all y.exists x.x loves y)
 P and (exists x.P(x)  implies  Q)  implies  P and (for all y.Q)
 // declarations
+Declare x,y,z,0
 Let x
 let x,y,z,wilma
 Declare f
-declare fred wilma barney !
+declare fred, wilma, barney, !
 P(c) for some c
 P(c,w)  implies  Q(c,y) for some c
 // environments
@@ -244,9 +245,6 @@ Comment "Fred often ponders reality."
 comment "Fred often ponders reality."
 ➤ "Fred often ponders reality."
 % "Fred often ponders reality."
-Comment x^2
-➤ x^2
-% x^2
 
 ////////////////////////////////
 // ND Propositional Logic Axioms
@@ -278,18 +276,18 @@ Comment x^2
 :{ (not (W or V)) ≡ { not W not V } }             // DeMorgan
 :{ :contradiction  W }                            // contradiction-
 // Pred Axioms
-:{ :(for all x.@(P,x)) @(P,t) }                   // for all -
-:{ :{ :Let x @(P,x) }  (for all y.@(P,y)) }       // for all +
-:{ :(exists x.@(P,x)) @(P,c) for some c }         // exists -
-:{ :@(P,t) (exists x.@(P,x)) }                    // exists +
-:{ :x=y :@(P,x) @(P,y) }                          // substitution
+:{ :(for all x.𝜆P(x)) 𝜆P(t) }                   // for all -
+:{ :{ :Let x 𝜆P(x) }  (for all y.𝜆P(y)) }       // for all +
+:{ :(exists x.𝜆P(x)) 𝜆P(c) for some c }         // exists -
+:{ :𝜆P(t) (exists x.𝜆P(x)) }                    // exists +
+:{ :x=y :𝜆P(x) 𝜆P(y) }                          // substitution
 :{ W=W }                                          // reflexive =
 ////////////////////////////////
 // Peano Axioms
 ////////////////////////////////
 :{ :sigma(m)=sigma(n) m=n }                                         // N2
 :{ not (0 = sigma(n)) }                                             // N3
-:{ :@(P,0) :{ :Let k :@(P,k) @(P,sigma(k)) } (for all n.@(P,n)) }   // N4
+:{ :𝜆P(0) :{ :Let k :𝜆P(k) 𝜆P(sigma(k)) } (for all n.𝜆P(n)) }   // N4
 :{ n+0 = n }                                                        // A0
 :{ m+sigma(n) = sigma(m+n) }                                        // A1
 :{ n cdot 0 = 0 }                                                   // M0
@@ -305,15 +303,17 @@ f:A → B
 f: A → B
 f : A → B
 f(0):A∩B → A∪B°
-f:ℕ → ℕ
+f:NN → NN
 f⁻:A→B
 
 // relations
 x~y
 x ~ y
 a~(b+1)~c~d^2
-a ≈ b mod m
-a+k ≈ b-3 mod m
+a≅b mod m
+a cong b mod m
+a+k ≅ b-3 mod m
+a+k cong b-3 mod m
 
 // misc
 ∀y.𝜆P(y) ⇒ y=x

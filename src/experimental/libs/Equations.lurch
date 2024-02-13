@@ -8,5 +8,5 @@ include libs/Number Theory
 Rules:
 {
   // and at this point we want the helpful Equations Rule
-  :{ Equations_Rule }
+  :{ EquationsRule }
 } 

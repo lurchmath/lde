@@ -843,7 +843,7 @@ const processBIHs = doc => {
 //
 //                          Process Equations
 //
-// Check if the doc contains the Rule :{ Equations_Rule }.  If not, just split
+// Check if the doc contains the Rule :{ EquationsRule }.  If not, just split
 // the equation chains.  
 //
 // Otherwise after splitting get the diffs of all equations, and add the
@@ -876,10 +876,10 @@ const processEquations = doc => {
   // those split from chains, with .equation=true
   splitEquations(doc)
   
-  // check if the Equations_Rule is around, if not, we're done
+  // check if the EquationsRule is around, if not, we're done
   const rule=doc.find(
     x=>x.isA('Rule') && x.numChildren()==1 && 
-       x.child(0) instanceof LurchSymbol && x.child(0).text()==='Equations_Rule',
+       x.child(0) instanceof LurchSymbol && x.child(0).text()==='EquationsRule',
     x=>!(x.isA('Rule') || x===doc))
   // if there is no Equations Rule loaded we are done
   if (!rule) return
@@ -963,7 +963,7 @@ const processEquations = doc => {
 //
 // Go through and fetch all of the user's equations (i.e., only equations that
 // are conclusions) which have more than two arguments and create and insert
-// them after the Equations_Rule rule.  For example, a=b=c=d=e would produce
+// them after the EquationsRule rule.  For example, a=b=c=d=e would produce
 // and insert the instantiation :{ :a=b :b=c :c=d :d=e a=e }
 //
 // This is a helper utility called by processEquations().
@@ -1212,7 +1212,7 @@ const getCaselikeRules = doc => {
     if (!U.isA(metavariable)) return false
     const others = rule.descendantsSatisfying( x => x.equals(U) )
     // we return only rules that have more than one U to avoid
-    // matching rules like :{ Equations_Rule } propositionally.
+    // matching rules like :{ EquationsRule } propositionally.
     // Note that a rule like :{ →← U } will match however.
     return others.length>1 && others.every( u => u.isOutermost() ) 
   })

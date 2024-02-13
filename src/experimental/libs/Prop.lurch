@@ -4,7 +4,7 @@
 //
 
 // Global Constants - we don't want any of these to be metavariables
-Declare and or ⇒ ⇔ ¬ →←
+Declare and, or, ⇒, ⇔, ¬, →←
 
 Rules:
 { 
@@ -16,7 +16,7 @@ Rules:
   :{ {:W V} ≡  W⇒V }                    // ⇒
   :{ { {:W V} {:V W} } ≡ W⇔V }          // ⇔
   :{ :W  (W or V) (V or W) }            // or+
-  cases> 
+  CasesRule: 
   :{ :(W or V) :{:W U} :{:V U}  U }     // or-
   :{ :{:W →←}  ¬W }                     // ¬+
   :{ :{:¬W →←}  W }                     // ¬-

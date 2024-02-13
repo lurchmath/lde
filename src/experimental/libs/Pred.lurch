@@ -4,7 +4,7 @@ include libs/Prop
 //
 
 // Global Constants - we don't want any of these to be metavariables
-Declare ∀ ∃ ∃! =
+Declare ∀, ∃, ∃!, =
 
 ////////////////////////////////
 // ND Predicate Logic Axioms

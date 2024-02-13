@@ -1,0 +1,41 @@
+////////////////////////////////////////////////////////////////////
+// Tests for Peggy Parser
+//
+// Here we do tests from the top down to find the first place something is short
+// circuited.
+
+// Simple Environments and LC sequences
+{}
+{} {}
+{{}} {} {{} {}}
+// Meta
+// putdown
+«(raw putdown here)»
+«(x (y z))»
+// comments
+% "This is a comment"
+comment "So is this."
+➤ "This is too."
+// shorthands
+{ } equiv { { } }
+recall {}
+rule {}
+rule: {}
+rules: {}
+thm {}
+lemma {}
+proof {}
+// Givens
+:{}
+assume { {} } {}
+If {} {{}}
+// Declare
+declare 0
+declare iff
+declare iff, 0
+declare a, b, 0, pi, implies, 3
+// Let
+Let x
+Let fun
+Let x, y
+Let a, b, pi

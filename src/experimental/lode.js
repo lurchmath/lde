@@ -64,7 +64,7 @@ import Compact from './global-validation.js'
 // load the custom formatters and reporting tools
 import Reporting from './reporting.js' 
 // import the parsing utiltiies (processShorthands comes from Interpret)
-import { makeParser, parselines } from './parsing.js'
+import { makeParser, parseLines } from './parsing.js'
 // load the CNFProp tools for testing
 import { CNFProp } from './CNFProp.js'
 // load the Lurch to putdown parser precompiled for efficiency
@@ -81,6 +81,12 @@ import { parse as lurchToTexTrace } from './parsers/lurch-to-tex-trace.js'
 global.textrace = lurchToTexTrace
 // load the Lurch to LaTeX parser precompiled for efficiency
 import { makedoc } from './parsers/makedoc.js'
+// load the chalk pens globally
+import Pens from './pens.js'
+global.Pens = Pens
+// load the pegjs tracer only in Lode
+import Tracer from 'pegjs-backtrace'
+global.Tracer = Tracer
 
 // External packages
 // load Algebrite
@@ -302,7 +308,7 @@ global.makedoc = makedoc
 
 // function to parse a test file one line at a time with the parser given as the
 // first argument and file to parse as the second (optional)
-global.parselines = parselines
+global.parseLines = parseLines
 
 // global.mathlive = MathLive.convertLatexToMarkup
 // global.html = katex.renderToString
@@ -501,13 +507,13 @@ rpl.defineCommand( "parsertest", {
   action() { 
     try { 
       const s=lc(parse(loadStr('parsers/LurchParserTest')))
-      parselines(parse)
+      parseLines(parse,false)
       console.log(`${itemPen('Parser Test:')} → ok`)
     } catch (e) { 
       console.log(xPen(`ERROR: Parser test failed.`)) 
     }
     try { 
-      parselines(tex)
+      parseLines(tex,false)
       console.log(`${itemPen('Tex Parser Test:')} → ok`)
     } catch (e) { 
       console.log(xPen(`ERROR: Tex Parser test failed.`)) 

@@ -136,7 +136,7 @@ include libs/Pred
   ➤ "Assignment #8 (b)"
   Proof:
   { 
-    Declare < 0 7 
+    Declare <, 0, 7 
     { :0<7
       ∃x.0<x
       ∃x.x<7
@@ -150,7 +150,7 @@ include libs/Pred
   ➤ "Assignment #8 (c)"
   Proof:
   { 
-    Declare Alice Bob loves
+    Declare Alice, Bob, loves
     { :∀x.(∀y.x loves y)
       ∀y.Alice loves y
       Alice loves Bob

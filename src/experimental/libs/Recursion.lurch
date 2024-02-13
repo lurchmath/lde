@@ -7,13 +7,13 @@ include libs/PeanoThm
 //////////////////////////////////
 // Recursive Sequence Definitions
 //////////////////////////////////
-Declare ∑ F multinom
+Declare Sum, F, multinom
 
 Definitions:  
 {
 		// summation
-    :{ ∑(0,k.𝜆P(k)) = 𝜆P(0) }
-    :{ ∑(𝜎(n),k.𝜆P(k)) = 𝜆P(𝜎(n)) + ∑(n,k.𝜆P(k)) }
+    :{ Sum(0,k.𝜆P(k)) = 𝜆P(0) }
+    :{ Sum(𝜎(n),k.𝜆P(k)) = 𝜆P(𝜎(n)) + Sum(n,k.𝜆P(k)) }
 
 		// natural number exponents
 		:{ z^0=1 }
@@ -29,5 +29,5 @@ Definitions:
 		:{ multinom(m,0)=1 multinom(0,n)=1 }
 		:{ multinom(m+1,n+1)=multinom(m+1,n)+multinom(m,n+1) }
 		// choose
-		:{ choose(n+m,m)=multi(n,m)}		
+		:{ (n+m choose m)=multinom(n,m) }		
 } 

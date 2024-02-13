@@ -6,9 +6,9 @@ include libs/Functions
 //////////////////////////////////
 // Definitions for Relations
 //////////////////////////////////
-Declare ~ ≈ reflexive symmetric transitive irreflexive antisymmetric total class
-Declare partial order  strict partial order  total order  equivalence relation
-Declare partition
+Declare ~, ≈, reflexive, symmetric, transitive, irreflexive, antisymmetric 
+Declare total, class, partial order,  strict partial order,  total order
+Declare equivalence relation, partition
 Definitions:  
 {
 	:{ x~y ≡ ⟨x,y⟩∈'~' }                          // infix vs set of tuples

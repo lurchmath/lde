@@ -1,10 +1,10 @@
 ///////////////////////////////////////////////////////////////////////////
-// AsciiMath Peggy Grammar and Parser
+// Math 299 Lurch Peggy Grammar and Parser
 //
 // A peggy grammar definition file to generate a parser for converting
 // AsciiMath expression to an LC.
 //
-// Note: for now we encode negative numbers as compound expressions e.g. -3 is
+// For now we encode negative numbers as compound expressions e.g. -3 is
 // encoded as (- 3). We also encode rational fractions as a product of the
 // numerator times the multiplicative inverse of the denominator where / is the
 // unary inverse operator, e.g. 2/3 parses as (⋅ 2 (/ 3)).  This is consistent
@@ -12,41 +12,66 @@
 // represent one half. We do not have an Integer or Rational constant type for
 // this reason.
 //
-// Note: Declare's have to be on a line by themselves and its declared
-// constants separated by spaces (not commas)
+// To make the parser more robust, all symbols can only consist of upper and 
+// lower case letters A-Z and a-z and digits 0-9, but cannot start with a digit.
 //
 // To save the resulting parser to a standalone .js file use:
-//   peggy --cache --format es -o asciimath.js asciimath.peggy
+//   peggy --cache --format es -o outfilename.js infilename.peggy
 //
-//
-// TODO: 
-//  * add equiv classes, infix relation symbols family
 
 {{
 
-  // remove empty arrays from a nested array
+  /////////////////////////////////////////////////////////////////
+  // Peggy-specific utilities
+  
+  // It is essential to understand how peggy parses a rule into strings and
+  // nested so that these can be processed appropriately.  We list here some
+  // notes for quick reference.  Let A, B, C ... denote rule names and 
+  // A',B',.. the result of parsing those.
+  // 
+  // Rule Form                 Returns
+  // A                         A'
+  // (A)                       A'
+  // A B C                     [ A' , B' , C']
+  // (A B C)                   [ A', B' , C' ]
+  // (A B) C                   [ [A',B'] , C' ]
+  // A (B C)                   [ A' , [B',C'] ]
+  // A* or A+                  [A',A',...]
+  // A|m..n,separator|         [A',A',...]
+  // !anything or &anything    undefined
+  // A?                        null or A' 
+
+  // Since we are returning a string with this parser, no matter how nested and
+  // convoluted an array might be, we always want to ignore undefined and empty
+  // arrays that peggy creates when interpreting the rule.  Here we remove both
+  // undefined terms and empty arrays that appear in array A.
   const clean = A => { 
-    return A.map( c => { 
-      return (Array.isArray(c) && c.length) ? clean(c) : c 
-      } ).filter( e => !(Array.isArray(e) && e.length===0) )
+    return A.filter(x=>x!==undefined && !(Array.isArray(x) && x.length===0))
+             .map( c => { return (Array.isArray(c)) ? clean(c) : c } )
   }
   
-  // replace the commas in a sequence with spaces
-  const spaced = s => s.replace(/,/g, ' ') 
+  // Toggle debuging output on or off here
+  const DEBUG = false
 
-  // default: convert optional associative binary operator to lisp
-  const lisp = (op,args) => {
+  // Convert optional associative binary operator to lisp. This is used to
+  // process rules that use the |m..n,op| sequence syntax. This returns an array
+  // which is passed as the args argument.  We do not clean the args to force being
+  // more careful when defining the rules.
+  const lispSeq = (op,args) => {
+    debug(`\nlispSeq ${op}`,args)
     // if there's only one arg, return it, otherwise apply the op
     return (args.length>1) ? `(${op} ${args.join(' ')})` : args[0]
   }
 
   // convert optional unary operator to lisp
   const lispUnary = (op,arg) => {
-    return (op) ? `(${op} ${arg})` : arg
+    debug(`\nlispUnary: ${op}`,arg)
+    return `(${op} ${arg})`
   }
 
   // convert mandatory binary operator to lisp
   const lispBinary = (op,a,b) => {
+    debug(`\nlispBinary: ${op}`,a,b)
     return `(${op} ${a} ${b})`
   }
 
@@ -64,14 +89,104 @@
 
   // convert signed sums to lisp
   const lispSum = (first,rest) => {
+    // console.log(`lispSum:\n`)
+    // write(first)
+    // console.log(rest)
     let ans = `(+ ${first}`
     rest.forEach( term => {
-      ans = ans + ( (term[0]==='-') ? ` (- ${term[1]})` : ` ${term[1]}` )
+      ans = ans + ( (term[1]==='-') ? ` (- ${term[3]})` : ` ${term[3]}` )
     })
     return ans + ')'
   }
 
-  // for debugging, shorthand for console.log
+  // replace the commas in a sequence with spaces
+  const spaced = s => s.replace(/,/g, ' ') 
+
+  /////////////////////////////////////////////////////////////////
+  // Parser specific utilities
+
+  // replace tabs with a space
+  const replaceTabs = s => s.replace(/\t/g,' ') 
+
+  // shrink consecutive spaces to a single space
+  const shrink = s => s.replace(/ ( +)/g,' ') 
+  
+  // Replace reserved phrases with Symbols.  These should be replaced in order
+  // so longer phrases are replaced before subphrases. We shrink the string
+  // before doing these substitutions in case someone has, e.g. 'partial    order'
+  // with extra spaces.  We also replace some standard words with unicode characters
+  // so they are easy to prevent being interpreted as Symbols.
+  const Phrases = [
+    [ '→←'                     , 'contradiction'          ] , 
+    [ '∃!'                     , 'existsUnique'           ] , 
+    [ 'exists unique'          , 'existsUnique'           ] , 
+    [ 'exists!'                , 'existsUnique'           ] , 
+    [ 'equivalence relation'   , 'equivalenceRelation'    ] ,
+    [ 'strict partial order'   , 'strictPartialOrder'     ] ,
+    [ 'partial order'          , 'partialOrder'           ] ,
+    [ 'total order'            , 'totalOrder'             ] ,
+    [ 'for all'                , 'forall'                 ] ,
+    [ 'for each'               , 'forall'                 ] ,
+    [ 'for every'              , 'forall'                 ] ,
+    [ 'there exists'           , 'exists'                 ] 
+  ]
+  
+  const UnicodeNames = {
+    '⋅' : '*'          ,  '≤' : 'leq'       , '¬' : 'not'    , '→' : 'to'        ,
+    '←' : 'from'       ,  '⇒' : 'implies'   , '⇔' : 'iff'    , '∩' : 'intersect' ,   
+    '∪' : 'union'      ,  '×' : 'cross'     , '∈' : 'in'     , '⊆' : 'subset'    ,    
+    '∖' : 'setminus'   ,  '∘' : 'circ'      , '∧' : 'wedge'  , '∨' : 'vee'       ,
+    '≡' : 'equiv'      ,  '↦' : 'mapsto'    , '≈' : 'approx' , '∀' : 'forall'    ,
+    '∃' : 'exists'     ,  '⟨' : 'langle'    , '⟩' : 'rangle' , '➤' : 'comment'   ,
+    '°' : 'complement' ,  '⁻' : 'inv'       , '≅' : 'cong'   , '!' : 'factorial'
+  }
+  
+  const internalNames = {
+    'equiv'     : '≡' , 'forall'   : '∀' , 'exists' : '∃'  , 'existsUnique' : '∃!'    ,
+    'iff'       : '⇔' , 'implies'  : '⇒' , 'vee'    : 'or' , 'wedge'        : 'and'   ,
+    'not'       : '¬' , 'setminus' : '∖' , 'subset' : '⊆'  , 'subseteq'     : '⊆'     ,
+    'cong'      : '≅' , 'leq'      : '≤' , 'lt'     : '<'  , 'factorial'    : '!'     ,
+    'divides'   : '|' , 'cdot'     : '⋅' , '*'      : '⋅'  , 'love'         : 'loves' ,
+    'in'       : '∈' 
+  }
+
+  // for use in Declare's, look up the internal name of a reserted word or
+  // symbol that might appear in the declare sequence
+  const internal = s => {
+    return internalNames[s] || s
+  }
+
+  // replace phrases first
+  const replacePhrases = s => {
+    Phrases.forEach( p => { 
+      const regex = new RegExp(p[0],'g')
+      s = s.replace(regex,` ${p[1]} ` )  
+    } )
+    return shrink(s)
+  }
+  
+  // then remove the unicodes
+  const replaceUnicode = s => {
+    // first, replace toxic unicode chars with their ascii synonym
+    s = s.replace(/𝜎/g, ' sigma') // usually used as a function so no following space
+         .replace(/𝜆/g, '@')  // for "LDE EFA"
+         .replace(/≠/g, ' neq ')
+         .replace(/∉/g, ' notin ')
+    const regex = /[⋅≤¬→←⇒⇔∩∪×∈⊆∖∘∧∨≡↦≈∀∃⟨⟩➤°!⁻≅]/g
+    const ans = shrink(s.replace(regex, c => { return ` ${UnicodeNames[c]} ` } ) )
+    return ans
+  }
+
+  // for debugging, say where you are in the parse and what you are seeing
+  const debug = (name,...args) => {
+    if (DEBUG) {
+      write(`${name}:`)
+      args.forEach(a=>write(a))
+    }
+    return true
+  }
+  
+  // for debugging, echo a string with line numbers
   const say = s => {
     const lines = s.split('\n')
     const lineNumberWidth = String(lines.length).length
@@ -85,238 +200,420 @@
 
 // Preprocess the input string
 { 
-  //   * replace toxic unicode chars with equivalents
-  input = input.replace(/𝜎/g, 'σ')
-  input = input.replace(/𝜆/g, 'λ')
-  input = input.replace(/≠/g, ' neq ')  
-  input = input.replace(/∉/g, ' notin ') 
   
-  //   * since we want to use → for maps, we replace the contradiction symbol pair up front
-  input = input.replace(/→←/g, ' contradiction ')
-  //   * we also prefer to write 'equivalence relation', etc. than equivalence_relation
-  input = input.replace(/equivalence relation/g, ' equivalence_relation ')
-  input = input.replace(/strict partial order/g, ' strict_partial_order ')
-  input = input.replace(/partial order/g, ' partial_order ')
-  input = input.replace(/total order/g, ' total_order ')
-  //   * in order to use ~ and ≈ as both infix operations AND sets (and talk about their
-  //     properties) we replace '~' and '≈' up front with (~) and (≈) respectively.
-  input = input.replace(/'~'/g, '(~)')
-  input = input.replace(/'≈'/g, '(≈)')
-  //   * Let's used to require a colon ':Let' but we no longer require it, so 
-  //     for backwards compatibility, remove it if its there.
-  input = input.replace(/:([Ll]et )/g, '$1') 
-  //   * Declaring reserved constants is tricky since it tries to parse them as they are
-  //     intended to be used, so for now we convert any line of the form `Declare stuff`
-  //     to escaped putdown up front.
-  input = input.replace(/[Dd]eclare \s*([^\s].*)$/mg, 'declare> «:[$1]»\n')
-  //   * also look for lines containing only a ➤ and whitespace, and replace
-  //     them with (➤ " ") to act as a line break in the output
-  input = input.replace(/^([ \t]*)➤[ \t]*$/mg, '$1➤ " " \n')
-  //   * delete comments (but leave any \n's to keep the line counts right)
+  // Comments
+  //
+  // Comments are defined to start at // and continue to the end of the line.
+  // Delete comments first, but leave any \n's to keep the line counts right for
+  // debugging.
   input = input.replace(/\/\/[^\n\r]*(\n|\r|$)/g, '\n')
-  //   * Replace tabs with a space
-  input = input.replace(/\t/g, ' ')
-  //   * shrink consecutive spaces to a single space
-  input = input.replace(/ ( +)/g,' ') 
-  //   * remove spaces around reserved infix unicode ops not inside literal putdown so
-  //     the parser doesn't have to find and avoid them
-  input = input.replace(/(?<!«[^«»]*)\s*([,.↦+⋅/^=<≤→⇒⇔|∩∪×∈⊆∖~≈])\s*(?![^«»]*»)/g,'$1')
-  //   * same for prefix ops
-  input = input.replace(/(?<!«[^«»]*)([-({∀∃])[ \t]*(?![^«»]*»)/g,'$1')
-  //   * same for postfix ops
-  input = input.replace(/(?<!«[^«»]*)[ \t]*([⁻°！)}])(?![^«»]*»)/g,'$1')
-  //   * replace all '/' with '⋅/'
-  input = input.replace(/(?<!«[^«»]*)\/(?![^«»]*»)/g,'⋅/')
+  // Look for lines containing only a ➤ and whitespace, and replace them
+  // with (➤ " ") to act as a line break in the output in Lode
+  input = input.replace(/^([ \t]*)➤[ \t]*$/mg, '$1➤ " " \n')
+  
+  // Tabs and Spaces
+  //
+  // replace tabs with a space
+  input = replaceTabs(input)
+  // remove double spaces
+  input = shrink(input)
+
+  // Phrases and unicode
+  //
+  // replace phrases with symbols
+  input = replacePhrases(input)
+  // replace unicode characters with ascii symbols
+  input = replaceUnicode(input)
+  
+  // Relations
+  //
+  // In order to use ~ and ≈ as both infix operations AND sets (and talk about
+  // their properties) we replace '~' and '≈' up front with (~) and (≈)
+  // respectively.
+  input = input.replace(/'~'/g, '(~)')
+  input = input.replace(/'approx'/g, '(approx)')
+  
+  // Optional Given Colons
+  //
+  // Lets used to require a colon e.g. ':Let' but we no longer require it, so
+  // for backwards compatibility, remove it if its there.  If someone puts it
+  // there, no big deal.
+  input = input.replace(/:([Ll]et )/g, '$1') 
+  
+  // Division '/' to product ' cdot /'
+  //
+  // Replace all '/' with ' cdot /'
+  input = input.replace(/(?<!«[^«»]*)\/(?![^«»]*»)/g,' cdot /')
+  
+  // Remove any double spaces that were created
+  input = shrink(input)
   
   // uncomment the following for debugging
-  // say(input)
+  if (options.debug) say(input)
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// LCs
+//
+// The philosophy behind this parser design is as follows.  Peggy parsing only
+// can implement precedence by testing all of the lower precedent rules before
+// the higher ones. 
+//
+// * For space sparated sequences of LCs and environments things are rather
+//   straightforward.  Expressions are more nuanced.  
+// * Meta content like comments and «» escaped raw putdown are easily handled
+//   right up front as they are nevey part of other expressions.
+// * Declarations are also not considered to be Expressions here, because we do
+//   not allow them to be part of larger compound expressions or other
+//   Declarations, and so they too can be handled separately up front right
+//   after Meta.
+// * Expressions are then processed in a strict order from lowest to highest
+//   precedence. Because of this all compound expressions are processed first,
+//   and atomic ones like symbols, numbers, and things in parentheses are
+//   handled last.  Thus, even though a single symbol like P might be a
+//   Proposiiton, or a Set, or a Relation, or an Algebraic, we only define those
+//   to be compound expressions for each of their operators, and save the atomic
+//   ones to be checked for last, with the arguments to lower precendence
+//   operations coming from the category of expressions that are higher than it
+//   in precedence.  The order we define here is roughly as follows from lowest to highest.
+//     - Quantified : 
+//     - Binding    :
+//     - Prop       :
+//     - Relations  :
+//     - Prefix     :
+//     - Set        :
+//     - Algebraic  :
+//     - Atomic     :
+//
 // The start rule for a Peggy grammar is the first rule.  For us, it's a
-// sequence of LCs.
-LCs = 
-_ a:(Meta / Contradiction / Given / Declaration / Environment / Expression)|..,__| _ 
-  { return a.join(' ') }
+// sequence of LCs. 
+//
+// (this consumes all of the inter-LC spaces)
+LCs "LC" = _ a:(LC)|..,__| _  { return a.join(' ') }
 
+///////////////////////////////////////////////////////////////////////////////
+// Overview
+//
+// Here we just put a high level overview that shows the precedence of
+// operations. All of these are defined below.
+//
 // A single LC
-LC "LC" = _ @( Meta / Contradiction / Given / Declaration / Environment / Expression) _
+LC = Meta / Given / Environment / Declaration / Expression
+  // Things it searches for and replaces up front
+  Meta = Putdown / Comment / StringLiteral / Shorthand 
+  // Declarations
+  Declaration = Declare / ForSome / Let 
+  // Expressions
+  Expression =  Quantified / Binding / Prop / PropArg
+    // higher precedence than Prop ops for use in Props
+    PropArg  = Relations / RelArg
+      // higher precedence than Relations for use in Relations
+      // Algebraic includes Atomic
+      RelArg = Set / Algebraic
+///////////////////////////////////////////////////////////////////////////////
 
-// givens
-Given "Given" = (':' / 'Assume'i __ / 'Given'i __ / 'Suppose'i __ / 'If'i __ ) 
-  a:(Environment / Expression) { return ':'+a }
-
-// environments
-Environment "Environment" = 
-  '{' _ a:( Meta / Declaration / Given / Environment / Expression )|..,__| _ '}'
-  { return `{ ${a.join(' ')} }` }
-
-// things it searches for and replaces up front
-Meta = Putdown / Comment / Shorthand / StringLiteral
-
-// unprocessed putdown notation (cannot include // comments)
-Putdown = '«' @$([^»]*) '»'  // todo: add a non-unicode way to do this
-
-// insert a comment that gets echoed
-Comment "Comment" = ('%' / 'Comment'i / '➤') __ a:(StringLiteral / Expression) { return `(➤ ${a})` }
-// String Literals for comments
+///////////////////////////////////////////////////////////////////////////////
+// Meta
+//
+// Unprocessed putdown notation (cannot include // comments)
+Putdown = '«' @$([^»]*) '»'  
+// Insert a comment that gets echoed in Lode
+Comment = ( '%' / 'Comment'i ) __ a:StringLiteral 
+          { return `(➤ ${a})` }
+// A string literal is anything enclosed in double quotes
+// Currently only used for comments
 StringLiteral = $('"' [^"]* '"')
+// Shorthands are special symbols which are not allowed to be part
+// of a larger expression and are post-processed by the LDE
+// They cannot be part of a longer symbol
+Shorthand = a:(BIH / Ruleset / Rule / Thm / Proof / Cases / Equiv) !alphanum 
+              { return a }
+  // Shorthands
+  Equiv = 'equiv'i { return '≡' }
+  BIH = ('since'i / 'because'i / 'recall'i) { return '>>' }
+  Ruleset = ('rules'i / 'axioms'i / 'definitions'i) ':'? { return 'rules>' }
+  Rule = ('rule'i / 'axiom'i / 'definition'i) ':'? { return 'rule>' }
+  Thm = ('theorem'i / 'thm'i / 'lemma'i / 'corollary'i) ':'? { return 'thm>' }
+  Proof = 'proof'i ':'? { return 'proof>' }
+  Cases = 'CasesRule'i ':'? { return 'cases>' }
 
-// Shorthand symbols that will be post-processed
-Shorthand = BIH / Ruleset / Rule / Thm / Proof
+///////////////////////////////////////////////////////////////////////////////
+// Givens
+//
+// A Given label that is not part of a longer symbol or followed by another :
+// character, separated from either an Environment or Expession sequence by
+// optional spaces.
+// TODO: use Expression|1..,comma|
+Given = GivenLabel a:(Environment / Expression) { return ':'+a }
+  GivenLabel = ':'_ / ('assume'i / 'given'i / 'suppose'i / 'if'i) _x
 
-BIHLabel = 'since'i / 'because'i / 'Recall'i
-BIH = BIHLabel { return '>>' }
-RulesetLabel = 'Rules'i / 'Axioms'i / 'Definitions'i
-Ruleset = RulesetLabel ':'? { return 'rules>' }
-RuleLabel = 'Rule'i / 'Axiom'i / 'Definition'i
-Rule = RuleLabel ':'? { return 'rule>' }
-ThmLabel = 'Theorem'i / 'Thm'i / 'Lemma'i / 'Corollary'i
-Thm = ThmLabel ':'? { return 'thm>' }
-ProofLabel = 'Proof'i 
-Proof = ProofLabel ':'? { return 'proof>' }
+///////////////////////////////////////////////////////////////////////////////
+// Environments
+//
+Environment =  '{' a:LCs '}' { return `{ ${a} }` }
 
-// declarations
-Declaration "Declaration" = ForSome / Let
-
+///////////////////////////////////////////////////////////////////////////////
+// Declarations
+//
+// Declare constants (cannot have a body and is a given)
+Declare = 'declare'i __ a:DeclareSeq { return `declare> :[${a}]` }
+// ForSome declaration (always a claim)
 ForSome = body:Expression __ 'for'i __ 'some'i __ a:SymbolSeq 
-          { return `[${spaced(a)}, ${body}]` }
+          { return `[${a}, ${body}]` }
 // the 'given' colon is optional since these are always 'given'.          
-Let =  'Let'i __ a:SymbolSeq __ ('be'i __)? 'such'i __ 'that'i __ b:Expression 
-       { return `:[${spaced(a)}, ${b}]` } /
-       'Let'i __ a:SymbolSeq { return `:[${spaced(a)}]` }
+Let = 'Let'i __ a:SymbolSeq __ ('be'i __)? 'such'i __ 'that'i __ b:Expression 
+                            { return `:[${a}, ${b}]` } /
+      'Let'i __ a:SymbolSeq { return `:[${a}]`       }
+  // Comma separated symbols, numbers, and reserved words
+  DeclareSeq = a:(ReservedWord / Number / Symbol)|1..,comma| 
+                { return a.map(internal).join(' ') }    
+  // We allow Reserved Words and Numbers to be declared by a Declare, but not
+  // by a Let or ForSome.
+  SymbolSeq  = a:(Symbol)|1..,comma| { return a.join(' ') }
 
-// expressions - get's Stuff from Not
-Expression "Expression" = Quantified / Binding / Prop / EFA  
+///////////////////////////////////////////////////////////////////////////////
+// Expressions 
+//
+// The trick here is that we want long, complex, compound expressions to be
+// matched before simpler, more atomic ones. We basically have three current
+// collections of related expressions: Propositions, Sets, and Algebraic.
+// However a single atomic Symbol could be any of those, e.g. P might be a
+// proposition, or a set, or a number because the symbols are not typed. Thus we
+// need to be careful to check for all compound propositions, sets, and
+// algebraic expressions before checking any of them for propositional variable
+// so that e.g. checking for Propositions doesn't skip over the checks for
+// compound sets or algebraic expressions that begin with an atomic. To do this,
+// we think of each category above Atomic as representing compound expressions
+// only of that category and order everything in terms of precedence.
 
+///////////////////////////////////////////////////////////////////////////////
+// Quantified and Binding
+//
 // quantified binding expressions
-Quantified = a:BindingSymbol b:Binding
-          { return `(${a} ${b})` }
-
-// binding expressions
-Binding = a:Symbol (period / '↦') b:(Expression / Binding) 
+Quantified = 'forall' _x b:Binding           { return `(∀ ${b})`  } /
+             'exists' _x b:Binding           { return `(∃ ${b})`  } /
+             'existsUnique' _x b:Binding    { return `(∃! ${b})` } 
+// binding expressions / anonymous maps
+Binding = a:Symbol (period _ / _'mapsto'_x) b:Expression 
           { return `${a}, ${b}` }
 
-// propositional expressions
-Prop = Iff / Implies / And / Or / Not
+///////////////////////////////////////////////////////////////////////////////
+// Propositional expressions
+//
+// We want a strict precedence of operations here, so lower precedence items 
+// should only permit higher precedence arguments.
+// Thus we only need Prop to point to Iff because the higher precedent ones feed
+// into that, and they use BelowProp and higher precendent Prop's as arguments. 
+Prop = Iff
 
-Contradiction = a:' contradiction '           { return '→←' }
+  Iff     = a:(Implies/PropArg)|1..,_'iff'_x|        { return lispSeq('⇔',a)   }
+  Implies = a:(Or/And/PropArg)|1..,_'implies'_x|     { return lispSeq('⇒',a)   }
+  Or      = a:(And/PropArg)|1..,_('or'/'vee')_x|     { return lispSeq('or',a)  }
+  And     = a:(Not/PropArg)|1..,_('and'/'wedge')_x|  { return lispSeq('and',a) }
+  Not     = _'not'_x b:PropArg                       { return lispUnary('¬',b) }
+  
+///////////////////////////////////////////////////////////////////////////////
+// Relations
+//
+Relations = Maps / Partition / Congruent / Subset / ElementOf / NotEltOf / 
+            Divides / Leq / LessThan / Relation / Equation / NotEqual / 
+            Loves / Is
 
-Iff           = a:Implies|1..,'⇔'/' iff '|    { return lisp('⇔',a) }
-Implies       = a:Or|1..,'⇒'/' implies '|     { return lisp('⇒',a) }
-Or            = a:And|1..,' or '/'∨'|         { return lisp('or',a) }
-And           = a:Not|1..,' and '/'∧'|        { return lisp('and',a) }
-Not           = a:('¬'/'not ')? _ b:Stuff     { return (a==='not ')
-                                                        ?lispUnary('¬',b)
-                                                        :lispUnary(a,b)
-                                              }
+  Maps       = a:RelArg _':'_ b:RelArg _'to'_x c:RelArg  
+                 { return lispSeq('maps',[a,b,c]) }
+  Partition  = a:(Binding/RelArg) _'is' __ 'a' __ 'partition'i __ 'of' __ 
+               b:(Binding/RelArg)
+                 { return lispSeq('partition',[a,b]) }
+  Congruent  = a:(Binding/RelArg) _'cong'_x b:(Binding/RelArg) _'mod'i_x 
+               c:(Binding/RelArg)
+                 { return lispSeq('≅',[a,b,c]) } /
+               a:(Binding/RelArg) _'cong mod'i_x c:(Binding/RelArg) _'to'_x 
+               b:(Binding/RelArg)
+                 { return lispSeq('≅',[a,b,c]) }              
+  Subset     = a:RelArg|2..,_('subset'/'subseteq')_x|  
+                 { return lispSeq('⊆',a) }
+  NotEltOf   = a:RelArg _'notin'_x b:RelArg        
+                 { return `(¬ ${lispBinary('∈',a,b)})` }
+  ElementOf  = a:RelArg _'in'_x b:RelArg           
+                 { return lispBinary('∈',a,b) }
+  Divides    = a:RelArg _('|'_ / 'divides'_x) b:RelArg      
+                 { return lispBinary('|',a,b) }  
+  Leq        = a:RelArg|2..,_'leq'_x|             
+                 { return lispSeq('≤',a) }
+  LessThan   = a:RelArg|2..,_('<'_ / 'lt'_x)|
+                 { return lispSeq('<',a) }
+  NotEqual   = a:RelArg _('neq'/'ne')_x b:RelArg   
+                 { return `(¬ ${lispBinary('=',a,b)})` }
+  Relation   = a:(Binding/RelArg)|2..,_'~'_|       
+                { return lispSeq('~',a) }             
+  Equation   = a:(Binding/RelArg)|2..,_'='_|       
+                { return lispSeq('=',a) }
+  Loves      = a:RelArg _('loves'/'love')_x b:RelArg
+                { return lispBinary('loves',a,b) }
+  Is         = a:RelArg _('is' __ 'an'/'is' __ 'a'/'is'/'are')_x b:RelArg
+                { return lispBinary('is',a,b) }
 
-// stuff that might be a prop
-Stuff = Relations / Thing
+///////////////////////////////////////////////////////////////////////////////
+// Prefix operators (function application)
+//
+// n-ary, left associative, function application. Args can be anything with
+// higher or equal precedence (Prefix, Set, Algebraic, Atomic, a.k.a. RelArgs)
+// one common situation we want to support is something like (g∘f)^(-1)(x), so
+// we allow Exp and Inverse for the head in addition to Symbols and
+// Parenthesized.  Since we want to allow things like (g∘f)(x), but don't want
+// something like `(x≤y) (z=0)` to parse as function application, we require
+// that function application does NOT allow a space between the function and the
+// parentheses wrapping it's arguments.  To enable this, Exp, Inverse, Symbol,
+// and Parenthesized cannot consume any spaces after their content.
+//
+// For convenience we define special Symbols beginning with '@' so that @P(k)
+// becomes (λ P k) and then replace λ with "LDE EFA" as a shortcut in
+// parsing.js.  Note that 𝜆 gets replaced by '@' up front in the input. This is
+// not intended for use in any other way than for writing rules that require
+// 𝜆P(x) where P is a single character Symbol and x an Expression.
+Prefix = '@' a:[a-z]i b:( '('_ @(Expression)|..,comma| _')' )+ 
+            { return `(λ ${a} ${b})` } /
+          a:(Inverse / Symbol / Parenthesized)
+          b:( '('_ @(Expression)|..,comma| _')' )+ 
+            { return lispPrefix(a,b) }
 
-// relations
-Relations = Maps / Partition / Congruent / Subset / ElementOf / NotEltOf / Divides / 
-            Leq / LessThan / Relation / Equation / NotEqual / Loves / Is
+///////////////////////////////////////////////////////////////////////////////
+// Sets 
+//
+// We imitate Algebraic operator precendence as much as possible and rank from
+// lowest to highest: set difference < set product < ∪ and ∩ (tied) <
+// composition , complement (tie) Thus, as for Prop we only need for Set to
+// point to the first one. Algebraic bubbles up from Composition.
+Set = RelativeComp
 
-Maps       = a:Thing _ ':' _ b:Thing '→' c:Thing      { return lisp('maps',[a,b,c]) }
-
-Partition  = a:(Binding/Thing) ' is a partition of 'i b:(Binding/Thing)
-             { return lisp('partition',[a,b]) }             
-Congruent  = a:(Binding/Thing) '≈' b:(Binding/Thing) ' mod 'i c:(Binding/Thing)
-             { return lisp('≈',[a,b,c]) }             
-Subset     = a:Thing|2..,'⊆'/' subset '/' subseteq '| { return lisp('⊆',a) }
-NotEltOf   = a:Thing (' notin ') b:Thing 
-             { return `(¬ ${lispBinary('∈',a,b)})` }
-ElementOf  = a:Thing ('∈'/' in ') b:Thing             { return lispBinary('∈',a,b) }
-Divides    = a:Thing ('|'/' divides ') b:Thing        { return lispBinary('|',a,b) }  
-Leq        = a:Thing|2..,'≤'/' leq '|                 { return lisp('≤',a) }
-LessThan   = a:Thing|2..,'<'/' lt '|                  { return lisp('<',a) }
-NotEqual   = a:Thing (' neq '/' ne ') b:Thing 
-             { return `(¬ ${lispBinary('=',a,b)})` }
-Relation   = a:(Binding/Thing)|2..,'~'|               { return lisp('~',a) }             
-Equation   = a:(Binding/Thing)|2..,'='|               { return lisp('=',a) }
-Loves      = a:Thing|2..2,' loves '|                  { return lisp('loves',a) }
-Is         = a:Thing|2..2,' is an '/' is a '/' is '|  { return lisp('is',a) }
-
-
-// things to relate
-Thing = Set / Algebraic
-
-// sets
-Set = Composition / CartProd / Union / Intersection / RelativeComp / Complement
-
-Composition   = a:Atomic|2..,'∘'/' circ '|            { return lisp('∘',a) }
-CartProd      = a:CompAtomic|2..,'×'/' times '|  { return lisp('×',a) }
-Union         = a:CompAtomic|2..,'∪'/' cup '/' union '|  { return lisp('∪',a) }
-Intersection  = a:CompAtomic|2..,'∩'/' cap '/' intersect '|  { return lisp('∩',a) }
-RelativeComp  = a:CompAtomic|2..,'∖'/' setminus '|  { return lisp('∖',a) }
-// we don't want to have to do e.g. A∩(B°) instead of just A∩B°
-CompAtomic    = Complement / Atomic
-Complement    = a:Atomic ('°'/' complement') { return lispUnary('°',a) }
-
-// algebraic expressions
+  RelativeComp  = a:CartProd|1..,_'setminus'_x| 
+                    { return lispSeq('∖',a) }  
+  CartProd      = a:Union|1..,_('times'/'cross')_x| 
+                    { return lispSeq('×',a) }
+  Union         = a:Intersection|1..,_('cup'/'union')_x| 
+                    { return lispSeq('∪',a) }
+  Intersection  = a:(Complement/Composition)|1..,_('cap'/'intersect')_x| 
+                    { return lispSeq('∩',a) }               
+  Complement    = a:Algebraic _'complement'!alphanum
+                    { return lispUnary('°',a) }
+  Composition   = a:Algebraic|1..,_('circ'/'comp')_x| 
+                    { return lispSeq('∘',a) }
+  
+///////////////////////////////////////////////////////////////////////////////
+// Algebraic Expressions
+//
+// For now we implement binomial coefficients with the infix operator 'choose'
+// and make it even lower precedence than sum so you can do things like '(n+1
+// choose k)' without additional parentheses. Sums and Products are particularly
+// subtle because of the need to integrate them with the standard conventions
+// for negation and division.
+//
+// Once again, Algebraic only has to point to the lowest precedence operator
+// that inherits the ones below it (but Choose does not). Atomic is passed up
+// the chain from Exp.
 Algebraic = Choose / Sum / Product
+  
+  Choose    = a:(Sum / Product) _'choose'_x b:(Sum / Product) 
+                { return lispBinary('choose',a,b) }      
+  Sum       = a:Product _ b:(_ [-+] _ Product)+            
+                { return lispSum(a,b) }
+  Product   = a:(Denom/Negated/Exp)
+                |1..,(_'⋅'_/_'cdot'_x/_'*'_)| 
+                { return lispSeq('⋅',a) }
+                
+    Denom     = '/' _ a:Exp 
+                  { return lispUnary('/',a) }    
+    Negated   = '-' _ a:Exp 
+                  { return lispUnary('-',a) }
+    // Atomic is a special case of exp.
+    //
+    // If we made it to here, we are at the bottom of the food chain for
+    // compound expressions, so it's ok to return a symbol or other atomic at
+    // this point. Exp also passes Inverse and Factorial up to Product, Denom,
+    // and Negated.
+    Exp       = a:(Factorial/Inverse/Prefix/Atomic)|1..,_'^'_|      
+                  { return lispSeq('^',a) } 
+    Inverse   = a:Atomic _'inv'!alphanum
+                  { return lispUnary('inv',a) } /
+                a:Atomic _'^'_'-'
+                  { return lispUnary('inv',a) } 
+    Factorial = a:Atomic _'factorial'!alphanum
+                  {  return lispUnary('!',a) }
 
-// binomial coefficients
-Choose  = a:(Sum / Product) ' choose ' b:(Sum / Product) 
-          { return lispBinary('choose',a,b) }
+///////////////////////////////////////////////////////////////////////////////
+// Algebraic Expressions
+//
+// morally atomic expressions (do not require parentheses)
+Atomic = Parenthesized / EquivalenceClass / Tuple / Symbol / Number
 
-Sum       = a:Product b:([-+] Product)+                   { return lispSum(a,b)     }
-Product   = a:(Recip/Factorial/Inversed/Negated)|1..,'⋅'/' cdot '/'*'| 
-                                                          { return lisp('⋅',a)      }
-Recip     = a:Atomic ('⁻'/' recip'/' inv')                { return lispUnary('⁻',a) }
-Factorial = a:Atomic ('！'/' factorial')                  { return lispUnary('!',a) }
-Inversed  = a:'/'? b:Exp                                  { return lispUnary(a,b)   }    
-Negated   = a:'-'? b:Exp                                  { return lispUnary(a,b)   }
-Exp       = a:Atomic|1..,'^'|                             { return lisp('^',a)      } 
+///////////////////////////////////////////////////////////////////////////////
+// Things in parentheses
+//
+// equivalence class - if the optional relation is missing from an equivalence
+//                     class we use '~'
+EquivalenceClass = 
+  '[' b:( @Expression ) ']'                   { return lispPrefix('class',[b,'~']) } /
+  '[' a:Expression comma b:('~'/Symbol) ']'   { return lispPrefix('class',[a,b]) }
+// tuples
+Tuple = 'langle'_x a:Expression|1..,comma| _'rangle'!alphanum
+        // lispSeq returns single args, but we don't want that here
+        { return (a.length===1) ? `(tuple ${a})` : lispSeq('tuple',a) }
+// parenthesized
+Parenthesized = '(' _ @Expression _ ')'
 
-// morally atomic (do not require parentheses)
-Atomic =   EFA / Prefix / Parenthesized / EquivalenceClass / Tuple / Symbol / Number
-
-// TODO: fix this hack for inverse functions
-Prefix = a:(Symbol ('⁻'/' recip'/' inv') / Symbol / Parenthesized ) 
-         b:( '(' @Expression|..,comma| ')' )+ 
-  { if (Array.isArray(a)) return lispPrefix(`(⁻ ${a[0]})`,b)
-    return lispPrefix(a,b) }
-
-// For convenience we define 𝜆P(k) to be (λ P k) and replace λ with "LDE EFA"
-// as a shortcut
-EFA = 'λ' a:Symbol '(' b:Expression ')' { return `(λ ${a} ${b})` }
-
-EquivalenceClass = '[' b:(  @Expression|1..2,comma| )+ ']' { 
-  // if the optional relation is missing from an equivalence class, use '~'
-  if (b.length===1 && b[0].length===1) b=[[b[0][0],'~']]
-  return lispPrefix('class',b) }
-Tuple = '⟨' b:(  @Expression|1..,comma| )+ '⟩' { return lispPrefix('tuple',b) }
-Parenthesized = '(' @Expression ')'
- 
-
-// while we probably will never use a number or reserved symbol as a bound var, 
-// we might Declare one to be a constant, e.g. Peano or ops
-// TODO: try to unify the lists of reserved symbols in one place
-DeclareSeq = a:(Symbol/Number/ReservedChars)|1..,comma| { return a.join(' ') }
-// numbers
+///////////////////////////////////////////////////////////////////////////////
+// Numbers 
+// (negatives and fractions are compound)
 Number  = Decimal / Natural
 Decimal = $( Natural '.' [0-9]+ )
 Natural = $( [1-9][0-9]* / '0' )
 
-// Symbols can't start with a digit, contain reserved constants, or keywords
-SymbolSeq = a:(Symbol/Number)|1..,comma| { return a.join(',') }
-Symbol "Symbol" = $( '≡' / '→←' / '~' / '"' [^"]* '"' / 'sigma' /
-                     !([0-9]/ReservedWords)
-                     [^-\][()⟨⟩ \t\n✦{},.:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∘∧∨≡↦~≈！*]+ )
-BindingSymbol = ('∃!'/'exists unique ') { return '∃!' } /
-                ('∀'/'forall '/'for all ') { return '∀' } /
-                ('∃'/'exists ') { return '∃' } 
+///////////////////////////////////////////////////////////////////////////////
+// Symbols and Reserved Words
+//
+// Symbols can be anything string of alphanumeric characters [a-zA-Z0-9] that
+// does not start with a digit and is not a reserved word.  Reserved words are not
+// symbols, but can be declared with a Declare.
+//
+// For clarity in reading the putdown output we rename some special frequently used
+// symbols.
+Symbol "Symbol" = 
+  'contradiction' { return '→←' } /
+  'sigma'         { return 'σ'  } / 
+  '✔︎' / '✗' / '⁉︎' /                    // for declaring expected results in tests
+  !(ReservedWord) @$([a-z]i alphanum* ) 
 
-// punctuation
-comma  =  ','
+// Reserved Words
+//
+// a string is a reserved word if it starts with one of these and is not
+// followed by an alphanum, so not part of a longer symbol, or things that
+// aren't symbols that we still want to declare as constants.
+ReservedWord  = @$(
+    'declare'i / 'existsUnique' / 'equivalenceRelation' / 'strictPartialOrder' /
+    'partialOrder' / 'totalOrder' / 'forall' / 'exists' / '*' / 'leq' /
+    'not' / 'to' / 'from' / 'implies' / 'iff' / 'intersect' / 'union' /
+    'cross' / 'in' / 'subset' / 'setminus'i / 'circ' / 'wedge' / 'vee' / 
+    'equiv' / 'mapsto' / 'approx' / 'langle' / 'rangle' / 'complement' / 
+    'inv' / 'and' / 'or' / '=' / '<' / '+' / '*' / '|')
+
+///////////////////////////////////////////////////////////////////////////////
+// punctuation and character classes
+
+// alphanum checks for a nonalphanumeric character without consuming any input.  It
+// is useful for checking for the end of reserved words and classes that end
+// with a word
+alphanum = [a-z0-9]i
+
+// We frequently want to allow optional spacing before or after a reserved word.
+// We might need to consume the space, but if there is no space there we need to
+// ensure that there isn't an alphanumeric character immediately following the
+// reserved word.  So we first check for that before consuming the space in case
+// it is the space that statisfies that condition. Then we just return undefined so 
+// it will be cleaned out of in the result.
+_x = !alphanum _ { return undefined }
+
+// commas, periods, and spaces
+comma  =  _ ',' _
 period =  '.'
 __  = [ \t\n\r]+
 _   = [ \t\n\r]*
-
-ReservedChars = $([:+⋅/^=<≤¬→←⇒⇔|∀∃∩∪×∈⊆∖⁻°∘∧∨≡σλ↦~≈！*])
-ReservedWords = ' or '/' and '/' loves '/' cdot '/' complement' / 
-                ' setminus '/' cap '/' cup '/' times '/' lt '/' leq '/
-                ' in '/' subset '/' implies '/' iff ' / 'maps ' /
-                ' contradiction ' / ' divides ' / 'forall' / 'exists' / 
-                'lambda' / 'sigma' / ' choose '

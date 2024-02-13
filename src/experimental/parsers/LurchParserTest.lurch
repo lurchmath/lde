@@ -118,9 +118,9 @@ x+y
 (2/(x-3/y) cdot z)^(-4)
 -2 cdot (x^3+y)/(-z)-4
 // factorials
-n！
-(n+1)！+2
-2+n！
+// n!
+// (n+1)!+2
+// 2+n!
 // sets
 A cap B
 A cup B
@@ -151,7 +151,7 @@ A times B  subset  B times A
 x=0
 fred lt wilma
 x+1 leq 0
--(-x^2+2 cdot x-7)/((x-1) cdot (x+1))=(3 cdot x+1)/2
+(-(-x^2+2 cdot x-7)/((x-1) cdot (x+1))=(3 cdot x+1)/2)
 2|6
 12|24
 n|6
@@ -205,7 +205,7 @@ P and (exists x.P(x)  implies  Q)  implies  P and (for all y.Q)
 Let x
 let x,y,z,wilma
 Declare f
-declare fred wilma barney # !
+declare fred wilma barney !
 P(c) for some c
 P(c,w)  implies  Q(c,y) for some c
 // environments
@@ -252,28 +252,28 @@ Rule: { :A B⇒A }
 :{ (not (W or V)) ≡ { not W not V } }             // DeMorgan
 :{ :contradiction  W }                            // contradiction-
 // Pred Axioms
-:{ :(for all x.@(P,x)) @(P,t) }                   // for all -
-:{ :{ :Let x @(P,x) }  (for all y.@(P,y)) }       // for all +
-:{ :(exists x.@(P,x)) @(P,c) for some c }         // exists -
-:{ :@(P,t) (exists x.@(P,x)) }                    // exists +
-:{ :x=y :@(P,x) @(P,y) }                          // substitution
+:{ :(for all x.𝜆P(x)) 𝜆P(t) }                     // for all -
+:{ :{ :Let x 𝜆P(x) }  (for all y.𝜆P(y)) }         // for all +
+:{ :(exists x.𝜆P(x)) 𝜆P(c) for some c }           // exists -
+:{ :𝜆P(t) (exists x.𝜆P(x)) }                      // exists +
+:{ :x=y :𝜆P(x) 𝜆P(y) }                            // substitution
 :{ W=W }                                          // reflexive =
-:{ (exists unique x.@(P,x)) ≡ 
-   { (exists x.@(P,x)) (for all y.@(P,y) implies y=x) } }  // exists unique  
+:{ (exists unique x.𝜆P(x)) ≡ 
+	 { (exists x.𝜆P(x)) (for all y.𝜆P(y) implies y=x) } }  // exists unique  
 // Pred Theorems
-:{ :x=y :@(P,y) @(P,x) }                          // alternate substutition
-:{ { (for all x. @(P,x)) (for all y.@(Q,y)) } ≡ 
-     (for all x. @(P,x) and @(Q,x)) }             // distributivity
-:{ { (exists x. @(P,x)) (exists y.@(Q,y)) } ≡ 
-     (exists x. @(P,x) or @(Q,x)) }               // distributivity
-:{ (exists unique x.@(W,x)) ≡ 
-   (exists c.for all z. @(W,z)  iff  z=c) }       // alternate def of exists unique  
+:{ :x=y :𝜆P(y) 𝜆P(x) }                          // alternate substutition
+:{ { (for all x. 𝜆P(x)) (for all y.𝜆Q(y)) } ≡ 
+     (for all x. 𝜆P(x) and 𝜆Q(x)) }             // distributivity
+:{ { (exists x. 𝜆P(x)) (exists y.𝜆Q(y)) } ≡ 
+     (exists x. 𝜆P(x) or 𝜆Q(x)) }               // distributivity
+:{ (exists unique x.𝜆W(x)) ≡ 
+	 (exists c.for all z. 𝜆W(z)  iff  z=c) }      // alternate def of exists unique  
 ////////////////////////////////
 // Peano Axioms
 ////////////////////////////////
 :{ :sigma(m)=sigma(n) m=n }                                         // N2
 :{ not (0 = sigma(n)) }                                             // N3
-:{ :@(P,0) :{ :Let k :@(P,k) @(P,sigma(k)) } (for all n.@(P,n)) }   // N4
+:{ :𝜆P(0) :{ :Let k :𝜆P(k) 𝜆P(sigma(k)) } (for all n.𝜆P(n)) }   // N4
 :{ n+0 = n }                                                        // A0
 :{ m+sigma(n) = sigma(m+n) }                                        // A1
 :{ n cdot 0 = 0 }                                                   // M0
@@ -289,15 +289,15 @@ f:A → B
 f: A → B
 f : A → B
 f(0):A∩B → A∪B°
-f:ℕ → ℕ
+f:NN → NN
 f⁻:A→B
 
 // relations
 x~y
 x ~ y
 a~(b+1)~c~d^2
-a ≈ b mod m
-a+k ≈ b-3 mod m
+a ≅ b mod m
+a+k ≅ b-3 mod m
 
 // misc
 ∀y.𝜆P(y) ⇒ y=x
@@ -430,11 +430,11 @@ a+k ≈ b-3 mod m
           sigma(k)=sigma(k)
           exists m.sigma(k)=sigma(m)
         }
-        not sigma(k=0)  implies  (exists m.sigma(k)=sigma(m))
+        not sigma(k)=0  implies  (exists m.sigma(k)=sigma(m))
       } 
     }
     //  "It would be nice to avoid the need for for all  and  implies  in this proof.")
-    //  "But (@ P n) only matches expressions")
+    //  "But (𝜆 P n) only matches expressions")
     (for all j. not j=0 implies (exists m.j=sigma(m)))
     (not n=0  implies  (exists m.n=sigma(m)))
     (exists m.n=sigma(m))
@@ -465,13 +465,13 @@ a+k ≈ b-3 mod m
 {
   // BIH
   Recall { "This is a BIH" }
-  Comment
+  Comment "This is a comment"
   ➤ "This is a comment"
   // Theorems
-  Theorem { I_am_a_theorem }
-  Lemma: { So_am_I }
-  Thm { Me_too }
-  Corollary { And_me }
+  Theorem { ImAtheorem }
+  Lemma: { SoAmI }
+  Thm { MeToo }
+  Corollary { AndMe }
 }
 
 Rules: {

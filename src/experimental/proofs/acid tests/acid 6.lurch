@@ -11,13 +11,13 @@ include libs/Acid Tests
      {:Let z 
        {:2<z
          1<z 
-         ∀x.1<x !✗ // a preemie 
-       } !✗
+         ∀x.1<x ⁉︎ // a preemie 
+       } ⁉︎
       2<z ⇒ (∀x.1<x) ✔︎
-     } !✗
+     } ⁉︎
      ∀y.2<y ⇒ (∀x.1<x) ✔︎
      2<3 ⇒ (∀x.1<x) ✔︎
      ∀x.1<x ✔︎
      1<1 ✔︎
-   } !✗
-} !✗
+   } ⁉︎
+} ⁉︎

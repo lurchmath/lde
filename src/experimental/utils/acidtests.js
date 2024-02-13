@@ -12,7 +12,12 @@ const DEBUG = false
 acid=[]
 const loadtest = (name, folder='acid tests') => { 
   if (DEBUG) console.log(`loading acid test ${folder}/${name}`)
-  acid.push(loadDoc(`proofs/${folder}/${name}`)) }
+  try {
+    acid.push(loadDoc(`proofs/${folder}/${name}`)) 
+  } catch {
+    console.log(`Error loading acid test: ${name}`)
+  }
+}
 
 // Load Acid Tests
 Array.seq(k=>k,0,13).forEach( k => loadtest(`acid ${k}`) )
@@ -75,6 +80,7 @@ const pen = (!failed) ? chalk.ansi256(40) : chalk.ansi256(9)
 console.log(pen(`\n${passed} tests passed - ${failed} tests failed\n`))
 console.log(
   `${checkPen(numchecks)} green checks\n${checkPen(numreds)} red marks`)
+
 console.log(`Test result stored in the array 'acid'\n`)
 
 // acid.forEach((x,k)=>{console.log('\nTest #'+k+'\n');x.report(user)})

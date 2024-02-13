@@ -9,7 +9,8 @@
 Declare or
 Rules:
 { 
-  cases> :{ :W or V  :{:W U}  :{:V U}  U }  
+  CasesRule: 
+	:{ :W or V  :{:W U}  :{:V U}  U }  
   :{ :W   W or V   V or W } 
 }
 // this should pass   

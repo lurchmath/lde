@@ -9,9 +9,6 @@
 //                       Parsers and Parsing Utilties 
 //                       for converting strings to LCs
 //
-//  (KEEP OUT!  Work in progress.)
-//
-//  This file is still under construction and subject to frequent change.
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -22,17 +19,20 @@ import { Symbol as LurchSymbol } from '../symbol.js'
 import './extensions.js'
 
 /**
- * Make both a normal and tracing peggy parser from the given string and customize
- * the error formatting, then return both parsers in an array.
+ * Make both a normal and tracing peggy parser from the given string and capture
+ * and customize the error formatting, then return both parsers and the original
+ * parser (which throws errors but doesn't trace) in an array.
  * @function
  * @param {string} parserstr - the peggy parser definition string  
- * @returns {function[]} - the normal and tracing parsers
+ * @returns {function[]} - the normal, tracing, and raw parsers
  */
 export const makeParser = parserstr => {
+  
   const opts = { cache:true }
   const traceopts = { ...opts , trace:true }
   const rawparser = peggy.generate(parserstr,opts)
   const rawtraceparser = peggy.generate(parserstr,traceopts)
+  
   const parser = s => {
     try { 
       return rawparser.parse(s)
@@ -48,19 +48,31 @@ export const makeParser = parserstr => {
       return undefined
     }
   }
-  const traceparser = s => {
-    try { 
-      return rawtraceparser.parse(s)
-    } catch(e) {
-      if (typeof e.format === 'function') {
-        console.log(e.format({ }))
-      } else {    
-        console.log(e.toString())
+  
+  // No need for this in a browser
+  const traceparser = (typeof global === 'undefined' ) ?
+    s => {
+      // make the backtracer
+      
+      const tracer = new Tracer(s,
+        { showTrace : true,
+          showFullPath : false,
+          hiddenPaths : [ "__" , "_" ]
+        }
+      )
+  
+      // show backtracing whether it's an error or not
+      try { 
+        const ans = rawtraceparser.parse(s,{ tracer:tracer })
+        write(tracer.getBacktraceString())
+        return ans
+      } catch(e) {
+        write(tracer.getBacktraceString())
+        return undefined
       }
-      return undefined
-    }
-  }
-  return [parser,traceparser]
+    } : undefined
+  
+  return [parser,traceparser,rawparser.parse]
 }
 
 export const lc2algebrite = e => {
@@ -80,24 +92,29 @@ export const lc2algebrite = e => {
   }
 }
 
-export const parselines = (parser,name='LurchParserTests',verbose=false) => {
+export const parseLines = (parser,verbose=true,name='LurchParserTests') => {
+  let ans = []
   const lines = 
     loadStr(name,'./parsers/','lurch').split('\n')
        .map(line => line.trim())
        .filter(line => line.length > 0 && line.slice(0,2)!=='//')
   // console.log(`File contains ${lines.length} parseable lines`)
   let pass = 0, fail = 0
+  let report = []
   lines.forEach( l => {
-    if (parser(l)) {
+    try { 
+      ans.push(parser(l))
       pass++
-      if (verbose) console.log(`${l}\n → ${parser(l)}\n`)
-    } else {
-      console.log(`Could not parse ${l}`)
+      if (verbose) write(`${Pens.itemPen(l)}\n → ${Pens.stringPen(parser(l))}\n`)
+    } catch {
+      report.push(l)
       fail++
     }
   })
+  report.forEach(l=>console.log(`Could not parse ${Pens.contextPen(l)}`))
+
   console.log(`Parsed ${pass} lines successfully, ${fail} failed`)
-  return lines.map( l => { return parser(l) })
+  return (verbose) ? ans : undefined
 }
 
 /**
@@ -154,7 +171,7 @@ export const parselines = (parser,name='LurchParserTests',verbose=false) => {
  *     LurchSymbol. Then delete both the `by` and it's next sibling.  Currently
  *     used by the `Cases` tool and the CAS tool.
  *
- *   * Scan for occurrences of the symbol `✔︎`, `✗`, and `!✗` and mark its
+ *   * Scan for occurrences of the symbol `✔︎`, `✗`, and `⁉︎` and mark its
  *     previous sibling with .expectedResult 'valid', 'indeterminate', and
  *     'invalid' respectively.
  *
@@ -332,7 +349,7 @@ export const processShorthands = L => {
     m.remove()
   } )
   
-  processSymbol( '!✗' , m => { 
+  processSymbol( '⁉︎' , m => { 
     m.previousSibling().setAttribute('ExpectedResult','invalid') 
     m.remove()
   } )

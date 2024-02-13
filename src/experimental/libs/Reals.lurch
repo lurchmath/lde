@@ -6,7 +6,7 @@ include libs/Recursion
 //////////////////////////////////
 // Axioms for the Reals
 //////////////////////////////////
-Declare ⁻ -
+Declare ⁻, -
 Axioms:  
 {
 		// Axioms of addition

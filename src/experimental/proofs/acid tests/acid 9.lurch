@@ -9,6 +9,6 @@ include libs/Acid Tests
    ➤ "Trying again to cheat the subset plus rule."
    // Thm/Pf attempt 
    { :Let x  :x∈T 
-     S⊆T !✗ // preemie 
-   } !✗ // preemie 
-} !✗  
+     S⊆T ⁉︎ // preemie 
+   } ⁉︎ // preemie 
+} ⁉︎  

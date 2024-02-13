@@ -46,7 +46,7 @@ const redstar    = xPen('☆')
 const greencheck = checkPen('✔︎')
 const redx       = xPen('✗')
 const idunno     = '❓'  // the emoji itself is red
-const preemiex   = xPen('!✗') 
+const preemiex   = xPen('⁉︎') 
 
 export default {
   

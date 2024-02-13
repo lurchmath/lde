@@ -218,7 +218,7 @@
 LCs =  _ a:LC|..,__| _  { return a.join(' ') }
 
 // A single LC
-LC "LC" = @( Meta / Contradiction / Given / Declaration / Environment / Expression)
+LC "LC" = @( Meta / Given / Declaration / Environment / Expression)
 
 // givens
 Given "Given" = a:(':' / 'Assume'i __ / 'Given'i __ / 'Suppose'i __ / 'If'i __ ) 
@@ -284,8 +284,6 @@ Binding = a:Symbol (period / '↦') b:(Expression / Binding)
 // propositional expressions
 Prop = Iff / Implies / And / Or / Not
 
-Contradiction = a:'contradiction'             { return '\\rightarrow\\leftarrow' }
-
 Iff           = a:Implies|1..,'⇔'/' iff '|    { return texJoin('\\Leftrightarrow ',a) }
 Implies       = a:Or|1..,'⇒'/' implies '|     { return texJoin('\\Rightarrow ',a) }
 Or            = a:And|1..,' or '/'∨'|         { return texJoin('\\text{ or }',a) }
@@ -296,7 +294,9 @@ Not           = a:('¬'/'not ')? _ b:Stuff     { return (a==='not ' || a==='¬')
                                               }
 
 // stuff that might be a prop
-Stuff = Relations / Thing
+Stuff = Relations / Thing / Contradiction
+
+Contradiction = ' contradiction '            { return '\\rightarrow\\leftarrow' }
 
 // relations
 Relations = Maps / Partition / Congruent / Subset / ElementOf / NotEltOf / Divides / 
