@@ -138,7 +138,8 @@
     '∖' : 'setminus'   ,  '∘' : 'circ'      , '∧' : 'wedge'  , '∨' : 'vee'       ,
     '≡' : 'equiv'      ,  '↦' : 'mapsto'    , '≈' : 'approx' , '∀' : 'forall'    ,
     '∃' : 'exists'     ,  '⟨' : 'langle'    , '⟩' : 'rangle' , '➤' : 'comment'   ,
-    '°' : 'complement' ,  '⁻' : 'inv'       , '≅' : 'cong'   , '!' : 'factorial'
+    '°' : 'complement' ,  '⁻' : 'inv'       , '≅' : 'cong'   , '!' : 'factorial' ,
+    '\\': ' '
   }
   
   const internalNames = {
@@ -147,7 +148,7 @@
     'not'       : '¬' , 'setminus' : '∖' , 'subset' : '⊆'  , 'subseteq'     : '⊆'     ,
     'cong'      : '≅' , 'leq'      : '≤' , 'lt'     : '<'  , 'factorial'    : '!'     ,
     'divides'   : '|' , 'cdot'     : '⋅' , '*'      : '⋅'  , 'love'         : 'loves' ,
-    'in'       : '∈' 
+    'in'        : '∈' , '\\'       : ' '           
   }
 
   // for use in Declare's, look up the internal name of a reserted word or
@@ -172,7 +173,10 @@
          .replace(/𝜆/g, '@')  // for "LDE EFA"
          .replace(/≠/g, ' neq ')
          .replace(/∉/g, ' notin ')
-    const regex = /[⋅≤¬→←⇒⇔∩∪×∈⊆∖∘∧∨≡↦≈∀∃⟨⟩➤°!⁻≅]/g
+    // now replace the given unicode characters that do not appear in strings or
+    // putdown
+    const chars = '[⋅≤¬→←⇒⇔∩∪×∈⊆∖∘∧∨≡↦≈∀∃⟨⟩➤°!⁻≅\\\\]'      
+    const regex = new RegExp(`(?<!«[^«»]*)(?<!^[^"]*"[^"]*)${chars}(?![^«»]*»)`,'mg')
     const ans = shrink(s.replace(regex, c => { return ` ${UnicodeNames[c]} ` } ) )
     return ans
   }
@@ -511,8 +515,10 @@ Set = RelativeComp
 // Once again, Algebraic only has to point to the lowest precedence operator
 // that inherits the ones below it (but Choose does not). Atomic is passed up
 // the chain from Exp.
-Algebraic = Choose / Sum / Product
+Algebraic = // Summation / 
+            Choose / Sum / Product
   
+  // Summation = 'Sum' __ 'to' __ Algebraic __ 'of' __ Binding
   Choose    = a:(Sum / Product) _'choose'_x b:(Sum / Product) 
                 { return lispBinary('choose',a,b) }      
   Sum       = a:Product _ b:(_ [-+] _ Product)+            
@@ -578,8 +584,10 @@ Natural = $( [1-9][0-9]* / '0' )
 // For clarity in reading the putdown output we rename some special frequently used
 // symbols.
 Symbol "Symbol" = 
-  'contradiction' { return '→←' } /
-  'sigma'         { return 'σ'  } / 
+  'contradiction' { return '→←' }  /  'sigma'         { return 'σ'  }   /
+  'NN'            { return 'ℕ'  }  /  'ZZ'            { return 'ℤ'  }   /
+  'QQ'            { return 'ℚ'  }  /  'RR'            { return 'ℝ'  }   /
+  'CC'            { return 'ℂ'  }  / 
   '✔︎' / '✗' / '⁉︎' /                    // for declaring expected results in tests
   !(ReservedWord) @$([a-z]i alphanum* ) 
 
@@ -594,7 +602,7 @@ ReservedWord  = @$(
     'not' / 'to' / 'from' / 'implies' / 'iff' / 'intersect' / 'union' /
     'cross' / 'in' / 'subset' / 'setminus'i / 'circ' / 'wedge' / 'vee' / 
     'equiv' / 'mapsto' / 'approx' / 'langle' / 'rangle' / 'complement' / 
-    'inv' / 'and' / 'or' / '=' / '<' / '+' / '*' / '|')
+    'inv' / 'and' / 'or' / '=' / '<' / '+' / '*' / '|' / 'Sum')
 
 ///////////////////////////////////////////////////////////////////////////////
 // punctuation and character classes
