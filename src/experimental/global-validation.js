@@ -458,7 +458,7 @@ const matchGivens = (a, b) => {
 }
 
 /**
- * Check if the doc contains the Rule `:{ EquationsRule }`.  If not, just split
+ * Check if the doc contains the Rule `:{ :EquationsRule }`.  If not, just split
  * the equation chains.  
  * 
  * Otherwise after splitting get the diffs of all equations, and add the
@@ -907,7 +907,7 @@ const getCaselikeRules = doc => {
     if (!U.isA(metavariable)) return false
     const others = rule.descendantsSatisfying( x => x.equals(U) )
     // we return only rules that have more than one U to avoid
-    // matching rules like :{ EquationsRule } propositionally.
+    // matching rules like :{ :EquationsRule } propositionally.
     // Note that a rule like :{ →← U } will match however.
     return others.length>1 && others.every( u => u.isOutermost() ) 
   })
