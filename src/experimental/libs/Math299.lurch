@@ -139,7 +139,7 @@ Definitions:
 Rules:
 {
   // and at this point we want the helpful Equations Rule
-  :{ EquationsRule }
+  :{ :EquationsRule }
 } 
 ////////////////////////////////////////////////////////////////////////////
 // Peano Axioms - basic theorems

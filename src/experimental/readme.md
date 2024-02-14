@@ -110,7 +110,7 @@ To construct and validate a document it does the following.
      (= B C)
      (= C D)
    ```
-   3. Check if the document contains the rule `:{ EquationsRule }`.  If not, exit.
+   3. Check if the document contains the rule `:{ :EquationsRule }`.  If not, exit.
    4. For every binary equation `x=y` in the user's content (e.g. not inside a Rule), insert the _symmetric equivalences_ after the Equations Rule, `:{ :x=y y=x }` `:{ :y=x x=y }`.  
    5. Get all of the binary equations that are conclusions (including those produced by splitting), and for each equation `LHS=RHS` compute the difference between the LHS and RHS, i.e., compute `diff(LHS,RHS)`.
    6. If the diff is nontrivial there exists `f`, `x`, and `y` such that `LHS=f(x)` and  `RHS=f(y)`. For each such case, insert the instantiation `:{ :x=y f(x)=f(y) }` after the Equations Rule.  Additionally insert `:x=y` and `:y=x` as `Consider`'s and the symmetric equivalences `:{ :x=y y=x }` `:{ :y=x x=y }`.
