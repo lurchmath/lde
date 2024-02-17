@@ -465,28 +465,43 @@ rpl.defineCommand( "test", {
   }
 })
 
-// define the Lode .compileparser command
+// define the Lode .test command
+rpl.defineCommand( "rebuildparsers", {
+  help: "Make the tracing versions of the parsers.",
+  action() { 
+    console.log(defaultPen(`Compiling parse(), trace(), and raw()...`))
+    const parser = loadParser('lurch-to-putdown')
+    global.parse = parser.parse
+    global.trace = parser.trace
+    global.raw   = parser.raw
+    console.log(defaultPen(`Compiling texparse(), textrace(), and texraw()...`))
+    const texparser = loadParser('lurch-to-tex')
+    global.tex      = texparser.parse
+    global.textrace = texparser.trace
+    global.texraw   = texparser.raw
+    console.log(defaultPen(`Done.`))
+    this.displayPrompt()
+  }
+})
+
+// Define the Lode .compileparser command. 
+//
+// The tracing parser is only for Lode and debugging, so we usually want to make
+// changes and recompile it frequently, so we use the Lode commmand .trace for
+// that.
 rpl.defineCommand( "compileparser", {
   help: "Compile the Lurch parser and rebuild the parser docs.",
   action() {
-    const compile = (name,trace=false) => {
-      // the trace parser is only for Lode
-      if (trace) {
-        console.log(defaultPen(`Compiling Lurch parser to lurch-to-${name}-trace.js...`))
-        execStr(`cd parsers && peggy --cache --trace --format es -o lurch-to-${name}-trace.js lurch-to-${name}.peggy`)
-      // the non-tracing parser is for both       
-      } else {
+    const compile = (name) => {
         console.log(defaultPen(`Compiling Lurch parser to lurch-to-${name}.js...`))
         execStr(`cd parsers && peggy --cache --format es -o lurch-to-${name}.js lurch-to-${name}.peggy`)
         execStr(`cd parsers && cp lurch-to-${name}.js ../../../../lurchmath/parsers/`)
         execStr(`cd parsers && cp lurch-to-${name}.peggy ../../../../lurchmath/parsers/`)
       }
-    }
+
     try {
       compile('putdown')
       compile('tex')
-      compile('putdown',true)
-      compile('tex',true)
     } catch (err) {
       console.log(xPen('Error compiling the parser.'))
     }

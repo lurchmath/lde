@@ -50,7 +50,7 @@ export const makeParser = parserstr => {
   }
   
   // No need for this in a browser
-  const traceparser = (typeof global === 'undefined' ) ?
+  const traceparser = (typeof global !== 'undefined' ) ?
     s => {
       // make the backtracer
       
@@ -72,7 +72,7 @@ export const makeParser = parserstr => {
       }
     } : undefined
   
-  return [parser,traceparser,rawparser.parse]
+  return { parse: parser, trace: traceparser, raw:  rawparser.parse }
 }
 
 export const lc2algebrite = e => {

@@ -118,7 +118,7 @@ let start = Date.now()
 //     Declare 1 = +
 //     Rules:
 //     { 
-//       :{ EquationsRule }
+//       :{ :EquationsRule }
 //     }   
 //     { 
 //       :a=b
@@ -136,7 +136,7 @@ let start = Date.now()
 //     Declare 1 = +
 //     Rules:
 //     { 
-//       :{ EquationsRule }
+//       :{ :EquationsRule }
 //     }   
 //     { 
 //       :a=b
@@ -351,7 +351,7 @@ let start = Date.now()
 
 // fname='lurch-parser-docs-template'
 
-parsers = loadParser('lurch-to-putdown')
+parsers = loadParser('lurch-to-tex-new')
 p = parsers[0]
 t = parsers[1]
 r = parsers[2]

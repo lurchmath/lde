@@ -77,15 +77,19 @@
 
   // convert prefix function application to lisp
   const lispPrefix = (op,args) => {
-    if (!Array.isArray(args)) { return `(${op} ${args})` }
-    else if (!args.every(Array.isArray)) { 
-      return `(${op} ${args.join(' ')})` 
-    } else {
-      return args.reduce( (ans,group) => { 
-        return (group.length) ? `(${ans} ${group.join(' ')})` : `(${ans})`  
-      } , op )
-    }
+      return args.reduce( (ans,expr) => { return `(${ans} ${expr})` } , op )
   }
+  
+  // const lispPrefix = (op,args) => {
+  //   if (!Array.isArray(args)) { return `(${op} ${args})` }
+  //   else if (!args.every(Array.isArray)) { 
+  //     return `(${op} ${args.join(' ')})` 
+  //   } else {
+  //     return args.reduce( (ans,group) => { 
+  //       return (group.length) ? `(${ans} ${group.join(' ')})` : `(${ans})`  
+  //     } , op )
+  //   }
+  // }
 
   // convert signed sums to lisp
   const lispSum = (first,rest) => {
@@ -99,8 +103,8 @@
     return ans + ')'
   }
 
-  // replace the commas in a sequence with spaces
-  const spaced = s => s.replace(/,/g, ' ') 
+  // join the elements in an array with spaces
+  const spacedSeq = s => { return s.join(' ') }
 
   /////////////////////////////////////////////////////////////////
   // Parser specific utilities
@@ -284,8 +288,8 @@
 //     - Binding    :
 //     - Prop       :
 //     - Relations  :
-//     - Prefix     :
 //     - Set        :
+//     - Prefix     :
 //     - Algebraic  :
 //     - Atomic     :
 //
@@ -314,6 +318,11 @@ LC = Meta / Given / Environment / Declaration / Expression
       // higher precedence than Relations for use in Relations
       // Algebraic includes Atomic
       RelArg = Set / Algebraic
+  
+  // It is often useful to have a sequence of one or more expressions separated
+  // by commas
+  ExpressionSeq = a:Expression|..,comma| { return a.join(' ') }
+
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -348,7 +357,8 @@ Shorthand = a:(BIH / Ruleset / Rule / Thm / Proof / Cases / Equiv) !alphanum
 // character, separated from either an Environment or Expession sequence by
 // optional spaces.
 // TODO: use Expression|1..,comma|
-Given = GivenLabel a:(Environment / Expression) { return ':'+a }
+Given = GivenLabel a:Environment { return ':'+a } /
+        GivenLabel a:Expression|1..,comma| { return a.map(x=>':'+x).join(' ') }
   GivenLabel = ':'_ / ('assume'i / 'given'i / 'suppose'i / 'if'i) _x
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -457,29 +467,6 @@ Relations = Maps / Partition / Congruent / Subset / ElementOf / NotEltOf /
   Is         = a:RelArg _('is' __ 'an'/'is' __ 'a'/'is'/'are')_x b:RelArg
                 { return lispBinary('is',a,b) }
 
-///////////////////////////////////////////////////////////////////////////////
-// Prefix operators (function application)
-//
-// n-ary, left associative, function application. Args can be anything with
-// higher or equal precedence (Prefix, Set, Algebraic, Atomic, a.k.a. RelArgs)
-// one common situation we want to support is something like (g∘f)^(-1)(x), so
-// we allow Exp and Inverse for the head in addition to Symbols and
-// Parenthesized.  Since we want to allow things like (g∘f)(x), but don't want
-// something like `(x≤y) (z=0)` to parse as function application, we require
-// that function application does NOT allow a space between the function and the
-// parentheses wrapping it's arguments.  To enable this, Exp, Inverse, Symbol,
-// and Parenthesized cannot consume any spaces after their content.
-//
-// For convenience we define special Symbols beginning with '@' so that @P(k)
-// becomes (λ P k) and then replace λ with "LDE EFA" as a shortcut in
-// parsing.js.  Note that 𝜆 gets replaced by '@' up front in the input. This is
-// not intended for use in any other way than for writing rules that require
-// 𝜆P(x) where P is a single character Symbol and x an Expression.
-Prefix = '@' a:[a-z]i b:( '('_ @(Expression)|..,comma| _')' )+ 
-            { return `(λ ${a} ${b})` } /
-          a:(Inverse / Symbol / Parenthesized)
-          b:( '('_ @(Expression)|..,comma| _')' )+ 
-            { return lispPrefix(a,b) }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Sets 
@@ -515,10 +502,8 @@ Set = RelativeComp
 // Once again, Algebraic only has to point to the lowest precedence operator
 // that inherits the ones below it (but Choose does not). Atomic is passed up
 // the chain from Exp.
-Algebraic = // Summation / 
-            Choose / Sum / Product
+Algebraic = Choose / Sum / Product
   
-  // Summation = 'Sum' __ 'to' __ Algebraic __ 'of' __ Binding
   Choose    = a:(Sum / Product) _'choose'_x b:(Sum / Product) 
                 { return lispBinary('choose',a,b) }      
   Sum       = a:Product _ b:(_ [-+] _ Product)+            
@@ -547,7 +532,32 @@ Algebraic = // Summation /
                   {  return lispUnary('!',a) }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Algebraic Expressions
+// Prefix operators (function application)
+//
+// n-ary, left associative, function application. Args can be anything with
+// higher or equal precedence (Prefix, Set, Algebraic, Atomic, a.k.a. RelArgs)
+// one common situation we want to support is something like (g∘f)^(-1)(x), so
+// we allow Exp and Inverse for the head in addition to Symbols and
+// Parenthesized.  Since we want to allow things like (g∘f)(x), but don't want
+// something like `(x≤y) (z=0)` to parse as function application, we require
+// that function application does NOT allow a space between the function and the
+// parentheses wrapping it's arguments.  To enable this, Exp, Inverse, Symbol,
+// and Parenthesized cannot consume any spaces after their content.
+//
+// For convenience we define special Symbols beginning with '@' so that @P(k)
+// becomes (λ P k) and then replace λ with "LDE EFA" as a shortcut in
+// parsing.js.  Note that 𝜆 gets replaced by '@' up front in the input. This is
+// not intended for use in any other way than for writing rules that require
+// 𝜆P(x) where P is a single character Symbol and x an Expression.
+Prefix = '@' a:[a-z]i b:( '('_ @ExpressionSeq _')' )+ 
+            { return `(λ ${a} ${b})` } /
+          
+          a:(Inverse / Symbol / Parenthesized)
+          b:( '('_ @ExpressionSeq _')' )+ 
+            { return lispPrefix(a,b) }
+
+///////////////////////////////////////////////////////////////////////////////
+// Atomic Expressions
 //
 // morally atomic expressions (do not require parentheses)
 Atomic = Parenthesized / EquivalenceClass / Tuple / Symbol / Number
@@ -561,9 +571,9 @@ EquivalenceClass =
   '[' b:( @Expression ) ']'                   { return lispPrefix('class',[b,'~']) } /
   '[' a:Expression comma b:('~'/Symbol) ']'   { return lispPrefix('class',[a,b]) }
 // tuples
-Tuple = 'langle'_x a:Expression|1..,comma| _'rangle'!alphanum
+Tuple = 'langle'_x a:ExpressionSeq _'rangle'!alphanum
         // lispSeq returns single args, but we don't want that here
-        { return (a.length===1) ? `(tuple ${a})` : lispSeq('tuple',a) }
+        { return a }
 // parenthesized
 Parenthesized = '(' _ @Expression _ ')'
 
@@ -596,7 +606,7 @@ Symbol "Symbol" =
 // a string is a reserved word if it starts with one of these and is not
 // followed by an alphanum, so not part of a longer symbol, or things that
 // aren't symbols that we still want to declare as constants.
-ReservedWord  = @$(
+ReservedWord  = $(
     'declare'i / 'existsUnique' / 'equivalenceRelation' / 'strictPartialOrder' /
     'partialOrder' / 'totalOrder' / 'forall' / 'exists' / '*' / 'leq' /
     'not' / 'to' / 'from' / 'implies' / 'iff' / 'intersect' / 'union' /
