@@ -7,7 +7,7 @@ Declare ∀, ∃, ∃!, =, 0, 1, 2, 𝜎, +, ⋅, ≤
 
 Rules:  
 {
-  :{ EquationsRule }  
+  :{ :EquationsRule }  
   :{ :x=y y=x }              
   :{ :𝜎(m)=𝜎(n) m=n }              
   :{ n+0=n }                       
