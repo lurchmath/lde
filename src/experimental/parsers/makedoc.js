@@ -47,7 +47,7 @@ const syntax =
 [['f:A→B'                            ],`f\\colon A\\to B`],
 [['f(x)'                             ],`f\\left(x\\right)`],
 [['g circ f', 'g∘f'                  ],`g\\circ f`],
-[['A times B', 'A×B'                 ],`A\\times B`],
+[['A times B', 'A cross B' ,'A×B'    ],`A\\times B`],
 [['⟨x,y⟩'                            ],'\\langle x,y \\rangle'],
 
 'Relations',
@@ -74,16 +74,16 @@ const syntax =
 [['Assume P', 'Given P', 
   'Suppose P', 'If P', ':P'          ],`\\text{Assume }P\\text{  (etc.)}` ],
 [['Let x'                            ],`\\text{Let }x` ],
-[['Let x be such that x in ℝ',
-  'Let x such that x in ℝ'           ],
+[['Let x be such that x in RR',
+  'Let x such that x in RR'           ],
   `\\text{Let }x\\text{ be such that }x\\in\\mathbb{R}` ],
 [['f(c)=0 for some c'                ],`f(c)=0\\text{ for some }c` ],
-[['Declare is 0 + cos'               ],`\\text{Declare is, 0, +, and cos}` ],
+[['Declare is, 0, +, cos'               ],`\\text{Declare is, 0, +, and cos}` ],
 
 'Miscellaneous',
-[['f⁻(x)', 'f recip(x)', 'f inv(x)'  ],`f^-\\left(x\\right)`],
-[['x recip', 'x inv', 'x⁻'           ],`x^-`],
-[['λP(k)'                            ],`\\lambda{P}(k)` ],
+[['f^inv(x)' , 'f^-(x)' , 'f⁻(x)'    ],`f^-\\left(x\\right)`],
+[['x^inv', 'x^-', 'x⁻'               ],`x^-`],
+[['@P(k)', 'λP(k)'                   ],`\\lambda{P}(k)` ],
 
 ]
 export const makedoc = () => {

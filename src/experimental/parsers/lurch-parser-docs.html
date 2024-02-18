@@ -101,9 +101,14 @@
 
   <p>LurchMath currently supports a small subset of AsciiMath, $\LaTeX$, and notation found in CAS software. Many symbols can be displayed using a TeX command but a preceeding backslash is not required.</p>
 
-  <p>Symbols can be more than one character long and can contain anything except reserved symbols and terms. Multiplication must be explicitly entered with <code>cdot</code> or <code>⋅</code> as a result, but is rendered as concatenation.</p>
+  <p>Symbols can be more than one character long, are case sensitive, contain only letters and digits, cannot start with a digit, and cannot be a reserved term. Multiplication must be explicitly entered with <code>⋅</code>, <code>cdot</code> or <code>*</code>.</p>
 
-  <p>English phrases such as <code>Given</code> or <code> is a </code> are case sensitive and will produce LaTeX with the same phrase.  For example, <code>Suppose P</code>, <code>Given P</code>, <code>If P</code>, <code>Assume P</code>, <code>assume P</code> are synonyms and all have the same mathematical meaning, but will format as $\text{Suppose P}$, $\text{Given P}$, $\text{If P}$, $\text{Assume P}$ and $\text{assume P}$, respectively.
+  <p>English phrases such as <code>Given</code> or <code>declare</code> are case sensitive and will produce LaTeX with the same phrase in the same case. Spaces within an expression are usually ignored and can be used for legibility.  The main exception is that there cannot be any spaces between a function and the parentheses containing its arguments in a function application expression.</p>
+
+  <p>English phrases such as <code>Given</code> or <code>declare</code> are case sensitive and will produce LaTeX with the same phrase in the same case. Spaces within an expression are usually ignored and can be used for legibility.  The main exception is that there cannot be any spaces between a function and the parentheses containing its arguments in a function application expression.</p>
+
+  <p>A comma separated sequence preceeded by one of the <code>Given</code> keywords has the same effect as saying that each of them is a <code>give</code> individually.</p>
+
 </section>
 
 
