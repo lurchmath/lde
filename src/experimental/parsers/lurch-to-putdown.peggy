@@ -522,7 +522,7 @@ Algebraic = Choose / Sum / Product
 
     // The choice of precedence of Function application vs Exp is tricky.
     // Consider e.g. 2^cos(x), f^2(x), 2^f(x), f^(-1)(x), and the nightmare
-    // expressions like sin^2(x) vs sin(x)^2. What is the natural way to parse
+    // expressions like sin^2(x) and sin(x)^2. What is the natural way to parse
     // each of those? 
     //
     // The main use case in the intro to proof course is for inverse functions.
@@ -530,7 +530,7 @@ Algebraic = Choose / Sum / Product
     // function application, and remove parentheses from exponents.  With this
     // choice of precedence we most likely would want to type the above
     // expressions as: 2^(cos(x)), f^2(x), 2^(f(x)), f^(-1)(x), and either
-    // define a rule that says sin^2(x)=sin(x)^2, or just don't ever use
+    // define a rule that says sin^2(x)=(sin(x))^2, or just don't ever use
     // sin^2(x) at all for input. 
     //
     // For a similar reason, Factorials are lower precedence than exponentials
