@@ -65,7 +65,8 @@ const syntax =
 [['x=y'                              ],`x=y`],
 [['x=y=z'                            ],`x=y=z`],
 [['X loves Y'                        ],`X\\text{ loves }Y`],
-[['X is Y', 'X is an Y', 'X is a Y'  ],`X\\text{ is }Y`],
+[['X is Y', 'X is an Y', 'X is a Y',
+  'X are Y'                          ],`X\\text{ is }Y`],
 [['P is a partition of A'            ],`P\\text{ is a partition of }A`],
 [[`'~' is an equivalence relation`   ],`\\sim\\text{ is equivalence relation}`],
 [['[a]'                              ],`\\left[a\\right]` ],
@@ -85,8 +86,8 @@ const syntax =
 [['Declare is, 0, +, cos'            ],`\\text{Declare is, 0, +, and cos}` ],
 
 'Miscellaneous',
-[['f^inv(x)' , 'f^-(x)' , 'f⁻(x)'    ],`f^-\\left(x\\right)`],
-[['x^inv', 'x^-', 'x⁻'               ],`x^-`],
+[['f^inv(A)'                         ],`f^\\text{inv}\\left(A\\right)`],
+[['x^-' , 'x⁻'                       ],`x^-`],
 [['@P(k)', 'λP(k)'                   ],`\\lambda{P}(k)` ]
 
 ]

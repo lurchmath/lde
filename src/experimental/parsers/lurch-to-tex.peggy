@@ -521,9 +521,9 @@ Let = a:'Let'i __ b:SymbolSeq __ 'be' __ 'such' __ 'that' __ c:Expression
 // Quantified and Binding
 //
 // quantified binding expressions
-Quantified = 'forall' _x b:Binding           { return `\\forall ${b})`   } /
-             'exists' _x b:Binding           { return `\\exists ${b})`   } /
-             'existsUnique' _x b:Binding     { return `(\\exists! ${b})` } 
+Quantified = 'forall' _x b:Binding           { return `\\forall ${b}`   } /
+             'exists' _x b:Binding           { return `\\exists ${b}`   } /
+             'existsUnique' _x b:Binding     { return `\\exists! ${b}` } 
 // binding expressions / anonymous maps
 Binding = a:Symbol period _ b:Expression 
           { return `${a}. ${b}` } /
