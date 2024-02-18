@@ -356,6 +356,8 @@ p = parsers.parse
 t = parsers.trace
 r = parsers.raw
 
+doc=loadDocStr('libs/Recursion')
+
 //////////////////////////////////////////////////////////
 // closing
 console.log(defaultPen(`done! (${(Date.now()-start)} ms)`))

@@ -15,6 +15,7 @@ const loadtest = (name, folder='acid tests') => {
   try {
     acid.push(loadDoc(`proofs/${folder}/${name}`)) 
   } catch {
+    acid.push(xPen(`Error loading acid test: ${name}`))
     console.log(`Error loading acid test: ${name}`)
   }
 }
@@ -54,6 +55,7 @@ let numchecks = 0
 let numreds = 0
 
 acid.forEach( (T,k) => {
+  if (typeof T === 'string') { write(T) ; failed++; return }
   // for each test, find the first comment if any and use that as the
   // description of the test file
   const desc = T.find(x=>x.isAComment())?.child(1)

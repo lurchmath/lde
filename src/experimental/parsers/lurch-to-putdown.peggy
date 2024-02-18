@@ -434,6 +434,7 @@ Relations = Maps / Partition / Congruent / Subset / ElementOf / NotEltOf /
 
   Maps       = a:RelArg _':'_ b:RelArg _'to'_x c:RelArg  
                  { return lispSeq('maps',[a,b,c]) }
+  // TODO: combine this with Is, and add the order relations
   Partition  = a:(Binding/RelArg) _'is' __ 'a' __ 'partition'i __ 'of' __ 
                b:(Binding/RelArg)
                  { return lispSeq('partition',[a,b]) }
@@ -624,7 +625,7 @@ ReservedWord  = $(
     'not' / 'to' / 'from' / 'implies' / 'iff' / 'intersect' / 'union' /
     'cross' / 'in' / 'subset' / 'setminus'i / 'circ' / 'wedge' / 'vee' / 
     'equiv' / 'mapsto' / 'approx' / 'langle' / 'rangle' / 'complement' / 
-    'inv' / 'and' / 'or' / '=' / '<' / '+' / '*' / '|' / 'Sum')
+    'inv' / 'and' / 'or' / '=' / '<' / '+' / '*' / '|' / '-')
 
 ///////////////////////////////////////////////////////////////////////////////
 // punctuation and character classes

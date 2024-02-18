@@ -133,9 +133,9 @@
 <tr><td>contradiction<br/>→←</td><td>$\rightarrow\leftarrow$</td></tr>
 
 <tr><td colspan="2" class="subheader">Quantifiers and bindings</td></tr>
-<tr><td>forall x.x&lt;x+1<br/>for all x.x&lt;x+1<br/>∀x.x&lt;x+1</td><td>$\forall x, x&lt;x+1$</td></tr>
-<tr><td>exists x.x=2 cdot x<br/>∃x.x=2⋅x</td><td>$\exists x, x=2x$</td></tr>
-<tr><td>exists unique x.x=2 cdot x<br/>∃!x.x=2⋅x</td><td>$\exists ! x, x=2x$</td></tr>
+<tr><td>forall x.x&lt;x+1<br/>for all x.x&lt;x+1<br/>∀x.x&lt;x+1</td><td>$\forall x, x\lt x+1$</td></tr>
+<tr><td>exists x.x=2 cdot x<br/>∃x.x=2⋅x</td><td>$\exists x, x=2\cdot x$</td></tr>
+<tr><td>exists unique x.x=2*x<br/>∃!x.x=2⋅x</td><td>$\exists ! x, x=2\cdot x$</td></tr>
 <tr><td>x.x+2<br/>x↦x+2</td><td>$x, x+1$</td></tr>
 
 <tr><td colspan="2" class="subheader">Algebraic expressions</td></tr>
@@ -144,14 +144,15 @@
 <tr><td>2+x+y</td><td>$2+x+y$</td></tr>
 <tr><td>-x</td><td>$-x$</td></tr>
 <tr><td>1-x</td><td>$1-x$</td></tr>
-<tr><td>x*y<br/>x cdot y<br/>x⋅y</td><td>$x y$</td></tr>
-<tr><td>2*x*y<br/>2 cdot x cdot y<br/>2⋅x⋅y</td><td>$2 x y$</td></tr>
-<tr><td>2*3*x<br/>2 cdot 3 cdot x<br/>2⋅3⋅x</td><td>$2\cdot 3 x$</td></tr>
+<tr><td>x*y<br/>x cdot y<br/>x⋅y</td><td>$x\cdot  y$</td></tr>
+<tr><td>2*x*y<br/>2 cdot x cdot y<br/>2⋅x⋅y</td><td>$2\cdot x\cdot y$</td></tr>
+<tr><td>2*3*x<br/>2 cdot 3 cdot x<br/>2⋅3⋅x</td><td>$2\cdot 3\cdot x$</td></tr>
 <tr><td>1/x</td><td>$\frac{1}{x}$</td></tr>
-<tr><td>2*1/x*y</td><td>$2\frac{1}{x}y$</td></tr>
-<tr><td>(2*1)/(x*y)</td><td>$\frac{(2\cdot 1)}{(xy)}$</td></tr>
+<tr><td>2*1/x*y</td><td>$2\cdot\frac{1}{x}\cdot y$</td></tr>
+<tr><td>(2*1)/(x*y)</td><td>$\frac{2\cdot 1}{(x\cdot y)}$</td></tr>
 <tr><td>x^2</td><td>$x^2$</td></tr>
-<tr><td>x factorial<br/>x！</td><td>$x!$</td></tr>
+<tr><td>x factorial<br/>x!</td><td>$x!$</td></tr>
+<tr><td>(n+1) choose (k-1)</td><td>$\binom{n+1}{k-1}$</td></tr>
 
 <tr><td colspan="2" class="subheader">Set Theory</td></tr>
 <tr><td>x in A<br/>x∈A</td><td>$x\in A$</td></tr>
@@ -161,10 +162,10 @@
 <tr><td>A cap B<br/>A intersect B<br/>A∩B</td><td>$A\cap B$</td></tr>
 <tr><td>A setminus B<br/>A∖B</td><td>$A\setminus B$</td></tr>
 <tr><td>A complement<br/>A°</td><td>$A^\circ$</td></tr>
-<tr><td>f:A→B</td><td>$f\colon A\to B$</td></tr>
+<tr><td>f:A to B<br/>f:A→B</td><td>$f\colon A\to B$</td></tr>
 <tr><td>f(x)</td><td>$f\left(x\right)$</td></tr>
-<tr><td>g circ f<br/>g∘f</td><td>$g\circ f$</td></tr>
-<tr><td>A times B<br/>A×B</td><td>$A\times B$</td></tr>
+<tr><td>g circ f<br/>g comp f<br/>g∘f</td><td>$g\circ f$</td></tr>
+<tr><td>A times B<br/>A cross B<br/>A×B</td><td>$A\times B$</td></tr>
 <tr><td>⟨x,y⟩</td><td>$\langle x,y \rangle$</td></tr>
 
 <tr><td colspan="2" class="subheader">Relations</td></tr>
@@ -190,14 +191,14 @@
 <tr><td colspan="2" class="subheader">Assumptions and Declarations (case insensitive, phrase is echoed)</td></tr>
 <tr><td>Assume P<br/>Given P<br/>Suppose P<br/>If P<br/>:P</td><td>$\text{Assume }P\text{  (etc.)}$</td></tr>
 <tr><td>Let x</td><td>$\text{Let }x$</td></tr>
-<tr><td>Let x be such that x in ℝ<br/>Let x such that x in ℝ</td><td>$\text{Let }x\text{ be such that }x\in\mathbb{R}$</td></tr>
+<tr><td>Let x be such that x in RR<br/>Let x such that x in RR</td><td>$\text{Let }x\text{ be such that }x\in\mathbb{R}$</td></tr>
 <tr><td>f(c)=0 for some c</td><td>$f(c)=0\text{ for some }c$</td></tr>
-<tr><td>Declare is 0 + cos</td><td>$\text{Declare is, 0, +, and cos}$</td></tr>
+<tr><td>Declare is, 0, +, cos</td><td>$\text{Declare is, 0, +, and cos}$</td></tr>
 
 <tr><td colspan="2" class="subheader">Miscellaneous</td></tr>
-<tr><td>f⁻(x)<br/>f recip(x)<br/>f inv(x)</td><td>$f^-\left(x\right)$</td></tr>
-<tr><td>x recip<br/>x inv<br/>x⁻</td><td>$x^-$</td></tr>
-<tr><td>λP(k)</td><td>$\lambda{P}(k)$</td></tr>
+<tr><td>f^inv(x)<br/>f^-(x)<br/>f⁻(x)</td><td>$f^-\left(x\right)$</td></tr>
+<tr><td>x^inv<br/>x^-<br/>x⁻</td><td>$x^-$</td></tr>
+<tr><td>@P(k)<br/>λP(k)</td><td>$\lambda{P}(k)$</td></tr>
 
   </tbody>
 </table>

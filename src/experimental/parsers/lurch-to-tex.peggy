@@ -284,7 +284,7 @@
          .replace(/𝜆/g  , '@'      ) // for "LDE EFA"
          .replace(/≠/g  , ' neq '  )
          .replace(/∉/g  , ' notin ')
-         .replace(/⁻/g  , '^-'     )
+         .replace(/⁻/g  , '^-'     ) // no need to declare this.. declare - instead
     // now replace the given unicode characters that do not appear in strings or
     // putdown
     const chars = '[⋅≤¬→←⇒⇔∩∪×∈⊆∖∘∧∨≡↦≈∀∃⟨⟩➤°!⁻≅\\\\]'      
@@ -481,15 +481,15 @@ Environment =  '{' a:LCs '}' { return `\\left\\{ ${a} \\right\\}` }
 // Declarations
 //
 // Declare constants (cannot have a body and is a given)
-Declare = a:'declare'i __ b:DeclareSeq { return `${a} ${b}` }
+Declare = a:'declare'i __ b:DeclareSeq { return `${txt(a)} ${b}` }
 // ForSome declaration (always a claim)
 ForSome = body:Expression __ 'for' __ 'some' __ a:SymbolSeq 
           { return `${body}\\text{ for some }${a}` }
 // the 'given' colon is optional since these are always 'given'.          
 Let = a:'Let'i __ b:SymbolSeq __ 'be' __ 'such' __ 'that' __ c:Expression 
-          { return `${txt(a)}${b}\\text{ be such that }${c}]` } /
+          { return `${txt(a)}${b}\\text{ be such that }${c}` } /
       a:'Let'i __ b:SymbolSeq __ 'such'i __ 'that'i __ c:Expression
-          { return `${txt(a)}${b}\\text{ such that }${c}]` }    /
+          { return `${txt(a)}${b}\\text{ such that }${c}` }    /
       a:'Let'i __ b:SymbolSeq { return `${txt(a)}${b}`       }
   // Comma separated symbols, numbers, and reserved words
   DeclareSeq = a:(ReservedWord / Number / Symbol)|1..,comma| {return sequence(a) }
@@ -522,7 +522,7 @@ Quantified = 'forall' _x b:Binding           { return `\\forall ${b})`   } /
 // binding expressions / anonymous maps
 Binding = a:Symbol period _ b:Expression 
           { return `${a}. ${b}` } /
-  a:Symbol 'mapsto'_x b:Expression 
+  a:Symbol _'mapsto'_x b:Expression 
           { return `${a}\\mapsto ${b}` }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -582,10 +582,10 @@ Relations = Maps / Partition / Congruent / Subset / ElementOf / NotEltOf /
   Equation   = a:(Binding/RelArg)|2..,_'='_|       
                 { return texEquation(a) }
   Loves      = a:RelArg _ b:('loves'/'love')_x c:RelArg
-                { return `${a}${txt(b)}${c}` }
+                { return `${a}${txt(' '+b)}${c}` }
   Is         = a:RelArg _ b:('is' __ 'an'/'is' __ 'a'/'is'/'are') _x c:RelArg
                 { return (Array.isArray(b)) 
-                  ? `${a}\\text{ ${b[0]} }${txt(b[1])}${c}`
+                  ? `${a}\\text{ ${b[0]} }${txt(b[2])}${c}`
                   : `${a}\\text{ ${b} }${c}` }
 
 
@@ -745,7 +745,7 @@ ReservedWord  = $(
     'not' / 'to' / 'from' / 'implies' / 'iff' / 'intersect' / 'union' /
     'cross' / 'in' / 'subset' / 'setminus'i / 'circ' / 'wedge' / 'vee' / 
     'equiv' / 'mapsto' / 'approx' / 'langle' / 'rangle' / 'complement' / 
-    'inv' / 'and' / 'or' / '=' / '<' / '+' / '*' / '|' / 'Sum')
+    'inv' / 'and' / 'or' / '=' / '<' / '+' / '*' / '|' / '-')
 
 ///////////////////////////////////////////////////////////////////////////////
 // punctuation and character classes

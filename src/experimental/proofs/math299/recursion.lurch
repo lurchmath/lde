@@ -10,16 +10,16 @@ include libs/Recursion
 ➤ "Just a warm up example (not assigned)"
 
 {
-  ➤ "Theorem: ∑(2,i.i^2) = 2^2+(1^2+0^2)"
-	{ ∑(2,i.i^2) = 2^2+(1^2+0^2) }
+  ➤ "Theorem: Sum(2,i.i^2) = 2^2+(1^2+0^2)"
+	{ Sum(2,i.i^2) = 2^2+(1^2+0^2) }
 	➤ "Proof:"
 	{
-		∑(2,i.i^2) = ∑(𝜎(1),i.i^2)
-							 = 𝜎(1)^2+∑(1,i.i^2)
-							 = 2^2+∑(1,i.i^2)
-							 = 2^2+∑(𝜎(0),i.i^2)
-							 = 2^2+(𝜎(0)^2+∑(0,i.i^2))
-							 = 2^2+(1^2+∑(0,i.i^2))
+		Sum(2,i.i^2) = Sum(𝜎(1),i.i^2)
+							 = 𝜎(1)^2+Sum(1,i.i^2)
+							 = 2^2+Sum(1,i.i^2)
+							 = 2^2+Sum(𝜎(0),i.i^2)
+							 = 2^2+(𝜎(0)^2+Sum(0,i.i^2))
+							 = 2^2+(1^2+Sum(0,i.i^2))
 							 = 2^2+(1^2+0^2)
 	}
 }
@@ -58,30 +58,30 @@ Rule: :{ z^m⋅z^n = z^(m+n) }
 ➤ "Thm 8.5(a) - Assignment #15"
 
 {
-	➤ "Theorem: ∑(n,i.a(i)+b(i)) = ∑(n,i.a(i))+∑(n,i.b(i))"
-	{ ∑(n,i.a(i)+b(i)) = ∑(n,i.a(i))+∑(n,i.b(i)) }
+	➤ "Theorem: Sum(n,i.a(i)+b(i)) = Sum(n,i.a(i))+Sum(n,i.b(i))"
+	{ Sum(n,i.a(i)+b(i)) = Sum(n,i.a(i))+Sum(n,i.b(i)) }
 	➤ "Proof: (by induction on n)"
 	{
     ➤ "Base Case"
-		  ∑(0,i.a(i)+b(i)) = a(0)+b(0)
-			                 = ∑(0,i.a(i))+b(0)
-											 = ∑(0,i.a(i))+∑(0,i.b(i))
+		  Sum(0,i.a(i)+b(i)) = a(0)+b(0)
+			                 = Sum(0,i.a(i))+b(0)
+											 = Sum(0,i.a(i))+Sum(0,i.b(i))
      
 		➤ "Inductive step:"
-		{ :Let k be such that ∑(k,i.a(i)+b(i)) = ∑(k,i.a(i))+∑(k,i.b(i))
+		{ :Let k be such that Sum(k,i.a(i)+b(i)) = Sum(k,i.a(i))+Sum(k,i.b(i))
 			
-			∑(𝜎(k),i.a(i)+b(i)) = ( a(𝜎(k))+b(𝜎(k)) ) + ∑(k,i.a(i)+b(i)) 
-			                    = ( a(𝜎(k))+b(𝜎(k)) ) + ( ∑(k,i.a(i))+∑(k,i.b(i)) )
-			                    = a(𝜎(k)) + (b(𝜎(k))+( ∑(k,i.a(i))+∑(k,i.b(i)) ))
-			                    = a(𝜎(k)) + (( b(𝜎(k))+∑(k,i.a(i)) )+∑(k,i.b(i)))
-			                    = a(𝜎(k)) + (( ∑(k,i.a(i))+b(𝜎(k)) )+∑(k,i.b(i)))
-			                    = a(𝜎(k)) + (∑(k,i.a(i))+( b(𝜎(k))+∑(k,i.b(i)) ))
-			                    = ( a(𝜎(k))+∑(k,i.a(i)) ) + ( b(𝜎(k))+∑(k,i.b(i)) )
-			                    = ∑(𝜎(k),i.a(i)) + ( b(𝜎(k))+∑(k,i.b(i)) )
-													= ∑(𝜎(k),i.a(i)) + ∑(𝜎(k),i.b(i))
+			Sum(𝜎(k),i.a(i)+b(i)) = ( a(𝜎(k))+b(𝜎(k)) ) + Sum(k,i.a(i)+b(i)) 
+			                    = ( a(𝜎(k))+b(𝜎(k)) ) + ( Sum(k,i.a(i))+Sum(k,i.b(i)) )
+			                    = a(𝜎(k)) + (b(𝜎(k))+( Sum(k,i.a(i))+Sum(k,i.b(i)) ))
+			                    = a(𝜎(k)) + (( b(𝜎(k))+Sum(k,i.a(i)) )+Sum(k,i.b(i)))
+			                    = a(𝜎(k)) + (( Sum(k,i.a(i))+b(𝜎(k)) )+Sum(k,i.b(i)))
+			                    = a(𝜎(k)) + (Sum(k,i.a(i))+( b(𝜎(k))+Sum(k,i.b(i)) ))
+			                    = ( a(𝜎(k))+Sum(k,i.a(i)) ) + ( b(𝜎(k))+Sum(k,i.b(i)) )
+			                    = Sum(𝜎(k),i.a(i)) + ( b(𝜎(k))+Sum(k,i.b(i)) )
+													= Sum(𝜎(k),i.a(i)) + Sum(𝜎(k),i.b(i))
 		}
 		➤ "Therefore, by induction"
-		∀n.∑(n,i.a(i)+b(i)) = ∑(n,i.a(i))+∑(n,i.b(i))		
+		∀n.Sum(n,i.a(i)+b(i)) = Sum(n,i.a(i))+Sum(n,i.b(i))		
 		➤ "and the theorem follows."
 	}
 }

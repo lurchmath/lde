@@ -29,5 +29,5 @@ Definitions:
 		:{ multinom(m,0)=1 multinom(0,n)=1 }
 		:{ multinom(m+1,n+1)=multinom(m+1,n)+multinom(m,n+1) }
 		// choose
-		:{ (n+m choose m)=multinom(n,m) }		
+		:{ ((n+m) choose m)=multinom(n,m) }		
 } 
