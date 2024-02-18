@@ -60,6 +60,7 @@
 		<a href="#about">about</a>
 		<a href="#features">features</a>
 		<a href="#examples">examples</a>
+		<a href="#precedence">precedence</a>
 	</div>
 </nav>
 
@@ -107,7 +108,7 @@
 
   <p>English phrases such as <code>Given</code> or <code>declare</code> are case sensitive and will produce LaTeX with the same phrase in the same case. Spaces within an expression are usually ignored and can be used for legibility.  The main exception is that there cannot be any spaces between a function and the parentheses containing its arguments in a function application expression.</p>
 
-  <p>A comma separated sequence preceeded by one of the <code>Given</code> keywords has the same effect as saying that each of them is a <code>give</code> individually.</p>
+  <p>A comma separated sequence preceeded by one of the <code>Given</code> keywords has the same effect as saying that each of them is a <code>Given</code> individually.</p>
 
 </section>
 
@@ -127,6 +128,47 @@
   </tbody>
 </table>
 </section>
+
+
+<section id="precedence"></section>
+<h2>Precedence</h2>
+
+<p>The precedence of operations from highest to lowest is as follows.</p>
+<table id="precedence">
+    <thead>
+    <tr>
+    	<th>Precedence (high to low)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>parentheses $(~~)$, tuples $\langle~~\rangle$, equivalence classes $[~~]$, symbols, numbers</td></tr>
+    <tr><td>exponentials ($x^2$)</td></tr>
+    <tr><td>factorial ($n!$)</td></tr>
+    <tr><td>function application ($f(x,y)(z)$)</td></tr>
+    <tr><td>negation ($-x$), reciprocal ($1/2$)</td></tr>
+    <tr><td>product ($2\cdot x$)</td></tr>
+    <tr><td>sum ($x+y-1$)</td></tr>
+    <tr><td>choose ($\binom{m+n}{m}$)</td></tr>
+    <tr><td>composition ($g\circ f$)</td></tr>
+    <tr><td>complement ($A^\circ$)</td></tr>
+    <tr><td>intersection ($A\cap B$)</td></tr>
+    <tr><td>union ($A\cup B$)</td></tr>
+    <tr><td>cartesian product ($A\times B$)</td></tr>
+    <tr><td>relative complement ($A\setminus B$)</td></tr>
+    <tr><td>relations ($f:A\to B$, $\underset{m}{\equiv}$, $\subseteq$, $\in$, $\notin$, $\mid$, $\leq$, $\lt$, $=$, $\neq$, $\sim$, 'is', 'loves')</td></tr>
+    <tr><td>not ($\neg$)</td></tr>
+    <tr><td>and ($\wedge$)</td></tr>
+    <tr><td>or ($\vee$)</td></tr>
+    <tr><td>implies ($\Rightarrow$)</td></tr>
+    <tr><td>iff ($\Leftrightarrow$)</td></tr>
+    <tr><td>binding ($x.P(x)$)</td></tr>
+    <tr><td>quantified ($\forall x.P(x)$)</td></tr>
+    <tr><td>declarations ('Declare', 'Let', 'for some')</td></tr>
+    <tr><td>environment ($\{~\}$)</td></tr>    
+  </tbody>
+</table>
+</section>
+
 
 </article>
 </div>

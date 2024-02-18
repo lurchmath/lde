@@ -200,6 +200,12 @@ caption {
   margin-bottom: 2em;
 }
 
+#precedence {
+  th, td {
+    text-align: center;
+  };
+}
+
 #grammar{
   font-size: 0.75em;
 }
@@ -225,4 +231,5 @@ caption {
   #wrapper {
       width: 100%;
   }
+
 }

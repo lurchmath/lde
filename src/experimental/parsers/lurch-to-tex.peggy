@@ -56,7 +56,7 @@
   const sequence = s => {
     const a = s.map(texsymbol)  
     if (a.length>2) {
-      return a.slice(0,-1).join(', ')+',\\text{and }'+a[a.length-1]
+      return a.slice(0,-1).join('\\text{, }')+'\\text{, and }'+a[a.length-1]
     } else if (a.length === 2) {
       return `${a[0]}\\text{ and }${a[1]}`
     } else {
@@ -150,7 +150,12 @@
       NN      : '\\mathbb{N}'   , ZZ   : '\\mathbb{Z}' , QQ         : '\\mathbb{Q}'  , 
       RR      : '\\mathbb{R}'   , CC   : '\\mathbb{C}' , or         : '\\text{or}'   ,
       implies : '\\Rightarrow'  , and  : '\\text{and}' , not        : '\\neg'        ,
-      contradiction : '\\rightarrow\\leftarrow' , iff  : '\\Leftrightarrow'    
+      '~'     : '\\sim'         , iff  : '\\Leftrightarrow' ,   
+      contradiction : '\\rightarrow\\leftarrow' ,
+      equivalenceRelation : '\\text{equivalence relation}' ,
+      strictPartialOrder : '\\text{strict partial order}' ,
+      partialOrder : '\\text{partial order}' ,
+      totalOrder : '\\text{total order}' 
     } 
     return (tex[s]) ? tex[s] : s
   }
@@ -347,7 +352,7 @@
   // their properties) we replace '~' and '≈' up front with (~) and (≈)
   // respectively.
   input = input.replace(/'~'/g, '(~)')
-  input = input.replace(/'approx'/g, '(approx)')
+  input = input.replace(/'≈'/g, '(approx)')
   
   // Optional Given Colons
   //
@@ -601,13 +606,13 @@ Set = RelativeComp
   RelativeComp  = a:CartProd|1..,_'setminus'_x| 
                     { return a.join('\\setminus ') }  
   CartProd      = a:Union|1..,_('times'/'cross')_x| 
-                    { return a.join('\\cross ') }
+                    { return a.join('\\times ') }
   Union         = a:Intersection|1..,_('cup'/'union')_x| 
                     { return a.join('\\cup ') }
   Intersection  = a:(Complement/Composition)|1..,_('cap'/'intersect')_x| 
                     { return a.join('\\cap ') }               
   Complement    = a:Algebraic _'complement'!alphanum
-                    { return `${{a}}^\\circ ` }
+                    { return `{${a}}^\\circ ` }
   Composition   = a:Algebraic|1..,_('circ'/'comp')_x| 
                     { return a.join('\\circ ') }
   
@@ -639,25 +644,32 @@ Algebraic = Choose / Sum / Product
                   { return '-'+a }
 
     // Exp and higher precedence args
-    ExpArgs = Exp / Prefix / Inverse / Factorial / Atomic
+    ExpArgs = Factorial / Prefix / Exp / Atomic
 
-    // Function application has higher precedence than Exp, so that e.g.
-    // 2^cos(x) will evaluated as expected.  The exception to this is for
-    // inverse functions, which occur so frequently that we make an exception
-    // specifically for them, so that .e.g. f^inv(x) evaluates as expected
-    // without additional parentheses.  So the precedence from lowest to highest
-    // is
+    // The choice of precedence of Function application vs Exp is tricky.
+    // Consider e.g. 2^cos(x), f^2(x), 2^f(x), f^(-1)(x), and the nightmare
+    // expressions like sin^2(x) vs sin(x)^2. What is the natural way to parse
+    // each of those? 
     //
-    //                   Exp  < Prefix < Inverse < Factorial
+    // The main use case in the intro to proof course is for inverse functions.
+    // For this reason we choose to make exponentiation higher precedence than
+    // function application, and remove parentheses from exponents.  With this
+    // choice of precedence we most likely would want to type the above
+    // expressions as: 2^(cos(x)), f^2(x), 2^(f(x)), f^(-1)(x), and either
+    // define a rule that says sin^2(x)=sin(x)^2, or just don't ever use
+    // sin^2(x) at all for input. 
     //
-    // and Exp should not match Inverses.
+    // For a similar reason, Factorials are lower precedence than exponentials
+    // so that e.g. 2^n! parses as (2^n)! instead of 2^(n!). And since f(n)!
+    // really only makes sense in one way, function application is a higher
+    // precedence than Factorial.
     //
-    // If we made it to here, we are at the bottom of the food chain for
-    // compound expressions, so it's ok to return a symbol or other atomic at
-    // this point. Exp also passes Prefix, Inverse and Factorial up to Product,
-    // Denom, and Negated.
-    Exp = a:(Prefix/Factorial/Atomic) _'^'_ b:(Prefix/Factorial/Atomic) 
-            { return `{${a}}^{${b}}` } 
+    // So the precedence from lowest to highest is
+    //
+    //                   Factorial < Prefix < Exp
+    
+    Factorial = a:(Prefix / Exp / Atomic) _'factorial'!alphanum
+                  {  return a+'!' }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Prefix operators (function application)
@@ -682,14 +694,15 @@ Prefix = // LDE EFA's first
          '@' a:[a-z]i b:( '('_ @ExpressionSeq _')' )+ 
             { return `\\lambda ${a}\\left(${b})\\right)` } /
           // then the rest 
-          a:(Inverse / Symbol / Parenthesized)
+          a:(Exp / Symbol / Parenthesized)
           b:( '('_ @ExpressionSeq _')' )+ { return texPrefix(a,b) }
-
-  Inverse   = a:Atomic _ '^' _ InverseName {  return `{${a}}^-` }
-    InverseName = '-' / 'inv'!alphanum
   
-  Factorial = a:Atomic _'factorial'!alphanum
-                  {  return a+'!' }
+    // If we made it to here, we are at the bottom of the food chain for
+    // compound expressions, so it's ok to return a symbol or other atomic at
+    // this point. Exp also passes Prefix, Inverse and Factorial up to Product,
+    // Denom, and Negated.
+    Exp = a:Atomic _'^'_ b:(Atomic / '-') 
+            { return `{${a}}^{${nopar(b)}}` } 
 
 ///////////////////////////////////////////////////////////////////////////////
 // Atomic Expressions
@@ -711,7 +724,9 @@ EquivalenceClass =
 Tuple = 'langle'_x a:ExpressionSeq _'rangle'!alphanum
         { return `\\left\\langle{${a}}\\right\\rangle` }
 // parenthesized
-Parenthesized = '(' _ a:Expression _ ')' { return `\\left(${a}\\right)` }
+Parenthesized = '(' _ a:Expression _ ')' { 
+  // we have to check for ~ as a special case (see above)
+  return (a === '\\sim') ? a : `\\left(${a}\\right)` }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Numbers 
@@ -729,7 +744,7 @@ Natural = $( [1-9][0-9]* / '0' )
 //
 // For clarity in reading the putdown output we rename some special frequently used
 // symbols.
-Symbol "Symbol" =  a:('contradiction' / '✔︎' / '✗' / '⁉︎') { return texsymbol(a) } / 
+Symbol "Symbol" =  a:('contradiction' / '✔︎' / '✗' / '⁉︎' / '~' ) { return texsymbol(a) } / 
   !(ReservedWord !alphanum) a:([a-z]i alphanum* ) 
   { let b = texsymbol(a[0]+a[1].join(''))
     return (b.length>1 && !b.startsWith('\\')) ? `\\text{${b}}` : b }
@@ -740,8 +755,7 @@ Symbol "Symbol" =  a:('contradiction' / '✔︎' / '✗' / '⁉︎') { return te
 // followed by an alphanum, so not part of a longer symbol, or things that
 // aren't symbols that we still want to declare as constants.
 ReservedWord  = $(
-    'declare'i / 'existsUnique' / 'equivalenceRelation' / 'strictPartialOrder' /
-    'partialOrder' / 'totalOrder' / 'forall' / 'exists' / '*' / 'leq' /
+    'declare'i / 'existsUnique' / 'forall' / 'exists' / '*' / 'leq' /
     'not' / 'to' / 'from' / 'implies' / 'iff' / 'intersect' / 'union' /
     'cross' / 'in' / 'subset' / 'setminus'i / 'circ' / 'wedge' / 'vee' / 
     'equiv' / 'mapsto' / 'approx' / 'langle' / 'rangle' / 'complement' / 

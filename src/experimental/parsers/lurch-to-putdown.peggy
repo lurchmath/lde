@@ -239,7 +239,7 @@
   // their properties) we replace '~' and '≈' up front with (~) and (≈)
   // respectively.
   input = input.replace(/'~'/g, '(~)')
-  input = input.replace(/'approx'/g, '(approx)')
+  input = input.replace(/'≈'/g, '(approx)')
   
   // Optional Given Colons
   //
@@ -517,58 +517,64 @@ Algebraic = Choose / Sum / Product
     Negated   = '-' _ a:ExpArgs 
                   { return lispUnary('-',a) }
 
-    // Exp and higher precedence args
-    ExpArgs = Exp / Prefix / Inverse / Factorial / Atomic
+    // higher precedence args 
+    ExpArgs =  Factorial / Prefix / Exp / Atomic
 
-    // Function application has higher precedence than Exp, so that e.g.
-    // 2^cos(x) will evaluated as expected.  The exception to this is for
-    // inverse functions, which occur so frequently that we make an exception
-    // specifically for them, so that .e.g. f^inv(x) evaluates as expected
-    // without additional parentheses.  So the precedence from lowest to highest
-    // is
+    // The choice of precedence of Function application vs Exp is tricky.
+    // Consider e.g. 2^cos(x), f^2(x), 2^f(x), f^(-1)(x), and the nightmare
+    // expressions like sin^2(x) vs sin(x)^2. What is the natural way to parse
+    // each of those? 
     //
-    //                   Exp  < Prefix < Inverse < Factorial
+    // The main use case in the intro to proof course is for inverse functions.
+    // For this reason we choose to make exponentiation higher precedence than
+    // function application, and remove parentheses from exponents.  With this
+    // choice of precedence we most likely would want to type the above
+    // expressions as: 2^(cos(x)), f^2(x), 2^(f(x)), f^(-1)(x), and either
+    // define a rule that says sin^2(x)=sin(x)^2, or just don't ever use
+    // sin^2(x) at all for input. 
     //
-    // and Exp should not match Inverses.
+    // For a similar reason, Factorials are lower precedence than exponentials
+    // so that e.g. 2^n! parses as (2^n)! instead of 2^(n!). And since f(n)!
+    // really only makes sense in one way, function application is a higher
+    // precedence than Factorial.
+    //
+    // So the precedence from lowest to highest is
+    //
+    //                   Factorial < Prefix < Exp
     
+    Factorial = a:(Prefix / Exp / Atomic) _'factorial'!alphanum 
+                  { return lispUnary('!',a) }
+    
+    ///////////////////////////////////////////////////////////////////////////////
+    // Prefix operators (function application)
+    //
+    // n-ary, left associative, function application. Args can be any Expressions
+    // but the head (function) can only have higher precedence. One common situation
+    // we want to support is something like (g∘f)^(-1)(x), so we allow Inverse for
+    // the head in addition to Symbols and Parenthesized.
+    //
+    // Since we want to allow things like (g∘f)(x), but don't want something like
+    // `(x≤y) (z=0)` to parse as function application, we require that function
+    // application does NOT allow a space between the function and the parentheses
+    // wrapping it's arguments.  To enable this, Inverse, Symbol, and
+    // Parenthesized cannot consume any spaces after their content.
+    //
+    // For convenience we define special Symbols beginning with '@' so that @P(k)
+    // becomes (λ P k) and then replace λ with "LDE EFA" as a shortcut in
+    // parsing.js.  Note that 𝜆 gets replaced by '@' up front in the input. This is
+    // not intended for use in any other way than for writing rules that require
+    // 𝜆P(k) where P is a single character Symbol and k an Expression.
+    Prefix = '@' a:[a-z]i b:( '('_ @ExpressionSeq _')' )+ 
+              { return `(λ ${a} ${b})` } /
+          
+            a:(Exp / Symbol / Parenthesized)
+            b:( '('_ @ExpressionSeq _')' )+ 
+              { return lispPrefix(a,b) }
+
     // If we made it to here, we are at the bottom of the food chain for
     // compound expressions, so it's ok to return a symbol or other atomic at
-    // this point. Exp also passes Prefix, Inverse and Factorial up to Product,
-    // Denom, and Negated.
-    Exp = a:(Prefix/Factorial/Atomic) _'^'_ b:(Prefix/Factorial/Atomic) 
-            { return lispBinary('^',a,b) } 
-
-///////////////////////////////////////////////////////////////////////////////
-// Prefix operators (function application)
-//
-// n-ary, left associative, function application. Args can be any Expressions
-// but the head (function) can only have higher precedence. One common situation
-// we want to support is something like (g∘f)^(-1)(x), so we allow Inverse for
-// the head in addition to Symbols and Parenthesized.
-//
-// Since we want to allow things like (g∘f)(x), but don't want something like
-// `(x≤y) (z=0)` to parse as function application, we require that function
-// application does NOT allow a space between the function and the parentheses
-// wrapping it's arguments.  To enable this, Inverse, Symbol, and
-// Parenthesized cannot consume any spaces after their content.
-//
-// For convenience we define special Symbols beginning with '@' so that @P(k)
-// becomes (λ P k) and then replace λ with "LDE EFA" as a shortcut in
-// parsing.js.  Note that 𝜆 gets replaced by '@' up front in the input. This is
-// not intended for use in any other way than for writing rules that require
-// 𝜆P(k) where P is a single character Symbol and k an Expression.
-Prefix = '@' a:[a-z]i b:( '('_ @ExpressionSeq _')' )+ 
-            { return `(λ ${a} ${b})` } /
-          
-          a:(Inverse / Symbol / Parenthesized)
-          b:( '('_ @ExpressionSeq _')' )+ 
-            { return lispPrefix(a,b) }
-
-  Inverse   = a:Atomic _ '^' _ InverseName { return lispUnary('inv',a) }
-    InverseName = '-' / 'inv'!alphanum
-  
-  Factorial = a:Atomic _'factorial'!alphanum
-                {  return lispUnary('!',a) }
+    // this point.
+    Exp = a:Atomic _'^'_ b:(Atomic / '-') { return lispBinary('^',a,b) } 
 
 ///////////////////////////////////////////////////////////////////////////////
 // Atomic Expressions
@@ -610,8 +616,8 @@ Symbol "Symbol" =
   'contradiction' { return '→←' }  /  'sigma'         { return 'σ'  }   /
   'NN'            { return 'ℕ'  }  /  'ZZ'            { return 'ℤ'  }   /
   'QQ'            { return 'ℚ'  }  /  'RR'            { return 'ℝ'  }   /
-  'CC'            { return 'ℂ'  }  / 
-  '✔︎' / '✗' / '⁉︎' /                    // for declaring expected results in tests
+  'CC'            { return 'ℂ'  }  /  '~'                               /
+  '✔︎' / '✗' / '⁉︎' /            // for declaring expected results in tests
   !(ReservedWord !alphanum) @$([a-z]i alphanum* ) 
 
 // Reserved Words
@@ -620,8 +626,7 @@ Symbol "Symbol" =
 // followed by an alphanum, so not part of a longer symbol, or things that
 // aren't symbols that we still want to declare as constants.
 ReservedWord  = $(
-    'declare'i / 'existsUnique' / 'equivalenceRelation' / 'strictPartialOrder' /
-    'partialOrder' / 'totalOrder' / 'forall' / 'exists' / '*' / 'leq' /
+    'declare'i / 'existsUnique' / 'forall' / 'exists' / '*' / 'leq' /
     'not' / 'to' / 'from' / 'implies' / 'iff' / 'intersect' / 'union' /
     'cross' / 'in' / 'subset' / 'setminus'i / 'circ' / 'wedge' / 'vee' / 
     'equiv' / 'mapsto' / 'approx' / 'langle' / 'rangle' / 'complement' / 
