@@ -69,10 +69,38 @@ import { makeParser, parseLines } from './parsing.js'
 import { CNFProp } from './CNFProp.js'
 // load the Lurch to putdown parser precompiled for efficiency
 import { parse as lurchToPutdown } from './parsers/lurch-to-putdown.js'
-global.parse = lurchToPutdown
+global.parse = s => {
+  try { 
+    return lurchToPutdown(s)
+  } catch(e) {
+    if (typeof e.format === 'function') {
+      console.log(e.format([{
+        text:s
+      }]))
+    } else {    
+      console.log(e.toString())
+    }
+    return undefined
+  }
+}
+
 // load the Lurch to TeX parser precompiled for efficiency
 import { parse as lurchToTex } from './parsers/lurch-to-tex.js'
-global.tex = lurchToTex
+global.tex = s => {
+  try { 
+    return lurchToTex(s)
+  } catch(e) {
+    if (typeof e.format === 'function') {
+      console.log(e.format([{
+        text:s
+      }]))
+    } else {    
+      console.log(e.toString())
+    }
+    return undefined
+  }
+}
+
 // load the Lurch to putdown parser precompiled for efficiency
 import { parse as lurchToPutdownTrace } from './parsers/lurch-to-putdown-trace.js'
 global.trace = lurchToPutdownTrace
