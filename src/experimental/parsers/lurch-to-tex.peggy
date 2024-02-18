@@ -250,8 +250,7 @@
     '∖' : 'setminus'   ,  '∘' : 'circ'      , '∧' : 'wedge'  , '∨' : 'vee'       ,
     '≡' : 'equiv'      ,  '↦' : 'mapsto'    , '≈' : 'approx' , '∀' : 'forall'    ,
     '∃' : 'exists'     ,  '⟨' : 'langle'    , '⟩' : 'rangle' , '➤' : 'comment'   ,
-    '°' : 'complement' ,  '⁻' : 'inv'       , '≅' : 'cong'   , '!' : 'factorial' ,
-    '\\': ' '
+    '°' : 'complement' ,  '≅' : 'cong'      , '\\': ' '      , '!' : 'factorial' 
   }
   
   const internalNames = {
@@ -281,10 +280,11 @@
   // then remove the unicodes
   const replaceUnicode = s => {
     // first, replace toxic unicode chars with their ascii synonym
-    s = s.replace(/𝜎/g, ' sigma') // usually used as a function so no following space
-         .replace(/𝜆/g, '@' )     // for "LDE EFA"
-         .replace(/≠/g, ' neq ')
-         .replace(/∉/g, ' notin ')
+    s = s.replace(/𝜎/g  , ' sigma' ) // usually used as a function so no following space
+         .replace(/𝜆/g  , '@'      ) // for "LDE EFA"
+         .replace(/≠/g  , ' neq '  )
+         .replace(/∉/g  , ' notin ')
+         .replace(/⁻/g  , '^-'     )
     // now replace the given unicode characters that do not appear in strings or
     // putdown
     const chars = '[⋅≤¬→←⇒⇔∩∪×∈⊆∖∘∧∨≡↦≈∀∃⟨⟩➤°!⁻≅\\\\]'      
@@ -431,7 +431,7 @@ LC = Meta / Given / Environment / Declaration / Expression
 
   // It is often useful to have a sequence of one or more expressions separated
   // by commas
-  ExpressionSeq = a:Expression|..,comma| { return a.join(txt(',')) }
+  ExpressionSeq = a:Expression|..,comma| { return a.join(',') }
     
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -535,15 +535,15 @@ Binding = a:Symbol period _ b:Expression
 Prop = Iff
 
   Iff     = a:(Implies/PropArg)|1..,_'iff'_x|        
-              { return a.join('\\Leftrightarrow ') }
+              { return a.join('\\Leftrightarrow ')  }
   Implies = a:(Or/And/PropArg)|1..,_'implies'_x|     
-              { return a.join('\\Rightarrow ')     }
+              { return a.join('\\Rightarrow ')      }
   Or      = a:(And/PropArg)|1..,_('or'/'vee')_x|     
-              { return a.join('\\text{ or }')      }
+              { return a.join('\\text{ or }')       }
   And     = a:(Not/PropArg)|1..,_('and'/'wedge')_x|  
-              { return a.join('\\text{ and }')  }
+              { return a.join('\\text{ and }')      }
   Not     = _'not'_x b:PropArg                       
-              { return '\\neg '+b  }
+              { return '\\neg '+b                   }
   
 ///////////////////////////////////////////////////////////////////////////////
 // Relations
@@ -629,53 +629,67 @@ Algebraic = Choose / Sum / Product
                 { return `\\binom{${nopar(a)}}{${nopar(b)}}` }
   Sum       = a:Product _ b:(_ [-+] _ Product)+            
                 { return texSum(a,b) }
-  Product   = a:(Denom/Negated/Exp)
+  Product   = a:(Denom/Negated/ExpArgs)
                 |1..,(_'⋅'_/_'cdot'_x/_'*'_)| 
                 { return texProduct(a) }
                 
-    Denom     = '/' _ a:Exp 
+    Denom     = '/' _ a:ExpArgs 
                   { return '/'+a }    
-    Negated   = '-' _ a:Exp 
+    Negated   = '-' _ a:ExpArgs 
                   { return '-'+a }
-    // Atomic is a special case of exp.
+
+    // Exp and higher precedence args
+    ExpArgs = Exp / Prefix / Inverse / Factorial / Atomic
+
+    // Function application has higher precedence than Exp, so that e.g.
+    // 2^cos(x) will evaluated as expected.  The exception to this is for
+    // inverse functions, which occur so frequently that we make an exception
+    // specifically for them, so that .e.g. f^inv(x) evaluates as expected
+    // without additional parentheses.  So the precedence from lowest to highest
+    // is
+    //
+    //                   Exp  < Prefix < Inverse < Factorial
+    //
+    // and Exp should not match Inverses.
     //
     // If we made it to here, we are at the bottom of the food chain for
     // compound expressions, so it's ok to return a symbol or other atomic at
-    // this point. Exp also passes Inverse and Factorial up to Product, Denom,
-    // and Negated.
-    Exp       = a:(Factorial/Inverse/Prefix/Atomic)|1..,_'^'_|      
-                  { return texRightAssoc('^',a) } 
-    Inverse   = a:Atomic _'inv'!alphanum
-                  { return `{${a}}^${txt('inv')}` } /
-                a:Atomic _'^'_'-'
-                  { return `{${a}}^-` } 
-    Factorial = a:Atomic _'factorial'!alphanum
-                  {  return a+'!' }
+    // this point. Exp also passes Prefix, Inverse and Factorial up to Product,
+    // Denom, and Negated.
+    Exp = a:(Prefix/Factorial/Atomic) _'^'_ b:(Prefix/Factorial/Atomic) 
+            { return `{${a}}^{${b}}` } 
 
 ///////////////////////////////////////////////////////////////////////////////
 // Prefix operators (function application)
 //
-// n-ary, left associative, function application. Args can be anything with
-// higher or equal precedence (Prefix, Set, Algebraic, Atomic, a.k.a. RelArgs)
-// one common situation we want to support is something like (g∘f)^(-1)(x), so
-// we allow Exp and Inverse for the head in addition to Symbols and
-// Parenthesized.  Since we want to allow things like (g∘f)(x), but don't want
-// something like `(x≤y) (z=0)` to parse as function application, we require
-// that function application does NOT allow a space between the function and the
-// parentheses wrapping it's arguments.  To enable this, Exp, Inverse, Symbol,
-// and Parenthesized cannot consume any spaces after their content.
+// n-ary, left associative, function application. Args can be any Expressions
+// but the head (function) can only have higher precedence. One common situation
+// we want to support is something like (g∘f)^(-1)(x), so we allow Inverse for
+// the head in addition to Symbols and Parenthesized.
+//
+// Since we want to allow things like (g∘f)(x), but don't want something like
+// `(x≤y) (z=0)` to parse as function application, we require that function
+// application does NOT allow a space between the function and the parentheses
+// wrapping it's arguments.  To enable this, Inverse, Symbol, and
+// Parenthesized cannot consume any spaces after their content.
 //
 // For convenience we define special Symbols beginning with '@' so that @P(k)
 // becomes (λ P k) and then replace λ with "LDE EFA" as a shortcut in
 // parsing.js.  Note that 𝜆 gets replaced by '@' up front in the input. This is
 // not intended for use in any other way than for writing rules that require
-// 𝜆P(x) where P is a single character Symbol and x an Expression.
+// 𝜆P(k) where P is a single character Symbol and k an Expression.
 Prefix = // LDE EFA's first
          '@' a:[a-z]i b:( '('_ @ExpressionSeq _')' )+ 
             { return `\\lambda ${a}\\left(${b})\\right)` } /
           // then the rest 
           a:(Inverse / Symbol / Parenthesized)
           b:( '('_ @ExpressionSeq _')' )+ { return texPrefix(a,b) }
+
+  Inverse   = a:Atomic _ '^' _ InverseName {  return `{${a}}^-` }
+    InverseName = '-' / 'inv'!alphanum
+  
+  Factorial = a:Atomic _'factorial'!alphanum
+                  {  return a+'!' }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Atomic Expressions
@@ -686,6 +700,7 @@ Atomic = Parenthesized / EquivalenceClass / Tuple / Symbol / Number
 ///////////////////////////////////////////////////////////////////////////////
 // Things in parentheses
 //
+
 // equivalence class - if the optional relation is missing from an equivalence
 //                     class we use '~'
 EquivalenceClass = 
@@ -715,7 +730,7 @@ Natural = $( [1-9][0-9]* / '0' )
 // For clarity in reading the putdown output we rename some special frequently used
 // symbols.
 Symbol "Symbol" =  a:('contradiction' / '✔︎' / '✗' / '⁉︎') { return texsymbol(a) } / 
-  !(ReservedWord) a:([a-z]i alphanum* ) 
+  !(ReservedWord !alphanum) a:([a-z]i alphanum* ) 
   { let b = texsymbol(a[0]+a[1].join(''))
     return (b.length>1 && !b.startsWith('\\')) ? `\\text{${b}}` : b }
 

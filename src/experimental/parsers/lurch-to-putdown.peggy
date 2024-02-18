@@ -142,8 +142,7 @@
     '∖' : 'setminus'   ,  '∘' : 'circ'      , '∧' : 'wedge'  , '∨' : 'vee'       ,
     '≡' : 'equiv'      ,  '↦' : 'mapsto'    , '≈' : 'approx' , '∀' : 'forall'    ,
     '∃' : 'exists'     ,  '⟨' : 'langle'    , '⟩' : 'rangle' , '➤' : 'comment'   ,
-    '°' : 'complement' ,  '⁻' : 'inv'       , '≅' : 'cong'   , '!' : 'factorial' ,
-    '\\': ' '
+    '°' : 'complement' ,  '≅' : 'cong'      , '\\': ' '      , '!' : 'factorial' 
   }
   
   const internalNames = {
@@ -173,10 +172,11 @@
   // then remove the unicodes
   const replaceUnicode = s => {
     // first, replace toxic unicode chars with their ascii synonym
-    s = s.replace(/𝜎/g, ' sigma') // usually used as a function so no following space
-         .replace(/𝜆/g, '@')  // for "LDE EFA"
-         .replace(/≠/g, ' neq ')
-         .replace(/∉/g, ' notin ')
+    s = s.replace(/𝜎/g  , ' sigma' ) // usually used as a function so no following space
+         .replace(/𝜆/g  , '@'      ) // for "LDE EFA"
+         .replace(/≠/g  , ' neq '  )
+         .replace(/∉/g  , ' notin ')
+         .replace(/⁻/g  , '^-'     )
     // now replace the given unicode characters that do not appear in strings or
     // putdown
     const chars = '[⋅≤¬→←⇒⇔∩∪×∈⊆∖∘∧∨≡↦≈∀∃⟨⟩➤°!⁻≅\\\\]'      
@@ -316,7 +316,6 @@ LC = Meta / Given / Environment / Declaration / Expression
     // higher precedence than Prop ops for use in Props
     PropArg  = Relations / RelArg
       // higher precedence than Relations for use in Relations
-      // Algebraic includes Atomic
       RelArg = Set / Algebraic
   
   // It is often useful to have a sequence of one or more expressions separated
@@ -406,7 +405,7 @@ Let = 'Let'i __ a:SymbolSeq __ ('be'i __)? 'such'i __ 'that'i __ b:Expression
 // quantified binding expressions
 Quantified = 'forall' _x b:Binding           { return `(∀ ${b})`  } /
              'exists' _x b:Binding           { return `(∃ ${b})`  } /
-             'existsUnique' _x b:Binding    { return `(∃! ${b})` } 
+             'existsUnique' _x b:Binding     { return `(∃! ${b})` } 
 // binding expressions / anonymous maps
 Binding = a:Symbol (period _ / _'mapsto'_x) b:Expression 
           { return `${a}, ${b}` }
@@ -508,53 +507,67 @@ Algebraic = Choose / Sum / Product
                 { return lispBinary('choose',a,b) }      
   Sum       = a:Product _ b:(_ [-+] _ Product)+            
                 { return lispSum(a,b) }
-  Product   = a:(Denom/Negated/Exp)
+  Product   = a:(Denom/Negated/ExpArgs)
                 |1..,(_'⋅'_/_'cdot'_x/_'*'_)| 
                 { return lispSeq('⋅',a) }
                 
-    Denom     = '/' _ a:Exp 
+    Denom     = '/' _ a:ExpArgs 
                   { return lispUnary('/',a) }    
-    Negated   = '-' _ a:Exp 
+    Negated   = '-' _ a:ExpArgs 
                   { return lispUnary('-',a) }
-    // Atomic is a special case of exp.
+
+    // Exp and higher precedence args
+    ExpArgs = Exp / Prefix / Inverse / Factorial / Atomic
+
+    // Function application has higher precedence than Exp, so that e.g.
+    // 2^cos(x) will evaluated as expected.  The exception to this is for
+    // inverse functions, which occur so frequently that we make an exception
+    // specifically for them, so that .e.g. f^inv(x) evaluates as expected
+    // without additional parentheses.  So the precedence from lowest to highest
+    // is
     //
+    //                   Exp  < Prefix < Inverse < Factorial
+    //
+    // and Exp should not match Inverses.
+    
     // If we made it to here, we are at the bottom of the food chain for
     // compound expressions, so it's ok to return a symbol or other atomic at
-    // this point. Exp also passes Inverse and Factorial up to Product, Denom,
-    // and Negated.
-    Exp       = a:(Factorial/Inverse/Prefix/Atomic)|1..,_'^'_|      
-                  { return lispSeq('^',a) } 
-    Inverse   = a:Atomic _'inv'!alphanum
-                  { return lispUnary('inv',a) } /
-                a:Atomic _'^'_'-'
-                  { return lispUnary('inv',a) } 
-    Factorial = a:Atomic _'factorial'!alphanum
-                  {  return lispUnary('!',a) }
+    // this point. Exp also passes Prefix, Inverse and Factorial up to Product,
+    // Denom, and Negated.
+    Exp = a:(Prefix/Factorial/Atomic) _'^'_ b:(Prefix/Factorial/Atomic) 
+            { return lispBinary('^',a,b) } 
 
 ///////////////////////////////////////////////////////////////////////////////
 // Prefix operators (function application)
 //
-// n-ary, left associative, function application. Args can be anything with
-// higher or equal precedence (Prefix, Set, Algebraic, Atomic, a.k.a. RelArgs)
-// one common situation we want to support is something like (g∘f)^(-1)(x), so
-// we allow Exp and Inverse for the head in addition to Symbols and
-// Parenthesized.  Since we want to allow things like (g∘f)(x), but don't want
-// something like `(x≤y) (z=0)` to parse as function application, we require
-// that function application does NOT allow a space between the function and the
-// parentheses wrapping it's arguments.  To enable this, Exp, Inverse, Symbol,
-// and Parenthesized cannot consume any spaces after their content.
+// n-ary, left associative, function application. Args can be any Expressions
+// but the head (function) can only have higher precedence. One common situation
+// we want to support is something like (g∘f)^(-1)(x), so we allow Inverse for
+// the head in addition to Symbols and Parenthesized.
+//
+// Since we want to allow things like (g∘f)(x), but don't want something like
+// `(x≤y) (z=0)` to parse as function application, we require that function
+// application does NOT allow a space between the function and the parentheses
+// wrapping it's arguments.  To enable this, Inverse, Symbol, and
+// Parenthesized cannot consume any spaces after their content.
 //
 // For convenience we define special Symbols beginning with '@' so that @P(k)
 // becomes (λ P k) and then replace λ with "LDE EFA" as a shortcut in
 // parsing.js.  Note that 𝜆 gets replaced by '@' up front in the input. This is
 // not intended for use in any other way than for writing rules that require
-// 𝜆P(x) where P is a single character Symbol and x an Expression.
+// 𝜆P(k) where P is a single character Symbol and k an Expression.
 Prefix = '@' a:[a-z]i b:( '('_ @ExpressionSeq _')' )+ 
             { return `(λ ${a} ${b})` } /
           
           a:(Inverse / Symbol / Parenthesized)
           b:( '('_ @ExpressionSeq _')' )+ 
             { return lispPrefix(a,b) }
+
+  Inverse   = a:Atomic _ '^' _ InverseName { return lispUnary('inv',a) }
+    InverseName = '-' / 'inv'!alphanum
+  
+  Factorial = a:Atomic _'factorial'!alphanum
+                {  return lispUnary('!',a) }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Atomic Expressions
@@ -565,15 +578,14 @@ Atomic = Parenthesized / EquivalenceClass / Tuple / Symbol / Number
 ///////////////////////////////////////////////////////////////////////////////
 // Things in parentheses
 //
+
 // equivalence class - if the optional relation is missing from an equivalence
 //                     class we use '~'
 EquivalenceClass = 
   '[' b:( @Expression ) ']'                   { return lispPrefix('class',[b,'~']) } /
   '[' a:Expression comma b:('~'/Symbol) ']'   { return lispPrefix('class',[a,b]) }
 // tuples
-Tuple = 'langle'_x a:ExpressionSeq _'rangle'!alphanum
-        // lispSeq returns single args, but we don't want that here
-        { return a }
+Tuple = 'langle'_x a:ExpressionSeq _'rangle'!alphanum { return `(tuple ${a})` }
 // parenthesized
 Parenthesized = '(' _ @Expression _ ')'
 
@@ -599,7 +611,7 @@ Symbol "Symbol" =
   'QQ'            { return 'ℚ'  }  /  'RR'            { return 'ℝ'  }   /
   'CC'            { return 'ℂ'  }  / 
   '✔︎' / '✗' / '⁉︎' /                    // for declaring expected results in tests
-  !(ReservedWord) @$([a-z]i alphanum* ) 
+  !(ReservedWord !alphanum) @$([a-z]i alphanum* ) 
 
 // Reserved Words
 //
