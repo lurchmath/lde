@@ -719,7 +719,7 @@ Atomic = Parenthesized / EquivalenceClass / Tuple / Symbol / Number
 EquivalenceClass = 
   '[' a:( @Expression ) ']'                   { return `\\left[${a}\\right]` } /
   '[' a:Expression comma b:Symbol ']'    { return `\\left[${a}\\right]_${b}` }  /
-  '[' a:Expression comma b:'~' ']'    { return `\\left[${a}_{\\sim}\\right]` }
+  '[' a:Expression comma b:'~' ']'    { return `\\left[${a}\\right]_{\\sim}` }
 // tuples
 Tuple = 'langle'_x a:ExpressionSeq _'rangle'!alphanum
         { return `\\left\\langle{${a}}\\right\\rangle` }

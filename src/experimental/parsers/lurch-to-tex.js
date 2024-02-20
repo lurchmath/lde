@@ -771,7 +771,7 @@ function peg$parse(input, options) {
   var peg$f54 = function(a, b) { return `{${a}}^{${nopar(b)}}` };
   var peg$f55 = function(a) { return `\\left[${a}\\right]` };
   var peg$f56 = function(a, b) { return `\\left[${a}\\right]_${b}` };
-  var peg$f57 = function(a, b) { return `\\left[${a}_{\\sim}\\right]` };
+  var peg$f57 = function(a, b) { return `\\left[${a}\\right]_{\\sim}` };
   var peg$f58 = function(a) { return `\\left\\langle{${a}}\\right\\rangle` };
   var peg$f59 = function(a) { 
   // we have to check for ~ as a special case (see above)
