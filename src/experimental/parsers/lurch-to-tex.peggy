@@ -264,7 +264,7 @@
     'not'       : '¬' , 'setminus' : '∖' , 'subset' : '⊆'  , 'subseteq'     : '⊆'     ,
     'cong'      : '≅' , 'leq'      : '≤' , 'lt'     : '<'  , 'factorial'    : '!'     ,
     'divides'   : '|' , 'cdot'     : '⋅' , '*'      : '⋅'  , 'love'         : 'loves' ,
-    'in'        : '∈' , '\\'       : ' '           
+    'in'        : '∈' , '\\'       : ' ' , 'fear'   : 'fears'           
   }
 
   // for use in Declare's, look up the internal name of a reserted word or
@@ -555,7 +555,7 @@ Prop = Iff
 //
 Relations = Maps / Partition / Congruent / Subset / ElementOf / NotEltOf / 
             Divides / Leq / LessThan / Relation / Equation / NotEqual / 
-            Loves / Is
+            Loves / Fears / Is
 
   Maps       = a:RelArg _':'_ b:RelArg _'to'_x c:RelArg  
                  { return `${a}\\colon ${b}\\to ${c}` }
@@ -587,6 +587,8 @@ Relations = Maps / Partition / Congruent / Subset / ElementOf / NotEltOf /
   Equation   = a:(Binding/RelArg)|2..,_'='_|       
                 { return texEquation(a) }
   Loves      = a:RelArg _ b:('loves'/'love')_x c:RelArg
+                { return `${a}${txt(' '+b)}${c}` }
+  Fears      = a:RelArg _ b:('fears'/'fear')_x c:RelArg
                 { return `${a}${txt(' '+b)}${c}` }
   Is         = a:RelArg _ b:('is' __ 'an'/'is' __ 'a'/'is'/'are') _x c:RelArg
                 { return (Array.isArray(b)) 

@@ -151,7 +151,7 @@
     'not'       : '¬' , 'setminus' : '∖' , 'subset' : '⊆'  , 'subseteq'     : '⊆'     ,
     'cong'      : '≅' , 'leq'      : '≤' , 'lt'     : '<'  , 'factorial'    : '!'     ,
     'divides'   : '|' , 'cdot'     : '⋅' , '*'      : '⋅'  , 'love'         : 'loves' ,
-    'in'        : '∈' , '\\'       : ' '           
+    'in'        : '∈' , '\\'       : ' ' , 'fear'   : 'fears'          
   }
 
   // for use in Declare's, look up the internal name of a reserted word or
@@ -430,7 +430,7 @@ Prop = Iff
 //
 Relations = Maps / Partition / Congruent / Subset / ElementOf / NotEltOf / 
             Divides / Leq / LessThan / Relation / Equation / NotEqual / 
-            Loves / Is
+            Loves / Fears / Is
 
   Maps       = a:RelArg _':'_ b:RelArg _'to'_x c:RelArg  
                  { return lispSeq('maps',[a,b,c]) }
@@ -464,6 +464,8 @@ Relations = Maps / Partition / Congruent / Subset / ElementOf / NotEltOf /
                 { return lispSeq('=',a) }
   Loves      = a:RelArg _('loves'/'love')_x b:RelArg
                 { return lispBinary('loves',a,b) }
+  Fears      = a:RelArg _('fears'/'fear')_x b:RelArg
+                { return lispBinary('fears',a,b) }
   Is         = a:RelArg _('is' __ 'an'/'is' __ 'a'/'is'/'are')_x b:RelArg
                 { return lispBinary('is',a,b) }
 
@@ -503,6 +505,7 @@ Set = RelativeComp
 // that inherits the ones below it (but Choose does not). Atomic is passed up
 // the chain from Exp.
 Algebraic = Choose / Sum / Product
+  
   
   Choose    = a:(Sum / Product) _'choose'_x b:(Sum / Product) 
                 { return lispBinary('choose',a,b) }      

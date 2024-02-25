@@ -166,6 +166,9 @@ x+1 leq 0
 n|6
 k+1|n-1
 Fred loves wilma
+You love wilma
+Fred fears wilma
+We fear Fred
 // set relations
 x in A
 2 in Set(0,2,4,6)
