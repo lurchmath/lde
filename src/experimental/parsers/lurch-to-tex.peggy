@@ -93,6 +93,12 @@
     return ans
   }
 
+  // convert summations to putdown
+  const summation = (f,k,a,b) => {
+    a = a || 0 
+    return `\\displaystyle\\sum_{${k}=${a}}^{${b}} ${f}`
+  }
+
   // remove tex parentheses from a string
   const nopar = s => {
     return s.replace(/^\\left\((.*)\\right\)$/,'$1')
@@ -630,8 +636,26 @@ Set = RelativeComp
 // Once again, Algebraic only has to point to the lowest precedence operator
 // that inherits the ones below it (but Choose does not). Atomic is passed up
 // the chain from Exp.
-Algebraic = Choose / Sum / Product
+Algebraic = Summation / Choose / Sum / Product
   
+  // this is one of the more complex symbols so we support multiple ways of entering it
+  Summation = 'sum'i __ k:Symbol __ a:('from' __ @Expression __)? 'to'i __ b:Expression
+              __ ('of'i __)? f:Expression
+                  { return summation(f,k,a,b) }  /  
+
+              'sum'i __ k:Symbol _ '=' _ a:Expression __ 'to'i __ b:Expression
+              __ ('of'i __)? f:Expression
+                  { return summation(f,k,a,b) }  /  
+
+              'sum'i __ ('of'i __)? f:Expression __ 
+              ('as'i __ / 'for'i__) k:Symbol __ ('goes'i __)? 
+              a:('from' __ @Expression __)? 'to'i __ b:Expression
+                  { return summation(f,k,a,b) }  /  
+
+              'sum'i '(' _ f:Expression comma 
+                           k:Symbol comma a:(@Expression comma)? b:Expression _ ')'
+                  { return summation(f,k,a,b) }  
+
   Choose    = a:(Sum / Product) _'choose'_x b:(Sum / Product) 
                 { return `\\binom{${nopar(a)}}{${nopar(b)}}` }
   Sum       = a:Product _ b:(_ [-+] _ Product)+            

@@ -103,6 +103,12 @@
     return ans + ')'
   }
 
+  // convert summations to putdown
+  const summation = (f,k,a,b) => {
+    a = a || 0 
+    return `(sum (${k} , ${f}) ${a} ${b})`
+  }
+
   // join the elements in an array with spaces
   const spacedSeq = s => { return s.join(' ') }
 
@@ -504,9 +510,26 @@ Set = RelativeComp
 // Once again, Algebraic only has to point to the lowest precedence operator
 // that inherits the ones below it (but Choose does not). Atomic is passed up
 // the chain from Exp.
-Algebraic = Choose / Sum / Product
+Algebraic = Summation / Choose / Sum / Product
   
-  
+  // this is one of the more complex symbols so we support multiple ways of entering it
+  Summation = 'sum'i __ k:Symbol _ '=' _ a:Expression __ 'to'i __ b:Expression
+              __ ('of'i __)? f:Expression
+                  { return summation(f,k,a,b) }  / 
+
+              'sum'i __ k:Symbol __ a:('from' __ @Expression __)? 'to'i __ b:Expression
+              __ ('of'i __)? f:Expression
+                  { return summation(f,k,a,b) }  /  
+
+              'sum'i __ ('of'i __)? f:Expression 
+              __ ('as'i __ / 'for'i__) k:Symbol __ ('goes'i __)? 
+              a:('from' __ @Expression __)? 'to'i __ b:Expression
+                  { return summation(f,k,a,b) }  /
+
+              'sum'i '(' _ f:Expression comma 
+              k:Symbol comma a:(@Expression comma)? b:Expression _ ')'
+                  { return summation(f,k,a,b) }              
+
   Choose    = a:(Sum / Product) _'choose'_x b:(Sum / Product) 
                 { return lispBinary('choose',a,b) }      
   Sum       = a:Product _ b:(_ [-+] _ Product)+            
@@ -633,7 +656,8 @@ ReservedWord  = $(
     'not' / 'to' / 'from' / 'implies' / 'iff' / 'intersect' / 'union' /
     'cross' / 'in' / 'subset' / 'setminus'i / 'circ' / 'wedge' / 'vee' / 
     'equiv' / 'mapsto' / 'approx' / 'langle' / 'rangle' / 'complement' / 
-    'inv' / 'and' / 'or' / '=' / '<' / '+' / '*' / '|' / '-')
+    'inv' / 'and' / 'or' / '=' / '<' / '+' / '*' / '|' / '-' / 'sum' / 
+    'to' / 'of' / 'from' / 'as' / 'for')
 
 ///////////////////////////////////////////////////////////////////////////////
 // punctuation and character classes

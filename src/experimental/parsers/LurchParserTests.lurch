@@ -319,6 +319,23 @@ a cong b mod m
 a+k ≅ b-3 mod m
 a+k cong b-3 mod m
 
+// summations
+sum k=0 to n of k^2
+sum k from 0 to n of k^2
+sum k to n of k^2
+
+sum of k^2 as k goes from 0 to n
+sum k^2 as k goes from 0 to n
+sum k^2 as k from 0 to n
+sum k^2 for k from 0 to n
+sum k^2 for k to n
+sum of k^2 as k to n
+sum of k^2 for k to n
+
+sum( k^2 , k , 0 , n )
+sum(k^2,k,0,n)
+sum(k^2,k,n)
+
 // misc
 ∀y.𝜆P(y) ⇒ y=x
 { :not n=0 (exists m.n=sigma(m)) }
