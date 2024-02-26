@@ -156,7 +156,10 @@
       NN      : '\\mathbb{N}'   , ZZ   : '\\mathbb{Z}' , QQ         : '\\mathbb{Q}'  , 
       RR      : '\\mathbb{R}'   , CC   : '\\mathbb{C}' , or         : '\\text{or}'   ,
       implies : '\\Rightarrow'  , and  : '\\text{and}' , not        : '\\neg'        ,
-      '~'     : '\\sim'         , iff  : '\\Leftrightarrow' ,   
+      forall  : '\\forall'  , exists   : '\\exists'    , existsUnique : '\\exists!'  ,
+      '*'     : '\\cdot'    , cdot     : '\\cdot'      , leq        : '\\leq'        ,
+      '^'     : '{}^\\wedge', 
+      '~'     : '\\sim'     , iff      : '\\Leftrightarrow' ,   
       contradiction : '\\rightarrow\\leftarrow' ,
       equivalenceRelation : '\\text{equivalence relation}' ,
       strictPartialOrder : '\\text{strict partial order}' ,
@@ -636,34 +639,40 @@ Set = RelativeComp
 // Once again, Algebraic only has to point to the lowest precedence operator
 // that inherits the ones below it (but Choose does not). Atomic is passed up
 // the chain from Exp.
-Algebraic = Summation / Choose / Sum / Product
+Algebraic = Choose / Sum / Summation / Product
   
-  // this is one of the more complex symbols so we support multiple ways of entering it
-  Summation = 'sum'i __ k:Symbol __ a:('from' __ @Expression __)? 'to'i __ b:Expression
-              __ ('of'i __)? f:Expression
-                  { return summation(f,k,a,b) }  /  
-
-              'sum'i __ k:Symbol _ '=' _ a:Expression __ 'to'i __ b:Expression
-              __ ('of'i __)? f:Expression
-                  { return summation(f,k,a,b) }  /  
-
-              'sum'i __ ('of'i __)? f:Expression __ 
-              ('as'i __ / 'for'i__) k:Symbol __ ('goes'i __)? 
-              a:('from' __ @Expression __)? 'to'i __ b:Expression
-                  { return summation(f,k,a,b) }  /  
-
-              'sum'i '(' _ f:Expression comma 
-                           k:Symbol comma a:(@Expression comma)? b:Expression _ ')'
-                  { return summation(f,k,a,b) }  
-
   Choose    = a:(Sum / Product) _'choose'_x b:(Sum / Product) 
                 { return `\\binom{${nopar(a)}}{${nopar(b)}}` }
-  Sum       = a:Product _ b:(_ [-+] _ Product)+            
+  Sum       = a:(Summation / Product) _ b:(_ [-+] _ (Summation / Product))+ 
                 { return texSum(a,b) }
-  Product   = a:(Denom/Negated/ExpArgs)
+
+  // this is one of the more complex symbols so we support multiple ways of
+  // entering it Precendence for this is a bit tricky.  What seems most natural
+  // and avoids the most awkward parentheses is to make summation higher
+  // precedence than addition but lower than multiplication.  That way e.g. 'sum
+  // k to n of f(k) + sum k to n of g(k)' will be the sum of the two summations,
+  // rather than a single summation where the second one is part of the summands
+  // of the first. 
+  Summation = 'sum'i __ k:Symbol __ a:('from' __ @Product __)? 'to'i __ b:Product
+              __ ('of'i __)? f:Product
+                  { return summation(f,k,a,b) }  /  
+
+              'sum'i __ k:Symbol _ '=' _ a:Product __ 'to'i __ b:Product
+              __ ('of'i __)? f:Product
+                  { return summation(f,k,a,b) }  /  
+
+              'sum'i __ ('of'i __)? f:Product __ 
+              ('as'i __ / 'for'i__) k:Symbol __ ('goes'i __)? 
+              a:('from' __ @Product __)? 'to'i __ b:Product
+                  { return summation(f,k,a,b) }  /  
+
+              'sum'i '(' _ f:Product comma 
+                           k:Symbol comma a:(@Product comma)? b:Product _ ')'
+                  { return summation(f,k,a,b) }  
+
+    Product   = a:(Denom/Negated/ExpArgs)
                 |1..,(_'⋅'_/_'cdot'_x/_'*'_)| 
                 { return texProduct(a) }
-                
     Denom     = '/' _ a:ExpArgs 
                   { return '/'+a }    
     Negated   = '-' _ a:ExpArgs 
@@ -717,8 +726,13 @@ Algebraic = Summation / Choose / Sum / Product
 // not intended for use in any other way than for writing rules that require
 // 𝜆P(k) where P is a single character Symbol and k an Expression.
 Prefix = // LDE EFA's first
+         // Notice that for tex purposes there's no need to show the user the @
+         // or 𝜆, thought technically both P(k) and @P(k) will render the same.
+         // But the EFA's only appear in rules and standard math convention is
+         // that it is understood.  However, we can make it more distinctive by
+         // making the function name in mathcal or some other font.
          '@' a:[a-z]i b:( '('_ @ExpressionSeq _')' )+ 
-            { return `\\lambda ${a}\\left(${b})\\right)` } /
+            { return `\\mathcal{${a}}\\left(${b}\\right)` } /
           // then the rest 
           a:(Exp / Symbol / Parenthesized)
           b:( '('_ @ExpressionSeq _')' )+ { return texPrefix(a,b) }
@@ -785,7 +799,7 @@ ReservedWord  = $(
     'not' / 'to' / 'from' / 'implies' / 'iff' / 'intersect' / 'union' /
     'cross' / 'in' / 'subset' / 'setminus'i / 'circ' / 'wedge' / 'vee' / 
     'equiv' / 'mapsto' / 'approx' / 'langle' / 'rangle' / 'complement' / 
-    'inv' / 'and' / 'or' / '=' / '<' / '+' / '*' / '|' / '-')
+    'inv' / 'and' / 'or' / '=' / '<' / '+' / '*' / '|' / '-' / '^')
 
 ///////////////////////////////////////////////////////////////////////////////
 // punctuation and character classes

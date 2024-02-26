@@ -157,7 +157,7 @@
     'not'       : '¬' , 'setminus' : '∖' , 'subset' : '⊆'  , 'subseteq'     : '⊆'     ,
     'cong'      : '≅' , 'leq'      : '≤' , 'lt'     : '<'  , 'factorial'    : '!'     ,
     'divides'   : '|' , 'cdot'     : '⋅' , '*'      : '⋅'  , 'love'         : 'loves' ,
-    'in'        : '∈' , '\\'       : ' ' , 'fear'   : 'fears'          
+    'in'        : '∈' , 'Sum'      : 'sum', '\\'    : ' '  , 'fear'         : 'fears'
   }
 
   // for use in Declare's, look up the internal name of a reserted word or
@@ -510,30 +510,37 @@ Set = RelativeComp
 // Once again, Algebraic only has to point to the lowest precedence operator
 // that inherits the ones below it (but Choose does not). Atomic is passed up
 // the chain from Exp.
-Algebraic = Summation / Choose / Sum / Product
+Algebraic = Choose / Sum / Summation / Product
   
-  // this is one of the more complex symbols so we support multiple ways of entering it
-  Summation = 'sum'i __ k:Symbol _ '=' _ a:Expression __ 'to'i __ b:Expression
-              __ ('of'i __)? f:Expression
-                  { return summation(f,k,a,b) }  / 
-
-              'sum'i __ k:Symbol __ a:('from' __ @Expression __)? 'to'i __ b:Expression
-              __ ('of'i __)? f:Expression
-                  { return summation(f,k,a,b) }  /  
-
-              'sum'i __ ('of'i __)? f:Expression 
-              __ ('as'i __ / 'for'i__) k:Symbol __ ('goes'i __)? 
-              a:('from' __ @Expression __)? 'to'i __ b:Expression
-                  { return summation(f,k,a,b) }  /
-
-              'sum'i '(' _ f:Expression comma 
-              k:Symbol comma a:(@Expression comma)? b:Expression _ ')'
-                  { return summation(f,k,a,b) }              
-
   Choose    = a:(Sum / Product) _'choose'_x b:(Sum / Product) 
                 { return lispBinary('choose',a,b) }      
-  Sum       = a:Product _ b:(_ [-+] _ Product)+            
+  Sum       = a:(Summation / Product) _ b:(_ [-+] _ (Summation / Product))+ 
                 { return lispSum(a,b) }
+
+  // this is one of the more complex symbols so we support multiple ways of
+  // entering it Precendence for this is a bit tricky.  What seems most natural
+  // and avoids the most awkward parentheses is to make summation higher
+  // precedence than addition but lower than multiplication.  That way e.g. 'sum
+  // k to n of f(k) + sum k to n of g(k)' will be the sum of the two summations,
+  // rather than a single summation where the second one is part of the summands
+  // of the first. 
+  Summation = 'sum'i __ k:Symbol _ '=' _ a:Product __ 'to'i __ b:Product
+              __ ('of'i __)? f:Product
+                  { return summation(f,k,a,b) }  / 
+
+              'sum'i __ k:Symbol __ a:('from' __ @Product __)? 'to'i __ b:Product
+              __ ('of'i __)? f:Product
+                  { return summation(f,k,a,b) }  /  
+
+              'sum'i __ ('of'i __)? f:Product 
+              __ ('as'i __ / 'for'i__) k:Symbol __ ('goes'i __)? 
+              a:('from' __ @Product __)? 'to'i __ b:Product
+                  { return summation(f,k,a,b) }  /
+
+              'sum'i '(' _ f:Product comma 
+              k:Symbol comma a:(@Product comma)? b:Product _ ')'
+                  { return summation(f,k,a,b) }              
+
   Product   = a:(Denom/Negated/ExpArgs)
                 |1..,(_'⋅'_/_'cdot'_x/_'*'_)| 
                 { return lispSeq('⋅',a) }
@@ -656,8 +663,8 @@ ReservedWord  = $(
     'not' / 'to' / 'from' / 'implies' / 'iff' / 'intersect' / 'union' /
     'cross' / 'in' / 'subset' / 'setminus'i / 'circ' / 'wedge' / 'vee' / 
     'equiv' / 'mapsto' / 'approx' / 'langle' / 'rangle' / 'complement' / 
-    'inv' / 'and' / 'or' / '=' / '<' / '+' / '*' / '|' / '-' / 'sum' / 
-    'to' / 'of' / 'from' / 'as' / 'for')
+    'inv' / 'and' / 'or' / '=' / '<' / '+' / '*' / '|' / '-' / 'sum'i / 
+    'to' / 'of' / 'from' / 'as' / 'for' / '^' )
 
 ///////////////////////////////////////////////////////////////////////////////
 // punctuation and character classes
