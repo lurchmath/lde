@@ -142,6 +142,12 @@ const all = { showDeclares, showAttributes , showBodies, showContexts,
               showInstantiations , showNumbers , showProperNames ,
               showUserRules , showUserInstantiations , showValidation
             }                     
+// most report options
+const most = { showDeclares, showAttributes , showBodies, showContexts,
+              showRules , showUserThms , showConsiders ,
+              showInstantiations , showNumbers , showProperNames ,
+              showUserRules , showUserInstantiations , showValidation
+            }                     
 // simple report option
 const show = { showDeclares, showAttributes , showBodies, showContexts,
                showRules , showUserThms , showPartials,
@@ -179,6 +185,7 @@ const formula = 'Formula'
 const constant = 'constant'
 const hint = 'BIH'
 const scoping = 'scope errors'
+const implicit = 'implicitly declares'
 const valid = 'valid'
 const invalid = 'invalid'
 const context = 'context'
@@ -266,7 +273,7 @@ const formatter = ( options=defaultOptions ) => {
       const highlighted=[ metavariable, constant, instantiation, hint, valid, 
             invalid, declare, formula ].map( s => '_type_'+s )
       // then non-types
-      highlighted.push(scoping,context,ProperName,validation,validations,id)
+      highlighted.push(scoping,implicit,context,ProperName,validation,validations,id)
       let keys=attr.filter( a => !highlighted.includes(a) )
       // format what's left
       if (keys.length>0) {
@@ -551,6 +558,13 @@ Object.defineProperty(LogicConcept.prototype, 'all', {
 })
 
 // Because this is used so often
+Object.defineProperty(LogicConcept.prototype, 'most', {
+  get: function() {
+    this.report(most)
+  }
+})
+
+// Because this is used so often
 Object.defineProperty(LogicConcept.prototype, 'nice', {
   get: function() {
     this.report(nice)
@@ -572,7 +586,7 @@ export default {
   decPen , commentPen , headingPen , docPen , linenumPen , itemPen ,
   
   // report definitions
-  all, show, detailed , moderate, allclean, clean , user , nice ,
+  all, most, show, detailed , moderate, allclean, clean , user , nice ,
   
   // report options
   showAttributes , showContexts , showRules , showInstantiations , 
