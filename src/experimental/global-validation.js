@@ -264,7 +264,7 @@ const validate = ( doc, target = doc ) => {
   
   ///////////////
   // Scoping
-  Scoping.validate(doc)
+  Scoping.validate(doc, Scoping.declareInAncestor)
   
   ///////////////
   // Caching
