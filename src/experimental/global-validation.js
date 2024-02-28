@@ -264,7 +264,7 @@ const validate = ( doc, target = doc ) => {
   
   ///////////////
   // Scoping
-  Scoping.validate(doc, Scoping.declareInAncestor)
+  Scoping.validate(doc, Scoping.declareWhenSeen)
   
   ///////////////
   // Caching
@@ -1141,6 +1141,24 @@ const matchPropositions = (p, e) => {
  */
 const insertInstantiation = ( inst, formula, creator ) => {
 
+    // Currently expressions are marked as Consider's, 
+    // If inst is an Expression we need to wrap it in an Environment so that any
+    // free variables it contains are not implicitly declared by it and
+    // inadvertently invalidate declarations of the same symbol later in the
+    // document.
+    const consider = inst instanceof Expression
+    if (consider) {
+      inst.makeIntoA('Consider')
+      inst.unmakeIntoA('given')
+      // Consider's don't have prop form
+      inst.ignore = true
+      // wrap it in an environment
+      inst = new Environment(inst)
+      // and it can be ignored as well
+      inst.ignore=true
+      // inst.makeIntoA('Inst')  // do we need this?
+    }
+
     // it might contain a Let which was instantiated by some other
     // statment, so we might have to add the tickmarks.
     //
@@ -1188,15 +1206,15 @@ const insertInstantiation = ( inst, formula, creator ) => {
     inst.statements().forEach(x => renameBindings(x))
     
     // if it's an expression, it's a Consider
-    if (inst instanceof Expression) {
-      inst.makeIntoA('Consider')
-      inst.makeIntoA('Inst')
-      // Consider's don't have prop form
-      inst.ignore = true
-    }
+    // if (inst instanceof Expression) {
+    //   inst.makeIntoA('Consider')
+    //   inst.makeIntoA('Inst')
+    //   // Consider's don't have prop form
+    //   inst.ignore = true
+    // }
 
     // if it's an environment, check if the inst has metavars, and mark it appropriately
-    if ( inst instanceof Environment ) {
+    if ( inst instanceof Environment && !consider ) {
       cacheFormulaDomainInfo(inst)
       if (inst.domain.size === 0) {
         inst.unmakeIntoA('Rule')
