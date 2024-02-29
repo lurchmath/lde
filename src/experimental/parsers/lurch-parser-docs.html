@@ -201,7 +201,7 @@
 <tr><td colspan="2" class="subheader">Miscellaneous</td></tr>
 <tr><td>f^inv(A)</td><td>${f}^{\text{inv}}\left(A\right)$</td></tr>
 <tr><td>x^-<br/>x⁻</td><td>${x}^{-}$</td></tr>
-<tr><td>@P(k)<br/>λP(k)</td><td>$P\left(k\right)$</td></tr>
+<tr><td>@P(k)<br/>λP(k)</td><td>$\mathcal{P}\left(k\right)$</td></tr>
 
   </tbody>
 </table>
@@ -211,7 +211,12 @@
 <section id="precedence"></section>
 <h2>Precedence</h2>
 
-<p>The precedence of operations from highest to lowest is as follows.</p>
+<p>The precedence of operations from highest to lowest are given in the following table. There are a few fine points to be aware of.</p>
+  <ul>
+    <li>Exponentiation has higher precedence than function application.  That is normally what is expected for something like $f^2(x)$ or $f^\text{inv}(S)$ but might not be what is expected for something like $z^{\sigma(n)}$.  The first two can be typed as you would expect <code>f^2(S)</code> and <code>f^inv(x)</code> while the latter would be entered as <br/><code>z^(sigma(x))</code>.</li>
+    <li>Summation has precedence higher than addition but lower than multiplication. Thus, <br/><code>sum k to n f(k) + 2</code> is interpreted as $\left(\sum_{k=0}^n f(k)\right)+2$, whereas <code>sum k to n (f(k) + 2)</code> is interpreted as $\sum_{k=0}^n \left(f(k)+2\right)$.
+    </li>
+  </ul>
 <table id="precedence">
     <thead>
     <tr>
@@ -220,14 +225,15 @@
   </thead>
   <tbody>
     <tr><td>parentheses $(~~)$, tuples $\langle~~\rangle$, equivalence classes $[~~]$, symbols, numbers</td></tr>
-    <tr><td>exponentials ($x^2$)</td></tr>
+    <tr><td>exponentials $\left(x^2\right)$</td></tr>
     <tr><td>factorial ($n!$)</td></tr>
-    <tr><td>function application ($f(x,y)(z)$)</td></tr>
+    <tr><td>function application $\left(f(x,y)(z)\right)$</td></tr>
     <tr><td>negation ($-x$), reciprocal ($1/2$)</td></tr>
     <tr><td>product ($2\cdot x$)</td></tr>
+    <tr><td>summation $\left(\sum_{k=0}^n f(k)\right)$</td></tr>
     <tr><td>sum ($x+y-1$)</td></tr>
-    <tr><td>choose ($\binom{m+n}{m}$)</td></tr>
-    <tr><td>composition ($g\circ f$)</td></tr>
+    <tr><td>choose $\binom{m+n}{m}$</td></tr>
+    <tr><td>composition $\left(g\circ f\right)$</td></tr>
     <tr><td>complement ($A^\circ$)</td></tr>
     <tr><td>intersection ($A\cap B$)</td></tr>
     <tr><td>union ($A\cup B$)</td></tr>
@@ -242,7 +248,7 @@
     <tr><td>binding ($x.P(x)$)</td></tr>
     <tr><td>quantified ($\forall x.P(x)$)</td></tr>
     <tr><td>declarations ('Declare', 'Let', 'for some')</td></tr>
-    <tr><td>environment ($\{~\}$)</td></tr>    
+    <tr><td>environment $\{~\}$</td></tr>    
   </tbody>
 </table>
 </section>
