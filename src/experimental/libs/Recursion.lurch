@@ -7,27 +7,27 @@ include libs/PeanoThm
 //////////////////////////////////
 // Recursive Sequence Definitions
 //////////////////////////////////
-Declare Sum, F, multinom
+Declare Sum, ^, Fib, multinom
 
 Definitions:  
 {
 		// summation
-    :{ Sum(0,k.𝜆P(k)) = 𝜆P(0) }
-    :{ Sum(𝜎(n),k.𝜆P(k)) = 𝜆P(𝜎(n)) + Sum(n,k.𝜆P(k)) }
+    :{ Sum(𝜆P(k),k,0,0) = 𝜆P(0) }
+    :{ Sum(𝜆P(k),k,0,𝜎(n)) = 𝜆P(𝜎(n)) + Sum(𝜆P(k),k,0,n) }
 
 		// natural number exponents
 		:{ z^0=1 }
-		:{ z^𝜎(n)=z⋅z^n }
+		:{ z^(𝜎(n))=z⋅z^n }
 
     // factorial (TODO: make the peggy parser work for factorials)
 
 		// Fibonacci
-    :{ F(0)=1 F(1)=1 }
-		:{ F(n+2)=F(n+1)+F(n) }
+    :{ Fib(0)=1 Fib(1)=1 }
+		:{ Fib(n+2)=Fib(n+1)+Fib(n) }
 
 		// multinomial coefficient
 		:{ multinom(m,0)=1 multinom(0,n)=1 }
 		:{ multinom(m+1,n+1)=multinom(m+1,n)+multinom(m,n+1) }
 		// choose
-		:{ ((n+m) choose m)=multinom(n,m) }		
+		:{ (n+m choose m)=multinom(n,m) }		
 } 

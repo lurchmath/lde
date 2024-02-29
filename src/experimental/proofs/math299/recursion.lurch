@@ -10,16 +10,16 @@ include libs/Recursion
 ➤ "Just a warm up example (not assigned)"
 
 {
-  ➤ "Theorem: Sum(2,i.i^2) = 2^2+(1^2+0^2)"
-	{ Sum(2,i.i^2) = 2^2+(1^2+0^2) }
+  ➤ "Theorem: Sum(i^2,i,2) = 2^2+(1^2+0^2)"
+	{ Sum(i^2,i,2) = 2^2+(1^2+0^2) }
 	➤ "Proof:"
 	{
-		Sum(2,i.i^2) = Sum(𝜎(1),i.i^2)
-							 = (𝜎(1))^2+Sum(1,i.i^2)
-							 = 2^2+Sum(1,i.i^2)
-							 = 2^2+Sum(𝜎(0),i.i^2)
-							 = 2^2+((𝜎(0))^2+Sum(0,i.i^2))
-							 = 2^2+(1^2+Sum(0,i.i^2))
+		Sum(i^2,i,2) = Sum(i^2,i,𝜎(1))
+							 = (𝜎(1))^2+Sum(i^2,i,1)
+							 = 2^2+Sum(i^2,i,1)
+							 = 2^2+Sum(i^2,i,𝜎(0))
+							 = 2^2+((𝜎(0))^2+Sum(i^2,i,0))
+							 = 2^2+(1^2+Sum(i^2,i,0))
 							 = 2^2+(1^2+0^2)
 	}
 }
@@ -43,10 +43,10 @@ Rule: :{ z^m⋅z^n = z^(m+n) }
 		➤ "Inductive step:"
 		{ :Let k be such that (z^m)^k = z^(m⋅k)
 
-			(z^m)^𝜎(k) = z^m⋅(z^m)^k
-			           = z^m⋅z^(m⋅k)
-								 = z^(m+m⋅k)
-								 = z^(m⋅𝜎(k))
+			(z^m)^(𝜎(k)) = z^m⋅(z^m)^k
+			             = z^m⋅z^(m⋅k)
+								   = z^(m+m⋅k)
+								   = z^(m⋅𝜎(k))
 
 		}				
 		➤ "Therefore, by induction"
@@ -58,30 +58,31 @@ Rule: :{ z^m⋅z^n = z^(m+n) }
 ➤ "Thm 8.5(a) - Assignment #15"
 
 {
-	➤ "Theorem: Sum(n,i.a(i)+b(i)) = Sum(n,i.a(i))+Sum(n,i.b(i))"
-	{ Sum(n,i.a(i)+b(i)) = Sum(n,i.a(i))+Sum(n,i.b(i)) }
+	➤ "Theorem: Sum(a(i,i,n)+b(i)) = Sum(a(i,i,n))+Sum(b(i,i,n))"
+	{ Sum((a(i)+b(i)),i,n) = Sum(a(i),i,n) + Sum(b(i),i,n) }
 	➤ "Proof: (by induction on n)"
 	{
     ➤ "Base Case"
-		  Sum(0,i.a(i)+b(i)) = a(0)+b(0)
-			                 = Sum(0,i.a(i))+b(0)
-											 = Sum(0,i.a(i))+Sum(0,i.b(i))
+		  Sum((a(i)+b(i)),i,0) = a(0)+b(0)
+			                 = Sum(a(i),i,0)+b(0)
+											 = Sum(a(i),i,0)+Sum(b(i),i,0)
      
 		➤ "Inductive step:"
-		{ :Let k be such that Sum(k,i.a(i)+b(i)) = Sum(k,i.a(i))+Sum(k,i.b(i))
+		{ :Let k be such that Sum((a(i)+b(i)),i,k) = Sum(a(i),i,k)+Sum(b(i),i,k)
 			
-			Sum(𝜎(k),i.a(i)+b(i)) = ( a(𝜎(k))+b(𝜎(k)) ) + Sum(k,i.a(i)+b(i)) 
-			                    = ( a(𝜎(k))+b(𝜎(k)) ) + ( Sum(k,i.a(i))+Sum(k,i.b(i)) )
-			                    = a(𝜎(k)) + (b(𝜎(k))+( Sum(k,i.a(i))+Sum(k,i.b(i)) ))
-			                    = a(𝜎(k)) + (( b(𝜎(k))+Sum(k,i.a(i)) )+Sum(k,i.b(i)))
-			                    = a(𝜎(k)) + (( Sum(k,i.a(i))+b(𝜎(k)) )+Sum(k,i.b(i)))
-			                    = a(𝜎(k)) + (Sum(k,i.a(i))+( b(𝜎(k))+Sum(k,i.b(i)) ))
-			                    = ( a(𝜎(k))+Sum(k,i.a(i)) ) + ( b(𝜎(k))+Sum(k,i.b(i)) )
-			                    = Sum(𝜎(k),i.a(i)) + ( b(𝜎(k))+Sum(k,i.b(i)) )
-													= Sum(𝜎(k),i.a(i)) + Sum(𝜎(k),i.b(i))
+			Sum((a(i)+b(i)),i,𝜎(k)) 
+			        = ( a(𝜎(k))+b(𝜎(k)) ) + Sum((a(i)+b(i)),i,k) 
+			        = ( a(𝜎(k))+b(𝜎(k)) ) + ( Sum(a(i),i,k)+Sum(b(i),i,k) )
+			        =  a(𝜎(k)) + (b(𝜎(k))+( Sum(a(i),i,k)+Sum(b(i),i,k) ))
+			        =  a(𝜎(k)) + ( ( b(𝜎(k))+Sum(a(i),i,k) ) + Sum(b(i),i,k) )
+			        =  a(𝜎(k)) + ( ( Sum(a(i),i,k)+b(𝜎(k)) ) + Sum(b(i),i,k) )
+			        =  a(𝜎(k)) + ( Sum(a(i),i,k)+ (b(𝜎(k))+Sum(b(i),i,k)) )
+			        =  (a(𝜎(k)) + Sum(a(i),i,k)) + (b(𝜎(k))+Sum(b(i),i,k))
+			        =  Sum(a(i),i,𝜎(k)) + (b(𝜎(k))+Sum(b(i),i,k))
+			        =  Sum(a(i),i,𝜎(k)) + Sum(b(i),i,𝜎(k))
 		}
 		➤ "Therefore, by induction"
-		∀n.Sum(n,i.a(i)+b(i)) = Sum(n,i.a(i))+Sum(n,i.b(i))		
+		∀n.Sum((a(i)+b(i)),i,n) = Sum(a(i),i,n) + Sum(b(i),i,n)
 		➤ "and the theorem follows."
 	}
 }
@@ -89,25 +90,25 @@ Rule: :{ z^m⋅z^n = z^(m+n) }
 ➤ "Thm 8.7 - Assignment #15 - Fibonacci numbers"
 
 {
-  ➤ "Theorem: F(n+3)+F(n)=2⋅F(n+2)"
-	{ F(n+3)+F(n)=2⋅F(n+2) }
+  ➤ "Theorem: Fib(n+3)+Fib(n)=2⋅Fib(n+2)"
+	{ Fib(n+3)+Fib(n)=2⋅Fib(n+2) }
 	➤ "Proof:"
 	{
-		F(n+3)+F(n) = F(n+𝜎(2))+F(n)
-		            = F(n+(2+1))+F(n)
-		            = F(n+(1+2))+F(n)
-		            = F((n+1)+2)+F(n)
-								= (F((n+1)+1)+F(n+1))+F(n)
-								= (F(n+(1+1))+F(n+1))+F(n)
-								= (F(n+𝜎(1))+F(n+1))+F(n)
-								= (F(n+2)+F(n+1))+F(n)
-								= F(n+2)+(F(n+1)+F(n))
-								= F(n+2)+F(n+2)
-								= 1⋅F(n+2)+F(n+2)
-								= 1⋅F(n+2)+1⋅F(n+2)
-								= (1+1)⋅F(n+2)
-								= 𝜎(1)⋅F(n+2)
-		            = 2⋅F(n+2)
+		Fib(n+3)+Fib(n) = Fib(n+𝜎(2))+Fib(n)
+		            = Fib(n+(2+1))+Fib(n)
+		            = Fib(n+(1+2))+Fib(n)
+		            = Fib((n+1)+2)+Fib(n)
+								= (Fib((n+1)+1)+Fib(n+1))+Fib(n)
+								= (Fib(n+(1+1))+Fib(n+1))+Fib(n)
+								= (Fib(n+𝜎(1))+Fib(n+1))+Fib(n)
+								= (Fib(n+2)+Fib(n+1))+Fib(n)
+								= Fib(n+2)+(Fib(n+1)+Fib(n))
+								= Fib(n+2)+Fib(n+2)
+								= 1⋅Fib(n+2)+Fib(n+2)
+								= 1⋅Fib(n+2)+1⋅Fib(n+2)
+								= (1+1)⋅Fib(n+2)
+								= 𝜎(1)⋅Fib(n+2)
+		            = 2⋅Fib(n+2)
 	}
 } ✔︎
 
