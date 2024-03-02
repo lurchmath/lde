@@ -589,6 +589,15 @@ rpl.defineCommand( "showdocs", {
   }
 })
 
+// define the Lode .fixcdn command
+rpl.defineCommand( "fixcdn", {
+  help: "Overwrite lde-cdn.js with the local copy.",
+  action() { 
+    exec('cp "utils/lurchmath config/lde-cdn.js" ../../../lurchmath')
+    console.log(defaultPen('...done'))
+    this.displayPrompt()
+  }
+})
 
 // export the repl.writer to be available at the repl command line
 global.write = s => console.log(rpl.writer(s))
