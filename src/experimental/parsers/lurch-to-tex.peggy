@@ -32,8 +32,8 @@
   // Rule Form                 Returns
   // A                         A'
   // (A)                       A'
-  // A B C                     [ A' , B' , C']
-  // (A B C)                   [ A', B' , C' ]
+  // A B C                     [ A' , B' , C' ]
+  // (A B C)                   [ A' , B' , C' ]
   // (A B) C                   [ [A',B'] , C' ]
   // A (B C)                   [ A' , [B',C'] ]
   // A* or A+                  [A',A',...]
@@ -136,7 +136,7 @@
     ans += (ans.length>0) ? `\\cdot ${latest}` : latest
     return ans
   }
-  // instead of making a separate paring class for each symbol we want 
+  // instead of making a separate parsing class for each symbol we want 
   // to convert to tex, we just remap them here
   const texsymbol = s => {
     const tex = {
