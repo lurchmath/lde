@@ -641,8 +641,11 @@ Set = RelativeComp
 // the chain from Exp.
 Algebraic = Choose / Sum / Summation / Product
   
+  // we make this lower precedence that sums so e.g. 'n+1 choose k' can be
+  // entered without parentheses
   Choose    = a:(Sum / Product) _'choose'_x b:(Sum / Product) 
                 { return `\\binom{${nopar(a)}}{${nopar(b)}}` }
+
   Sum       = a:(Summation / Product) _ b:(_ [-+] _ (Summation / Product))+ 
                 { return texSum(a,b) }
 
@@ -679,7 +682,7 @@ Algebraic = Choose / Sum / Summation / Product
                   { return '-'+a }
 
     // Exp and higher precedence args
-    ExpArgs = Factorial / Prefix / Exp / Atomic
+    ExpArgs = Factorial / Multinomial / Prefix / Exp / Atomic
 
     // The choice of precedence of Function application vs Exp is tricky.
     // Consider e.g. 2^cos(x), f^2(x), 2^f(x), f^(-1)(x), and the nightmare
@@ -703,7 +706,7 @@ Algebraic = Choose / Sum / Summation / Product
     //
     //                   Factorial < Prefix < Exp
     
-    Factorial = a:(Prefix / Exp / Atomic) _'factorial'!alphanum
+    Factorial = a:(Multinomial / Prefix / Exp / Atomic) _'factorial'!alphanum
                   {  return a+'!' }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -719,7 +722,12 @@ Algebraic = Choose / Sum / Summation / Product
 // application does NOT allow a space between the function and the parentheses
 // wrapping it's arguments.  To enable this, Inverse, Symbol, and
 // Parenthesized cannot consume any spaces after their content.
-//
+
+// Reserved prefixes
+// Multinomial coefficients
+Multinomial = 'multinomial('i _ a:Expression comma b:Expression _')' 
+            { return `\\left(${a},${b}\\right)` }
+
 // For convenience we define special Symbols beginning with '@' so that @P(k)
 // becomes (λ P k) and then replace λ with "LDE EFA" as a shortcut in
 // parsing.js.  Note that 𝜆 gets replaced by '@' up front in the input. This is
@@ -763,10 +771,12 @@ EquivalenceClass =
 // tuples
 Tuple = 'langle'_x a:ExpressionSeq _'rangle'!alphanum
         { return `\\left\\langle{${a}}\\right\\rangle` }
-// parenthesized
-Parenthesized = '(' _ a:Expression _ ')' { 
-  // we have to check for ~ as a special case (see above)
-  return (a === '\\sim') ? a : `\\left(${a}\\right)` }
+// parenthesized - we also put things here that when they appear in parentheses
+// don't need them
+Parenthesized = '(' _ a:(Choose/Multinomial/Prefix) _ ')' { return a  } /
+                '(' _ a:Expression _ ')' {
+                // we have to check for ~ as a special case (see above)
+                return (a === '\\sim') ? a : `\\left(${a}\\right)` }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Numbers 
