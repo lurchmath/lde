@@ -152,15 +152,16 @@
   }
   
   const internalNames = {
-    'equiv'     : '≡' , 'forall'   : '∀' , 'exists' : '∃'  , 'existsUnique' : '∃!'    ,
-    'iff'       : '⇔' , 'implies'  : '⇒' , 'vee'    : 'or' , 'wedge'        : 'and'   ,
-    'not'       : '¬' , 'setminus' : '∖' , 'subset' : '⊆'  , 'subseteq'     : '⊆'     ,
-    'cong'      : '≅' , 'leq'      : '≤' , 'lt'     : '<'  , 'factorial'    : '!'     ,
-    'divides'   : '|' , 'cdot'     : '⋅' , '*'      : '⋅'  , 'love'         : 'loves' ,
-    'in'        : '∈' , 'Sum'      : 'sum', '\\'    : ' '  , 'fear'         : 'fears'
+    'equiv'     : '≡' , 'forall'   : '∀'  , 'exists' : '∃'  , 'existsUnique' : '∃!'    ,
+    'iff'       : '⇔' , 'implies'  : '⇒'  , 'vee'    : 'or' , 'wedge'        : 'and'   ,
+    'not'       : '¬' , 'setminus' : '∖'  , 'subset' : '⊆'  , 'subseteq'     : '⊆'     ,
+    'cong'      : '≅' , 'leq'      : '≤'  , 'lt'     : '<'  , 'factorial'    : '!'     ,
+    'divides'   : '|' , 'cdot'     : '⋅'  , '*'      : '⋅'  , 'love'         : 'loves' ,
+    'in'        : '∈' , 'Sum'      : 'sum', '\\'     : ' '  , 'fear'         : 'fears' ,
+    'complement': '°' , 'intersect': '∩'  , 'union'  : '∪'
   }
 
-  // for use in Declare's, look up the internal name of a reserted word or
+  // for use in Declare's, look up the internal name of a reserved word or
   // symbol that might appear in the declare sequence
   const internal = s => {
     return internalNames[s] || s
@@ -178,11 +179,12 @@
   // then remove the unicodes
   const replaceUnicode = s => {
     // first, replace toxic unicode chars with their ascii synonym
-    s = s.replace(/𝜎/g  , ' sigma' ) // usually used as a function so no following space
-         .replace(/𝜆/g  , '@'      ) // for "LDE EFA"
-         .replace(/≠/g  , ' neq '  )
-         .replace(/∉/g  , ' notin ')
-         .replace(/⁻/g  , '^-'     )
+    s = s.replace(/𝜎/g  , ' sigma'    ) // usually used as a function so no following space
+         .replace(/𝜆/g  , '@'         ) // for "LDE EFA"
+         .replace(/≠/g  , ' neq '     )
+         .replace(/∉/g  , ' notin '   )
+         .replace(/⁻/g  , '^-'        )
+         .replace(/𝒫/g  , ' powerset' ) // usually used as a function so no following space
     // now replace the given unicode characters that do not appear in strings or
     // putdown
     const chars = '[⋅≤¬→←⇒⇔∩∪×∈⊆∖∘∧∨≡↦≈∀∃⟨⟩➤°!⁻≅\\\\]'      
@@ -646,11 +648,11 @@ Natural = $( [1-9][0-9]* / '0' )
 // For clarity in reading the putdown output we rename some special frequently used
 // symbols.
 Symbol "Symbol" = 
+  '✔︎' / '✗' / '⁉︎' /   // for declaring expected results in tests
   'contradiction' { return '→←' }  /  'sigma'         { return 'σ'  }   /
   'NN'            { return 'ℕ'  }  /  'ZZ'            { return 'ℤ'  }   /
   'QQ'            { return 'ℚ'  }  /  'RR'            { return 'ℝ'  }   /
   'CC'            { return 'ℂ'  }  /  '~'                               /
-  '✔︎' / '✗' / '⁉︎' /            // for declaring expected results in tests
   !(ReservedWord !alphanum) @$([a-z]i alphanum* ) 
 
 // Reserved Words

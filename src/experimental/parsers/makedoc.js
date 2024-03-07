@@ -59,6 +59,7 @@ const syntax =
 [['A cap B', 'A intersect B', 'A∩B'  ],`A\\cap B`],
 [['A setminus B', 'A∖B'              ],`A\\setminus B`],
 [['A complement', 'A°'               ],`A^\\circ`],
+[['powerset(A)', '𝒫(A)'              ],`\\textbf{P}(A)`],
 [['f:A to B', 'f:A→B'                ],`f\\colon A\\to B`],
 [['f(x)'                             ],`f\\left(x\\right)`],
 [['g circ f', 'g comp f' , 'g∘f'     ],`g\\circ f`],

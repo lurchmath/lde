@@ -141,13 +141,16 @@
       implies : '\\Rightarrow'  , and  : '\\text{and}' , not        : '\\neg'        ,
       forall  : '\\forall'  , exists   : '\\exists'    , existsUnique : '\\exists!'  ,
       '*'     : '\\cdot'    , cdot     : '\\cdot'      , leq        : '\\leq'        ,
-      '^'     : '{}^\\wedge', 
-      '~'     : '\\sim'     , iff      : '\\Leftrightarrow' ,   
-      contradiction : '\\rightarrow\\leftarrow' ,
+      in      : '\\in'      , cap      : '\\cap'       , cup        : '\\cup'        ,
+      union   : '\\cup'     , intersect: '\\cap'       , setminus   : '\\setminus'   ,
+      subset  : '\\subseteq', powerset : '\\mathsf{P}' , complement : '{}^\\circ'    ,
+      '^'     : '{}^\\wedge', cross    : '\\times'     , '~'        : '\\sim'        ,
+      iff                 : '\\Leftrightarrow'             ,   
+      contradiction       : '\\rightarrow\\leftarrow'      ,
       equivalenceRelation : '\\text{equivalence relation}' ,
-      strictPartialOrder : '\\text{strict partial order}' ,
-      partialOrder : '\\text{partial order}' ,
-      totalOrder : '\\text{total order}' 
+      strictPartialOrder  : '\\text{strict partial order}' ,
+      partialOrder        : '\\text{partial order}'        ,
+      totalOrder          : '\\text{total order}' 
     } 
     return (tex[s]) ? tex[s] : s
   }
@@ -251,12 +254,13 @@
   }
   
   const internalNames = {
-    'equiv'     : '≡' , 'forall'   : '∀' , 'exists' : '∃'  , 'existsUnique' : '∃!'    ,
-    'iff'       : '⇔' , 'implies'  : '⇒' , 'vee'    : 'or' , 'wedge'        : 'and'   ,
-    'not'       : '¬' , 'setminus' : '∖' , 'subset' : '⊆'  , 'subseteq'     : '⊆'     ,
-    'cong'      : '≅' , 'leq'      : '≤' , 'lt'     : '<'  , 'factorial'    : '!'     ,
-    'divides'   : '|' , 'cdot'     : '⋅' , '*'      : '⋅'  , 'love'         : 'loves' ,
-    'in'        : '∈' , '\\'       : ' ' , 'fear'   : 'fears'           
+    'equiv'     : '≡' , 'forall'   : '∀'  , 'exists' : '∃'  , 'existsUnique' : '∃!'    ,
+    'iff'       : '⇔' , 'implies'  : '⇒'  , 'vee'    : 'or' , 'wedge'        : 'and'   ,
+    'not'       : '¬' , 'setminus' : '∖'  , 'subset' : '⊆'  , 'subseteq'     : '⊆'     ,
+    'cong'      : '≅' , 'leq'      : '≤'  , 'lt'     : '<'  , 'factorial'    : '!'     ,
+    'divides'   : '|' , 'cdot'     : '⋅'  , '*'      : '⋅'  , 'love'         : 'loves' ,
+    'in'        : '∈' , 'Sum'      : 'sum', '\\'     : ' '  , 'fear'         : 'fears' ,
+    'complement': '°' , 'intersect': '∩'  , 'union'  : '∪'
   }
 
   // for use in Declare's, look up the internal name of a reserted word or
@@ -277,11 +281,12 @@
   // then remove the unicodes
   const replaceUnicode = s => {
     // first, replace toxic unicode chars with their ascii synonym
-    s = s.replace(/𝜎/g  , ' sigma' ) // usually used as a function so no following space
-         .replace(/𝜆/g  , '@'      ) // for "LDE EFA"
-         .replace(/≠/g  , ' neq '  )
-         .replace(/∉/g  , ' notin ')
-         .replace(/⁻/g  , '^-'     ) // no need to declare this.. declare - instead
+    s = s.replace(/𝜎/g  , ' sigma'    ) // usually used as a function so no following space
+         .replace(/𝜆/g  , '@'         ) // for "LDE EFA"
+         .replace(/≠/g  , ' neq '     )
+         .replace(/∉/g  , ' notin '   )
+         .replace(/⁻/g  , '^-'        ) // no need to declare this.. declare - instead
+         .replace(/𝒫/g  , ' powerset' ) // usually used as a function so no following space
     // now replace the given unicode characters that do not appear in strings or
     // putdown
     const chars = '[⋅≤¬→←⇒⇔∩∪×∈⊆∖∘∧∨≡↦≈∀∃⟨⟩➤°!⁻≅\\\\]'      
