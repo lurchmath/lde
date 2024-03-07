@@ -216,7 +216,7 @@ const timeEnd = (description) => { if (Debug) console.timeEnd(description) }
  * @param {Environment} doc - the user's document as an LC environment
  * @param {Environment} target - the inference to validate
  */
-const validate = ( doc, target = doc ) => {
+const validate = ( doc, target = doc , scopingMethod = Scoping.declareWhenSeen ) => {
   
   // interpret it if it hasn't been already (the interpret routine checks)
   interpret( doc )
@@ -264,7 +264,7 @@ const validate = ( doc, target = doc ) => {
   
   ///////////////
   // Scoping
-  Scoping.validate(doc, Scoping.declareWhenSeen)
+  Scoping.validate(doc, scopingMethod )
   
   ///////////////
   // Caching
