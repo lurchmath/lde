@@ -35,6 +35,7 @@ loadtest('peano','math299')
 loadtest('midterm','math299')
 loadtest('recursion','math299')
 loadtest('reals','math299')
+loadtest('sets','math299')
 
 // run the tests
 let passed = 0

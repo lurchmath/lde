@@ -32,7 +32,7 @@ include libs/Sets
 		}
 	  𝒫(B°)⊆𝒫(A°)
 	}
-}
+} ✔︎
 
 // end of all
 } 
