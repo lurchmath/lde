@@ -69,9 +69,9 @@ import { makeParser, parseLines } from './parsing.js'
 import { CNFProp } from './CNFProp.js'
 // load the Lurch to putdown parser precompiled for efficiency
 import { parse as lurchToPutdown } from './parsers/lurch-to-putdown.js'
-global.parse = s => {
+global.parse = (s,opts) => {
   try { 
-    return lurchToPutdown(s)
+    return lurchToPutdown(s,opts)
   } catch(e) {
     if (typeof e.format === 'function') {
       console.log(e.format([{
