@@ -33,9 +33,9 @@ export const makeParser = parserstr => {
   const rawparser = peggy.generate(parserstr,opts)
   const rawtraceparser = peggy.generate(parserstr,traceopts)
   
-  const parser = s => {
+  const parser = (s,opts) => {
     try { 
-      return rawparser.parse(s)
+      return rawparser.parse(s,opts)
     } catch(e) {
       if (typeof e.format === 'function') {
         console.log(e.format([{
