@@ -86,9 +86,9 @@ global.parse = (s,opts) => {
 
 // load the Lurch to TeX parser precompiled for efficiency
 import { parse as lurchToTex } from './parsers/lurch-to-tex.js'
-global.tex = s => {
+global.tex = (s,opts)  => {
   try { 
-    return lurchToTex(s)
+    return lurchToTex(s,opts)
   } catch(e) {
     if (typeof e.format === 'function') {
       console.log(e.format([{
