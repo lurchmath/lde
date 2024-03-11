@@ -216,7 +216,6 @@
 
 // Preprocess the input string
 { 
-  
   // Comments
   //
   // Comments are defined to start at // and continue to the end of the line.
@@ -264,8 +263,28 @@
   // Remove any double spaces that were created
   input = shrink(input)
   
-  // uncomment the following for debugging
+  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+  //  Set brackets option
+  //
+  //  We have the following problem. For backwards compatibility with the
+  //  testing suite we need to keep { } brackets for environments.  But we also
+  //  now want to allow students to type sets using those brackets.  To
+  //  accomplish both with the same parsers we do the following.
+  //
+  //  1. There is a parser option `options.enableSets` which is a boolean.
+  //  2. If true, then every set bracket { or } in the input is replaced by the
+  //     unicode `Fullwidth Curly Brackets`｛  ｝which are then parsed
+  //     differently. 
+  //  3. In the UI for students entering expressions, this option is enabled.
+  //  4. In Lode and the testing suite it is disabled, but in that case the
+  //     unicode curly brackets can be entered directly with a keyboard shortcut
+  //     to make test proofs involving sets.
+  if (options.enableSets) 
+    input = input.replace(/{/g,'｛').replace(/}/g,'｝')
+
+  // set options.debug to true for debugging
   if (options.debug) say(input)
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -600,11 +619,15 @@ Algebraic = Choose / Sum / Summation / Product
     // not intended for use in any other way than for writing rules that require
     // 𝜆P(k) where P is a single character Symbol and k an Expression.
     Prefix = '@' a:[a-z]i b:( '('_ @ExpressionSeq _')' )+ 
-              { return `(λ ${a} ${b})` } /
-          
-            a:(Exp / Symbol / Parenthesized)
-            b:( '('_ @ExpressionSeq _')' )+ 
-              { return lispPrefix(a,b) }
+                { return `(λ ${a} ${b})` } /
+              // we use { } for environments for now
+              // allow 'set' to be case insensitive
+              'set('i _ b:ExpressionSeq _')'  
+                { return `(set ${b})` } /
+              // everything else
+              a:(Exp / Symbol / Parenthesized)
+              b:( '('_ @ExpressionSeq _')' )+ 
+                { return lispPrefix(a,b) }
 
     // If we made it to here, we are at the bottom of the food chain for
     // compound expressions, so it's ok to return a symbol or other atomic at
@@ -615,7 +638,7 @@ Algebraic = Choose / Sum / Summation / Product
 // Atomic Expressions
 //
 // morally atomic expressions (do not require parentheses)
-Atomic = Parenthesized / EquivalenceClass / Tuple / Symbol / Number
+Atomic = Parenthesized / EquivalenceClass / Tuple / SetBracketed / Symbol / Number
 
 ///////////////////////////////////////////////////////////////////////////////
 // Things in parentheses
@@ -628,6 +651,8 @@ EquivalenceClass =
   '[' a:Expression comma b:('~'/Symbol) ']'   { return lispPrefix('class',[a,b]) }
 // tuples
 Tuple = 'langle'_x a:ExpressionSeq _'rangle'!alphanum { return `(tuple ${a})` }
+// sets
+SetBracketed = '｛'_ a:ExpressionSeq _'｝' { return `(set ${a})` }
 // parenthesized
 Parenthesized = '(' _ @Expression _ ')'
 

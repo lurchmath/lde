@@ -38,4 +38,4 @@ Axioms:
 	// (∀x ∈ A, P (x))⇔ ∀x, x ∈ A ⇒ P(x)
 	// (∃x ∈ A, P (x))⇔ ∃x, x ∈ A and P(x)
 
-} 
+}

@@ -382,6 +382,25 @@
   
   // Remove any double spaces that were created
   input = shrink(input)
+
+  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+  //  Set brackets option
+  //
+  //  We have the following problem. For backwards compatibility with the
+  //  testing suite we need to keep { } brackets for environments.  But we also
+  //  now want to allow students to type sets using those brackets.  To
+  //  accomplish both with the same parsers we do the following.
+  //
+  //  1. There is a parser option `options.enableSets` which is a boolean.
+  //  2. If true, then every set bracket { or } in the input is replaced by the
+  //     unicode `Fullwidth Curly Brackets`｛  ｝which are then parsed
+  //     differently. 
+  //  3. In the UI for students entering expressions, this option is enabled.
+  //  4. In Lode and the testing suite it is disabled, but in that case the
+  //     unicode curly brackets can be entered directly with a keyboard shortcut
+  //     to make test proofs involving sets.
+  if (options.enableSets) 
+    input = input.replace(/{/g,'｛').replace(/}/g,'｝')
   
   // uncomment the following for debugging
   if (options.debug) say(input)
@@ -738,14 +757,20 @@ Multinomial = 'multinomial('i _ a:Expression comma b:Expression _')'
 // parsing.js.  Note that 𝜆 gets replaced by '@' up front in the input. This is
 // not intended for use in any other way than for writing rules that require
 // 𝜆P(k) where P is a single character Symbol and k an Expression.
-Prefix = // LDE EFA's first
-         // Notice that for tex purposes there's no need to show the user the @
-         // or 𝜆, thought technically both P(k) and @P(k) will render the same.
-         // But the EFA's only appear in rules and standard math convention is
-         // that it is understood.  However, we can make it more distinctive by
-         // making the function name in mathcal or some other font.
-         '@' a:[a-z]i b:( '('_ @ExpressionSeq _')' )+ 
+Prefix =  // LDE EFA's first
+          // Notice that for tex purposes there's no need to show the user the @
+          // or 𝜆, thought technically both P(k) and @P(k) will render the same.
+          // But the EFA's only appear in rules and standard math convention is
+          // that it is understood.  However, we can make it more distinctive by
+          // making the function name in mathcal or some other font.
+          '@' a:[a-z]i b:( '('_ @ExpressionSeq _')' )+ 
             { return `\\mathcal{${a}}\\left(${b}\\right)` } /
+          // TODO: for now we use { } for environments, so we temporarily write sets
+          // like this.  
+          'set('i _ a:Symbol period _ b:Expression _ ')'  
+            { return `\\left\\{\\,${a} : ${b}\\,\\right\\}` } /
+          'set('i _ b:ExpressionSeq _ ')'  
+            { return `\\left\\{\\,${b}\\,\\right\\}` } /
           // then the rest 
           a:(Exp / Symbol / Parenthesized)
           b:( '('_ @ExpressionSeq _')' )+ { return texPrefix(a,b) }
@@ -761,7 +786,7 @@ Prefix = // LDE EFA's first
 // Atomic Expressions
 //
 // morally atomic expressions (do not require parentheses)
-Atomic = Parenthesized / EquivalenceClass / Tuple / Symbol / Number
+Atomic = Parenthesized / EquivalenceClass / Tuple / SetBracketed / Symbol / Number
 
 ///////////////////////////////////////////////////////////////////////////////
 // Things in parentheses
@@ -771,11 +796,14 @@ Atomic = Parenthesized / EquivalenceClass / Tuple / Symbol / Number
 //                     class we use '~'
 EquivalenceClass = 
   '[' a:( @Expression ) ']'                   { return `\\left[${a}\\right]` } /
-  '[' a:Expression comma b:Symbol ']'    { return `\\left[${a}\\right]_${b}` }  /
+  '[' a:Expression comma b:Symbol ']'    { return `\\left[${a}\\right]_${b}` } /
   '[' a:Expression comma b:'~' ']'    { return `\\left[${a}\\right]_{\\sim}` }
 // tuples
 Tuple = 'langle'_x a:ExpressionSeq _'rangle'!alphanum
         { return `\\left\\langle{${a}}\\right\\rangle` }
+// sets
+SetBracketed = '｛'_ a:ExpressionSeq _'｝'
+               { return `\\left\\{\\,${a}\\,\\right\\}` }        
 // parenthesized - we also put things here that when they appear in parentheses
 // don't need them
 Parenthesized = '(' _ a:(Choose/Multinomial/Prefix) _ ')' { return a  } /
