@@ -590,10 +590,16 @@ rpl.defineCommand( "showdocs", {
 })
 
 // define the Lode .fixcdn command
-rpl.defineCommand( "fixcdn", {
-  help: "Overwrite lde-cdn.js with the local copy.",
+rpl.defineCommand( "fixrepo", {
+  help: "Modify the main repo code with local changes.",
   action() { 
-    exec('cp "utils/lurchmath config/lde-cdn.js" ../../../lurchmath')
+    const lurchmathpath = '../../../lurchmath'
+    console.log(defaultPen('Overwriting lde-cdn.js ...'))
+    exec('cp "utils/lurchmath config/lde-cdn.js" ' + lurchmathpath)
+    console.log(defaultPen('Changing default About page ...\n'))
+    let editorjs = fs.readFileSync( lurchmathpath+'/editor.js' , { encoding:'utf8'} )
+    editorjs = editorjs.replace('lurchmath.github.io/site/about/','monks.scranton.edu/lurch')
+    fs.writeFileSync( lurchmathpath+'/editor.js' , editorjs )
     console.log(defaultPen('...done'))
     this.displayPrompt()
   }
