@@ -14,11 +14,11 @@
         let tex,putdown
         try { 
           const isBlank = /^\s*$/.test(text)
-          console.log(`The text input is blank: ${isBlank}`)
-          tex = (!isBlank) ? `$${lurch2tex(text)}$` : ''
-          putdown = (!isBlank) ? lurch2putdown(text) : ''
-          console.log(
-            `changing render from ${text} to ${tex} with meaning ${putdown}` )
+          // console.log(`The text input is blank: ${isBlank}`)
+          tex = (!isBlank) ? `$${lurch2tex(text,{enableSets:true})}$` : ''
+          putdown = (!isBlank) ? lurch2putdown(text,{enableSets:true}) : ''
+          // console.log(
+            // `changing render from ${text} to ${tex} with meaning ${putdown}` )
           const meaningDiv = document.getElementById('meaning')
           meaningDiv.innerHTML = putdown
           const renderDiv = document.getElementById('rendered')
@@ -77,7 +77,9 @@
 		<label for="source">Input:</label>
 		<br/>
 
-		<textarea class="ioArea" id="source" onchange="()=>{ console.log('changed!');updateRender(this.value) }">Let x be such that x leq 10</textarea>
+		<textarea class="ioArea" id="source" onchange="()=>{ 
+      // console.log('changed!')
+      updateRender(this.value) }">Let x be such that x leq 10</textarea>
 	</div>
 
 	<div class="rightColumn">
@@ -107,6 +109,8 @@
   <p>English phrases such as <code>Given</code> or <code>declare</code> are case sensitive and will produce LaTeX with the same phrase in the same case. Spaces within an expression are usually ignored and can be used for legibility.  The main exception is that there cannot be any spaces between a function and the parentheses containing its arguments in a function application expression.</p>
 
   <p>A comma separated sequence preceeded by one of the <code>Given</code> keywords has the same effect as saying that each of them is a <code>Given</code> individually.</p>
+  
+  <p>To declared the set operator $\{\ \}$ as a global constant use <code>Declare set</code>. To declare the ordered pair, triple, or tuple operator $\langle\ \rangle$ as a constant use <code>Declare tuple</code>.</p>
 
 </section>
 

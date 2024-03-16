@@ -765,12 +765,16 @@ Prefix =  // LDE EFA's first
           // making the function name in mathcal or some other font.
           '@' a:[a-z]i b:( '('_ @ExpressionSeq _')' )+ 
             { return `\\mathcal{${a}}\\left(${b}\\right)` } /
-          // TODO: for now we use { } for environments, so we temporarily write sets
-          // like this.  
-          'set('i _ a:Symbol period _ b:Expression _ ')'  
-            { return `\\left\\{\\,${a} : ${b}\\,\\right\\}` } /
+          // allow 'set' to be case insensitive, check for setbuilder before
+          // finite sets
+          'set('i _ a:Symbol _ ':' _ b:Expression _')'  
+            { return `\\left\\{\\,${a}:\\,${b}\\right\\}` } /
+          // allow 'set' to be case insensitive
           'set('i _ b:ExpressionSeq _ ')'  
             { return `\\left\\{\\,${b}\\,\\right\\}` } /
+          // allow 'tuple' to be case insensitive and format it appropriately
+          'tuple('i _ b:ExpressionSeq _ ')'  
+            { return `\\left\\langle\\,${b}\\,\\right\\rangle` } /  
           // then the rest 
           a:(Exp / Symbol / Parenthesized)
           b:( '('_ @ExpressionSeq _')' )+ { return texPrefix(a,b) }
@@ -802,8 +806,10 @@ EquivalenceClass =
 Tuple = 'langle'_x a:ExpressionSeq _'rangle'!alphanum
         { return `\\left\\langle{${a}}\\right\\rangle` }
 // sets
-SetBracketed = '｛'_ a:ExpressionSeq _'｝'
-               { return `\\left\\{\\,${a}\\,\\right\\}` }        
+SetBracketed = '｛'_ a:Symbol _ ':' _ b:Expression _'｝' 
+                 { return `\\left\\{\\,${a}:\\,${b}\\right\\}` } /
+               '｛'_ a:ExpressionSeq _'｝'
+                 { return `\\left\\{\\,${a}\\,\\right\\}` }
 // parenthesized - we also put things here that when they appear in parentheses
 // don't need them
 Parenthesized = '(' _ a:(Choose/Multinomial/Prefix) _ ')' { return a  } /

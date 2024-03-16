@@ -14,11 +14,11 @@
         let tex,putdown
         try { 
           const isBlank = /^\s*$/.test(text)
-          console.log(`The text input is blank: ${isBlank}`)
-          tex = (!isBlank) ? `$${lurch2tex(text)}$` : ''
-          putdown = (!isBlank) ? lurch2putdown(text) : ''
-          console.log(
-            `changing render from ${text} to ${tex} with meaning ${putdown}` )
+          // console.log(`The text input is blank: ${isBlank}`)
+          tex = (!isBlank) ? `$${lurch2tex(text,{enableSets:true})}$` : ''
+          putdown = (!isBlank) ? lurch2putdown(text,{enableSets:true}) : ''
+          // console.log(
+            // `changing render from ${text} to ${tex} with meaning ${putdown}` )
           const meaningDiv = document.getElementById('meaning')
           meaningDiv.innerHTML = putdown
           const renderDiv = document.getElementById('rendered')
@@ -77,7 +77,9 @@
 		<label for="source">Input:</label>
 		<br/>
 
-		<textarea class="ioArea" id="source" onchange="()=>{ console.log('changed!');updateRender(this.value) }">Let x be such that x leq 10</textarea>
+		<textarea class="ioArea" id="source" onchange="()=>{ 
+      // console.log('changed!')
+      updateRender(this.value) }">Let x be such that x leq 10</textarea>
 	</div>
 
 	<div class="rightColumn">
@@ -107,6 +109,8 @@
   <p>English phrases such as <code>Given</code> or <code>declare</code> are case sensitive and will produce LaTeX with the same phrase in the same case. Spaces within an expression are usually ignored and can be used for legibility.  The main exception is that there cannot be any spaces between a function and the parentheses containing its arguments in a function application expression.</p>
 
   <p>A comma separated sequence preceeded by one of the <code>Given</code> keywords has the same effect as saying that each of them is a <code>Given</code> individually.</p>
+  
+  <p>To declared the set operator $\{\ \}$ as a global constant use <code>Declare set</code>. To declare the ordered pair, triple, or tuple operator $\langle\ \rangle$ as a constant use <code>Declare tuple</code>.</p>
 
 </section>
 
@@ -124,85 +128,285 @@
   <tbody>
     
 <tr><td colspan="2" class="subheader">Logic</td></tr>
-<tr><td>P and Q<br/>P∧Q</td><td>$P\text{ and }Q$</td></tr>
-<tr><td>P or Q<br/>P∨Q</td><td>$P\text{ or }Q$</td></tr>
-<tr><td>not P<br/>¬P</td><td>$\neg P$</td></tr>
-<tr><td>P implies Q<br/>P⇒Q</td><td>$P\Rightarrow Q$</td></tr>
-<tr><td>P iff Q<br/>P⇔Q</td><td>$P\Leftrightarrow Q$</td></tr>
-<tr><td>contradiction<br/>→←</td><td>$\rightarrow\leftarrow$</td></tr>
+<tr>
+          <td>P and Q<br/>P∧Q</td>
+          <td>$P\text{ and }Q$</td>
+        </tr>
+<tr>
+          <td>P or Q<br/>P∨Q</td>
+          <td>$P\text{ or }Q$</td>
+        </tr>
+<tr>
+          <td>not P<br/>¬P</td>
+          <td>$\neg P$</td>
+        </tr>
+<tr>
+          <td>P implies Q<br/>P⇒Q</td>
+          <td>$P\Rightarrow Q$</td>
+        </tr>
+<tr>
+          <td>P iff Q<br/>P⇔Q</td>
+          <td>$P\Leftrightarrow Q$</td>
+        </tr>
+<tr>
+          <td>contradiction<br/>→←</td>
+          <td>$\rightarrow\leftarrow$</td>
+        </tr>
 
 <tr><td colspan="2" class="subheader">Quantifiers and bindings</td></tr>
-<tr><td>forall x.x leq x+1<br/>for all x.x leq x+1<br/>∀x.x leq x+1</td><td>$\forall x. x\leq x+1$</td></tr>
-<tr><td>exists x.x=2 cdot x<br/>∃x.x=2⋅x</td><td>$\exists x. x=2\cdot x$</td></tr>
-<tr><td>exists unique x.x=2*x<br/>∃!x.x=2⋅x</td><td>$\exists! x. x=2\cdot x$</td></tr>
-<tr><td>x.x+2<br/>x↦x+2</td><td>$x. x+2$</td></tr>
+<tr>
+          <td>forall x.x leq x+1<br/>for all x.x leq x+1<br/>∀x.x leq x+1</td>
+          <td>$\forall x. x\leq x+1$</td>
+        </tr>
+<tr>
+          <td>exists x.x=2 cdot x<br/>∃x.x=2⋅x</td>
+          <td>$\exists x. x=2\cdot x$</td>
+        </tr>
+<tr>
+          <td>exists unique x.x=2*x<br/>∃!x.x=2⋅x</td>
+          <td>$\exists! x. x=2\cdot x$</td>
+        </tr>
+<tr>
+          <td>x.x+2<br/>x↦x+2</td>
+          <td>$x. x+2$</td>
+        </tr>
 
 <tr><td colspan="2" class="subheader">Algebraic expressions</td></tr>
-<tr><td>(x)</td><td>$\left(x\right)$</td></tr>
-<tr><td>x+y</td><td>$x+y$</td></tr>
-<tr><td>2+x+y</td><td>$2+x+y$</td></tr>
-<tr><td>-x</td><td>$-x$</td></tr>
-<tr><td>1-x</td><td>$1-x$</td></tr>
-<tr><td>x*y<br/>x cdot y<br/>x⋅y</td><td>$x\cdot y$</td></tr>
-<tr><td>2*x*y<br/>2 cdot x cdot y<br/>2⋅x⋅y</td><td>$2\cdot x\cdot y$</td></tr>
-<tr><td>2*3*x<br/>2 cdot 3 cdot x<br/>2⋅3⋅x</td><td>$2\cdot 3\cdot x$</td></tr>
-<tr><td>1/x</td><td>$\frac{1}{x}$</td></tr>
-<tr><td>2*1/x*y</td><td>$2\cdot \frac{1}{x}\cdot y$</td></tr>
-<tr><td>(2*1)/(x*y)</td><td>$\frac{2\cdot 1}{x\cdot y}$</td></tr>
-<tr><td>x^2</td><td>${x}^{2}$</td></tr>
-<tr><td>x factorial<br/>x!</td><td>$x!$</td></tr>
-<tr><td>(n+1) choose (k-1)</td><td>$\binom{n+1}{k-1}$</td></tr>
-<tr><td>sum k=0 to n of k^2<br/>sum k from 0 to n of k^2<br/>sum k to n of k^2<br/>sum of k^2 as k goes from 0 to n<br/>sum k^2 as k goes from 0 to n<br/>sum k^2 as k from 0 to n<br/>sum k^2 for k from 0 to n<br/>sum k^2 for k to n<br/>sum of k^2 as k to n<br/>sum of k^2 for k to n<br/>sum( k^2 , k , 0 , n )<br/>sum(k^2,k,0,n)<br/>sum(k^2,k,n)</td><td>$\displaystyle\sum_{k=0}^{n} {k}^{2}$</td></tr>
+<tr>
+          <td>(x)</td>
+          <td>$\left(x\right)$</td>
+        </tr>
+<tr>
+          <td>x+y</td>
+          <td>$x+y$</td>
+        </tr>
+<tr>
+          <td>2+x+y</td>
+          <td>$2+x+y$</td>
+        </tr>
+<tr>
+          <td>-x</td>
+          <td>$-x$</td>
+        </tr>
+<tr>
+          <td>1-x</td>
+          <td>$1-x$</td>
+        </tr>
+<tr>
+          <td>x*y<br/>x cdot y<br/>x⋅y</td>
+          <td>$x\cdot y$</td>
+        </tr>
+<tr>
+          <td>2*x*y<br/>2 cdot x cdot y<br/>2⋅x⋅y</td>
+          <td>$2\cdot x\cdot y$</td>
+        </tr>
+<tr>
+          <td>2*3*x<br/>2 cdot 3 cdot x<br/>2⋅3⋅x</td>
+          <td>$2\cdot 3\cdot x$</td>
+        </tr>
+<tr>
+          <td>1/x</td>
+          <td>$\frac{1}{x}$</td>
+        </tr>
+<tr>
+          <td>2*1/x*y</td>
+          <td>$2\cdot \frac{1}{x}\cdot y$</td>
+        </tr>
+<tr>
+          <td>(2*1)/(x*y)</td>
+          <td>$\frac{2\cdot 1}{x\cdot y}$</td>
+        </tr>
+<tr>
+          <td>x^2</td>
+          <td>${x}^{2}$</td>
+        </tr>
+<tr>
+          <td>x factorial<br/>x!</td>
+          <td>$x!$</td>
+        </tr>
+<tr>
+          <td>(n+1) choose (k-1)</td>
+          <td>$\binom{n+1}{k-1}$</td>
+        </tr>
+<tr>
+          <td>sum k=0 to n of k^2<br/>sum k from 0 to n of k^2<br/>sum k to n of k^2<br/>sum of k^2 as k goes from 0 to n<br/>sum k^2 as k goes from 0 to n<br/>sum k^2 as k from 0 to n<br/>sum k^2 for k from 0 to n<br/>sum k^2 for k to n<br/>sum of k^2 as k to n<br/>sum of k^2 for k to n<br/>sum( k^2 , k , 0 , n )<br/>sum(k^2,k,0,n)<br/>sum(k^2,k,n)</td>
+          <td>$\displaystyle\sum_{k=0}^{n} {k}^{2}$</td>
+        </tr>
 
 <tr><td colspan="2" class="subheader">Set Theory</td></tr>
-<tr><td>x in A<br/>x∈A</td><td>$x\in A$</td></tr>
-<tr><td>x notin A<br/>x∉A</td><td>$x\notin A$</td></tr>
-<tr><td>A subset B<br/>A subseteq B<br/>A⊆B</td><td>$A\subseteq B$</td></tr>
-<tr><td>A cup B<br/>A union B<br/>A∪B</td><td>$A\cup B$</td></tr>
-<tr><td>A cap B<br/>A intersect B<br/>A∩B</td><td>$A\cap B$</td></tr>
-<tr><td>A setminus B<br/>A∖B</td><td>$A\setminus B$</td></tr>
-<tr><td>A complement<br/>A°</td><td>${A}^\circ $</td></tr>
-<tr><td>powerset(A)<br/>𝒫(A)</td><td>$\mathsf{P}\left(A\right)$</td></tr>
-<tr><td>f:A to B<br/>f:A→B</td><td>$f\colon A\to B$</td></tr>
-<tr><td>f(x)</td><td>$f\left(x\right)$</td></tr>
-<tr><td>g circ f<br/>g comp f<br/>g∘f</td><td>$g\circ f$</td></tr>
-<tr><td>A times B<br/>A cross B<br/>A×B</td><td>$A\times B$</td></tr>
-<tr><td>⟨x,y⟩</td><td>$\left\langle{x,y}\right\rangle$</td></tr>
+<tr>
+          <td>x in A<br/>x∈A</td>
+          <td>$x\in A$</td>
+        </tr>
+<tr>
+          <td>x notin A<br/>x∉A</td>
+          <td>$x\notin A$</td>
+        </tr>
+<tr>
+          <td>{a,b,c}<br/>set(a,b,c)</td>
+          <td>$\left\{\,a,b,c\,\right\}$</td>
+        </tr>
+<tr>
+          <td>{ p:p is prime}<br/>set(p:p is prime)</td>
+          <td>$\left\{\,p:\,p\text{ is }\text{prime}\right\}$</td>
+        </tr>
+<tr>
+          <td>A subset B<br/>A subseteq B<br/>A⊆B</td>
+          <td>$A\subseteq B$</td>
+        </tr>
+<tr>
+          <td>A cup B<br/>A union B<br/>A∪B</td>
+          <td>$A\cup B$</td>
+        </tr>
+<tr>
+          <td>A cap B<br/>A intersect B<br/>A∩B</td>
+          <td>$A\cap B$</td>
+        </tr>
+<tr>
+          <td>A setminus B<br/>A∖B</td>
+          <td>$A\setminus B$</td>
+        </tr>
+<tr>
+          <td>A complement<br/>A°</td>
+          <td>${A}^\circ $</td>
+        </tr>
+<tr>
+          <td>powerset(A)<br/>𝒫(A)</td>
+          <td>$\mathsf{P}\left(A\right)$</td>
+        </tr>
+<tr>
+          <td>f:A to B<br/>f:A→B</td>
+          <td>$f\colon A\to B$</td>
+        </tr>
+<tr>
+          <td>f(x)</td>
+          <td>$f\left(x\right)$</td>
+        </tr>
+<tr>
+          <td>g circ f<br/>g comp f<br/>g∘f</td>
+          <td>$g\circ f$</td>
+        </tr>
+<tr>
+          <td>A times B<br/>A cross B<br/>A×B</td>
+          <td>$A\times B$</td>
+        </tr>
+<tr>
+          <td>tuple(x,y)<br/>⟨x,y⟩</td>
+          <td>$\left\langle\,x,y\,\right\rangle$</td>
+        </tr>
 
 <tr><td colspan="2" class="subheader">Relations</td></tr>
-<tr><td>x lt 0<br/>x &lt; 0</td><td>$x\lt 0$</td></tr>
-<tr><td>x leq 0<br/>x ≤ 0</td><td>$x\leq 0$</td></tr>
-<tr><td>x neq 0<br/>x ne 0<br/>x≠0</td><td>$x\neq 0$</td></tr>
-<tr><td>m | n<br/>m divides n</td><td>$m\mid n$</td></tr>
-<tr><td>a cong b mod m<br/>a cong mod m to b</td><td>$a\underset{m}{\equiv}b$</td></tr>
-<tr><td>x~y</td><td>$x\sim y$</td></tr>
-<tr><td>x~y~z</td><td>$x\sim y\sim z$</td></tr>
-<tr><td>x=y</td><td>$x=y$</td></tr>
-<tr><td>x=y=z</td><td>$\begin{align}
+<tr>
+          <td>x lt 0<br/>x &lt; 0</td>
+          <td>$x\lt 0$</td>
+        </tr>
+<tr>
+          <td>x leq 0<br/>x ≤ 0</td>
+          <td>$x\leq 0$</td>
+        </tr>
+<tr>
+          <td>x neq 0<br/>x ne 0<br/>x≠0</td>
+          <td>$x\neq 0$</td>
+        </tr>
+<tr>
+          <td>m | n<br/>m divides n</td>
+          <td>$m\mid n$</td>
+        </tr>
+<tr>
+          <td>a cong b mod m<br/>a cong mod m to b</td>
+          <td>$a\underset{m}{\equiv}b$</td>
+        </tr>
+<tr>
+          <td>x~y</td>
+          <td>$x\sim y$</td>
+        </tr>
+<tr>
+          <td>x~y~z</td>
+          <td>$x\sim y\sim z$</td>
+        </tr>
+<tr>
+          <td>x=y</td>
+          <td>$x=y$</td>
+        </tr>
+<tr>
+          <td>x=y=z</td>
+          <td>$\begin{align}
   x &= y \\
     &= z
-\end{align}$</td></tr>
-<tr><td>X loves Y</td><td>$X\text{ loves }Y$</td></tr>
-<tr><td>X is Y<br/>X is an Y<br/>X is a Y<br/>X are Y</td><td>$X\text{ is }Y$</td></tr>
-<tr><td>P is a partition of A</td><td>$P\text{ is a partition of }A$</td></tr>
-<tr><td>'~' is an equivalence relation</td><td>$\sim\text{ is }\text{an }\text{equivalence relation}$</td></tr>
-<tr><td>[a]</td><td>$\left[a\right]$</td></tr>
-<tr><td>[a,~]</td><td>$\left[a\right]_\sim$</td></tr>
-<tr><td>'~' is a strict partial order</td><td>$\sim\text{ is }\text{a }\text{strict partial order}$</td></tr>
-<tr><td>'~' is a partial order</td><td>$\sim\text{ is }\text{a }\text{partial order}$</td></tr>
-<tr><td>'~' is a total order</td><td>$\sim\text{ is }\text{a }\text{total order}$</td></tr>
+\end{align}$</td>
+        </tr>
+<tr>
+          <td>X loves Y</td>
+          <td>$X\text{ loves }Y$</td>
+        </tr>
+<tr>
+          <td>X is Y<br/>X is an Y<br/>X is a Y<br/>X are Y</td>
+          <td>$X\text{ is }Y$</td>
+        </tr>
+<tr>
+          <td>P is a partition of A</td>
+          <td>$P\text{ is a partition of }A$</td>
+        </tr>
+<tr>
+          <td>'~' is an equivalence relation</td>
+          <td>$\sim\text{ is }\text{an }\text{equivalence relation}$</td>
+        </tr>
+<tr>
+          <td>[a]</td>
+          <td>$\left[a\right]$</td>
+        </tr>
+<tr>
+          <td>[a,~]</td>
+          <td>$\left[a\right]_\sim$</td>
+        </tr>
+<tr>
+          <td>'~' is a strict partial order</td>
+          <td>$\sim\text{ is }\text{a }\text{strict partial order}$</td>
+        </tr>
+<tr>
+          <td>'~' is a partial order</td>
+          <td>$\sim\text{ is }\text{a }\text{partial order}$</td>
+        </tr>
+<tr>
+          <td>'~' is a total order</td>
+          <td>$\sim\text{ is }\text{a }\text{total order}$</td>
+        </tr>
 
 <tr><td colspan="2" class="subheader">Assumptions and Declarations (case insensitive, phrase is echoed)</td></tr>
-<tr><td>Assume P<br/>Given P<br/>Suppose P<br/>If P<br/>:P</td><td>$\text{Assume } P$</td></tr>
-<tr><td>Let x</td><td>$\text{Let }x$</td></tr>
-<tr><td>Let x be such that x in RR<br/>Let x such that x in RR</td><td>$\text{Let }x\text{ be such that }x\in \mathbb{R}$</td></tr>
-<tr><td>f(c)=0 for some c</td><td>$f\left(c\right)=0\text{ for some }c$</td></tr>
-<tr><td>Declare is, 0, +, cos</td><td>$\text{Declare } \text{is}\text{, }0\text{, }+\text{, and }\text{cos}$</td></tr>
+<tr>
+          <td>Assume P<br/>Given P<br/>Suppose P<br/>If P<br/>:P</td>
+          <td>$\text{Assume } P$</td>
+        </tr>
+<tr>
+          <td>Let x</td>
+          <td>$\text{Let }x$</td>
+        </tr>
+<tr>
+          <td>Let x be such that x in RR<br/>Let x such that x in RR</td>
+          <td>$\text{Let }x\text{ be such that }x\in \mathbb{R}$</td>
+        </tr>
+<tr>
+          <td>f(c)=0 for some c</td>
+          <td>$f\left(c\right)=0\text{ for some }c$</td>
+        </tr>
+<tr>
+          <td>Declare is, 0, +, cos</td>
+          <td>$\text{Declare } \text{is}\text{, }0\text{, }+\text{, and }\text{cos}$</td>
+        </tr>
 
 <tr><td colspan="2" class="subheader">Miscellaneous</td></tr>
-<tr><td>f^inv(A)</td><td>${f}^{\text{inv}}\left(A\right)$</td></tr>
-<tr><td>x^-<br/>x⁻</td><td>${x}^{-}$</td></tr>
-<tr><td>@P(k)<br/>λP(k)</td><td>$\mathcal{P}\left(k\right)$</td></tr>
+<tr>
+          <td>f^inv(A)</td>
+          <td>${f}^{\text{inv}}\left(A\right)$</td>
+        </tr>
+<tr>
+          <td>x^-<br/>x⁻</td>
+          <td>${x}^{-}$</td>
+        </tr>
+<tr>
+          <td>@P(k)<br/>λP(k)</td>
+          <td>$\mathcal{P}\left(k\right)$</td>
+        </tr>
 
   </tbody>
 </table>

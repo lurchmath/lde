@@ -54,6 +54,9 @@ const syntax =
 'Set Theory',
 [['x in A', 'x∈A'                    ],`x\\in A` ],
 [['x notin A', 'x∉A'                 ],`x\\notin A` ],
+[['{a,b,c}', 'set(a,b,c)'            ],`\\left\\{\\,a,b,c\\,\\right\\}` ],
+[['{ p:p is prime}', 
+  'set(p:p is prime)'                ],`\\left\\{\\,a,b,c\\,\\right\\}` ],
 [['A subset B', 'A subseteq B', 'A⊆B'],`A\\subseteq B`],
 [['A cup B', 'A union B', 'A∪B'      ],`A\\cup B`],
 [['A cap B', 'A intersect B', 'A∩B'  ],`A\\cap B`],
@@ -64,7 +67,7 @@ const syntax =
 [['f(x)'                             ],`f\\left(x\\right)`],
 [['g circ f', 'g comp f' , 'g∘f'     ],`g\\circ f`],
 [['A times B', 'A cross B' ,'A×B'    ],`A\\times B`],
-[['⟨x,y⟩'                            ],'\\langle x,y \\rangle'],
+[['tuple(x,y)', '⟨x,y⟩'              ],'\\langle x,y \\rangle'],
 
 'Relations',
 [['x lt 0', 'x &lt; 0'               ],`x\\lt 0` ],
@@ -112,7 +115,10 @@ export const makedoc = () => {
         `\n<tr><td colspan="2" class="subheader">${row}</td></tr>\n`
     } else {
       ans = ans + 
-        `<tr><td>${row[0].join('<br/>')}</td><td>$${tex(row[0][0])}$</td></tr>\n`
+       `<tr>
+          <td>${row[0].join('<br/>')}</td>
+          <td>$${tex(row[0][0],{enableSets:true})}$</td>
+        </tr>\n`
     }
   })
   let doc = loadStr('lurch-parser-docs-template','./parsers/','html')

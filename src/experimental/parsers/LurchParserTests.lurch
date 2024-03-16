@@ -301,6 +301,10 @@ comment "Fred often ponders reality."
 // tuples
 ⟨x⟩
 ⟨x,y,z⟩
+tuple()
+tuple(x)
+tuple( x , y )
+tuple(x , y ,z)
 // maps
 f:A→B
 f:A → B

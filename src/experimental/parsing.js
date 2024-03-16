@@ -92,7 +92,7 @@ export const lc2algebrite = e => {
   }
 }
 
-export const parseLines = (parser,verbose=true,name='LurchParserTests') => {
+export const parseLines = (parser,verbose=true,name='LurchParserTests',opts) => {
   let ans = []
   const lines = 
     loadStr(name,'./parsers/','lurch').split('\n')
@@ -103,9 +103,9 @@ export const parseLines = (parser,verbose=true,name='LurchParserTests') => {
   let report = []
   lines.forEach( l => {
     try { 
-      ans.push(parser(l))
+      ans.push(parser(l,opts))
       pass++
-      if (verbose) write(`${Pens.itemPen(l)}\n → ${Pens.stringPen(parser(l))}\n`)
+      if (verbose) write(`${Pens.itemPen(l)}\n → ${Pens.stringPen(parser(l,opts))}\n`)
     } catch {
       report.push(l)
       fail++

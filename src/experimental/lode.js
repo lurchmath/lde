@@ -493,7 +493,7 @@ rpl.defineCommand( "test", {
   }
 })
 
-// define the Lode .test command
+// define the Lode .rebuildparsers command
 rpl.defineCommand( "rebuildparsers", {
   help: "Make the tracing versions of the parsers.",
   action() { 
@@ -558,6 +558,18 @@ rpl.defineCommand( "parsertest", {
     try { 
       parseLines(tex,false)
       console.log(`${itemPen('Tex Parser Test:')} → ok`)
+    } catch (e) { 
+      console.log(xPen(`ERROR: Tex Parser test failed.`)) 
+    }
+    try { 
+      parseLines(lurchToPutdown,false,'LurchParserSetTests',{enableSets:true})
+      console.log(`${itemPen('Set Parser Test:')} → ok`)
+    } catch (e) { 
+      console.log(xPen(`ERROR: Parser test failed.`)) 
+    }
+    try { 
+      parseLines(lurchToTex,false,'LurchParserSetTests',{enableSets:true})
+      console.log(`${itemPen('Set Tex Parser Test:')} → ok`)
     } catch (e) { 
       console.log(xPen(`ERROR: Tex Parser test failed.`)) 
     }

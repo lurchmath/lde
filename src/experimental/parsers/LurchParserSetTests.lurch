@@ -1,0 +1,25 @@
+////////////////////////////////////////////////////////////////////
+// Tests for Peggy Parser with the option enableSets:true
+//
+// This file is parsed one line at a time individualy.  
+
+// finite sets
+set()
+set(0)
+set(0,1)
+set(0,2,4,6)
+{}
+{0}
+{0,1}
+{ 0 , 2 , 4 , 6 }
+x in Set()
+x in Set(0)
+x in Set(0,1)
+x in Set( 0 , 2 , 4 , 6 ) 
+x in {}
+x in {0}
+x in {0,1}
+x in {0,2,4,6}
+x in set() union {n-1,n,n+1}
+x in {0,1} intersect x set()
+x in {} union x set()

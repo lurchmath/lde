@@ -620,7 +620,10 @@ Algebraic = Choose / Sum / Summation / Product
     // 𝜆P(k) where P is a single character Symbol and k an Expression.
     Prefix = '@' a:[a-z]i b:( '('_ @ExpressionSeq _')' )+ 
                 { return `(λ ${a} ${b})` } /
-              // we use { } for environments for now
+              // allow 'set' to be case insensitive, check for setbuilder before
+              // finite sets
+              'set('i _ a:Symbol _ ':' _ b:Expression _')'  
+                { return `(setbuilder (${a},${b}))` } /
               // allow 'set' to be case insensitive
               'set('i _ b:ExpressionSeq _')'  
                 { return `(set ${b})` } /
@@ -652,7 +655,9 @@ EquivalenceClass =
 // tuples
 Tuple = 'langle'_x a:ExpressionSeq _'rangle'!alphanum { return `(tuple ${a})` }
 // sets
-SetBracketed = '｛'_ a:ExpressionSeq _'｝' { return `(set ${a})` }
+SetBracketed = '｛'_ a:Symbol _ ':' _ b:Expression _'｝' 
+                 { return `(setbuilder (${a},${b}))` } /
+               '｛'_ a:ExpressionSeq _'｝' { return `(set ${a})` }
 // parenthesized
 Parenthesized = '(' _ @Expression _ ')'
 
