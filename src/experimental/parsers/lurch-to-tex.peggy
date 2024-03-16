@@ -523,8 +523,11 @@ Declare = a:'declare'i __ b:DeclareSeq { return `${txt(a)} ${b}` }
 // ForSome declaration (always a claim)
 ForSome = body:Expression __ 'for' __ 'some' __ a:SymbolSeq 
           { return `${body}\\text{ for some }${a}` }
-// the 'given' colon is optional since these are always 'given'.          
-Let = a:'Let'i __ b:SymbolSeq __ 'be' __ 'such' __ 'that' __ c:Expression 
+// the 'given' colon is optional since these are always 'given'. We also 
+// allow the special shortand `Let x∈A` since it is so common.            
+Let = a:'Let'i __ b:Symbol __ 'in'i __ c:Expression 
+          { return `${txt(a)}${b}\\in ${c}` } /
+      a:'Let'i __ b:SymbolSeq __ 'be' __ 'such' __ 'that' __ c:Expression 
           { return `${txt(a)}${b}\\text{ be such that }${c}` } /
       a:'Let'i __ b:SymbolSeq __ 'such'i __ 'that'i __ c:Expression
           { return `${txt(a)}${b}\\text{ such that }${c}` }    /
@@ -646,8 +649,8 @@ Set = RelativeComp
                     { return a.join('\\cup ') }
   Intersection  = a:(Complement/Composition)|1..,_('cap'/'intersect')_x| 
                     { return a.join('\\cap ') }               
-  Complement    = a:Algebraic _'complement'!alphanum
-                    { return `{${a}}^\\circ ` }
+  Complement    = a:Algebraic _('\''/'complement')!alphanum
+                    { return `{${a}}'` }
   Composition   = a:Algebraic|1..,_('circ'/'comp')_x| 
                     { return a.join('\\circ ') }
   

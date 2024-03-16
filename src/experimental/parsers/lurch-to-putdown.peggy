@@ -400,8 +400,11 @@ Declare = 'declare'i __ a:DeclareSeq { return `declare> :[${a}]` }
 // ForSome declaration (always a claim)
 ForSome = body:Expression __ 'for'i __ 'some'i __ a:SymbolSeq 
           { return `[${a}, ${body}]` }
-// the 'given' colon is optional since these are always 'given'.          
-Let = 'Let'i __ a:SymbolSeq __ ('be'i __)? 'such'i __ 'that'i __ b:Expression 
+// the 'given' colon is optional since these are always 'given'. We also 
+// allow the special shortand `Let x∈A` since it is so common.          
+Let = 'Let'i __ a:Symbol __ 'in'i __ b:Expression 
+                            { return `:[${a}, ${lispBinary('∈',a,b)}]` } /
+      'Let'i __ a:SymbolSeq __ ('be'i __)? 'such'i __ 'that'i __ b:Expression 
                             { return `:[${a}, ${b}]` } /
       'Let'i __ a:SymbolSeq { return `:[${a}]`       }
   // Comma separated symbols, numbers, and reserved words
@@ -514,7 +517,7 @@ Set = RelativeComp
                     { return lispSeq('∪',a) }
   Intersection  = a:(Complement/Composition)|1..,_('cap'/'intersect')_x| 
                     { return lispSeq('∩',a) }               
-  Complement    = a:Algebraic _'complement'!alphanum
+  Complement    = a:Algebraic _('\''/'complement')!alphanum
                     { return lispUnary('°',a) }
   Composition   = a:Algebraic|1..,_('circ'/'comp')_x| 
                     { return lispSeq('∘',a) }
