@@ -23,3 +23,11 @@ x in {0,2,4,6}
 x in set() union {n-1,n,n+1}
 x in {0,1} intersect x set()
 x in {} union x set()
+// set builder
+{ n : P(n) }
+{ n : @P(n) }
+{n:P(n)}
+{n:@P(n)}
+{ n : n is prime and n is odd }
+n in { n : n in { 1,2,3 } }
+S in { { 0 }, { 0 , {0}}, { p : p cong 3 mod 4 } }
