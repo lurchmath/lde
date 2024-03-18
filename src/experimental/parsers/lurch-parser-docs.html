@@ -108,7 +108,7 @@
 
   <p>English phrases such as <code>Given</code> or <code>declare</code> are case sensitive and will produce LaTeX with the same phrase in the same case. Spaces within an expression are usually ignored and can be used for legibility.  The main exception is that there cannot be any spaces between a function and the parentheses containing its arguments in a function application expression.</p>
 
-  <p>A comma separated sequence preceeded by one of the <code>Given</code> keywords has the same effect as saying that each of them is a <code>Given</code> individually.</p>
+  <p>A comma separated sequence preceeded by one of the <code>Given</code> keywords has the same effect as saying that each of them is a <code>Given</code> individually. The shortcut declaration <code>Let x in A</code> has the same meaning as <code>Let x be such that x in A</code>. The shortcut declaration <code>P(x) for some x in A</code> has the same meaning as <code>P(x) and x in A for some x</code>.</p>
   
   <p>To declared the set operator $\{\ \}$ as a global constant use <code>Declare set</code>. To declare the ordered pair, triple, or tuple operator $\langle\ \rangle$ as a constant use <code>Declare tuple</code>.</p>
 
@@ -232,6 +232,10 @@
           <td>sum k=0 to n of k^2<br/>sum k from 0 to n of k^2<br/>sum k to n of k^2<br/>sum of k^2 as k goes from 0 to n<br/>sum k^2 as k goes from 0 to n<br/>sum k^2 as k from 0 to n<br/>sum k^2 for k from 0 to n<br/>sum k^2 for k to n<br/>sum of k^2 as k to n<br/>sum of k^2 for k to n<br/>sum( k^2 , k , 0 , n )<br/>sum(k^2,k,0,n)<br/>sum(k^2,k,n)</td>
           <td>$\displaystyle\sum_{k=0}^{n} {k}^{2}$</td>
         </tr>
+<tr>
+          <td>Fib_(n+2)</td>
+          <td>$F_{n+2}$</td>
+        </tr>
 
 <tr><td colspan="2" class="subheader">Set Theory</td></tr>
 <tr>
@@ -283,6 +287,14 @@
           <td>$f\left(x\right)$</td>
         </tr>
 <tr>
+          <td>f_(x)</td>
+          <td>$f_{x}$</td>
+        </tr>
+<tr>
+          <td>f_(0)(x)_(n+1)</td>
+          <td>$f_{0}\left(x\right)_{n+1}$</td>
+        </tr>
+<tr>
           <td>g circ f<br/>g comp f<br/>g∘f</td>
           <td>$g\circ f$</td>
         </tr>
@@ -291,8 +303,16 @@
           <td>$A\times B$</td>
         </tr>
 <tr>
-          <td>tuple(x,y)<br/>⟨x,y⟩</td>
+          <td>pair(x,y)<br/>tuple(x,y)<br/>⟨x,y⟩</td>
           <td>$\left\langle\,x,y\,\right\rangle$</td>
+        </tr>
+<tr>
+          <td>triple(x,y,z)<br/>tuple(x,y,z)<br/>⟨x,y,z⟩</td>
+          <td>$\left\langle\,x,y,z\,\right\rangle$</td>
+        </tr>
+<tr>
+          <td>tuple(w,x,y,z)<br/>⟨w,x,y,z⟩</td>
+          <td>$\left\langle\,w,x,y,z\,\right\rangle$</td>
         </tr>
 
 <tr><td colspan="2" class="subheader">Relations</td></tr>
@@ -382,6 +402,10 @@
           <td>$\text{Let }x$</td>
         </tr>
 <tr>
+          <td>Let x in A</td>
+          <td>$\text{Let }x\in A$</td>
+        </tr>
+<tr>
           <td>Let x be such that x in RR<br/>Let x such that x in RR</td>
           <td>$\text{Let }x\text{ be such that }x\in \mathbb{R}$</td>
         </tr>
@@ -390,15 +414,15 @@
           <td>$f\left(c\right)=0\text{ for some }c$</td>
         </tr>
 <tr>
+          <td>f(c)=0 for some c in A</td>
+          <td>$f\left(c\right)=0\text{ for some }c\in A$</td>
+        </tr>
+<tr>
           <td>Declare is, 0, +, cos</td>
           <td>$\text{Declare } \text{is}\text{, }0\text{, }+\text{, and }\text{cos}$</td>
         </tr>
 
 <tr><td colspan="2" class="subheader">Miscellaneous</td></tr>
-<tr>
-          <td>f^inv(A)</td>
-          <td>${f}^{\text{inv}}\left(A\right)$</td>
-        </tr>
 <tr>
           <td>x^-<br/>x⁻</td>
           <td>${x}^{-}$</td>

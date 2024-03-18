@@ -51,6 +51,8 @@ const syntax =
   'sum( k^2 , k , 0 , n )',
   'sum(k^2,k,0,n)',
   'sum(k^2,k,n)'                     ],`\\sum_{k=0}^n k^2`],
+[['Fib_(n+2)'                        ],`F_{n+2}`],
+
 'Set Theory',
 [['x in A', 'x∈A'                    ],`x\\in A` ],
 [['x notin A', 'x∉A'                 ],`x\\notin A` ],
@@ -65,9 +67,14 @@ const syntax =
 [['powerset(A)', '𝒫(A)'              ],`\\textbf{P}(A)`],
 [['f:A to B', 'f:A→B'                ],`f\\colon A\\to B`],
 [['f(x)'                             ],`f\\left(x\\right)`],
+[['f_(x)'                            ],`f_x`],
+[['f_(0)(x)_(n+1)'                   ],`f_{0}\\left(x\\right)_{n+1}`],
 [['g circ f', 'g comp f' , 'g∘f'     ],`g\\circ f`],
 [['A times B', 'A cross B' ,'A×B'    ],`A\\times B`],
-[['tuple(x,y)', '⟨x,y⟩'              ],'\\langle x,y \\rangle'],
+[['pair(x,y)' , 'tuple(x,y)', '⟨x,y⟩'],`\\langle x,y \\rangle`],
+[['triple(x,y,z)' , 'tuple(x,y,z)', 
+  '⟨x,y,z⟩'                          ],`\\langle x,y,z \\rangle`],
+[['tuple(w,x,y,z)' , '⟨w,x,y,z⟩'     ],`\\langle x,y \\rangle`],
 
 'Relations',
 [['x lt 0', 'x &lt; 0'               ],`x\\lt 0` ],
@@ -95,14 +102,15 @@ const syntax =
 [['Assume P', 'Given P', 
   'Suppose P', 'If P', ':P'          ],`\\text{Assume }P\\text{  (etc.)}` ],
 [['Let x'                            ],`\\text{Let }x` ],
+[['Let x in A'                       ],`\\text{Let }x\\in A` ],
 [['Let x be such that x in RR',
   'Let x such that x in RR'           ],
   `\\text{Let }x\\text{ be such that }x\\in\\mathbb{R}` ],
 [['f(c)=0 for some c'                ],`f(c)=0\\text{ for some }c` ],
+[['f(c)=0 for some c in A'           ],`f(c)=0\\text{ for some }c\\in A` ],
 [['Declare is, 0, +, cos'            ],`\\text{Declare is, 0, +, and cos}` ],
 
 'Miscellaneous',
-[['f^inv(A)'                         ],`f^\\text{inv}\\left(A\\right)`],
 [['x^-' , 'x⁻'                       ],`x^-`],
 [['@P(k)', 'λP(k)'                   ],`\\lambda{P}(k)` ]
 

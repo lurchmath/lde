@@ -138,7 +138,9 @@
     [ 'for all'                , 'forall'                 ] ,
     [ 'for each'               , 'forall'                 ] ,
     [ 'for every'              , 'forall'                 ] ,
-    [ 'there exists'           , 'exists'                 ] 
+    [ 'there exists'           , 'exists'                 ] ,
+    [ '(?<![a-zA-Z0-9])pair\\('    , 'tuple('  ] ,
+    [ '(?<![a-zA-Z0-9])triple\\('  , 'tuple('  ] 
   ]
   
   const UnicodeNames = {
@@ -158,11 +160,13 @@
     'cong'      : '≅' , 'leq'      : '≤'  , 'lt'     : '<'  , 'factorial'    : '!'     ,
     'divides'   : '|' , 'cdot'     : '⋅'  , '*'      : '⋅'  , 'love'         : 'loves' ,
     'in'        : '∈' , 'Sum'      : 'sum', '\\'     : ' '  , 'fear'         : 'fears' ,
-    'complement': '°' , 'intersect': '∩'  , 'union'  : '∪'
+    'complement': '°' , 'intersect': '∩'  , 'union'  : '∪'  , 'cap'          : '∩'     ,
+    'cup'       : '∪' , 'comp'     : '∘'  , 'circ'   : '∘'  
   }
 
   // for use in Declare's, look up the internal name of a reserved word or
-  // symbol that might appear in the declare sequence
+  // symbol that might appear in the declare sequence.  If the name isn't on the list
+  // then it is internally just iteslf
   const internal = s => {
     return internalNames[s] || s
   }
@@ -385,7 +389,8 @@ Shorthand = a:(BIH / Ruleset / Rule / Thm / Proof / Cases / Equiv) !alphanum
 // TODO: use Expression|1..,comma|
 Given = GivenLabel a:Environment { return ':'+a } /
         GivenLabel a:Expression|1..,comma| { return a.map(x=>':'+x).join(' ') }
-  GivenLabel = ':'_ / ('assume'i / 'given'i / 'suppose'i / 'if'i) _x
+  GivenLabel = ':'_ / ('assume'i / 'given'i / 'suppose'i / 
+                       'if'i / 'from'i ) _x
 
 ///////////////////////////////////////////////////////////////////////////////
 // Environments
@@ -398,17 +403,20 @@ Environment =  '{' a:LCs '}' { return `{ ${a} }` }
 // Declare constants (cannot have a body and is a given)
 Declare = 'declare'i __ a:DeclareSeq { return `declare> :[${a}]` }
 // ForSome declaration (always a claim)
-ForSome = body:Expression __ 'for'i __ 'some'i __ a:SymbolSeq 
-          { return `[${a}, ${body}]` }
+// We also allow the special shorthand `for some x∈A` since it is so common.
+ForSome = body:Expression __ 'for'i __ 'some'i __ a:Symbol __ 'in'i __ b:Expression
+            { return `[${a}, (and ${body} (∈ ${a} ${b}))]` } /
+          body:Expression __ 'for'i __ 'some'i __ a:SymbolSeq 
+            { return `[${a}, ${body}]` }
 // the 'given' colon is optional since these are always 'given'. We also 
-// allow the special shortand `Let x∈A` since it is so common.          
+// allow the special shorthand `Let x∈A` since it is so common.          
 Let = 'Let'i __ a:Symbol __ 'in'i __ b:Expression 
                             { return `:[${a}, ${lispBinary('∈',a,b)}]` } /
       'Let'i __ a:SymbolSeq __ ('be'i __)? 'such'i __ 'that'i __ b:Expression 
                             { return `:[${a}, ${b}]` } /
       'Let'i __ a:SymbolSeq { return `:[${a}]`       }
   // Comma separated symbols, numbers, and reserved words
-  DeclareSeq = a:(ReservedWord / Number / Symbol)|1..,comma| 
+  DeclareSeq = a:(Symbol / Number / ReservedWord)|1..,comma| 
                 { return a.map(internal).join(' ') }    
   // We allow Reserved Words and Numbers to be declared by a Declare, but not
   // by a Let or ForSome.
@@ -605,22 +613,36 @@ Algebraic = Choose / Sum / Summation / Product
     ///////////////////////////////////////////////////////////////////////////////
     // Prefix operators (function application)
     //
-    // n-ary, left associative, function application. Args can be any Expressions
-    // but the head (function) can only have higher precedence. One common situation
-    // we want to support is something like (g∘f)^(-1)(x), so we allow Inverse for
-    // the head in addition to Symbols and Parenthesized.
+    // n-ary, left associative, function application. Args can be any
+    // Expressions but the head (function) can only have higher precedence. One
+    // common situation we want to support is something like (g∘f)^(-1)(x), so
+    // we allow Inverse for the head in addition to Symbols and Parenthesized.
     //
-    // Since we want to allow things like (g∘f)(x), but don't want something like
-    // `(x≤y) (z=0)` to parse as function application, we require that function
-    // application does NOT allow a space between the function and the parentheses
-    // wrapping it's arguments.  To enable this, Inverse, Symbol, and
-    // Parenthesized cannot consume any spaces after their content.
+    // Since we want to allow things like (g∘f)(x), but don't want something
+    // like `(x≤y) (z=0)` to parse as function application, we require that
+    // function application does NOT allow a space between the function and the
+    // parentheses wrapping it's arguments.  To enable this, Inverse, Symbol,
+    // and Parenthesized cannot consume any spaces after their content.
     //
-    // For convenience we define special Symbols beginning with '@' so that @P(k)
-    // becomes (λ P k) and then replace λ with "LDE EFA" as a shortcut in
-    // parsing.js.  Note that 𝜆 gets replaced by '@' up front in the input. This is
-    // not intended for use in any other way than for writing rules that require
-    // 𝜆P(k) where P is a single character Symbol and k an Expression.
+    // For convenience we define special Symbols beginning with '@' so that
+    // @P(k) becomes (λ P k) and then replace λ with "LDE EFA" as a shortcut in
+    // parsing.js.  Note that 𝜆 gets replaced by '@' up front in the input.
+    // This is not intended for use in any other way than for writing rules that
+    // require 𝜆P(k) where P is a single character Symbol and k an Expression.
+    //
+    // In order to allow subscripted variables and expressions like id_A we
+    // allow an options underscore character immediately preceeding the opening
+    // parentheses of a funciton application.  This is completely ignored as far
+    // as meaning is concerned but allows the user to decide whether they want
+    // e.g. x(0) or x_0 for how the expression appears.  So they can enter
+    // either `x_(0)` or `x(0)` to get `(x 0)` in putdown, but the parentheses
+    // cannot be omitted in the former case. We might allow e.g. `x_0` with no
+    // parentheses in the case where the function argument is a Symbol or
+    // Number, but for now we do not do that so that it reinforces the concept
+    // for students that it's just a formatting difference, not a meaningful
+    // difference and that subscripting is just a notationally different way to
+    // enter function application.  This seems more valuable than learning that,
+    // e.g. in LaTeX you would enter `x_{n+1}` instead of `x_(n+1)`.
     Prefix = '@' a:[a-z]i b:( '('_ @ExpressionSeq _')' )+ 
                 { return `(λ ${a} ${b})` } /
               // allow 'set' to be case insensitive, check for setbuilder before
@@ -631,7 +653,7 @@ Algebraic = Choose / Sum / Summation / Product
               'set('i _ b:ExpressionSeq _')'  
                 { return `(set ${b})` } /
               // everything else
-              a:(Exp / Symbol / Parenthesized)
+              a:(Exp / Symbol / Parenthesized) '_'?
               b:( '('_ @ExpressionSeq _')' )+ 
                 { return lispPrefix(a,b) }
 
@@ -696,10 +718,10 @@ Symbol "Symbol" =
 ReservedWord  = $(
     'declare'i / 'existsUnique' / 'forall' / 'exists' / '*' / 'leq' /
     'not' / 'to' / 'from' / 'implies' / 'iff' / 'intersect' / 'union' /
-    'cross' / 'in' / 'subset' / 'setminus'i / 'circ' / 'wedge' / 'vee' / 
+    'cross' / 'subset' / 'setminus'i / 'circ' / 'comp' / 'wedge' / 'vee' / 
     'equiv' / 'mapsto' / 'approx' / 'langle' / 'rangle' / 'complement' / 
-    'inv' / 'and' / 'or' / '=' / '<' / '+' / '*' / '|' / '-' / 'sum'i / 
-    'to' / 'of' / 'from' / 'as' / 'for' / '^' )
+    'in' / 'and' / 'or' / '=' / '<' / '+' / '*' / '|' / '-' / 
+    'sum'i / 'to' / 'of' / 'from' / 'as' / 'for' / '^' )
 
 ///////////////////////////////////////////////////////////////////////////////
 // punctuation and character classes

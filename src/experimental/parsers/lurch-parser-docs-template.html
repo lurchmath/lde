@@ -108,7 +108,7 @@
 
   <p>English phrases such as <code>Given</code> or <code>declare</code> are case sensitive and will produce LaTeX with the same phrase in the same case. Spaces within an expression are usually ignored and can be used for legibility.  The main exception is that there cannot be any spaces between a function and the parentheses containing its arguments in a function application expression.</p>
 
-  <p>A comma separated sequence preceeded by one of the <code>Given</code> keywords has the same effect as saying that each of them is a <code>Given</code> individually.</p>
+  <p>A comma separated sequence preceeded by one of the <code>Given</code> keywords has the same effect as saying that each of them is a <code>Given</code> individually. The shortcut declaration <code>Let x in A</code> has the same meaning as <code>Let x be such that x in A</code>. The shortcut declaration <code>P(x) for some x in A</code> has the same meaning as <code>P(x) and x in A for some x</code>.</p>
   
   <p>To declared the set operator $\{\ \}$ as a global constant use <code>Declare set</code>. To declare the ordered pair, triple, or tuple operator $\langle\ \rangle$ as a constant use <code>Declare tuple</code>.</p>
 
