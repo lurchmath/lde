@@ -504,7 +504,7 @@ Relations = Maps / Partition / Congruent / Subset / ElementOf / NotEltOf /
                 { return lispBinary('loves',a,b) }
   Fears      = a:RelArg _('fears'/'fear')_x b:RelArg
                 { return lispBinary('fears',a,b) }
-  Is         = a:RelArg _('is' __ 'an'/'is' __ 'a'/'is'/'are')_x b:RelArg
+  Is         = a:RelArg _('is' __ 'an' __/'is' __ 'a'__/'is'__/'are'__) b:RelArg
                 { return lispBinary('is',a,b) }
 
 

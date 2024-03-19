@@ -351,7 +351,7 @@ let start = Date.now()
 
 // fname='lurch-parser-docs-template'
 
-parsers = loadParser('lurch-to-tex')
+parsers = loadParser('lurch-to-putdown')
 p = (s,o) => parsers.parse(s,o)
 t = parsers.trace
 r = parsers.raw
