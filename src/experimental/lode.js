@@ -606,12 +606,20 @@ rpl.defineCommand( "fixrepo", {
   help: "Modify the main repo code with local changes.",
   action() { 
     const lurchmathpath = '../../../lurchmath'
+
     console.log(defaultPen('Overwriting lde-cdn.js ...'))
     exec('cp "utils/lurchmath config/lde-cdn.js" ' + lurchmathpath)
+
     console.log(defaultPen('Changing default About page ...\n'))
     let editorjs = fs.readFileSync( lurchmathpath+'/editor.js' , { encoding:'utf8'} )
     editorjs = editorjs.replace('lurchmath.github.io/site/about/','monks.scranton.edu/lurch')
     fs.writeFileSync( lurchmathpath+'/editor.js' , editorjs )
+
+    console.log(defaultPen('Adding icon to File Open ...\n'))
+    let lsdjs = fs.readFileSync( lurchmathpath+'/local-storage-drive.js' , { encoding:'utf8'} )
+    lsdjs = lsdjs.replace("/// icon : 'upload'","icon : 'upload'")
+    fs.writeFileSync( lurchmathpath+'/local-storage-drive.js' , lsdjs )
+
     console.log(defaultPen('...done'))
     this.displayPrompt()
   }
