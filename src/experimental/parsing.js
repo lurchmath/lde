@@ -136,6 +136,7 @@ export const parseLines = (parser,verbose=true,name='LurchParserTests',opts) => 
  *       | 'declare>'  | 'Declare' |
  *       | 'rule>'     | 'Rule'    |
  *       | 'cases>'    | 'Cases'   |
+ *       | 'subs>'     | 'Subs'    |
  *       | 'thm>'      | 'Theorem' |
  *       | '<thm'      | 'Theorem' |
  *       | 'proof>'    | 'Proof'   |
@@ -219,6 +220,7 @@ export const processShorthands = L => {
   processSymbol( 'declare>'      , m => makeNext(m,'Declare','given') )
   processSymbol( 'rule>'         , m => makeNext(m,'Rule','given') )  
   processSymbol( 'cases>'        , m => makeNext(m,'Cases','given') )  
+  processSymbol( 'subs>'         , m => makeNext(m,'Subs','given') )  
   processSymbol( 'thm>'          , m => makeNext(m,'Theorem','claim') )  
   processSymbol( '<thm'          , m => makePrevious(m,'Theorem','claim') )  
   processSymbol( 'proof>'        , m => makeNext(m,'Proof','claim') )
