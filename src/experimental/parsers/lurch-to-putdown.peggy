@@ -109,6 +109,15 @@
     return `(sum (${k} , ${f}) ${a} ${b})`
   }
 
+  // convert indexed union to putdown
+  const union = (f,k,a) => {
+    return `(Union (${k} , ${f}) ${a})`
+  }
+  // convert indexed intersection to putdown
+  const intersect = (f,k,a) => {
+    return `(Intersect (${k} , ${f}) ${a})`
+  }
+
   // join the elements in an array with spaces
   const spacedSeq = s => { return s.join(' ') }
 
@@ -135,6 +144,7 @@
     [ 'strict partial order'   , 'strictPartialOrder'     ] ,
     [ 'partial order'          , 'partialOrder'           ] ,
     [ 'total order'            , 'totalOrder'             ] ,
+    [ 'topological space'      , 'topSpace'               ] ,
     [ 'for all'                , 'forall'                 ] ,
     [ 'for each'               , 'forall'                 ] ,
     [ 'for every'              , 'forall'                 ] ,
@@ -161,7 +171,7 @@
     'divides'   : '|' , 'cdot'     : '⋅'  , '*'      : '⋅'  , 'love'         : 'loves' ,
     'in'        : '∈' , 'Sum'      : 'sum', '\\'     : ' '  , 'fear'         : 'fears' ,
     'complement': '°' , 'intersect': '∩'  , 'union'  : '∪'  , 'cap'          : '∩'     ,
-    'cup'       : '∪' , 'comp'     : '∘'  , 'circ'   : '∘'  
+    'cup'       : '∪' , 'comp'     : '∘'  , 'circ'   : '∘'  , 'cross'        : '×'
   }
 
   // for use in Declare's, look up the internal name of a reserved word or
@@ -314,7 +324,9 @@
 //   to be compound expressions for each of their operators, and save the atomic
 //   ones to be checked for last, with the arguments to lower precendence
 //   operations coming from the category of expressions that are higher than it
-//   in precedence.  The order we define here is roughly as follows from lowest to highest.
+//   in precedence.  The order we define here is roughly as follows from lowest
+//   to highest.
+//
 //     - Quantified : 
 //     - Binding    :
 //     - Prop       :
@@ -369,8 +381,8 @@ StringLiteral = $('"' [^"]* '"')
 // Shorthands are special symbols which are not allowed to be part
 // of a larger expression and are post-processed by the LDE
 // They cannot be part of a longer symbol
-Shorthand = a:(BIH / Ruleset / Rule / Thm / Proof / Cases / Equiv) !alphanum 
-              { return a }
+Shorthand = a:(BIH / Ruleset / Rule / Thm / Proof / Cases / Subs / Equiv) 
+              !alphanum { return a }
   // Shorthands
   Equiv = 'equiv'i { return '≡' }
   BIH = ('since'i / 'because'i / 'recall'i) { return '>>' }
@@ -379,6 +391,7 @@ Shorthand = a:(BIH / Ruleset / Rule / Thm / Proof / Cases / Equiv) !alphanum
   Thm = ('theorem'i / 'thm'i / 'lemma'i / 'corollary'i) ':'? { return 'thm>' }
   Proof = 'proof'i ':'? { return 'proof>' }
   Cases = 'CasesRule'i ':'? { return 'cases>' }
+  Subs = 'Substitution'i ':'? { return 'subs>' }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Givens
@@ -523,13 +536,43 @@ Set = RelativeComp
                     { return lispSeq('×',a) }
   Union         = a:Intersection|1..,_('cup'/'union')_x| 
                     { return lispSeq('∪',a) }
-  Intersection  = a:(Complement/Composition)|1..,_('cap'/'intersect')_x| 
+  // Moved Complement below so ticks can be used for both complement and
+  // derivatives and other operations as needed.
+  //
+  // Intersection  = a:(Complement/Composition)|1..,_('cap'/'intersect')_x| 
+  Intersection  = a:(Composition)|1..,_('cap'/'intersect')_x| 
                     { return lispSeq('∩',a) }               
-  Complement    = a:Algebraic _('\''/'complement')!alphanum
-                    { return lispUnary('°',a) }
+  // Complement    = a:Algebraic _('\''/'complement')!alphanum
+  //                   { return lispUnary('°',a) }
   Composition   = a:Algebraic|1..,_('circ'/'comp')_x| 
                     { return lispSeq('∘',a) }
   
+  // We imitate Summation to implement both IndexedUnion and IndexedIntersection
+  // and give it rought the same precedence
+  BigUnionName = 'Union'/'Cup'/'bigcup'i 
+  IndexedUnion = BigUnionName __ k:Symbol __ 'in'_x a:Set __ 'of' __ f:Set
+                  { return union(f,k,a) }  / 
+
+                 BigUnionName __ ('of'i __)? f:Set 
+                 __ 'for'i__ k:Symbol _ 'in'_x a:Set
+                     { return union(f,k,a) }  /
+
+                 BigUnionName '(' _ f:Set comma 
+                 k:Symbol comma  a:Set _ ')'
+                     { return union(f,k,a) }
+
+  BigIntersectName = 'Intersect'/'Cap'/'bigcap'i 
+  IndexedIntersect = BigIntersectName __ k:Symbol __ 'in'_x a:Set __ 'of' __ f:Set
+                         { return intersect(f,k,a) }  / 
+
+                     BigIntersectName __ ('of'i __)? f:Set 
+                     __ 'for'i__ k:Symbol _ 'in'_x a:Set
+                         { return intersect(f,k,a) }  /
+    
+                     BigIntersectName '(' _ f:Set comma k:Symbol comma  a:Set _ ')'
+                         { return intersect(f,k,a) }              
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // Algebraic Expressions
 //
@@ -542,7 +585,7 @@ Set = RelativeComp
 // Once again, Algebraic only has to point to the lowest precedence operator
 // that inherits the ones below it (but Choose does not). Atomic is passed up
 // the chain from Exp.
-Algebraic = Choose / Sum / Summation / Product
+Algebraic = Choose / Sum / Summation / IndexedUnion / IndexedIntersect / Product
   
   Choose    = a:(Sum / Product) _'choose'_x b:(Sum / Product) 
                 { return lispBinary('choose',a,b) }      
@@ -583,7 +626,7 @@ Algebraic = Choose / Sum / Summation / Product
                   { return lispUnary('-',a) }
 
     // higher precedence args 
-    ExpArgs =  Factorial / Prefix / Exp / Atomic
+    ExpArgs =  Factorial / Complement / Prefix / Exp / Atomic
 
     // The choice of precedence of Function application vs Exp is tricky.
     // Consider e.g. 2^cos(x), f^2(x), 2^f(x), f^(-1)(x), and the nightmare
@@ -609,6 +652,12 @@ Algebraic = Choose / Sum / Summation / Product
     
     Factorial = a:(Prefix / Exp / Atomic) _'factorial'!alphanum 
                   { return lispUnary('!',a) }
+
+    // even though we originally defined this for set complement, if we move it's 
+    // precedence here we can also use it for derivatives or other operators.
+
+    Complement = a:(Prefix / Exp / Atomic) _('\''/'complement')!alphanum
+                  { return lispUnary('°',a) }
     
     ///////////////////////////////////////////////////////////////////////////////
     // Prefix operators (function application)

@@ -41,7 +41,7 @@
   <script type="text/javascript" id="MathJax-script" async
     src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
   </script>
-  <link rel="shortcut icon" href="favicon.ico">
+  <link rel="shortcut icon" href="favicon.svg">
 	<link href=https://fonts.googleapis.com/css?family=Quicksand
 			rel=stylesheet type=text/css>
 	<link rel=stylesheet href=lurch-parser-docs.css>
@@ -156,19 +156,19 @@
 <tr><td colspan="2" class="subheader">Quantifiers and bindings</td></tr>
 <tr>
           <td>forall x.x leq x+1<br/>for all x.x leq x+1<br/>∀x.x leq x+1</td>
-          <td>$\forall x. x\leq x+1$</td>
+          <td>$\forall x.\, x\leq x+1$</td>
         </tr>
 <tr>
           <td>exists x.x=2 cdot x<br/>∃x.x=2⋅x</td>
-          <td>$\exists x. x=2\cdot x$</td>
+          <td>$\exists x.\, x=2\cdot x$</td>
         </tr>
 <tr>
           <td>exists unique x.x=2*x<br/>∃!x.x=2⋅x</td>
-          <td>$\exists! x. x=2\cdot x$</td>
+          <td>$\exists! x.\, x=2\cdot x$</td>
         </tr>
 <tr>
           <td>x.x+2<br/>x↦x+2</td>
-          <td>$x. x+2$</td>
+          <td>$x.\, x+2$</td>
         </tr>
 
 <tr><td colspan="2" class="subheader">Algebraic expressions</td></tr>
@@ -229,6 +229,10 @@
           <td>$\binom{n+1}{k-1}$</td>
         </tr>
 <tr>
+          <td>multinomial(m,n)</td>
+          <td>$\left(m,n\right)$</td>
+        </tr>
+<tr>
           <td>sum k=0 to n of k^2<br/>sum k from 0 to n of k^2<br/>sum k to n of k^2<br/>sum of k^2 as k goes from 0 to n<br/>sum k^2 as k goes from 0 to n<br/>sum k^2 as k from 0 to n<br/>sum k^2 for k from 0 to n<br/>sum k^2 for k to n<br/>sum of k^2 as k to n<br/>sum of k^2 for k to n<br/>sum( k^2 , k , 0 , n )<br/>sum(k^2,k,0,n)<br/>sum(k^2,k,n)</td>
           <td>$\displaystyle\sum_{k=0}^{n} {k}^{2}$</td>
         </tr>
@@ -252,7 +256,7 @@
         </tr>
 <tr>
           <td>{ p:p is prime}<br/>set(p:p is prime)</td>
-          <td>$\left\{\,p:\,p\text{ is }\text{undefined }\text{prime}\right\}$</td>
+          <td>$\left\{\,p:\,p\text{ is }\text{prime}\right\}$</td>
         </tr>
 <tr>
           <td>A subset B<br/>A subseteq B<br/>A⊆B</td>
@@ -276,7 +280,7 @@
         </tr>
 <tr>
           <td>powerset(A)<br/>𝒫(A)</td>
-          <td>$\mathsf{P}\left(A\right)$</td>
+          <td>$\mathscr{P}\left(A\right)$</td>
         </tr>
 <tr>
           <td>f:A to B<br/>f:A→B</td>
@@ -313,6 +317,14 @@
 <tr>
           <td>tuple(w,x,y,z)<br/>⟨w,x,y,z⟩</td>
           <td>$\left\langle\,w,x,y,z\,\right\rangle$</td>
+        </tr>
+<tr>
+          <td>Union i in I of A_(i)<br/>Union of A_(i) for i in I<br/>Union(A_(i),i,I)<br/>Cup i in I of A_(i)<br/>bigcup i in I of A_(i)</td>
+          <td>$\displaystyle\bigcup_{i\in I} A_{i}$</td>
+        </tr>
+<tr>
+          <td>Intersect i in I of A_(i)<br/>Intersect of A_(i) for i in I<br/>Intersect(A_(i),i,I)<br/>Cap i in I of A_(i)<br/>bigcap i in I of A_(i)</td>
+          <td>$\displaystyle\bigcap_{i\in I} A_{i}$</td>
         </tr>
 
 <tr><td colspan="2" class="subheader">Relations</td></tr>
@@ -361,7 +373,7 @@
         </tr>
 <tr>
           <td>X is Y<br/>X is an Y<br/>X is a Y<br/>X are Y</td>
-          <td>$X\text{ is }\text{undefined }Y$</td>
+          <td>$X\text{ is }Y$</td>
         </tr>
 <tr>
           <td>P is a partition of A</td>
@@ -455,15 +467,15 @@
   <tbody>
     <tr><td>parentheses $(~~)$, tuples $\langle~~\rangle$, equivalence classes $[~~]$, symbols, numbers</td></tr>
     <tr><td>exponentials $\left(x^2\right)$</td></tr>
-    <tr><td>factorial ($n!$)</td></tr>
-    <tr><td>function application $\left(f(x,y)(z)\right)$</td></tr>
+    <tr><td>function application $\left(f_0(x,y)(z)\right)$</td></tr>
+    <tr><td>postfix ($n!$, $f'$)</td></tr>
     <tr><td>negation ($-x$), reciprocal ($1/2$)</td></tr>
     <tr><td>product ($2\cdot x$)</td></tr>
     <tr><td>summation $\left(\sum_{k=0}^n f(k)\right)$</td></tr>
+    <tr><td>indexed union and intersection $\left(\bigcup_{i \in \mathbb{N}} A_{i}\right)$</td></tr>
     <tr><td>sum ($x+y-1$)</td></tr>
     <tr><td>choose $\binom{m+n}{m}$</td></tr>
     <tr><td>composition $\left(g\circ f\right)$</td></tr>
-    <tr><td>complement ($A^\circ$)</td></tr>
     <tr><td>intersection ($A\cap B$)</td></tr>
     <tr><td>union ($A\cup B$)</td></tr>
     <tr><td>cartesian product ($A\times B$)</td></tr>

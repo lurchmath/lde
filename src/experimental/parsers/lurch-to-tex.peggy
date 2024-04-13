@@ -93,10 +93,19 @@
     return ans
   }
 
-  // convert summations to putdown
+  // convert summations to tex
   const summation = (f,k,a,b) => {
     a = a || 0 
     return `\\displaystyle\\sum_{${k}=${a}}^{${b}} ${f}`
+  }
+
+  // convert indexed union to tex
+  const union = (f,k,a) => {
+    return `\\displaystyle\\bigcup_{${k}\\in ${a}} ${f}`
+  }
+  // convert indexed intersection to tex
+  const intersect = (f,k,a) => {
+    return `\\displaystyle\\bigcap_{${k}\\in ${a}} ${f}`
   }
 
   // remove tex parentheses from a string
@@ -160,7 +169,7 @@
       '*'     : '\\cdot'    , cdot     : '\\cdot'      , leq        : '\\leq'        ,
       in      : '\\in'      , cap      : '\\cap'       , cup        : '\\cup'        ,
       union   : '\\cup'     , intersect: '\\cap'       , setminus   : '\\setminus'   ,
-      subset  : '\\subseteq', powerset : '\\mathsf{P}' , complement : '\''           ,
+      subset  : '\\subseteq', powerset : '\\mathscr{P}', complement : '\''           ,
       '^'     : '{}^\\wedge', cross    : '\\times'     , '~'        : '\\sim'        ,
       circ    : '\\circ'    , comp     : '\\circ'      , inv        : '\\text{inv}'  ,
       Fib     : 'F'         ,
@@ -169,7 +178,8 @@
       equivalenceRelation : '\\text{equivalence relation}' ,
       strictPartialOrder  : '\\text{strict partial order}' ,
       partialOrder        : '\\text{partial order}'        ,
-      totalOrder          : '\\text{total order}'          
+      totalOrder          : '\\text{total order}'          ,
+      topSpace            : '\\text{topologial space}'          
     } 
     return (tex[s]) ? tex[s] : s
   }
@@ -261,6 +271,7 @@
     [ 'strict partial order'   , 'strictPartialOrder'     ] ,
     [ 'partial order'          , 'partialOrder'           ] ,
     [ 'total order'            , 'totalOrder'             ] ,
+    [ 'topological space'      , 'topSpace'               ] ,
     [ 'for all'                , 'forall'                 ] ,
     [ 'for each'               , 'forall'                 ] ,
     [ 'for every'              , 'forall'                 ] ,
@@ -499,16 +510,17 @@ StringLiteral = $('"' [^"]* '"')
 // Shorthands are special symbols which are not allowed to be part
 // of a larger expression and are post-processed by the LDE
 // They cannot be part of a longer symbol
-Shorthand = Equiv / a:(BIH / Ruleset / Rule / Thm / Proof / Cases)
+Shorthand = Equiv / a:(BIH / Ruleset / Rule / Thm / Proof / Cases / Subs)
                      !alphanum { return txt(a) }
   // Shorthands
-  Equiv   = 'equiv'i { return '\\equiv ' }
+  Equiv   = 'equiv'i { return '\\text{ iff }' }
   BIH     = $('since'i / 'because'i / 'recall'i)
   Ruleset = $(('rules'i / 'axioms'i / 'definitions'i) ':'?) 
   Rule    = $(('rule'i / 'axiom'i / 'definition'i) ':'?)
   Thm     = $(('theorem'i / 'thm'i / 'lemma'i / 'corollary'i) ':'?)
   Proof   = $('proof'i ':'?)
   Cases   = $('CasesRule'i ':'?)
+  Subs    = $('Substitution'i ':'?)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Givens
@@ -577,7 +589,7 @@ Quantified = 'forall' _x b:Binding           { return `\\forall ${b}`   } /
              'existsUnique' _x b:Binding     { return `\\exists! ${b}` } 
 // binding expressions / anonymous maps
 Binding = a:Symbol period _ b:Expression 
-          { return `${a}. ${b}` } /
+          { return `${a}.\\, ${b}` } /
   a:Symbol _'mapsto'_x b:Expression 
           { return `${a}\\mapsto ${b}` }
 
@@ -662,13 +674,42 @@ Set = RelativeComp
                     { return a.join('\\times ') }
   Union         = a:Intersection|1..,_('cup'/'union')_x| 
                     { return a.join('\\cup ') }
-  Intersection  = a:(Complement/Composition)|1..,_('cap'/'intersect')_x| 
+  // Moved Complement below so ticks can be used for both complement and
+  // derivatives and other operations as needed.
+  //
+  // Intersection  = a:(Complement/Composition)|1..,_('cap'/'intersect')_x| 
+  Intersection  = a:(Composition)|1..,_('cap'/'intersect')_x| 
                     { return a.join('\\cap ') }               
-  Complement    = a:Algebraic _('\''/'complement')!alphanum
-                    { return `{${a}}'` }
+  // Complement    = a:Algebraic _('\''/'complement')!alphanum
+  //                   { return `{${a}}'` }
   Composition   = a:Algebraic|1..,_('circ'/'comp')_x| 
                     { return a.join('\\circ ') }
   
+  // We imitate Summation to implement both IndexedUnion and IndexedIntersection
+  // and give it rought the same precedence
+  BigUnionName = 'Union'/'Cup'/'bigcup'i 
+  IndexedUnion = BigUnionName __ k:Symbol __ 'in'_x a:Set __ 'of' __ f:Set
+                  { return union(f,k,a) }  / 
+
+                 BigUnionName __ ('of'i __)? f:Set 
+                 __ 'for'i__ k:Symbol _ 'in'_x a:Set
+                     { return union(f,k,a) }  /
+
+                 BigUnionName '(' _ f:Set comma 
+                 k:Symbol comma  a:Set _ ')'
+                     { return summation(f,k,a) }              
+
+  BigIntersectName = 'Intersect'/'Cap'/'bigcap'i 
+  IndexedIntersect = BigIntersectName __ k:Symbol __ 'in'_x a:Set __ 'of' __ f:Set
+                         { return intersect(f,k,a) }  / 
+
+                     BigIntersectName __ ('of'i __)? f:Set 
+                     __ 'for'i__ k:Symbol _ 'in'_x a:Set
+                         { return intersect(f,k,a) }  /
+    
+                     BigIntersectName '(' _ f:Set comma k:Symbol comma  a:Set _ ')'
+                         { return intersect(f,k,a) }              
+
 ///////////////////////////////////////////////////////////////////////////////
 // Algebraic Expressions
 //
@@ -681,7 +722,7 @@ Set = RelativeComp
 // Once again, Algebraic only has to point to the lowest precedence operator
 // that inherits the ones below it (but Choose does not). Atomic is passed up
 // the chain from Exp.
-Algebraic = Choose / Sum / Summation / Product
+Algebraic = Choose / Sum / Summation / IndexedUnion / IndexedIntersect / Product
   
   // we make this lower precedence that sums so e.g. 'n+1 choose k' can be
   // entered without parentheses
@@ -724,7 +765,7 @@ Algebraic = Choose / Sum / Summation / Product
                   { return '-'+a }
 
     // Exp and higher precedence args
-    ExpArgs = Factorial / Multinomial / Prefix / Exp / Atomic
+    ExpArgs = Complement / Factorial / Multinomial / Prefix / Exp / Atomic
 
     // The choice of precedence of Function application vs Exp is tricky.
     // Consider e.g. 2^cos(x), f^2(x), 2^f(x), f^(-1)(x), and the nightmare
@@ -750,6 +791,12 @@ Algebraic = Choose / Sum / Summation / Product
     
     Factorial = a:(Multinomial / Prefix / Exp / Atomic) _'factorial'!alphanum
                   {  return a+'!' }
+
+    // even though we originally defined this for set complement, if we move it's 
+    // precedence here we can also use it for derivatives or other operators.
+
+    Complement = a:(Prefix / Exp / Atomic) _('\''/'complement')!alphanum
+                   { return `{${a}}'` }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Prefix operators (function application)

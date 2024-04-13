@@ -1,6 +1,6 @@
 /**
  * Lurch Options
- * 
+ *
  * We just use a global for storing the current options. This avoids having to
  * pass it as an optional argument through the entire validation chain of
  * interpretations and validation tools. To set an option just do e.g.
@@ -15,17 +15,17 @@
  *      proposition.
  *   * `avoidLoneEFAs` - the same thing for lone EFAs        
  *   * `processEquations` - process equations iff this is true  
- *   * `processCases`- process the cases tool iff this is true      
+ *   * `processCases`- process the cases tool iff this is true 
  *   * `autoCases` - similar to avoidLoneMetavars=false. If true, then identify
  *      all Cases-like rules and try to instantiate their univar conclusion with
  *      every user's conclusion in the document.
  *   * `processCAS` - process CAS tool iff this is true
- *   * `swapTheoremProofPairs` - move theorems after their next sibling if its 
- *      a proof
+ *   * `swapTheoremProofPairs` - move theorems after their next sibling if its a
+ *      proof
  *   *  `updateProgress` - the function that gives progress updates while
  *       instantiating
  *   * `updateFreq` - how often to give a progress update during a pass
- *   * `badResultMsg` - what the feedback message should be internally to 
+ *   * `badResultMsg` - what the feedback message should be internally to
  *     expressions which are not found to be propositionally valid 
  *
  */
