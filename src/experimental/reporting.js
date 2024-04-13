@@ -550,6 +550,57 @@ LogicConcept.prototype.investigate = function(option) {
   console.log(_investigate(this,option))
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Stats
+//
+// For each top level Rules in a document, report the number of Parts 
+// and Insts it has.
+const _stats = function (doc,options) {
+  // get only top level rules
+  const kids = doc.children()
+  const Rules = kids.filter( x => x.isA('Rule'))
+  // get the table data
+  let table = Rules.map( (r,k) => {
+    const a = r.address()[0]
+    const b = (k===Rules.length-1) ? kids.length : Rules[k+1].address()[0]
+    const parts = kids.slice(a,b).filter(x=>x.isA('Part')).length
+    const insts = kids.slice(a,b).filter(x=>x.isA('Inst')).length
+    console.log(`Rule:${k} Parts:${parts} Insts:${insts}`)
+    return { Address : a, Parts: parts, Insts: insts }
+  })
+  // return the table of data 
+  return table
+}
+
+// The actual function prints the string so it syntax highlights
+LogicConcept.prototype.stats = function(options) {
+  console.table(_stats(this,options))
+}
+
+// Utilities related to the .stats table
+LogicConcept.prototype.Rule = function(n) {
+  return this.children().filter( x => x.isA('Rule'))[n]
+}
+// internal utility used by the next two functions
+const _getRuleOffspring = function(n,getparts = false) {
+  const kids = doc.children()
+  const Rules = kids.filter( x => x.isA('Rule'))
+  const r = Rules[n]
+  const a = r.address()[0]
+  const b = (n===Rules.length-1) ? kids.length : Rules[n+1].address()[0]
+  if (getparts) 
+   return kids.slice(a,b).filter(x=>x.isA('Part'))
+  else
+   return kids.slice(a,b).filter(x=>x.isA('Inst'))
+}
+LogicConcept.prototype.Insts = function(n) {
+   return _getRuleOffspring(n)
+}
+LogicConcept.prototype.Parts = function(n) {
+   return _getRuleOffspring(n,true)
+}
+
+
 // Because this is used so often
 Object.defineProperty(LogicConcept.prototype, 'all', {
   get: function() {
@@ -570,7 +621,6 @@ Object.defineProperty(LogicConcept.prototype, 'nice', {
     this.report(nice)
   }
 })
-
 
 export default {
   
