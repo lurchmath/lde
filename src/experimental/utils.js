@@ -84,6 +84,16 @@ const subscriptDigits = '₀₁₂₃₄₅₆₇₈₉'
 const subscript = n => [...n.toString()].map(d => subscriptDigits[d]).join('')
 
 /** 
+ * Convert RGB to HEX
+ */ 
+const rgb2hex = (r, g, b) => {
+  const hexR = r.toString(16).padStart(2, '0').toUpperCase()
+  const hexG = g.toString(16).padStart(2, '0').toUpperCase()
+  const hexB = b.toString(16).padStart(2, '0').toUpperCase()
+  return `#${hexR}${hexG}${hexB}`;
+}
+
+/** 
  * Report the time it took to execute function `f`, passed as an argument. 
  */
 const timer = (f,msg='') => {
@@ -93,5 +103,6 @@ const timer = (f,msg='') => {
 }
 
 export default {
-  commonInitialSlice, checkExtension, tab, indent, lineNum, subscript, timer
+  commonInitialSlice, checkExtension, tab, indent, lineNum, subscript, 
+  rgb2hex, timer
 }
