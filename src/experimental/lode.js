@@ -109,6 +109,10 @@ import { parse as lurchToTexTrace } from './parsers/lurch-to-tex-trace.js'
 global.textrace = lurchToTexTrace
 // load the Lurch to LaTeX parser precompiled for efficiency
 import { makedoc } from './parsers/makedoc.js'
+// load the utility to create the site lurch file index page
+import { generatePage } from '../../../lurchmath/grading-tools/toc.js'
+// load the utility to create the site lurch file index page
+import { scrape } from '../../../lurchmath/grading-tools/scraper.js'
 // load the chalk pens globally
 import Pens from './pens.js'
 global.Pens = Pens
@@ -333,6 +337,14 @@ global.$ = s => {
   return (parsed) ? lc(parsed) : undefined
 }
 global.makedoc = makedoc
+// store the folders we want to be scanned as part of the indexing page
+// relative folders are relative to the root of the server (the lurch folder 
+// of the LFY)
+global.contentFolders = ['math','math299','dropbox','help','299solns']
+global.toc = () => generatePage(...contentFolders)
+global.scrape = scrape
+global.scrapeToGomez = () => 
+  exec('cd ../../..;cp scrape.txt ~/Dropbox/shared/Gomez/Lurch')
 
 // function to parse a test file one line at a time with the parser given as the
 // first argument and file to parse as the second (optional)
