@@ -219,11 +219,18 @@ export const processShorthands = L => {
   processSymbol( 'BIH>'          , m => makeNext(m,'BIH','claim') )
   processSymbol( 'declare>'      , m => makeNext(m,'Declare','given') )
   processSymbol( 'rule>'         , m => makeNext(m,'Rule','given') )  
-  processSymbol( 'cases>'        , m => makeNext(m,'Cases','given') )  
-  processSymbol( 'subs>'         , m => makeNext(m,'Subs','given') )  
   processSymbol( 'thm>'          , m => makeNext(m,'Theorem','claim') )  
   processSymbol( '<thm'          , m => makePrevious(m,'Theorem','claim') )  
   processSymbol( 'proof>'        , m => makeNext(m,'Proof','claim') )
+  processSymbol( 'cases>'        , m => makeNext(m,'Cases','given') )  
+  
+  // Mark a rule as the substitution rule, and mark it's conclusion as a 
+  // substitution EFA so that it can be instantiated by expressions marked
+  // with .by='substitution'
+  processSymbol( 'subs>'         , m => {
+    m.nextSibling().conclusions().forEach( c => c.makeIntoA('Subs'))
+    makeNext(m,'Subs','given')
+  })  
   
   // attribute the previous sibling with .by attribute whose value is the text
   // of the next sibling if it is a symbol (and does nothing if it isn't)

@@ -172,7 +172,7 @@
       subset  : '\\subseteq', powerset : '\\mathscr{P}', complement : '\''           ,
       '^'     : '{}^\\wedge', cross    : '\\times'     , '~'        : '\\sim'        ,
       circ    : '\\circ'    , comp     : '\\circ'      , inv        : '\\text{inv}'  ,
-      Fib     : 'F'         ,
+      Fib     : 'F'         , by       : '\\text{by }' ,
       iff                 : '\\Leftrightarrow'             ,   
       contradiction       : '\\rightarrow\\leftarrow'      ,
       equivalenceRelation : '\\text{equivalence relation}' ,
@@ -520,7 +520,7 @@ Shorthand = Equiv / a:(BIH / Ruleset / Rule / Thm / Proof / Cases / Subs)
   Thm     = $(('theorem'i / 'thm'i / 'lemma'i / 'corollary'i) ':'?)
   Proof   = $('proof'i ':'?)
   Cases   = $('CasesRule'i ':'?)
-  Subs    = $('Substitution'i ':'?)
+  Subs    = 'SubsRule'i ':'? { return 'Substitution' }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Givens

@@ -404,7 +404,7 @@ function peg$parse(input, options) {
   var peg$c19 = "corollary";
   var peg$c20 = "proof";
   var peg$c21 = "casesrule";
-  var peg$c22 = "substitution";
+  var peg$c22 = "subsrule";
   var peg$c23 = "assume";
   var peg$c24 = "given";
   var peg$c25 = "suppose";
@@ -546,7 +546,7 @@ function peg$parse(input, options) {
   var peg$e22 = peg$literalExpectation("corollary", true);
   var peg$e23 = peg$literalExpectation("proof", true);
   var peg$e24 = peg$literalExpectation("CasesRule", true);
-  var peg$e25 = peg$literalExpectation("Substitution", true);
+  var peg$e25 = peg$literalExpectation("SubsRule", true);
   var peg$e26 = peg$literalExpectation("assume", true);
   var peg$e27 = peg$literalExpectation("given", true);
   var peg$e28 = peg$literalExpectation("suppose", true);
@@ -1781,9 +1781,9 @@ function peg$parse(input, options) {
     }
 
     s0 = peg$currPos;
-    if (input.substr(peg$currPos, 12).toLowerCase() === peg$c22) {
-      s1 = input.substr(peg$currPos, 12);
-      peg$currPos += 12;
+    if (input.substr(peg$currPos, 8).toLowerCase() === peg$c22) {
+      s1 = input.substr(peg$currPos, 8);
+      peg$currPos += 8;
     } else {
       s1 = peg$FAILED;
       if (peg$silentFails === 0) { peg$fail(peg$e25); }

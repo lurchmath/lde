@@ -391,7 +391,7 @@ Shorthand = a:(BIH / Ruleset / Rule / Thm / Proof / Cases / Subs / Equiv)
   Thm = ('theorem'i / 'thm'i / 'lemma'i / 'corollary'i) ':'? { return 'thm>' }
   Proof = 'proof'i ':'? { return 'proof>' }
   Cases = 'CasesRule'i ':'? { return 'cases>' }
-  Subs = 'Substitution'i ':'? { return 'subs>' }
+  Subs = 'SubsRule'i ':'? { return 'subs>' }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Givens

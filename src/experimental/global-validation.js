@@ -330,19 +330,53 @@ const cacheFormulaDomainInfo = f => {
 
 /**
  * Check if an expression is forbidden as a Weenie. Currently we don't try to
- * match user expressions to a pattern that is a single metavariable or EFA
- * because they match everything. This causes some rules, like or- or
- * substitution, to require another validation tool like BIH, Cases, or
- * Equations.
+ * match user expressions to a pattern that is a single metavariable or EFA that
+ * is not partially instantiated because they match everything. This causes some
+ * rules, like or- or substitution, to require another validation tool like BIH,
+ * Cases, or Equations.
+ *
+ * Note that for EFA's it is ok if the expression is partially instantiated, so
+ * that it's not enough just for it to be an EFA.  For example, in the
+ * substitution rule, both the premise and conclusion is of the form @P(x) where
+ * bot P and x are metaviarables.  But if the premise that is the equation is
+ * instantiated first to create a partial instantiation of the rule, then the x
+ * will be replaced by an expression not containing any metavariables which is
+ * MUCH more efficient for matching.  For example, in an expression like 
+ *                  `(-(z*y)+z*x)+z*y = z*y+(-(z*y)+z*x)`
+ * (an actual example) trying to match that expression to @P(x) where x and P
+ * are metavars produces a whopping 191 matches.  But trying to match it to 
+ * e.g. @P(z*y), only produces 16 matches... much more manageable.
  *
  * The LurchOptions.avoidLoneMetavars and LurchOptions.avoidLoneEFAs options can
  * be used to change the behavior of this function in the corresponding manner.
  * They are both true by default.
  */
-const forbiddenWeeny = ( L ) => (
-  (L instanceof Environment) || 
-  ((L instanceof LurchSymbol) && LurchOptions.avoidLoneMetavars) || 
-  (isAnEFA(L) && LurchOptions.avoidLoneEFAs) )
+const forbiddenWeeny = L => 
+  // it's an Environment
+  ( L instanceof Environment ) || 
+  // or we are avoiding lone metavars and it is one
+  ( LurchOptions.avoidLoneMetavars && 
+    (L instanceof LurchSymbol)
+  ) || 
+  // or we are avoiding LoneEFAs except for the subsitutition rule when the
+  // conclusion is partially instantiated, and in that case only the conclusion
+  // is checked against a user proposition that is flagged 'by substitution' for
+  // efficiency, since that will determine P for the premise.
+  ( LurchOptions.avoidLoneEFAs && 
+    isAnEFA(L) && 
+    ( !L.isA('Subs') || 
+      !L.children().slice(1).some(kid =>
+        kid.hasDescendantSatisfying( x => 
+          (x instanceof LurchSymbol) && !x.isA(metavariable)
+        )
+      ) 
+    )
+  ) ||
+  // don't match x∈A when A is a metavariable because almost every
+  // statment in a typical Set Theory proof has this form and will match
+  ( L instanceof Application && L.child(0) instanceof LurchSymbol &&
+    L.child(0).text()==='∈'  && L.child(2) instanceof LurchSymbol && 
+    L.child(2).isA(metavariable))
 
 /** 
  * Process BIHs
@@ -945,6 +979,8 @@ const instantiate = doc => {
       f.weenies.forEach(p => {
         // try to match this pattern p to every user proposition e
         E.forEach(e => {
+          // if it's a Subs EFA and e isn't .by substitution skip it
+          if ((p.isA('Subs') && e.by!=='substitution')) return 
           // get all valid solutions 
           // declarations with body are a special case
           let solns = []
