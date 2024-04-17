@@ -411,9 +411,12 @@ const processBIHs = doc => {
           inst.unmakeIntoA('Rule')
           inst.unmakeIntoA('Part')
           inst.makeIntoA('Inst')
+          if (!f.creators) f.creators = []
+          // A BIH should not be made from a Part but we do this for consistency
+          // for now
           inst.rule = f.rule || f
-          if (!inst.creators) inst.creators = []
-          inst.creators.push(b)
+          inst.part = f  
+          inst.creators = [ ...f.creators, b ]
           Formula.addCachedInstantiation(f, inst)
         })
       } catch { }
@@ -518,43 +521,47 @@ const processEquations = doc => {
     // TODO: consider generalizing or upgrading
     const delta = diff(A,B,true)
     // for now we only allow a single substutition at a time, so check if
-    // there's a diff, and that it is vacuous (e.g., the equation isn't x=x).
+    // there's a diff, and that it is not vacuous (e.g., the equation isn't x=x).
     // The argument 'true' to diff above guarantees there will only be one diff,
     // if any. 
     //
     // TODO: maybe generalize later
     if (delta && delta[0].length>0) {
-      // get x,y such that replacing x with y in A produces B
-      let x = A.child(...delta[0]).copy(), y=B.child(...delta[0]).copy()
-      // construct the instantiation :{ :x=y A=B }
-      
-      // build it
-      let inst = new Environment( 
-        new Application( new LurchSymbol('=') , x , y).asA('given') , 
-        new Application( new LurchSymbol('=') , A , B ) 
-      )
-  
-      // and insert it
-      insertInstantiation( inst , rule , eq )
+      // the substititution might also be for a common ancestor of the diff
+      // locations, so we consider them all
+      const n = delta[0].length
+      for (let i=1;i<=n;i++) {
+        // get x,y such that replacing x with y in A produces B
+        let x = A.child(...(delta[0].slice(0,i))).copy(), 
+            y = B.child(...(delta[0].slice(0,i))).copy()
+        // construct the instantiation :{ :x=y A=B }
+        
+        // build it
+        let inst = new Environment( 
+          new Application( new LurchSymbol('=') , x , y).asA('given') , 
+          new Application( new LurchSymbol('=') , A.copy() , B.copy() ) 
+        )
+        // and insert it
+        insertInstantiation( inst , rule , eq )
+        
+        // additionally add x=y to the list of things that should be considered
+        // as user propositions for further instantiation when prop validating.
+        const x_eq_y = inst.child(0).copy()
+        
+        // and insert it
+        insertInstantiation( x_eq_y , rule , eq )
+        
+        // Also make the reverse diff equation as a Consider to impose symmetry
+        // const y_eq_x = new Application(new LurchSymbol('='),y.copy(),x.copy())
+        const y_eq_x = reverseEquation(x_eq_y)
+        
+        // and insert it
+        insertInstantiation( y_eq_x , rule , eq )
 
-      // additionally add x=y to the list of things that should be considered
-      // as user propositions for further instantiation when prop validating.
-      const x_eq_y = inst.child(0).copy()
-
-      // and insert it
-      insertInstantiation( x_eq_y , rule , eq )
-      
-      // Also make the reverse diff equation as a Consider to impose symmetry
-      // const y_eq_x = new Application(new LurchSymbol('='),y.copy(),x.copy())
-      const y_eq_x = reverseEquation(x_eq_y)
-      
-      // and insert it
-      insertInstantiation( y_eq_x , rule , eq )
-
-      // and insert the symmetric equivalences for them (only need to do it for
-      // one of them)
-      insertSymmetricEquivalences( x_eq_y , rule )
-
+        // and insert the symmetric equivalences for them (only need to do it for
+        // one of them)
+        insertSymmetricEquivalences( x_eq_y , rule )
+      }
     // and in the case where there's no substitution possible, also add the
     // reverse of the equation to impose symmetry (its symmetric equivalences are inserted above)
     } else {
@@ -724,7 +731,7 @@ const splitEquations = doc => {
  * ```
  * but
  * ```
- *   diff( f(g(a,b) , f(g(c,d)) true ) returns [[1]]
+ *   diff( f(g(a,b) , f(g(c,d)) , true ) returns [[1]]
  * ```
  * so in the latter case we know that the second expression can be obtained from
  * the first via the single substitution `g(a,b)=g(c,d)`, whereas the former would
@@ -872,10 +879,12 @@ const processCases = doc => {
               inst.makeIntoA('Part')
               inst.ignore = true
             }
-            // store the rule it came from and add c to the list of creators
-            inst.rule = r
-            if (!inst.creators) inst.creators = []
-            inst.creators.push(e)
+            // store the rule and part it came from and add e to the list of
+            // creators.
+            inst.rule = r.rule || r
+            inst.part = r
+            if (!r.creators) r.creators = []
+            inst.creators = [ ...r.creators, e ]
             // also rename the bindings to match what the user would have
             // for the same expressions in his document
             // time('Rename bindings')
@@ -1052,7 +1061,7 @@ const getUserPropositions = doc => {
   const dups = new Set()
   allE.forEach(e => {
     const eprop = e.prop().replace(/^[:]/, '')
-    if (!dups.has(eprop)) {
+    if (!dups.has(eprop) || e.by) {
       dups.add(eprop)
       E.push(e)
     }
@@ -1186,11 +1195,17 @@ const insertInstantiation = ( inst, formula, creator ) => {
 
     // save the rule (whether formula is a Part or Rule)
     inst.rule = formula.rule || formula
+    // save the Part (whether or not it is the same as the Rule)
+    inst.part = formula
     // if a creator is specified, push it onto the list
     if (creator) {
-      // if the inst is for a Part it might already have creators, if so, keep them
-      if (!inst.creators) inst.creators = []
-      inst.creators.push(creator)
+      // If the inst is for a Part it might already have creators, if so, keep
+      // them. It is also possible that it is the first time it is being
+      // instantiated and was created directly from putdown rather than though
+      // the rule> shorthand, and so doesn't have a creators array, in which
+      // case we initialize it
+      if (!formula.creators) formula.creators = []
+      inst.creators = [ ...formula.creators, creator ]
     }
     // mark it as a cached instantiation for the Formula package.
     // TODO: is this really needed?
@@ -1338,7 +1353,7 @@ LogicConcept.prototype._validate = function (target = this,
     } catch (e) {
       doc.negate()
       say(`\nError validating the following for ${(checkPreemies) ? 'preemies' : 'prop'}:\n`)
-      write(target)
+      console.log(target)
       say(`at address: ${target.address()}`)
     }
     // un-negate this

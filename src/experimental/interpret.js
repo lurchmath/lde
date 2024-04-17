@@ -179,6 +179,8 @@ const processTheorems = doc => {
       thmrule.makeIntoA('Rule')
       // mark it for easy identification later
       thmrule.userRule = true
+      // initialize it's creators array
+      thmrule.creators = []
       // and insert it after the theorem
       thmrule.insertAfter(thm)
     })

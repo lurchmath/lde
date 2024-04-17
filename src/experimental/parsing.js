@@ -267,6 +267,8 @@ export const processShorthands = L => {
       if (kid instanceof Environment) { 
         kid.makeIntoA('Rule') 
         kid.makeIntoA('given')
+        // the rule has no creators
+        kid.creators=[]
         // TODO: the following would be useful for web UI but not for 
         // Lode, since I've used claim environments in rules.
         // kid.children().forEach( premise => {
