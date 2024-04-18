@@ -565,7 +565,6 @@ const _stats = function (doc,options) {
     const b = (k===Rules.length-1) ? kids.length : Rules[k+1].address()[0]
     const parts = kids.slice(a,b).filter(x=>x.isA('Part')).length
     const insts = kids.slice(a,b).filter(x=>x.isA('Inst')).length
-    console.log(`Rule:${k} Parts:${parts} Insts:${insts}`)
     return { Address : a, Parts: parts, Insts: insts }
   })
   // return the table of data 
