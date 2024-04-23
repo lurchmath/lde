@@ -1352,9 +1352,9 @@ LogicConcept.prototype._validate = function (target = this,
       answer = !CNF.isSatisfiable(this.cnf(target, checkPreemies))
     } catch (e) {
       doc.negate()
-      say(`\nError validating the following for ${(checkPreemies) ? 'preemies' : 'prop'}:\n`)
+      console.log(`\nError validating the following for ${(checkPreemies) ? 'preemies' : 'prop'}:\n`)
       console.log(target)
-      say(`at address: ${target.address()}`)
+      console.log(`at address: ${target.address()}`)
     }
     // un-negate this
     doc.negate()
@@ -1653,7 +1653,7 @@ const markDeclarationContexts = doc => {
 //
 // TODO:
 // * finish this
-let Report = {}
+let Stats = {}
 const Benchmark = function (f, name) {
   const start = Date.now()
   f()
@@ -1669,7 +1669,7 @@ const Benchmark = function (f, name) {
 export default {
   validate, getUserPropositions, instantiate, markDeclarationContexts,
   processBIHs, processEquations, splitEquations, processDomains, diff,
-  cacheFormulaDomainInfo, Benchmark, getCaselikeRules, LurchOptions, Report,
+  cacheFormulaDomainInfo, Benchmark, getCaselikeRules, LurchOptions, Stats,
   matchPropositions, LogicConcept, Formula, Scoping, Validation
 }
 ///////////////////////////////////////////////////////////////////////////////

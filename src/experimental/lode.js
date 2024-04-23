@@ -29,6 +29,8 @@ import fs, { write } from 'fs'
 import { execSync } from 'child_process'
 import util from 'util'
 import peggy from 'peggy'
+import { XMLParser } from 'fast-xml-parser'
+global.xml = (s) => new XMLParser({ ignoreAttributes:false }).parse(s)
 // import asciimath2latex from './parsers/asciimath-to-latex.js'
 import { latexToLurch } from './parsers/tex-to-lurch.js'
 // import * as MathLive from 'mathlive'
