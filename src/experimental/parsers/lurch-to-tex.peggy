@@ -172,7 +172,9 @@
       subset  : '\\subseteq', powerset : '\\mathscr{P}', complement : '\''           ,
       '^'     : '{}^\\wedge', cross    : '\\times'     , '~'        : '\\sim'        ,
       circ    : '\\circ'    , comp     : '\\circ'      , inv        : '\\text{inv}'  ,
-      Fib     : 'F'         , by       : '\\text{by }' ,
+      Fib     : 'F'         , by       : '\\text{by }' , pie        : '🥧'           ,
+      basket  : '🧺'        , tree     : '🌳'           , apple      : '🍎'           ,
+      cherry  : '🍒'        , blueberry: '🫐'           , star       : '\\star'       , 
       iff                 : '\\Leftrightarrow'             ,   
       contradiction       : '\\rightarrow\\leftarrow'      ,
       equivalenceRelation : '\\text{equivalence relation}' ,
@@ -298,7 +300,7 @@
     'divides'   : '|' , 'cdot'     : '⋅'  , '*'      : '⋅'  , 'love'         : 'loves' ,
     'in'        : '∈' , 'Sum'      : 'sum', '\\'     : ' '  , 'fear'         : 'fears' ,
     'complement': '°' , 'intersect': '∩'  , 'union'  : '∪'  , 'cap'          : '∩'     ,
-    'cup'       : '∪' , 'comp'     : '∘'  , 'circ'   : '∘'  
+    'cup'       : '∪' , 'comp'     : '∘'  , 'circ'   : '∘'  , 'star'         : '★'
   }
 
   // for use in Declare's, look up the internal name of a reserted word or
@@ -532,7 +534,7 @@ Shorthand = Equiv / a:(BIH / Ruleset / Rule / Thm / Proof / Cases / Subs)
 Given = a:GivenLabel b:Environment { return `${txt(a)} ${b}` } /
         a:GivenLabel b:Expression|1..,comma| { return `${txt(a)} ${sequence(b)}` }
   GivenLabel = @':'_ / @('assume'i / 'given'i / 'suppose'i / 
-                         'if'i / 'from'i) _x
+                         'if'i / 'from'i / 'define'i ) _x
 
 ///////////////////////////////////////////////////////////////////////////////
 // Environments
@@ -624,7 +626,11 @@ Relations = Maps / Partition / Congruent / Subset / ElementOf / NotEltOf /
                  { return `${a}\\colon ${b}\\to ${c}` }
   Partition  = a:(Binding/RelArg) _'is' __ 'a' __ 'partition' __ 'of' __ 
                b:(Binding/RelArg)
-                 { return `${a}\\text{ is a partition of }${b}` }
+                 { return `${a}\\text{ is a partition of }${b}` } /
+               a:(Binding/RelArg) _'is' __ 'a' __ 'relation' __ 'on' __ 
+               b:(Binding/RelArg)
+                 { return `${a}\\text{ is a relation on} ${b}` } 
+
   Congruent  = a:(Binding/RelArg) _'cong'_x b:(Binding/RelArg) _'mod'i_x 
                c:(Binding/RelArg)
                  { return `${a}\\underset{${c}}{\\equiv}${b}` } /
@@ -765,7 +771,7 @@ Algebraic = Choose / Sum / Summation / IndexedUnion / IndexedIntersect / Product
                   { return '-'+a }
 
     // Exp and higher precedence args
-    ExpArgs = Complement / Factorial / Multinomial / Prefix / Exp / Atomic
+    ExpArgs = Complement / Factorial / Multinomial / Prefix / Exp / Star / Atomic
 
     // The choice of precedence of Function application vs Exp is tricky.
     // Consider e.g. 2^cos(x), f^2(x), 2^f(x), f^(-1)(x), and the nightmare
@@ -865,6 +871,10 @@ Prefix =  // LDE EFA's first
     Exp = a:Atomic _'^'_ b:(Atomic / '-') 
             { return `{${a}}^{${nopar(b)}}` } 
 
+    // An arbitrary high precedence infix operator
+    Star = a:Atomic|1..,(_'★'_/_'star'_x)| 
+                { return texJoin('\\star ',a) }
+
 ///////////////////////////////////////////////////////////////////////////////
 // Atomic Expressions
 //
@@ -912,7 +922,7 @@ Natural = $( [1-9][0-9]* / '0' )
 //
 // For clarity in reading the putdown output we rename some special frequently used
 // symbols.
-Symbol "Symbol" =  a:('contradiction' / '✔︎' / '✗' / '⁉︎' / '~' ) { return texsymbol(a) } / 
+Symbol "Symbol" =  a:('contradiction' / '✔︎' / '✗' / '⁉︎' / '~') { return texsymbol(a) } / 
   !(ReservedWord !alphanum) a:([a-z]i alphanum* ) 
   { let b = texsymbol(a[0]+a[1].join(''))
     return (b.length>1 && !b.startsWith('\\')) ? `\\text{${b}}` : b }

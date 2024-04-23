@@ -143,4 +143,5 @@ export const makedoc = () => {
   let doc = loadStr('lurch-parser-docs-template','./parsers/','html')
               .replace(/## MAKEDOC OUTPUT GOES HERE ##/g,ans)           
   fs.writeFileSync('./parsers/lurch-parser-docs.html', doc)
+  write('The Lurch syntax documentation page was written successfully.')
 }

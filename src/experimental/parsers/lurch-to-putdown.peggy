@@ -171,7 +171,8 @@
     'divides'   : '|' , 'cdot'     : '⋅'  , '*'      : '⋅'  , 'love'         : 'loves' ,
     'in'        : '∈' , 'Sum'      : 'sum', '\\'     : ' '  , 'fear'         : 'fears' ,
     'complement': '°' , 'intersect': '∩'  , 'union'  : '∪'  , 'cap'          : '∩'     ,
-    'cup'       : '∪' , 'comp'     : '∘'  , 'circ'   : '∘'  , 'cross'        : '×'
+    'cup'       : '∪' , 'comp'     : '∘'  , 'circ'   : '∘'  , 'cross'        : '×'     ,
+    'star'      : '★'
   }
 
   // for use in Declare's, look up the internal name of a reserved word or
@@ -403,7 +404,7 @@ Shorthand = a:(BIH / Ruleset / Rule / Thm / Proof / Cases / Subs / Equiv)
 Given = GivenLabel a:Environment { return ':'+a } /
         GivenLabel a:Expression|1..,comma| { return a.map(x=>':'+x).join(' ') }
   GivenLabel = ':'_ / ('assume'i / 'given'i / 'suppose'i / 
-                       'if'i / 'from'i ) _x
+                       'if'i / 'from'i / 'define'i ) _x
 
 ///////////////////////////////////////////////////////////////////////////////
 // Environments
@@ -488,7 +489,10 @@ Relations = Maps / Partition / Congruent / Subset / ElementOf / NotEltOf /
   // TODO: combine this with Is, and add the order relations
   Partition  = a:(Binding/RelArg) _'is' __ 'a' __ 'partition'i __ 'of' __ 
                b:(Binding/RelArg)
-                 { return lispSeq('partition',[a,b]) }
+                 { return lispSeq('partition',[a,b]) } / 
+               a:(Binding/RelArg) _'is' __ 'a' __ 'relation'i __ 'on' __ 
+               b:(Binding/RelArg)
+                 { return lispSeq('relation',[a,b]) }    
   Congruent  = a:(Binding/RelArg) _'cong'_x b:(Binding/RelArg) _'mod'i_x 
                c:(Binding/RelArg)
                  { return lispSeq('≅',[a,b,c]) } /
@@ -626,7 +630,7 @@ Algebraic = Choose / Sum / Summation / IndexedUnion / IndexedIntersect / Product
                   { return lispUnary('-',a) }
 
     // higher precedence args 
-    ExpArgs =  Factorial / Complement / Prefix / Exp / Atomic
+    ExpArgs =  Factorial / Complement / Prefix / Exp / Star / Atomic
 
     // The choice of precedence of Function application vs Exp is tricky.
     // Consider e.g. 2^cos(x), f^2(x), 2^f(x), f^(-1)(x), and the nightmare
@@ -711,6 +715,10 @@ Algebraic = Choose / Sum / Summation / IndexedUnion / IndexedIntersect / Product
     // this point.
     Exp = a:Atomic _'^'_ b:(Atomic / '-') { return lispBinary('^',a,b) } 
 
+    // An arbitrary high precedence infix operator
+    Star = a:Atomic|1..,(_'★'_/_'star'_x)| 
+                { return lispSeq('★',a) }
+
 ///////////////////////////////////////////////////////////////////////////////
 // Atomic Expressions
 //
@@ -752,7 +760,7 @@ Natural = $( [1-9][0-9]* / '0' )
 // For clarity in reading the putdown output we rename some special frequently used
 // symbols.
 Symbol "Symbol" = 
-  '✔︎' / '✗' / '⁉︎' /   // for declaring expected results in tests
+  '✔︎' / '✗' / '⁉︎' / // useful unicode
   'contradiction' { return '→←' }  /  'sigma'         { return 'σ'  }   /
   'NN'            { return 'ℕ'  }  /  'ZZ'            { return 'ℤ'  }   /
   'QQ'            { return 'ℚ'  }  /  'RR'            { return 'ℝ'  }   /
