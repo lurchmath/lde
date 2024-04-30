@@ -188,9 +188,9 @@
   // convert equations with more than two arguments to a transitive chain
   const texEquation = a => {
     if (a.length === 2) return a.join('=')
-    let ans = `\\begin{align}\n  ${a[0]} &= ${a[1]}`
+    let ans = `\\begin{align*}\n  ${a[0]} &= ${a[1]}`
     a.slice(2).forEach( eq => ans += ` \\\\\n    &= ${eq}`)
-    ans += '\n\\end{align}'
+    ans += '\n\\end{align*}'
     return ans 
   }
 
