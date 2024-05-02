@@ -147,6 +147,7 @@
       mu      : '\\mu'      , omega    : '\\omega'     , Omega      : '\\Omega'      ,
       NN      : '\\mathbb{N}'   , ZZ   : '\\mathbb{Z}' , QQ         : '\\mathbb{Q}'  , 
       RR      : '\\mathbb{R}'   , CC   : '\\mathbb{C}' , or         : '\\text{or}'   ,
+      OO      : '\\mathbb{O}'   , II   : '\\mathbb{I}' , smiley     : '😀'           ,
       implies : '\\Rightarrow'  , and  : '\\text{and}' , not        : '\\neg'        ,
       forall  : '\\forall'  , exists   : '\\exists'    , existsUnique : '\\exists!'  ,
       '*'     : '\\cdot'    , cdot     : '\\cdot'      , leq        : '\\leq'        ,

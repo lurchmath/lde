@@ -764,7 +764,8 @@ Symbol "Symbol" =
   'contradiction' { return '→←' }  /  'sigma'         { return 'σ'  }   /
   'NN'            { return 'ℕ'  }  /  'ZZ'            { return 'ℤ'  }   /
   'QQ'            { return 'ℚ'  }  /  'RR'            { return 'ℝ'  }   /
-  'CC'            { return 'ℂ'  }  /  '~'                               /
+  'CC'            { return 'ℂ'  }  /  'II'            { return '𝕀'  }   /  
+  'OO'            { return '𝕆'  }   /  '~'                              /
   !(ReservedWord !alphanum) @$([a-z]i alphanum* ) 
 
 // Reserved Words
