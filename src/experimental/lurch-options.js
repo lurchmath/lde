@@ -20,6 +20,8 @@
  *      all Cases-like rules and try to instantiate their univar conclusion with
  *      every user's conclusion in the document.
  *   * `processCAS` - process CAS tool iff this is true
+ *   * `processAlgebra` - use the CAS tool to validate equations followed by 'by
+ *      algebra' iff this is true
  *   * `swapTheoremProofPairs` - move theorems after their next sibling if its a
  *      proof
  *   *  `updateProgress` - the function that gives progress updates while
@@ -39,6 +41,7 @@ export const LurchOptions = {
   processCases: true ,    
   autoCases: false ,
   processCAS: true ,
+  processAlgebra: true,
   swapTheoremProofPairs: true ,
   updateProgress: async () => { }  ,
   updateFreq: 100 ,

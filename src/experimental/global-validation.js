@@ -102,6 +102,9 @@
 //    Insts that have a bound constant or other idiosyncracies.
 //
 
+// import Algebrite
+import Algebrite from '../../dependencies/algebrite.js'
+const compute = Algebrite.run
 // import LDE tools
 // import { LogicConcept } from '../logic-concept.js'
 // import { Expression } from '../expression.js'
@@ -213,6 +216,11 @@ const validate = ( doc, target = doc , scopingMethod = Scoping.declareWhenSeen )
   // any CAS.
   processCAS(doc)
   
+  // a special case of the CAS tool is the 'by algebra' tool which only determines
+  // if an equation of the form LHS=RHS is valid by asking Algebrite if 
+  // (LHS)-(RHS) evaluates to zero.
+  processAlgebra(doc)
+
   //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
   
   // instantiate with the user content (if it isn't already) this also caches
@@ -934,6 +942,34 @@ const processCAS = doc => {
     // if the CAS evaluates to truthy, mark the proposition as valid
     const ans = (compute(command)==='1') ? 'valid' : 'invalid'
     c.setResult('CAS', ans , 'CAS')
+  })
+}
+
+// This is a prototype of the Algebra Tool based on the CAS tool
+const processAlgebra = doc => {
+  // check options
+  if (!LurchOptions.processAlgebra) return
+  
+  // get all the things the user wants to checked as a conclusion by CAS
+  const userAlgebras = [...doc.descendantsSatisfyingIterator( x => typeof x.by === 'string' && x.by ==='algebra')]
+  
+  userAlgebras.forEach( c => { 
+    // get the lurch notation for the expression
+    const lurchmath = c.getAttribute('lurchNotation')
+    console.log(lurchmath)
+    // a regex for an equation
+    const eqn = /^([^=]+)=([^=]+)$/
+    // if it's not a simple equation we're done
+    if (!eqn.test(lurchmath)) return
+    // otherwise get the LHS and RHS
+    const [LHS,RHS]=lurchmath.match(eqn).slice(-2)
+    const command = `simplify((${LHS})-(${RHS}))`
+    console.log(command)
+    console.log(compute(command))
+    // if the CAS evaluates to 0, mark the proposition as valid
+    const ans = (compute(command)==='0') ? 'valid' : 'invalid'
+    c.setResult('algebra', ans , 'CAS')
+    console.log(c)
   })
 }
 

@@ -7119,17 +7119,20 @@ function peg$parse(input, options) {
       return cached.result;
     }
 
-    s0 = peg$parseParenthesized();
+    s0 = peg$parseStringLiteral();
     if (s0 === peg$FAILED) {
-      s0 = peg$parseEquivalenceClass();
+      s0 = peg$parseParenthesized();
       if (s0 === peg$FAILED) {
-        s0 = peg$parseTuple();
+        s0 = peg$parseEquivalenceClass();
         if (s0 === peg$FAILED) {
-          s0 = peg$parseSetBracketed();
+          s0 = peg$parseTuple();
           if (s0 === peg$FAILED) {
-            s0 = peg$parseSymbol();
+            s0 = peg$parseSetBracketed();
             if (s0 === peg$FAILED) {
-              s0 = peg$parseNumber();
+              s0 = peg$parseSymbol();
+              if (s0 === peg$FAILED) {
+                s0 = peg$parseNumber();
+              }
             }
           }
         }

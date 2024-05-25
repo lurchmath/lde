@@ -21,7 +21,7 @@ const syntax =
   '∃x.x=2⋅x'                         ],`\\exists x, x=2\\cdot x` ],
 [['exists unique x.x=2*x', 
   '∃!x.x=2⋅x'                        ],`\\exists ! x, x=2\\cdot x` ],
-[['x.x+2', 'x↦x+2'                   ],`x, x+1`],
+[['x.x+2', 'x mapsto x+2' , 'x↦x+2'  ],`x, x+1`],
 
 'Algebraic expressions',
 [['(x)'                              ],'\\left(x\\right)'],
@@ -110,8 +110,8 @@ const syntax =
 [[`'~' is a total order`             ],`\\sim\\text{ is total order}`],
 
 'Assumptions and Declarations (case insensitive, phrase is echoed)',
-[['Assume P', 'Given P', 
-  'Suppose P', 'If P', ':P'          ],`\\text{Assume }P\\text{  (etc.)}` ],
+[['Assume P', 'Given P', 'From P',
+  'Suppose P', 'If P', ':P',         ],`\\text{Assume }P\\text{  (etc.)}` ],
 [['Let x'                            ],`\\text{Let }x` ],
 [['Let x in A'                       ],`\\text{Let }x\\in A` ],
 [['Let x be such that x in RR',

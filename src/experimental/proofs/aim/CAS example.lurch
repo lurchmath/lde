@@ -1,0 +1,7 @@
+{   
+    Declare prime, or, is 
+    23 is prime by CAS("isprime(23)")
+    91 is prime by CAS("isprime(91)")
+    23 is prime by CAS
+    91 is prime by CAS
+}

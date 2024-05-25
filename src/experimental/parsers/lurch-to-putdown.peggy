@@ -723,7 +723,7 @@ Algebraic = Choose / Sum / Summation / IndexedUnion / IndexedIntersect / Product
 // Atomic Expressions
 //
 // morally atomic expressions (do not require parentheses)
-Atomic = Parenthesized / EquivalenceClass / Tuple / SetBracketed / Symbol / Number
+Atomic = StringLiteral / Parenthesized / EquivalenceClass / Tuple / SetBracketed / Symbol / Number
 
 ///////////////////////////////////////////////////////////////////////////////
 // Things in parentheses
@@ -765,7 +765,7 @@ Symbol "Symbol" =
   'NN'            { return 'ℕ'  }  /  'ZZ'            { return 'ℤ'  }   /
   'QQ'            { return 'ℚ'  }  /  'RR'            { return 'ℝ'  }   /
   'CC'            { return 'ℂ'  }  /  'II'            { return '𝕀'  }   /  
-  'OO'            { return '𝕆'  }   /  '~'                              /
+  'OO'            { return '𝕆'  }  /  '~'                              /
   !(ReservedWord !alphanum) @$([a-z]i alphanum* ) 
 
 // Reserved Words
