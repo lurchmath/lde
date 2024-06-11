@@ -144,9 +144,8 @@ const highestMentioned = CNF => {
 }
 const firstUnmentioned = CNF => highestMentioned( CNF ) + 1
 
-// Utility function for computing an array plus an integer, in the sense that
-// we get back the same array if the integer was already in it, or an array
-// of length 1 greater, if we had to add the integer to it.
+// Utility function for the union of two arrays of integers, treating the
+// arrays as if they were sets.
 const arrayUnion = ( a1, a2 ) => [ ...new Set( [ ...a1, ...a2 ] ) ]
 // Utility for binding the previous function to an argument, i.e., currying.
 const unionWith = a1 => a2 => arrayUnion( a1, a2 )
