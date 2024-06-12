@@ -80,7 +80,7 @@
 //  * Consider speeding up matching in several ways.
 //    * Allow an option to eliminate the constant lambda expression as a
 //      solution.
-//    * Allow an option to efficiently solve 'Weenie' matching problems. e.g.,
+//    * Allow an option to efficiently solve 'Weeny' matching problems. e.g.,
 //      if (@ P c) where P is a metavar and c is a constant is matched to e, and
 //      e does not contain c, return the constant solution (or none if the
 //      previous option is enabled).  If e only has one instance of c, there's
@@ -322,7 +322,7 @@ const validate = ( doc, target = doc , scopingMethod = Scoping.declareWhenSeen )
  * For efficiency, mark all of the expressions in formulas with their domains
  * (the set of metavariable text names) for easy lookup.  This assumes that the
  * metavariables have been marked during interpretation.  We also mark the formula
- * with its maximally Weenie expressions, and its domain size while we are
+ * with its maximally Weeny expressions, and its domain size while we are
  * caching stuff for easy access later.
  * 
  * This routine applies `cacheFormulaDomainInfo` to all formulas in the document.
@@ -385,7 +385,7 @@ const cacheFormulaDomainInfo = f => {
 }
 
 /**
- * Check if an expression is forbidden as a Weenie. Currently we don't try to
+ * Check if an expression is forbidden as a Weeny. Currently we don't try to
  * match user expressions to a pattern that is a single metavariable or EFA that
  * is not partially instantiated because they match everything. This causes some
  * rules, like or- or substitution, to require another validation tool like BIH,
@@ -1110,7 +1110,7 @@ const instantiate = doc => {
 
         })
       })
-      // we've matched every user proposition to every weenie pattern in
+      // we've matched every user proposition to every weeny pattern in
       // this formula, and don't want to do it again on future passes, so
       // mark it as finished.
       f.finished = true

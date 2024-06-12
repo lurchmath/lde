@@ -31,7 +31,7 @@
 // * Consider speeding up matching in several ways.
 //   * Allow an option to eliminate the constant lambda expression as a
 //     solution.
-//   * Allow an option to efficiently solve 'Weenie' matching problems. e.g., if
+//   * Allow an option to efficiently solve 'Weeny' matching problems. e.g., if
 //     (@ P c) where P is a metavar and c is a constant is matched to e, and e
 //     does not contain c, return the constant solution (or none if the previous
 //     option is enabled).  If e only has one instance of c, there's only one
@@ -373,7 +373,7 @@ const processDoc = doc => {
 // For efficiency, mark all of the expressions in formulas with their domains
 // (the set of metavariable text names) for easy lookup.  This assumes that the
 // metavariables have been marked in Step #2 above.  We also mark the formula
-// with its maximally Weenie expressions, and its domain size while we are
+// with its maximally Weeny expressions, and its domain size while we are
 // caching stuff for easy access later.
 //
 // TODO: 
@@ -414,7 +414,7 @@ const processDoc = doc => {
 
 // Forbid toxic Weenies
 //
-// Check if an expression is potentially Weenie.  
+// Check if an expression is potentially Weeny.  
 // Currently we don't try to match user expressions to a pattern that is a
 // single metavariable or EFA because they match everything.  
 // This causes some rules, like or- or substitution, to require BIH's for now.
@@ -1378,7 +1378,7 @@ const instantiate = doc => {
           })
         })
       })
-      // we've matched every user proposition to every weenie pattern in
+      // we've matched every user proposition to every weeny pattern in
       // this formula, and don't want to do it again on future passes, so
       // mark it as finished.
       f.finished = true
