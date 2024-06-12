@@ -809,7 +809,8 @@ function peg$parse(input, options) {
   var peg$f3 = function(a) { return txt(a) };
   var peg$f4 = function() { return '\\text{ iff }' };
   var peg$f5 = function() { return 'Substitution' };
-  var peg$f6 = function(a, b) { return `${txt(a)} ${b}` };
+  var peg$f6 = function(a, b) { 
+          return (/^\s*:\s*$/.test(a)) ? b : `${txt(a)} ${b}` };
   var peg$f7 = function(a, b) { return `${txt(a)} ${sequence(b)}` };
   var peg$f8 = function(a) { return `\\left\\{ ${a} \\right\\}` };
   var peg$f9 = function(a, b) { return `${txt(a)} ${b}` };
@@ -830,7 +831,7 @@ function peg$parse(input, options) {
   var peg$f24 = function(a) { return a.join('\\Rightarrow ')      };
   var peg$f25 = function(a) { return a.join('\\text{ or }')       };
   var peg$f26 = function(a) { return a.join('\\text{ and }')      };
-  var peg$f27 = function(b) { return '\\neg '+b                   };
+  var peg$f27 = function(b) { return '\\text{not } '+b                   };
   var peg$f28 = function(a, b, c) { return `${a}\\colon ${b}\\to ${c}` };
   var peg$f29 = function(a, b) { return `${a}\\text{ is a partition of }${b}` };
   var peg$f30 = function(a, b) { return `${a}\\text{ is a relation on} ${b}` };

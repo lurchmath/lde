@@ -342,7 +342,7 @@ global.makedoc = makedoc
 // store the folders we want to be scanned as part of the indexing page
 // relative folders are relative to the root of the server (the lurch folder 
 // of the LFY)
-global.contentFolders = ['math','math299','dropbox','help','299solns']
+global.contentFolders = ['pima','pima-local','math','math299','299solns','dropbox','help']
 global.toc = () => generatePage(...contentFolders)
 global.scrape = scrape
 global.scrapeToGomez = () => 

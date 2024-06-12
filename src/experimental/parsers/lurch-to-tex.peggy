@@ -532,7 +532,8 @@ Shorthand = Equiv / a:(BIH / Ruleset / Rule / Thm / Proof / Cases / Subs)
 // character, separated from either an Environment or Expession sequence by
 // optional spaces.
 // TODO: use Expression|1..,comma|
-Given = a:GivenLabel b:Environment { return `${txt(a)} ${b}` } /
+Given = a:GivenLabel b:Environment { 
+          return (/^\s*:\s*$/.test(a)) ? b : `${txt(a)} ${b}` } /
         a:GivenLabel b:Expression|1..,comma| { return `${txt(a)} ${sequence(b)}` }
   GivenLabel = @':'_ / @('assume'i / 'given'i / 'suppose'i / 
                          'if'i / 'from'i / 'define'i ) _x
@@ -614,7 +615,7 @@ Prop = Iff
   And     = a:(Not/PropArg)|1..,_('and'/'wedge')_x|  
               { return a.join('\\text{ and }')      }
   Not     = _'not'_x b:PropArg                       
-              { return '\\neg '+b                   }
+              { return '\\text{not } '+b                   }
   
 ///////////////////////////////////////////////////////////////////////////////
 // Relations
