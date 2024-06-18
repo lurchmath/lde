@@ -1,0 +1,3114 @@
+[
+    {
+        "desiredParsedResult": "(and W V)",
+        "fromThisTextInput": "W and V"
+    },
+    {
+        "desiredParsedResult": "(⇒ W V)",
+        "fromThisTextInput": "W ⇒ V"
+    },
+    {
+        "desiredParsedResult": "(⇔ W V)",
+        "fromThisTextInput": "W ⇔ V"
+    },
+    {
+        "desiredParsedResult": "(or W V)",
+        "fromThisTextInput": "W or V"
+    },
+    {
+        "desiredParsedResult": "(or V W)",
+        "fromThisTextInput": "V or W"
+    },
+    {
+        "desiredParsedResult": "(or W V)",
+        "fromThisTextInput": "W or V"
+    },
+    {
+        "desiredParsedResult": "(¬ W)",
+        "fromThisTextInput": "¬W"
+    },
+    {
+        "desiredParsedResult": "(¬ W)",
+        "fromThisTextInput": "¬W"
+    },
+    {
+        "desiredParsedResult": "(¬ W)",
+        "fromThisTextInput": "¬W"
+    },
+    {
+        "desiredParsedResult": "(∀ x , (@ P x))",
+        "fromThisTextInput": "∀x.P(x)"
+    },
+    {
+        "desiredParsedResult": "(@ P t)",
+        "fromThisTextInput": "P(t)"
+    },
+    {
+        "desiredParsedResult": "(∀ y , (@ P y))",
+        "fromThisTextInput": "∀y.P(y)"
+    },
+    {
+        "desiredParsedResult": "(@ P x)",
+        "fromThisTextInput": "P(x)"
+    },
+    {
+        "desiredParsedResult": "(∀ y , (@ P y))",
+        "fromThisTextInput": "∀y.P(y)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (@ P x))",
+        "fromThisTextInput": "∃x.P(x)"
+    },
+    {
+        "desiredParsedResult": "(@ P c)",
+        "fromThisTextInput": "P(c)"
+    },
+    {
+        "desiredParsedResult": "(@ P t)",
+        "fromThisTextInput": "P(t)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (@ P x))",
+        "fromThisTextInput": "∃x.P(x)"
+    },
+    {
+        "desiredParsedResult": "(= x y)",
+        "fromThisTextInput": "x = y"
+    },
+    {
+        "desiredParsedResult": "(@ P x)",
+        "fromThisTextInput": "P(x)"
+    },
+    {
+        "desiredParsedResult": "(@ P y)",
+        "fromThisTextInput": "P(y)"
+    },
+    {
+        "desiredParsedResult": "(= W W)",
+        "fromThisTextInput": "W = W"
+    },
+    {
+        "desiredParsedResult": "(< 1 2)",
+        "fromThisTextInput": "1 < 2"
+    },
+    {
+        "desiredParsedResult": "(< 2 3)",
+        "fromThisTextInput": "2 < 3"
+    },
+    {
+        "desiredParsedResult": "(< W V)",
+        "fromThisTextInput": "W < V"
+    },
+    {
+        "desiredParsedResult": "(< V U)",
+        "fromThisTextInput": "V < U"
+    },
+    {
+        "desiredParsedResult": "(< W U)",
+        "fromThisTextInput": "W < U"
+    },
+    {
+        "desiredParsedResult": "(⊆ W V)",
+        "fromThisTextInput": "W ⊆ V"
+    },
+    {
+        "desiredParsedResult": "(∈ x W)",
+        "fromThisTextInput": "x ∈ W"
+    },
+    {
+        "desiredParsedResult": "(∈ x V)",
+        "fromThisTextInput": "x ∈ V"
+    },
+    {
+        "desiredParsedResult": "(⊆ W V)",
+        "fromThisTextInput": "W ⊆ V"
+    },
+    {
+        "desiredParsedResult": "(and W V)",
+        "fromThisTextInput": "W and V"
+    },
+    {
+        "desiredParsedResult": "(⇒ W V)",
+        "fromThisTextInput": "W ⇒ V"
+    },
+    {
+        "desiredParsedResult": "(⇔ W V)",
+        "fromThisTextInput": "W ⇔ V"
+    },
+    {
+        "desiredParsedResult": "(or W V)",
+        "fromThisTextInput": "W or V"
+    },
+    {
+        "desiredParsedResult": "(or V W)",
+        "fromThisTextInput": "V or W"
+    },
+    {
+        "desiredParsedResult": "(or W V)",
+        "fromThisTextInput": "W or V"
+    },
+    {
+        "desiredParsedResult": "(¬ W)",
+        "fromThisTextInput": "¬W"
+    },
+    {
+        "desiredParsedResult": "(¬ W)",
+        "fromThisTextInput": "¬W"
+    },
+    {
+        "desiredParsedResult": "(¬ W)",
+        "fromThisTextInput": "¬W"
+    },
+    {
+        "desiredParsedResult": "(∀ x , (@ P x))",
+        "fromThisTextInput": "∀x.P(x)"
+    },
+    {
+        "desiredParsedResult": "(@ P t)",
+        "fromThisTextInput": "P(t)"
+    },
+    {
+        "desiredParsedResult": "(∀ y , (@ P y))",
+        "fromThisTextInput": "∀y.P(y)"
+    },
+    {
+        "desiredParsedResult": "(@ P x)",
+        "fromThisTextInput": "P(x)"
+    },
+    {
+        "desiredParsedResult": "(∀ y , (@ P y))",
+        "fromThisTextInput": "∀y.P(y)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (@ P x))",
+        "fromThisTextInput": "∃x.P(x)"
+    },
+    {
+        "desiredParsedResult": "(@ P c)",
+        "fromThisTextInput": "P(c)"
+    },
+    {
+        "desiredParsedResult": "(@ P t)",
+        "fromThisTextInput": "P(t)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (@ P x))",
+        "fromThisTextInput": "∃x.P(x)"
+    },
+    {
+        "desiredParsedResult": "(= x y)",
+        "fromThisTextInput": "x = y"
+    },
+    {
+        "desiredParsedResult": "(@ P x)",
+        "fromThisTextInput": "P(x)"
+    },
+    {
+        "desiredParsedResult": "(@ P y)",
+        "fromThisTextInput": "P(y)"
+    },
+    {
+        "desiredParsedResult": "(= W W)",
+        "fromThisTextInput": "W = W"
+    },
+    {
+        "desiredParsedResult": "(< 1 2)",
+        "fromThisTextInput": "1 < 2"
+    },
+    {
+        "desiredParsedResult": "(< 2 3)",
+        "fromThisTextInput": "2 < 3"
+    },
+    {
+        "desiredParsedResult": "(< W V)",
+        "fromThisTextInput": "W < V"
+    },
+    {
+        "desiredParsedResult": "(< V U)",
+        "fromThisTextInput": "V < U"
+    },
+    {
+        "desiredParsedResult": "(< W U)",
+        "fromThisTextInput": "W < U"
+    },
+    {
+        "desiredParsedResult": "(∈ x W)",
+        "fromThisTextInput": "x ∈ W"
+    },
+    {
+        "desiredParsedResult": "(∈ x V)",
+        "fromThisTextInput": "x ∈ V"
+    },
+    {
+        "desiredParsedResult": "(⊆ W V)",
+        "fromThisTextInput": "W ⊆ V"
+    },
+    {
+        "desiredParsedResult": "(and W V)",
+        "fromThisTextInput": "W and V"
+    },
+    {
+        "desiredParsedResult": "(and W V)",
+        "fromThisTextInput": "W and V"
+    },
+    {
+        "desiredParsedResult": "(or W V)",
+        "fromThisTextInput": "W or V"
+    },
+    {
+        "desiredParsedResult": "(or V W)",
+        "fromThisTextInput": "V or W"
+    },
+    {
+        "desiredParsedResult": "(or W V)",
+        "fromThisTextInput": "W or V"
+    },
+    {
+        "desiredParsedResult": "(⇒ W V)",
+        "fromThisTextInput": "W ⇒ V"
+    },
+    {
+        "desiredParsedResult": "(⇒ W V)",
+        "fromThisTextInput": "W ⇒ V"
+    },
+    {
+        "desiredParsedResult": "(⇔ W V)",
+        "fromThisTextInput": "W ⇔ V"
+    },
+    {
+        "desiredParsedResult": "(⇔ W V)",
+        "fromThisTextInput": "W ⇔ V"
+    },
+    {
+        "desiredParsedResult": "(¬ W)",
+        "fromThisTextInput": "¬W"
+    },
+    {
+        "desiredParsedResult": "(¬ W)",
+        "fromThisTextInput": "¬W"
+    },
+    {
+        "desiredParsedResult": "(¬ W)",
+        "fromThisTextInput": "¬W"
+    },
+    {
+        "desiredParsedResult": "(∀ x , (@ P x))",
+        "fromThisTextInput": "∀x.P(x)"
+    },
+    {
+        "desiredParsedResult": "(@ P t)",
+        "fromThisTextInput": "P(t)"
+    },
+    {
+        "desiredParsedResult": "(@ P x)",
+        "fromThisTextInput": "P(x)"
+    },
+    {
+        "desiredParsedResult": "(∀ y , (@ P y))",
+        "fromThisTextInput": "∀y.P(y)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (@ P x))",
+        "fromThisTextInput": "∃x.P(x)"
+    },
+    {
+        "desiredParsedResult": "(@ P c)",
+        "fromThisTextInput": "P(c)"
+    },
+    {
+        "desiredParsedResult": "(@ P t)",
+        "fromThisTextInput": "P(t)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (@ P x))",
+        "fromThisTextInput": "∃x.P(x)"
+    },
+    {
+        "desiredParsedResult": "(= x y)",
+        "fromThisTextInput": "x = y"
+    },
+    {
+        "desiredParsedResult": "(@ P x)",
+        "fromThisTextInput": "P(x)"
+    },
+    {
+        "desiredParsedResult": "(@ P y)",
+        "fromThisTextInput": "P(y)"
+    },
+    {
+        "desiredParsedResult": "(= W W)",
+        "fromThisTextInput": "W = W"
+    },
+    {
+        "desiredParsedResult": "(∃! x , (@ P x))",
+        "fromThisTextInput": "∃!x.P(x)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (and (@ P x) (∀ y , (⇒ (@ P y) (= y x)))))",
+        "fromThisTextInput": "∃x.(P(x) and ∀y.(P(y) ⇒ y = x))"
+    },
+    {
+        "desiredParsedResult": "(∈ x (Set a))",
+        "fromThisTextInput": "x ∈ { a }"
+    },
+    {
+        "desiredParsedResult": "(= x a)",
+        "fromThisTextInput": "x = a"
+    },
+    {
+        "desiredParsedResult": "(= x a)",
+        "fromThisTextInput": "x = a"
+    },
+    {
+        "desiredParsedResult": "(∈ x (Set a))",
+        "fromThisTextInput": "x ∈ { a }"
+    },
+    {
+        "desiredParsedResult": "(∈ x (Set a b))",
+        "fromThisTextInput": "x ∈ { a, b }"
+    },
+    {
+        "desiredParsedResult": "(or (= x a) (= x b))",
+        "fromThisTextInput": "x = a or x = b"
+    },
+    {
+        "desiredParsedResult": "(or (= x a) (= x b))",
+        "fromThisTextInput": "x = a or x = b"
+    },
+    {
+        "desiredParsedResult": "(∈ x (Set a b))",
+        "fromThisTextInput": "x ∈ { a, b }"
+    },
+    {
+        "desiredParsedResult": "(∈ x (Set a b c))",
+        "fromThisTextInput": "x ∈ { a, b, c }"
+    },
+    {
+        "desiredParsedResult": "(or (= x a) (= x b) (= x b))",
+        "fromThisTextInput": "x = a or x = b or x = b"
+    },
+    {
+        "desiredParsedResult": "(or (= x a) (= x b) (= x b))",
+        "fromThisTextInput": "x = a or x = b or x = b"
+    },
+    {
+        "desiredParsedResult": "(∈ x (Set a b c))",
+        "fromThisTextInput": "x ∈ { a, b, c }"
+    },
+    {
+        "desiredParsedResult": "(∈ x (Set t , (@ P t)))",
+        "fromThisTextInput": "x ∈ { t | P(t) }"
+    },
+    {
+        "desiredParsedResult": "(@ P x)",
+        "fromThisTextInput": "P(x)"
+    },
+    {
+        "desiredParsedResult": "(@ P x)",
+        "fromThisTextInput": "P(x)"
+    },
+    {
+        "desiredParsedResult": "(∈ x (Set t , (@ P t)))",
+        "fromThisTextInput": "x ∈ { t | P(t) }"
+    },
+    {
+        "desiredParsedResult": "(⊆ A B)",
+        "fromThisTextInput": "A ⊆ B"
+    },
+    {
+        "desiredParsedResult": "(∈ x A)",
+        "fromThisTextInput": "x ∈ A"
+    },
+    {
+        "desiredParsedResult": "(∈ x B)",
+        "fromThisTextInput": "x ∈ B"
+    },
+    {
+        "desiredParsedResult": "(∈ x A)",
+        "fromThisTextInput": "x ∈ A"
+    },
+    {
+        "desiredParsedResult": "(∈ x B)",
+        "fromThisTextInput": "x ∈ B"
+    },
+    {
+        "desiredParsedResult": "(⊆ A B)",
+        "fromThisTextInput": "A ⊆ B"
+    },
+    {
+        "desiredParsedResult": "(∈ a A)",
+        "fromThisTextInput": "a ∈ A"
+    },
+    {
+        "desiredParsedResult": "(∈ a B)",
+        "fromThisTextInput": "a ∈ B"
+    },
+    {
+        "desiredParsedResult": "(∈ b B)",
+        "fromThisTextInput": "b ∈ B"
+    },
+    {
+        "desiredParsedResult": "(∈ b A)",
+        "fromThisTextInput": "b ∈ A"
+    },
+    {
+        "desiredParsedResult": "(= A B)",
+        "fromThisTextInput": "A = B"
+    },
+    {
+        "desiredParsedResult": "(∈ A (℘ B))",
+        "fromThisTextInput": "A ∈ ℘(B)"
+    },
+    {
+        "desiredParsedResult": "(⊆ A B)",
+        "fromThisTextInput": "A ⊆ B"
+    },
+    {
+        "desiredParsedResult": "(⊆ A B)",
+        "fromThisTextInput": "A ⊆ B"
+    },
+    {
+        "desiredParsedResult": "(∈ A (℘ B))",
+        "fromThisTextInput": "A ∈ ℘(B)"
+    },
+    {
+        "desiredParsedResult": "(∈ x (∩ A B))",
+        "fromThisTextInput": "x ∈ A ∩ B"
+    },
+    {
+        "desiredParsedResult": "(∈ x A)",
+        "fromThisTextInput": "x ∈ A"
+    },
+    {
+        "desiredParsedResult": "(∈ x B)",
+        "fromThisTextInput": "x ∈ B"
+    },
+    {
+        "desiredParsedResult": "(∈ x A)",
+        "fromThisTextInput": "x ∈ A"
+    },
+    {
+        "desiredParsedResult": "(∈ x B)",
+        "fromThisTextInput": "x ∈ B"
+    },
+    {
+        "desiredParsedResult": "(∈ x (∩ A B))",
+        "fromThisTextInput": "x ∈ A ∩ B"
+    },
+    {
+        "desiredParsedResult": "(∈ x (∪ A B))",
+        "fromThisTextInput": "x ∈ A ∪ B"
+    },
+    {
+        "desiredParsedResult": "(or (∈ x A) (∈ x B))",
+        "fromThisTextInput": "x ∈ A or x ∈ B"
+    },
+    {
+        "desiredParsedResult": "(or (∈ x A) (∈ x B))",
+        "fromThisTextInput": "x ∈ A or x ∈ B"
+    },
+    {
+        "desiredParsedResult": "(∈ x (∪ A B))",
+        "fromThisTextInput": "x ∈ A ∪ B"
+    },
+    {
+        "desiredParsedResult": "(∈ x (- A B))",
+        "fromThisTextInput": "x ∈ A - B"
+    },
+    {
+        "desiredParsedResult": "(∈ x A)",
+        "fromThisTextInput": "x ∈ A"
+    },
+    {
+        "desiredParsedResult": "(¬ (∈ x B))",
+        "fromThisTextInput": "¬(x ∈ B)"
+    },
+    {
+        "desiredParsedResult": "(∈ x A)",
+        "fromThisTextInput": "x ∈ A"
+    },
+    {
+        "desiredParsedResult": "(¬ (∈ x B))",
+        "fromThisTextInput": "¬(x ∈ B)"
+    },
+    {
+        "desiredParsedResult": "(∈ x (- A B))",
+        "fromThisTextInput": "x ∈ A - B"
+    },
+    {
+        "desiredParsedResult": "(∈ x (- B))",
+        "fromThisTextInput": "x ∈ -B"
+    },
+    {
+        "desiredParsedResult": "(∈ x B)",
+        "fromThisTextInput": "x ∈ B"
+    },
+    {
+        "desiredParsedResult": "(∈ x B)",
+        "fromThisTextInput": "x ∈ B"
+    },
+    {
+        "desiredParsedResult": "(∈ x (- B))",
+        "fromThisTextInput": "x ∈ -B"
+    },
+    {
+        "desiredParsedResult": "(= (× a b) (× x y))",
+        "fromThisTextInput": "a × b = x × y"
+    },
+    {
+        "desiredParsedResult": "(= a x)",
+        "fromThisTextInput": "a = x"
+    },
+    {
+        "desiredParsedResult": "(= b y)",
+        "fromThisTextInput": "b = y"
+    },
+    {
+        "desiredParsedResult": "(= a x)",
+        "fromThisTextInput": "a = x"
+    },
+    {
+        "desiredParsedResult": "(= b y)",
+        "fromThisTextInput": "b = y"
+    },
+    {
+        "desiredParsedResult": "(= (× a b) (× x y))",
+        "fromThisTextInput": "a × b = x × y"
+    },
+    {
+        "desiredParsedResult": "(= (× a b c) (× x y z))",
+        "fromThisTextInput": "a × b × c = x × y × z"
+    },
+    {
+        "desiredParsedResult": "(= a x)",
+        "fromThisTextInput": "a = x"
+    },
+    {
+        "desiredParsedResult": "(= b y)",
+        "fromThisTextInput": "b = y"
+    },
+    {
+        "desiredParsedResult": "(= c z)",
+        "fromThisTextInput": "c = z"
+    },
+    {
+        "desiredParsedResult": "(= a x)",
+        "fromThisTextInput": "a = x"
+    },
+    {
+        "desiredParsedResult": "(= b y)",
+        "fromThisTextInput": "b = y"
+    },
+    {
+        "desiredParsedResult": "(= c z)",
+        "fromThisTextInput": "c = z"
+    },
+    {
+        "desiredParsedResult": "(= (× a b c) (× x y z))",
+        "fromThisTextInput": "a × b × c = x × y × z"
+    },
+    {
+        "desiredParsedResult": "(∈ x (× A B))",
+        "fromThisTextInput": "x ∈ A × B"
+    },
+    {
+        "desiredParsedResult": "(∈ a A)",
+        "fromThisTextInput": "a ∈ A"
+    },
+    {
+        "desiredParsedResult": "(∈ b B)",
+        "fromThisTextInput": "b ∈ B"
+    },
+    {
+        "desiredParsedResult": "(= x (× a b))",
+        "fromThisTextInput": "x = a × b"
+    },
+    {
+        "desiredParsedResult": "(∈ a A)",
+        "fromThisTextInput": "a ∈ A"
+    },
+    {
+        "desiredParsedResult": "(∈ b B)",
+        "fromThisTextInput": "b ∈ B"
+    },
+    {
+        "desiredParsedResult": "(∈ (× a b) (× A B))",
+        "fromThisTextInput": "a × b ∈ A × B"
+    },
+    {
+        "desiredParsedResult": "(→ f A B)",
+        "fromThisTextInput": "f:A→B"
+    },
+    {
+        "desiredParsedResult": "(∈ x A)",
+        "fromThisTextInput": "x ∈ A"
+    },
+    {
+        "desiredParsedResult": "(∈ (f x) B)",
+        "fromThisTextInput": "f(x) ∈ B"
+    },
+    {
+        "desiredParsedResult": "(∈ x A)",
+        "fromThisTextInput": "x ∈ A"
+    },
+    {
+        "desiredParsedResult": "(∈ (f x) B)",
+        "fromThisTextInput": "f(x) ∈ B"
+    },
+    {
+        "desiredParsedResult": "(→ f A B)",
+        "fromThisTextInput": "f:A→B"
+    },
+    {
+        "desiredParsedResult": "(= (Domain f) A)",
+        "fromThisTextInput": "Domain(f) = A"
+    },
+    {
+        "desiredParsedResult": "(→ f A B)",
+        "fromThisTextInput": "f:A→B"
+    },
+    {
+        "desiredParsedResult": "(→ f A B)",
+        "fromThisTextInput": "f:A→B"
+    },
+    {
+        "desiredParsedResult": "(= (Domain f) A)",
+        "fromThisTextInput": "Domain(f) = A"
+    },
+    {
+        "desiredParsedResult": "(= (Codomain f) B)",
+        "fromThisTextInput": "Codomain(f) = B"
+    },
+    {
+        "desiredParsedResult": "(→ f A B)",
+        "fromThisTextInput": "f:A→B"
+    },
+    {
+        "desiredParsedResult": "(→ f A B)",
+        "fromThisTextInput": "f:A→B"
+    },
+    {
+        "desiredParsedResult": "(= (Codomain f) B)",
+        "fromThisTextInput": "Codomain(f) = B"
+    },
+    {
+        "desiredParsedResult": "(⊆ S (Domain f))",
+        "fromThisTextInput": "S ⊆ Domain(f)"
+    },
+    {
+        "desiredParsedResult": "(∈ y (f S))",
+        "fromThisTextInput": "y ∈ f(S)"
+    },
+    {
+        "desiredParsedResult": "(∈ x S)",
+        "fromThisTextInput": "x ∈ S"
+    },
+    {
+        "desiredParsedResult": "(= y (f x))",
+        "fromThisTextInput": "y = f(x)"
+    },
+    {
+        "desiredParsedResult": "(⊆ S (Domain f))",
+        "fromThisTextInput": "S ⊆ Domain(f)"
+    },
+    {
+        "desiredParsedResult": "(∈ x S)",
+        "fromThisTextInput": "x ∈ S"
+    },
+    {
+        "desiredParsedResult": "(∈ x (f S))",
+        "fromThisTextInput": "x ∈ f(S)"
+    },
+    {
+        "desiredParsedResult": "(= (Range f) (f (Domain f)))",
+        "fromThisTextInput": "Range(f) = f(Domain(f))"
+    },
+    {
+        "desiredParsedResult": "(→ (id A) A A)",
+        "fromThisTextInput": "id(A):A→A"
+    },
+    {
+        "desiredParsedResult": "(∈ x A)",
+        "fromThisTextInput": "x ∈ A"
+    },
+    {
+        "desiredParsedResult": "(= ((id A) x) x)",
+        "fromThisTextInput": "id(A)(x) = x"
+    },
+    {
+        "desiredParsedResult": "(→ f A B)",
+        "fromThisTextInput": "f:A→B"
+    },
+    {
+        "desiredParsedResult": "(→ g B C)",
+        "fromThisTextInput": "g:B→C"
+    },
+    {
+        "desiredParsedResult": "(→ (∘ g f) A C)",
+        "fromThisTextInput": "(g ∘ f):A→C"
+    },
+    {
+        "desiredParsedResult": "(= ((∘ g f) x) (g (f x)))",
+        "fromThisTextInput": "(g ∘ f)(x) = g(f(x))"
+    },
+    {
+        "desiredParsedResult": "(= ((∘ g f) x) (g (f x)))",
+        "fromThisTextInput": "(g ∘ f)(x) = g(f(x))"
+    },
+    {
+        "desiredParsedResult": "(= (f x) (f y))",
+        "fromThisTextInput": "f(x) = f(y)"
+    },
+    {
+        "desiredParsedResult": "(= x y)",
+        "fromThisTextInput": "x = y"
+    },
+    {
+        "desiredParsedResult": "(injective f)",
+        "fromThisTextInput": "injective(f)"
+    },
+    {
+        "desiredParsedResult": "(injective f)",
+        "fromThisTextInput": "injective(f)"
+    },
+    {
+        "desiredParsedResult": "(= (f x) (f y))",
+        "fromThisTextInput": "f(x) = f(y)"
+    },
+    {
+        "desiredParsedResult": "(= x y)",
+        "fromThisTextInput": "x = y"
+    },
+    {
+        "desiredParsedResult": "(= 1 (𝜎 0))",
+        "fromThisTextInput": "1 = 𝜎(0)"
+    },
+    {
+        "desiredParsedResult": "(= 2 (𝜎 1))",
+        "fromThisTextInput": "2 = 𝜎(1)"
+    },
+    {
+        "desiredParsedResult": "(= 3 (𝜎 2))",
+        "fromThisTextInput": "3 = 𝜎(2)"
+    },
+    {
+        "desiredParsedResult": "(= 4 (𝜎 3))",
+        "fromThisTextInput": "4 = 𝜎(3)"
+    },
+    {
+        "desiredParsedResult": "(= 5 (𝜎 4))",
+        "fromThisTextInput": "5 = 𝜎(4)"
+    },
+    {
+        "desiredParsedResult": "(= (𝜎 m) (𝜎 n))",
+        "fromThisTextInput": "𝜎(m) = 𝜎(n)"
+    },
+    {
+        "desiredParsedResult": "(= m n)",
+        "fromThisTextInput": "m = n"
+    },
+    {
+        "desiredParsedResult": "(¬ (= 0 (𝜎 n)))",
+        "fromThisTextInput": "¬(0 = 𝜎(n))"
+    },
+    {
+        "desiredParsedResult": "(@ P 0)",
+        "fromThisTextInput": "P(0)"
+    },
+    {
+        "desiredParsedResult": "(@ P k)",
+        "fromThisTextInput": "P(k)"
+    },
+    {
+        "desiredParsedResult": "(@ P (𝜎 k))",
+        "fromThisTextInput": "P(𝜎(k))"
+    },
+    {
+        "desiredParsedResult": "(∀ n , (@ P n))",
+        "fromThisTextInput": "∀n.P(n)"
+    },
+    {
+        "desiredParsedResult": "(= (+ n 0) n)",
+        "fromThisTextInput": "n + 0 = n"
+    },
+    {
+        "desiredParsedResult": "(= (+ m (𝜎 n)) (𝜎 (+ m n)))",
+        "fromThisTextInput": "m + 𝜎(n) = 𝜎(m + n)"
+    },
+    {
+        "desiredParsedResult": "(= (⋅ n 0) 0)",
+        "fromThisTextInput": "n ⋅ 0 = 0"
+    },
+    {
+        "desiredParsedResult": "(= (⋅ n (𝜎 m)) (+ m (⋅ m n)))",
+        "fromThisTextInput": "n ⋅ 𝜎(m) = m + m ⋅ n"
+    },
+    {
+        "desiredParsedResult": "(≤ m n)",
+        "fromThisTextInput": "m ≤ n"
+    },
+    {
+        "desiredParsedResult": "(∃ k , (= (+ m k) n))",
+        "fromThisTextInput": "∃k.(m + k = n)"
+    },
+    {
+        "desiredParsedResult": "(∀ x , (@ P x))",
+        "fromThisTextInput": "∀x.P(x)"
+    },
+    {
+        "desiredParsedResult": "(@ P t)",
+        "fromThisTextInput": "P(t)"
+    },
+    {
+        "desiredParsedResult": "(@ P x)",
+        "fromThisTextInput": "P(x)"
+    },
+    {
+        "desiredParsedResult": "(∀ y , (@ P y))",
+        "fromThisTextInput": "∀y.P(y)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (@ P x))",
+        "fromThisTextInput": "∃x.P(x)"
+    },
+    {
+        "desiredParsedResult": "(@ P c)",
+        "fromThisTextInput": "P(c)"
+    },
+    {
+        "desiredParsedResult": "(@ P t)",
+        "fromThisTextInput": "P(t)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (@ P x))",
+        "fromThisTextInput": "∃x.P(x)"
+    },
+    {
+        "desiredParsedResult": "(= x y)",
+        "fromThisTextInput": "x = y"
+    },
+    {
+        "desiredParsedResult": "(@ P x)",
+        "fromThisTextInput": "P(x)"
+    },
+    {
+        "desiredParsedResult": "(@ P y)",
+        "fromThisTextInput": "P(y)"
+    },
+    {
+        "desiredParsedResult": "(= W W)",
+        "fromThisTextInput": "W = W"
+    },
+    {
+        "desiredParsedResult": "(∃! x , (@ P x))",
+        "fromThisTextInput": "∃!x.P(x)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (and (@ P x) (∀ y , (⇒ (@ P y) (= y x)))))",
+        "fromThisTextInput": "∃x.(P(x) and ∀y.(P(y) ⇒ y = x))"
+    },
+    {
+        "desiredParsedResult": "(= x y)",
+        "fromThisTextInput": "x = y"
+    },
+    {
+        "desiredParsedResult": "(@ P y)",
+        "fromThisTextInput": "P(y)"
+    },
+    {
+        "desiredParsedResult": "(@ P x)",
+        "fromThisTextInput": "P(x)"
+    },
+    {
+        "desiredParsedResult": "(∀ x , (@ P x))",
+        "fromThisTextInput": "∀x.P(x)"
+    },
+    {
+        "desiredParsedResult": "(∀ y , (@ Q y))",
+        "fromThisTextInput": "∀y.Q(y)"
+    },
+    {
+        "desiredParsedResult": "(∀ x , (and (@ P x) (@ Q x)))",
+        "fromThisTextInput": "∀x.(P(x) and Q(x))"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (@ P x))",
+        "fromThisTextInput": "∃x.P(x)"
+    },
+    {
+        "desiredParsedResult": "(∃ y , (@ Q y))",
+        "fromThisTextInput": "∃y.Q(y)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (or (@ P x) (@ Q x)))",
+        "fromThisTextInput": "∃x.(P(x) or Q(x))"
+    },
+    {
+        "desiredParsedResult": "(∃! x , (@ W x))",
+        "fromThisTextInput": "∃!x.W(x)"
+    },
+    {
+        "desiredParsedResult": "(∃ c , (∀ z , (⇔ (@ W z) (= z c))))",
+        "fromThisTextInput": "∃c.∀z.(W(z) ⇔ z = c)"
+    },
+    {
+        "desiredParsedResult": "(and W V)",
+        "fromThisTextInput": "W and V"
+    },
+    {
+        "desiredParsedResult": "(⇒ W V)",
+        "fromThisTextInput": "W ⇒ V"
+    },
+    {
+        "desiredParsedResult": "(⇔ W V)",
+        "fromThisTextInput": "W ⇔ V"
+    },
+    {
+        "desiredParsedResult": "(or W V)",
+        "fromThisTextInput": "W or V"
+    },
+    {
+        "desiredParsedResult": "(or V W)",
+        "fromThisTextInput": "V or W"
+    },
+    {
+        "desiredParsedResult": "(or W V)",
+        "fromThisTextInput": "W or V"
+    },
+    {
+        "desiredParsedResult": "(¬ W)",
+        "fromThisTextInput": "¬W"
+    },
+    {
+        "desiredParsedResult": "(¬ W)",
+        "fromThisTextInput": "¬W"
+    },
+    {
+        "desiredParsedResult": "(¬ W)",
+        "fromThisTextInput": "¬W"
+    },
+    {
+        "desiredParsedResult": "(or W (¬ W))",
+        "fromThisTextInput": "W or ¬W"
+    },
+    {
+        "desiredParsedResult": "(¬ (¬ W))",
+        "fromThisTextInput": "¬¬W"
+    },
+    {
+        "desiredParsedResult": "(or W W)",
+        "fromThisTextInput": "W or W"
+    },
+    {
+        "desiredParsedResult": "(or W V)",
+        "fromThisTextInput": "W or V"
+    },
+    {
+        "desiredParsedResult": "(or V W)",
+        "fromThisTextInput": "V or W"
+    },
+    {
+        "desiredParsedResult": "(or (or W V) U)",
+        "fromThisTextInput": "W or V or U"
+    },
+    {
+        "desiredParsedResult": "(or W (or V U))",
+        "fromThisTextInput": "W or V or U"
+    },
+    {
+        "desiredParsedResult": "(or V U)",
+        "fromThisTextInput": "V or U"
+    },
+    {
+        "desiredParsedResult": "(or (and W V) (and W U))",
+        "fromThisTextInput": "W and V or W and U"
+    },
+    {
+        "desiredParsedResult": "(or W (and V U))",
+        "fromThisTextInput": "W or V and U"
+    },
+    {
+        "desiredParsedResult": "(or W V)",
+        "fromThisTextInput": "W or V"
+    },
+    {
+        "desiredParsedResult": "(or W U)",
+        "fromThisTextInput": "W or U"
+    },
+    {
+        "desiredParsedResult": "(⇒ W V)",
+        "fromThisTextInput": "W ⇒ V"
+    },
+    {
+        "desiredParsedResult": "(⇒ V U)",
+        "fromThisTextInput": "V ⇒ U"
+    },
+    {
+        "desiredParsedResult": "(⇒ W U)",
+        "fromThisTextInput": "W ⇒ U"
+    },
+    {
+        "desiredParsedResult": "(⇔ W V)",
+        "fromThisTextInput": "W ⇔ V"
+    },
+    {
+        "desiredParsedResult": "(⇔ V U)",
+        "fromThisTextInput": "V ⇔ U"
+    },
+    {
+        "desiredParsedResult": "(⇔ W U)",
+        "fromThisTextInput": "W ⇔ U"
+    },
+    {
+        "desiredParsedResult": "(⇒ W V)",
+        "fromThisTextInput": "W ⇒ V"
+    },
+    {
+        "desiredParsedResult": "(or (¬ W) V)",
+        "fromThisTextInput": "¬W or V"
+    },
+    {
+        "desiredParsedResult": "(or W V)",
+        "fromThisTextInput": "W or V"
+    },
+    {
+        "desiredParsedResult": "(¬ W)",
+        "fromThisTextInput": "¬W"
+    },
+    {
+        "desiredParsedResult": "(or W V)",
+        "fromThisTextInput": "W or V"
+    },
+    {
+        "desiredParsedResult": "(¬ V)",
+        "fromThisTextInput": "¬V"
+    },
+    {
+        "desiredParsedResult": "(¬ (⇒ W V))",
+        "fromThisTextInput": "¬(W ⇒ V)"
+    },
+    {
+        "desiredParsedResult": "(¬ V)",
+        "fromThisTextInput": "¬V"
+    },
+    {
+        "desiredParsedResult": "(⇒ W V)",
+        "fromThisTextInput": "W ⇒ V"
+    },
+    {
+        "desiredParsedResult": "(⇒ (¬ V) (¬ W))",
+        "fromThisTextInput": "¬V ⇒ ¬W"
+    },
+    {
+        "desiredParsedResult": "(¬ (and W V))",
+        "fromThisTextInput": "¬(W and V)"
+    },
+    {
+        "desiredParsedResult": "(or (¬ W) (¬ V))",
+        "fromThisTextInput": "¬W or ¬V"
+    },
+    {
+        "desiredParsedResult": "(¬ (or W V))",
+        "fromThisTextInput": "¬(W or V)"
+    },
+    {
+        "desiredParsedResult": "(¬ W)",
+        "fromThisTextInput": "¬W"
+    },
+    {
+        "desiredParsedResult": "(¬ V)",
+        "fromThisTextInput": "¬V"
+    },
+    {
+        "desiredParsedResult": "(= (+ 1 1) 2)",
+        "fromThisTextInput": "1 + 1 = 2"
+    },
+    {
+        "desiredParsedResult": "(= 1 (𝜎 0))",
+        "fromThisTextInput": "1 = 𝜎(0)"
+    },
+    {
+        "desiredParsedResult": "(= (+ 1 1) (+ 1 1))",
+        "fromThisTextInput": "1 + 1 = 1 + 1"
+    },
+    {
+        "desiredParsedResult": "(= (+ 1 1) (+ 1 (𝜎 0)))",
+        "fromThisTextInput": "1 + 1 = 1 + 𝜎(0)"
+    },
+    {
+        "desiredParsedResult": "(= (+ 1 (𝜎 0)) (𝜎 (+ 1 0)))",
+        "fromThisTextInput": "1 + 𝜎(0) = 𝜎(1 + 0)"
+    },
+    {
+        "desiredParsedResult": "(= (+ 1 1) (+ 1 (𝜎 0)))",
+        "fromThisTextInput": "1 + 1 = 1 + 𝜎(0)"
+    },
+    {
+        "desiredParsedResult": "(= (+ 1 1) (𝜎 (+ 1 0)))",
+        "fromThisTextInput": "1 + 1 = 𝜎(1 + 0)"
+    },
+    {
+        "desiredParsedResult": "(= (+ 1 0) 1)",
+        "fromThisTextInput": "1 + 0 = 1"
+    },
+    {
+        "desiredParsedResult": "(= (+ 1 1) (𝜎 (+ 1 0)))",
+        "fromThisTextInput": "1 + 1 = 𝜎(1 + 0)"
+    },
+    {
+        "desiredParsedResult": "(= (+ 1 1) (𝜎 1))",
+        "fromThisTextInput": "1 + 1 = 𝜎(1)"
+    },
+    {
+        "desiredParsedResult": "(= (𝜎 1) 2)",
+        "fromThisTextInput": "𝜎(1) = 2"
+    },
+    {
+        "desiredParsedResult": "(= (+ 1 1) (𝜎 1))",
+        "fromThisTextInput": "1 + 1 = 𝜎(1)"
+    },
+    {
+        "desiredParsedResult": "(= (+ 1 1) 2)",
+        "fromThisTextInput": "1 + 1 = 2"
+    },
+    {
+        "desiredParsedResult": "(= 2 (𝜎 1))",
+        "fromThisTextInput": "2 = 𝜎(1)"
+    },
+    {
+        "desiredParsedResult": "(= 2 2)",
+        "fromThisTextInput": "2 = 2"
+    },
+    {
+        "desiredParsedResult": "(= (𝜎 1) 2)",
+        "fromThisTextInput": "𝜎(1) = 2"
+    },
+    {
+        "desiredParsedResult": "(= (+ 1 1) (+ 1 1))",
+        "fromThisTextInput": "1 + 1 = 1 + 1"
+    },
+    {
+        "desiredParsedResult": "(= (+ 1 1) (+ 1 (𝜎 0)))",
+        "fromThisTextInput": "1 + 1 = 1 + 𝜎(0)"
+    },
+    {
+        "desiredParsedResult": "(= (+ 1 1) (𝜎 (+ 1 0)))",
+        "fromThisTextInput": "1 + 1 = 𝜎(1 + 0)"
+    },
+    {
+        "desiredParsedResult": "(= (+ 1 1) (𝜎 1))",
+        "fromThisTextInput": "1 + 1 = 𝜎(1)"
+    },
+    {
+        "desiredParsedResult": "(= (+ 1 1) 2)",
+        "fromThisTextInput": "1 + 1 = 2"
+    },
+    {
+        "desiredParsedResult": "(¬ (= n 0))",
+        "fromThisTextInput": "¬(n = 0)"
+    },
+    {
+        "desiredParsedResult": "(∃ m , (= n (𝜎 m)))",
+        "fromThisTextInput": "∃m.(n = 𝜎(m))"
+    },
+    {
+        "desiredParsedResult": "(¬ (= n 0))",
+        "fromThisTextInput": "¬(n = 0)"
+    },
+    {
+        "desiredParsedResult": "(¬ (= 0 0))",
+        "fromThisTextInput": "¬(0 = 0)"
+    },
+    {
+        "desiredParsedResult": "(¬ (∃ m , (= 0 (𝜎 m))))",
+        "fromThisTextInput": "¬(∃m.(0 = 𝜎(m)))"
+    },
+    {
+        "desiredParsedResult": "(= 0 0)",
+        "fromThisTextInput": "0 = 0"
+    },
+    {
+        "desiredParsedResult": "(∃ m , (= 0 (𝜎 m)))",
+        "fromThisTextInput": "∃m.(0 = 𝜎(m))"
+    },
+    {
+        "desiredParsedResult": "(⇒ (¬ (= 0 0)) (∃ m , (= 0 (𝜎 m))))",
+        "fromThisTextInput": "¬(0 = 0) ⇒ ∃m.(0 = 𝜎(m))"
+    },
+    {
+        "desiredParsedResult": "(⇒ (¬ (= k 0)) (∃ m , (= k (𝜎 m))))",
+        "fromThisTextInput": "¬(k = 0) ⇒ ∃m.(k = 𝜎(m))"
+    },
+    {
+        "desiredParsedResult": "(¬ (= (𝜎 k) 0))",
+        "fromThisTextInput": "¬(𝜎(k) = 0)"
+    },
+    {
+        "desiredParsedResult": "(= (𝜎 k) (𝜎 k))",
+        "fromThisTextInput": "𝜎(k) = 𝜎(k)"
+    },
+    {
+        "desiredParsedResult": "(∃ m , (= (𝜎 k) (𝜎 m)))",
+        "fromThisTextInput": "∃m.(𝜎(k) = 𝜎(m))"
+    },
+    {
+        "desiredParsedResult": "(⇒ (¬ (= (𝜎 k) 0)) (∃ m , (= (𝜎 k) (𝜎 m))))",
+        "fromThisTextInput": "¬(𝜎(k) = 0) ⇒ ∃m.(𝜎(k) = 𝜎(m))"
+    },
+    {
+        "desiredParsedResult": "(∀ j , (⇒ (¬ (= j 0)) (∃ m , (= j (𝜎 m)))))",
+        "fromThisTextInput": "∀j.(¬(j = 0) ⇒ ∃m.(j = 𝜎(m)))"
+    },
+    {
+        "desiredParsedResult": "(⇒ (¬ (= n 0)) (∃ m , (= n (𝜎 m))))",
+        "fromThisTextInput": "¬(n = 0) ⇒ ∃m.(n = 𝜎(m))"
+    },
+    {
+        "desiredParsedResult": "(∃ m , (= n (𝜎 m)))",
+        "fromThisTextInput": "∃m.(n = 𝜎(m))"
+    },
+    {
+        "desiredParsedResult": "(¬ (= n (𝜎 n)))",
+        "fromThisTextInput": "¬(n = 𝜎(n))"
+    },
+    {
+        "desiredParsedResult": "(¬ (= 0 (𝜎 0)))",
+        "fromThisTextInput": "¬(0 = 𝜎(0))"
+    },
+    {
+        "desiredParsedResult": "(¬ (= k (𝜎 k)))",
+        "fromThisTextInput": "¬(k = 𝜎(k))"
+    },
+    {
+        "desiredParsedResult": "(= (𝜎 k) (𝜎 (𝜎 k)))",
+        "fromThisTextInput": "𝜎(k) = 𝜎(𝜎(k))"
+    },
+    {
+        "desiredParsedResult": "(= k (𝜎 k))",
+        "fromThisTextInput": "k = 𝜎(k)"
+    },
+    {
+        "desiredParsedResult": "(¬ (= (𝜎 k) (𝜎 (𝜎 k))))",
+        "fromThisTextInput": "¬(𝜎(k) = 𝜎(𝜎(k)))"
+    },
+    {
+        "desiredParsedResult": "(∀ j , (¬ (= j (𝜎 j))))",
+        "fromThisTextInput": "∀j.¬(j = 𝜎(j))"
+    },
+    {
+        "desiredParsedResult": "(¬ (= n (𝜎 n)))",
+        "fromThisTextInput": "¬(n = 𝜎(n))"
+    },
+    {
+        "desiredParsedResult": "(= (𝜎 n) (+ n 1))",
+        "fromThisTextInput": "𝜎(n) = n + 1"
+    },
+    {
+        "desiredParsedResult": "(= (+ n 0) n)",
+        "fromThisTextInput": "n + 0 = n"
+    },
+    {
+        "desiredParsedResult": "(= (𝜎 (+ n 0)) (𝜎 (+ n 0)))",
+        "fromThisTextInput": "𝜎(n + 0) = 𝜎(n + 0)"
+    },
+    {
+        "desiredParsedResult": "(= (𝜎 n) (𝜎 (+ n 0)))",
+        "fromThisTextInput": "𝜎(n) = 𝜎(n + 0)"
+    },
+    {
+        "desiredParsedResult": "(= (+ n (𝜎 0)) (𝜎 (+ n 0)))",
+        "fromThisTextInput": "n + 𝜎(0) = 𝜎(n + 0)"
+    },
+    {
+        "desiredParsedResult": "(= (+ n (𝜎 0)) (+ n (𝜎 0)))",
+        "fromThisTextInput": "n + 𝜎(0) = n + 𝜎(0)"
+    },
+    {
+        "desiredParsedResult": "(= (𝜎 (+ n 0)) (+ n (𝜎 0)))",
+        "fromThisTextInput": "𝜎(n + 0) = n + 𝜎(0)"
+    },
+    {
+        "desiredParsedResult": "(= (𝜎 (+ n 0)) (+ n (𝜎 0)))",
+        "fromThisTextInput": "𝜎(n + 0) = n + 𝜎(0)"
+    },
+    {
+        "desiredParsedResult": "(= (𝜎 n) (𝜎 (+ n 0)))",
+        "fromThisTextInput": "𝜎(n) = 𝜎(n + 0)"
+    },
+    {
+        "desiredParsedResult": "(= (𝜎 n) (+ n (𝜎 0)))",
+        "fromThisTextInput": "𝜎(n) = n + 𝜎(0)"
+    },
+    {
+        "desiredParsedResult": "(= 1 (𝜎 0))",
+        "fromThisTextInput": "1 = 𝜎(0)"
+    },
+    {
+        "desiredParsedResult": "(= 1 1)",
+        "fromThisTextInput": "1 = 1"
+    },
+    {
+        "desiredParsedResult": "(= (𝜎 0) 1)",
+        "fromThisTextInput": "𝜎(0) = 1"
+    },
+    {
+        "desiredParsedResult": "(= (𝜎 0) 1)",
+        "fromThisTextInput": "𝜎(0) = 1"
+    },
+    {
+        "desiredParsedResult": "(= (𝜎 n) (+ n (𝜎 0)))",
+        "fromThisTextInput": "𝜎(n) = n + 𝜎(0)"
+    },
+    {
+        "desiredParsedResult": "(= (𝜎 n) (+ n 1))",
+        "fromThisTextInput": "𝜎(n) = n + 1"
+    },
+    {
+        "desiredParsedResult": "(= (+ (+ m n) p) (+ m (+ n p)))",
+        "fromThisTextInput": "m + n + p = m + n + p"
+    },
+    {
+        "desiredParsedResult": "(= (+ n 0) n)",
+        "fromThisTextInput": "n + 0 = n"
+    },
+    {
+        "desiredParsedResult": "(= (+ (+ m n) 0) (+ m n))",
+        "fromThisTextInput": "m + n + 0 = m + n"
+    },
+    {
+        "desiredParsedResult": "(= (+ (+ m n) 0) (+ m (+ n 0)))",
+        "fromThisTextInput": "m + n + 0 = m + n + 0"
+    },
+    {
+        "desiredParsedResult": "(= (+ (+ m n) k) (+ m (+ n k)))",
+        "fromThisTextInput": "m + n + k = m + n + k"
+    },
+    {
+        "desiredParsedResult": "(= (+ (+ m n) k) (+ m (+ n k)))",
+        "fromThisTextInput": "m + n + k = m + n + k"
+    },
+    {
+        "desiredParsedResult": "(= (+ (+ m n) (𝜎 k)) (𝜎 (+ (+ m n) k)))",
+        "fromThisTextInput": "m + n + 𝜎(k) = 𝜎(m + n + k)"
+    },
+    {
+        "desiredParsedResult": "(= (+ (+ m n) (𝜎 k)) (𝜎 (+ m (+ n k))))",
+        "fromThisTextInput": "m + n + 𝜎(k) = 𝜎(m + n + k)"
+    },
+    {
+        "desiredParsedResult": "(= (+ m (𝜎 (+ n k))) (𝜎 (+ m (+ n k))))",
+        "fromThisTextInput": "m + 𝜎(n + k) = 𝜎(m + n + k)"
+    },
+    {
+        "desiredParsedResult": "(= (+ (+ m n) (𝜎 k)) (𝜎 (+ m (+ n k))))",
+        "fromThisTextInput": "m + n + 𝜎(k) = 𝜎(m + n + k)"
+    },
+    {
+        "desiredParsedResult": "(= (+ (+ m n) (𝜎 k)) (+ m (𝜎 (+ n k))))",
+        "fromThisTextInput": "m + n + 𝜎(k) = m + 𝜎(n + k)"
+    },
+    {
+        "desiredParsedResult": "(= (+ n (𝜎 k)) (𝜎 (+ n k)))",
+        "fromThisTextInput": "n + 𝜎(k) = 𝜎(n + k)"
+    },
+    {
+        "desiredParsedResult": "(= (+ (+ m n) (𝜎 k)) (+ m (𝜎 (+ n k))))",
+        "fromThisTextInput": "m + n + 𝜎(k) = m + 𝜎(n + k)"
+    },
+    {
+        "desiredParsedResult": "(= (+ (+ m n) (𝜎 k)) (+ m (+ n (𝜎 k))))",
+        "fromThisTextInput": "m + n + 𝜎(k) = m + n + 𝜎(k)"
+    },
+    {
+        "desiredParsedResult": "(∀ p , (= (+ (+ m n) p) (+ m (+ n p))))",
+        "fromThisTextInput": "∀p.(m + n + p = m + n + p)"
+    },
+    {
+        "desiredParsedResult": "(⇒ (∀ x , (P x)) (∀ y , (P y)))",
+        "fromThisTextInput": "∀x.P(x) ⇒ ∀y.P(y)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (and (P x) (Q x)))",
+        "fromThisTextInput": "∃x.(P(x) and Q(x))"
+    },
+    {
+        "desiredParsedResult": "(and (P c) (Q c))",
+        "fromThisTextInput": "P(c) and Q(c)"
+    },
+    {
+        "desiredParsedResult": "(P c)",
+        "fromThisTextInput": "P(c)"
+    },
+    {
+        "desiredParsedResult": "(∃ y , (P y))",
+        "fromThisTextInput": "∃y.P(y)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (Q x))",
+        "fromThisTextInput": "∃x.Q(x)"
+    },
+    {
+        "desiredParsedResult": "(Q c)",
+        "fromThisTextInput": "Q(c)"
+    },
+    {
+        "desiredParsedResult": "(P c)",
+        "fromThisTextInput": "P(c)"
+    },
+    {
+        "desiredParsedResult": "(Q c)",
+        "fromThisTextInput": "Q(c)"
+    },
+    {
+        "desiredParsedResult": "(⇒ (P c) (Q c))",
+        "fromThisTextInput": "P(c) ⇒ Q(c)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (⇒ (P x) (Q x)))",
+        "fromThisTextInput": "∃x.(P(x) ⇒ Q(x))"
+    },
+    {
+        "desiredParsedResult": "(⇒ (∃ x , (Q x)) (∃ x , (⇒ (P x) (Q x))))",
+        "fromThisTextInput": "∃x.Q(x) ⇒ ∃x.(P(x) ⇒ Q(x))"
+    },
+    {
+        "desiredParsedResult": "(∀ x , (¬ (P x)))",
+        "fromThisTextInput": "∀x.¬P(x)"
+    },
+    {
+        "desiredParsedResult": "(∃ y , (P y))",
+        "fromThisTextInput": "∃y.P(y)"
+    },
+    {
+        "desiredParsedResult": "(P n)",
+        "fromThisTextInput": "P(n)"
+    },
+    {
+        "desiredParsedResult": "(¬ (P n))",
+        "fromThisTextInput": "¬P(n)"
+    },
+    {
+        "desiredParsedResult": "(¬ (∃ y , (P y)))",
+        "fromThisTextInput": "¬(∃y.P(y))"
+    },
+    {
+        "desiredParsedResult": "(⇒ (∀ x , (¬ (P x))) (¬ (∃ y , (P y))))",
+        "fromThisTextInput": "∀x.¬P(x) ⇒ ¬(∃y.P(y))"
+    },
+    {
+        "desiredParsedResult": "(and (∀ y , (P y)) (∀ z , (Q z)))",
+        "fromThisTextInput": "∀y.P(y) and ∀z.Q(z)"
+    },
+    {
+        "desiredParsedResult": "(∀ y , (P y))",
+        "fromThisTextInput": "∀y.P(y)"
+    },
+    {
+        "desiredParsedResult": "(∀ z , (Q z))",
+        "fromThisTextInput": "∀z.Q(z)"
+    },
+    {
+        "desiredParsedResult": "(P x)",
+        "fromThisTextInput": "P(x)"
+    },
+    {
+        "desiredParsedResult": "(Q x)",
+        "fromThisTextInput": "Q(x)"
+    },
+    {
+        "desiredParsedResult": "(and (P x) (Q x))",
+        "fromThisTextInput": "P(x) and Q(x)"
+    },
+    {
+        "desiredParsedResult": "(∀ x , (and (P x) (Q x)))",
+        "fromThisTextInput": "∀x.(P(x) and Q(x))"
+    },
+    {
+        "desiredParsedResult": "(⇒ (and (∀ y , (P y)) (∀ z , (Q z))) (∀ x , (and (P x) (Q x))))",
+        "fromThisTextInput": "∀y.P(y) and ∀z.Q(z) ⇒ ∀x.(P(x) and Q(x))"
+    },
+    {
+        "desiredParsedResult": "(∀ x , (and (P x) (Q x)))",
+        "fromThisTextInput": "∀x.(P(x) and Q(x))"
+    },
+    {
+        "desiredParsedResult": "(and (P x) (Q x))",
+        "fromThisTextInput": "P(x) and Q(x)"
+    },
+    {
+        "desiredParsedResult": "(P x)",
+        "fromThisTextInput": "P(x)"
+    },
+    {
+        "desiredParsedResult": "(Q x)",
+        "fromThisTextInput": "Q(x)"
+    },
+    {
+        "desiredParsedResult": "(∀ y , (P y))",
+        "fromThisTextInput": "∀y.P(y)"
+    },
+    {
+        "desiredParsedResult": "(∀ z , (Q z))",
+        "fromThisTextInput": "∀z.Q(z)"
+    },
+    {
+        "desiredParsedResult": "(and (∀ y , (P y)) (∀ z , (Q z)))",
+        "fromThisTextInput": "∀y.P(y) and ∀z.Q(z)"
+    },
+    {
+        "desiredParsedResult": "(⇒ (∀ x , (and (P x) (Q x))) (and (∀ y , (P y)) (∀ z , (Q z))))",
+        "fromThisTextInput": "∀x.(P(x) and Q(x)) ⇒ ∀y.P(y) and ∀z.Q(z)"
+    },
+    {
+        "desiredParsedResult": "(⇔ (∀ x , (and (P x) (Q x))) (and (∀ y , (P y)) (∀ z , (Q z))))",
+        "fromThisTextInput": "∀x.(P(x) and Q(x)) ⇔ ∀y.P(y) and ∀z.Q(z)"
+    },
+    {
+        "desiredParsedResult": "(or (∃ y , (P y)) (∃ z , (Q z)))",
+        "fromThisTextInput": "∃y.P(y) or ∃z.Q(z)"
+    },
+    {
+        "desiredParsedResult": "(∃ y , (P y))",
+        "fromThisTextInput": "∃y.P(y)"
+    },
+    {
+        "desiredParsedResult": "(P c)",
+        "fromThisTextInput": "P(c)"
+    },
+    {
+        "desiredParsedResult": "(or (P c) (Q c))",
+        "fromThisTextInput": "P(c) or Q(c)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (or (P x) (Q x)))",
+        "fromThisTextInput": "∃x.(P(x) or Q(x))"
+    },
+    {
+        "desiredParsedResult": "(∃ z , (Q z))",
+        "fromThisTextInput": "∃z.Q(z)"
+    },
+    {
+        "desiredParsedResult": "(Q c)",
+        "fromThisTextInput": "Q(c)"
+    },
+    {
+        "desiredParsedResult": "(or (P c) (Q c))",
+        "fromThisTextInput": "P(c) or Q(c)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (or (P x) (Q x)))",
+        "fromThisTextInput": "∃x.(P(x) or Q(x))"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (or (P x) (Q x)))",
+        "fromThisTextInput": "∃x.(P(x) or Q(x))"
+    },
+    {
+        "desiredParsedResult": "(or (∃ y , (P y)) (∃ z , (Q z)))",
+        "fromThisTextInput": "∃y.P(y) or ∃z.Q(z)"
+    },
+    {
+        "desiredParsedResult": "(∃ y , (P y))",
+        "fromThisTextInput": "∃y.P(y)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (or (P x) (Q x)))",
+        "fromThisTextInput": "∃x.(P(x) or Q(x))"
+    },
+    {
+        "desiredParsedResult": "(∃ z , (Q z))",
+        "fromThisTextInput": "∃z.Q(z)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (or (P x) (Q x)))",
+        "fromThisTextInput": "∃x.(P(x) or Q(x))"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (or (P x) (Q x)))",
+        "fromThisTextInput": "∃x.(P(x) or Q(x))"
+    },
+    {
+        "desiredParsedResult": "(⇒ (or (∃ y , (P y)) (∃ z , (Q z))) (∃ x , (or (P x) (Q x))))",
+        "fromThisTextInput": "∃y.P(y) or ∃z.Q(z) ⇒ ∃x.(P(x) or Q(x))"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (or (P x) (Q x)))",
+        "fromThisTextInput": "∃x.(P(x) or Q(x))"
+    },
+    {
+        "desiredParsedResult": "(or (P c) (Q c))",
+        "fromThisTextInput": "P(c) or Q(c)"
+    },
+    {
+        "desiredParsedResult": "(P c)",
+        "fromThisTextInput": "P(c)"
+    },
+    {
+        "desiredParsedResult": "(or (∃ y , (P y)) (∃ z , (Q z)))",
+        "fromThisTextInput": "∃y.P(y) or ∃z.Q(z)"
+    },
+    {
+        "desiredParsedResult": "(Q c)",
+        "fromThisTextInput": "Q(c)"
+    },
+    {
+        "desiredParsedResult": "(or (∃ y , (P y)) (∃ z , (Q z)))",
+        "fromThisTextInput": "∃y.P(y) or ∃z.Q(z)"
+    },
+    {
+        "desiredParsedResult": "(or (∃ y , (P y)) (∃ z , (Q z)))",
+        "fromThisTextInput": "∃y.P(y) or ∃z.Q(z)"
+    },
+    {
+        "desiredParsedResult": "(or (P c) (Q c))",
+        "fromThisTextInput": "P(c) or Q(c)"
+    },
+    {
+        "desiredParsedResult": "(P c)",
+        "fromThisTextInput": "P(c)"
+    },
+    {
+        "desiredParsedResult": "(or (∃ y , (P y)) (∃ z , (Q z)))",
+        "fromThisTextInput": "∃y.P(y) or ∃z.Q(z)"
+    },
+    {
+        "desiredParsedResult": "(Q c)",
+        "fromThisTextInput": "Q(c)"
+    },
+    {
+        "desiredParsedResult": "(or (∃ y , (P y)) (∃ z , (Q z)))",
+        "fromThisTextInput": "∃y.P(y) or ∃z.Q(z)"
+    },
+    {
+        "desiredParsedResult": "(or (∃ y , (P y)) (∃ z , (Q z)))",
+        "fromThisTextInput": "∃y.P(y) or ∃z.Q(z)"
+    },
+    {
+        "desiredParsedResult": "(⇒ (∃ x , (or (P x) (Q x))) (or (∃ y , (P y)) (∃ z , (Q z))))",
+        "fromThisTextInput": "∃x.(P(x) or Q(x)) ⇒ ∃y.P(y) or ∃z.Q(z)"
+    },
+    {
+        "desiredParsedResult": "(⇔ (∃ x , (or (P x) (Q x))) (or (∃ y , (P y)) (∃ z , (Q z))))",
+        "fromThisTextInput": "∃x.(P(x) or Q(x)) ⇔ ∃y.P(y) or ∃z.Q(z)"
+    },
+    {
+        "desiredParsedResult": "(< 0 7)",
+        "fromThisTextInput": "0 < 7"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (< 0 x))",
+        "fromThisTextInput": "∃x.(0 < x)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (< x 7))",
+        "fromThisTextInput": "∃x.(x < 7)"
+    },
+    {
+        "desiredParsedResult": "(and (∃ x , (< 0 x)) (∃ x , (< x 7)))",
+        "fromThisTextInput": "∃x.(0 < x) and ∃x.(x < 7)"
+    },
+    {
+        "desiredParsedResult": "(⇒ (< 0 7) (and (∃ x , (< 0 x)) (∃ x , (< x 7))))",
+        "fromThisTextInput": "0 < 7 ⇒ ∃x.(0 < x) and ∃x.(x < 7)"
+    },
+    {
+        "desiredParsedResult": "(∀ x , (∀ y , (L x y)))",
+        "fromThisTextInput": "∀x.∀y.L(x,y)"
+    },
+    {
+        "desiredParsedResult": "(∀ y , (L Alice y))",
+        "fromThisTextInput": "∀y.L(Alice,y)"
+    },
+    {
+        "desiredParsedResult": "(L Alice Bob)",
+        "fromThisTextInput": "L(Alice,Bob)"
+    },
+    {
+        "desiredParsedResult": "(⇒ (∀ x , (∀ y , (L x y))) (L Alice Bob))",
+        "fromThisTextInput": "∀x.∀y.L(x,y) ⇒ L(Alice,Bob)"
+    },
+    {
+        "desiredParsedResult": "(and (= x y) (= y z))",
+        "fromThisTextInput": "x = y and y = z"
+    },
+    {
+        "desiredParsedResult": "(= x y)",
+        "fromThisTextInput": "x = y"
+    },
+    {
+        "desiredParsedResult": "(= y z)",
+        "fromThisTextInput": "y = z"
+    },
+    {
+        "desiredParsedResult": "(= x z)",
+        "fromThisTextInput": "x = z"
+    },
+    {
+        "desiredParsedResult": "(= y z)",
+        "fromThisTextInput": "y = z"
+    },
+    {
+        "desiredParsedResult": "(= x y)",
+        "fromThisTextInput": "x = y"
+    },
+    {
+        "desiredParsedResult": "(= x z)",
+        "fromThisTextInput": "x = z"
+    },
+    {
+        "desiredParsedResult": "(⇒ (and (= x y) (= y z)) (= x z))",
+        "fromThisTextInput": "x = y and y = z ⇒ x = z"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (⇒ (P x) (Q x)))",
+        "fromThisTextInput": "∃x.(P(x) ⇒ Q(x))"
+    },
+    {
+        "desiredParsedResult": "(⇒ (P c) (Q c))",
+        "fromThisTextInput": "P(c) ⇒ Q(c)"
+    },
+    {
+        "desiredParsedResult": "(∀ y , (P y))",
+        "fromThisTextInput": "∀y.P(y)"
+    },
+    {
+        "desiredParsedResult": "(P c)",
+        "fromThisTextInput": "P(c)"
+    },
+    {
+        "desiredParsedResult": "(Q c)",
+        "fromThisTextInput": "Q(c)"
+    },
+    {
+        "desiredParsedResult": "(∃ z , (Q z))",
+        "fromThisTextInput": "∃z.Q(z)"
+    },
+    {
+        "desiredParsedResult": "(⇒ (∀ y , (P y)) (∃ z , (Q z)))",
+        "fromThisTextInput": "∀y.P(y) ⇒ ∃z.Q(z)"
+    },
+    {
+        "desiredParsedResult": "(⇔ (∃ x , (⇒ (P x) (Q x))) (⇒ (∀ y , (P y)) (∃ z , (Q z))))",
+        "fromThisTextInput": "∃x.(P(x) ⇒ Q(x)) ⇔ ∀y.P(y) ⇒ ∃z.Q(z)"
+    },
+    {
+        "desiredParsedResult": "(⇒ (and (∀ x , (∃! y , (L x y))) (¬ (= a b))) (¬ (and (L c a) (L c b))))",
+        "fromThisTextInput": "∀x.∃!y.L(x,y) and ¬(a = b) ⇒ ¬(L(c,a) and L(c,b))"
+    },
+    {
+        "desiredParsedResult": "(and (∀ x , (∃! y , (L x y))) (¬ (= a b)))",
+        "fromThisTextInput": "∀x.∃!y.L(x,y) and ¬(a = b)"
+    },
+    {
+        "desiredParsedResult": "(¬ (= a b))",
+        "fromThisTextInput": "¬(a = b)"
+    },
+    {
+        "desiredParsedResult": "(∀ x , (∃! y , (L x y)))",
+        "fromThisTextInput": "∀x.∃!y.L(x,y)"
+    },
+    {
+        "desiredParsedResult": "(∃! y , (L c y))",
+        "fromThisTextInput": "∃!y.L(c,y)"
+    },
+    {
+        "desiredParsedResult": "(∃ y , (and (L c y) (∀ z , (⇒ (L c z) (= z y)))))",
+        "fromThisTextInput": "∃y.(L(c,y) and ∀z.(L(c,z) ⇒ z = y))"
+    },
+    {
+        "desiredParsedResult": "(and (L c w) (∀ z , (⇒ (L c z) (= z w))))",
+        "fromThisTextInput": "L(c,w) and ∀z.(L(c,z) ⇒ z = w)"
+    },
+    {
+        "desiredParsedResult": "(L c w)",
+        "fromThisTextInput": "L(c,w)"
+    },
+    {
+        "desiredParsedResult": "(∀ z , (⇒ (L c z) (= z w)))",
+        "fromThisTextInput": "∀z.(L(c,z) ⇒ z = w)"
+    },
+    {
+        "desiredParsedResult": "(and (L c a) (L c b))",
+        "fromThisTextInput": "L(c,a) and L(c,b)"
+    },
+    {
+        "desiredParsedResult": "(L c a)",
+        "fromThisTextInput": "L(c,a)"
+    },
+    {
+        "desiredParsedResult": "(L c b)",
+        "fromThisTextInput": "L(c,b)"
+    },
+    {
+        "desiredParsedResult": "(⇒ (L c a) (= a w))",
+        "fromThisTextInput": "L(c,a) ⇒ a = w"
+    },
+    {
+        "desiredParsedResult": "(⇒ (L c b) (= b w))",
+        "fromThisTextInput": "L(c,b) ⇒ b = w"
+    },
+    {
+        "desiredParsedResult": "(= a w)",
+        "fromThisTextInput": "a = w"
+    },
+    {
+        "desiredParsedResult": "(= b w)",
+        "fromThisTextInput": "b = w"
+    },
+    {
+        "desiredParsedResult": "(= b w)",
+        "fromThisTextInput": "b = w"
+    },
+    {
+        "desiredParsedResult": "(= b b)",
+        "fromThisTextInput": "b = b"
+    },
+    {
+        "desiredParsedResult": "(= w b)",
+        "fromThisTextInput": "w = b"
+    },
+    {
+        "desiredParsedResult": "(= w b)",
+        "fromThisTextInput": "w = b"
+    },
+    {
+        "desiredParsedResult": "(= a w)",
+        "fromThisTextInput": "a = w"
+    },
+    {
+        "desiredParsedResult": "(= a b)",
+        "fromThisTextInput": "a = b"
+    },
+    {
+        "desiredParsedResult": "(¬ (and (L c a) (L c b)))",
+        "fromThisTextInput": "¬(L(c,a) and L(c,b))"
+    },
+    {
+        "desiredParsedResult": "(⇒ (and (∀ x , (∃! y , (L x y))) (¬ (= a b))) (¬ (and (L c a) (L c b))))",
+        "fromThisTextInput": "∀x.∃!y.L(x,y) and ¬(a = b) ⇒ ¬(L(c,a) and L(c,b))"
+    },
+    {
+        "desiredParsedResult": "(⇒ (⇒ (⇒ P Q) P) P)",
+        "fromThisTextInput": "P ⇒ Q ⇒ P ⇒ P"
+    },
+    {
+        "desiredParsedResult": "(⇒ (⇒ P Q) P)",
+        "fromThisTextInput": "P ⇒ Q ⇒ P"
+    },
+    {
+        "desiredParsedResult": "(¬ P)",
+        "fromThisTextInput": "¬P"
+    },
+    {
+        "desiredParsedResult": "(¬ Q)",
+        "fromThisTextInput": "¬Q"
+    },
+    {
+        "desiredParsedResult": "(⇒ P Q)",
+        "fromThisTextInput": "P ⇒ Q"
+    },
+    {
+        "desiredParsedResult": "(⇒ (or (⇒ P R) (⇒ Q R)) (⇒ (and P Q) R))",
+        "fromThisTextInput": "(P ⇒ R) or (Q ⇒ R) ⇒ P and Q ⇒ R"
+    },
+    {
+        "desiredParsedResult": "(or (⇒ P R) (⇒ Q R))",
+        "fromThisTextInput": "(P ⇒ R) or (Q ⇒ R)"
+    },
+    {
+        "desiredParsedResult": "(and P Q)",
+        "fromThisTextInput": "P and Q"
+    },
+    {
+        "desiredParsedResult": "(⇒ P R)",
+        "fromThisTextInput": "P ⇒ R"
+    },
+    {
+        "desiredParsedResult": "(⇒ Q R)",
+        "fromThisTextInput": "Q ⇒ R"
+    },
+    {
+        "desiredParsedResult": "(or (⇒ P R) (⇒ Q R))",
+        "fromThisTextInput": "(P ⇒ R) or (Q ⇒ R)"
+    },
+    {
+        "desiredParsedResult": "(⇒ P R)",
+        "fromThisTextInput": "P ⇒ R"
+    },
+    {
+        "desiredParsedResult": "(⇒ Q R)",
+        "fromThisTextInput": "Q ⇒ R"
+    },
+    {
+        "desiredParsedResult": "(⇒ (and P Q) R)",
+        "fromThisTextInput": "P and Q ⇒ R"
+    },
+    {
+        "desiredParsedResult": "(⇒ (or (⇒ P R) (⇒ Q R)) (⇒ (and P Q) R))",
+        "fromThisTextInput": "(P ⇒ R) or (Q ⇒ R) ⇒ P and Q ⇒ R"
+    },
+    {
+        "desiredParsedResult": "(∀ x , (L x x))",
+        "fromThisTextInput": "∀x.L(x,x)"
+    },
+    {
+        "desiredParsedResult": "(∀ x , (∃ y , (L x y)))",
+        "fromThisTextInput": "∀x.∃y.L(x,y)"
+    },
+    {
+        "desiredParsedResult": "(∀ x , (L x x))",
+        "fromThisTextInput": "∀x.L(x,x)"
+    },
+    {
+        "desiredParsedResult": "(L z z)",
+        "fromThisTextInput": "L(z,z)"
+    },
+    {
+        "desiredParsedResult": "(∃ y , (L z y))",
+        "fromThisTextInput": "∃y.L(z,y)"
+    },
+    {
+        "desiredParsedResult": "(∀ x , (∃ y , (L x y)))",
+        "fromThisTextInput": "∀x.∃y.L(x,y)"
+    },
+    {
+        "desiredParsedResult": "(∃! x , (P x))",
+        "fromThisTextInput": "∃!x.P(x)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (and (P x) (∀ y , (⇒ (P y) (= y x)))))",
+        "fromThisTextInput": "∃x.(P(x) and ∀y.(P(y) ⇒ y = x))"
+    },
+    {
+        "desiredParsedResult": "(and (P c) (∀ y , (⇒ (P y) (= y c))))",
+        "fromThisTextInput": "P(c) and ∀y.(P(y) ⇒ y = c)"
+    },
+    {
+        "desiredParsedResult": "(P c)",
+        "fromThisTextInput": "P(c)"
+    },
+    {
+        "desiredParsedResult": "(∀ y , (⇒ (P y) (= y c)))",
+        "fromThisTextInput": "∀y.(P(y) ⇒ y = c)"
+    },
+    {
+        "desiredParsedResult": "(¬ (= z c))",
+        "fromThisTextInput": "¬(z = c)"
+    },
+    {
+        "desiredParsedResult": "(P z)",
+        "fromThisTextInput": "P(z)"
+    },
+    {
+        "desiredParsedResult": "(⇒ (P z) (= z c))",
+        "fromThisTextInput": "P(z) ⇒ z = c"
+    },
+    {
+        "desiredParsedResult": "(= z c)",
+        "fromThisTextInput": "z = c"
+    },
+    {
+        "desiredParsedResult": "(¬ (P z))",
+        "fromThisTextInput": "¬P(z)"
+    },
+    {
+        "desiredParsedResult": "(⇒ (¬ (= z c)) (¬ (P z)))",
+        "fromThisTextInput": "¬(z = c) ⇒ ¬P(z)"
+    },
+    {
+        "desiredParsedResult": "(∀ y , (⇒ (¬ (= y c)) (¬ (P y))))",
+        "fromThisTextInput": "∀y.(¬(y = c) ⇒ ¬P(y))"
+    },
+    {
+        "desiredParsedResult": "(and (P c) (∀ y , (⇒ (¬ (= y c)) (¬ (P y)))))",
+        "fromThisTextInput": "P(c) and ∀y.(¬(y = c) ⇒ ¬P(y))"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (and (P x) (∀ y , (⇒ (¬ (= y x)) (¬ (P y))))))",
+        "fromThisTextInput": "∃x.(P(x) and ∀y.(¬(y = x) ⇒ ¬P(y)))"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (and (P x) (∀ y , (⇒ (¬ (= y x)) (¬ (P y))))))",
+        "fromThisTextInput": "∃x.(P(x) and ∀y.(¬(y = x) ⇒ ¬P(y)))"
+    },
+    {
+        "desiredParsedResult": "(and (P c) (∀ y , (⇒ (¬ (= y c)) (¬ (P y)))))",
+        "fromThisTextInput": "P(c) and ∀y.(¬(y = c) ⇒ ¬P(y))"
+    },
+    {
+        "desiredParsedResult": "(P c)",
+        "fromThisTextInput": "P(c)"
+    },
+    {
+        "desiredParsedResult": "(∀ y , (⇒ (¬ (= y c)) (¬ (P y))))",
+        "fromThisTextInput": "∀y.(¬(y = c) ⇒ ¬P(y))"
+    },
+    {
+        "desiredParsedResult": "(P z)",
+        "fromThisTextInput": "P(z)"
+    },
+    {
+        "desiredParsedResult": "(⇒ (¬ (= z c)) (¬ (P z)))",
+        "fromThisTextInput": "¬(z = c) ⇒ ¬P(z)"
+    },
+    {
+        "desiredParsedResult": "(¬ (= z c))",
+        "fromThisTextInput": "¬(z = c)"
+    },
+    {
+        "desiredParsedResult": "(¬ (P z))",
+        "fromThisTextInput": "¬P(z)"
+    },
+    {
+        "desiredParsedResult": "(= z c)",
+        "fromThisTextInput": "z = c"
+    },
+    {
+        "desiredParsedResult": "(⇒ (P z) (= z c))",
+        "fromThisTextInput": "P(z) ⇒ z = c"
+    },
+    {
+        "desiredParsedResult": "(∀ y , (⇒ (P y) (= y c)))",
+        "fromThisTextInput": "∀y.(P(y) ⇒ y = c)"
+    },
+    {
+        "desiredParsedResult": "(and (P c) (∀ y , (⇒ (P y) (= y c))))",
+        "fromThisTextInput": "P(c) and ∀y.(P(y) ⇒ y = c)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (and (P x) (∀ y , (⇒ (P y) (= y x)))))",
+        "fromThisTextInput": "∃x.(P(x) and ∀y.(P(y) ⇒ y = x))"
+    },
+    {
+        "desiredParsedResult": "(∃! x , (P x))",
+        "fromThisTextInput": "∃!x.P(x)"
+    },
+    {
+        "desiredParsedResult": "(⇒ (¬ (∀ x , (∃ y , (∀ z , (P x y z))))) (∃ x , (∀ y , (∃ z , (¬ (P x y z))))))",
+        "fromThisTextInput": "¬(∀x.∃y.∀z.P(x,y,z)) ⇒ ∃x.∀y.∃z.¬P(x,y,z)"
+    },
+    {
+        "desiredParsedResult": "(⇒ (¬ (∀ x , (∃ y , (∀ z , (P x y z))))) (∃ x , (∀ y , (∃ z , (¬ (P x y z))))))",
+        "fromThisTextInput": "¬(∀x.∃y.∀z.P(x,y,z)) ⇒ ∃x.∀y.∃z.¬P(x,y,z)"
+    },
+    {
+        "desiredParsedResult": "(¬ (∀ x , (∃ y , (∀ z , (P x y z)))))",
+        "fromThisTextInput": "¬(∀x.∃y.∀z.P(x,y,z))"
+    },
+    {
+        "desiredParsedResult": "(¬ (∃ x , (∀ y , (∃ z , (¬ (P x y z))))))",
+        "fromThisTextInput": "¬(∃x.∀y.∃z.¬P(x,y,z))"
+    },
+    {
+        "desiredParsedResult": "(¬ (∃ y , (∀ z , (P a y z))))",
+        "fromThisTextInput": "¬(∃y.∀z.P(a,y,z))"
+    },
+    {
+        "desiredParsedResult": "(¬ (∃ z , (¬ (P a b z))))",
+        "fromThisTextInput": "¬(∃z.¬P(a,b,z))"
+    },
+    {
+        "desiredParsedResult": "(¬ (P a b c))",
+        "fromThisTextInput": "¬P(a,b,c)"
+    },
+    {
+        "desiredParsedResult": "(∃ z , (¬ (P a b z)))",
+        "fromThisTextInput": "∃z.¬P(a,b,z)"
+    },
+    {
+        "desiredParsedResult": "(P a b c)",
+        "fromThisTextInput": "P(a,b,c)"
+    },
+    {
+        "desiredParsedResult": "(∀ z , (P a b z))",
+        "fromThisTextInput": "∀z.P(a,b,z)"
+    },
+    {
+        "desiredParsedResult": "(∃ y , (∀ z , (P a y z)))",
+        "fromThisTextInput": "∃y.∀z.P(a,y,z)"
+    },
+    {
+        "desiredParsedResult": "(∃ z , (¬ (P a b z)))",
+        "fromThisTextInput": "∃z.¬P(a,b,z)"
+    },
+    {
+        "desiredParsedResult": "(∀ y , (∃ z , (¬ (P a y z))))",
+        "fromThisTextInput": "∀y.∃z.¬P(a,y,z)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (∀ y , (∃ z , (¬ (P x y z)))))",
+        "fromThisTextInput": "∃x.∀y.∃z.¬P(x,y,z)"
+    },
+    {
+        "desiredParsedResult": "(∃ y , (∀ z , (P a y z)))",
+        "fromThisTextInput": "∃y.∀z.P(a,y,z)"
+    },
+    {
+        "desiredParsedResult": "(∀ x , (∃ y , (∀ z , (P x y z))))",
+        "fromThisTextInput": "∀x.∃y.∀z.P(x,y,z)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (∀ y , (∃ z , (¬ (P x y z)))))",
+        "fromThisTextInput": "∃x.∀y.∃z.¬P(x,y,z)"
+    },
+    {
+        "desiredParsedResult": "(⇒ P P)",
+        "fromThisTextInput": "P ⇒ P"
+    },
+    {
+        "desiredParsedResult": "(and P Q)",
+        "fromThisTextInput": "P and Q"
+    },
+    {
+        "desiredParsedResult": "(and Q P)",
+        "fromThisTextInput": "Q and P"
+    },
+    {
+        "desiredParsedResult": "(or Q P)",
+        "fromThisTextInput": "Q or P"
+    },
+    {
+        "desiredParsedResult": "(⇒ Q (or Q P))",
+        "fromThisTextInput": "Q ⇒ Q or P"
+    },
+    {
+        "desiredParsedResult": "(⇒ P Q)",
+        "fromThisTextInput": "P ⇒ Q"
+    },
+    {
+        "desiredParsedResult": "(⇒ Q (⇒ P Q))",
+        "fromThisTextInput": "Q ⇒ P ⇒ Q"
+    },
+    {
+        "desiredParsedResult": "(¬ P)",
+        "fromThisTextInput": "¬P"
+    },
+    {
+        "desiredParsedResult": "(¬ (¬ P))",
+        "fromThisTextInput": "¬¬P"
+    },
+    {
+        "desiredParsedResult": "(¬ (¬ P))",
+        "fromThisTextInput": "¬¬P"
+    },
+    {
+        "desiredParsedResult": "(¬ P)",
+        "fromThisTextInput": "¬P"
+    },
+    {
+        "desiredParsedResult": "(⇔ P (¬ (¬ P)))",
+        "fromThisTextInput": "P ⇔ ¬¬P"
+    },
+    {
+        "desiredParsedResult": "(⇒ →← P)",
+        "fromThisTextInput": "→← ⇒ P"
+    },
+    {
+        "desiredParsedResult": "(and P (¬ P))",
+        "fromThisTextInput": "P and ¬P"
+    },
+    {
+        "desiredParsedResult": "(¬ (and P (¬ P)))",
+        "fromThisTextInput": "¬(P and ¬P)"
+    },
+    {
+        "desiredParsedResult": "(or P Q)",
+        "fromThisTextInput": "P or Q"
+    },
+    {
+        "desiredParsedResult": "(⇒ Q (or P Q))",
+        "fromThisTextInput": "Q ⇒ P or Q"
+    },
+    {
+        "desiredParsedResult": "(⇒ R (⇒ Q (or P Q)))",
+        "fromThisTextInput": "R ⇒ Q ⇒ P or Q"
+    },
+    {
+        "desiredParsedResult": "(or (¬ P) Q)",
+        "fromThisTextInput": "¬P or Q"
+    },
+    {
+        "desiredParsedResult": "(¬ P)",
+        "fromThisTextInput": "¬P"
+    },
+    {
+        "desiredParsedResult": "(⇒ P Q)",
+        "fromThisTextInput": "P ⇒ Q"
+    },
+    {
+        "desiredParsedResult": "(⇒ P Q)",
+        "fromThisTextInput": "P ⇒ Q"
+    },
+    {
+        "desiredParsedResult": "(⇒ P Q)",
+        "fromThisTextInput": "P ⇒ Q"
+    },
+    {
+        "desiredParsedResult": "(or (¬ P) Q)",
+        "fromThisTextInput": "¬P or Q"
+    },
+    {
+        "desiredParsedResult": "(¬ P)",
+        "fromThisTextInput": "¬P"
+    },
+    {
+        "desiredParsedResult": "(¬ Q)",
+        "fromThisTextInput": "¬Q"
+    },
+    {
+        "desiredParsedResult": "(⇒ P Q)",
+        "fromThisTextInput": "P ⇒ Q"
+    },
+    {
+        "desiredParsedResult": "(⇒ P Q)",
+        "fromThisTextInput": "P ⇒ Q"
+    },
+    {
+        "desiredParsedResult": "(⇒ P Q)",
+        "fromThisTextInput": "P ⇒ Q"
+    },
+    {
+        "desiredParsedResult": "(⇒ (or (¬ P) Q) (⇒ P Q))",
+        "fromThisTextInput": "¬P or Q ⇒ P ⇒ Q"
+    },
+    {
+        "desiredParsedResult": "(or (or P Q) R)",
+        "fromThisTextInput": "P or Q or R"
+    },
+    {
+        "desiredParsedResult": "(or P Q)",
+        "fromThisTextInput": "P or Q"
+    },
+    {
+        "desiredParsedResult": "(or P (or Q R))",
+        "fromThisTextInput": "P or Q or R"
+    },
+    {
+        "desiredParsedResult": "(or P (or Q R))",
+        "fromThisTextInput": "P or Q or R"
+    },
+    {
+        "desiredParsedResult": "(or P (or Q R))",
+        "fromThisTextInput": "P or Q or R"
+    },
+    {
+        "desiredParsedResult": "(or P Q)",
+        "fromThisTextInput": "P or Q"
+    },
+    {
+        "desiredParsedResult": "(or P (or Q R))",
+        "fromThisTextInput": "P or Q or R"
+    },
+    {
+        "desiredParsedResult": "(or P (or Q R))",
+        "fromThisTextInput": "P or Q or R"
+    },
+    {
+        "desiredParsedResult": "(or P (or Q R))",
+        "fromThisTextInput": "P or Q or R"
+    },
+    {
+        "desiredParsedResult": "(or (or P Q) R)",
+        "fromThisTextInput": "P or Q or R"
+    },
+    {
+        "desiredParsedResult": "(or P Q)",
+        "fromThisTextInput": "P or Q"
+    },
+    {
+        "desiredParsedResult": "(or P (or Q R))",
+        "fromThisTextInput": "P or Q or R"
+    },
+    {
+        "desiredParsedResult": "(or Q R)",
+        "fromThisTextInput": "Q or R"
+    },
+    {
+        "desiredParsedResult": "(or P (or Q R))",
+        "fromThisTextInput": "P or Q or R"
+    },
+    {
+        "desiredParsedResult": "(or P (or Q R))",
+        "fromThisTextInput": "P or Q or R"
+    },
+    {
+        "desiredParsedResult": "(or Q R)",
+        "fromThisTextInput": "Q or R"
+    },
+    {
+        "desiredParsedResult": "(or P (or Q R))",
+        "fromThisTextInput": "P or Q or R"
+    },
+    {
+        "desiredParsedResult": "(or P (or Q R))",
+        "fromThisTextInput": "P or Q or R"
+    },
+    {
+        "desiredParsedResult": "(⇒ (or (or P Q) R) (or P (or Q R)))",
+        "fromThisTextInput": "P or Q or R ⇒ P or Q or R"
+    },
+    {
+        "desiredParsedResult": "(¬ (and P Q))",
+        "fromThisTextInput": "¬(P and Q)"
+    },
+    {
+        "desiredParsedResult": "(¬ (or (¬ P) (¬ Q)))",
+        "fromThisTextInput": "¬(¬P or ¬Q)"
+    },
+    {
+        "desiredParsedResult": "(¬ P)",
+        "fromThisTextInput": "¬P"
+    },
+    {
+        "desiredParsedResult": "(or (¬ P) (¬ Q))",
+        "fromThisTextInput": "¬P or ¬Q"
+    },
+    {
+        "desiredParsedResult": "(¬ Q)",
+        "fromThisTextInput": "¬Q"
+    },
+    {
+        "desiredParsedResult": "(or (¬ P) (¬ Q))",
+        "fromThisTextInput": "¬P or ¬Q"
+    },
+    {
+        "desiredParsedResult": "(and P Q)",
+        "fromThisTextInput": "P and Q"
+    },
+    {
+        "desiredParsedResult": "(or (¬ P) (¬ Q))",
+        "fromThisTextInput": "¬P or ¬Q"
+    },
+    {
+        "desiredParsedResult": "(⇒ (¬ (and P Q)) (or (¬ P) (¬ Q)))",
+        "fromThisTextInput": "¬(P and Q) ⇒ ¬P or ¬Q"
+    },
+    {
+        "desiredParsedResult": "(and P Q)",
+        "fromThisTextInput": "P and Q"
+    },
+    {
+        "desiredParsedResult": "(and Q P)",
+        "fromThisTextInput": "Q and P"
+    },
+    {
+        "desiredParsedResult": "(and Q P)",
+        "fromThisTextInput": "Q and P"
+    },
+    {
+        "desiredParsedResult": "(and P Q)",
+        "fromThisTextInput": "P and Q"
+    },
+    {
+        "desiredParsedResult": "(⇔ (and P Q) (and Q P))",
+        "fromThisTextInput": "P and Q ⇔ Q and P"
+    },
+    {
+        "desiredParsedResult": "(and P (¬ Q))",
+        "fromThisTextInput": "P and ¬Q"
+    },
+    {
+        "desiredParsedResult": "(⇒ P Q)",
+        "fromThisTextInput": "P ⇒ Q"
+    },
+    {
+        "desiredParsedResult": "(¬ Q)",
+        "fromThisTextInput": "¬Q"
+    },
+    {
+        "desiredParsedResult": "(¬ (⇒ P Q))",
+        "fromThisTextInput": "¬(P ⇒ Q)"
+    },
+    {
+        "desiredParsedResult": "(⇒ (and P (¬ Q)) (¬ (⇒ P Q)))",
+        "fromThisTextInput": "P and ¬Q ⇒ ¬(P ⇒ Q)"
+    },
+    {
+        "desiredParsedResult": "(¬ (or P (¬ P)))",
+        "fromThisTextInput": "¬(P or ¬P)"
+    },
+    {
+        "desiredParsedResult": "(or P (¬ P))",
+        "fromThisTextInput": "P or ¬P"
+    },
+    {
+        "desiredParsedResult": "(¬ P)",
+        "fromThisTextInput": "¬P"
+    },
+    {
+        "desiredParsedResult": "(or P (¬ P))",
+        "fromThisTextInput": "P or ¬P"
+    },
+    {
+        "desiredParsedResult": "(or P (¬ P))",
+        "fromThisTextInput": "P or ¬P"
+    },
+    {
+        "desiredParsedResult": "(⇒ (⇒ P Q) (or (¬ P) Q))",
+        "fromThisTextInput": "P ⇒ Q ⇒ ¬P or Q"
+    },
+    {
+        "desiredParsedResult": "(or P (and Q R))",
+        "fromThisTextInput": "P or Q and R"
+    },
+    {
+        "desiredParsedResult": "(and (or P Q) (or P R))",
+        "fromThisTextInput": "(P or Q) and (P or R)"
+    },
+    {
+        "desiredParsedResult": "(and Q R)",
+        "fromThisTextInput": "Q and R"
+    },
+    {
+        "desiredParsedResult": "(and (or P Q) (or P R))",
+        "fromThisTextInput": "(P or Q) and (P or R)"
+    },
+    {
+        "desiredParsedResult": "(and (or P Q) (or P R))",
+        "fromThisTextInput": "(P or Q) and (P or R)"
+    },
+    {
+        "desiredParsedResult": "(or P Q)",
+        "fromThisTextInput": "P or Q"
+    },
+    {
+        "desiredParsedResult": "(or P (and Q R))",
+        "fromThisTextInput": "P or Q and R"
+    },
+    {
+        "desiredParsedResult": "(or P (and Q R))",
+        "fromThisTextInput": "P or Q and R"
+    },
+    {
+        "desiredParsedResult": "(or P (and Q R))",
+        "fromThisTextInput": "P or Q and R"
+    },
+    {
+        "desiredParsedResult": "(or P R)",
+        "fromThisTextInput": "P or R"
+    },
+    {
+        "desiredParsedResult": "(or P (and Q R))",
+        "fromThisTextInput": "P or Q and R"
+    },
+    {
+        "desiredParsedResult": "(or P (and Q R))",
+        "fromThisTextInput": "P or Q and R"
+    },
+    {
+        "desiredParsedResult": "(or P (and Q R))",
+        "fromThisTextInput": "P or Q and R"
+    },
+    {
+        "desiredParsedResult": "(or P (and Q R))",
+        "fromThisTextInput": "P or Q and R"
+    },
+    {
+        "desiredParsedResult": "(or P Q)",
+        "fromThisTextInput": "P or Q"
+    },
+    {
+        "desiredParsedResult": "(or P R)",
+        "fromThisTextInput": "P or R"
+    },
+    {
+        "desiredParsedResult": "(and (or P Q) (or P R))",
+        "fromThisTextInput": "(P or Q) and (P or R)"
+    },
+    {
+        "desiredParsedResult": "(and Q R)",
+        "fromThisTextInput": "Q and R"
+    },
+    {
+        "desiredParsedResult": "(or P Q)",
+        "fromThisTextInput": "P or Q"
+    },
+    {
+        "desiredParsedResult": "(or P R)",
+        "fromThisTextInput": "P or R"
+    },
+    {
+        "desiredParsedResult": "(and (or P Q) (or P R))",
+        "fromThisTextInput": "(P or Q) and (P or R)"
+    },
+    {
+        "desiredParsedResult": "(and (or P Q) (or P R))",
+        "fromThisTextInput": "(P or Q) and (P or R)"
+    },
+    {
+        "desiredParsedResult": "(and (or P Q) (or P R))",
+        "fromThisTextInput": "(P or Q) and (P or R)"
+    },
+    {
+        "desiredParsedResult": "(or P Q)",
+        "fromThisTextInput": "P or Q"
+    },
+    {
+        "desiredParsedResult": "(or P R)",
+        "fromThisTextInput": "P or R"
+    },
+    {
+        "desiredParsedResult": "(or P (and Q R))",
+        "fromThisTextInput": "P or Q and R"
+    },
+    {
+        "desiredParsedResult": "(or P (and Q R))",
+        "fromThisTextInput": "P or Q and R"
+    },
+    {
+        "desiredParsedResult": "(and Q R)",
+        "fromThisTextInput": "Q and R"
+    },
+    {
+        "desiredParsedResult": "(or P (and Q R))",
+        "fromThisTextInput": "P or Q and R"
+    },
+    {
+        "desiredParsedResult": "(or P (and Q R))",
+        "fromThisTextInput": "P or Q and R"
+    },
+    {
+        "desiredParsedResult": "(or P (and Q R))",
+        "fromThisTextInput": "P or Q and R"
+    },
+    {
+        "desiredParsedResult": "(⇔ (or P (and Q R)) (and (or P Q) (or P R)))",
+        "fromThisTextInput": "P or Q and R ⇔ (P or Q) and (P or R)"
+    },
+    {
+        "desiredParsedResult": "(or P Q)",
+        "fromThisTextInput": "P or Q"
+    },
+    {
+        "desiredParsedResult": "(and (or P Q) (¬ Q))",
+        "fromThisTextInput": "(P or Q) and ¬Q"
+    },
+    {
+        "desiredParsedResult": "(or P Q)",
+        "fromThisTextInput": "P or Q"
+    },
+    {
+        "desiredParsedResult": "(¬ Q)",
+        "fromThisTextInput": "¬Q"
+    },
+    {
+        "desiredParsedResult": "(¬ P)",
+        "fromThisTextInput": "¬P"
+    },
+    {
+        "desiredParsedResult": "(⇒ (and (or P Q) (¬ Q)) P)",
+        "fromThisTextInput": "(P or Q) and ¬Q ⇒ P"
+    },
+    {
+        "desiredParsedResult": "(or (or (¬ (⇒ P Q)) (¬ P)) Q)",
+        "fromThisTextInput": "¬(P ⇒ Q) or ¬P or Q"
+    },
+    {
+        "desiredParsedResult": "(¬ (or (or (¬ (⇒ P Q)) (¬ P)) Q))",
+        "fromThisTextInput": "¬(¬(P ⇒ Q) or ¬P or Q)"
+    },
+    {
+        "desiredParsedResult": "(¬ (or (¬ (⇒ P Q)) (¬ P)))",
+        "fromThisTextInput": "¬(¬(P ⇒ Q) or ¬P)"
+    },
+    {
+        "desiredParsedResult": "(or (or (¬ (⇒ P Q)) (¬ P)) Q)",
+        "fromThisTextInput": "¬(P ⇒ Q) or ¬P or Q"
+    },
+    {
+        "desiredParsedResult": "(¬ Q)",
+        "fromThisTextInput": "¬Q"
+    },
+    {
+        "desiredParsedResult": "(⇒ P Q)",
+        "fromThisTextInput": "P ⇒ Q"
+    },
+    {
+        "desiredParsedResult": "(¬ (⇒ P Q))",
+        "fromThisTextInput": "¬(P ⇒ Q)"
+    },
+    {
+        "desiredParsedResult": "(or (¬ (⇒ P Q)) (¬ P))",
+        "fromThisTextInput": "¬(P ⇒ Q) or ¬P"
+    },
+    {
+        "desiredParsedResult": "(¬ P)",
+        "fromThisTextInput": "¬P"
+    },
+    {
+        "desiredParsedResult": "(or (¬ (⇒ P Q)) (¬ P))",
+        "fromThisTextInput": "¬(P ⇒ Q) or ¬P"
+    },
+    {
+        "desiredParsedResult": "(or (¬ (⇒ P Q)) (¬ P))",
+        "fromThisTextInput": "¬(P ⇒ Q) or ¬P"
+    },
+    {
+        "desiredParsedResult": "(or (or (¬ (⇒ P Q)) (¬ P)) Q)",
+        "fromThisTextInput": "¬(P ⇒ Q) or ¬P or Q"
+    },
+    {
+        "desiredParsedResult": "(= (+ (+ m n) p) (+ m (+ n p)))",
+        "fromThisTextInput": "m + n + p = m + n + p"
+    },
+    {
+        "desiredParsedResult": "(= (+ n 0) n)",
+        "fromThisTextInput": "n + 0 = n"
+    },
+    {
+        "desiredParsedResult": "(= (+ (+ m n) 0) (+ m n))",
+        "fromThisTextInput": "m + n + 0 = m + n"
+    },
+    {
+        "desiredParsedResult": "(= (+ (+ m n) 0) (+ m (+ n 0)))",
+        "fromThisTextInput": "m + n + 0 = m + n + 0"
+    },
+    {
+        "desiredParsedResult": "(= (+ (+ m n) k) (+ m (+ n k)))",
+        "fromThisTextInput": "m + n + k = m + n + k"
+    },
+    {
+        "desiredParsedResult": "(= (+ (+ m n) k) (+ m (+ n k)))",
+        "fromThisTextInput": "m + n + k = m + n + k"
+    },
+    {
+        "desiredParsedResult": "(= (+ (+ m n) (𝜎 k)) (𝜎 (+ (+ m n) k)))",
+        "fromThisTextInput": "m + n + 𝜎(k) = 𝜎(m + n + k)"
+    },
+    {
+        "desiredParsedResult": "(= (+ (+ m n) (𝜎 k)) (𝜎 (+ m (+ n k))))",
+        "fromThisTextInput": "m + n + 𝜎(k) = 𝜎(m + n + k)"
+    },
+    {
+        "desiredParsedResult": "(= (+ m (𝜎 (+ n k))) (𝜎 (+ m (+ n k))))",
+        "fromThisTextInput": "m + 𝜎(n + k) = 𝜎(m + n + k)"
+    },
+    {
+        "desiredParsedResult": "(= (+ (+ m n) (𝜎 k)) (𝜎 (+ m (+ n k))))",
+        "fromThisTextInput": "m + n + 𝜎(k) = 𝜎(m + n + k)"
+    },
+    {
+        "desiredParsedResult": "(= (+ (+ m n) (𝜎 k)) (+ m (𝜎 (+ n k))))",
+        "fromThisTextInput": "m + n + 𝜎(k) = m + 𝜎(n + k)"
+    },
+    {
+        "desiredParsedResult": "(= (+ n (𝜎 k)) (𝜎 (+ n k)))",
+        "fromThisTextInput": "n + 𝜎(k) = 𝜎(n + k)"
+    },
+    {
+        "desiredParsedResult": "(= (+ (+ m n) (𝜎 k)) (+ m (𝜎 (+ n k))))",
+        "fromThisTextInput": "m + n + 𝜎(k) = m + 𝜎(n + k)"
+    },
+    {
+        "desiredParsedResult": "(= (+ (+ m n) (𝜎 k)) (+ m (+ n (𝜎 k))))",
+        "fromThisTextInput": "m + n + 𝜎(k) = m + n + 𝜎(k)"
+    },
+    {
+        "desiredParsedResult": "(∀ p , (= (+ (+ m n) p) (+ m (+ n p))))",
+        "fromThisTextInput": "∀p.(m + n + p = m + n + p)"
+    },
+    {
+        "desiredParsedResult": "(= (+ (+ m n) p) (+ m (+ n p)))",
+        "fromThisTextInput": "m + n + p = m + n + p"
+    },
+    {
+        "desiredParsedResult": "(= (+ (+ 2 1) 3) (+ 2 (+ 1 3)))",
+        "fromThisTextInput": "2 + 1 + 3 = 2 + 1 + 3"
+    },
+    {
+        "desiredParsedResult": "(¬ (= n 0))",
+        "fromThisTextInput": "¬(n = 0)"
+    },
+    {
+        "desiredParsedResult": "(∃ m , (= n (𝜎 m)))",
+        "fromThisTextInput": "∃m.(n = 𝜎(m))"
+    },
+    {
+        "desiredParsedResult": "(¬ (= n 0))",
+        "fromThisTextInput": "¬(n = 0)"
+    },
+    {
+        "desiredParsedResult": "(¬ (= 0 0))",
+        "fromThisTextInput": "¬(0 = 0)"
+    },
+    {
+        "desiredParsedResult": "(¬ (∃ m , (= 0 (𝜎 m))))",
+        "fromThisTextInput": "¬(∃m.(0 = 𝜎(m)))"
+    },
+    {
+        "desiredParsedResult": "(= 0 0)",
+        "fromThisTextInput": "0 = 0"
+    },
+    {
+        "desiredParsedResult": "(∃ m , (= 0 (𝜎 m)))",
+        "fromThisTextInput": "∃m.(0 = 𝜎(m))"
+    },
+    {
+        "desiredParsedResult": "(⇒ (¬ (= 0 0)) (∃ m , (= 0 (𝜎 m))))",
+        "fromThisTextInput": "¬(0 = 0) ⇒ ∃m.(0 = 𝜎(m))"
+    },
+    {
+        "desiredParsedResult": "(⇒ (¬ (= k 0)) (∃ m , (= k (𝜎 m))))",
+        "fromThisTextInput": "¬(k = 0) ⇒ ∃m.(k = 𝜎(m))"
+    },
+    {
+        "desiredParsedResult": "(¬ (= (𝜎 k) 0))",
+        "fromThisTextInput": "¬(𝜎(k) = 0)"
+    },
+    {
+        "desiredParsedResult": "(= (𝜎 k) (𝜎 k))",
+        "fromThisTextInput": "𝜎(k) = 𝜎(k)"
+    },
+    {
+        "desiredParsedResult": "(∃ m , (= (𝜎 k) (𝜎 m)))",
+        "fromThisTextInput": "∃m.(𝜎(k) = 𝜎(m))"
+    },
+    {
+        "desiredParsedResult": "(⇒ (¬ (= (𝜎 k) 0)) (∃ m , (= (𝜎 k) (𝜎 m))))",
+        "fromThisTextInput": "¬(𝜎(k) = 0) ⇒ ∃m.(𝜎(k) = 𝜎(m))"
+    },
+    {
+        "desiredParsedResult": "(∀ j , (⇒ (¬ (= j 0)) (∃ m , (= j (𝜎 m)))))",
+        "fromThisTextInput": "∀j.(¬(j = 0) ⇒ ∃m.(j = 𝜎(m)))"
+    },
+    {
+        "desiredParsedResult": "(⇒ (¬ (= n 0)) (∃ m , (= n (𝜎 m))))",
+        "fromThisTextInput": "¬(n = 0) ⇒ ∃m.(n = 𝜎(m))"
+    },
+    {
+        "desiredParsedResult": "(∃ m , (= n (𝜎 m)))",
+        "fromThisTextInput": "∃m.(n = 𝜎(m))"
+    },
+    {
+        "desiredParsedResult": "(¬ (= 1 0))",
+        "fromThisTextInput": "¬(1 = 0)"
+    },
+    {
+        "desiredParsedResult": "(∃ m , (= 1 (𝜎 m)))",
+        "fromThisTextInput": "∃m.(1 = 𝜎(m))"
+    },
+    {
+        "desiredParsedResult": "(¬ (= (+ 1 1) 0))",
+        "fromThisTextInput": "¬(1 + 1 = 0)"
+    },
+    {
+        "desiredParsedResult": "(∃ m , (= (+ 1 1) (𝜎 m)))",
+        "fromThisTextInput": "∃m.(1 + 1 = 𝜎(m))"
+    },
+    {
+        "desiredParsedResult": "(¬ (= b 0))",
+        "fromThisTextInput": "¬(b = 0)"
+    },
+    {
+        "desiredParsedResult": "(∃ m , (= b (𝜎 m)))",
+        "fromThisTextInput": "∃m.(b = 𝜎(m))"
+    },
+    {
+        "desiredParsedResult": "(⇒ P Q)",
+        "fromThisTextInput": "P ⇒ Q"
+    },
+    {
+        "desiredParsedResult": "(or (¬ P) Q)",
+        "fromThisTextInput": "¬P or Q"
+    },
+    {
+        "desiredParsedResult": "(⇒ P Q)",
+        "fromThisTextInput": "P ⇒ Q"
+    },
+    {
+        "desiredParsedResult": "(¬ (or (¬ P) Q))",
+        "fromThisTextInput": "¬(¬P or Q)"
+    },
+    {
+        "desiredParsedResult": "(or (¬ P) Q)",
+        "fromThisTextInput": "¬P or Q"
+    },
+    {
+        "desiredParsedResult": "(¬ P)",
+        "fromThisTextInput": "¬P"
+    },
+    {
+        "desiredParsedResult": "(or (¬ P) Q)",
+        "fromThisTextInput": "¬P or Q"
+    },
+    {
+        "desiredParsedResult": "(or (¬ P) Q)",
+        "fromThisTextInput": "¬P or Q"
+    },
+    {
+        "desiredParsedResult": "(∈ x T)",
+        "fromThisTextInput": "x ∈ T"
+    },
+    {
+        "desiredParsedResult": "(⊆ S T)",
+        "fromThisTextInput": "S ⊆ T"
+    },
+    {
+        "desiredParsedResult": "(∈ x T)",
+        "fromThisTextInput": "x ∈ T"
+    },
+    {
+        "desiredParsedResult": "(⊆ S T)",
+        "fromThisTextInput": "S ⊆ T"
+    },
+    {
+        "desiredParsedResult": "(∈ x T)",
+        "fromThisTextInput": "x ∈ T"
+    },
+    {
+        "desiredParsedResult": "(⊆ S T)",
+        "fromThisTextInput": "S ⊆ T"
+    },
+    {
+        "desiredParsedResult": "(∈ x T)",
+        "fromThisTextInput": "x ∈ T"
+    },
+    {
+        "desiredParsedResult": "(∈ x T)",
+        "fromThisTextInput": "x ∈ T"
+    },
+    {
+        "desiredParsedResult": "(⊆ S T)",
+        "fromThisTextInput": "S ⊆ T"
+    },
+    {
+        "desiredParsedResult": "(∈ x T)",
+        "fromThisTextInput": "x ∈ T"
+    },
+    {
+        "desiredParsedResult": "(⊆ S T)",
+        "fromThisTextInput": "S ⊆ T"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (∀ y , (Q x y)))",
+        "fromThisTextInput": "∃x.∀y.Q(x,y)"
+    },
+    {
+        "desiredParsedResult": "(∀ y , (∃ x , (Q x y)))",
+        "fromThisTextInput": "∀y.∃x.Q(x,y)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (∀ y , (Q x y)))",
+        "fromThisTextInput": "∃x.∀y.Q(x,y)"
+    },
+    {
+        "desiredParsedResult": "(∀ y , (∃ x , (Q x y)))",
+        "fromThisTextInput": "∀y.∃x.Q(x,y)"
+    },
+    {
+        "desiredParsedResult": "(∀ y , (Q c y))",
+        "fromThisTextInput": "∀y.Q(c,y)"
+    },
+    {
+        "desiredParsedResult": "(Q c z)",
+        "fromThisTextInput": "Q(c,z)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (Q x z))",
+        "fromThisTextInput": "∃x.Q(x,z)"
+    },
+    {
+        "desiredParsedResult": "(∀ y , (∃ x , (Q x y)))",
+        "fromThisTextInput": "∀y.∃x.Q(x,y)"
+    },
+    {
+        "desiredParsedResult": "(= x y)",
+        "fromThisTextInput": "x = y"
+    },
+    {
+        "desiredParsedResult": "(= y z)",
+        "fromThisTextInput": "y = z"
+    },
+    {
+        "desiredParsedResult": "(= y x)",
+        "fromThisTextInput": "y = x"
+    },
+    {
+        "desiredParsedResult": "(= x z)",
+        "fromThisTextInput": "x = z"
+    },
+    {
+        "desiredParsedResult": "(= x y)",
+        "fromThisTextInput": "x = y"
+    },
+    {
+        "desiredParsedResult": "(= y z)",
+        "fromThisTextInput": "y = z"
+    },
+    {
+        "desiredParsedResult": "(= x x)",
+        "fromThisTextInput": "x = x"
+    },
+    {
+        "desiredParsedResult": "(= y x)",
+        "fromThisTextInput": "y = x"
+    },
+    {
+        "desiredParsedResult": "(= x y)",
+        "fromThisTextInput": "x = y"
+    },
+    {
+        "desiredParsedResult": "(= x x)",
+        "fromThisTextInput": "x = x"
+    },
+    {
+        "desiredParsedResult": "(= y x)",
+        "fromThisTextInput": "y = x"
+    },
+    {
+        "desiredParsedResult": "(= x z)",
+        "fromThisTextInput": "x = z"
+    },
+    {
+        "desiredParsedResult": "(= y z)",
+        "fromThisTextInput": "y = z"
+    },
+    {
+        "desiredParsedResult": "(= x y)",
+        "fromThisTextInput": "x = y"
+    },
+    {
+        "desiredParsedResult": "(= x z)",
+        "fromThisTextInput": "x = z"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (∃ y , (∀ u , (∀ v , (F x y u v)))))",
+        "fromThisTextInput": "∃x.∃y.∀u.∀v.F(x,y,u,v)"
+    },
+    {
+        "desiredParsedResult": "(∃ y , (∀ v , (∃ u , (∃ x , (F x y u v)))))",
+        "fromThisTextInput": "∃y.∀v.∃u.∃x.F(x,y,u,v)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (∃ y , (∀ u , (∀ v , (F x y u v)))))",
+        "fromThisTextInput": "∃x.∃y.∀u.∀v.F(x,y,u,v)"
+    },
+    {
+        "desiredParsedResult": "(∃ y , (∀ u , (∀ v , (F c y u v))))",
+        "fromThisTextInput": "∃y.∀u.∀v.F(c,y,u,v)"
+    },
+    {
+        "desiredParsedResult": "(∀ u , (∀ v , (F c d u v)))",
+        "fromThisTextInput": "∀u.∀v.F(c,d,u,v)"
+    },
+    {
+        "desiredParsedResult": "(∀ v , (∃ u , (∃ x , (F x d u v))))",
+        "fromThisTextInput": "∀v.∃u.∃x.F(x,d,u,v)"
+    },
+    {
+        "desiredParsedResult": "(∀ v , (F c d z v))",
+        "fromThisTextInput": "∀v.F(c,d,z,v)"
+    },
+    {
+        "desiredParsedResult": "(F c d z z)",
+        "fromThisTextInput": "F(c,d,z,z)"
+    },
+    {
+        "desiredParsedResult": "(∃ x , (F x d z z))",
+        "fromThisTextInput": "∃x.F(x,d,z,z)"
+    },
+    {
+        "desiredParsedResult": "(∃ u , (∃ x , (F x d u z)))",
+        "fromThisTextInput": "∃u.∃x.F(x,d,u,z)"
+    },
+    {
+        "desiredParsedResult": "(∀ v , (∃ u , (∃ x , (F x d u v))))",
+        "fromThisTextInput": "∀v.∃u.∃x.F(x,d,u,v)"
+    },
+    {
+        "desiredParsedResult": "(∃ y , (∀ v , (∃ u , (∃ x , (F x y u v)))))",
+        "fromThisTextInput": "∃y.∀v.∃u.∃x.F(x,y,u,v)"
+    },
+    {
+        "desiredParsedResult": "(∀ x , (∃ y , (P x y)))",
+        "fromThisTextInput": "∀x.∃y.P(x,y)"
+    },
+    {
+        "desiredParsedResult": "(∀ x , (P x c))",
+        "fromThisTextInput": "∀x.P(x,c)"
+    },
+    {
+        "desiredParsedResult": "(∃ y , (P z y))",
+        "fromThisTextInput": "∃y.P(z,y)"
+    },
+    {
+        "desiredParsedResult": "(P z c)",
+        "fromThisTextInput": "P(z,c)"
+    },
+    {
+        "desiredParsedResult": "(∀ x , (P x c))",
+        "fromThisTextInput": "∀x.P(x,c)"
+    },
+    {
+        "desiredParsedResult": "(∃ y , (∀ x , (P z c)))",
+        "fromThisTextInput": "∃y.∀x.P(z,c)"
+    },
+    {
+        "desiredParsedResult": "(< 1 1)",
+        "fromThisTextInput": "1 < 1"
+    },
+    {
+        "desiredParsedResult": "(< 1 1)",
+        "fromThisTextInput": "1 < 1"
+    },
+    {
+        "desiredParsedResult": "(∀ x , (< 1 1))",
+        "fromThisTextInput": "∀x.(1 < 1)"
+    },
+    {
+        "desiredParsedResult": "(< 1 1)",
+        "fromThisTextInput": "1 < 1"
+    },
+    {
+        "desiredParsedResult": "(< 2 z)",
+        "fromThisTextInput": "2 < z"
+    },
+    {
+        "desiredParsedResult": "(< 1 z)",
+        "fromThisTextInput": "1 < z"
+    },
+    {
+        "desiredParsedResult": "(∀ x , (< 1 x))",
+        "fromThisTextInput": "∀x.(1 < x)"
+    },
+    {
+        "desiredParsedResult": "(⇒ (< 2 z) (∀ x , (< 1 x)))",
+        "fromThisTextInput": "2 < z ⇒ ∀x.(1 < x)"
+    },
+    {
+        "desiredParsedResult": "(∀ y , (⇒ (< 2 z) (∀ x , (< 1 x))))",
+        "fromThisTextInput": "∀y.(2 < z ⇒ ∀x.(1 < x))"
+    },
+    {
+        "desiredParsedResult": "(⇒ (< 2 3) (∀ x , (< 1 x)))",
+        "fromThisTextInput": "2 < 3 ⇒ ∀x.(1 < x)"
+    },
+    {
+        "desiredParsedResult": "(∀ x , (< 1 x))",
+        "fromThisTextInput": "∀x.(1 < x)"
+    },
+    {
+        "desiredParsedResult": "(< 1 1)",
+        "fromThisTextInput": "1 < 1"
+    },
+    {
+        "desiredParsedResult": "(∈ x T)",
+        "fromThisTextInput": "x ∈ T"
+    },
+    {
+        "desiredParsedResult": "(⊆ S T)",
+        "fromThisTextInput": "S ⊆ T"
+    },
+    {
+        "desiredParsedResult": "(⊆ S T)",
+        "fromThisTextInput": "S ⊆ T"
+    },
+    {
+        "desiredParsedResult": "(∈ x T)",
+        "fromThisTextInput": "x ∈ T"
+    },
+    {
+        "desiredParsedResult": "(⊆ S T)",
+        "fromThisTextInput": "S ⊆ T"
+    }
+]

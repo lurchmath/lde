@@ -13,9 +13,9 @@ const syntax =
 [['contradiction', '→←'              ],`\\rightarrow\\leftarrow`],
 
 'Quantifiers and bindings',
-[['forall x.x&lt;x+1',
-  'for all x.x&lt;x+1', 
-  '∀x.x&lt;x+1'                      ],`\\forall x, x&lt;x+1` ],
+[['forall x.x<x+1',
+  'for all x.x<x+1', 
+  '∀x.x<x+1'                         ],`\\forall x, x<x+1` ],
 [['exists x.x=2 cdot x', 
   '∃x.x=2⋅x'                         ],`\\exists x, x=2x` ],
 [['exists unique x.x=2 cdot x', 
@@ -52,7 +52,7 @@ const syntax =
 [['⟨x,y⟩'                            ],'\\langle x,y \\rangle'],
 
 'Relations',
-[['x &lt; 0', 'x lt 0'               ],`x&lt;0` ],
+[['x < 0', 'x lt 0'                  ],`x<0` ],
 [['x leq 0', 'x ≤ 0'                 ],`x\\leq 0` ],
 [['x neq 0', 'x ne 0', 'x≠0'         ],`x\\neq 0` ],
 [['m | n', 'm divides n'             ],`m\\mid n` ],
@@ -71,9 +71,9 @@ const syntax =
 [[`'~' is a partial order`           ],`\\sim\\text{ is partial order}`],
 [[`'~' is a total order`             ],`\\sim\\text{ is total order}`],
 
-'Assumptions and Declarations (case insensitive, phrase is echoed)',
+'Assumptions and Declarations (case insensitive)',
 [['Assume P', 'Given P', 
-  'Suppose P', 'If P', ':P'          ],`\\text{Assume }P\\text{  (etc.)}` ],
+  'Suppose P', 'If P', ':P'          ],`\\text{Assume }P` ],
 [['Let x'                            ],`\\text{Let }x` ],
 [['Let x be such that x in ℝ',
   'Let x such that x in ℝ'           ],
@@ -86,8 +86,6 @@ const syntax =
 [['x recip', 'x inv', 'x⁻'           ],`x^-`],
 [['λP(k)'                            ],`\\lambda{P}(k)` ],
 
-]
-export const makedoc = () => {
 ] 
 const maketable = () => {
   let ans = ''
@@ -100,9 +98,7 @@ const maketable = () => {
         `<tr><td>${row[0].join('<br/>')}</td><td>$${row[1]}$</td></tr>\n`
     }
   })
-  let doc = loadStr('lurch-parser-docs-template','./parsers/','html')
-              .replace(/## MAKEDOC OUTPUT GOES HERE ##/g,ans)           
-  fs.writeFileSync('./parsers/lurch-parser-docs.html', doc)
+  return ans
 }
 const maketable2 = () => {
   let ans = ''
@@ -139,4 +135,17 @@ const maketable2 = () => {
   })
   return ans
 }
-console.log( maketable2() )
+const maketable3 = () => {
+  let ans = ''
+  syntax.forEach( row => {
+    if (typeof row === 'string') {
+      ans = ans + `\n## ${row}\n\n| Lurch notation | Meaning |\n|---|---|\n`
+    } else {
+      row[0].forEach( lurchNotation => {
+        ans = ans + `| \`${lurchNotation}\` | $${row[1]}$ |\n`
+      } )
+    }
+  })
+  return ans
+}
+console.log( maketable3() )
