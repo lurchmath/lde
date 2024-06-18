@@ -1,7 +1,0 @@
-Declare and < 0 1
-Rule { Assume m  Assume n  m and n }
-
-Assume 0<x 
-Assume x<1
-
-0<x and x<1
