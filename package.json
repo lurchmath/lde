@@ -13,7 +13,7 @@
     "esm": "^3.2.25",
     "jsdoc": "^3.6.7",
     "mocha": "^10.0.0",
-    "puppeteer": "^15.1.1",
+    "puppeteer": "^24.22.3",
     "tidy-jsdoc": "^1.4.1"
   },
   "scripts": {
